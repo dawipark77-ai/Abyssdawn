@@ -15,10 +15,10 @@ MonoBehaviour:
   skillID: 07
   skillName: Shield Wall
   skillIcon: {fileID: 9040223973580938310, guid: 4985a8268ae904544946ff1d15b75116, type: 3}
-  description: 'Passive: Increases defense by 20% when defending.'
+  description: "\uD328\uC2DC\uBE0C: \uBC29\uC5B4 \uC0AC\uC6A9 \uC2DC \uBC29\uC5B4\uB7C9 +20% \uCD94\uAC00"
   usageType: 1
   damageType: 0
-  scaleStat: 1
+  scalingStat: 0
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -26,11 +26,14 @@ MonoBehaviour:
   hitCount: 0
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurse: 0
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
   selfCurseChance: 0
-  targetCurse: 0
-  targetCurseChance: 0
-  effectType: 3
-  recoveryTarget: 0
-  effectAmount: 20
+  effects: []
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 1

@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: Skill_Swords_T1_05_CombatBreathing
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Swords_T1_05
+  skillName: Combat Breathing
+  skillIcon: {fileID: 0}
+  description: "\uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC HP \uD68C\uBCF5 +5% (3\uD134). \uD6C4\uC5F4
+    \uC704\uCE58 \uC2DC HP \uD68C\uBCF5 +2% \uCD94\uAC00."
+  usageType: 1
+  damageType: 1
+  scalingStat: 1
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 0
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
+  selfCurseChance: 0
+  effects:
+  - effectType: 2
+    recoveryTarget: 0
+    effectAmount: 5
+    curseData: {fileID: 0}
+    curseChance: 0
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  category: 2
+  tier: 1
+  prerequisites: []
+  prosAndCons: "\uC5BB\uB294 \uAC83: HP \uD68C\uBCF5\n\uC783\uB294 \uAC83: \uC5C6\uC74C
+    (\uD328\uC2DC\uBE0C)"

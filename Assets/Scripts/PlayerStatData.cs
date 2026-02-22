@@ -32,4 +32,20 @@ public class PlayerStatData : ScriptableObject
 
     [Tooltip("현재 장착된 패시브 리스트 - SkillData(Passive) 에셋을 사용")]
     public List<AbyssdawnBattle.SkillData> equippedPassives = new List<AbyssdawnBattle.SkillData>();
+
+    [Header("장비 시스템")]
+    [Tooltip("오른손 장비 (한손 무기 또는 양손 무기)")]
+    public AbyssdawnBattle.EquipmentData rightHand;
+
+    [Tooltip("왼손 장비 (한손 무기 또는 방패)")]
+    public AbyssdawnBattle.EquipmentData leftHand;
+
+    [Tooltip("몸통 장비 (갑옷)")]
+    public AbyssdawnBattle.EquipmentData body;
+
+    [Tooltip("장신구 1")]
+    public AbyssdawnBattle.EquipmentData accessory1;
+
+    [Tooltip("장신구 2")]
+    public AbyssdawnBattle.EquipmentData accessory2;
 }

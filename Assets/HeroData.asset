@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a344a122eb8754989d26c422398af5, type: 3}
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatData
-  currentHP: 85
+  currentHP: 105
   currentMP: 10
   level: 1
   exp: 0
-  currentJob: {fileID: 11400000, guid: 86173007c73427d4c8dff10b39345910, type: 2}
+  currentJob: {fileID: 11400000, guid: 0066eb8cc4bf76c44baa77b0df8897cd, type: 2}
   equippedSkills:
   - {fileID: 11400000, guid: 9ae9873a52a6654469c0ab1c0cac9605, type: 2}
   - {fileID: 11400000, guid: e4f9aa5631d3b0e4b9f63df985ba4866, type: 2}
@@ -26,3 +26,8 @@ MonoBehaviour:
   equippedPassives:
   - {fileID: 11400000, guid: 9e52ba0da4994fe47a97d8eed3c6b20f, type: 2}
   - {fileID: 11400000, guid: 8908d8eaf3bad6f4dbdf4a344ab581af, type: 2}
+  rightHand: {fileID: 11400000, guid: 3ff1f34e885371c41a64f2690f64f995, type: 2}
+  leftHand: {fileID: 11400000, guid: f11abdb46a6c8804bbcc6bab1e0cbfd0, type: 2}
+  body: {fileID: 11400000, guid: e9a66495ca4098b4aab796c8edf644c4, type: 2}
+  accessory1: {fileID: 11400000, guid: 4ed214cc9ca37264da616dbfc05d6960, type: 2}
+  accessory2: {fileID: 11400000, guid: 811620911ec01884bb165042dc142cb8, type: 2}

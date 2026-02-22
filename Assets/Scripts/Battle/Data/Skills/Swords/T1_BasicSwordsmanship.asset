@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: Skill_Swords_T1_01_BasicSwordsmanship
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Swords_T1_01
+  skillName: Basic Swordsmanship
+  skillIcon: {fileID: 0}
+  description: "\uAC80 \uC7A5\uCC29 \uC2DC \uAE30\uBCF8 \uACF5\uACA9\uB825 +2, \uBA85\uC911\uB960
+    +5%. \uB808\uBCA8\uB2F9 \uCD94\uAC00 \uACF5\uACA9\uB825 +1 (\uCD5C\uB300 +5).
+    \uC55E\uC5F4 \uC704\uCE58 \uC2DC \uBC1B\uB294 \uB370\uBBF8\uC9C0 -5%."
+  usageType: 1
+  damageType: 1
+  scalingStat: 1
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 0
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
+  selfCurseChance: 0
+  effects:
+  - effectType: 8
+    recoveryTarget: 0
+    effectAmount: 2
+    curseData: {fileID: 0}
+    curseChance: 0
+  - effectType: 13
+    recoveryTarget: 0
+    effectAmount: 5
+    curseData: {fileID: 0}
+    curseChance: 0
+  - effectType: 9
+    recoveryTarget: 0
+    effectAmount: 5
+    curseData: {fileID: 0}
+    curseChance: 0
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  category: 2
+  tier: 1
+  prerequisites: []
+  prosAndCons: "\uC5BB\uB294 \uAC83: \uACF5\uACA9\uB825, \uBA85\uC911\uB960, \uC0DD\uC874\uB825\n\uC783\uB294
+    \uAC83: \uC5C6\uC74C (\uAE30\uBCF8\uAE30)"

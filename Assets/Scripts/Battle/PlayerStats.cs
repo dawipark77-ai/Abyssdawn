@@ -68,7 +68,8 @@ public class PlayerStats : MonoBehaviour
         {
             int baseValue = (characterClass != null) ? characterClass.GetFinalMaxHP(baseHP) : baseHP;
             int passiveBonus = GetPassiveHPBonus();
-            return baseValue + passiveBonus;
+            int equipmentBonus = GetEquipmentHPBonus();
+            return baseValue + passiveBonus + equipmentBonus;
         }
     }
 
@@ -78,7 +79,8 @@ public class PlayerStats : MonoBehaviour
         {
             int baseValue = (characterClass != null) ? characterClass.GetFinalMaxMP(baseMP) : baseMP;
             int passiveBonus = GetPassiveMPBonus();
-            return baseValue + passiveBonus;
+            int equipmentBonus = GetEquipmentMPBonus();
+            return baseValue + passiveBonus + equipmentBonus;
         }
     }
 
@@ -88,7 +90,7 @@ public class PlayerStats : MonoBehaviour
         get
         {
             int baseValue = (characterClass != null) ? characterClass.GetFinalAttack(baseAttack) : baseAttack;
-            return baseValue + GetPassiveAttackBonus();
+            return baseValue + GetPassiveAttackBonus() + GetEquipmentAttackBonus();
         }
     }
 
@@ -97,7 +99,7 @@ public class PlayerStats : MonoBehaviour
         get
         {
             int baseValue = (characterClass != null) ? characterClass.GetFinalDefense(baseDefense) : baseDefense;
-            return baseValue + GetPassiveDefenseBonus();
+            return baseValue + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus();
         }
     }
 
@@ -106,7 +108,7 @@ public class PlayerStats : MonoBehaviour
         get
         {
             int baseValue = (characterClass != null) ? characterClass.GetFinalMagic(baseMagic) : baseMagic;
-            return baseValue + GetPassiveMagicBonus();
+            return baseValue + GetPassiveMagicBonus() + GetEquipmentMagicBonus();
         }
     }
 
@@ -276,18 +278,25 @@ public class PlayerStats : MonoBehaviour
         if (statData == null || statData.equippedPassives == null) return 0;
         int total = 0;
 
+        Debug.Log($"[GetPassiveBonus] Calculating {stat} bonus from {statData.equippedPassives.Count} passives");
+
         foreach (var passive in statData.equippedPassives)
         {
             if (passive == null || !passive.IsPassive) continue;
 
+            Debug.Log($"  - Checking passive: {passive.skillName}");
+
             bool usedEffect = false;
             if (passive.Effects != null && passive.Effects.Count > 0)
             {
+                Debug.Log($"    Effects count: {passive.Effects.Count}");
                 foreach (var effect in passive.Effects)
                 {
                     if (effect == null) continue;
 
                     int amount = Mathf.RoundToInt(effect.effectAmount);
+                    Debug.Log($"    Effect: type={effect.effectType}, amount={amount}");
+                    
                     switch (stat)
                     {
                         case PassiveBonusStat.HP:
@@ -312,6 +321,7 @@ public class PlayerStats : MonoBehaviour
                             {
                                 total += amount;
                                 usedEffect = true;
+                                Debug.Log($"      → Attack +{amount} (from effect)");
                             }
                             break;
                         case PassiveBonusStat.Defense:
@@ -347,36 +357,22 @@ public class PlayerStats : MonoBehaviour
                 }
             }
 
-            if (!usedEffect)
-            {
-                int fallbackAmount = Mathf.RoundToInt(passive.effectAmount);
-                switch (stat)
-                {
-                    case PassiveBonusStat.Attack:
-                        if (passive.scalingStat == ScaleStat.Attack) total += fallbackAmount;
-                        break;
-                    case PassiveBonusStat.Defense:
-                        if (passive.scalingStat == ScaleStat.Defense) total += fallbackAmount;
-                        break;
-                    case PassiveBonusStat.Magic:
-                        if (passive.scalingStat == ScaleStat.Magic) total += fallbackAmount;
-                        break;
-                    case PassiveBonusStat.Agility:
-                        if (passive.scalingStat == ScaleStat.Agility) total += fallbackAmount;
-                        break;
-                    case PassiveBonusStat.Luck:
-                        if (passive.scalingStat == ScaleStat.Luck) total += fallbackAmount;
-                        break;
-                }
-            }
+            // Fallback 로직 제거: 모든 패시브는 명시적인 effectType을 사용해야 함
+            // Shield Wall 같은 조건부 효과는 stat bonus를 주지 않음
         }
 
+        Debug.Log($"[GetPassiveBonus] Total {stat} bonus: +{total}");
         return total;
     }
 
     private int GetPassiveHPBonus() => GetPassiveBonus(PassiveBonusStat.HP);
     private int GetPassiveMPBonus() => GetPassiveBonus(PassiveBonusStat.MP);
-    private int GetPassiveAttackBonus() => GetPassiveBonus(PassiveBonusStat.Attack);
+    private int GetPassiveAttackBonus()
+    {
+        int bonus = GetPassiveBonus(PassiveBonusStat.Attack);
+        Debug.LogWarning($"★★★ FINAL PASSIVE ATTACK BONUS: +{bonus} ★★★");
+        return bonus;
+    }
     private int GetPassiveDefenseBonus() => GetPassiveBonus(PassiveBonusStat.Defense);
     private int GetPassiveMagicBonus() => GetPassiveBonus(PassiveBonusStat.Magic);
     private int GetPassiveAgilityBonus() => GetPassiveBonus(PassiveBonusStat.Agility);
@@ -408,6 +404,106 @@ public class PlayerStats : MonoBehaviour
             }
         }
 
+        return total;
+    }
+
+    /// <summary>
+    /// 장비로부터 HP 보정치를 가져옵니다.
+    /// </summary>
+    public int GetEquipmentHPBonus()
+    {
+        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
+        if (equipmentManager == null) return 0;
+
+        int total = 0;
+        var equippedItems = equipmentManager.GetEquippedItems();
+        foreach (var item in equippedItems)
+        {
+            if (item != null)
+            {
+                total += item.hpBonus;
+            }
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// 장비로부터 MP 보정치를 가져옵니다.
+    /// </summary>
+    public int GetEquipmentMPBonus()
+    {
+        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
+        if (equipmentManager == null) return 0;
+
+        int total = 0;
+        var equippedItems = equipmentManager.GetEquippedItems();
+        foreach (var item in equippedItems)
+        {
+            if (item != null)
+            {
+                total += item.mpBonus;
+            }
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// 장비로부터 공격력 보정치를 가져옵니다.
+    /// </summary>
+    public int GetEquipmentAttackBonus()
+    {
+        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
+        if (equipmentManager == null) return 0;
+
+        int total = 0;
+        var equippedItems = equipmentManager.GetEquippedItems();
+        foreach (var item in equippedItems)
+        {
+            if (item != null)
+            {
+                total += item.attackBonus;
+            }
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// 장비로부터 방어력 보정치를 가져옵니다.
+    /// </summary>
+    public int GetEquipmentDefenseBonus()
+    {
+        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
+        if (equipmentManager == null) return 0;
+
+        int total = 0;
+        var equippedItems = equipmentManager.GetEquippedItems();
+        foreach (var item in equippedItems)
+        {
+            if (item != null)
+            {
+                total += item.defenseBonus;
+            }
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// 장비로부터 마법력 보정치를 가져옵니다.
+    /// </summary>
+    public int GetEquipmentMagicBonus()
+    {
+        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
+        if (equipmentManager == null) return 0;
+
+        int total = 0;
+        var equippedItems = equipmentManager.GetEquippedItems();
+        foreach (var item in equippedItems)
+        {
+            if (item != null)
+            {
+                total += item.magicBonus;
+            }
+        }
         return total;
     }
 
@@ -485,35 +581,35 @@ public class PlayerStats : MonoBehaviour
     public int GetHPBonus() => maxHP - baseHP;
     public int GetMPBonus() => maxMP - baseMP;
 
-    // 스탯 보너스 (직업 보정치 + 패시브 보너스)
+    // 스탯 보너스 (직업 보정치 + 패시브 보너스 + 장비 보너스)
     public int GetAttackBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.attackBonus : 0;
-        return jobBonus + GetPassiveAttackBonus();
+        return jobBonus + GetPassiveAttackBonus() + GetEquipmentAttackBonus();
     }
 
     public int GetDefenseBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.defenseBonus : 0;
-        return jobBonus + GetPassiveDefenseBonus();
+        return jobBonus + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus();
     }
 
     public int GetMagicBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.magicBonus : 0;
-        return jobBonus + GetPassiveMagicBonus();
+        return jobBonus + GetPassiveMagicBonus() + GetEquipmentMagicBonus();
     }
 
     public int GetAgilityBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.agilityBonus : 0;
-        return jobBonus + GetPassiveAgilityBonus();
+        return jobBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus();
     }
 
     public int GetLuckBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.luckBonus : 0;
-        return jobBonus + GetPassiveLuckBonus();
+        return jobBonus + GetPassiveLuckBonus() + GetEquipmentLuckBonus();
     }
 
     [Header("5. 레벨 시스템")]
