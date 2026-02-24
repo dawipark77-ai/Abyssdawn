@@ -10,21 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: Skill_Swords_T1_02_Slash
+  m_Name: T1_Mandritto
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Swords_T1_02
-  skillName: Slash
+  skillID: Swords_T1_03
+  skillName: Mandritto
   skillIcon: {fileID: 0}
-  description: "\uAC15\uD55C \uACF5\uACA9\uB825\uC744 \uAC00\uC9C4 \uAC80 \uACF5\uACA9.
-    \uCD5C\uB300 HP\uC758 5%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
+  description: "\uC801 \uC55E\uC5F4 (1,2\uBC88)\uC744 \uB3D9\uC2DC\uC5D0 \uACF5\uACA9\uD558\uB294
+    \uD6A1\uBCA0\uAE30. \uCD5C\uB300 HP\uC758 4%\uB97C \uC18C\uBAA8\uD55C\uB2E4.
+    \uC55E\uC5F4\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5."
   usageType: 0
   damageType: 1
   scalingStat: 1
-  hpCostPercent: 5
+  hpCostPercent: 4
   mpCost: 0
-  minMult: 1.5
-  maxMult: 1.8
-  hitCount: 1
+  minMult: 0.9
+  maxMult: 0.9
+  hitCount: 2
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
@@ -42,8 +43,3 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  category: 2
-  tier: 1
-  prerequisites: []
-  prosAndCons: "\uC5BB\uB294 \uAC83: \uAC15\uD55C \uACF5\uACA9\uB825\n\uC783\uB294
-    \uAC83: HP 5% \uC18C\uBAA8"

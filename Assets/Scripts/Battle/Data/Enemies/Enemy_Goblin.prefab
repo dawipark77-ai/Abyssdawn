@@ -58,12 +58,13 @@ MonoBehaviour:
   luck: 5
   hitShakeDuration: 0.2
   hitShakeMagnitude: 0.1
-  isIgnited: 0
-  igniteTurnsRemaining: 0
+  activeCurses: []
   useCustomStatusUISettings: 0
   statusUISize: {x: 8, y: 8}
   statusUIScale: 0.01
   statusUIOffsetY: 1.5
+  level: 1
+  expReward: 10
 --- !u!212 &8155923440722834393
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -111,8 +112,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 4942646190446778861, guid: e64568468ae5bb14b85d816f758c64a6,
-    type: 3}
+  m_Sprite: {fileID: -4011119153508685156, guid: 1b4ecd82a5593134f82daca60b488025, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -161,7 +161,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.68, y: 0.81}
+    oldSize: {x: 8.86, y: 8.68}
     newSize: {x: 0.29, y: 0.17}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

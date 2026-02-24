@@ -33,6 +33,13 @@ public class PlayerStatData : ScriptableObject
     [Tooltip("현재 장착된 패시브 리스트 - SkillData(Passive) 에셋을 사용")]
     public List<AbyssdawnBattle.SkillData> equippedPassives = new List<AbyssdawnBattle.SkillData>();
 
+    [Header("스킬 트리 시스템")]
+    [Tooltip("배운 스킬 목록 (스킬 트리에서 배운 모든 스킬)")]
+    public List<AbyssdawnBattle.SkillData> learnedSkills = new List<AbyssdawnBattle.SkillData>();
+
+    [Tooltip("사용 가능한 스킬 포인트")]
+    public int skillPoints = 0;
+
     [Header("장비 시스템")]
     [Tooltip("오른손 장비 (한손 무기 또는 양손 무기)")]
     public AbyssdawnBattle.EquipmentData rightHand;

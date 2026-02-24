@@ -10,32 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: Skill_Swords_T1_04_SharpEdge
+  m_Name: T1_Slash
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Swords_T1_04
-  skillName: Sharp Edge
-  skillIcon: {fileID: 0}
-  description: "\uAC80 \uACF5\uACA9 \uC2DC \uBC29\uC5B4 \uAD00\uD1B5 +8%. \uC7A5\uBE44
-    \uACF5\uACA9\uB825 \uBCF4\uC815\uCE58 \xD7 0.1\uB9CC\uD07C \uCD94\uAC00 \uBC29\uC5B4
-    \uAD00\uD1B5. \uC55E\uC5F4 \uC801 \uACF5\uACA9 \uC2DC \uBC29\uC5B4 \uAD00\uD1B5
-    \uCD94\uAC00 +5%. 3\uD134 \uC9C0\uC18D."
+  skillID: Swords_T1_02
+  skillName: Slash
+  skillIcon: {fileID: -376088948105539100, guid: 00a6bf59c2d7f184ca967ed5b77e6022, type: 3}
+  description: "\uAC15\uD55C \uACF5\uACA9\uB825\uC744 \uAC00\uC9C4 \uAC80 \uACF5\uACA9.
+    \uCD5C\uB300 HP\uC758 5%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
   usageType: 0
   damageType: 1
   scalingStat: 1
-  hpCostPercent: 0
+  hpCostPercent: 5
   mpCost: 0
-  minMult: 0
-  maxMult: 0
-  hitCount: 0
+  minMult: 1.5
+  maxMult: 1.8
+  hitCount: 1
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
   selfCurseData: {fileID: 0}
   selfCurseChance: 0
   effects:
-  - effectType: 3
+  - effectType: 1
     recoveryTarget: 0
-    effectAmount: 8
+    effectAmount: 0
     curseData: {fileID: 0}
     curseChance: 0
   legacyCurseData: {fileID: 0}
@@ -44,8 +42,3 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  category: 2
-  tier: 1
-  prerequisites: []
-  prosAndCons: "\uC5BB\uB294 \uAC83: \uBC84\uD504 3\uD134 (\uBC29\uC5B4 \uAD00\uD1B5
-    \uC99D\uAC00)\n\uC783\uB294 \uAC83: \uC5C6\uC74C"
