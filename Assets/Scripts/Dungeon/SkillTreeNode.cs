@@ -149,20 +149,45 @@ public class SkillTreeNode : MonoBehaviour
             return;
         }
         
-        if (currentState == SkillState.Available)
+        // 스킬 상세 정보 팝업 표시
+        ShowSkillDetailPopup();
+    }
+    
+    /// <summary>
+    /// 스킬 상세 정보 팝업 표시
+    /// </summary>
+    private void ShowSkillDetailPopup()
+    {
+        if (skillData == null)
         {
-            // 스킬 배우기 시도
-            treeManager.TryLearnSkill(this);
+            Debug.LogWarning("[SkillTreeNode] SkillData가 없습니다!");
+            return;
         }
-        else if (currentState == SkillState.Locked)
+        
+        // SkillDetailPopup 찾기
+        SkillDetailPopup popup = FindObjectOfType<SkillDetailPopup>(true); // 비활성화된 것도 찾기
+        
+        if (popup != null)
         {
-            // 잠긴 이유 표시
-            ShowLockedReason();
+            popup.ShowSkillDetail(skillData);
         }
-        else if (currentState == SkillState.Learned)
+        else
         {
-            // 이미 배운 스킬 정보 표시
-            ShowSkillInfo();
+            Debug.LogWarning("[SkillTreeNode] SkillDetailPopup을 찾을 수 없습니다!");
+            
+            // 팝업이 없으면 기존 방식 사용
+            if (currentState == SkillState.Available)
+            {
+                treeManager.TryLearnSkill(this);
+            }
+            else if (currentState == SkillState.Locked)
+            {
+                ShowLockedReason();
+            }
+            else if (currentState == SkillState.Learned)
+            {
+                ShowSkillInfo();
+            }
         }
     }
     
