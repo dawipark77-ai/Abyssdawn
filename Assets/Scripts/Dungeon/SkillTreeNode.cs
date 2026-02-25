@@ -36,6 +36,10 @@ public class SkillTreeNode : MonoBehaviour
     [Tooltip("배움 상태 표시 (밝은 효과 등)")]
     public GameObject learnedEffect;
     
+    [Header("팝업 참조")]
+    [Tooltip("스킬 상세 정보 팝업 (수동으로 연결)")]
+    public SkillDetailPopup skillDetailPopup;
+    
     [Header("시각적 설정")]
     [Tooltip("잠긴 상태 색상")]
     public Color lockedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
@@ -59,16 +63,85 @@ public class SkillTreeNode : MonoBehaviour
     
     private void Awake()
     {
-        // 버튼이 없으면 자동으로 찾기
+        Debug.Log($"[SkillTreeNode] ⚡ Awake 시작 - {gameObject.name}");
+        
+        // 버튼이 없으면 자동으로 찾기 (자신 → 자식 → 부모 → 형제 순서로 검색)
         if (nodeButton == null)
         {
+            // 1. 먼저 자신에게서 찾기
             nodeButton = GetComponent<Button>();
+            if (nodeButton != null)
+            {
+                Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: Button을 자신에게서 발견 - {nodeButton.gameObject.name}");
+            }
+            
+            // 2. 없으면 자식에서 찾기
+            if (nodeButton == null)
+            {
+                nodeButton = GetComponentInChildren<Button>(true);
+                if (nodeButton != null)
+                {
+                    Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: Button을 자식에서 발견 - {nodeButton.gameObject.name}");
+                }
+            }
+            
+            // 3. 없으면 부모에서 찾기
+            if (nodeButton == null && transform.parent != null)
+            {
+                nodeButton = transform.parent.GetComponent<Button>();
+                if (nodeButton != null)
+                {
+                    Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: Button을 부모에서 발견 - {nodeButton.gameObject.name}");
+                }
+            }
+            
+            // 4. 없으면 형제에서 찾기
+            if (nodeButton == null && transform.parent != null)
+            {
+                nodeButton = transform.parent.GetComponentInChildren<Button>(true);
+                if (nodeButton != null)
+                {
+                    Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: Button을 형제에서 발견 - {nodeButton.gameObject.name}");
+                }
+            }
+            
+            // 최종 확인
+            if (nodeButton == null)
+            {
+                Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: Button을 찾을 수 없습니다! (자신/자식/부모/형제 모두 검색 완료)");
+            }
         }
         
         // 버튼 클릭 이벤트 연결
         if (nodeButton != null)
         {
+            nodeButton.onClick.RemoveAllListeners(); // 기존 리스너 제거
             nodeButton.onClick.AddListener(OnNodeClicked);
+            Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: Button 클릭 이벤트 연결 완료! (Interactable: {nodeButton.interactable})");
+        }
+        else
+        {
+            Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: Button이 null이어서 이벤트 연결 실패!");
+        }
+        
+        // SkillDetailPopup 연결 확인
+        if (skillDetailPopup != null)
+        {
+            Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: SkillDetailPopup 연결됨 - {skillDetailPopup.gameObject.name}");
+        }
+        else
+        {
+            Debug.LogWarning($"[SkillTreeNode] ⚠️ {gameObject.name}: SkillDetailPopup이 연결되지 않았습니다!");
+        }
+        
+        // SkillData 확인
+        if (skillData != null)
+        {
+            Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: SkillData 연결됨 - {skillData.skillName}");
+        }
+        else
+        {
+            Debug.LogWarning($"[SkillTreeNode] ⚠️ {gameObject.name}: SkillData가 연결되지 않았습니다!");
         }
         
         // 스킬 아이콘이 없으면 자동으로 찾기
@@ -143,10 +216,12 @@ public class SkillTreeNode : MonoBehaviour
     /// </summary>
     private void OnNodeClicked()
     {
+        Debug.Log($"[SkillTreeNode] 🔘🔘🔘 버튼 클릭 감지!!! - {gameObject.name} (Time: {Time.time})");
+        Debug.Log($"[SkillTreeNode] 현재 GameObject 활성 상태: {gameObject.activeSelf}, Enabled: {enabled}");
+        
         if (treeManager == null)
         {
-            Debug.LogError("[SkillTreeNode] TreeManager가 설정되지 않았습니다!");
-            return;
+            Debug.LogWarning($"[SkillTreeNode] ⚠️ {gameObject.name}: TreeManager가 설정되지 않았습니다! (팝업은 열립니다)");
         }
         
         // 스킬 상세 정보 팝업 표시
@@ -158,37 +233,33 @@ public class SkillTreeNode : MonoBehaviour
     /// </summary>
     private void ShowSkillDetailPopup()
     {
+        Debug.Log($"[SkillTreeNode] 🔘 {gameObject.name} 클릭됨!");
+        
         if (skillData == null)
         {
-            Debug.LogWarning("[SkillTreeNode] SkillData가 없습니다!");
+            Debug.LogWarning($"[SkillTreeNode] {gameObject.name}: SkillData가 없습니다!");
             return;
         }
         
-        // SkillDetailPopup 찾기
-        SkillDetailPopup popup = FindObjectOfType<SkillDetailPopup>(true); // 비활성화된 것도 찾기
-        
-        if (popup != null)
+        // skillDetailPopup이 연결되지 않았으면 자동으로 찾기
+        if (skillDetailPopup == null)
         {
-            popup.ShowSkillDetail(skillData);
-        }
-        else
-        {
-            Debug.LogWarning("[SkillTreeNode] SkillDetailPopup을 찾을 수 없습니다!");
+            Debug.Log($"[SkillTreeNode] {gameObject.name}: SkillDetailPopup을 자동으로 찾는 중...");
+            skillDetailPopup = FindObjectOfType<SkillDetailPopup>(true);
             
-            // 팝업이 없으면 기존 방식 사용
-            if (currentState == SkillState.Available)
+            if (skillDetailPopup != null)
             {
-                treeManager.TryLearnSkill(this);
+                Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: SkillDetailPopup 자동 검색 성공 - {skillDetailPopup.gameObject.name}");
             }
-            else if (currentState == SkillState.Locked)
+            else
             {
-                ShowLockedReason();
-            }
-            else if (currentState == SkillState.Learned)
-            {
-                ShowSkillInfo();
+                Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: SkillDetailPopup을 찾을 수 없습니다!");
+                return;
             }
         }
+        
+        Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: 팝업 열기 시도 - {skillData.skillName}");
+        skillDetailPopup.ShowSkillDetail(skillData);
     }
     
     /// <summary>

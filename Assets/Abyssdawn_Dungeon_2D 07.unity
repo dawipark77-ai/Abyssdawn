@@ -382,6 +382,7 @@ MonoBehaviour:
   skillNameText: {fileID: 1672933970}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 2101294282}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -708,6 +709,7 @@ MonoBehaviour:
   skillNameText: {fileID: 0}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 0}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -1977,6 +1979,7 @@ MonoBehaviour:
   skillNameText: {fileID: 0}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 0}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2124,6 +2127,7 @@ MonoBehaviour:
   skillNameText: {fileID: 1111761602}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 2101294282}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2790,6 +2794,7 @@ MonoBehaviour:
   skillNameText: {fileID: 65568152}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 2101294282}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -6386,7 +6391,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 222.9, y: 320.2}
+  m_AnchoredPosition: {x: 232.11, y: 327.98}
   m_SizeDelta: {x: 48.1404, y: 48.8728}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &813007342
@@ -10396,6 +10401,7 @@ MonoBehaviour:
   skillNameText: {fileID: 817429068}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 2101294282}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -11049,6 +11055,7 @@ MonoBehaviour:
   skillNameText: {fileID: 0}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 0}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -12577,6 +12584,7 @@ MonoBehaviour:
   skillNameText: {fileID: 1532219237}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 2101294282}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -12676,6 +12684,7 @@ MonoBehaviour:
   skillNameText: {fileID: 0}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 0}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -13179,6 +13188,7 @@ MonoBehaviour:
   skillNameText: {fileID: 712980571}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 2101294282}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -15567,6 +15577,7 @@ MonoBehaviour:
   skillNameText: {fileID: 0}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 0}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -16748,6 +16759,7 @@ MonoBehaviour:
   skillNameText: {fileID: 0}
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
+  skillDetailPopup: {fileID: 0}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -17291,7 +17303,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2101294279
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17315,8 +17327,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -5.538025, y: 60.68518}
-  m_SizeDelta: {x: -567.6469, y: -924.3891}
+  m_AnchoredPosition: {x: 19.900879, y: 37.272278}
+  m_SizeDelta: {x: -527.8451, y: -877.5634}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2101294280
 MonoBehaviour:
@@ -17368,10 +17380,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eec4f8f9dc0f5342a664a26d12ba740, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillDetailPopup
+  popupPanel: {fileID: 2101294278}
   backgroundImage: {fileID: 1837967218}
   closeButton: {fileID: 813007342}
   iconImage: {fileID: 1428041650}
-  nameText: {fileID: 0}
+  nameText: {fileID: 1023415471}
   descriptionText: {fileID: 730293437}
   costText: {fileID: 929163612}
   enableEscapeKey: 1
