@@ -53,3 +53,5 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
+  prerequisiteSkills: []
+  requiredLorePoints: 1

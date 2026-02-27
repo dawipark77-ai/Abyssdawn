@@ -9956,7 +9956,7 @@ GameObject:
   - component: {fileID: 1315548588}
   - component: {fileID: 1315548590}
   - component: {fileID: 1315548589}
-  - component: {fileID: 1315548591}
+  - component: {fileID: 1315548592}
   m_Layer: 5
   m_Name: SwordLore
   m_TagString: Untagged
@@ -10028,7 +10028,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1315548587}
   m_CullTransparentMesh: 1
---- !u!114 &1315548591
+--- !u!114 &1315548592
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10040,8 +10040,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4c3666dbdc76f741abfd500f25247d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwordSkillTreeManager
-  playerStatData: {fileID: 0}
-  testSkillPoints: 5
+  playerStatData: {fileID: 11400000, guid: a176c788f5d164441af8bae214804085, type: 2}
+  testSkillPoints: 0
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
@@ -10394,7 +10394,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
   skillData: {fileID: 11400000, guid: 4a7ee89704a4bd145881031179dde2b5, type: 2}
   prerequisiteNodes:
-  - {fileID: 1577597430}
+  - {fileID: 33618912}
   requiredSkillPoints: 1
   nodeButton: {fileID: 1342585409}
   skillIcon: {fileID: 1342585410}
@@ -17327,7 +17327,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 19.900879, y: 37.272278}
+  m_AnchoredPosition: {x: -263.92, y: 89}
   m_SizeDelta: {x: -527.8451, y: -877.5634}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2101294280
@@ -17383,10 +17383,14 @@ MonoBehaviour:
   popupPanel: {fileID: 2101294278}
   backgroundImage: {fileID: 1837967218}
   closeButton: {fileID: 813007342}
+  learnButton: {fileID: 1130721913}
+  learnButtonText: {fileID: 959837316}
   iconImage: {fileID: 1428041650}
   nameText: {fileID: 1023415471}
   descriptionText: {fileID: 730293437}
   costText: {fileID: 929163612}
+  statusText: {fileID: 0}
+  requiredLPText: {fileID: 0}
   enableEscapeKey: 1
 --- !u!1 &2107078337
 GameObject:

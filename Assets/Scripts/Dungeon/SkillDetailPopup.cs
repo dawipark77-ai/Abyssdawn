@@ -19,6 +19,12 @@ public class SkillDetailPopup : MonoBehaviour
     [Tooltip("닫기 버튼")]
     public Button closeButton;
     
+    [Tooltip("스킬 배우기 버튼")]
+    public Button learnButton;
+    
+    [Tooltip("스킬 배우기 버튼 텍스트")]
+    public TextMeshProUGUI learnButtonText;
+    
     [Header("Skill Info Display")]
     [Tooltip("스킬 아이콘 이미지")]
     public Image iconImage;
@@ -32,12 +38,19 @@ public class SkillDetailPopup : MonoBehaviour
     [Tooltip("코스트 텍스트")]
     public TextMeshProUGUI costText;
     
+    [Tooltip("스킬 상태 텍스트 (Locked/Available/Learned)")]
+    public TextMeshProUGUI statusText;
+    
+    [Tooltip("필요한 LP 텍스트")]
+    public TextMeshProUGUI requiredLPText;
+    
     [Header("Settings")]
     [Tooltip("ESC 키로 팝업 닫기")]
     public bool enableEscapeKey = true;
     
     private bool isPanelOpen = false;
     private SkillData currentSkillData;
+    private SkillTreeNode currentNode;
     
     private void Awake()
     {
@@ -83,6 +96,46 @@ public class SkillDetailPopup : MonoBehaviour
         {
             Debug.LogWarning("[SkillDetailPopup] ⚠️ Close Button이 할당되지 않았습니다!");
         }
+        
+        // Learn 버튼 연결
+        if (learnButton != null)
+        {
+            learnButton.onClick.RemoveListener(OnLearnButtonClicked); // 중복 방지
+            learnButton.onClick.AddListener(OnLearnButtonClicked);
+            Debug.Log("[SkillDetailPopup] ✅ Learn 버튼 이벤트 연결 완료");
+        }
+        else
+        {
+            Debug.LogWarning("[SkillDetailPopup] ⚠️ Learn Button이 할당되지 않았습니다!");
+        }
+    }
+    
+    /// <summary>
+    /// Learn 버튼 클릭 시 호출
+    /// </summary>
+    private void OnLearnButtonClicked()
+    {
+        Debug.Log("[SkillDetailPopup] 🔘 Learn 버튼 클릭 감지!");
+        
+        if (currentNode == null)
+        {
+            Debug.LogError("[SkillDetailPopup] ❌ currentNode가 null입니다!");
+            return;
+        }
+        
+        // SwordSkillTreeManager 찾기
+        SwordSkillTreeManager manager = FindObjectOfType<SwordSkillTreeManager>();
+        if (manager == null)
+        {
+            Debug.LogError("[SkillDetailPopup] ❌ SwordSkillTreeManager를 찾을 수 없습니다!");
+            return;
+        }
+        
+        // 스킬 배우기 시도
+        manager.TryLearnSkill(currentNode);
+        
+        // 스킬 정보 새로고침 (상태 변경 반영)
+        UpdateSkillInfo();
     }
     
     /// <summary>
@@ -171,11 +224,11 @@ public class SkillDetailPopup : MonoBehaviour
     }
     
     /// <summary>
-    /// 스킬 정보를 표시하며 팝업 열기
+    /// 스킬 정보를 표시하며 팝업 열기 (SkillData만)
     /// </summary>
     public void ShowSkillDetail(SkillData skillData)
     {
-        Debug.Log($"[SkillDetailPopup] 🔘 ShowSkillDetail 호출됨!");
+        Debug.Log($"[SkillDetailPopup] 🔘 ShowSkillDetail(SkillData) 호출됨!");
         
         if (skillData == null)
         {
@@ -184,6 +237,32 @@ public class SkillDetailPopup : MonoBehaviour
         }
         
         currentSkillData = skillData;
+        currentNode = null; // 노드 정보 없음
+        
+        // 스킬 정보 표시
+        UpdateSkillInfo();
+        
+        // 팝업 열기
+        OpenPopup();
+        
+        Debug.Log($"[SkillDetailPopup] ✅ {skillData.skillName} 정보 표시 완료!");
+    }
+    
+    /// <summary>
+    /// 스킬 정보를 표시하며 팝업 열기 (SkillTreeNode 포함)
+    /// </summary>
+    public void ShowSkillDetail(SkillData skillData, SkillTreeNode node)
+    {
+        Debug.Log($"[SkillDetailPopup] 🔘 ShowSkillDetail(SkillData, SkillTreeNode) 호출됨!");
+        
+        if (skillData == null)
+        {
+            Debug.LogError("[SkillDetailPopup] ❌ SkillData가 null입니다!");
+            return;
+        }
+        
+        currentSkillData = skillData;
+        currentNode = node;
         
         // 스킬 정보 표시
         UpdateSkillInfo();
@@ -273,7 +352,7 @@ public class SkillDetailPopup : MonoBehaviour
             
             if (costInfo.Length == 0)
             {
-                costInfo = "Cost: None";
+                costInfo = "Passive";
             }
             else
             {
@@ -281,6 +360,112 @@ public class SkillDetailPopup : MonoBehaviour
             }
             
             costText.text = costInfo;
+        }
+        
+        // 노드 상태에 따라 Learn 버튼 업데이트
+        UpdateLearnButton();
+    }
+    
+    /// <summary>
+    /// Learn 버튼 상태 업데이트
+    /// </summary>
+    private void UpdateLearnButton()
+    {
+        if (learnButton == null)
+        {
+            Debug.LogWarning("[SkillDetailPopup] Learn Button이 null입니다!");
+            return;
+        }
+        
+        // 노드 정보가 없으면 버튼 비활성화
+        if (currentNode == null)
+        {
+            learnButton.interactable = false;
+            if (learnButtonText != null)
+            {
+                learnButtonText.text = "View Only";
+            }
+            if (statusText != null)
+            {
+                statusText.text = "";
+            }
+            if (requiredLPText != null)
+            {
+                requiredLPText.text = "";
+            }
+            Debug.Log("[SkillDetailPopup] currentNode가 null → View Only 모드");
+            return;
+        }
+        
+        // 노드 상태 확인
+        SkillTreeNode.SkillState state = currentNode.GetState();
+        string skillName = currentSkillData != null ? currentSkillData.skillName : "Unknown";
+        
+        // 필요 LP 표시
+        if (requiredLPText != null)
+        {
+            requiredLPText.text = $"Required LP: {currentNode.requiredSkillPoints}";
+        }
+        
+        // TreeManager에서 현재 LP 확인
+        SwordSkillTreeManager manager = FindObjectOfType<SwordSkillTreeManager>();
+        int availableLP = manager != null ? manager.GetAvailableSkillPoints() : 0;
+        
+        Debug.Log($"[SkillDetailPopup] {skillName} 상태: {state}, 필요 LP: {currentNode.requiredSkillPoints}, 보유 LP: {availableLP}");
+        
+        switch (state)
+        {
+            case SkillTreeNode.SkillState.Locked:
+                learnButton.interactable = false;
+                if (learnButtonText != null)
+                {
+                    learnButtonText.text = "Locked";
+                }
+                if (statusText != null)
+                {
+                    statusText.text = "⛔ Locked (선행 스킬 필요)";
+                    statusText.color = Color.gray;
+                }
+                Debug.Log($"[SkillDetailPopup] {skillName}: Locked → 버튼 비활성화");
+                break;
+                
+            case SkillTreeNode.SkillState.Available:
+                bool canLearn = currentNode.CanLearn();
+                learnButton.interactable = canLearn;
+                
+                if (learnButtonText != null)
+                {
+                    learnButtonText.text = canLearn ? "Learn!" : "Insufficient LP";
+                }
+                if (statusText != null)
+                {
+                    if (canLearn)
+                    {
+                        statusText.text = "✨ Available (배울 수 있음!)";
+                        statusText.color = Color.yellow;
+                    }
+                    else
+                    {
+                        statusText.text = $"⚠️ LP 부족 (필요: {currentNode.requiredSkillPoints}, 보유: {availableLP})";
+                        statusText.color = Color.red;
+                    }
+                }
+                Debug.Log($"[SkillDetailPopup] {skillName}: Available, CanLearn: {canLearn} → 버튼 {(canLearn ? "활성화" : "비활성화")}");
+                break;
+                
+            case SkillTreeNode.SkillState.Learned:
+                learnButton.interactable = false;
+                if (learnButtonText != null)
+                {
+                    learnButtonText.text = "Learned";
+                }
+                if (statusText != null)
+                {
+                    statusText.text = "✅ Learned (이미 배움)";
+                    statusText.color = Color.green;
+                }
+                Debug.Log($"[SkillDetailPopup] {skillName}: Learned → 버튼 비활성화");
+                break;
         }
     }
     
@@ -358,6 +543,11 @@ public class SkillDetailPopup : MonoBehaviour
         if (closeButton != null)
         {
             closeButton.onClick.RemoveListener(OnCloseButtonClicked);
+        }
+        
+        if (learnButton != null)
+        {
+            learnButton.onClick.RemoveListener(OnLearnButtonClicked);
         }
     }
 }

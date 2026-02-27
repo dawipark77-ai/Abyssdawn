@@ -42,3 +42,6 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 257d06caffdd79143b05f14980b5bd65, type: 2}
+  requiredLorePoints: 1

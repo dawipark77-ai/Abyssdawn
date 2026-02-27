@@ -71,15 +71,24 @@ public class SwordSkillTreeSetup : EditorWindow
         // 5. 스킬 노드들 찾기 및 설정
         int setupCount = SetupSkillNodes(swordLore.transform, skillDataMap);
         
-        // 6. 선행 스킬 관계 설정
-        SetupPrerequisites(swordLore.transform);
+        // 6. 선행 스킬 관계 설정 (SkillData SO 정보 기반)
+        SetupPrerequisitesFromSkillData(swordLore.transform);
         
         // 변경사항 저장
         EditorUtility.SetDirty(manager);
         
+        // PlayerStatData에 초기 LP 설정 (0이면 1로 설정)
+        if (playerStatData != null && playerStatData.skillPoints == 0)
+        {
+            playerStatData.skillPoints = 1;
+            EditorUtility.SetDirty(playerStatData);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[SwordSkillTreeSetup] PlayerStatData에 초기 LP 1개 설정 완료!");
+        }
+        
         EditorUtility.DisplayDialog(
             "설정 완료!", 
-            $"Sword Lore 스킬 트리 설정 완료!\n\n✓ {setupCount}개의 스킬 노드 연결\n✓ 선행 스킬 관계 설정\n✓ PlayerStatData 연결\n\n게임을 실행하여 테스트해보세요!", 
+            $"Sword Lore 스킬 트리 설정 완료!\n\n✓ {setupCount}개의 스킬 노드 연결\n✓ 선행 스킬 관계 설정 (SO 기반)\n✓ PlayerStatData 연결\n✓ 현재 LP: {(playerStatData != null ? playerStatData.skillPoints : 0)}개\n\n게임을 실행하여 테스트해보세요!\n\n추가 도구:\n• LP 관리: Tools > Skill Tree > Manage Lore Points\n• SO 선행 스킬 설정: Tools > Skill Tree > Setup Sword Skill Prerequisites (SO)", 
             "확인"
         );
     }
@@ -212,7 +221,110 @@ public class SwordSkillTreeSetup : EditorWindow
     }
     
     /// <summary>
-    /// 선행 스킬 관계 설정
+    /// 선행 스킬 관계 설정 (SkillData SO 정보 기반)
+    /// </summary>
+    private static void SetupPrerequisitesFromSkillData(Transform parent)
+    {
+        Debug.Log("[SwordSkillTreeSetup] === 선행 스킬 관계 설정 시작 (SO 기반) ===");
+        
+        // 모든 SkillTreeNode 찾기
+        SkillTreeNode[] allNodes = parent.GetComponentsInChildren<SkillTreeNode>(true);
+        
+        int setupCount = 0;
+        
+        foreach (SkillTreeNode node in allNodes)
+        {
+            if (node == null || node.GetSkillData() == null) continue;
+            
+            SkillData skillData = node.GetSkillData();
+            
+            // SkillData SO의 prerequisiteSkills 정보 확인
+            if (skillData.prerequisiteSkills == null || skillData.prerequisiteSkills.Count == 0)
+            {
+                // 선행 스킬 없음 (루트 스킬)
+                SerializedObject so = new SerializedObject(node);
+                so.FindProperty("prerequisiteNodes").ClearArray();
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(node);
+                
+                Debug.Log($"[SwordSkillTreeSetup] ✅ {skillData.skillName}: 선행 스킬 없음 (루트)");
+                setupCount++;
+            }
+            else
+            {
+                // 선행 스킬이 있는 경우
+                List<SkillTreeNode> prerequisiteNodes = new List<SkillTreeNode>();
+                
+                foreach (SkillData prereqSkill in skillData.prerequisiteSkills)
+                {
+                    if (prereqSkill == null) continue;
+                    
+                    // 선행 스킬에 해당하는 노드 찾기
+                    SkillTreeNode prereqNode = FindNodeBySkillData(allNodes, prereqSkill);
+                    
+                    if (prereqNode != null)
+                    {
+                        prerequisiteNodes.Add(prereqNode);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[SwordSkillTreeSetup] ⚠️ {skillData.skillName}의 선행 스킬 '{prereqSkill.skillName}'에 해당하는 노드를 찾을 수 없습니다!");
+                    }
+                }
+                
+                // 노드에 선행 스킬 설정
+                if (prerequisiteNodes.Count > 0)
+                {
+                    SerializedObject so = new SerializedObject(node);
+                    SerializedProperty prereqProp = so.FindProperty("prerequisiteNodes");
+                    prereqProp.ClearArray();
+                    prereqProp.arraySize = prerequisiteNodes.Count;
+                    
+                    for (int i = 0; i < prerequisiteNodes.Count; i++)
+                    {
+                        prereqProp.GetArrayElementAtIndex(i).objectReferenceValue = prerequisiteNodes[i];
+                    }
+                    
+                    // requiredSkillPoints도 SkillData SO에서 가져오기
+                    so.FindProperty("requiredSkillPoints").intValue = skillData.requiredLorePoints;
+                    
+                    so.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(node);
+                    
+                    string prereqNames = string.Join(", ", prerequisiteNodes.ConvertAll(n => n.GetSkillData().skillName));
+                    Debug.Log($"[SwordSkillTreeSetup] ✅ {skillData.skillName}: {prereqNames} 필요 (LP: {skillData.requiredLorePoints})");
+                    setupCount++;
+                }
+            }
+        }
+        
+        Debug.Log($"[SwordSkillTreeSetup] === 선행 스킬 관계 설정 완료: {setupCount}개 노드 ===");
+    }
+    
+    /// <summary>
+    /// SkillData로 SkillTreeNode 찾기
+    /// </summary>
+    private static SkillTreeNode FindNodeBySkillData(SkillTreeNode[] nodes, SkillData skillData)
+    {
+        foreach (SkillTreeNode node in nodes)
+        {
+            if (node != null && node.GetSkillData() == skillData)
+            {
+                return node;
+            }
+        }
+        return null;
+    }
+    
+    /// <summary>
+    /// 선행 스킬 관계 설정 (수동 - 백업용)
+    /// 스킬 트리 구조:
+    /// Basic Swordsmanship (루트)
+    /// ├── Slash
+    /// │   └── Strong Slash
+    /// ├── Mandritto
+    /// └── Sharp Edge
+    ///     └── Combat Breathing
     /// </summary>
     private static void SetupPrerequisites(Transform parent)
     {
@@ -224,33 +336,68 @@ public class SwordSkillTreeSetup : EditorWindow
         SkillTreeNode combatBreathing = FindNodeByName(parent, "Combat Breathing", "CombatBreathing", "Combat_Breathing");
         SkillTreeNode strongSlash = FindNodeByName(parent, "Strong Slash", "StrongSlash", "Strong_Slash");
         
-        // 선행 스킬 설정
-        // 기본 검술: 선행 스킬 없음 (루트)
+        Debug.Log("[SwordSkillTreeSetup] === 선행 스킬 관계 설정 시작 ===");
+        
+        // 1. 기본 검술: 선행 스킬 없음 (루트)
         if (basicSwordsmanship != null)
         {
             SerializedObject so = new SerializedObject(basicSwordsmanship);
             so.FindProperty("prerequisiteNodes").ClearArray();
             so.ApplyModifiedProperties();
-            Debug.Log("[SwordSkillTreeSetup] 기본 검술: 선행 스킬 없음 (루트)");
+            EditorUtility.SetDirty(basicSwordsmanship);
+            Debug.Log("[SwordSkillTreeSetup] ✅ Basic Swordsmanship: 선행 스킬 없음 (루트)");
         }
         
-        // 나머지 스킬들: 기본 검술이 선행 스킬
-        SkillTreeNode[] tier1Skills = { slash, mandritto, sharpEdge, combatBreathing, strongSlash };
-        
-        foreach (var skill in tier1Skills)
+        // 2. Slash: Basic Swordsmanship 필요
+        if (slash != null && basicSwordsmanship != null)
         {
-            if (skill != null && basicSwordsmanship != null)
-            {
-                SerializedObject so = new SerializedObject(skill);
-                SerializedProperty prereqProp = so.FindProperty("prerequisiteNodes");
-                prereqProp.ClearArray();
-                prereqProp.arraySize = 1;
-                prereqProp.GetArrayElementAtIndex(0).objectReferenceValue = basicSwordsmanship;
-                so.ApplyModifiedProperties();
-                
-                Debug.Log($"[SwordSkillTreeSetup] {skill.name}: 선행 스킬 = 기본 검술");
-            }
+            SetPrerequisite(slash, basicSwordsmanship);
+            Debug.Log("[SwordSkillTreeSetup] ✅ Slash: Basic Swordsmanship 필요");
         }
+        
+        // 3. Mandritto: Basic Swordsmanship 필요
+        if (mandritto != null && basicSwordsmanship != null)
+        {
+            SetPrerequisite(mandritto, basicSwordsmanship);
+            Debug.Log("[SwordSkillTreeSetup] ✅ Mandritto: Basic Swordsmanship 필요");
+        }
+        
+        // 4. Sharp Edge: Basic Swordsmanship 필요
+        if (sharpEdge != null && basicSwordsmanship != null)
+        {
+            SetPrerequisite(sharpEdge, basicSwordsmanship);
+            Debug.Log("[SwordSkillTreeSetup] ✅ Sharp Edge: Basic Swordsmanship 필요");
+        }
+        
+        // 5. Combat Breathing: Sharp Edge 필요 (2단계!)
+        if (combatBreathing != null && sharpEdge != null)
+        {
+            SetPrerequisite(combatBreathing, sharpEdge);
+            Debug.Log("[SwordSkillTreeSetup] ✅ Combat Breathing: Sharp Edge 필요 (2단계)");
+        }
+        
+        // 6. Strong Slash: Slash 필요 (2단계!)
+        if (strongSlash != null && slash != null)
+        {
+            SetPrerequisite(strongSlash, slash);
+            Debug.Log("[SwordSkillTreeSetup] ✅ Strong Slash: Slash 필요 (2단계)");
+        }
+        
+        Debug.Log("[SwordSkillTreeSetup] === 선행 스킬 관계 설정 완료 ===");
+    }
+    
+    /// <summary>
+    /// 선행 스킬 하나 설정 (헬퍼 메서드)
+    /// </summary>
+    private static void SetPrerequisite(SkillTreeNode node, SkillTreeNode prerequisite)
+    {
+        SerializedObject so = new SerializedObject(node);
+        SerializedProperty prereqProp = so.FindProperty("prerequisiteNodes");
+        prereqProp.ClearArray();
+        prereqProp.arraySize = 1;
+        prereqProp.GetArrayElementAtIndex(0).objectReferenceValue = prerequisite;
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(node);
     }
     
     /// <summary>

@@ -31,15 +31,34 @@ public class SwordSkillTreeManager : MonoBehaviour
     // 배운 스킬 목록
     private HashSet<string> learnedSkillIDs = new HashSet<string>();
     
+    // Play 모드 시작 시 백업 (에디터에서만)
+    #if UNITY_EDITOR
+    private List<SkillData> backupLearnedSkills = new List<SkillData>();
+    private int backupSkillPoints = 0;
+    #endif
+    
     private void Awake()
     {
         // PlayerStatData 자동 검색
         if (playerStatData == null)
         {
+            // 먼저 Resources에서 찾기
             playerStatData = Resources.Load<PlayerStatData>("PlayerStatData");
+            
+            // 없으면 HeroData 찾기
+            if (playerStatData == null)
+            {
+                playerStatData = Resources.Load<PlayerStatData>("HeroData");
+            }
+            
+            // 여전히 없으면 경고
             if (playerStatData == null)
             {
                 Debug.LogWarning("[SwordSkillTreeManager] PlayerStatData를 찾을 수 없습니다. 테스트 모드로 실행합니다.");
+            }
+            else
+            {
+                Debug.Log($"[SwordSkillTreeManager] ✅ PlayerStatData 발견! 현재 LP: {playerStatData.skillPoints}");
             }
         }
         
@@ -53,6 +72,11 @@ public class SwordSkillTreeManager : MonoBehaviour
     
     private void Start()
     {
+        // 🔥 Play 모드 시작 시 PlayerStatData 백업 (에디터에서만)
+        #if UNITY_EDITOR
+        BackupPlayerData();
+        #endif
+        
         // 모든 노드 초기화
         InitializeAllNodes();
         
@@ -63,6 +87,53 @@ public class SwordSkillTreeManager : MonoBehaviour
         UpdateSkillPointsUI();
         UpdateAllNodesState();
     }
+    
+    #if UNITY_EDITOR
+    /// <summary>
+    /// Play 모드 시작 시 PlayerStatData 백업
+    /// </summary>
+    private void BackupPlayerData()
+    {
+        if (playerStatData == null) return;
+        
+        // 배운 스킬 백업
+        backupLearnedSkills.Clear();
+        if (playerStatData.learnedSkills != null)
+        {
+            backupLearnedSkills.AddRange(playerStatData.learnedSkills);
+        }
+        
+        // 스킬 포인트 백업
+        backupSkillPoints = playerStatData.skillPoints;
+        
+        Debug.Log($"[SwordSkillTreeManager] 💾 Play 모드 시작 - 백업 완료 (배운 스킬: {backupLearnedSkills.Count}, LP: {backupSkillPoints})");
+    }
+    
+    /// <summary>
+    /// Play 모드 종료 시 PlayerStatData 복원
+    /// </summary>
+    private void RestorePlayerData()
+    {
+        if (playerStatData == null) return;
+        
+        // 배운 스킬 복원
+        if (playerStatData.learnedSkills == null)
+        {
+            playerStatData.learnedSkills = new List<SkillData>();
+        }
+        playerStatData.learnedSkills.Clear();
+        playerStatData.learnedSkills.AddRange(backupLearnedSkills);
+        
+        // 스킬 포인트 복원
+        playerStatData.skillPoints = backupSkillPoints;
+        
+        // 변경사항 저장
+        UnityEditor.EditorUtility.SetDirty(playerStatData);
+        UnityEditor.AssetDatabase.SaveAssets();
+        
+        Debug.Log($"[SwordSkillTreeManager] 🔄 Play 모드 종료 - 복원 완료 (배운 스킬: {playerStatData.learnedSkills.Count}, LP: {playerStatData.skillPoints})");
+    }
+    #endif
     
     /// <summary>
     /// 모든 노드 초기화
@@ -182,6 +253,7 @@ public class SwordSkillTreeManager : MonoBehaviour
         
         // 스킬 포인트 차감
         int requiredPoints = node.requiredSkillPoints;
+        int beforeLP = GetAvailableSkillPoints();
         
         if (playerStatData != null)
         {
@@ -198,6 +270,12 @@ public class SwordSkillTreeManager : MonoBehaviour
             
             // 스킬 포인트 차감
             playerStatData.skillPoints -= requiredPoints;
+            
+            // 변경사항 저장 (에디터에서만)
+            #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(playerStatData);
+            UnityEditor.AssetDatabase.SaveAssets();
+            #endif
         }
         else
         {
@@ -205,11 +283,15 @@ public class SwordSkillTreeManager : MonoBehaviour
             testSkillPoints -= requiredPoints;
         }
         
+        int afterLP = GetAvailableSkillPoints();
+        
         // 배운 스킬 목록에 추가
         learnedSkillIDs.Add(skill.skillID);
         
         // 노드 상태 업데이트
         node.LearnSkill();
+        
+        Debug.Log($"[SwordSkillTreeManager] ✅ {skill.skillName} 배움! LP: {beforeLP} → {afterLP}");
         
         // 모든 노드 상태 업데이트 (연쇄 해금)
         UpdateAllNodesState();
@@ -217,7 +299,7 @@ public class SwordSkillTreeManager : MonoBehaviour
         // UI 업데이트
         UpdateSkillPointsUI();
         
-        Debug.Log($"[SwordSkillTreeManager] ✅ {skill.skillName} 배움 완료! (남은 포인트: {GetAvailableSkillPoints()})");
+        Debug.Log($"[SwordSkillTreeManager] 🔄 연쇄 해금 확인 완료!");
     }
     
     /// <summary>
@@ -225,15 +307,41 @@ public class SwordSkillTreeManager : MonoBehaviour
     /// </summary>
     private void UpdateAllNodesState()
     {
-        if (allNodes == null) return;
+        if (allNodes == null)
+        {
+            Debug.LogWarning("[SwordSkillTreeManager] allNodes가 null입니다!");
+            return;
+        }
+        
+        Debug.Log($"[SwordSkillTreeManager] === 모든 노드 상태 업데이트 시작 ({allNodes.Length}개) ===");
+        
+        int lockedCount = 0;
+        int availableCount = 0;
+        int learnedCount = 0;
         
         foreach (var node in allNodes)
         {
             if (node != null)
             {
                 node.UpdateState();
+                
+                // 상태 카운트
+                switch (node.GetState())
+                {
+                    case SkillTreeNode.SkillState.Locked:
+                        lockedCount++;
+                        break;
+                    case SkillTreeNode.SkillState.Available:
+                        availableCount++;
+                        break;
+                    case SkillTreeNode.SkillState.Learned:
+                        learnedCount++;
+                        break;
+                }
             }
         }
+        
+        Debug.Log($"[SwordSkillTreeManager] 상태 업데이트 완료 - Locked: {lockedCount}, Available: {availableCount}, Learned: {learnedCount}");
     }
     
     /// <summary>
@@ -356,5 +464,27 @@ public class SwordSkillTreeManager : MonoBehaviour
         
         Debug.Log($"[SwordSkillTreeManager] 아이콘 새로고침 완료 - 성공: {successCount}, 실패: {failCount}");
     }
+    
+    #if UNITY_EDITOR
+    /// <summary>
+    /// Play 모드 종료 시 자동 복원
+    /// </summary>
+    private void OnApplicationQuit()
+    {
+        RestorePlayerData();
+    }
+    
+    /// <summary>
+    /// GameObject 파괴 시에도 복원 (씬 전환 등)
+    /// </summary>
+    private void OnDestroy()
+    {
+        // 애플리케이션 종료가 아닐 때만 복원 (씬 전환 시)
+        if (!UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode && Application.isPlaying)
+        {
+            RestorePlayerData();
+        }
+    }
+    #endif
 }
 
