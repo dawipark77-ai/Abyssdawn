@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d, type: 3}
+  m_Name: Human_Skin
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
+  memoryID: Human_Skin
+  memoryName: Skin
+  subtitle: 'Sweat Glands: Heat Control'
+  species: 0
+  memoryIcon: {fileID: -3882488315521381977, guid: 73b2c61308c599b4c858571754bd85c9, type: 3}
+  hpBonusPercent: 5
+  hpBonus: 0
+  attackBonus: 0
+  defenseBonus: -1
+  agilityBonus: 0
+  magicBonus: -1
+  luckBonus: 0
+  description: "HP +5% (\uC9C0\uAD6C\uB825 \uC99D\uAC00)\n\uBC29\uC5B4 -1 (\uD138\uC774\uB098
+    \uAC00\uC8FD \uAC19\uC740 \uCC9C\uC5F0 \uBCF4\uD638\uB9C9 \uBD80\uC7AC)\n\uB9C8\uBC95
+    -1 (\uACFC\uC5F4 \uC5C6\uC774 \uC9C0\uC18D\uC801\uC778 \uC6C0\uC9C1\uC784)"
+  flavorText: "\uC778\uAC04\uC740 \uAC00\uC7A5 \uC587\uC740 \uAC00\uC8FD\uC744 \uAC00\uC84C\uC9C0\uB9CC,
+    \uAC00\uC7A5 \uC624\uB7AB\uB3D9\uC548 \uB728\uAC70\uC6B4 \uC804\uC7A5\uC744 \uB2EC\uB9B4
+    \uC218 \uC788\uB2E4."
+  requiredMemoriesForTrait: 3
+  traitName: 
+  traitDescription: 
