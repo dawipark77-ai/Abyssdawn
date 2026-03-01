@@ -55,4 +55,18 @@ public class PlayerStatData : ScriptableObject
 
     [Tooltip("장신구 2")]
     public AbyssdawnBattle.EquipmentData accessory2;
+
+    [Header("종의 기억 (Memory of Species)")]
+    [Tooltip("종의 기억 슬롯 1 - 3개 장착 시 특성 발동")]
+    public MemoryOfSpeciesData memorySlot1;
+
+    [Tooltip("종의 기억 슬롯 2 - 3개 장착 시 특성 발동")]
+    public MemoryOfSpeciesData memorySlot2;
+
+    [Tooltip("종의 기억 슬롯 3 - 3개 장착 시 특성 발동")]
+    public MemoryOfSpeciesData memorySlot3;
+
+    [Header("종의 특성 (Traits of Species)")]
+    [Tooltip("활성화된 종의 특성 - 종의 기억 3개 장착 시 자동 활성화")]
+    public TraitsOfSpeciesData activeTrait;
 }
