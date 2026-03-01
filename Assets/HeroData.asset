@@ -33,6 +33,7 @@ MonoBehaviour:
   body: {fileID: 11400000, guid: e9a66495ca4098b4aab796c8edf644c4, type: 2}
   accessory1: {fileID: 11400000, guid: 4ed214cc9ca37264da616dbfc05d6960, type: 2}
   accessory2: {fileID: 11400000, guid: 811620911ec01884bb165042dc142cb8, type: 2}
-  memorySlot1: {fileID: 0}
-  memorySlot2: {fileID: 0}
-  memorySlot3: {fileID: 0}
+  memorySlot1: {fileID: 11400000, guid: b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6, type: 2}
+  memorySlot2: {fileID: 11400000, guid: c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6, type: 2}
+  memorySlot3: {fileID: 11400000, guid: d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6, type: 2}
+  activeTrait: {fileID: 11400000, guid: 95e87254ade992b4eae3bccf5046d08e, type: 2}

@@ -5307,7 +5307,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 4.7766, y: -126.1102}
+  m_AnchoredPosition: {x: 4.7766113, y: -126.11023}
   m_SizeDelta: {x: -110.8592, y: -429.5793}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &561049009
@@ -5496,7 +5496,7 @@ GameObject:
   - component: {fileID: 586083441}
   - component: {fileID: 586083440}
   m_Layer: 5
-  m_Name: Speciality
+  m_Name: Traits_text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11135,6 +11135,7 @@ GameObject:
   - component: {fileID: 1166983886}
   - component: {fileID: 1166983885}
   - component: {fileID: 1166983887}
+  - component: {fileID: 1166983888}
   m_Layer: 5
   m_Name: Memory of Species
   m_TagString: Untagged
@@ -11160,8 +11161,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 237.67, y: -358}
-  m_SizeDelta: {x: 212.1405, y: 153.1066}
+  m_AnchoredPosition: {x: 237.67, y: -364.1996}
+  m_SizeDelta: {x: 212.1405, y: 165.5057}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1166983885
 MonoBehaviour:
@@ -11216,6 +11217,26 @@ MonoBehaviour:
   m_EffectColor: {r: 1, g: 1, b: 1, a: 0.5}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 0
+--- !u!114 &1166983888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166983883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39a6dcb53c100cb47b70be21c2929838, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MemoryOfSpeciesUI
+  playerStatData: {fileID: 11400000, guid: a176c788f5d164441af8bae214804085, type: 2}
+  slot1Image: {fileID: 413225821}
+  slot2Image: {fileID: 1668877105}
+  slot3Image: {fileID: 1243789109}
+  traitsImage: {fileID: 1216771418}
+  traitsText: {fileID: 586083440}
+  emptySlotColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.3}
+  filledSlotColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1168363294
 GameObject:
   m_ObjectHideFlags: 0
@@ -11795,7 +11816,7 @@ GameObject:
   - component: {fileID: 1216771419}
   - component: {fileID: 1216771418}
   m_Layer: 5
-  m_Name: Speciality_Image
+  m_Name: Traits_Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
