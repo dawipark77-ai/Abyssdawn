@@ -3369,57 +3369,84 @@ public class BattleManager : MonoBehaviour
     }
 
     private IEnumerator ExecuteSkill(PlayerStats attacker, SkillData skill, EnemyStats target)
-{
-    if (attacker == null || skill == null) yield break;
-    // 타겟이 필요한 스킬인데 타겟이 없으면 리턴 (회복/방어 스킬 제외)
-    if (target == null && !IsSelfTargetSkill(skill)) yield break;
-
-    // MP 소모
-    if (skill.mpCost > 0)
     {
-        attacker.currentMP -= (int)skill.mpCost;
-        attacker.currentMP = Mathf.Max(0, attacker.currentMP);
-        // MP 변경 시 GameManager에 저장
-        var gm = GameManager.Instance;
-        if (gm != null)
+        if (attacker == null || skill == null) yield break;
+        // 타겟이 필요한 스킬인데 타겟이 없으면 리턴 (회복/방어 스킬 제외)
+        if (target == null && !IsSelfTargetSkill(skill)) yield break;
+
+        // MP 소모
+        if (skill.mpCost > 0)
         {
-            gm.SaveFromPlayer(attacker);
-            Debug.Log($"[BattleManager] {attacker.playerName} used {skill.mpCost} MP. Current MP: {attacker.currentMP}/{attacker.maxMP}. Saved to GameManager.");
+            attacker.currentMP -= (int)skill.mpCost;
+            attacker.currentMP = Mathf.Max(0, attacker.currentMP);
+            // MP 변경 시 GameManager에 저장
+            var gm = GameManager.Instance;
+            if (gm != null)
+            {
+                gm.SaveFromPlayer(attacker);
+                Debug.Log($"[BattleManager] {attacker.playerName} used {skill.mpCost} MP. Current MP: {attacker.currentMP}/{attacker.maxMP}. Saved to GameManager.");
+            }
         }
+
+        // HP 소모
+        if (skill.hpCostPercent > 0)
+        {
+            int hpCost = Mathf.FloorToInt(attacker.maxHP * (skill.hpCostPercent / 100f));
+            attacker.currentHP -= hpCost;
+            attacker.currentHP = Mathf.Max(0, attacker.currentHP);
+            Debug.Log($"[BattleManager] {attacker.playerName} used {skill.skillName} and lost {hpCost} HP. Current HP: {attacker.currentHP}/{attacker.maxHP}");
+            ShakePlayerStatusUI(attacker);
+            
+            // HP 변경 시 GameManager에 저장
+            var gm = GameManager.Instance;
+            if (gm != null)
+            {
+                gm.SaveFromPlayer(attacker);
+            }
+            
+            if (attacker.currentHP <= 0)
+            {
+                attacker.currentHP = 0;
+                Debug.Log($"[BattleManager] {attacker.playerName} defeated by skill cost!");
+            }
+        }
+
+        bool isSelfSkill = IsSelfTargetSkill(skill);
+
+        // 1. 회복/버프 스킬
+        if (isSelfSkill)
+        {
+            ApplySelfEffects(attacker, skill);
+        }
+        // 2. 공격 스킬
+        else if (target != null)
+        {
+            // Mandritto: 전열 2명 동시 공격 (멀티 타겟)
+            if (skill.skillName == "Mandritto")
+            {
+                yield return StartCoroutine(ExecuteMandritto(attacker, skill));
+            }
+            else
+            {
+                yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, target));
+            }
+        }
+
+        // 스킬 사용 시 발동하는 패시브 처리 (Combat Breathing 등)
+        ApplyOnSkillUsePassives(attacker, skill);
+
+        Debug.Log("[BattleManager] ExecuteSkill finished. Updating status UI.");
+        UpdateStatusUI();
+        CheckBattleEnd();
     }
 
-    // HP 소모
-    if (skill.hpCostPercent > 0)
+    /// <summary>
+    /// 일반 단일 타겟 공격 스킬 처리
+    /// </summary>
+    private IEnumerator ExecuteSingleTargetSkill(PlayerStats attacker, SkillData skill, EnemyStats target)
     {
-        int hpCost = Mathf.FloorToInt(attacker.maxHP * (skill.hpCostPercent / 100f));
-        attacker.currentHP -= hpCost;
-        attacker.currentHP = Mathf.Max(0, attacker.currentHP);
-        Debug.Log($"[BattleManager] {attacker.playerName} used {skill.skillName} and lost {hpCost} HP. Current HP: {attacker.currentHP}/{attacker.maxHP}");
-        ShakePlayerStatusUI(attacker);
-        
-        // HP 변경 시 GameManager에 저장
-        var gm = GameManager.Instance;
-        if (gm != null)
-        {
-            gm.SaveFromPlayer(attacker);
-        }
-        
-        if (attacker.currentHP <= 0)
-        {
-            attacker.currentHP = 0;
-            Debug.Log($"[BattleManager] {attacker.playerName} defeated by skill cost!");
-        }
-    }
+        if (attacker == null || skill == null || target == null) yield break;
 
-    // 1. 회복/버프 스킬
-    if (IsSelfTargetSkill(skill))
-    {
-        ApplySelfEffects(attacker, skill);
-    }
-    // 2. 공격 스킬
-    else if (target != null)
-    {
-        
         int hits = skill.hitCount > 0 ? skill.hitCount : 1;
         int totalDamage = 0;
         int successfulHits = 0;
@@ -3477,6 +3504,9 @@ public class BattleManager : MonoBehaviour
                 damage = Mathf.FloorToInt(damage * 1.5f);
             }
             damage = Mathf.Max(1, damage);
+
+            // Sharp Edge 등 공격 패시브로 인한 추가 보정
+            damage = ApplyOffensivePassiveBonuses(attacker, skill, target, damage);
 
             Debug.Log($"[BattleLog] Skill Final Damage: {damage}");
 
@@ -3542,10 +3572,85 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    Debug.Log("[BattleManager] ExecuteSkill finished. Updating status UI.");
-    UpdateStatusUI();
-    CheckBattleEnd();
-}
+    /// <summary>
+    /// Mandritto: 전열(앞열) 적 2명 동시 타격
+    /// 현재는 activeEnemies 리스트의 앞에서부터 살아있는 최대 2명을 전열로 간주
+    /// </summary>
+    private IEnumerator ExecuteMandritto(PlayerStats attacker, SkillData skill)
+    {
+        if (attacker == null || skill == null) yield break;
+
+        // TODO: 전열/후열 시스템 도입 시, 실제 위치 인덱스(1~4)를 기반으로 전열 판단
+        List<EnemyStats> frontRowEnemies = new List<EnemyStats>();
+        foreach (var enemy in activeEnemies)
+        {
+            if (enemy != null && enemy.currentHP > 0)
+            {
+                frontRowEnemies.Add(enemy);
+                if (frontRowEnemies.Count >= 2) break;
+            }
+        }
+
+        if (frontRowEnemies.Count == 0) yield break;
+
+        int totalDamage = 0;
+
+        foreach (var target in frontRowEnemies)
+        {
+            if (target == null || target.currentHP <= 0) continue;
+
+            float hitChance = CalculateHitChance(skill, attacker, target);
+            float roll = UnityEngine.Random.Range(0f, 1f);
+
+            if (roll >= hitChance)
+            {
+                AddMessage($"{target.enemyName} evaded {attacker.playerName}'s {skill.skillName}!");
+                continue;
+            }
+
+            bool critical = CheckCritical(attacker.luck);
+            float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
+
+            float baseStat = attacker.GetScaleValue(skill.scalingStat);
+            float scaleMultiplier = 1f;
+            if (skill.scalingStat == ScaleStat.CurrentHPPercent ||
+                skill.scalingStat == ScaleStat.CurrentMPPercent)
+            {
+                scaleMultiplier = baseStat;
+                baseStat = attacker.Attack;
+            }
+            else if (skill.scalingStat == ScaleStat.None)
+            {
+                baseStat = attacker.Attack;
+            }
+
+            int damage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier);
+            if (critical)
+            {
+                damage = Mathf.FloorToInt(damage * 1.5f);
+            }
+            damage = Mathf.Max(1, damage);
+
+            // Sharp Edge 등 공격 패시브 보정
+            damage = ApplyOffensivePassiveBonuses(attacker, skill, target, damage);
+
+            target.TakeDamage(damage, critical);
+            totalDamage += damage;
+
+            string critMsg = critical ? " Critical hit!" : "";
+            AddMessage($"{attacker.playerName} used {skill.skillName} on {target.enemyName}! {damage} damage{critMsg}");
+
+            ApplyCurseEffects(target, skill);
+
+            // 각 타겟 사이에 약간의 딜레이
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        if (totalDamage > 0)
+        {
+            AddMessage($"Mandritto total damage: {totalDamage}");
+        }
+    }
 
     // -------------------- Damage Calculation --------------------
     private int CalculateDQDamage(int atk, int def, bool isCritical)
@@ -3555,6 +3660,53 @@ public class BattleManager : MonoBehaviour
         int damage = Mathf.FloorToInt(baseValue * UnityEngine.Random.Range(0.85f, 1.15f));
         if (isCritical) damage = Mathf.FloorToInt(damage * 1.5f);
         return Mathf.Max(damage, 1);
+    }
+
+    /// <summary>
+    /// 공격 패시브(Sharp Edge 등)에 의한 추가 데미지 보정
+    /// </summary>
+    private int ApplyOffensivePassiveBonuses(PlayerStats attacker, SkillData usedSkill, EnemyStats target, int baseDamage)
+    {
+        if (attacker == null || attacker.statData == null || attacker.statData.equippedPassives == null)
+            return baseDamage;
+
+        int result = baseDamage;
+
+        foreach (var passive in attacker.statData.equippedPassives)
+        {
+            if (passive == null || !passive.IsPassive) continue;
+
+            // Sharp Edge: 방어 관통 효과를 "추가 피해 %"로 단순 모델링
+            if (passive.skillName == "Sharp Edge")
+            {
+                float penPercent = 0.08f; // 기본 8%
+
+                // 무기 공격력 보정치 × 0.1% 만큼 추가 관통 → 총 공격력 보정치를 사용
+                int equipAtk = attacker.GetEquipmentAttackBonus();
+                penPercent += equipAtk * 0.001f; // 예: +10 공격 → +1% 추가
+
+                // 앞열 적 대상이면 추가 +5%
+                if (IsFrontRowEnemy(target))
+                {
+                    penPercent += 0.05f;
+                }
+
+                result = Mathf.FloorToInt(result * (1f + penPercent));
+            }
+        }
+
+        return Mathf.Max(result, 1);
+    }
+
+    /// <summary>
+    /// 현재 임시 규칙: activeEnemies 리스트의 0,1 인덱스를 전열로 간주
+    /// 전열/후열 시스템 정식 도입 시 교체 예정.
+    /// </summary>
+    private bool IsFrontRowEnemy(EnemyStats enemy)
+    {
+        if (enemy == null) return false;
+        int index = activeEnemies.IndexOf(enemy);
+        return index >= 0 && index <= 1;
     }
 
     // -------------------- Critical / Evasion --------------------
@@ -3568,6 +3720,38 @@ public class BattleManager : MonoBehaviour
     {
         float roll = UnityEngine.Random.Range(0f, 100f);
         return roll < evasionChance + (targetAgility - attackerAgility) * 0.5f;
+    }
+
+    /// <summary>
+    /// 스킬 사용 시 발동하는 패시브 처리 (Combat Breathing 등)
+    /// </summary>
+    private void ApplyOnSkillUsePassives(PlayerStats attacker, SkillData usedSkill)
+    {
+        if (attacker == null || attacker.statData == null || attacker.statData.equippedPassives == null) return;
+
+        foreach (var passive in attacker.statData.equippedPassives)
+        {
+            if (passive == null || !passive.IsPassive) continue;
+
+            // Combat Breathing: 스킬 사용 시 HP 5% 회복, 후열이면 +2% 추가
+            if (passive.skillName == "Combat Breathing")
+            {
+                float healPercent = 5f;
+
+                // TODO: 전열/후열 시스템 정식 도입 시, PlayerStats.IsBackRow를 실제 위치 값으로 설정
+                if (attacker.IsBackRow)
+                {
+                    healPercent += 2f;
+                }
+
+                int healAmount = Mathf.FloorToInt(attacker.maxHP * (healPercent / 100f));
+                if (healAmount > 0)
+                {
+                    attacker.Heal(healAmount);
+                    AddMessage($"{attacker.playerName}'s Combat Breathing restores {healAmount} HP!");
+                }
+            }
+        }
     }
 
     // -------------------- Hit Chance Calculation --------------------

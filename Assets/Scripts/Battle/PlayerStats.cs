@@ -130,6 +130,16 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    [Header("5. 전투 포지션 (전열 / 후열)")]
+    [Tooltip("현재 캐릭터가 전열(Front Row)에 있는지 여부. 전열/후열 시스템 도입 전까지는 수동으로 설정해서 사용.")]
+    public bool isFrontRow = true;
+
+    /// <summary>
+    /// 전열 여부 (전투 포지션 시스템 정식 도입 시, 인덱스 기반으로 교체 예정)
+    /// </summary>
+    public bool IsFrontRow => isFrontRow;
+    public bool IsBackRow => !isFrontRow;
+
     // 소문자 버전 (GameManager 등 기존 레거시 스크립트 호환용)
     public int attack  => Attack;
     public int defense => Defense;
@@ -370,6 +380,10 @@ public class PlayerStats : MonoBehaviour
     private int GetPassiveAttackBonus()
     {
         int bonus = GetPassiveBonus(PassiveBonusStat.Attack);
+
+        // 기본 검술(Basic Swordsmanship) 전용 추가 보정
+        bonus += GetBasicSwordsmanshipAttackBonus();
+
         Debug.LogWarning($"★★★ FINAL PASSIVE ATTACK BONUS: +{bonus} ★★★");
         return bonus;
     }
@@ -404,7 +418,49 @@ public class PlayerStats : MonoBehaviour
             }
         }
 
+        // 기본 검술(Basic Swordsmanship) 명중률 +5%
+        if (HasEquippedPassiveByName("Basic Swordsmanship"))
+        {
+            total += 0.05f;
+        }
+
         return total;
+    }
+
+    /// <summary>
+    /// 현재 장착된 패시브 목록에서 특정 이름의 패시브를 가지고 있는지 확인
+    /// (SO ID 시스템 도입 전까지 임시로 skillName 문자열을 사용)
+    /// </summary>
+    private bool HasEquippedPassiveByName(string skillName)
+    {
+        if (statData == null || statData.equippedPassives == null) return false;
+        foreach (var passive in statData.equippedPassives)
+        {
+            if (passive == null) continue;
+            if (!passive.IsPassive) continue;
+            if (passive.skillName == skillName) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 기본 검술 패시브로 인한 추가 공격력 보정
+    /// - 검 장착 시 기본 공격력 +2
+    /// - 레벨당 공격력 +0.25 (소수점은 내림 처리)
+    /// </summary>
+    private int GetBasicSwordsmanshipAttackBonus()
+    {
+        if (!HasEquippedPassiveByName("Basic Swordsmanship")) return 0;
+
+        // TODO: "검 장착 여부" 체크는 장비 타입 시스템 도입 시 EquipmentManager 기반으로 교체
+        bool hasSwordEquipped = true;
+
+        if (!hasSwordEquipped) return 0;
+
+        int bonus = 2;
+        bonus += Mathf.FloorToInt(level * 0.25f);
+        Debug.Log($"[BasicSwordsmanship] Attack bonus: +{bonus} (level {level})");
+        return bonus;
     }
 
     /// <summary>
@@ -804,18 +860,49 @@ public class PlayerStats : MonoBehaviour
 
     public int TakeDamage(int damage)
     {
-        int finalDamage = damage;
-        if (isDefending || defenseBuffAmount > 0)
+        float totalReduction = 0f;
+
+        // 방어 커맨드 / 방어 버프
+        if (isDefending)
         {
-            float totalReduction = isDefending ? defenceReduction : 0f;
-            totalReduction += (defenseBuffAmount / 100f);
-            finalDamage = Mathf.Max(1, Mathf.FloorToInt(damage * (1f - totalReduction)));
-            isDefending = false;
-            defenseBuffAmount = 0f;
+            totalReduction += defenceReduction;
         }
+        if (defenseBuffAmount > 0)
+        {
+            totalReduction += (defenseBuffAmount / 100f);
+        }
+
+        // 패시브에 의한 추가 피해 감소 (예: 기본 검술 전열 -5%)
+        totalReduction += GetAdditionalDamageReductionFromPassives();
+
+        // 과도한 감소 방지
+        totalReduction = Mathf.Clamp(totalReduction, 0f, 0.9f);
+
+        int finalDamage = Mathf.Max(1, Mathf.FloorToInt(damage * (1f - totalReduction)));
+
+        // 한 턴짜리 방어 상태/버프는 소모
+        isDefending = false;
+        defenseBuffAmount = 0f;
+
         currentHP = Mathf.Clamp(currentHP - finalDamage, 0, maxHP);
         if (currentHP <= 0) Die();
         return finalDamage;
+    }
+
+    /// <summary>
+    /// 패시브 스킬에서 오는 추가 피해 감소율 계산
+    /// </summary>
+    private float GetAdditionalDamageReductionFromPassives()
+    {
+        float reduction = 0f;
+
+        // 기본 검술: 전열일 때 받는 데미지 -5%
+        if (HasEquippedPassiveByName("Basic Swordsmanship") && IsFrontRow)
+        {
+            reduction += 0.05f;
+        }
+
+        return reduction;
     }
 
     public void Heal(int amount) { currentHP = Mathf.Min(currentHP + amount, maxHP); }

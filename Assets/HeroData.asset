@@ -17,8 +17,17 @@ MonoBehaviour:
   level: 1
   exp: 0
   currentJob: {fileID: 11400000, guid: 0066eb8cc4bf76c44baa77b0df8897cd, type: 2}
-  equippedSkills: []
-  equippedPassives: []
+  equippedSkills:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  equippedPassives:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   learnedSkills: []
   skillPoints: 5
   rightHand: {fileID: 11400000, guid: 3ff1f34e885371c41a64f2690f64f995, type: 2}

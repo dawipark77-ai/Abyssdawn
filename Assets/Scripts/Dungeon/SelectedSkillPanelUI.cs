@@ -26,9 +26,14 @@ public class SelectedSkillPanelUI : MonoBehaviour
     public Color emptyIconColor = new Color(1f, 1f, 1f, 0.2f);
 
     private SkillData currentSelectedSkill;
+    private RectTransform panelRect;
+    private Canvas parentCanvas;
 
     private void Awake()
     {
+        panelRect = GetComponent<RectTransform>();
+        parentCanvas = GetComponentInParent<Canvas>();
+
         // PlayerStatData 자동 로드
         if (playerStatData == null)
         {
@@ -69,6 +74,20 @@ public class SelectedSkillPanelUI : MonoBehaviour
     {
         RefreshSlotsFromPlayerData();
         ClearSelection();
+    }
+
+    private void Update()
+    {
+        // 패널이 열려 있고, 마우스/터치가 눌렸을 때
+        if (!gameObject.activeInHierarchy) return;
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (!IsPointerOverPanel())
+            {
+                ClosePanel();
+            }
+        }
     }
 
     /// <summary>
@@ -237,6 +256,8 @@ public class SelectedSkillPanelUI : MonoBehaviour
         }
 
         Debug.Log($"[SelectedSkillPanelUI] 패시브 슬롯 {index} 에 {currentSelectedSkill.skillName} 장착");
+
+        RefreshStatusPanels();
         ClearSelection();
     }
 
@@ -260,6 +281,8 @@ public class SelectedSkillPanelUI : MonoBehaviour
         }
 
         Debug.Log($"[SelectedSkillPanelUI] 액티브 슬롯 {index} 에 {currentSelectedSkill.skillName} 장착");
+
+        RefreshStatusPanels();
         ClearSelection();
     }
 
@@ -270,6 +293,41 @@ public class SelectedSkillPanelUI : MonoBehaviour
         {
             list.Add(null);
         }
+    }
+
+    /// <summary>
+    /// 배틀셋이 변경되었을 때 Status 패널 UI를 즉시 새로고침
+    /// </summary>
+    private void RefreshStatusPanels()
+    {
+        // StatusUIHandler 사용 중일 경우
+        var handler = FindObjectOfType<StatusUIHandler>(true);
+        if (handler != null)
+        {
+            handler.RefreshUI();
+        }
+
+        // StatusUIUpdate 사용 중일 경우
+        var legacy = FindObjectOfType<StatusUIUpdate>(true);
+        if (legacy != null)
+        {
+            legacy.UpdateUI();
+        }
+    }
+
+    /// <summary>
+    /// 현재 마우스/터치 위치가 이 패널 Rect 안에 포함되는지 확인
+    /// </summary>
+    private bool IsPointerOverPanel()
+    {
+        if (panelRect == null) return false;
+
+        Vector2 screenPos = Input.mousePosition;
+        Camera cam = (parentCanvas != null && parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            ? parentCanvas.worldCamera
+            : null;
+
+        return RectTransformUtility.RectangleContainsScreenPoint(panelRect, screenPos, cam);
     }
 }
 

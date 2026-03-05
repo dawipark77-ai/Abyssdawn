@@ -12,6 +12,8 @@ public class PlayModeRestoreSkills
     private static PlayerStatData playerStatData;
     private static List<SkillData> backupLearnedSkills = new List<SkillData>();
     private static int backupSkillPoints = 0;
+    private static List<SkillData> backupEquippedSkills = new List<SkillData>();
+    private static List<SkillData> backupEquippedPassives = new List<SkillData>();
     private static bool hasBackup = false;
 
     static PlayModeRestoreSkills()
@@ -52,7 +54,16 @@ public class PlayModeRestoreSkills
     private static void BackupPlayerData()
     {
         // PlayerStatData 찾기
-        playerStatData = Resources.Load<PlayerStatData>("PlayerStatData");
+        // 1순위: 프로젝트 루트의 HeroData.asset (실제 게임에서 사용하는 주요 데이터)
+        playerStatData = AssetDatabase.LoadAssetAtPath<PlayerStatData>("Assets/HeroData.asset");
+
+        // 2순위: Resources/PlayerStatData.asset
+        if (playerStatData == null)
+        {
+            playerStatData = Resources.Load<PlayerStatData>("PlayerStatData");
+        }
+
+        // 3순위: Resources/HeroData.asset
         if (playerStatData == null)
         {
             playerStatData = Resources.Load<PlayerStatData>("HeroData");
@@ -70,6 +81,19 @@ public class PlayModeRestoreSkills
         if (playerStatData.learnedSkills != null)
         {
             backupLearnedSkills.AddRange(playerStatData.learnedSkills);
+        }
+
+        // 배틀 셋(장착 스킬/패시브) 백업
+        backupEquippedSkills.Clear();
+        if (playerStatData.equippedSkills != null)
+        {
+            backupEquippedSkills.AddRange(playerStatData.equippedSkills);
+        }
+
+        backupEquippedPassives.Clear();
+        if (playerStatData.equippedPassives != null)
+        {
+            backupEquippedPassives.AddRange(playerStatData.equippedPassives);
         }
 
         // 스킬 포인트 백업
@@ -107,11 +131,27 @@ public class PlayModeRestoreSkills
         // 스킬 포인트 복원
         playerStatData.skillPoints = backupSkillPoints;
 
+        // 배틀 셋(장착 스킬/패시브) 복원
+        if (playerStatData.equippedSkills == null)
+        {
+            playerStatData.equippedSkills = new List<SkillData>();
+        }
+        playerStatData.equippedSkills.Clear();
+        playerStatData.equippedSkills.AddRange(backupEquippedSkills);
+
+        if (playerStatData.equippedPassives == null)
+        {
+            playerStatData.equippedPassives = new List<SkillData>();
+        }
+        playerStatData.equippedPassives.Clear();
+        playerStatData.equippedPassives.AddRange(backupEquippedPassives);
+
         // 변경사항 저장
         EditorUtility.SetDirty(playerStatData);
         AssetDatabase.SaveAssets();
 
-        Debug.Log($"[PlayModeRestoreSkills] 🔄 복원 완료 - 배운 스킬: {playerStatData.learnedSkills.Count}, LP: {playerStatData.skillPoints}");
+        Debug.Log($"[PlayModeRestoreSkills] 🔄 복원 완료 - 배운 스킬: {playerStatData.learnedSkills.Count}, LP: {playerStatData.skillPoints}, " +
+                  $"EquippedSkills: {playerStatData.equippedSkills.Count}, EquippedPassives: {playerStatData.equippedPassives.Count}");
 
         hasBackup = false;
     }
