@@ -188,3 +188,7 @@ public class MemoryOfSpeciesUI : MonoBehaviour
 #endif
 }
 
+
+
+
+

@@ -27,7 +27,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9e52ba0da4994fe47a97d8eed3c6b20f, type: 2}
   - {fileID: 11400000, guid: 8908d8eaf3bad6f4dbdf4a344ab581af, type: 2}
   learnedSkills: []
-  skillPoints: 0
+  skillPoints: 5
   rightHand: {fileID: 11400000, guid: 3ff1f34e885371c41a64f2690f64f995, type: 2}
   leftHand: {fileID: 11400000, guid: f11abdb46a6c8804bbcc6bab1e0cbfd0, type: 2}
   body: {fileID: 11400000, guid: e9a66495ca4098b4aab796c8edf644c4, type: 2}
