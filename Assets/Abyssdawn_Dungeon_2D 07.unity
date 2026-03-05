@@ -10922,6 +10922,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68b9a01388069143b27d0378f9a1bc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SelectedSkillPanelUI
+  playerStatData: {fileID: 11400000, guid: a176c788f5d164441af8bae214804085, type: 2}
+  passiveSlotImages:
+  - {fileID: 954204070}
+  - {fileID: 1168363296}
+  - {fileID: 121383191}
+  passiveSlotButtons:
+  - {fileID: 1238725131}
+  - {fileID: 431803705}
+  - {fileID: 1670925145}
+  activeSlotImages:
+  - {fileID: 822333571}
+  - {fileID: 926637380}
+  - {fileID: 1868836360}
+  - {fileID: 1159887282}
+  - {fileID: 787507000}
+  - {fileID: 860425947}
+  activeSlotButtons:
+  - {fileID: 790627375}
+  - {fileID: 692126497}
+  - {fileID: 1656704172}
+  - {fileID: 1677120757}
+  - {fileID: 1671295077}
+  - {fileID: 414445288}
+  normalSlotColor: {r: 1, g: 1, b: 1, a: 1}
+  highlightSlotColor: {r: 1, g: 0.95, b: 0.5, a: 1}
+  disabledSlotColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  emptyIconColor: {r: 1, g: 1, b: 1, a: 0.2}
 --- !u!1 &1102137328
 GameObject:
   m_ObjectHideFlags: 0

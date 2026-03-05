@@ -7,6 +7,7 @@ using AbyssdawnBattle;
 /// 스킬 리스트 아이템 UI 컴포넌트
 /// SkillListItem 프레팹에 붙여서 사용
 /// </summary>
+[RequireComponent(typeof(Button))]
 public class SkillListItem : MonoBehaviour
 {
     [Header("UI References")]
@@ -19,6 +20,9 @@ public class SkillListItem : MonoBehaviour
     [Header("Data")]
     [Tooltip("이 아이템이 표시하는 스킬 데이터")]
     private SkillData skillData;
+
+    private Button button;
+    private SelectedSkillPanelUI selectedSkillPanel;
     
     private void Awake()
     {
@@ -40,6 +44,8 @@ public class SkillListItem : MonoBehaviour
                 skillNameText = nameTransform.GetComponent<TextMeshProUGUI>();
             }
         }
+
+        button = GetComponent<Button>();
     }
     
     /// <summary>
@@ -49,6 +55,7 @@ public class SkillListItem : MonoBehaviour
     {
         skillData = skill;
         UpdateUI();
+        SetupClickEvent();
     }
     
     /// <summary>
@@ -83,6 +90,36 @@ public class SkillListItem : MonoBehaviour
             skillNameText.text = skillData.skillName;
         }
     }
+
+    /// <summary>
+    /// 버튼 클릭 시 선택 패널에 통보
+    /// </summary>
+    private void SetupClickEvent()
+    {
+        if (button == null) return;
+
+        if (selectedSkillPanel == null)
+        {
+            selectedSkillPanel = FindObjectOfType<SelectedSkillPanelUI>(true);
+        }
+
+        button.onClick.RemoveAllListeners();
+
+        if (selectedSkillPanel != null)
+        {
+            button.onClick.AddListener(OnClick);
+        }
+        else
+        {
+            Debug.LogWarning("[SkillListItem] SelectedSkillPanelUI 를 찾을 수 없습니다.");
+        }
+    }
+
+    private void OnClick()
+    {
+        if (skillData == null || selectedSkillPanel == null) return;
+        selectedSkillPanel.OnSkillItemClicked(skillData);
+    }
     
     /// <summary>
     /// 현재 설정된 스킬 데이터 가져오기
@@ -92,6 +129,3 @@ public class SkillListItem : MonoBehaviour
         return skillData;
     }
 }
-
-
-
