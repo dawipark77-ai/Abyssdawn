@@ -1,11 +1,103 @@
 한글로 답해
 
-"너가 Random 충돌을 해결하려다가 프로젝트의 URP(Universal Render Pipeline) 설정까지 망가뜨렸어. 현재 Default Renderer is missing 에러가 뜨면서 그래픽 설정이 다 깨진 상태야. 당장 아래 작업들을 수행해:
+전열/후열 슬롯 시스템 구현 작업을 이어받아 진행해주세요.
 
-URP 에셋 복구: 프로젝트 내의 UniversalRP 에셋(또는 관련 .asset 파일)을 찾아서, 비어버린 Renderer List에 기존의 ForwardRenderer(또는 UniversalRP_Renderer)를 다시 할당해.
+## 📋 현재까지 완료된 작업
 
-설정 파일 변경사항 확인: 너가 방금 Library나 ProjectSettings 폴더, 혹은 .asset 파일을 임의로 수정하거나 지운 게 있는지 확인하고 전부 되돌려(Rollback).
+1. **설계 문서**: `Assets/Scripts/Battle/PositionSystem_Design.md`
+   - 전체 시스템 설계 및 구현 계획이 정리되어 있습니다.
 
-Random 에러 최종 해결: Random 문제는 아까 말했듯이 **'코드 내부'**에서 UnityEngine.Random으로 풀네임을 쓰는 방식으로만 해결하고, 프로젝트 전역 설정이나 외부 패키지(KMeans.cs)는 절대 건드리지 마.
+2. **타겟팅 시스템**: `Assets/Scripts/Battle/Data/SkillData.cs`
+   - `SlotMask` (Flags enum) - 스킬 조건 표현용
+   - `RowType` enum - 전열/후열 분리
+   - `SkillTargeting` 클래스 - SlotMask 기반 타겟팅 설정
+   - `SlotHelper` 유틸리티 클래스
 
-에러 제로 확인: 유니티 콘솔에 Renderer missing 에러와 Random 에러가 모두 사라질 때까지 책임을 지고 수정해."
+3. **BattleLine 클래스**: `Assets/Scripts/Battle/BattleLine.cs`
+   - 제네릭 클래스로 아군/적 모두 사용 가능
+   - 포지션 관리 메서드들 (AssignToSlot, Swap, Move, Shuffle 등)
+
+4. **방어구 타입 시스템**: `Assets/Scripts/Battle/Data/EquipmentData.cs`
+   - `ArmourCategory` (LightArmour, HeavyArmour)
+   - `ArmourType` (Cloth, Leather, Plate, FullArmour)
+
+## 🎯 구현해야 할 작업
+
+### Phase 1: 데이터 구조 통합
+1. **PlayerStats.cs** 수정
+   - `currentSlot` 필드 추가 (BattleSlot enum)
+   - 기존 `isFrontRow` bool을 `currentSlot` 기반으로 계산하도록 변경
+   - `IsFrontRow`, `IsBackRow` 프로퍼티는 SlotHelper를 사용하도록 수정
+
+2. **EnemyStats.cs** 수정
+   - `currentSlot` 필드 추가 (BattleSlot enum)
+   - `IsFrontRow`, `IsBackRow` 프로퍼티 추가
+
+### Phase 2: BattleManager 통합
+1. **BattleManager.cs** 수정
+   - `BattleLine<PlayerStats> playerLine` 필드 추가
+   - `BattleLine<EnemyStats> enemyLine` 필드 추가
+   - `StartBattle()`에서 슬롯 초기화 로직 추가
+     - 플레이어 파티를 순서대로 Slot1, Slot2, Slot3, Slot4에 할당
+     - 적을 순서대로 Slot1, Slot2, Slot3, Slot4에 할당
+   - 기존 `PositionPartyMembers()` 로직을 BattleLine 기반으로 변경
+
+### Phase 3: 스킬 실행 로직 통합
+1. **BattleManager.cs**의 스킬 실행 메서드 수정
+   - `ExecuteSkill()`에서 `skill.targeting`을 사용하여 타겟 결정
+   - `ExecuteMandritto()`를 SlotMask 기반으로 변경
+   - `IsFrontRowEnemy()` 메서드를 슬롯 기반으로 변경
+   - 모든 전열/후열 체크를 SlotHelper를 사용하도록 변경
+
+### Phase 4: 테스트 스킬 구현
+1. **Mandritto 스킬** (이미 존재할 수 있음)
+   - `targeting.allowedCasterSlots = SlotMask.Front`
+   - `targeting.allowedTargetSlots = SlotMask.Front`
+   - `targeting.targetFaction = TargetFaction.Enemy`
+
+## 📝 구현 시 주의사항
+
+1. **기존 코드 호환성 유지**
+   - `isFrontRow` bool 필드는 유지하되, `currentSlot` 기반으로 자동 계산
+   - 기존 `IsFrontRow`, `IsBackRow` 프로퍼티는 그대로 유지
+
+2. **BattleLine 사용**
+   - 모든 포지션 관련 연산은 BattleLine 클래스를 통해서만 수행
+   - 직접 배열 조작 금지
+
+3. **SlotMask 활용**
+   - 스킬 조건 체크는 SlotMask 비트 연산 사용
+   - `SlotHelper.ContainsSlot()` 활용
+
+4. **슬롯 번호 규칙**
+   - 슬롯 1,2 = 전열 (Front Row)
+   - 슬롯 3,4 = 후열 (Back Row)
+   - 인덱스는 1-4 (배열 인덱스는 0-3이지만, BattleSlot enum은 1-4)
+
+## 🔍 참고 파일 위치
+
+- 설계 문서: `Assets/Scripts/Battle/PositionSystem_Design.md`
+- BattleLine 클래스: `Assets/Scripts/Battle/BattleLine.cs`
+- 타겟팅 시스템: `Assets/Scripts/Battle/Data/SkillData.cs` (SkillTargeting 클래스)
+- PlayerStats: `Assets/Scripts/Battle/PlayerStats.cs`
+- EnemyStats: `Assets/Scripts/Battle/EnemyStats.cs`
+- BattleManager: `Assets/Scripts/Battle/BattleManager.cs`
+
+## ✅ 완료 체크리스트
+
+- [ ] PlayerStats에 currentSlot 필드 추가 및 isFrontRow 자동 계산
+- [ ] EnemyStats에 currentSlot 필드 추가
+- [ ] BattleManager에 BattleLine 인스턴스 추가
+- [ ] StartBattle()에서 슬롯 초기화
+- [ ] 기존 isFrontRow 로직을 슬롯 기반으로 마이그레이션
+- [ ] 스킬 실행 로직에 타겟팅 시스템 통합
+- [ ] Mandritto 스킬이 SlotMask 기반으로 작동하는지 확인
+- [ ] 전투 시작 시 플레이어/적이 올바른 슬롯에 배치되는지 확인
+
+## 💡 추가 구현 가능한 기능 (선택사항)
+
+- 위치 변경 스킬 (Shuffle, Push, Pull)
+- 슬롯 UI 표시
+- 위치 변경 애니메이션
+
+위 작업을 순서대로 진행해주세요. 질문이 있으면 언제든 물어보세요.

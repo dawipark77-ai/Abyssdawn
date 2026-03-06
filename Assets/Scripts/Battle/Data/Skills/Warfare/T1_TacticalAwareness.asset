@@ -10,16 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: T1_CombatBreathing
+  m_Name: T1_TacticalAwareness
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Warfare_T1_01
-  skillName: Combat Breathing
-  skillIcon: {fileID: 5329708327426976617, guid: 540bef903ad51c04697635fbf8c0260d, type: 3}
-  description: "\uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC HP \uD68C\uBCF5 +5% (3\uD134). \uD6C4\uC5F4
-    \uC704\uCE58 \uC2DC HP \uD68C\uBCF5 +2% \uCD94\uAC00."
+  skillID: Warfare_T1_03
+  skillName: Tactical Awareness
+  skillIcon: {fileID: 0}
+  description: "\uBA85\uC911\uB960 +5%, \uD68C\uD53C\uC728 +5%. \uC801\uC774 2\uAE30 \uC774\uC0C1\uC77C \uB54C \uD06C\uB9AC\uD2F0\uCEE4\uB9AC \uD5A5\uB960 +3%"
   usageType: 1
   damageType: 0
-  scalingStat: 0
+  scalingStat: 4
   targeting:
     targetFaction: 2
     targetMode: 0
@@ -36,7 +35,7 @@ MonoBehaviour:
   selfCurseData: {fileID: 0}
   selfCurseChance: 0
   effects:
-  - effectType: 2
+  - effectType: 22
     recoveryTarget: 0
     effectAmount: 5
     curseData: {fileID: 0}
@@ -47,7 +46,9 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  dunbreakChance: 1.2
-  dunbreakDescription: "\uC774 \uD134 \uD68C\uBCF5\uB7C\uC6A9 2\uBC00, \uB610\uB294 1\uD134 \uB3D9\uC548 \uCD94\uAC00 \uC911\uB3D9/\uCD9C\uD0DC \uC800\uD56D +20%"
+  dunbreakChance: 0.8
+  dunbreakDescription: "\uC774 \uD134 \uCC98\uC74C \uC801 \uACF5\uACA9\uC744 \uC644\uC804 \uD68C\uD53C + \uBC18\uACA9"
   prerequisiteSkills: []
   requiredLorePoints: 1
+
+

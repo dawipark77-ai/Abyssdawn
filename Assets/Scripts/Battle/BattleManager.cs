@@ -191,6 +191,10 @@ public class BattleManager : MonoBehaviour
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private int currentTargetIndex = 0;
 
+    // ========== 전열/후열 슬롯 시스템 ==========
+    private BattleLine<PlayerStats> playerLine = new BattleLine<PlayerStats>();
+    private BattleLine<EnemyStats> enemyLine = new BattleLine<EnemyStats>();
+
     // ========== 스킬 시스템 ==========
     [Header("Skill System")]
     public SkillDataList skillLibrary;
@@ -1351,11 +1355,43 @@ public class BattleManager : MonoBehaviour
         // 적 상태 UI 패널 재구성
         RebuildEnemyStatusPanel();
 
+        // 슬롯 초기화 (BattleLine 기반)
+        InitializeBattleLines();
+
         // 턴 순서 구성
         BuildTurnOrder();
 
         // 커맨드 페이즈 시작
         StartCommandPhase();
+    }
+
+    /// <summary>
+    /// 플레이어 파티와 적을 BattleLine에 슬롯 순서대로 배치합니다.
+    /// 슬롯 1,2 = 전열, 슬롯 3,4 = 후열
+    /// </summary>
+    private void InitializeBattleLines()
+    {
+        playerLine.Clear();
+        for (int i = 0; i < activePartyMembers.Count && i < 4; i++)
+        {
+            var member = activePartyMembers[i];
+            if (member == null) continue;
+            int slotIndex = i + 1;
+            member.currentSlot = (BattleSlot)slotIndex;
+            playerLine.AssignToSlot(member, slotIndex);
+        }
+
+        enemyLine.Clear();
+        for (int i = 0; i < activeEnemies.Count && i < 4; i++)
+        {
+            var e = activeEnemies[i];
+            if (e == null) continue;
+            int slotIndex = i + 1;
+            e.currentSlot = (BattleSlot)slotIndex;
+            enemyLine.AssignToSlot(e, slotIndex);
+        }
+
+        Debug.Log($"[BattleManager] BattleLine 초기화 완료. 플레이어: {playerLine}, 적: {enemyLine}");
     }
 
     private void RebuildEnemyStatusPanel()
@@ -3580,16 +3616,11 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || skill == null) yield break;
 
-        // TODO: 전열/후열 시스템 도입 시, 실제 위치 인덱스(1~4)를 기반으로 전열 판단
-        List<EnemyStats> frontRowEnemies = new List<EnemyStats>();
-        foreach (var enemy in activeEnemies)
-        {
-            if (enemy != null && enemy.currentHP > 0)
-            {
-                frontRowEnemies.Add(enemy);
-                if (frontRowEnemies.Count >= 2) break;
-            }
-        }
+        // SlotMask 기반으로 타겟 슬롯 결정 (스킬의 allowedTargetSlots 활용)
+        SlotMask targetMask = (skill.targeting != null) ? skill.targeting.allowedTargetSlots : SlotMask.Front;
+        List<EnemyStats> frontRowEnemies = enemyLine.GetCharactersInMask(targetMask)
+            .Where(e => e != null && e.currentHP > 0)
+            .ToList();
 
         if (frontRowEnemies.Count == 0) yield break;
 
@@ -3699,14 +3730,12 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 임시 규칙: activeEnemies 리스트의 0,1 인덱스를 전열로 간주
-    /// 전열/후열 시스템 정식 도입 시 교체 예정.
+    /// 적이 전열(슬롯 1,2)에 있는지 확인합니다. currentSlot 기반으로 판단합니다.
     /// </summary>
     private bool IsFrontRowEnemy(EnemyStats enemy)
     {
         if (enemy == null) return false;
-        int index = activeEnemies.IndexOf(enemy);
-        return index >= 0 && index <= 1;
+        return enemy.IsFrontRow;
     }
 
     // -------------------- Critical / Evasion --------------------

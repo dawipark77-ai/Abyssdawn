@@ -131,14 +131,14 @@ public class PlayerStats : MonoBehaviour
     }
 
     [Header("5. 전투 포지션 (전열 / 후열)")]
-    [Tooltip("현재 캐릭터가 전열(Front Row)에 있는지 여부. 전열/후열 시스템 도입 전까지는 수동으로 설정해서 사용.")]
-    public bool isFrontRow = true;
+    [Tooltip("현재 슬롯 위치 (BattleLine에서 자동 설정됨). 슬롯 1,2 = 전열, 슬롯 3,4 = 후열.")]
+    public BattleSlot currentSlot = BattleSlot.Slot1;
 
-    /// <summary>
-    /// 전열 여부 (전투 포지션 시스템 정식 도입 시, 인덱스 기반으로 교체 예정)
-    /// </summary>
-    public bool IsFrontRow => isFrontRow;
-    public bool IsBackRow => !isFrontRow;
+    [HideInInspector]
+    public bool isFrontRow = true; // 레거시 호환 - IsFrontRow 프로퍼티는 currentSlot 기반으로 계산됩니다.
+
+    public bool IsFrontRow => SlotHelper.IsFrontRow(currentSlot);
+    public bool IsBackRow => SlotHelper.IsBackRow(currentSlot);
 
     // 소문자 버전 (GameManager 등 기존 레거시 스크립트 호환용)
     public int attack  => Attack;

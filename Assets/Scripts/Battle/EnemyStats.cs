@@ -19,6 +19,13 @@ public class EnemyStats : MonoBehaviour
     public int Agility = 5;
     public int luck = 1;
 
+    [Header("Battle Position")]
+    [Tooltip("현재 슬롯 위치 (BattleLine에서 자동 설정됨). 슬롯 1,2 = 전열, 슬롯 3,4 = 후열.")]
+    public BattleSlot currentSlot = BattleSlot.Slot1;
+
+    public bool IsFrontRow => SlotHelper.IsFrontRow(currentSlot);
+    public bool IsBackRow => SlotHelper.IsBackRow(currentSlot);
+
     [Header("Visual Effects")]
     public float hitShakeDuration = 0.2f;
     public float hitShakeMagnitude = 0.1f;

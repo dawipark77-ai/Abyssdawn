@@ -10,16 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: T1_CombatBreathing
+  m_Name: T1_HardenedBody
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Warfare_T1_01
-  skillName: Combat Breathing
-  skillIcon: {fileID: 5329708327426976617, guid: 540bef903ad51c04697635fbf8c0260d, type: 3}
-  description: "\uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC HP \uD68C\uBCF5 +5% (3\uD134). \uD6C4\uC5F4
-    \uC704\uCE58 \uC2DC HP \uD68C\uBCF5 +2% \uCD94\uAC00."
+  skillID: Warfare_T1_02
+  skillName: Hardened Body
+  skillIcon: {fileID: 0}
+  description: "Max HP +8%, \uAD6C\uB9E4 \uD53C\uD574 -5%, \uCD9C\uD0DC/\uC810\uD654 \uB3C4\uD2B8 \uD53C\uD574 -20%. \uC804\uC5F4\uC5D0 \uC788\uC744 \uB54C \uCD94\uAC00 \uD53C\uD574 \uAC10\uC18C +3%"
   usageType: 1
   damageType: 0
-  scalingStat: 0
+  scalingStat: 2
   targeting:
     targetFaction: 2
     targetMode: 0
@@ -36,9 +35,9 @@ MonoBehaviour:
   selfCurseData: {fileID: 0}
   selfCurseChance: 0
   effects:
-  - effectType: 2
+  - effectType: 19
     recoveryTarget: 0
-    effectAmount: 5
+    effectAmount: 8
     curseData: {fileID: 0}
     curseChance: 0
   legacyCurseData: {fileID: 0}
@@ -47,7 +46,9 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  dunbreakChance: 1.2
-  dunbreakDescription: "\uC774 \uD134 \uD68C\uBCF5\uB7C\uC6A9 2\uBC00, \uB610\uB294 1\uD134 \uB3D9\uC548 \uCD94\uAC00 \uC911\uB3D9/\uCD9C\uD0DC \uC800\uD56D +20%"
+  dunbreakChance: 1
+  dunbreakDescription: "\uC774 \uD134 \uB3D9\uC548 \uCE58\uBA85\uD0C0 \uB9E4\uC774\uB3C4 HP\uAC00 1 \uC774\uD558\uB85C \uB0B4\uB824\uAC00\uC9C0 \uC54A\uC74C"
   prerequisiteSkills: []
   requiredLorePoints: 1
+
+

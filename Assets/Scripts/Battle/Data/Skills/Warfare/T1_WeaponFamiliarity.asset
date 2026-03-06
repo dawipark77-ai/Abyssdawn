@@ -10,13 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: T1_CombatBreathing
+  m_Name: T1_WeaponFamiliarity
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Warfare_T1_01
-  skillName: Combat Breathing
-  skillIcon: {fileID: 5329708327426976617, guid: 540bef903ad51c04697635fbf8c0260d, type: 3}
-  description: "\uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC HP \uD68C\uBCF5 +5% (3\uD134). \uD6C4\uC5F4
-    \uC704\uCE58 \uC2DC HP \uD68C\uBCF5 +2% \uCD94\uAC00."
+  skillID: Warfare_T1_05
+  skillName: Weapon Familiarity
+  skillIcon: {fileID: 0}
+  description: "\uC7A5\uCC29 \uBB34\uAE30 \uD0C0\uC785\uC5D0 \uB530\uB77C \uBCF4\uC815. \uAC80/\uB3C4: \uACF5\uACA9 +2, \uD06C\uB9AC +3%. \uB450\uB2E8\uAE30/\uB3C4\uB04C: \uACF5\uACA9 +3, \uBC29\uC5B4 \uBB34\uC2DC +5%. \uCC3D/\uD3EC\uB9C8: \uBA85\uC911 +5%, \uC804\uC5F4 \uC801 \uB300\uC0C1 \uB2E4\uC784\uC9C0 +7%"
   usageType: 1
   damageType: 0
   scalingStat: 0
@@ -36,9 +35,9 @@ MonoBehaviour:
   selfCurseData: {fileID: 0}
   selfCurseChance: 0
   effects:
-  - effectType: 2
+  - effectType: 17
     recoveryTarget: 0
-    effectAmount: 5
+    effectAmount: 2
     curseData: {fileID: 0}
     curseChance: 0
   legacyCurseData: {fileID: 0}
@@ -47,7 +46,9 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  dunbreakChance: 1.2
-  dunbreakDescription: "\uC774 \uD134 \uD68C\uBCF5\uB7C\uC6A9 2\uBC00, \uB610\uB294 1\uD134 \uB3D9\uC548 \uCD94\uAC00 \uC911\uB3D9/\uCD9C\uD0DC \uC800\uD56D +20%"
+  dunbreakChance: 0.8
+  dunbreakDescription: "\uB2E4\uC74C \uBB34\uAE30 \uACF5\uACA9 1\uD68C, \uD574\uB2F9 \uBB34\uAE30 \uD0C0\uC785 \uBCF4\uC815\uC774 2\uBC00\uB85C \uC801\uC6A9"
   prerequisiteSkills: []
   requiredLorePoints: 1
+
+

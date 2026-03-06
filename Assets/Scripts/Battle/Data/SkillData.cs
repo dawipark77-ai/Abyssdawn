@@ -104,6 +104,22 @@ namespace AbyssdawnBattle
         }
 
         /// <summary>
+        /// 슬롯 인덱스(1-4)가 후열인지 확인
+        /// </summary>
+        public static bool IsBackRow(int slotIndex)
+        {
+            return slotIndex > 2;
+        }
+
+        /// <summary>
+        /// BattleSlot이 후열인지 확인
+        /// </summary>
+        public static bool IsBackRow(BattleSlot slot)
+        {
+            return slot == BattleSlot.Slot3 || slot == BattleSlot.Slot4;
+        }
+
+        /// <summary>
         /// BattleSlot을 SlotMask로 변환
         /// </summary>
         public static SlotMask ToSlotMask(BattleSlot slot)
@@ -279,6 +295,15 @@ namespace AbyssdawnBattle
 
         [Header("Passive")]
         public TriggerCondition triggerCondition = TriggerCondition.None;
+
+        [Header("Dunbreak (던브레이크)")]
+        [Tooltip("던브레이크 발동 확률 (0.0 ~ 100.0%)")]
+        [Range(0f, 100f)]
+        public float dunbreakChance = 0f;
+        
+        [Tooltip("던브레이크 효과 설명 (게임 내 표시용)")]
+        [TextArea(1, 3)]
+        public string dunbreakDescription = "";
 
         [Header("Skill Tree")]
         [Tooltip("이 스킬을 배우기 위해 필요한 선행 스킬들")]
