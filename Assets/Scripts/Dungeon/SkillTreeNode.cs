@@ -134,20 +134,39 @@ public class SkillTreeNode : MonoBehaviour
             Debug.LogWarning($"[SkillTreeNode] ⚠️ {gameObject.name}: SkillDetailPopup이 연결되지 않았습니다!");
         }
         
-        // SkillData 확인
+        // SkillData 확인 (자세한 정보 출력)
         if (skillData != null)
         {
-            Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: SkillData 연결됨 - {skillData.skillName}");
+            Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: SkillData 연결됨");
+            Debug.Log($"  - SkillData 이름: {skillData.name}");
+            Debug.Log($"  - SkillData skillName: {skillData.skillName}");
+            Debug.Log($"  - SkillData skillID: {skillData.skillID}");
+            Debug.Log($"  - SkillData skillIcon: {(skillData.skillIcon != null ? skillData.skillIcon.name : "NULL")}");
         }
         else
         {
-            Debug.LogWarning($"[SkillTreeNode] ⚠️ {gameObject.name}: SkillData가 연결되지 않았습니다!");
+            Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: SkillData가 연결되지 않았습니다! Inspector에서 Skill Data 필드를 확인하세요.");
         }
         
-        // 스킬 아이콘이 없으면 자동으로 찾기
+        // 스킬 아이콘이 없으면 자동으로 찾기 (자신 → 직접 자식 순서로)
         if (skillIcon == null)
         {
-            skillIcon = GetComponentInChildren<Image>();
+            // 1. 먼저 자신에게서 찾기
+            skillIcon = GetComponent<Image>();
+            
+            // 2. 없으면 직접 자식에서만 찾기 (재귀 X)
+            if (skillIcon == null)
+            {
+                foreach (Transform child in transform)
+                {
+                    Image img = child.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        skillIcon = img;
+                        break; // 첫 번째 Image만 사용
+                    }
+                }
+            }
         }
         
         // 스킬 이름 텍스트가 없으면 자동으로 찾기
@@ -170,13 +189,16 @@ public class SkillTreeNode : MonoBehaviour
     /// </summary>
     public void Initialize()
     {
+        Debug.Log($"[SkillTreeNode] ========== Initialize() 시작: {gameObject.name} ==========");
+        Debug.Log($"[SkillTreeNode] skillData 참조: {(skillData != null ? skillData.name : "NULL")}");
+        
         if (skillData == null)
         {
-            Debug.LogWarning($"[SkillTreeNode] {gameObject.name}에 SkillData가 할당되지 않았습니다!");
+            Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: SkillData가 null입니다! Inspector에서 Skill Data 필드를 확인하세요.");
             return;
         }
         
-        Debug.Log($"[SkillTreeNode] 🔄 {gameObject.name} 초기화 시작 - 스킬: {skillData.skillName}");
+        Debug.Log($"[SkillTreeNode] 🔄 {gameObject.name} 초기화 시작 - 스킬: {skillData.skillName} (skillID: {skillData.skillID})");
         
         // 스킬 이름 표시
         if (skillNameText != null)
@@ -189,13 +211,50 @@ public class SkillTreeNode : MonoBehaviour
             Debug.LogWarning($"[SkillTreeNode] ⚠️ {gameObject.name}에 skillNameText가 없습니다!");
         }
         
-        // 스킬 아이콘 표시
+        // 스킬 아이콘 표시 (Initialize에서 다시 찾기 - Awake에서 못 찾았을 수 있음)
+        if (skillIcon == null)
+        {
+            Debug.LogWarning($"[SkillTreeNode] ⚠️ {gameObject.name}: skillIcon이 null입니다. 다시 찾는 중...");
+            // 다시 찾기 시도
+            skillIcon = GetComponent<Image>();
+            if (skillIcon == null)
+            {
+                foreach (Transform child in transform)
+                {
+                    Image img = child.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        skillIcon = img;
+                        Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: 자식에서 Image 발견 - {skillIcon.gameObject.name}");
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: 자신에게서 Image 발견 - {skillIcon.gameObject.name}");
+            }
+        }
+        
         if (skillIcon != null)
         {
+            Debug.Log($"[SkillTreeNode] 📌 Image 컴포넌트 정보:");
+            Debug.Log($"  - GameObject 이름: {skillIcon.gameObject.name}");
+            Debug.Log($"  - InstanceID: {skillIcon.GetInstanceID()}");
+            Debug.Log($"  - 현재 스프라이트: {(skillIcon.sprite != null ? skillIcon.sprite.name : "null")}");
+            
             if (skillData.skillIcon != null)
             {
+                // 🔥 중요: 스프라이트를 확실히 설정하기 전에 현재 스프라이트 확인
+                string beforeSprite = skillIcon.sprite != null ? skillIcon.sprite.name : "null";
                 skillIcon.sprite = skillData.skillIcon;
-                Debug.Log($"[SkillTreeNode] ✅ 아이콘 설정 완료: {skillData.skillName} - {skillData.skillIcon.name}");
+                string afterSprite = skillIcon.sprite != null ? skillIcon.sprite.name : "null";
+                
+                Debug.Log($"[SkillTreeNode] ✅ 아이콘 설정 완료: {skillData.skillName}");
+                Debug.Log($"  - SkillData.skillIcon: {skillData.skillIcon.name}");
+                Debug.Log($"  - Image GameObject: {skillIcon.gameObject.name}");
+                Debug.Log($"  - Image InstanceID: {skillIcon.GetInstanceID()}");
+                Debug.Log($"  - 이전 스프라이트: {beforeSprite} → 현재 스프라이트: {afterSprite}");
             }
             else
             {
@@ -204,13 +263,14 @@ public class SkillTreeNode : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[SkillTreeNode] ❌ {gameObject.name}의 skillIcon Image 컴포넌트가 연결되지 않았습니다!");
+            Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}의 skillIcon Image 컴포넌트를 찾을 수 없습니다!");
         }
         
         // 🔥 중요: 초기 상태 체크 (선행 스킬 기반)
         // UpdateState()는 나중에 UpdateAllNodesState()에서 호출됨
         // 여기서는 시각만 업데이트
         Debug.Log($"[SkillTreeNode] 🔄 {skillData.skillName} 초기화 완료 (상태는 나중에 업데이트됨)");
+        Debug.Log($"[SkillTreeNode] ========== Initialize() 완료: {gameObject.name} ==========");
     }
     
     /// <summary>
@@ -305,10 +365,17 @@ public class SkillTreeNode : MonoBehaviour
     /// </summary>
     public void UpdateState()
     {
+        // skillData null 체크
+        if (skillData == null)
+        {
+            Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: UpdateState() 호출 시 skillData가 null입니다! Initialize()가 호출되지 않았거나 SkillData가 할당되지 않았습니다.");
+            return;
+        }
+        
         if (currentState == SkillState.Learned)
         {
             // 이미 배운 스킬은 상태 변경 안 함
-            Debug.Log($"[SkillTreeNode] {skillData?.skillName}: 이미 배움 (상태 유지)");
+            Debug.Log($"[SkillTreeNode] {skillData.skillName}: 이미 배움 (상태 유지)");
             return;
         }
         
@@ -319,12 +386,12 @@ public class SkillTreeNode : MonoBehaviour
         if (prerequisitesMet)
         {
             currentState = SkillState.Available;
-            Debug.Log($"[SkillTreeNode] ✨ {skillData?.skillName}: Available (선행 스킬 충족!)");
+            Debug.Log($"[SkillTreeNode] ✨ {skillData.skillName}: Available (선행 스킬 충족!)");
         }
         else
         {
             currentState = SkillState.Locked;
-            Debug.Log($"[SkillTreeNode] 🔒 {skillData?.skillName}: Locked (선행 스킬 필요)");
+            Debug.Log($"[SkillTreeNode] 🔒 {skillData.skillName}: Locked (선행 스킬 필요)");
         }
         
         UpdateVisualState();
@@ -337,7 +404,7 @@ public class SkillTreeNode : MonoBehaviour
     {
         if (skillData == null)
         {
-            Debug.LogError($"[SkillTreeNode] {gameObject.name}: SkillData가 null입니다!");
+            Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: CheckPrerequisites() 호출 시 skillData가 null입니다! Initialize()가 호출되지 않았거나 SkillData가 할당되지 않았습니다.");
             return false;
         }
         
@@ -403,7 +470,47 @@ public class SkillTreeNode : MonoBehaviour
     /// </summary>
     private void UpdateVisualState()
     {
-        string skillName = skillData != null ? skillData.skillName : gameObject.name;
+        // skillData null 체크
+        if (skillData == null)
+        {
+            Debug.LogError($"[SkillTreeNode] ❌ {gameObject.name}: UpdateVisualState() 호출 시 skillData가 null입니다! 시각적 상태를 업데이트할 수 없습니다.");
+            return;
+        }
+        
+        string skillName = skillData.skillName;
+        
+        // 아이콘 스프라이트 다시 확인 및 설정 (혹시 모를 공유 문제 방지)
+        if (skillIcon == null)
+        {
+            skillIcon = GetComponent<Image>();
+            if (skillIcon == null)
+            {
+                foreach (Transform child in transform)
+                {
+                    Image img = child.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        skillIcon = img;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // 스프라이트 확실히 설정 (매번 강제로 설정)
+        if (skillIcon != null && skillData.skillIcon != null)
+        {
+            skillIcon.sprite = skillData.skillIcon;
+            Debug.Log($"[SkillTreeNode] 🔄 UpdateVisualState: {skillData.skillName} 스프라이트 재설정 - {skillData.skillIcon.name} (Image: {skillIcon.gameObject.name}, InstanceID: {skillIcon.GetInstanceID()})");
+        }
+        else if (skillIcon == null)
+        {
+            Debug.LogWarning($"[SkillTreeNode] ⚠️ {skillName}: UpdateVisualState()에서 skillIcon이 null입니다!");
+        }
+        else if (skillData.skillIcon == null)
+        {
+            Debug.LogWarning($"[SkillTreeNode] ⚠️ {skillName}: UpdateVisualState()에서 skillData.skillIcon이 null입니다!");
+        }
         
         switch (currentState)
         {

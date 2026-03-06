@@ -14,16 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_T1_02
   skillName: Hardened Body
-  skillIcon: {fileID: 0}
-  description: "Max HP +8%, \uAD6C\uB9E4 \uD53C\uD574 -5%, \uCD9C\uD0DC/\uC810\uD654 \uB3C4\uD2B8 \uD53C\uD574 -20%. \uC804\uC5F4\uC5D0 \uC788\uC744 \uB54C \uCD94\uAC00 \uD53C\uD574 \uAC10\uC18C +3%"
+  skillIcon: {fileID: 843639385197948872, guid: 039cd1b67ae44b7438bc5d896fe0f8fb, type: 3}
+  description: "Max HP +8%, \uAD6C\uB9E4 \uD53C\uD574 -5%, \uCD9C\uD0DC/\uC810\uD654
+    \uB3C4\uD2B8 \uD53C\uD574 -20%. \uC804\uC5F4\uC5D0 \uC788\uC744 \uB54C \uCD94\uAC00
+    \uD53C\uD574 \uAC10\uC18C +3%"
   usageType: 1
   damageType: 0
   scalingStat: 2
   targeting:
     targetFaction: 2
-    targetMode: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
     specificSlots: 
-    defaultSlot: 0
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -47,8 +49,6 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 1
-  dunbreakDescription: "\uC774 \uD134 \uB3D9\uC548 \uCE58\uBA85\uD0C0 \uB9E4\uC774\uB3C4 HP\uAC00 1 \uC774\uD558\uB85C \uB0B4\uB824\uAC00\uC9C0 \uC54A\uC74C"
+  dunbreakDescription: This turn, critical hits cannot reduce HP below 1
   prerequisiteSkills: []
   requiredLorePoints: 1
-
-

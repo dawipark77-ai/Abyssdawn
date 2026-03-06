@@ -14,16 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_T1_04
   skillName: Formation Discipline
-  skillIcon: {fileID: 0}
-  description: "\uD30C\uD2F0 \uC804\uCCB4\uC5D0 \uC601\uD5A5. \uC804\uC5F4: \uD53C\uD574 -3%, \uBA85\uC911 +3%. \uD6C4\uC5F4: \uD53C\uD574 -1%, \uC2A4\uD0AC \uC778\uD130\uB7F4\uD2B8 \uD5A5\uB960 -20%"
+  skillIcon: {fileID: -7881139419853764829, guid: d84ebf3262e43504aaeb9c974718cc48, type: 3}
+  description: "\uD30C\uD2F0 \uC804\uCCB4\uC5D0 \uC601\uD5A5. \uC804\uC5F4: \uD53C\uD574
+    -3%, \uBA85\uC911 +3%. \uD6C4\uC5F4: \uD53C\uD574 -1%, \uC2A4\uD0AC \uC778\uD130\uB7F4\uD2B8
+    \uD5A5\uB960 -20%"
   usageType: 1
   damageType: 0
   scalingStat: 0
   targeting:
     targetFaction: 3
-    targetMode: 4
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
     specificSlots: 
-    defaultSlot: 0
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -47,8 +49,6 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 1
-  dunbreakDescription: "\uC774 \uD134 \uB3D9\uC548 \uD30C\uD2F0 \uC804\uCCB4 \uBC29\uC5B4 +10%, \uD68C\uD53C +10%"
+  dunbreakDescription: This turn, party-wide defense +10%, evasion +10%
   prerequisiteSkills: []
   requiredLorePoints: 1
-
-

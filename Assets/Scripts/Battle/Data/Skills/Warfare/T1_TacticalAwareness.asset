@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_T1_03
   skillName: Tactical Awareness
-  skillIcon: {fileID: 0}
-  description: "\uBA85\uC911\uB960 +5%, \uD68C\uD53C\uC728 +5%. \uC801\uC774 2\uAE30 \uC774\uC0C1\uC77C \uB54C \uD06C\uB9AC\uD2F0\uCEE4\uB9AC \uD5A5\uB960 +3%"
+  skillIcon: {fileID: -8400421116468495983, guid: 2664d9dbb95aa5349b08846d3eac75ec, type: 3}
+  description: "\uBA85\uC911\uB960 +5%, \uD68C\uD53C\uC728 +5%. \uC801\uC774 2\uAE30
+    \uC774\uC0C1\uC77C \uB54C \uD06C\uB9AC\uD2F0\uCEE4\uB9AC \uD5A5\uB960 +3%"
   usageType: 1
   damageType: 0
   scalingStat: 4
   targeting:
     targetFaction: 2
-    targetMode: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
     specificSlots: 
-    defaultSlot: 0
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -47,8 +48,6 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0.8
-  dunbreakDescription: "\uC774 \uD134 \uCC98\uC74C \uC801 \uACF5\uACA9\uC744 \uC644\uC804 \uD68C\uD53C + \uBC18\uACA9"
+  dunbreakDescription: This turn, completely evade first enemy attack + counterattack
   prerequisiteSkills: []
   requiredLorePoints: 1
-
-

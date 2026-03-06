@@ -140,18 +140,37 @@ public class SwordSkillTreeManager : MonoBehaviour
     /// </summary>
     private void InitializeAllNodes()
     {
-        if (allNodes == null) return;
+        if (allNodes == null)
+        {
+            Debug.LogWarning("[SwordSkillTreeManager] allNodes가 null입니다!");
+            return;
+        }
+        
+        int initializedCount = 0;
+        int skippedCount = 0;
         
         foreach (var node in allNodes)
         {
-            if (node != null)
+            if (node == null)
             {
-                node.SetTreeManager(this);
-                node.Initialize();
+                skippedCount++;
+                continue;
             }
+            
+            // SkillData가 할당되었는지 확인
+            if (node.skillData == null)
+            {
+                Debug.LogError($"[SwordSkillTreeManager] ❌ {node.gameObject.name}: SkillData가 할당되지 않았습니다! Inspector에서 Skill Data 필드를 확인하세요.");
+                skippedCount++;
+                continue;
+            }
+            
+            node.SetTreeManager(this);
+            node.Initialize();
+            initializedCount++;
         }
         
-        Debug.Log($"[SwordSkillTreeManager] {allNodes.Length}개의 노드 초기화 완료");
+        Debug.Log($"[SwordSkillTreeManager] 노드 초기화 완료 - 성공: {initializedCount}, 건너뜀: {skippedCount} (전체: {allNodes.Length})");
     }
     
     /// <summary>
@@ -318,30 +337,42 @@ public class SwordSkillTreeManager : MonoBehaviour
         int lockedCount = 0;
         int availableCount = 0;
         int learnedCount = 0;
+        int skippedCount = 0;
         
         foreach (var node in allNodes)
         {
-            if (node != null)
+            if (node == null)
             {
-                node.UpdateState();
-                
-                // 상태 카운트
-                switch (node.GetState())
-                {
-                    case SkillTreeNode.SkillState.Locked:
-                        lockedCount++;
-                        break;
-                    case SkillTreeNode.SkillState.Available:
-                        availableCount++;
-                        break;
-                    case SkillTreeNode.SkillState.Learned:
-                        learnedCount++;
-                        break;
-                }
+                skippedCount++;
+                continue;
+            }
+            
+            // SkillData가 null인 노드는 건너뛰기
+            if (node.skillData == null)
+            {
+                Debug.LogWarning($"[SwordSkillTreeManager] ⚠️ {node.gameObject.name}: SkillData가 null이어서 상태 업데이트를 건너뜁니다.");
+                skippedCount++;
+                continue;
+            }
+            
+            node.UpdateState();
+            
+            // 상태 카운트
+            switch (node.GetState())
+            {
+                case SkillTreeNode.SkillState.Locked:
+                    lockedCount++;
+                    break;
+                case SkillTreeNode.SkillState.Available:
+                    availableCount++;
+                    break;
+                case SkillTreeNode.SkillState.Learned:
+                    learnedCount++;
+                    break;
             }
         }
         
-        Debug.Log($"[SwordSkillTreeManager] 상태 업데이트 완료 - Locked: {lockedCount}, Available: {availableCount}, Learned: {learnedCount}");
+        Debug.Log($"[SwordSkillTreeManager] 상태 업데이트 완료 - Locked: {lockedCount}, Available: {availableCount}, Learned: {learnedCount}, 건너뜀: {skippedCount}");
     }
     
     /// <summary>

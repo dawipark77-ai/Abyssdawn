@@ -14,16 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_T1_05
   skillName: Weapon Familiarity
-  skillIcon: {fileID: 0}
-  description: "\uC7A5\uCC29 \uBB34\uAE30 \uD0C0\uC785\uC5D0 \uB530\uB77C \uBCF4\uC815. \uAC80/\uB3C4: \uACF5\uACA9 +2, \uD06C\uB9AC +3%. \uB450\uB2E8\uAE30/\uB3C4\uB04C: \uACF5\uACA9 +3, \uBC29\uC5B4 \uBB34\uC2DC +5%. \uCC3D/\uD3EC\uB9C8: \uBA85\uC911 +5%, \uC804\uC5F4 \uC801 \uB300\uC0C1 \uB2E4\uC784\uC9C0 +7%"
+  skillIcon: {fileID: -5816105751508217489, guid: 609d5d3bf3eed144e8b9b21aa45a3189, type: 3}
+  description: "\uC7A5\uCC29 \uBB34\uAE30 \uD0C0\uC785\uC5D0 \uB530\uB77C \uBCF4\uC815.
+    \uAC80/\uB3C4: \uACF5\uACA9 +2, \uD06C\uB9AC +3%. \uB450\uB2E8\uAE30/\uB3C4\uB04C:
+    \uACF5\uACA9 +3, \uBC29\uC5B4 \uBB34\uC2DC +5%. \uCC3D/\uD3EC\uB9C8: \uBA85\uC911
+    +5%, \uC804\uC5F4 \uC801 \uB300\uC0C1 \uB2E4\uC784\uC9C0 +7%"
   usageType: 1
   damageType: 0
   scalingStat: 0
   targeting:
     targetFaction: 2
-    targetMode: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
     specificSlots: 
-    defaultSlot: 0
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -47,8 +50,6 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0.8
-  dunbreakDescription: "\uB2E4\uC74C \uBB34\uAE30 \uACF5\uACA9 1\uD68C, \uD574\uB2F9 \uBB34\uAE30 \uD0C0\uC785 \uBCF4\uC815\uC774 2\uBC00\uB85C \uC801\uC6A9"
+  dunbreakDescription: Next weapon attack, weapon type bonus x2
   prerequisiteSkills: []
   requiredLorePoints: 1
-
-

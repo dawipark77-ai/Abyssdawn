@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: Skill_08_Focus
+  m_Name: T1_Focus
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 08
   skillName: Focus
@@ -19,11 +19,17 @@ MonoBehaviour:
   usageType: 1
   damageType: 0
   scalingStat: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 1
   maxMult: 1
   hitCount: 1
+  accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
   selfCurseData: {fileID: 0}
@@ -45,3 +51,7 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  prerequisiteSkills: []
+  requiredLorePoints: 1

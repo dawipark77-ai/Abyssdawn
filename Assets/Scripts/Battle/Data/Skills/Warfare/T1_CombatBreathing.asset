@@ -22,9 +22,9 @@ MonoBehaviour:
   scalingStat: 0
   targeting:
     targetFaction: 2
-    targetMode: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
     specificSlots: 
-    defaultSlot: 0
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -48,6 +48,7 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 1.2
-  dunbreakDescription: "\uC774 \uD134 \uD68C\uBCF5\uB7C\uC6A9 2\uBC00, \uB610\uB294 1\uD134 \uB3D9\uC548 \uCD94\uAC00 \uC911\uB3D9/\uCD9C\uD0DC \uC800\uD56D +20%"
+  dunbreakDescription: This turn recovery x2, or +20% poison/bleed resistance for
+    1 turn
   prerequisiteSkills: []
   requiredLorePoints: 1
