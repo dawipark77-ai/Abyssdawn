@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   equipmentName: Crude Armour
   equipmentIcon: {fileID: -8949577016260091297, guid: 8fba69845c07a0f47b3fa5ab9b6dcc6a, type: 3}
-  description: "\uBC29\uC5B4\uB825\uC740 \uC870\uAE08 \uC0DD\uACBC\uC9C0\uB9CC, \uD589\uB3D9\uD558\uAE30\uC5D4 \uAF64\uB098 \uAC70\uBD81\uD569\uB2C8\uB2E4."
+  description: "\uBC29\uC5B4\uB825\uC740 \uC870\uAE08 \uC0DD\uACBC\uC9C0\uB9CC, \uD589\uB3D9\uD558\uAE30\uC5D4
+    \uAF64\uB098 \uAC70\uBD81\uD569\uB2C8\uB2E4."
   equipmentType: 2
   isTwoHanded: 0
+  armourCategory: 2
+  armourType: 3
   attackBonus: 0
   defenseBonus: 3
   magicBonus: 0

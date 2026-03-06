@@ -12,14 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
   m_Name: T1_CombatBreathing
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Swords_T1_05
+  skillID: Warfare_T1_01
   skillName: Combat Breathing
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 5329708327426976617, guid: 540bef903ad51c04697635fbf8c0260d, type: 3}
   description: "\uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC HP \uD68C\uBCF5 +5% (3\uD134). \uD6C4\uC5F4
     \uC704\uCE58 \uC2DC HP \uD68C\uBCF5 +2% \uCD94\uAC00."
   usageType: 1
-  damageType: 1
-  scalingStat: 1
+  damageType: 0
+  scalingStat: 0
+  targeting:
+    targetFaction: 2
+    targetMode: 0
+    specificSlots: 
+    defaultSlot: 0
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -42,6 +47,5 @@ MonoBehaviour:
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  prerequisiteSkills:
-  - {fileID: 11400000, guid: 257d06caffdd79143b05f14980b5bd65, type: 2}
+  prerequisiteSkills: []
   requiredLorePoints: 1

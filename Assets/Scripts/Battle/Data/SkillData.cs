@@ -4,6 +4,205 @@ using UnityEngine.Serialization;
 
 namespace AbyssdawnBattle
 {
+    /// <summary>
+    /// 타겟 종류 (적, 아군, 자신, 모두)
+    /// </summary>
+    public enum TargetFaction
+    {
+        Enemy,      // 적
+        Ally,       // 아군
+        Self,       // 자신
+        All         // 모두 (적+아군)
+    }
+
+    /// <summary>
+    /// 타겟팅 모드 (단일, 다중, 전열, 후열, 전체 등)
+    /// </summary>
+    public enum TargetMode
+    {
+        Single,         // 단일 타겟 (슬롯 1개 선택)
+        Multiple,       // 다중 타겟 (특정 슬롯들 지정)
+        FrontRow,       // 전열 전체 (슬롯 1, 2)
+        BackRow,        // 후열 전체 (슬롯 3, 4)
+        All             // 전체 (모든 슬롯)
+    }
+
+    /// <summary>
+    /// 전열/후열 타입 (슬롯 인덱스로부터 계산됨)
+    /// </summary>
+    public enum RowType
+    {
+        Front,  // 전열 (슬롯 1, 2)
+        Back    // 후열 (슬롯 3, 4)
+    }
+
+    /// <summary>
+    /// 슬롯 번호 (1-4, 인덱스 기반)
+    /// </summary>
+    public enum BattleSlot
+    {
+        None = 0,
+        Slot1 = 1,
+        Slot2 = 2,
+        Slot3 = 3,
+        Slot4 = 4
+    }
+
+    /// <summary>
+    /// 슬롯 마스크 (Flags enum) - 스킬 조건 표현용
+    /// 예: SlotMask.Front | SlotMask.Slot3 = 전열 + 3번 슬롯
+    /// </summary>
+    [System.Flags]
+    public enum SlotMask
+    {
+        None = 0,
+        Slot1 = 1 << 0,      // 1
+        Slot2 = 1 << 1,      // 2
+        Slot3 = 1 << 2,      // 4
+        Slot4 = 1 << 3,      // 8
+        Front = Slot1 | Slot2,   // 전열 (1, 2)
+        Back = Slot3 | Slot4,    // 후열 (3, 4)
+        Any = Front | Back      // 전체 (1, 2, 3, 4)
+    }
+
+    /// <summary>
+    /// 슬롯/전열 관련 유틸리티 헬퍼
+    /// </summary>
+    public static class SlotHelper
+    {
+        /// <summary>
+        /// 슬롯 인덱스(1-4)로부터 전열/후열 타입 반환
+        /// </summary>
+        public static RowType GetRow(int slotIndex)
+        {
+            return slotIndex <= 2 ? RowType.Front : RowType.Back;
+        }
+
+        /// <summary>
+        /// BattleSlot enum으로부터 전열/후열 타입 반환
+        /// </summary>
+        public static RowType GetRow(BattleSlot slot)
+        {
+            int index = (int)slot;
+            return index <= 2 ? RowType.Front : RowType.Back;
+        }
+
+        /// <summary>
+        /// 슬롯 인덱스(1-4)가 전열인지 확인
+        /// </summary>
+        public static bool IsFrontRow(int slotIndex)
+        {
+            return slotIndex <= 2;
+        }
+
+        /// <summary>
+        /// BattleSlot이 전열인지 확인
+        /// </summary>
+        public static bool IsFrontRow(BattleSlot slot)
+        {
+            return slot == BattleSlot.Slot1 || slot == BattleSlot.Slot2;
+        }
+
+        /// <summary>
+        /// BattleSlot을 SlotMask로 변환
+        /// </summary>
+        public static SlotMask ToSlotMask(BattleSlot slot)
+        {
+            return (SlotMask)(1 << ((int)slot - 1));
+        }
+
+        /// <summary>
+        /// BattleSlot 리스트를 SlotMask로 변환
+        /// </summary>
+        public static SlotMask ToSlotMask(List<BattleSlot> slots)
+        {
+            SlotMask mask = SlotMask.None;
+            foreach (var slot in slots)
+            {
+                if (slot != BattleSlot.None)
+                    mask |= ToSlotMask(slot);
+            }
+            return mask;
+        }
+
+        /// <summary>
+        /// SlotMask에 해당 슬롯이 포함되어 있는지 확인
+        /// </summary>
+        public static bool ContainsSlot(SlotMask mask, BattleSlot slot)
+        {
+            SlotMask slotMask = ToSlotMask(slot);
+            return (mask & slotMask) != 0;
+        }
+    }
+
+    /// <summary>
+    /// 스킬 타겟팅 설정 (SlotMask 기반)
+    /// </summary>
+    [System.Serializable]
+    public class SkillTargeting
+    {
+        [Header("타겟 종류")]
+        [Tooltip("적, 아군, 자신, 모두 중 선택")]
+        public TargetFaction targetFaction = TargetFaction.Enemy;
+
+        [Header("스킬 사용 가능 위치 (SlotMask)")]
+        [Tooltip("이 스킬을 사용할 수 있는 슬롯 위치\n" +
+                 "예: Front = 전열(1,2)에서만 사용 가능\n" +
+                 "예: Slot1 = 1번 슬롯에서만 사용 가능\n" +
+                 "예: Any = 어디서든 사용 가능")]
+        public SlotMask allowedCasterSlots = SlotMask.Any;
+
+        [Header("타겟 슬롯 (SlotMask)")]
+        [Tooltip("타겟팅할 슬롯 위치\n" +
+                 "예: Front = 전열(1,2) 타겟\n" +
+                 "예: Slot1 | Slot2 = 1번과 2번 슬롯 타겟\n" +
+                 "예: Slot3 = 3번 슬롯만 타겟\n" +
+                 "예: Any = 전체 타겟")]
+        public SlotMask allowedTargetSlots = SlotMask.Slot1;
+
+        [Header("레거시 호환 (Multiple 모드용)")]
+        [Tooltip("레거시 호환을 위한 슬롯 리스트 (자동 변환됨)")]
+        [System.Obsolete("Use allowedTargetSlots instead")]
+        public List<BattleSlot> specificSlots = new List<BattleSlot>();
+
+        /// <summary>
+        /// 실제 타겟팅할 슬롯 리스트를 반환 (SlotMask 기반)
+        /// </summary>
+        public List<BattleSlot> GetTargetSlots()
+        {
+            List<BattleSlot> slots = new List<BattleSlot>();
+
+            if ((allowedTargetSlots & SlotMask.Slot1) != 0)
+                slots.Add(BattleSlot.Slot1);
+            if ((allowedTargetSlots & SlotMask.Slot2) != 0)
+                slots.Add(BattleSlot.Slot2);
+            if ((allowedTargetSlots & SlotMask.Slot3) != 0)
+                slots.Add(BattleSlot.Slot3);
+            if ((allowedTargetSlots & SlotMask.Slot4) != 0)
+                slots.Add(BattleSlot.Slot4);
+
+            return slots;
+        }
+
+        /// <summary>
+        /// 특정 슬롯에서 이 스킬을 사용할 수 있는지 확인
+        /// </summary>
+        public bool CanCastFrom(BattleSlot casterSlot)
+        {
+            SlotMask casterMask = SlotHelper.ToSlotMask(casterSlot);
+            return (allowedCasterSlots & casterMask) != 0;
+        }
+
+        /// <summary>
+        /// 특정 슬롯이 타겟 범위에 포함되는지 확인
+        /// </summary>
+        public bool CanTarget(BattleSlot targetSlot)
+        {
+            SlotMask targetMask = SlotHelper.ToSlotMask(targetSlot);
+            return (allowedTargetSlots & targetMask) != 0;
+        }
+    }
+
     [System.Serializable]
     public class SkillEffect
     {
@@ -31,6 +230,15 @@ namespace AbyssdawnBattle
         public DamageType damageType = DamageType.Physical;
         [FormerlySerializedAs("scaleStat")]
         public ScaleStat scalingStat = ScaleStat.Attack;
+
+        [Header("Targeting")]
+        [Tooltip("스킬의 타겟팅 설정\n" +
+                 "타겟 종류: 적/아군/자신/모두\n" +
+                 "타겟팅 모드: 단일/다중/전열/후열/전체\n" +
+                 "예: Mandritto = 적, 전열 (Slot1, Slot2)\n" +
+                 "예: Heal = 아군, 단일\n" +
+                 "예: AoE = 적, 전체")]
+        public SkillTargeting targeting = new SkillTargeting();
 
         [Header("Cost")]
         [Range(0f, 100f)]

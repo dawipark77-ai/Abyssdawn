@@ -18,6 +18,8 @@ MonoBehaviour:
     \uAE4C\uC9D1\uB2C8\uB2E4."
   equipmentType: 3
   isTwoHanded: 0
+  armourCategory: 1
+  armourType: 2
   attackBonus: 0
   defenseBonus: 0
   magicBonus: 0

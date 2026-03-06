@@ -3,6 +3,31 @@ using UnityEngine;
 namespace AbyssdawnBattle
 {
     public enum EquipmentType { Hand, TwoHanded, Armour, Accessory }
+    
+    /// <summary>
+    /// 방어구 카테고리 (Armour 타입 장비에만 적용)
+    /// 경갑(Light Armour) 또는 중갑(Heavy Armour)을 먼저 선택
+    /// </summary>
+    public enum ArmourCategory
+    {
+        None,           // 갑옷이 아니거나 미지정
+        LightArmour,    // 경갑
+        HeavyArmour     // 중갑
+    }
+    
+    /// <summary>
+    /// 방어구 세부 타입 (ArmourCategory 선택 후 세부 타입 선택)
+    /// Light Armour: Cloth(천), Leather(가죽)
+    /// Heavy Armour: Plate(판금), FullArmour(전신갑)
+    /// </summary>
+    public enum ArmourType 
+    { 
+        None,           // 미지정
+        Cloth,          // 경갑 - 천
+        Leather,        // 경갑 - 가죽
+        Plate,          // 중갑 - 판금
+        FullArmour      // 중갑 - 전신갑
+    }
 
     [CreateAssetMenu(fileName = "Equipment_", menuName = "Abyssdawn/Equipment Data", order = 2)]
     public class EquipmentData : ScriptableObject
@@ -24,6 +49,18 @@ namespace AbyssdawnBattle
         
         [Tooltip("양손 무기 여부 (TwoHanded 타입이면 자동으로 true로 간주)")]
         public bool isTwoHanded = false;
+        
+        [Space(5)]
+        [Header("━━━━━━━━━━ 방어구 분류 (Armour 타입 장비에만 적용) ━━━━━━━━━━")]
+        [Tooltip("방어구 카테고리: 경갑(Light Armour) 또는 중갑(Heavy Armour)\n" +
+                 "먼저 경갑/중갑을 선택한 후, 아래에서 세부 타입을 선택하세요.")]
+        public ArmourCategory armourCategory = ArmourCategory.None;
+        
+        [Tooltip("방어구 세부 타입\n" +
+                 "경갑: Cloth(천), Leather(가죽)\n" +
+                 "중갑: Plate(판금), FullArmour(전신갑)\n" +
+                 "직업/스킬이 장비 종류에 따라 보정치를 받을 수 있습니다.")]
+        public ArmourType armourType = ArmourType.None;
 
         [Header("━━━━━━━━━━ 기본 스탯 보너스 ━━━━━━━━━━")]
         [Tooltip("공격력 보정치")]
