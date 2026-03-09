@@ -24,6 +24,13 @@ MonoBehaviour:
   agilityBonus: -1
   magicBonus: 0
   luckBonus: 0
+  hpGrowthPerLevel: 0
+  mpGrowthPerLevel: 0
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0.2
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0
   description: "\uBC29\uC5B4 +1 (\uD558\uC545 \uAD6C\uC870 \uAC15\uD654)\n\uBBFC\uCCA9
     -1"
   flavorText: "\uBAA8\uB4E0 \uC885\uC871 \uC911 \uC720\uC77C\uD558\uAC8C \uD131\uC774
@@ -32,10 +39,5 @@ MonoBehaviour:
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-
-
-
 
 

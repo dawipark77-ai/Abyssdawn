@@ -22,7 +22,10 @@ MonoBehaviour:
   luckBonus: 3
   hpMultiplier: 0.85
   mpMultiplier: 1.03
-  hpPerLevel: 0
-  mpPerLevel: 0
-  attackPerLevel: 0
-  defensePerLevel: 0
+  hpPerLevel: 4
+  mpPerLevel: 3
+  attackGrowthPerLevel: 0.4
+  defenseGrowthPerLevel: 0.2
+  magicGrowthPerLevel: 0.1
+  agilityGrowthPerLevel: 0.8
+  luckGrowthPerLevel: 0.6

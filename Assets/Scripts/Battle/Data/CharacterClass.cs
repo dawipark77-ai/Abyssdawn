@@ -29,10 +29,27 @@ public class CharacterClass : ScriptableObject
     public float mpMultiplier = 1.0f;           // MP 배율
 
     [Header("레벨업 보너스 (선택)")]
+    [Tooltip("레벨당 추가 HP (정수, 예: 8 = 레벨당 HP +8)")]
     public int hpPerLevel = 0;                  // 레벨당 추가 HP
+    
+    [Tooltip("레벨당 추가 MP (정수, 예: 6 = 레벨당 MP +6)")]
     public int mpPerLevel = 0;                  // 레벨당 추가 MP
-    public int attackPerLevel = 0;              // 레벨당 추가 공격력
-    public int defensePerLevel = 0;             // 레벨당 추가 방어력
+
+    [Header("레벨업 스탯 성장치 (직업별)")]
+    [Tooltip("레벨당 힘/공격 성장치 (예: 0.8 = 레벨당 +0.8 공격)")]
+    public float attackGrowthPerLevel = 0f;     // 레벨당 공격력 성장
+    
+    [Tooltip("레벨당 방어 성장치 (예: 0.6 = 레벨당 +0.6 방어)")]
+    public float defenseGrowthPerLevel = 0f;    // 레벨당 방어력 성장
+    
+    [Tooltip("레벨당 마력 성장치 (예: 0.4 = 레벨당 +0.4 마력)")]
+    public float magicGrowthPerLevel = 0f;      // 레벨당 마력 성장
+    
+    [Tooltip("레벨당 민첩 성장치 (예: 0.2 = 레벨당 +0.2 민첩)")]
+    public float agilityGrowthPerLevel = 0f;    // 레벨당 민첩 성장
+    
+    [Tooltip("레벨당 행운 성장치 (예: 0.1 = 레벨당 +0.1 행운)")]
+    public float luckGrowthPerLevel = 0f;       // 레벨당 행운 성장
 
     /// <summary>
     /// 기본 스탯에 직업 보정치를 적용한 최종 스탯 계산
@@ -58,6 +75,8 @@ public class CharacterClass : ScriptableObject
                $"AGI:{agilityBonus:+#;-#;0} LUK:{luckBonus:+#;-#;0} HP:{hpMultiplier:P0} MP:{mpMultiplier:P0}";
     }
 }
+
+
 
 
 

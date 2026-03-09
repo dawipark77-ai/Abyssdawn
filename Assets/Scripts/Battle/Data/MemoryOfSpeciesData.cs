@@ -67,6 +67,35 @@ namespace AbyssdawnBattle
         [Range(-10, 10)]
         public int luckBonus = 0;
         
+        [Header("Level Growth (레벨업 성장치)")]
+        [Tooltip("레벨당 HP 성장치 (예: 0.2 = 레벨당 +0.2 HP)")]
+        [Range(-5f, 5f)]
+        public float hpGrowthPerLevel = 0f;
+        
+        [Tooltip("레벨당 MP 성장치 (예: 0.1 = 레벨당 +0.1 MP)")]
+        [Range(-5f, 5f)]
+        public float mpGrowthPerLevel = 0f;
+        
+        [Tooltip("레벨당 공격력 성장치 (예: 0.3 = 레벨당 +0.3 공격력)")]
+        [Range(-5f, 5f)]
+        public float attackGrowthPerLevel = 0f;
+        
+        [Tooltip("레벨당 방어력 성장치 (예: 0.2 = 레벨당 +0.2 방어력)")]
+        [Range(-5f, 5f)]
+        public float defenseGrowthPerLevel = 0f;
+        
+        [Tooltip("레벨당 마력 성장치 (예: 0.2 = 레벨당 +0.2 마력)")]
+        [Range(-5f, 5f)]
+        public float magicGrowthPerLevel = 0f;
+        
+        [Tooltip("레벨당 민첩 성장치 (예: 0.1 = 레벨당 +0.1 민첩)")]
+        [Range(-5f, 5f)]
+        public float agilityGrowthPerLevel = 0f;
+        
+        [Tooltip("레벨당 행운 성장치 (예: 0.2 = 레벨당 +0.2 행운)")]
+        [Range(-5f, 5f)]
+        public float luckGrowthPerLevel = 0f;
+        
         [Header("Description")]
         [Tooltip("득실 정보 (효과 상세 설명)")]
         [TextArea(3, 6)]
@@ -109,7 +138,41 @@ namespace AbyssdawnBattle
             if (luckBonus != 0)
                 bonuses.Add($"LUK {(luckBonus > 0 ? "+" : "")}{luckBonus}");
             
+            // 레벨업 성장치 표시
+            if (hpGrowthPerLevel != 0)
+                bonuses.Add($"HP +{hpGrowthPerLevel:F1}/레벨");
+            if (mpGrowthPerLevel != 0)
+                bonuses.Add($"MP +{mpGrowthPerLevel:F1}/레벨");
+            if (attackGrowthPerLevel != 0)
+                bonuses.Add($"ATK +{attackGrowthPerLevel:F1}/레벨");
+            if (defenseGrowthPerLevel != 0)
+                bonuses.Add($"DEF +{defenseGrowthPerLevel:F1}/레벨");
+            if (magicGrowthPerLevel != 0)
+                bonuses.Add($"MAG +{magicGrowthPerLevel:F1}/레벨");
+            if (agilityGrowthPerLevel != 0)
+                bonuses.Add($"AGI +{agilityGrowthPerLevel:F1}/레벨");
+            if (luckGrowthPerLevel != 0)
+                bonuses.Add($"LUK +{luckGrowthPerLevel:F1}/레벨");
+            
             return bonuses.Count > 0 ? string.Join(", ", bonuses) : "No bonuses";
+        }
+        
+        /// <summary>
+        /// 특정 레벨에서의 성장치 보정치 계산
+        /// </summary>
+        /// <param name="level">현재 레벨</param>
+        /// <returns>레벨에 따른 총 성장치 보정치</returns>
+        public (float hp, float mp, float attack, float defense, float magic, float agility, float luck) GetGrowthBonusesAtLevel(int level)
+        {
+            return (
+                hp: hpGrowthPerLevel * level,
+                mp: mpGrowthPerLevel * level,
+                attack: attackGrowthPerLevel * level,
+                defense: defenseGrowthPerLevel * level,
+                magic: magicGrowthPerLevel * level,
+                agility: agilityGrowthPerLevel * level,
+                luck: luckGrowthPerLevel * level
+            );
         }
         
         /// <summary>
@@ -121,6 +184,7 @@ namespace AbyssdawnBattle
         }
     }
 }
+
 
 
 

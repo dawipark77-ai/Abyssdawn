@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d, type: 3}
+  m_Name: Orc_RedBloodCells
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
+  memoryID: Orc_RedBloodCells
+  memoryName: RedBloodCells
+  subtitle: Excessive Red Blood Cells
+  species: 2
+  memoryIcon: {fileID: 0}
+  hpBonusPercent: 10
+  hpBonus: 0
+  attackBonus: 1
+  defenseBonus: 0
+  agilityBonus: 0
+  magicBonus: 0
+  luckBonus: -1
+  hpGrowthPerLevel: 0
+  mpGrowthPerLevel: 0
+  attackGrowthPerLevel: 0.2
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0
+  description: "Attack +1, Max HP +10%, Luck -1. Level up: Attack +0.2 per level."
+  flavorText: "Blood thick with power keeps them fighting long after others fall."
+  requiredMemoriesForTrait: 3
+  traitName: 
+  traitDescription: 
+
+
+

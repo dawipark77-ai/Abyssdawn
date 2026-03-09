@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d, type: 3}
+  m_Name: Halfling_Foot
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
+  memoryID: Halfling_Foot
+  memoryName: Foot
+  subtitle: Natural Leather Soles
+  species: 3
+  memoryIcon: {fileID: 0}
+  hpBonusPercent: 0
+  hpBonus: 0
+  attackBonus: -1
+  defenseBonus: 0
+  agilityBonus: 2
+  magicBonus: 0
+  luckBonus: 0
+  hpGrowthPerLevel: 0
+  mpGrowthPerLevel: 0
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0.3
+  luckGrowthPerLevel: 0
+  description: "Agility +2, Attack -1. Level up: Agility +0.3 per level."
+  flavorText: "Bare feet tough as leather let them run quietly over any ground."
+  requiredMemoriesForTrait: 3
+  traitName: 
+  traitDescription: 
+
+
+

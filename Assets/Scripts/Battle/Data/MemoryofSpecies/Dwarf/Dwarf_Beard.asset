@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d, type: 3}
+  m_Name: Dwarf_Beard
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
+  memoryID: Dwarf_Beard
+  memoryName: Beard
+  subtitle: Ore-Sensing Beard
+  species: 4
+  memoryIcon: {fileID: 0}
+  hpBonusPercent: 0
+  hpBonus: 0
+  attackBonus: 0
+  defenseBonus: 0
+  agilityBonus: -1
+  magicBonus: 1
+  luckBonus: 1
+  hpGrowthPerLevel: 0
+  mpGrowthPerLevel: 0
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0.2
+  description: "Luck +1, Magic +1, Agility -1. Level up: Luck +0.2 per level."
+  flavorText: "Their beards twitch at the scent of ore and buried treasure."
+  requiredMemoriesForTrait: 3
+  traitName: 
+  traitDescription: 
+
+
+

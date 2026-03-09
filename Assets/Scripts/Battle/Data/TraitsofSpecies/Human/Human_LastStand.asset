@@ -16,7 +16,7 @@ MonoBehaviour:
   traitName: "\uBD88\uAD74"
   traitNameEnglish: Last Stand
   species: 0
-  traitIcon: {fileID: 0}
+  traitIcon: {fileID: 2593526975875595140, guid: 2dabbe6e6eaecd04d8d1179e0b807657, type: 3}
   requiredMemoryCount: 3
   requireSameSpecies: 1
   hpBonusPercent: 0

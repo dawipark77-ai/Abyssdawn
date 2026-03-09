@@ -268,3 +268,6 @@ public class LoreCategoryController : MonoBehaviour
 
 
 
+
+
+

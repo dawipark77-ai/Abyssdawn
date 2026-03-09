@@ -204,3 +204,6 @@ public class SkillDetailPopupSetup : EditorWindow
 
 
 
+
+
+
