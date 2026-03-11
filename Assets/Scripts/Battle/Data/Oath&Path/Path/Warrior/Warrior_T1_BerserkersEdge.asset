@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549bd4ec46651140b01bd6f69a8af54, type: 3}
+  m_Name: Warrior_T1_BerserkersEdge
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
+  skillID: Warrior_T1_BerserkersEdge
+  skillName: Berserker's Edge
+  jobClass: 0
+  tier: 1
+  type: 0
+  costType: 0
+  costValue: 0
+  effectDescription: "HP 40% \uC774\uD558\uC77C \uB54C \uACF5\uACA9\uB825 +15%, \uBC1B\uB294
+    \uD53C\uD574 +10%.\n\uC0DD\uC874\uBCF4\uB2E4 \uD3ED\uBC1C\uC801\uC778 \uD654\uB825\uC744
+    \uC911\uC2DC\uD558\uB294 \uC2A4\uD0C0\uC77C."
+  drawbackDescription: "\uC704\uD5D8 \uAD6C\uAC04\uC5D0 \uBA38\uBB3C\uC218\uB85D
+    \uC0DD\uC874 \uB9AC\uC2A4\uD06C\uAC00 \uCEE4\uC9C4\uB2E4."

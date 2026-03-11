@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549bd4ec46651140b01bd6f69a8af54, type: 3}
+  m_Name: Monk_T1_InnerBreath
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
+  skillID: Monk_T1_InnerBreath
+  skillName: Inner Breath
+  jobClass: 1
+  tier: 1
+  type: 2
+  costType: 2
+  costValue: 6
+  effectDescription: "\uC989\uC2DC HP Max\uC758 8% \uD68C\uBCF5.\n2\uD134 \uB3D9\uC548
+    \uC800\uC8FC \uC800\uD56D +20%."
+  drawbackDescription: "MP 6%\uB97C \uC18C\uBAA8\uD55C\uB2E4."

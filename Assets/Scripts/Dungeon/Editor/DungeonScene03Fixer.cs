@@ -13,14 +13,10 @@ public class DungeonScene03Fixer : EditorWindow
         GameObject sys = GameObject.Find("DungeonSystem_03");
         if (sys == null) sys = new GameObject("DungeonSystem_03");
 
-        // 2. Ensure Map exists
-
-        // 3. Ensure Player exists
+        // 2. Ensure Player exists
         DungeonGridPlayer player = sys.GetComponent<DungeonGridPlayer>();
         if (player == null) player = sys.AddComponent<DungeonGridPlayer>();
         
-        // Link Map
-
         // 4. Find and Link Minimap Cursor
         GameObject cursorObj = GameObject.Find("PlayerCursor");
         if (cursorObj == null) cursorObj = GameObject.Find("Cursor"); // Fallback
@@ -40,8 +36,7 @@ public class DungeonScene03Fixer : EditorWindow
         DungeonInputBinder binder = sys.GetComponent<DungeonInputBinder>();
         if (binder == null) binder = sys.AddComponent<DungeonInputBinder>();
 
-        // 5. Try to link View if it exists (Optional, but good to try)
-        Debug.Log("Scene 03 Controls Fixed! WASD and UI Buttons should now work. (View linking skipped)");
+        Debug.Log("Scene 03 Controls Fixed! WASD and UI Buttons should now work.");
         
         // Force selection so user sees it
         Selection.activeGameObject = sys;

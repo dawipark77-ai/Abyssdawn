@@ -1,0 +1,1137 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+Built from '6000.2/staging' branch; Version is '6000.2.13f1 (abdb44fca7f7) revision 11262788'; Using compiler version '194234433'; Build Type 'Release'
+OS: 'Windows 10  (10.0.19045) 64bit Professional' Language: 'ko' Physical Memory: 32654 MB
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User" at "2026-03-11T14:47:14.4667003Z"
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+Date: 2026-03-11T14:47:14Z
+
+COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity\Hub\Editor\6000.2.13f1\Editor\Unity.exe
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker0
+-projectPath
+E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01
+-logFile
+Logs/AssetImportWorker0.log
+-srvPort
+56952
+-licensingIpc
+LicenseClient-User
+-job-worker-count
+3
+-background-job-worker-count
+8
+-gc-helper-count
+1
+-name
+AssetImport
+Successfully changed project path to: E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01
+E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Player connection [20776]  Target information:
+
+Player connection [20776]  * "[IP] 221.146.237.131 [Port] 0 [Flags] 2 [Guid] 3628331506 [EditorId] 3628331506 [Version] 1048832 [Id] WindowsEditor(7,User-PC) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [20776] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [20776] Host joined alternative multi-casting on [225.0.0.222:34997]...
+JobSystem: Creating JobQueue using job-worker-count value 3
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Refreshing native plugins compatible for Editor in 11.31 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 6000.2.13f1 (abdb44fca7f7)
+[Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01/Assets
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.0]
+    Renderer: Intel(R) HD Graphics 4000 (ID=0x162)
+    Vendor:   Intel
+    VRAM:     128 MB
+    Driver:   10.18.10.4358
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Initialize mono
+Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/Managed'
+Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56916
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.003764 seconds.
+- Loaded All Assemblies, in  0.933 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.058 seconds
+Domain Reload Profiling: 1989ms
+	BeginReloadAssembly (321ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (2ms)
+	RebuildCommonClasses (80ms)
+	RebuildNativeTypeToScriptingClass (29ms)
+	initialDomainReloadingComplete (91ms)
+	LoadAllAssembliesAndSetupDomain (407ms)
+		LoadAssemblies (318ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (401ms)
+			TypeCache.Refresh (398ms)
+				TypeCache.ScanAssembly (367ms)
+			BuildScriptInfoCaches (0ms)
+			ResolveRequiredComponents (1ms)
+	FinalizeReload (1059ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (926ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (152ms)
+			SetLoadedEditorAssemblies (13ms)
+			BeforeProcessingInitializeOnLoad (210ms)
+			ProcessInitializeOnLoadAttributes (402ms)
+			ProcessInitializeOnLoadMethodAttributes (150ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+========================================================================
+Worker process is ready to serve import requests
+Import Worker Mode flag is 0x00
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.17.4+4293ba1
+  Session Id:              5be8c73a2211498091ae31bc51bddd35
+  Correlation Id:          19ce961546bcc017d77a723a33b0321c
+  External correlation Id: 7372722775495457667
+  Machine Id:              PqfLONiypRxW53GBMsOvo+/r+k0=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-User" (connect: 0.00s, validation: 0.00s, handshake: 4.77s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User-notifications" at "2026-03-11T14:47:19.2376828Z"
+[Licensing::Module] Licensing Background thread has ended after 4.77s
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 14569675034098-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+- Loaded All Assemblies, in  1.963 seconds
+Refreshing native plugins compatible for Editor in 16.62 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+Package Manager log level set to [2]
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.787 seconds
+Domain Reload Profiling: 3746ms
+	BeginReloadAssembly (438ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (16ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (47ms)
+	RebuildCommonClasses (92ms)
+	RebuildNativeTypeToScriptingClass (29ms)
+	initialDomainReloadingComplete (98ms)
+	LoadAllAssembliesAndSetupDomain (1301ms)
+		LoadAssemblies (896ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (685ms)
+			TypeCache.Refresh (504ms)
+				TypeCache.ScanAssembly (475ms)
+			BuildScriptInfoCaches (146ms)
+			ResolveRequiredComponents (27ms)
+	FinalizeReload (1788ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1465ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (8ms)
+			BeforeProcessingInitializeOnLoad (338ms)
+			ProcessInitializeOnLoadAttributes (825ms)
+			ProcessInitializeOnLoadMethodAttributes (284ms)
+			AfterProcessingInitializeOnLoad (8ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (32ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
+Refreshing native plugins compatible for Editor in 5.36 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6905 unused Assets / (2.5 MB). Loaded Objects now: 7633.
+Memory consumption went from 138.6 MB to 136.0 MB.
+Total: 35.827800 ms (FindLiveObjects: 2.173800 ms CreateObjectMapping: 1.869700 ms MarkObjects: 25.533600 ms  DeleteObjects: 6.248000 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 28057.914965 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_InnerFlow.asset
+  artifactKey: Guid(31186009e52c8ca4b8b74a1f82cb0f14) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_InnerFlow.asset using Guid(31186009e52c8ca4b8b74a1f82cb0f14) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '2591b4063f109223eb202af04c4e8a69') in 0.05356 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000036 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_DarkRevelation.asset
+  artifactKey: Guid(1a224651031ebc749b90a31103e86d1a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_DarkRevelation.asset using Guid(1a224651031ebc749b90a31103e86d1a) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'a301ac5dd4f3c61b31cbd5cd62a20981') in 0.0039402 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000044 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_UnarmedProwess.asset
+  artifactKey: Guid(fc872c1d2bb263f4c88335ac1aee3d2b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_UnarmedProwess.asset using Guid(fc872c1d2bb263f4c88335ac1aee3d2b) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'cf4d2984e6fb331ca3bfbe30fcdd005e') in 0.0015682 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000025 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_GhostStep.asset
+  artifactKey: Guid(17e9193e0a75ddb48ad792330aa7c460) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_GhostStep.asset using Guid(17e9193e0a75ddb48ad792330aa7c460) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'eca9272cf31b5fff471e391e96abb266') in 0.0016769 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_SacredVow.asset
+  artifactKey: Guid(9ad3a284a307225428ef502f3b85a48d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_SacredVow.asset using Guid(9ad3a284a307225428ef502f3b85a48d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'e44a870c55deb64d4e46b2fc2d993f1d') in 0.0020232 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000028 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_WarriorsWill.asset
+  artifactKey: Guid(e5150296158014c418e0f7cb1900e5ac) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_WarriorsWill.asset using Guid(e5150296158014c418e0f7cb1900e5ac) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '6a08b400f27f8bc7defd45c9260ca816') in 0.0018993 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  1.591 seconds
+Refreshing native plugins compatible for Editor in 2.77 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.572 seconds
+Domain Reload Profiling: 3164ms
+	BeginReloadAssembly (479ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (27ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (100ms)
+	RebuildCommonClasses (67ms)
+	RebuildNativeTypeToScriptingClass (28ms)
+	initialDomainReloadingComplete (47ms)
+	LoadAllAssembliesAndSetupDomain (971ms)
+		LoadAssemblies (750ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (464ms)
+			TypeCache.Refresh (16ms)
+				TypeCache.ScanAssembly (3ms)
+			BuildScriptInfoCaches (414ms)
+			ResolveRequiredComponents (25ms)
+	FinalizeReload (1572ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1262ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (2ms)
+			SetLoadedEditorAssemblies (7ms)
+			BeforeProcessingInitializeOnLoad (257ms)
+			ProcessInitializeOnLoadAttributes (873ms)
+			ProcessInitializeOnLoadMethodAttributes (115ms)
+			AfterProcessingInitializeOnLoad (7ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (50ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 7.61 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6905 unused Assets / (3.8 MB). Loaded Objects now: 7642.
+Memory consumption went from 140.3 MB to 136.5 MB.
+Total: 14.093700 ms (FindLiveObjects: 1.038400 ms CreateObjectMapping: 1.541400 ms MarkObjects: 7.976000 ms  DeleteObjects: 3.536000 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Import Request.
+  Time since last request: 302.924612 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Mage
+  artifactKey: Guid(fc5f03e1e2f43a84b88e9c5a288a9441) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Mage using Guid(fc5f03e1e2f43a84b88e9c5a288a9441) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'f052c0f7726394f411c218bb06b23372') in 0.0081419 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.027825 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ChainCurse.asset
+  artifactKey: Guid(9e57925cd25e30543931791819c4cdcb) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ChainCurse.asset using Guid(9e57925cd25e30543931791819c4cdcb) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'f7df532f68db37a455e181dba0e80f11') in 0.0443111 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_Overcharge.asset
+  artifactKey: Guid(cfdc2263a3029234b909b3e47ce1cf9b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_Overcharge.asset using Guid(cfdc2263a3029234b909b3e47ce1cf9b) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '45e58a3a71a280dfcb57634a0d2fe1d3') in 0.0018224 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000043 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ManaVeil.asset
+  artifactKey: Guid(13096828df2786649ba201ee92a3ebe7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ManaVeil.asset using Guid(13096828df2786649ba201ee92a3ebe7) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '56adc859d8daa8fafb0639135d0b4d1e') in 0.0015816 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 283.491357 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_BasicSwordsmanship.asset
+  artifactKey: Guid(fcbeb2fd6e7fa9a49873162e0d3d162f) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_BasicSwordsmanship.asset using Guid(fcbeb2fd6e7fa9a49873162e0d3d162f) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'c924b739f2f787e237a011b0d9e6da65') in 0.0045813 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  1.765 seconds
+Refreshing native plugins compatible for Editor in 4.22 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.409 seconds
+Domain Reload Profiling: 3176ms
+	BeginReloadAssembly (471ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (34ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (91ms)
+	RebuildCommonClasses (85ms)
+	RebuildNativeTypeToScriptingClass (25ms)
+	initialDomainReloadingComplete (59ms)
+	LoadAllAssembliesAndSetupDomain (1126ms)
+		LoadAssemblies (903ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (457ms)
+			TypeCache.Refresh (30ms)
+				TypeCache.ScanAssembly (5ms)
+			BuildScriptInfoCaches (400ms)
+			ResolveRequiredComponents (21ms)
+	FinalizeReload (1410ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1091ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (4ms)
+			SetLoadedEditorAssemblies (8ms)
+			BeforeProcessingInitializeOnLoad (265ms)
+			ProcessInitializeOnLoadAttributes (692ms)
+			ProcessInitializeOnLoadMethodAttributes (116ms)
+			AfterProcessingInitializeOnLoad (6ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (37ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 7.05 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6906 unused Assets / (5.2 MB). Loaded Objects now: 7646.
+Memory consumption went from 140.3 MB to 135.2 MB.
+Total: 16.574100 ms (FindLiveObjects: 1.145400 ms CreateObjectMapping: 1.042600 ms MarkObjects: 10.046400 ms  DeleteObjects: 4.337400 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  1.460 seconds
+Refreshing native plugins compatible for Editor in 2.98 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.814 seconds
+Domain Reload Profiling: 3274ms
+	BeginReloadAssembly (438ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (26ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (87ms)
+	RebuildCommonClasses (64ms)
+	RebuildNativeTypeToScriptingClass (23ms)
+	initialDomainReloadingComplete (45ms)
+	LoadAllAssembliesAndSetupDomain (888ms)
+		LoadAssemblies (735ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (384ms)
+			TypeCache.Refresh (15ms)
+				TypeCache.ScanAssembly (3ms)
+			BuildScriptInfoCaches (339ms)
+			ResolveRequiredComponents (23ms)
+	FinalizeReload (1815ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1540ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (2ms)
+			SetLoadedEditorAssemblies (7ms)
+			BeforeProcessingInitializeOnLoad (514ms)
+			ProcessInitializeOnLoadAttributes (907ms)
+			ProcessInitializeOnLoadMethodAttributes (103ms)
+			AfterProcessingInitializeOnLoad (6ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (42ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 12.21 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6907 unused Assets / (4.0 MB). Loaded Objects now: 7650.
+Memory consumption went from 140.4 MB to 136.4 MB.
+Total: 14.882700 ms (FindLiveObjects: 1.690700 ms CreateObjectMapping: 1.740100 ms MarkObjects: 8.183700 ms  DeleteObjects: 3.266300 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Import Request.
+  Time since last request: 454.872893 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Bow_Lore
+  artifactKey: Guid(5e486935ecfb3ce4ea738f1016835367) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Skills/Bow_Lore using Guid(5e486935ecfb3ce4ea738f1016835367) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'd0947430335741c6315ac0d147347ed6') in 0.0181364 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
+========================================================================
+Received Import Request.
+  Time since last request: 1.388757 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore
+  artifactKey: Guid(534419bb7d46d014b847b4e5cf93424a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore using Guid(534419bb7d46d014b847b4e5cf93424a) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '897f79fe98b433399cd6c203deec4c6e') in 0.000795 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
+========================================================================
+Received Import Request.
+  Time since last request: 4.924870 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_BladeDance.asset
+  artifactKey: Guid(61fac1f914cbdc74da216d96f0dbc7df) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_BladeDance.asset using Guid(61fac1f914cbdc74da216d96f0dbc7df) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'ecd9adbc177c0993b79dd1491d585ff0') in 0.0312827 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_RendWound.asset
+  artifactKey: Guid(666a4ca63a5e60d499e2d860a387d4c6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_RendWound.asset using Guid(666a4ca63a5e60d499e2d860a387d4c6) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '67082a9a70f77d2366e75ec236adf05d') in 0.0018262 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000026 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_VitalStrike.asset
+  artifactKey: Guid(5e890bb8e72f02047a83dc8164486e37) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_VitalStrike.asset using Guid(5e890bb8e72f02047a83dc8164486e37) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '0f4279ead8d98a186faab7fa7b505f3d') in 0.001511 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 170.477603 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/CrudeArmor.asset
+  artifactKey: Guid(e9a66495ca4098b4aab796c8edf644c4) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/CrudeArmor.asset using Guid(e9a66495ca4098b4aab796c8edf644c4) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '266e7307bf17fc4278b190d1cffb2f55') in 0.0060993 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000027 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/CrudeShield.asset
+  artifactKey: Guid(f11abdb46a6c8804bbcc6bab1e0cbfd0) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/CrudeShield.asset using Guid(f11abdb46a6c8804bbcc6bab1e0cbfd0) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '394dd9c39e79956835c90ed51d710f07') in 0.0028682 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/CrudeBracelet.asset
+  artifactKey: Guid(4ed214cc9ca37264da616dbfc05d6960) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/CrudeBracelet.asset using Guid(4ed214cc9ca37264da616dbfc05d6960) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'ed169e0323a4b6a5e5a6dba1b1337472') in 0.0033456 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+
+========================================================================
+Received Import Request.
+  Time since last request: 5.530436 seconds.
+  path: Assets/Scripts/Dungeon/Editor/DungeonSceneBuilder.cs
+  artifactKey: Guid(87d6044c46b07fd4483dc253d50a4f9c) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Dungeon/Editor/DungeonSceneBuilder.cs using Guid(87d6044c46b07fd4483dc253d50a4f9c) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '6fbc81c25f6f7ba5ce9553f79c198a6b') in 0.2885662 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000024 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dual_Lore
+  artifactKey: Guid(3cc6d895f3a73774badf8c5636b80ed5) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dual_Lore using Guid(3cc6d895f3a73774badf8c5636b80ed5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '6a8eb9598f0fe3b810c8da226f6f4a3d') in 0.0055481 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000030 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_HealingLight.asset
+  artifactKey: Guid(fc2482d756bedbd49a84c91bf79947fc) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_HealingLight.asset using Guid(fc2482d756bedbd49a84c91bf79947fc) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '883921cff0f32476c21e7a85fdb26fac') in 0.0497758 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000024 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_GhostStep.asset
+  artifactKey: Guid(17e9193e0a75ddb48ad792330aa7c460) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_GhostStep.asset using Guid(17e9193e0a75ddb48ad792330aa7c460) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'd7787ead8a3d60cf5eb8f05b99595ec0') in 0.012676 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000031 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_DarkOffering.asset
+  artifactKey: Guid(b8581bcba3dff8d40ae4b80d21d3e99f) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_DarkOffering.asset using Guid(b8581bcba3dff8d40ae4b80d21d3e99f) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'e8c06ca1d9573ca1c440838b04c0bb3c') in 0.0095482 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000025 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Monk
+  artifactKey: Guid(f488db6b8d7b46c4d972c7f9be944393) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Monk using Guid(f488db6b8d7b46c4d972c7f9be944393) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'cd68147cd37bcf6322f259195caa8cc1') in 0.0047918 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_CrossResonance.asset
+  artifactKey: Guid(49c983ed8e4a1f644b8f94ab822f14fd) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_CrossResonance.asset using Guid(49c983ed8e4a1f644b8f94ab822f14fd) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '01594749bfc8855637326f798b0ee8f6') in 0.0098872 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000018 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_IronMomentum.asset
+  artifactKey: Guid(5b9f35a42c3d61848bcc773fd906ad12) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_IronMomentum.asset using Guid(5b9f35a42c3d61848bcc773fd906ad12) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'dc000a99e9b91bc3e0dedfa5da5fca97') in 0.0078203 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000021 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_SpellRebound.asset
+  artifactKey: Guid(b89ba62e2faab2e4cbf8fe86542b5fbd) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_SpellRebound.asset using Guid(b89ba62e2faab2e4cbf8fe86542b5fbd) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '457e9112468fd0d2e08a35ab55907eaf') in 0.0105688 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_RearSuppression.asset
+  artifactKey: Guid(c1ad97e2ab97601439bb161234e285b1) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_RearSuppression.asset using Guid(c1ad97e2ab97601439bb161234e285b1) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '562b3ec90aff360ff8cc861b7e182483') in 0.0092719 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000016 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/WeaponLoreSetupTool.cs
+  artifactKey: Guid(96dc9739596a53849914ed829c68b977) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/WeaponLoreSetupTool.cs using Guid(96dc9739596a53849914ed829c68b977) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'd3cc4b6563e9327e34d602f8cce3f303') in 0.0065249 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000024 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Katana_Lore/Katana_CrimsonStance.asset
+  artifactKey: Guid(0707487686b7a8546bd1b3a8f53c8847) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Katana_Lore/Katana_CrimsonStance.asset using Guid(0707487686b7a8546bd1b3a8f53c8847) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'c99d592e73e855e79cf85d0040214638') in 0.0113204 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000020 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/PathSkillData.cs
+  artifactKey: Guid(a549bd4ec46651140b01bd6f69a8af54) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/PathSkillData.cs using Guid(a549bd4ec46651140b01bd6f69a8af54) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '6ea53f9ebddeb6fef1769c5f28d5f49b') in 0.0059078 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000040 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ChainCurse.asset
+  artifactKey: Guid(9e57925cd25e30543931791819c4cdcb) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ChainCurse.asset using Guid(9e57925cd25e30543931791819c4cdcb) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '170e94935c118d82d81bce6fe2082641') in 0.0079367 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_WarriorsWill.asset
+  artifactKey: Guid(e5150296158014c418e0f7cb1900e5ac) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_WarriorsWill.asset using Guid(e5150296158014c418e0f7cb1900e5ac) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'fa0cb234dd0625adef346d66f586d6da') in 0.008395 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000018 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_FrontArcSlash.asset
+  artifactKey: Guid(c3fbc994db612d948abce46868a8f331) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_FrontArcSlash.asset using Guid(c3fbc994db612d948abce46868a8f331) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '079ad8dedaf55998f0664372876bc3b9') in 0.0087603 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000020 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_Transcendence.asset
+  artifactKey: Guid(652477df9d75cba48b340968bc1a83b5) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_Transcendence.asset using Guid(652477df9d75cba48b340968bc1a83b5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '99fca18296285af99697eb38bd758eed') in 0.0112442 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000029 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_CrossSlash.asset
+  artifactKey: Guid(94d3fa587b6feae4a85a0c5831b2c03e) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_CrossSlash.asset using Guid(94d3fa587b6feae4a85a0c5831b2c03e) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'aff657197dbc5ec2da330e268f89c62a') in 0.0120696 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_RendWound.asset
+  artifactKey: Guid(666a4ca63a5e60d499e2d860a387d4c6) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_RendWound.asset using Guid(666a4ca63a5e60d499e2d860a387d4c6) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '043415d52853dcaa6b8727e2815a32d3') in 0.0090889 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000024 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Bow_Lore/Bow_Mastery.asset
+  artifactKey: Guid(9f1b4fe9fd4fae3438ae1ca0482a9d39) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Bow_Lore/Bow_Mastery.asset using Guid(9f1b4fe9fd4fae3438ae1ca0482a9d39) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '980eb57e37678d7af04084de572262f4') in 0.0083774 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000028 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_Mastery.asset
+  artifactKey: Guid(aea61a676f99da4439060a8dfdc0a93f) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_Mastery.asset using Guid(aea61a676f99da4439060a8dfdc0a93f) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '34288281b3a3efe3b47bbb42eea57843') in 0.00857 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000030 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_VenomCoat.asset
+  artifactKey: Guid(7e6f4d61cb5f7dd4d86158284e4a9776) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_VenomCoat.asset using Guid(7e6f4d61cb5f7dd4d86158284e4a9776) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'bde3b247ab28f4f3efd4daba384bc3b4') in 0.0075386 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Mage
+  artifactKey: Guid(fc5f03e1e2f43a84b88e9c5a288a9441) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Mage using Guid(fc5f03e1e2f43a84b88e9c5a288a9441) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'c8508c932910a94d0778939f40336353') in 0.0056508 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000016 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_TwistedPrayer.asset
+  artifactKey: Guid(a99e95f28fe4f4049b1b96e829f024a4) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_TwistedPrayer.asset using Guid(a99e95f28fe4f4049b1b96e829f024a4) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '439484dd094f0b0b4a31246f7a7ea631') in 0.0103874 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000022 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Spear_Lore/Spear_Impale.asset
+  artifactKey: Guid(70ddbe7c154988b43940660450274dfe) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Spear_Lore/Spear_Impale.asset using Guid(70ddbe7c154988b43940660450274dfe) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '0ffd984689469210de6acccfd3e7c897') in 0.0088144 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000030 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Polearm_Lore
+  artifactKey: Guid(8a734085e65eef24d84e45074894d3ed) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Polearm_Lore using Guid(8a734085e65eef24d84e45074894d3ed) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '1616c8fe7be3bf106eac63d7f653e34e') in 0.0069707 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_BladeDance.asset
+  artifactKey: Guid(61fac1f914cbdc74da216d96f0dbc7df) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_BladeDance.asset using Guid(61fac1f914cbdc74da216d96f0dbc7df) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '9e8b2c729c99a6a7d54cd4cdf45fcad6') in 0.0102126 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_SoulDrain.asset
+  artifactKey: Guid(fee26eb1b35440b4fb1ee76c5eafe056) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_SoulDrain.asset using Guid(fee26eb1b35440b4fb1ee76c5eafe056) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '9c8c310eea5b8563d9fb33565451d4db') in 0.0079406 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000021 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_FocusedMind.asset
+  artifactKey: Guid(256c8becd7a16e84d96ed5b216251a1a) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_FocusedMind.asset using Guid(256c8becd7a16e84d96ed5b216251a1a) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '75f013dda486520b50c3537c7781aa4b') in 0.0075721 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000029 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Bow_Lore
+  artifactKey: Guid(5e486935ecfb3ce4ea738f1016835367) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Bow_Lore using Guid(5e486935ecfb3ce4ea738f1016835367) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '2394aa202ea88d0cf51378ca02b3d7f2') in 0.0071316 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000025 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_VitalStrike.asset
+  artifactKey: Guid(5e890bb8e72f02047a83dc8164486e37) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore/Dagger_VitalStrike.asset using Guid(5e890bb8e72f02047a83dc8164486e37) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '3a8c29986c54eabfbdc8f0921d8069ae') in 0.0116999 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000026 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_OffRhythmStrike.asset
+  artifactKey: Guid(43832dc83e8134d4c8b52e369320a47a) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_OffRhythmStrike.asset using Guid(43832dc83e8134d4c8b52e369320a47a) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '35df8b0fade96bb20e87d0a53daabfb9') in 0.0093283 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000022 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_InnerBreath.asset
+  artifactKey: Guid(2d6efd821325ca341b0af80f5d617f61) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_InnerBreath.asset using Guid(2d6efd821325ca341b0af80f5d617f61) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'fd2c0f6284966adf07a81dc0d7e938e9') in 0.0081122 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000030 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Warrior
+  artifactKey: Guid(2792757e2b66aca4d94c25398d2f4d86) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Warrior using Guid(2792757e2b66aca4d94c25398d2f4d86) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '1b6a54a25643249f19211cfd74af63dc') in 0.0056728 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000018 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Bow_Lore/Bow_AimedShot.asset
+  artifactKey: Guid(4dd9513c02840fa4993cbada71aa4b3e) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Bow_Lore/Bow_AimedShot.asset using Guid(4dd9513c02840fa4993cbada71aa4b3e) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'b42158e666c978965a5f0dbb700422c9') in 0.0090302 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000026 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Spear_Lore/Spear_PreemptiveThrust.asset
+  artifactKey: Guid(29d81a7d0fe44f4479c030067c5cfe22) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Spear_Lore/Spear_PreemptiveThrust.asset using Guid(29d81a7d0fe44f4479c030067c5cfe22) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'dd83a1f1a31311eb62b3d5a8602a0b7e') in 0.0094541 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000030 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_SacredVow.asset
+  artifactKey: Guid(9ad3a284a307225428ef502f3b85a48d) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_SacredVow.asset using Guid(9ad3a284a307225428ef502f3b85a48d) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'd23a19798fa5b1a5077850d35831c073') in 0.0210125 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000024 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Dagger_Lore
+  artifactKey: Guid(534419bb7d46d014b847b4e5cf93424a) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Dagger_Lore using Guid(534419bb7d46d014b847b4e5cf93424a) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '770fd94af8ac762ac14bf00827987eb5') in 0.0089795 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000028 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_Dominance.asset
+  artifactKey: Guid(4b5004e42cc9bd143a2ba2389c28083c) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_Dominance.asset using Guid(4b5004e42cc9bd143a2ba2389c28083c) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'b398d56c307bb05d516f524c93b1d8f7') in 0.0325327 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000029 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Sister
+  artifactKey: Guid(15804ab63ef81e841b0b8e16287206ec) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Sister using Guid(15804ab63ef81e841b0b8e16287206ec) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'e0cacba7c319cc8ee2cdf4adcddb25ad') in 0.0046404 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Skills/Bow_Lore/Bow_RapidShot.asset
+  artifactKey: Guid(0b845e0d0f1ba82419a1a6c3a0a1740e) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Skills/Bow_Lore/Bow_RapidShot.asset using Guid(0b845e0d0f1ba82419a1a6c3a0a1740e) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '32c22a232245be215b80e68aae8546c1') in 0.0080135 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000025 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_ShadowSwap.asset
+  artifactKey: Guid(3f202a5f89db9bc45801f898ff9f660f) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_ShadowSwap.asset using Guid(3f202a5f89db9bc45801f898ff9f660f) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'c1d015450726b57e1e79f1c5806096e0') in 0.0176095 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.014519 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude
+  artifactKey: Guid(ec4cedc38c383b04fbbb5e63f00fbf44) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude using Guid(ec4cedc38c383b04fbbb5e63f00fbf44) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '3797434f7094d12b912ab41968d840b8') in 0.0013343 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
+========================================================================
+Received Import Request.
+  Time since last request: 5.680396 seconds.
+  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_IronDiscipline.asset
+  artifactKey: Guid(54916d042f2f104488ce695aefc0c415) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_IronDiscipline.asset using Guid(54916d042f2f104488ce695aefc0c415) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'ddeaccdddb8bb235ee04238fe47153ce') in 0.0082532 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.968349 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/CrudeBoots.asset
+  artifactKey: Guid(811620911ec01884bb165042dc142cb8) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/CrudeBoots.asset using Guid(811620911ec01884bb165042dc142cb8) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '21efae07231defc81b9d958a4dab8e50') in 0.0247784 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000028 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/CrudeArmor.asset
+  artifactKey: Guid(e9a66495ca4098b4aab796c8edf644c4) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/CrudeArmor.asset using Guid(e9a66495ca4098b4aab796c8edf644c4) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '6ed6ce055dbad7c60cc3ca799e84c14d') in 0.0186197 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000032 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/CrudeBracelet.asset
+  artifactKey: Guid(4ed214cc9ca37264da616dbfc05d6960) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/CrudeBracelet.asset using Guid(4ed214cc9ca37264da616dbfc05d6960) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '0c9fb26f5fa3c16007d4d9dd4bd3c36e') in 0.0128172 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.555019 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude
+  artifactKey: Guid(ec4cedc38c383b04fbbb5e63f00fbf44) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude using Guid(ec4cedc38c383b04fbbb5e63f00fbf44) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'a1e0cc93872dde0daf1cd000b712603f') in 0.0073389 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  1.872 seconds
+Refreshing native plugins compatible for Editor in 2.81 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.365 seconds
+Domain Reload Profiling: 3239ms
+	BeginReloadAssembly (782ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (30ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (155ms)
+	RebuildCommonClasses (78ms)
+	RebuildNativeTypeToScriptingClass (26ms)
+	initialDomainReloadingComplete (49ms)
+	LoadAllAssembliesAndSetupDomain (939ms)
+		LoadAssemblies (931ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (487ms)
+			TypeCache.Refresh (18ms)
+				TypeCache.ScanAssembly (4ms)
+			BuildScriptInfoCaches (429ms)
+			ResolveRequiredComponents (32ms)
+	FinalizeReload (1366ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1068ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (2ms)
+			SetLoadedEditorAssemblies (9ms)
+			BeforeProcessingInitializeOnLoad (252ms)
+			ProcessInitializeOnLoadAttributes (689ms)
+			ProcessInitializeOnLoadMethodAttributes (108ms)
+			AfterProcessingInitializeOnLoad (7ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (41ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 4.58 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6908 unused Assets / (4.2 MB). Loaded Objects now: 7654.
+Memory consumption went from 140.5 MB to 136.3 MB.
+Total: 14.039900 ms (FindLiveObjects: 1.044700 ms CreateObjectMapping: 1.271600 ms MarkObjects: 8.394300 ms  DeleteObjects: 3.327800 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Import Request.
+  Time since last request: 206.054396 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Axe.asset
+  artifactKey: Guid(d10cb59fd29b1f04db66b22ec725e87b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Axe.asset using Guid(d10cb59fd29b1f04db66b22ec725e87b) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '9af61a49060da5cab796a70642fe437c') in 0.0797805 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000025 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Katana.asset
+  artifactKey: Guid(ea1f65d3e10c58a4b94268a5c800338d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Katana.asset using Guid(ea1f65d3e10c58a4b94268a5c800338d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '60683a07d48831e6fa77ab6f442381b8') in 0.0018491 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000039 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Greatsword.asset
+  artifactKey: Guid(7cb151bebe1498b4592feae81a6a38f1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Greatsword.asset using Guid(7cb151bebe1498b4592feae81a6a38f1) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '8754247f2b3e50dce5acfbfe15baeb6c') in 0.0015884 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000018 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Greatshield.asset
+  artifactKey: Guid(ebc30810353ed5c47aa5527e89052472) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Greatshield.asset using Guid(ebc30810353ed5c47aa5527e89052472) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'f95a554a5f4d284d9707d36b35a42a39') in 0.0015442 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000023 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Hammer.asset
+  artifactKey: Guid(d85d12e40e718ec4fb99335b5d6b7ed7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Hammer.asset using Guid(d85d12e40e718ec4fb99335b5d6b7ed7) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '99c4fbb1e59c16268e9772922b917105') in 0.001578 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000031 seconds.
+  path: Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Spear.asset
+  artifactKey: Guid(686da81157919fb4882aca4d68335065) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Equipments/Crude/Crude_Spear.asset using Guid(686da81157919fb4882aca4d68335065) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'ec3e19392a53793fdebc853f26f544ff') in 0.0015298 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c6d9afcd7582684582f26da5202eee5, type: 3}
+  m_Name: Monk_InnerFlow
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
+  oathID: Monk_InnerFlow
+  oathName: Inner Flow
+  jobClass: 1
+  oathDescription: "\uD68C\uD53C \uC131\uACF5 \uC2DC MP +3% \uD68C\uBCF5.\nMP 70%
+    \uC774\uC0C1 \uC2DC \uC2A4\uD0AC \uB370\uBBF8\uC9C0 +10%.\nHP 10% \uC774\uD558
+    1\uD68C \uD55C\uC815 \uB2E4\uC74C \uD134 \uD68C\uD53C\uC728 +30%."
+  bindingStrength: 2
+  bindingDescription: "\uBC29\uC5B4\uAD6C \uC7A5\uCC29 \uC2DC \uD68C\uD53C\uC728
+    -15%, MP \uD68C\uBCF5\uB7C9 \uC808\uBC18 \uAC10\uC18C."

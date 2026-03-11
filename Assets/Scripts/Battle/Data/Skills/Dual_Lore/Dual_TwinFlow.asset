@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8298377b504b7674db2bc7ce47b23869, type: 3}
+  m_Name: Dual_TwinFlow
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.WeaponLoreSkillData
+  skillID: Dual_TwinFlow
+  skillName: "\uC30D\uAC80\uB958 (Twin Flow)"
+  weaponCategory: 4
+  tier: 1
+  type: 0
+  costType: 0
+  costValue: 0
+  effectDescription: "\uB4C0\uC5BC \uC7A5\uCC29 \uC911 \uAE30\uBCF8 \uACF5\uACA9\uC774
+    \uC790\uB3D9\uC73C\uB85C 2\uD0C0\uAC00 \uB41C\uB2E4 (\uAC01 \xD70.35, \uCD1D
+    \xD70.7).\n\uCCAB \uD0C0 \uD06C\uB9AC\uD2F0\uCEEC \uC2DC \uB450 \uBC88\uC9F8
+    \uD0C0\uACA9\uC758 \uD06C\uB9AC\uD2F0\uCEEC \uD655\uB960 +20%."
+  drawbackDescription: "\uBC29\uD328 \uC7A5\uCC29 \uBD88\uAC00.\n\uAE30\uBCF8 \uACF5\uACA9
+    \uCD1D\uD569\uC774 \uD55C\uC190 \uB2E8\uC77C\uBCF4\uB2E4 \uB0AE\uC544 \uBC29\uC5B4\uB825\uC774
+    \uB192\uC740 \uC801\uC5D0\uAC8C\uB294 \uBD88\uB9AC."

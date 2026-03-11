@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8298377b504b7674db2bc7ce47b23869, type: 3}
+  m_Name: Dagger_VitalStrike
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.WeaponLoreSkillData
+  skillID: Dagger_VitalStrike
+  skillName: "\uAE09\uC18C \uD30C\uACE0\uB4E4\uAE30 (Vital Strike)"
+  weaponCategory: 2
+  tier: 1
+  type: 0
+  costType: 0
+  costValue: 0
+  effectDescription: "\uD6C4\uC5F4\uC5D0\uC11C \uC804\uC5F4\uC744 \uACF5\uACA9\uD560
+    \uB54C \uB370\uBBF8\uC9C0 +10%.\n\uC801 HP\uAC00 75% \uC774\uC0C1\uC77C \uB54C
+    \uD06C\uB9AC\uD2F0\uCEEC \uD655\uB960 +15%."
+  drawbackDescription: "\uC870\uAC74 \uC790\uCCB4\uAC00 \uB300\uAC00\uC774\uBBC0\uB85C
+    \uCD94\uAC00 \uD328\uB110\uD2F0 \uC5C6\uC74C."

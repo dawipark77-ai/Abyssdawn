@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8298377b504b7674db2bc7ce47b23869, type: 3}
+  m_Name: Spear_Mastery
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.WeaponLoreSkillData
+  skillID: Spear_Mastery
+  skillName: "\uCC3D \uC219\uB828 (Spear Mastery)"
+  weaponCategory: 5
+  tier: 1
+  type: 0
+  costType: 0
+  costValue: 0
+  effectDescription: "\uACF5\uACA9\uB825 +3, \uBA85\uC911 +5%.\n\uD6C4\uC5F4\uC5D0\uC11C
+    \uC804\uC5F4\uC744 \uACF5\uACA9 \uAC00\uB2A5 (\uBA85\uC911 -10%).\n\uC804\uC5F4\uC5D0\uC11C
+    \uD6C4\uC5F4\uC744 \uACF5\uACA9 \uAC00\uB2A5 (\uBA85\uC911 -15%)."
+  drawbackDescription: "\uD3EC\uC9C0\uC158 \uC720\uC5F0\uC131 \uB300\uC2E0 \uBA85\uC911
+    \uD328\uB110\uD2F0\uB97C \uAC10\uC218\uD574\uC57C \uD55C\uB2E4."

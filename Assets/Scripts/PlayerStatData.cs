@@ -23,6 +23,25 @@ public class PlayerStatData : ScriptableObject
     [Tooltip("경험치 - 실시간으로 저장됨")]
     public int exp = 0;
 
+    [Header("레벨업/능력치 분배 시스템")]
+    [Tooltip("자유 분배에 사용할 남은 스탯 포인트")]
+    public int freeStatPoints = 0;
+
+    [Tooltip("플레이어가 자유 분배로 투자한 힘/공격 추가 수치")]
+    public int allocatedAttack = 0;
+
+    [Tooltip("플레이어가 자유 분배로 투자한 방어 추가 수치")]
+    public int allocatedDefense = 0;
+
+    [Tooltip("플레이어가 자유 분배로 투자한 마력 추가 수치")]
+    public int allocatedMagic = 0;
+
+    [Tooltip("플레이어가 자유 분배로 투자한 민첩 추가 수치")]
+    public int allocatedAgility = 0;
+
+    [Tooltip("플레이어가 자유 분배로 투자한 행운 추가 수치")]
+    public int allocatedLuck = 0;
+
     [Header("탈부착형 캐릭터 시스템")]
     [Tooltip("현재 장착된 직업 - 에디터에서 변경하면 배틀/맵 씬 모두 자동 반영됨")]
     public CharacterClass currentJob;

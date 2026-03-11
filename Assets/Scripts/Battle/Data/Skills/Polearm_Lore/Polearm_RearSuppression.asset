@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8298377b504b7674db2bc7ce47b23869, type: 3}
+  m_Name: Polearm_RearSuppression
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.WeaponLoreSkillData
+  skillID: Polearm_RearSuppression
+  skillName: "\uD6C4\uC5F4 \uC555\uC81C (Rear Suppression)"
+  weaponCategory: 6
+  tier: 1
+  type: 4
+  costType: 1
+  costValue: 4
+  effectDescription: "\uD6C4\uC5F4 \uC801 \uC911 \uB204\uAD70\uAC00 \uACF5\uACA9
+    \uD589\uB3D9\uC744 \uC120\uC5B8\uD588\uC744 \uB54C\uB9CC \uBC1C\uB3D9.\n\uD574\uB2F9
+    \uC801\uC758 \uD589\uB3D9\uC744 \uCDE8\uC18C\uD558\uACE0, \uD6C4\uC5F4 \uD6A1\uBCA0\uAE30
+    \xD70.6\uC73C\uB85C \uACF5\uACA9."
+  drawbackDescription: "\uD6C4\uC5F4 \uC801\uC758 \uD589\uB3D9\uC5D0\uB9CC \uBC18\uC751
+    \uAC00\uB2A5.\n\uC870\uAC74\uC744 \uB9CC\uC871\uD558\uC9C0 \uBABB\uD558\uBA74
+    \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uACE0 HP\uB3C4 \uC18C\uBAA8\uB418\uC9C0 \uC54A\uB294\uB2E4.\n\uC774
+    \uD134\uC5D0\uB294 \uCD94\uAC00 \uD589\uB3D9\uC744 \uD560 \uC218 \uC5C6\uB2E4."

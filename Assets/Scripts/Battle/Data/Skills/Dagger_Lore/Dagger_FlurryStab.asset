@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8298377b504b7674db2bc7ce47b23869, type: 3}
+  m_Name: Dagger_FlurryStab
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.WeaponLoreSkillData
+  skillID: Dagger_FlurryStab
+  skillName: "\uC5F0\uC18D \uCC0C\uB974\uAE30 (Flurry Stab)"
+  weaponCategory: 2
+  tier: 1
+  type: 1
+  costType: 1
+  costValue: 5
+  effectDescription: "3\uD0C0 \uC5F0\uC18D \uACF5\uACA9, \uAC01 \uD0C0\uACA9 \uBC30\uC728
+    \xD70.5.\n\uAC01 \uD0C0\uACA9\uC740 \uB3C5\uB9BD \uD06C\uB9AC\uD2F0\uCEEC \uD310\uC815.\n3\uD0C0
+    \uBAA8\uB450 \uBA85\uC911 \uC2DC \uB9C8\uC9C0\uB9C9 \uD0C0\uACA9\uC5D0 \xD71.5
+    \uCD94\uAC00 \uBC30\uC728 \uC801\uC6A9."
+  drawbackDescription: "\uC0AC\uC6A9 \uD6C4 1\uD134 \uB3D9\uC548 \uBC29\uC5B4\uB825
+    -10%."

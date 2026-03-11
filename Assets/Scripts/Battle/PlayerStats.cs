@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System;
 #if UNITY_EDITOR
@@ -30,6 +30,13 @@ public class PlayerStats : MonoBehaviour
     [Tooltip("PlayerStatData 에셋을 연결하세요. HP/MP가 실시간으로 이 에셋에 저장됩니다.")]
     public PlayerStatData statData;
 
+    // --- [레벨업/자유 분배용 내부 캐시] ---
+    private int _fallbackAllocatedAttack;
+    private int _fallbackAllocatedDefense;
+    private int _fallbackAllocatedMagic;
+    private int _fallbackAllocatedAgility;
+    private int _fallbackAllocatedLuck;
+
     // [FIX] 런타임 fallback 변수 (statData가 없을 때만 사용)
     private int _fallbackCurrentHP;
     private int _fallbackCurrentMP;
@@ -60,6 +67,13 @@ public class PlayerStats : MonoBehaviour
     [Tooltip("이 필드는 Awake()에서 statData.currentJob을 읽어 자동 설정됩니다. 에디터에서 직접 수정하지 마세요!")]
     public CharacterClass characterClass;
 
+    // 자유 분배로 증가한 기본 스탯(직업/장비/패시브 적용 전 순수 플레이어 투자치)
+    public int AllocatedAttack   => (statData != null) ? statData.allocatedAttack   : _fallbackAllocatedAttack;
+    public int AllocatedDefense  => (statData != null) ? statData.allocatedDefense  : _fallbackAllocatedDefense;
+    public int AllocatedMagic    => (statData != null) ? statData.allocatedMagic    : _fallbackAllocatedMagic;
+    public int AllocatedAgility  => (statData != null) ? statData.allocatedAgility  : _fallbackAllocatedAgility;
+    public int AllocatedLuck     => (statData != null) ? statData.allocatedLuck     : _fallbackAllocatedLuck;
+
     // --- [실시간 조립 계산식 - 직업 + 패시브 보너스] ---
     // MaxHP/MP = (기본값 × 직업 배율) + 패시브 보너스
     public int maxHP
@@ -89,7 +103,8 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            int baseValue = (characterClass != null) ? characterClass.GetFinalAttack(baseAttack) : baseAttack;
+            int pureBase = baseAttack + AllocatedAttack;
+            int baseValue = (characterClass != null) ? characterClass.GetFinalAttack(pureBase) : pureBase;
             return baseValue + GetPassiveAttackBonus() + GetEquipmentAttackBonus();
         }
     }
@@ -98,7 +113,8 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            int baseValue = (characterClass != null) ? characterClass.GetFinalDefense(baseDefense) : baseDefense;
+            int pureBase = baseDefense + AllocatedDefense;
+            int baseValue = (characterClass != null) ? characterClass.GetFinalDefense(pureBase) : pureBase;
             return baseValue + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus();
         }
     }
@@ -107,7 +123,8 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            int baseValue = (characterClass != null) ? characterClass.GetFinalMagic(baseMagic) : baseMagic;
+            int pureBase = baseMagic + AllocatedMagic;
+            int baseValue = (characterClass != null) ? characterClass.GetFinalMagic(pureBase) : pureBase;
             return baseValue + GetPassiveMagicBonus() + GetEquipmentMagicBonus();
         }
     }
@@ -116,7 +133,8 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            int baseValue = (characterClass != null) ? characterClass.GetFinalAgility(baseAgility) : baseAgility;
+            int pureBase = baseAgility + AllocatedAgility;
+            int baseValue = (characterClass != null) ? characterClass.GetFinalAgility(pureBase) : pureBase;
             return baseValue + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus();
         }
     }
@@ -125,7 +143,8 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            int baseValue = (characterClass != null) ? characterClass.GetFinalLuck(baseLuck) : baseLuck;
+            int pureBase = baseLuck + AllocatedLuck;
+            int baseValue = (characterClass != null) ? characterClass.GetFinalLuck(pureBase) : pureBase;
             return baseValue + GetPassiveLuckBonus() + GetEquipmentLuckBonus();
         }
     }
@@ -641,31 +660,31 @@ public class PlayerStats : MonoBehaviour
     public int GetAttackBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.attackBonus : 0;
-        return jobBonus + GetPassiveAttackBonus() + GetEquipmentAttackBonus();
+        return jobBonus + AllocatedAttack + GetPassiveAttackBonus() + GetEquipmentAttackBonus();
     }
 
     public int GetDefenseBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.defenseBonus : 0;
-        return jobBonus + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus();
+        return jobBonus + AllocatedDefense + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus();
     }
 
     public int GetMagicBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.magicBonus : 0;
-        return jobBonus + GetPassiveMagicBonus() + GetEquipmentMagicBonus();
+        return jobBonus + AllocatedMagic + GetPassiveMagicBonus() + GetEquipmentMagicBonus();
     }
 
     public int GetAgilityBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.agilityBonus : 0;
-        return jobBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus();
+        return jobBonus + AllocatedAgility + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus();
     }
 
     public int GetLuckBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.luckBonus : 0;
-        return jobBonus + GetPassiveLuckBonus() + GetEquipmentLuckBonus();
+        return jobBonus + AllocatedLuck + GetPassiveLuckBonus() + GetEquipmentLuckBonus();
     }
 
     [Header("5. 레벨 시스템")]
@@ -1137,9 +1156,236 @@ public class PlayerStats : MonoBehaviour
         level++;
         exp -= maxExp;
         maxExp = level * 100;
+        ApplyClassRandomGrowth();
+        ApplyMemoryRandomGrowth();
+        ApplyHpMpGrowth();
+        GrantFreeStatPoint();
         currentHP = maxHP;
         currentMP = maxMP;
+        OnStatusChanged?.Invoke();
     }
+
+    /// <summary>
+    /// 레벨업 시 직업 성장치에 따라 기본 스탯이 랜덤 상승하는 로직
+    /// </summary>
+    private void ApplyClassRandomGrowth()
+    {
+        if (characterClass == null) return;
+
+        // 성장 가중치 설정 (0 이하인 값은 자동으로 무시)
+        float atkW = Mathf.Max(0f, characterClass.attackGrowthPerLevel);
+        float defW = Mathf.Max(0f, characterClass.defenseGrowthPerLevel);
+        float magW = Mathf.Max(0f, characterClass.magicGrowthPerLevel);
+        float agiW = Mathf.Max(0f, characterClass.agilityGrowthPerLevel);
+        float lukW = Mathf.Max(0f, characterClass.luckGrowthPerLevel);
+
+        float total = atkW + defW + magW + agiW + lukW;
+        if (total <= 0f)
+        {
+            // 성장치가 모두 0이면 균등 분배
+            atkW = defW = magW = agiW = lukW = 1f;
+            total = 5f;
+        }
+
+        float pick = UnityEngine.Random.Range(0f, total);
+
+        if (pick < atkW)
+        {
+            AddAllocatedStat(StatType.Attack, 1);
+        }
+        else if (pick < atkW + defW)
+        {
+            AddAllocatedStat(StatType.Defense, 1);
+        }
+        else if (pick < atkW + defW + magW)
+        {
+            AddAllocatedStat(StatType.Magic, 1);
+        }
+        else if (pick < atkW + defW + magW + agiW)
+        {
+            AddAllocatedStat(StatType.Agility, 1);
+        }
+        else
+        {
+            AddAllocatedStat(StatType.Luck, 1);
+        }
+    }
+
+    /// <summary>
+    /// 레벨업 시 장착된 종의 기억(MemoryOfSpecies) 성장치에 따라
+    /// 추가로 기본 스탯이 랜덤 상승하는 로직
+    /// - 직업 성장과는 완전히 별도로 한 번 더 돌립니다.
+    /// </summary>
+    private void ApplyMemoryRandomGrowth()
+    {
+        if (statData == null) return;
+
+        var memories = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>();
+        if (statData.memorySlot1 != null) memories.Add(statData.memorySlot1);
+        if (statData.memorySlot2 != null) memories.Add(statData.memorySlot2);
+        if (statData.memorySlot3 != null) memories.Add(statData.memorySlot3);
+
+        if (memories.Count == 0) return;
+
+        float atkW = 0f;
+        float defW = 0f;
+        float magW = 0f;
+        float agiW = 0f;
+        float lukW = 0f;
+
+        foreach (var mem in memories)
+        {
+            if (mem == null) continue;
+            atkW += Mathf.Max(0f, mem.attackGrowthPerLevel);
+            defW += Mathf.Max(0f, mem.defenseGrowthPerLevel);
+            magW += Mathf.Max(0f, mem.magicGrowthPerLevel);
+            agiW += Mathf.Max(0f, mem.agilityGrowthPerLevel);
+            lukW += Mathf.Max(0f, mem.luckGrowthPerLevel);
+        }
+
+        float total = atkW + defW + magW + agiW + lukW;
+        if (total <= 0f)
+        {
+            // 성장치가 전부 0이면 종의 기억에서는 레벨업 보정 없음
+            return;
+        }
+
+        float pick = UnityEngine.Random.Range(0f, total);
+
+        if (pick < atkW)
+        {
+            AddAllocatedStat(StatType.Attack, 1);
+        }
+        else if (pick < atkW + defW)
+        {
+            AddAllocatedStat(StatType.Defense, 1);
+        }
+        else if (pick < atkW + defW + magW)
+        {
+            AddAllocatedStat(StatType.Magic, 1);
+        }
+        else if (pick < atkW + defW + magW + agiW)
+        {
+            AddAllocatedStat(StatType.Agility, 1);
+        }
+        else
+        {
+            AddAllocatedStat(StatType.Luck, 1);
+        }
+    }
+
+    /// <summary>
+    /// 레벨업 시 HP/MP는 항상 상승하도록 처리.
+    /// - 직업의 hpPerLevel/mpPerLevel을 기본으로 사용하고
+    /// - 장착된 종의 기억의 hpGrowthPerLevel/mpGrowthPerLevel을 추가로 더해
+    ///   약간의 랜덤 오차를 준 뒤 baseHP/baseMP를 증가시킵니다.
+    /// </summary>
+    private void ApplyHpMpGrowth()
+    {
+        int classHpGain = 0;
+        int classMpGain = 0;
+
+        if (characterClass != null)
+        {
+            classHpGain = Mathf.Max(0, characterClass.hpPerLevel);
+            classMpGain = Mathf.Max(0, characterClass.mpPerLevel);
+        }
+
+        float memoryHpGrowth = 0f;
+        float memoryMpGrowth = 0f;
+
+        if (statData != null)
+        {
+            var memories = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>();
+            if (statData.memorySlot1 != null) memories.Add(statData.memorySlot1);
+            if (statData.memorySlot2 != null) memories.Add(statData.memorySlot2);
+            if (statData.memorySlot3 != null) memories.Add(statData.memorySlot3);
+
+            foreach (var mem in memories)
+            {
+                if (mem == null) continue;
+                memoryHpGrowth += Mathf.Max(0f, mem.hpGrowthPerLevel);
+                memoryMpGrowth += Mathf.Max(0f, mem.mpGrowthPerLevel);
+            }
+        }
+
+        float expectedHpGain = classHpGain + memoryHpGrowth;
+        float expectedMpGain = classMpGain + memoryMpGrowth;
+
+        // 약간의 오차(-1 ~ +1)를 더하되, 최소 1 이상은 항상 오른다.
+        int finalHpGain = Mathf.Max(1, Mathf.RoundToInt(expectedHpGain + UnityEngine.Random.Range(-1f, 1f)));
+        int finalMpGain = Mathf.Max(1, Mathf.RoundToInt(expectedMpGain + UnityEngine.Random.Range(-1f, 1f)));
+
+        baseHP += finalHpGain;
+        baseMP += finalMpGain;
+    }
+
+    /// <summary>
+    /// 레벨업 시 플레이어가 자유롭게 분배할 수 있는 포인트 1점 지급
+    /// </summary>
+    private void GrantFreeStatPoint()
+    {
+        if (statData != null)
+        {
+            statData.freeStatPoints++;
+        }
+    }
+
+    /// <summary>
+    /// 외부(UI 등)에서 호출하는 자유 분배용 API
+    /// </summary>
+    public void AllocateFreePoint(StatType statType)
+    {
+        if (statData != null)
+        {
+            if (statData.freeStatPoints <= 0) return;
+            statData.freeStatPoints--;
+        }
+
+        AddAllocatedStat(statType, 1);
+        OnStatusChanged?.Invoke();
+    }
+
+    private void AddAllocatedStat(StatType statType, int amount)
+    {
+        if (amount == 0) return;
+
+        switch (statType)
+        {
+            case StatType.Attack:
+                if (statData != null) statData.allocatedAttack += amount;
+                else _fallbackAllocatedAttack += amount;
+                break;
+            case StatType.Defense:
+                if (statData != null) statData.allocatedDefense += amount;
+                else _fallbackAllocatedDefense += amount;
+                break;
+            case StatType.Magic:
+                if (statData != null) statData.allocatedMagic += amount;
+                else _fallbackAllocatedMagic += amount;
+                break;
+            case StatType.Agility:
+                if (statData != null) statData.allocatedAgility += amount;
+                else _fallbackAllocatedAgility += amount;
+                break;
+            case StatType.Luck:
+                if (statData != null) statData.allocatedLuck += amount;
+                else _fallbackAllocatedLuck += amount;
+                break;
+        }
+    }
+}
+
+/// <summary>
+/// 자유 분배 / 직업 성장에 사용하는 기본 스탯 타입
+/// </summary>
+public enum StatType
+{
+    Attack,
+    Defense,
+    Magic,
+    Agility,
+    Luck
 }
 
 

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549bd4ec46651140b01bd6f69a8af54, type: 3}
+  m_Name: Sister_T1_HealingLight
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
+  skillID: Sister_T1_HealingLight
+  skillName: Healing Light
+  jobClass: 4
+  tier: 1
+  type: 3
+  costType: 2
+  costValue: 6
+  effectDescription: "\uB2E8\uC77C \uB300\uC0C1 HP Max\uC758 15% \uD68C\uBCF5.\n\uB300\uC0C1\uC5D0\uAC8C
+    \uAC78\uB9B0 \uC800\uC8FC 1\uAC1C \uD574\uC81C."
+  drawbackDescription: "MP 6%\uB97C \uC18C\uBAA8\uD55C\uB2E4."

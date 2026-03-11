@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c6d9afcd7582684582f26da5202eee5, type: 3}
+  m_Name: Warrior_WarriorsWill
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
+  oathID: Warrior_WarriorsWill
+  oathName: Warrior's Will
+  jobClass: 0
+  oathDescription: "\uC804\uD22C \uC2DC\uC791 \uC2DC STR +5, DEF +5.\nHP \uC18C\uBAA8
+    \uC2A4\uD0AC \uC18C\uBAA8\uB7C9 -15%.\n\uC544\uAD70 \uC0AC\uB9DD \uC2DC \uACF5\uACA9\uB825
+    +4% \uB204\uC801 (\uCD5C\uB300 3\uD68C).\nHP 30% \uC774\uD558 \uC2DC \uD53C\uD574
+    +10%, \uBC1B\uB294 \uD53C\uD574 -5%."
+  bindingStrength: 0
+  bindingDescription: "HP \uD68C\uBCF5 \uC2DC \uC544\uAD70 \uC0AC\uB9DD \uB204\uC801
+    \uC2A4\uD0DD \uCD08\uAE30\uD654."

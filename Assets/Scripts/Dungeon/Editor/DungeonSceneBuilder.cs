@@ -19,7 +19,7 @@ public class DungeonSceneBuilder : EditorWindow
 
         // 1. Root Object
         GameObject dungeonRoot = new GameObject("DungeonSystem");
-        // DungeonGridMap mapInfo = dungeonRoot.AddComponent<DungeonGridMap>(); // Commented out: Missing script
+        MapManager mapInfo = dungeonRoot.AddComponent<MapManager>();
         DungeonGridPlayer playerInfo = dungeonRoot.AddComponent<DungeonGridPlayer>();
         dungeonRoot.AddComponent<DungeonInputBinder>(); // Auto-bind UI
         
@@ -30,16 +30,16 @@ public class DungeonSceneBuilder : EditorWindow
         canvasObj.AddComponent<CanvasScaler>();
         canvasObj.AddComponent<GraphicRaycaster>();
         
-        // 3. View Layers
-// Background
+        // 3. View Layers (UI elements created but not linked to view script)
+        // Background
         GameObject bgObj = CreateUIElement("BackgroundLayer", canvasObj.transform, Color.gray);
         RectTransform bgRect = bgObj.GetComponent<RectTransform>();
         bgRect.anchorMin = Vector2.zero;
         bgRect.anchorMax = Vector2.one; // Full stretch
         bgRect.offsetMin = Vector2.zero;
         bgRect.offsetMax = Vector2.zero;
-        
-// Mid Layer Group
+
+        // Mid Layer Group
         GameObject midGroup = CreateUIElement("MidLayer_Group", canvasObj.transform, new Color(0,0,0,0));
         SetFullStretch(midGroup.GetComponent<RectTransform>());
 
@@ -72,10 +72,10 @@ public class DungeonSceneBuilder : EditorWindow
         SetRect(nearRight, 0.7f, 1f, 0.1f, 0.9f); // Full height-ish
         AssignSprite(nearRight.GetComponent<Image>(), "Wall_Side_Right");
 
-        // Link references
+        // Link references - 초기 플레이어 그리드 위치
         playerInfo.gridPos = new Vector2Int(1, 1);
 
-Debug.Log("Dungeon Scene Setup Complete!");
+        Debug.Log("Dungeon Scene Setup Complete!");
     }
 
     private static GameObject CreateUIElement(string name, Transform parent, Color color)
@@ -119,6 +119,3 @@ Debug.Log("Dungeon Scene Setup Complete!");
     }
 }
 #endif
-
-
-

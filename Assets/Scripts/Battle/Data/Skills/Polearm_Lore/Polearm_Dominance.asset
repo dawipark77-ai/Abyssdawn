@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8298377b504b7674db2bc7ce47b23869, type: 3}
+  m_Name: Polearm_Dominance
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.WeaponLoreSkillData
+  skillID: Polearm_Dominance
+  skillName: "\uD3F4\uC554\uC758 \uC704\uC555 (Polearm Dominance)"
+  weaponCategory: 6
+  tier: 1
+  type: 0
+  costType: 0
+  costValue: 0
+  effectDescription: "2\uBA85 \uC774\uC0C1\uC744 \uB3D9\uC2DC\uC5D0 \uD0C0\uACA9\uD560
+    \uB54C\uB9C8\uB2E4 \uB2E4\uC74C \uB2E8\uC77C \uACF5\uACA9 +10% \uB204\uC801 (\uCD5C\uB300
+    3\uC911\uCCA9).\n\uB2E8\uC77C \uACF5\uACA9 \uC0AC\uC6A9 \uC2DC \uB204\uC801\uC774
+    \uC18C\uBAA8\uB41C\uB2E4."
+  drawbackDescription: "\uB2E8\uC77C \uACF5\uACA9\uB9CC \uC0AC\uC6A9\uD558\uBA74
+    \uC911\uCCA9\uC744 \uC313\uC744 \uC218 \uC5C6\uB2E4."

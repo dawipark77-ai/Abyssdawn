@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549bd4ec46651140b01bd6f69a8af54, type: 3}
+  m_Name: Thief_T1_Blindside
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
+  skillID: Thief_T1_Blindside
+  skillName: Blindside
+  jobClass: 3
+  tier: 1
+  type: 1
+  costType: 1
+  costValue: 5
+  effectDescription: "\uD6C4\uC5F4\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5.\n\uC804\uC5F4
+    \uB610\uB294 \uD6C4\uC5F4 \uC801 \uB2E8\uC77C \uB300\uC0C1 \uACF5\uACA9.\n\uAE30\uBCF8
+    \uBC30\uC728 \xD71.4, \uB300\uC0C1\uC774 \uC774\uBBF8 \uD589\uB3D9\uC744 \uB9C8\uCE5C
+    \uC801\uC774\uB77C\uBA74 \xD71.8\uB85C \uC0C1\uC2B9.\n\uBA85\uC911 \uC2DC \uB300\uC0C1
+    \uBC29\uC5B4\uB825 -10% (2\uD134)."
+  drawbackDescription: "\uC804\uC5F4\uC5D0\uC11C\uB294 \uC0AC\uC6A9\uD560 \uC218
+    \uC5C6\uACE0,\n\uC801\uC774 \uC544\uC9C1 \uD589\uB3D9 \uC804\uC774\uBA74 \uBC30\uC728\uC774
+    \uB0AE\uB2E4."

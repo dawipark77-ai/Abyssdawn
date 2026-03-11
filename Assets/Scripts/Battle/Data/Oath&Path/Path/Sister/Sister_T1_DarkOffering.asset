@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549bd4ec46651140b01bd6f69a8af54, type: 3}
+  m_Name: Sister_T1_DarkOffering
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
+  skillID: Sister_T1_DarkOffering
+  skillName: Dark Offering
+  jobClass: 4
+  tier: 1
+  type: 1
+  costType: 2
+  costValue: 7
+  effectDescription: "\uC790\uC2E0 HP 10%\uB97C \uD76C\uC0DD.\n\uB2E8\uC77C \uC801\uC5D0\uAC8C
+    \uB9C8\uB825 \uAE30\uBC18 \uB370\uBBF8\uC9C0 \xD72.0.\n\uCD94\uAC00\uB85C \uC800\uC8FC\uB97C
+    60% \uD655\uB960\uB85C \uBD80\uC5EC."
+  drawbackDescription: "HP \uD76C\uC0DD + MP 7% \uC18C\uBAA8.\n\uAC15\uD55C \uC77C\uACA9\uC774\uC9C0\uB9CC
+    \uBC29\uC5B4\uC801\uC73C\uB85C \uCDE8\uC57D\uD574\uC9C4\uB2E4."

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549bd4ec46651140b01bd6f69a8af54, type: 3}
+  m_Name: Sister_T1_Sanctuary
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
+  skillID: Sister_T1_Sanctuary
+  skillName: Sanctuary
+  jobClass: 4
+  tier: 1
+  type: 2
+  costType: 2
+  costValue: 8
+  effectDescription: "2\uD134 \uB3D9\uC548 \uD30C\uD2F0 \uC804\uCCB4 \uC800\uC8FC
+    \uC800\uD56D +25%, \uBC1B\uB294 \uD53C\uD574 -5%."
+  drawbackDescription: "MP 8%\uB97C \uC18C\uBAA8\uD55C\uB2E4."

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a549bd4ec46651140b01bd6f69a8af54, type: 3}
+  m_Name: Monk_T1_HarmonicStrike
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
+  skillID: Monk_T1_HarmonicStrike
+  skillName: Harmonic Strike
+  jobClass: 1
+  tier: 1
+  type: 1
+  costType: 2
+  costValue: 5
+  effectDescription: "\uACF5\uACA9\uB825 \xD7 1.2 \uBC30\uC728\uB85C \uB2E8\uC77C
+    \uC801 \uACF5\uACA9.\n\uBA85\uC911 \uC2DC \uC790\uC2E0 HP Max\uC758 3%\uB97C
+    \uD68C\uBCF5."
+  drawbackDescription: "MP 5%\uB97C \uC18C\uBAA8\uD55C\uB2E4."

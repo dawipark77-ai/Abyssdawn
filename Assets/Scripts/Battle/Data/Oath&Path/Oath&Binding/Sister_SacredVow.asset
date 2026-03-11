@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c6d9afcd7582684582f26da5202eee5, type: 3}
+  m_Name: Sister_SacredVow
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
+  oathID: Sister_SacredVow
+  oathName: Sacred Vow
+  jobClass: 4
+  oathDescription: "\uD790 \uC2A4\uD0AC \uD6A8\uACFC\uB7C9 +15%.\n\uC800\uC8FC \uD574\uC81C
+    \uC131\uACF5 \uC2DC \uB300\uC0C1 HP 5% \uCD94\uAC00 \uD68C\uBCF5.\n\uD30C\uD2F0\uC6D0
+    \uC800\uC8FC \uC0C1\uD0DC\uC77C \uB54C \uB9C8\uB825 +10%."
+  bindingStrength: 2
+  bindingDescription: "Dark Revelation\uACFC \uB3D9\uC2DC \uBCF4\uC720 \uBD88\uAC00."

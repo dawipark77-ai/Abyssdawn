@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8298377b504b7674db2bc7ce47b23869, type: 3}
+  m_Name: Bow_RapidShot
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.WeaponLoreSkillData
+  skillID: Bow_RapidShot
+  skillName: "\uC18D\uC0AC (Rapid Shot)"
+  weaponCategory: 7
+  tier: 1
+  type: 1
+  costType: 1
+  costValue: 3
+  effectDescription: "2\uD68C \uC5F0\uC18D \uBC1C\uC0AC, \uAC01 \uD0C0\uACA9 \uBC30\uC728
+    \xD70.7.\n\uAC01 \uD0C0\uACA9\uC740 \uB3C5\uB9BD \uD06C\uB9AC\uD2F0\uCEEC \uD310\uC815.\n2\uBC1C
+    \uBAA8\uB450 \uBA85\uC911 \uC2DC \uD06C\uB9AC\uD2F0\uCEEC \uB204\uC801 +1 \uCD94\uAC00."
+  drawbackDescription: "\uBC30\uC728\uC774 \uB0AE\uC544 \uBC29\uC5B4\uB825\uC774
+    \uB192\uC740 \uC801\uC5D0\uAC8C\uB294 \uBE44\uD6A8\uC728\uC801."
