@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ee3885eebfa6c649bb3c5fbb7ea0273, type: 3}
-  m_Name: Curse_Ignite
+  m_Name: Curse_Stun
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
-  effectType: 3
-  variantId: Ignite
-  icon: {fileID: 6712674675594986518, guid: bdbe687403c6e7643b238571b21e4a17, type: 3}
-  physicalDuration: 2
+  effectType: 0
+  variantId: Stun
+  icon: {fileID: 0}
+  physicalDuration: 3
   magicalDuration: 3
-  physicalDamagePerTurn: 0.03
-  physicalApplyChance: 0.25
-  magicalDamagePerTurn: 0.05
-  magicalApplyChance: 0.1
-  selfApplyChance: 0.05
+  physicalDamagePerTurn: 0
+  physicalApplyChance: 0.2
+  magicalDamagePerTurn: 0
+  magicalApplyChance: 0.2
+  selfApplyChance: 0

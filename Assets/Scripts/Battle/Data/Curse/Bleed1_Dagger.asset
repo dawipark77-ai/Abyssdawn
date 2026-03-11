@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ee3885eebfa6c649bb3c5fbb7ea0273, type: 3}
-  m_Name: Curse_Ignite
+  m_Name: Bleed1_Dagger
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
-  effectType: 3
-  variantId: Ignite
-  icon: {fileID: 6712674675594986518, guid: bdbe687403c6e7643b238571b21e4a17, type: 3}
+  effectType: 1
+  variantId: Bleed1_Dagger
+  icon: {fileID: -5534561783290297894, guid: 02e36432dc23f1f488d8e26fe3848e23, type: 3}
   physicalDuration: 2
-  magicalDuration: 3
-  physicalDamagePerTurn: 0.03
-  physicalApplyChance: 0.25
-  magicalDamagePerTurn: 0.05
-  magicalApplyChance: 0.1
-  selfApplyChance: 0.05
+  magicalDuration: 2
+  physicalDamagePerTurn: 0.015
+  physicalApplyChance: 0.35
+  magicalDamagePerTurn: 0.015
+  magicalApplyChance: 0.35
+  selfApplyChance: 0
