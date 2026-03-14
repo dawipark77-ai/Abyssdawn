@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
@@ -2274,6 +2274,23 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        // 적 상태이상(StatusEffectSO) DoT 처리
+        foreach (var enemy in activeEnemies)
+        {
+            if (enemy != null && enemy.activeStatusEffects.Count > 0 && enemy.currentHP > 0 && !enemy.IsDead())
+            {
+                int hpBefore = enemy.currentHP;
+                enemy.ProcessStatusEffectsEndOfTurn();
+                if (enemy.currentHP < hpBefore)
+                {
+                    int damage = hpBefore - enemy.currentHP;
+                    AddMessage($"{enemy.enemyName} takes {damage} damage from status effects!");
+                    enemy.UpdateStatusUI();
+                    anyCurseDamage = true;
+                }
+            }
+        }
+
         // 저주 데미지가 있었으면 UI 업데이트 및 딜레이
         if (anyCurseDamage)
         {
@@ -3276,25 +3293,218 @@ public class BattleManager : MonoBehaviour
         if (CheckEvasion(target.Agility, attacker.Agility))
         {
             AddMessage($"{target.enemyName} evaded {attacker.playerName}!");
-            }
-            else
-            {
+        }
+        else
+        {
             bool critical = CheckCritical(attacker.luck);
 
             // [DEBUG LOG] 데미지 계산 전 스탯 확인
             Debug.Log($"[BattleLog] Player Attack Stats - Base: {attacker.baseAttack}, Bonus: {attacker.GetAttackBonus()}, Final: {attacker.Attack}");
             Debug.Log($"[BattleLog] Enemy Defense: {target.defense}, Critical: {critical}");
 
-            int damage = CalculateDQDamage(attacker.Attack, target.defense, critical);
+            bool isDual = IsDualWielding(attacker);
+            int shownTotal = 0;
 
-            Debug.Log($"[BattleLog] Final Damage: {damage}");
+            if (isDual)
+            {
+                // ───────── 쌍수 기본 공격 ─────────
+                // 1) 한손 기준 깡뎀 합
+                int singleBaseDamage = CalculateDQDamage(attacker.Attack, target.defense, false);
+                singleBaseDamage = Mathf.Max(singleBaseDamage, 1);
 
-            target.TakeDamage(damage, critical);
-            AddMessage(critical ? $"Critical hit! {attacker.playerName} dealt {damage}!" : $"{attacker.playerName} attacked and dealt {damage} damage!");
+                // 2) 쌍수 방어 파괴 공식
+                // 타격당 방어 파괴 = 적 현재 방어력 × 계수 × 0.35~0.45
+                // 2타 합산: 1타 후 남은 방어력으로 2타 계산
+                float coeff = GetArmorBreakCoefficient(attacker);
+                float remainingDef = target.defense;
+
+                float f1 = UnityEngine.Random.Range(0.35f, 0.45f);
+                float f2 = UnityEngine.Random.Range(0.35f, 0.45f);
+
+                // 깡뎀 분배 (총합 × 0.35~0.45 두 번 = 0.7~0.9)
+                int baseHit1 = Mathf.Max(1, Mathf.FloorToInt(singleBaseDamage * f1));
+                int baseHit2 = Mathf.Max(1, Mathf.FloorToInt(singleBaseDamage * f2));
+
+                int armorHit1 = 0;
+                int armorHit2 = 0;
+
+                if (coeff > 0f && remainingDef > 0f)
+                {
+                    float armor1 = remainingDef * coeff * f1;
+                    remainingDef -= armor1;
+                    float armor2 = Mathf.Max(0f, remainingDef) * coeff * f2;
+
+                    armorHit1 = Mathf.RoundToInt(armor1);
+                    armorHit2 = Mathf.RoundToInt(armor2);
+                }
+
+                int hit1 = baseHit1 + armorHit1;
+                int hit2 = baseHit2 + armorHit2;
+
+                // 크리티컬이면 두 타 모두 동일 배율 적용
+                if (critical)
+                {
+                    hit1 = Mathf.Max(1, Mathf.FloorToInt(hit1 * 1.5f));
+                    hit2 = Mathf.Max(1, Mathf.FloorToInt(hit2 * 1.5f));
+                }
+
+                Debug.Log($"[BattleLog] Dual basic attack - base1:{baseHit1}, base2:{baseHit2}, armor1:{armorHit1}, armor2:{armorHit2}, f1:{f1:F2}, f2:{f2:F2}");
+
+                int applied1 = target.TakeDamage(hit1, critical);
+                int applied2 = 0;
+                if (!target.IsDead())
+                {
+                    applied2 = target.TakeDamage(hit2, critical);
+                }
+
+                shownTotal = applied1 + applied2;
+                AddMessage(critical
+                    ? $"Critical! {attacker.playerName} struck twice for {shownTotal} ({hit1} + {hit2})!"
+                    : $"{attacker.playerName} struck twice for {shownTotal} ({hit1} + {hit2}) damage!");
+            }
+            else
+            {
+                // 한손/방패: fn = 1.0, 깡뎀 + 방어 파괴 (추가딜)
+                int singleBase = CalculateDQDamage(attacker.Attack, target.defense, false);
+                singleBase = Mathf.Max(singleBase, 1);
+
+                float singleCoeff = GetArmorBreakCoefficient(attacker);
+                int singleArmor = 0;
+                if (singleCoeff > 0f && target.defense > 0)
+                {
+                    // fn = 1.0 (한손은 랜덤 배율 없음)
+                    singleArmor = Mathf.RoundToInt(target.defense * singleCoeff);
+                }
+
+                if (critical)
+                {
+                    singleBase  = Mathf.Max(1, Mathf.FloorToInt(singleBase  * 1.5f));
+                    singleArmor = Mathf.Max(0, Mathf.FloorToInt(singleArmor * 1.5f));
+                }
+
+                int singleTotal = singleBase + singleArmor;
+                Debug.Log($"[BattleLog] Single-wield attack - base:{singleBase}, armorBreak:{singleArmor}, total:{singleTotal}");
+
+                int applied1 = target.TakeDamage(singleBase, critical);
+                int applied2 = 0;
+                if (singleArmor > 0 && !target.IsDead())
+                {
+                    applied2 = target.TakeDamage(singleArmor, critical);
+                }
+
+                shownTotal = applied1 + applied2;
+                AddMessage(critical
+                    ? $"Critical! {attacker.playerName} dealt {shownTotal} ({singleBase} + {singleArmor})!"
+                    : $"{attacker.playerName} struck for {shownTotal} ({singleBase} + {singleArmor}) damage!");
+            }
+
+            // ───────── 무기 저주 부여 ─────────
+            if (!target.IsDead())
+                TryApplyWeaponCurse(attacker, target);
         }
 
         UpdateStatusUI();
         CheckBattleEnd();
+    }
+
+    /// <summary>
+    /// 장착 무기의 weaponCurse(StatusEffectSO)를 확인해 적에게 상태이상을 부여합니다.
+    /// 부여 확률은 SO 내부의 physicalApplyChance를 사용합니다.
+    /// 쌍수일 경우 양손 모두 독립적으로 확률 체크합니다.
+    /// </summary>
+    private void TryApplyWeaponCurse(PlayerStats attacker, EnemyStats target)
+    {
+        EquipmentManager em = attacker.GetComponent<EquipmentManager>();
+        if (em == null) return;
+
+        void CheckAndApply(EquipmentData weapon)
+        {
+            if (weapon == null || weapon.weaponCurse == null) return;
+            bool applied = target.ApplyStatusEffect(weapon.weaponCurse);
+            if (applied)
+            {
+                AddMessage($"{weapon.equipmentName} inflicted {weapon.weaponCurse.effectType} on {target.enemyName}!");
+                Debug.Log($"[WeaponCurse] {weapon.equipmentName} → {weapon.weaponCurse.effectType} applied to {target.enemyName}");
+            }
+        }
+
+        CheckAndApply(em.rightHand);
+        if (em.leftHand != em.rightHand)
+            CheckAndApply(em.leftHand);
+    }
+
+    /// <summary>
+    /// 현재 공격자가 한손 무기 2개를 듀얼로 장착 중인지 판별
+    /// </summary>
+    private bool IsDualWielding(PlayerStats attacker)
+    {
+        if (attacker == null) return false;
+        var eq = attacker.GetComponent<EquipmentManager>();
+        if (eq == null) return false;
+
+        var right = eq.rightHand;
+        var left = eq.leftHand;
+        if (right == null || left == null) return false;
+
+        // 둘 다 한손 무기이고, 양손 무기가 아니어야 함
+        if (right.equipmentType != AbyssdawnBattle.EquipmentType.Hand) return false;
+        if (left.equipmentType != AbyssdawnBattle.EquipmentType.Hand) return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// 현재 공격자가 사용하는 방어구 파괴 계수 합산
+    /// - 한손/방패: 오른손 무기 계수만 사용
+    /// - 쌍수: 양손 한손 무기의 계수를 합산
+    /// </summary>
+    private float GetArmorBreakCoefficient(PlayerStats attacker)
+    {
+        if (attacker == null) return 0f;
+        var eq = attacker.GetComponent<EquipmentManager>();
+        if (eq == null) return 0f;
+
+        float coeff = 0f;
+        bool isDual = IsDualWielding(attacker);
+
+        if (isDual)
+        {
+            if (eq.rightHand != null) coeff += eq.rightHand.armorBreakCoefficient;
+            if (eq.leftHand != null) coeff += eq.leftHand.armorBreakCoefficient;
+        }
+        else
+        {
+            if (eq.rightHand != null &&
+                (eq.rightHand.equipmentType == AbyssdawnBattle.EquipmentType.Hand ||
+                 eq.rightHand.equipmentType == AbyssdawnBattle.EquipmentType.TwoHanded))
+            {
+                coeff = eq.rightHand.armorBreakCoefficient;
+            }
+        }
+
+        return Mathf.Max(0f, coeff);
+    }
+
+    /// <summary>
+    /// 무기 SO의 방어구 파괴 계수로 계산한 방어 퍼뎀 (적 방어력의 X% 고정 피해).
+    /// 기본 공식(한손): 적 방어력 × armorBreakCoefficient.
+    /// </summary>
+    private int GetArmorBreakDamage(PlayerStats attacker, int targetDefense)
+    {
+        if (attacker == null || targetDefense <= 0) return 0;
+        var equipmentManager = attacker.GetComponent<EquipmentManager>();
+        if (equipmentManager == null || equipmentManager.rightHand == null) return 0;
+
+        var weapon = equipmentManager.rightHand;
+        if (weapon.equipmentType != EquipmentType.Hand && weapon.equipmentType != EquipmentType.TwoHanded)
+            return 0;
+
+        float coeff = weapon.armorBreakCoefficient;
+        if (coeff <= 0f) return 0;
+
+        float percent = attacker.Attack * coeff;
+        float raw = targetDefense * percent;
+        return Mathf.RoundToInt(raw);
     }
 
     private static bool IsSelfTargetEffect(EffectType type)
@@ -3484,6 +3694,16 @@ public class BattleManager : MonoBehaviour
         if (attacker == null || skill == null || target == null) yield break;
 
         int hits = skill.hitCount > 0 ? skill.hitCount : 1;
+        bool isDual = IsDualWielding(attacker);
+        if (isDual)
+        {
+            // 쌍수: 스킬 타수 ×2
+            hits *= 2;
+        }
+
+        // 방어구 파괴 누적 계산용 남은 방어력 (스킬 전체 동안만 사용하는 가상 값)
+        float remainingDefense = target.defense;
+        float armorCoeff = GetArmorBreakCoefficient(attacker);
         int totalDamage = 0;
         int successfulHits = 0;
         int evadedHits = 0;
@@ -3534,17 +3754,33 @@ public class BattleManager : MonoBehaviour
             // [DEBUG LOG] 스킬 데미지 계산 정보
             Debug.Log($"[BattleLog] Skill {skill.skillName} - Base Stat: {baseStat}, Multiplier: {multiplier:F2}, Critical: {critical}, Scale: {scaleMultiplier:F2}");
 
-            int damage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier);
+            int baseDamage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier);
+            baseDamage = Mathf.Max(1, baseDamage);
+
+            // Sharp Edge 등 공격 패시브로 인한 추가 보정 (깡뎀에만 적용)
+            baseDamage = ApplyOffensivePassiveBonuses(attacker, skill, target, baseDamage);
+
+            // --- 방어구 파괴 계산 (타수 일반화) ---
+            int armorBreakDamage = 0;
+            if (armorCoeff > 0f && remainingDefense > 0f && skill.damageType == DamageType.Physical)
+            {
+                float fn = isDual ? UnityEngine.Random.Range(0.35f, 0.45f) : 1f;
+                float rawArmor = remainingDefense * armorCoeff * fn;
+                remainingDefense = Mathf.Max(0f, remainingDefense - rawArmor);
+                armorBreakDamage = Mathf.RoundToInt(rawArmor);
+            }
+
+            int damage = baseDamage + armorBreakDamage;
+
+            // 크리티컬은 깡뎀 + 방어 파괴 합산에 배율 적용
             if (critical)
             {
                 damage = Mathf.FloorToInt(damage * 1.5f);
             }
+
             damage = Mathf.Max(1, damage);
 
-            // Sharp Edge 등 공격 패시브로 인한 추가 보정
-            damage = ApplyOffensivePassiveBonuses(attacker, skill, target, damage);
-
-            Debug.Log($"[BattleLog] Skill Final Damage: {damage}");
+            Debug.Log($"[BattleLog] Skill Final Damage (with armor break): base={baseDamage}, armorBreak={armorBreakDamage}, total={damage}");
 
             // 데미지 적용 (적이 흔들림) - 크리티컬 여부 전달
             target.TakeDamage(damage, critical);

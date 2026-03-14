@@ -23,6 +23,8 @@ public static class CrudeEquipmentSetupTool
         CreateCrudePolearm();
         CreateCrudeBow();
         CreateCrudeCrossbow();
+        CreateCrudeWand();
+        CreateCrudeStaff();
 
         CreateCrudeBuckler();
         CreateCrudeShield();
@@ -121,7 +123,9 @@ public static class CrudeEquipmentSetupTool
         e.armourCategory = ArmourCategory.None;
         e.armourType = ArmourType.None;
         e.attackBonus = 2;
-        e.description = "대충 갈아 만든 도끼. 공격 +2.";
+        e.armorBreakCoefficient = 0.02f;
+        e.weaponEffect = AssetDatabase.LoadAssetAtPath<SkillData>("Assets/Scripts/Battle/Data/EquipmentsSkills/ArmorBreak.asset");
+        e.description = "대충 갈아 만든 도끼. 공격 +2, 방어구 파괴.";
         EditorUtility.SetDirty(e);
     }
 
@@ -190,6 +194,36 @@ public static class CrudeEquipmentSetupTool
         e.armourType = ArmourType.None;
         e.attackBonus = 2;
         e.description = "조악한 쇠뇌. 공격 +2.";
+        EditorUtility.SetDirty(e);
+    }
+
+    private static void CreateCrudeWand()
+    {
+        var e = CreateOrLoad("Crude_Wand");
+        e.equipmentName = "조잡한 한손 완드";
+        e.equipmentType = EquipmentType.Hand;
+        e.isTwoHanded = false;
+        e.armourCategory = ArmourCategory.None;
+        e.armourType = ArmourType.None;
+        e.attackBonus = 0;
+        e.magicBonus = 1;
+        e.mpBonusPercent = 0.05f;
+        e.description = "대충 깎아 만든 마법봉. 마력 +1, 최대 MP +5%.";
+        EditorUtility.SetDirty(e);
+    }
+
+    private static void CreateCrudeStaff()
+    {
+        var e = CreateOrLoad("Crude_Staff");
+        e.equipmentName = "조잡한 양손 지팡이";
+        e.equipmentType = EquipmentType.TwoHanded;
+        e.isTwoHanded = true;
+        e.armourCategory = ArmourCategory.None;
+        e.armourType = ArmourType.None;
+        e.attackBonus = 0;
+        e.magicBonus = 2;
+        e.mpBonusPercent = 0.08f;
+        e.description = "불균형한 양손 지팡이. 마력 +2, 최대 MP +8%.";
         EditorUtility.SetDirty(e);
     }
 

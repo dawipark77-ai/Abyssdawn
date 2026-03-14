@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: Warfare_FlankManeuver
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Warfare_Deception_04
+  skillName: "\uCE21\uBA74\uC758 \uBE44\uC218"
+  skillIcon: {fileID: 0}
+  description: "\uD6C4\uC5F4\uC5D0\uC11C \uC0AC\uC6A9 \uC2DC \uC801 \uD6C4\uC5F4 \uD0C0\uACF3 \uD53C\uD574 +42%, \uC801 \uC9C4\uD615 \uBA85\uC911\uB960 -12% (2\uD238). \uC804\uC5F4\uC5D0\uC11C \uC0AC\uC6A9 \uBD88\uAC00. \uC0AC\uC6A9 \uD6C4 \uB2E4\uC74C \uD238 \uD589\uB3D9 \uBD88\uAC00. \uC801 \uD6C4\uC5F4 \uD0C0\uACF3 \uCC98\uB9AC \uC2DC \uCF5C\uD238 1\uD238 \uCD08\uAE30\uD654. \uC0AC\uC6A9 \uD6C4 \uC804\uC5F4 \uC774\uB3D9 \uC2DC \uD6A8\uACFC \uBB34\uD6A8 + \uCF5C\uD238 \uCD08\uAE30\uD654. (\uCF5C\uD238 3\uD238)"
+  usageType: 0
+  damageType: 1
+  scalingStat: 1
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 12
+    allowedTargetSlots: 12
+    specificSlots: []
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
+  selfCurseChance: 0
+  effects: []
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  prerequisiteSkills: []
+  requiredLorePoints: 1

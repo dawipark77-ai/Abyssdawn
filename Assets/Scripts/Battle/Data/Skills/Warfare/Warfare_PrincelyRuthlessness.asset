@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: Warfare_PrincelyRuthlessness
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Warfare_Formation_03
+  skillName: "\uAD70\uC8FC\uC758 \uB0AD\uD6A8\uD568"
+  skillIcon: {fileID: 0}
+  description: "\uB9C8\uD0A4\uC544\uBCA8\uB9AC \u300E\uAD70\uC8FC\uB860\u300F 18\uC7A5. \uC544\uAD6D \uC804\uCCB4\uB97C \uC704\uD55C \uC2E0\uB8B0\uC801 \uC9C4\uD589 \uC2A4\uD2B8\uB9C8. (\uC0AC\uC6A9 \uC124\uBA85 \uCD94\uAC00 \uC608\uC815) (\uCF5C\uD238 6\uD238)"
+  usageType: 0
+  damageType: 0
+  scalingStat: 0
+  targeting:
+    targetFaction: 1
+    allowedCasterSlots: 15
+    allowedTargetSlots: 15
+    specificSlots: []
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
+  selfCurseChance: 0
+  effects: []
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  prerequisiteSkills: []
+  requiredLorePoints: 1

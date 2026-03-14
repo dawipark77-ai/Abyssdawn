@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: Warfare_FormationShift
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Warfare_Formation_02
+  skillName: "\uD3EC\uC9C4 \uC7AC\uBC30\uCE58"
+  skillIcon: {fileID: 0}
+  description: "아군 전열·후열 포진 자유 변경. 변경 직후 1턴 방어력 +22%. 재배치 후 3턴간 모든 스킬 쿨타임 +1, MP 코스트 200%. 진중 타겟 아군 1체를 후열로 이동시켜 보호. 재배치 직후 턴, 사용자 행동 불가. 발동 조건: 파티 내 아군 1명 이상 HP 50% 이하일 때만 사용 가능. (쿨타임 6턴)"
+  usageType: 0
+  damageType: 0
+  scalingStat: 0
+  targeting:
+    targetFaction: 1
+    allowedCasterSlots: 15
+    allowedTargetSlots: 15
+    specificSlots: []
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
+  selfCurseChance: 0
+  effects: []
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  prerequisiteSkills: []
+  requiredLorePoints: 1

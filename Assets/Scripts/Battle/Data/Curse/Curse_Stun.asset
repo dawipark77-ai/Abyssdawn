@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
   effectType: 0
   variantId: Stun
-  icon: {fileID: 0}
+  icon: {fileID: -869068424340414907, guid: 8a78bfbc335e8aa42bbf9e2c53e42e65, type: 3}
   physicalDuration: 3
   magicalDuration: 3
   physicalDamagePerTurn: 0

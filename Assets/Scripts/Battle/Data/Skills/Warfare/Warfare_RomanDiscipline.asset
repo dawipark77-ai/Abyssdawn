@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: Warfare_RomanDiscipline
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Warfare_Formation_01
+  skillName: "\uB85C\uB9C8 \uAD70\uAE30\uC758 \uADDC\uC721"
+  skillIcon: {fileID: 0}
+  description: "\uC804\uC5F4 3\uBA85 \uC774\uC0C1 \uD3F4\uC131 \uC2DC \uC544\uAD6D
+    \uC804\uCCB4 \uBC29\uC5B4\uB825 +18%, \uC0C1\uD0DC\uC774\uC0C1 \uC801\uC624 +22%.
+    \uD6C4\uC5F4 \uB529\uB7EC \uAC00\uD558\uB294 \uD53C\uD574 -15%, \uC2A4\uD2B8\uB9C8
+    \uCF5C\uD238 +1\uD238. \uC544\uAD6D\uC774 \uC0C1\uD0DC\uC774\uC0C1\uC5D0 \uAC78\uB9C8\uB9C8\uB2E4
+    \uBC29\uC5B4\uB825 \uCD94\uAC00 +5% \uB294\uACC4 (\uCD5C\uB300 3\uC911\uCC99).
+    \uC804\uC5F4 \uC778\uC6B0 2\uBA85 \uC774\uD558\uB85C \uB0AE\uC744 \uB54C \uD6A8\uACFC
+    \uC804\uBD80 \uCD08\uAE30 \uD574\uC81C, \uC7AC\uBC1C\uB3D9 \uBD88\uAC00."
+  usageType: 1
+  damageType: 0
+  scalingStat: 0
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
+  selfCurseChance: 0
+  effects: []
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  prerequisiteSkills: []
+  requiredLorePoints: 1

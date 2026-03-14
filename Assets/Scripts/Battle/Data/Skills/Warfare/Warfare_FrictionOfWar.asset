@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: Warfare_FrictionOfWar
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Warfare_Deception_02
+  skillName: "\uB9C8\uCCB4\uC758 \uAD50\uD7B4"
+  skillIcon: {fileID: 0}
+  description: "\uC801 \uC2A4\uD2B8\uB9C8\uAC00 \uBE5B\uB098\uAC00\uB098 \uC2E4\uD328\uD560 \uB54C\uB9C8\uB2E4 \uC544\uAD6D \uC804\uCCB4 \uD53C\uD574 \uC801\uC624 +12% (\uCD5C\uB300 3\uC911\uCC99). \uC790\uC2E0\uC758 \uC2A4\uD2B8\uB9C8\uAC00 \uBE5B\uB098\uAC00\uB294 \uACBD\uC6B0 \uBC1B\uB294 \uD53C\uD574 +28% + \uCF5C\uD238 \uCD08\uAE30\uD654. \uC801\uC758 \uC5F0\uC18D \uD589\uB3D9 \uC2E4\uD328 \uC2DC \uC544\uAD6D \uC804\uCCB4 \uB2E4\uC74C \uD238 \uACF5\uACA9\uB825 +10% \uCD94\uAC00. \uC790\uC2E0\uC774 \uBA85\uC911\uB960 \uB514\uBC84\uD504 \uC0C1\uD0DC\uC778 \uB54C \uC774\uB355 \uD6A8\uACFC 50% \uAC10\uC18C."
+  usageType: 1
+  damageType: 0
+  scalingStat: 0
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: []
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfCurseData: {fileID: 0}
+  selfCurseChance: 0
+  effects: []
+  legacyCurseData: {fileID: 0}
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  prerequisiteSkills: []
+  requiredLorePoints: 1

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
   effectType: 1
   variantId: Bleed1_Dagger
-  icon: {fileID: -5534561783290297894, guid: 02e36432dc23f1f488d8e26fe3848e23, type: 3}
+  icon: {fileID: 7886678303301008143, guid: 890ca33d0d795014d938be67201f8823, type: 3}
   physicalDuration: 2
   magicalDuration: 2
   physicalDamagePerTurn: 0.015

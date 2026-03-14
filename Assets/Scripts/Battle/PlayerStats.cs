@@ -93,7 +93,7 @@ public class PlayerStats : MonoBehaviour
         {
             int baseValue = (characterClass != null) ? characterClass.GetFinalMaxMP(baseMP) : baseMP;
             int passiveBonus = GetPassiveMPBonus();
-            int equipmentBonus = GetEquipmentMPBonus();
+            int equipmentBonus = GetEquipmentMPBonus(baseValue + passiveBonus);
             return baseValue + passiveBonus + equipmentBonus;
         }
     }
@@ -504,21 +504,26 @@ public class PlayerStats : MonoBehaviour
 
     /// <summary>
     /// 장비로부터 MP 보정치를 가져옵니다.
+    /// baseForPercent: mpBonusPercent 계산의 기준이 되는 MP값 (기본 + 패시브). 0이면 퍼센트 계산 생략.
     /// </summary>
-    public int GetEquipmentMPBonus()
+    public int GetEquipmentMPBonus(int baseForPercent = 0)
     {
         EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
         if (equipmentManager == null) return 0;
 
         int total = 0;
+        float totalPercent = 0f;
         var equippedItems = equipmentManager.GetEquippedItems();
         foreach (var item in equippedItems)
         {
             if (item != null)
             {
                 total += item.mpBonus;
+                totalPercent += item.mpBonusPercent;
             }
         }
+        if (baseForPercent > 0 && totalPercent > 0f)
+            total += Mathf.RoundToInt(baseForPercent * totalPercent);
         return total;
     }
 

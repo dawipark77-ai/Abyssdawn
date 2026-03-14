@@ -16,6 +16,12 @@ MonoBehaviour:
   currentMP: 10
   level: 1
   exp: 0
+  freeStatPoints: 0
+  allocatedAttack: 0
+  allocatedDefense: 0
+  allocatedMagic: 0
+  allocatedAgility: 0
+  allocatedLuck: 0
   currentJob: {fileID: 11400000, guid: 0066eb8cc4bf76c44baa77b0df8897cd, type: 2}
   equippedSkills:
   - {fileID: 0}

@@ -1,9 +1,25 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using AbyssdawnBattle;
+
+/// <summary>
+/// 무기(물리) 상태이상 인스턴스 — StatusEffectSO 기반 추적용
+/// </summary>
+[System.Serializable]
+public class StatusEffectInstance
+{
+    public StatusEffectSO data;
+    public int remainingTurns;
+
+    public StatusEffectInstance(StatusEffectSO effectData)
+    {
+        data = effectData;
+        remainingTurns = effectData.physicalDuration;
+    }
+}
 
 public class EnemyStats : MonoBehaviour
 {
@@ -33,6 +49,10 @@ public class EnemyStats : MonoBehaviour
     [Header("Curse System (저주 시스템)")]
     [Tooltip("현재 걸린 저주 리스트 (런타임에서 자동 관리)")]
     public List<CurseInstance> activeCurses = new List<CurseInstance>();
+
+    [Header("Status Effect System (상태이상 시스템)")]
+    [Tooltip("무기 공격으로 부여된 상태이상 리스트 (런타임에서 자동 관리)")]
+    public List<StatusEffectInstance> activeStatusEffects = new List<StatusEffectInstance>();
 
     // Legacy compatibility (for old Ignite system)
     public bool isIgnited => HasCurse(CurseType.Ignite);
@@ -312,6 +332,80 @@ public class EnemyStats : MonoBehaviour
         Debug.Log($"[Curse] {enemyName}의 모든 저주 해제됨");
     }
 
+    // ─────────── StatusEffectSO 기반 상태이상 ───────────
+
+    /// <summary>
+    /// 무기 물리 공격으로 상태이상을 부여합니다.
+    /// physicalApplyChance 확률 체크 후 중복이면 지속 턴 갱신, 신규면 추가합니다.
+    /// </summary>
+    public bool ApplyStatusEffect(StatusEffectSO effect)
+    {
+        if (effect == null) return false;
+
+        if (UnityEngine.Random.value > effect.physicalApplyChance) return false;
+
+        StatusEffectInstance existing = activeStatusEffects.Find(e => e.data.effectType == effect.effectType);
+        if (existing != null)
+        {
+            existing.remainingTurns = Mathf.Max(existing.remainingTurns, effect.physicalDuration);
+            Debug.Log($"[StatusEffect] {enemyName}의 {effect.effectType} 지속 갱신: {existing.remainingTurns}턴");
+        }
+        else
+        {
+            activeStatusEffects.Add(new StatusEffectInstance(effect));
+            Debug.Log($"[StatusEffect] {enemyName}에게 {effect.effectType} 부여! ({effect.physicalDuration}턴)");
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 턴 종료 시 상태이상 DoT 처리 및 턴 감소
+    /// </summary>
+    public void ProcessStatusEffectsEndOfTurn()
+    {
+        if (activeStatusEffects.Count == 0 || currentHP <= 0 || isDead) return;
+
+        for (int i = activeStatusEffects.Count - 1; i >= 0; i--)
+        {
+            StatusEffectInstance se = activeStatusEffects[i];
+
+            if (se.data.physicalDamagePerTurn > 0f)
+            {
+                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn));
+                currentHP = Mathf.Max(0, currentHP - dotDamage);
+                Debug.Log($"[StatusEffect] {enemyName}이(가) {se.data.effectType}로 {dotDamage} DoT 피해. (남은 HP: {currentHP})");
+            }
+
+            se.remainingTurns--;
+            if (se.remainingTurns <= 0)
+            {
+                Debug.Log($"[StatusEffect] {enemyName}의 {se.data.effectType} 효과 종료");
+                activeStatusEffects.RemoveAt(i);
+            }
+        }
+
+        if (currentHP <= 0) HandleDeath();
+    }
+
+    /// <summary>
+    /// 특정 타입의 상태이상이 걸려있는지 확인
+    /// </summary>
+    public bool HasStatusEffect(StatusEffectType type)
+    {
+        return activeStatusEffects.Exists(e => e.data.effectType == type);
+    }
+
+    /// <summary>
+    /// 특정 타입의 상태이상 남은 턴 수 반환
+    /// </summary>
+    public int GetStatusEffectRemainingTurns(StatusEffectType type)
+    {
+        StatusEffectInstance se = activeStatusEffects.Find(e => e.data.effectType == type);
+        return se != null ? se.remainingTurns : 0;
+    }
+
+    // ─────────────────────────────────────────────────────
+
     /// <summary>
     /// 특정 타입의 저주가 걸려있는지 확인
     /// </summary>
@@ -447,8 +541,9 @@ public class EnemyStats : MonoBehaviour
     {
         isDead = true;
 
-        // 사망 시 모든 저주 제거
+        // 사망 시 모든 저주 및 상태이상 제거
         RemoveAllCurses();
+        activeStatusEffects.Clear();
         
         // 흔들림 중지 및 위치 복원
         if (shakeCoroutine != null)

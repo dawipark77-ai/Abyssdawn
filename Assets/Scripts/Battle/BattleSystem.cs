@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class BattleSystem : MonoBehaviour
 {
     public PlayerStats player;
     public EnemyStats enemy;
+
+    private EquipmentManager equipmentManager;
     public bool battleEnded = false;
 
     [Header("Item Settings")]
@@ -29,6 +31,32 @@ public class BattleSystem : MonoBehaviour
         return UnityEngine.Random.value < critChance;
     }
 
+    void Awake()
+    {
+        equipmentManager = player != null ? player.GetComponent<EquipmentManager>() : null;
+    }
+
+    // -------------------- 유틸: 방어구 파괴 데미지 계산 --------------------
+    private int CalculateArmorBreakDamage(int targetDefense)
+    {
+        if (equipmentManager == null || equipmentManager.rightHand == null)
+            return 0;
+
+        var weapon = equipmentManager.rightHand;
+        if (weapon.equipmentType != AbyssdawnBattle.EquipmentType.Hand &&
+            weapon.equipmentType != AbyssdawnBattle.EquipmentType.TwoHanded)
+            return 0;
+
+        float coeff = weapon.armorBreakCoefficient;
+        if (coeff <= 0f || targetDefense <= 0)
+            return 0;
+
+        // 방어 퍼뎀 = (플레이어 최종 공격력 × 계수) [%] * 대상 현재 방어력
+        float percent = player.Attack * coeff * 0.01f;
+        float raw = targetDefense * percent;
+        return Mathf.RoundToInt(raw);
+    }
+
     // -------------------- 플레이어 공격 --------------------
     public int PlayerAttack()
     {
@@ -40,18 +68,54 @@ public class BattleSystem : MonoBehaviour
             return 0;
         }
 
-        int damage = Mathf.Max(1, player.attack - enemy.defense);
+        int baseDamage = Mathf.Max(0, player.attack - enemy.defense);
+        int armorBreakDamage = CalculateArmorBreakDamage(enemy.defense);
 
-        if (CheckCritical(player.luck))
+        bool critical = CheckCritical(player.luck);
+        if (critical)
         {
-            damage = Mathf.RoundToInt(damage * 1.5f);
+            baseDamage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * 1.5f));
+            armorBreakDamage = Mathf.Max(0, Mathf.RoundToInt(armorBreakDamage * 1.5f));
             Debug.Log("Critical hit!");
         }
 
-        enemy.TakeDamage(damage);
+        baseDamage = Mathf.Max(baseDamage, 1);
+        armorBreakDamage = Mathf.Max(armorBreakDamage, 0);
+
+        enemy.TakeDamage(baseDamage);
+        if (armorBreakDamage > 0 && !enemy.IsDead())
+        {
+            enemy.TakeDamage(armorBreakDamage);
+        }
+
+        // 무기 저주 부여
+        if (!enemy.IsDead())
+            TryApplyWeaponCurse();
+
         if (enemy.currentHP <= 0) battleEnded = true;
 
-        return damage;
+        int totalDamage = baseDamage + armorBreakDamage;
+        return totalDamage;
+    }
+
+    /// <summary>
+    /// 장착 무기의 weaponCurse(StatusEffectSO)를 physicalApplyChance 확률로 적에게 부여합니다.
+    /// </summary>
+    private void TryApplyWeaponCurse()
+    {
+        if (equipmentManager == null) return;
+
+        void CheckAndApply(AbyssdawnBattle.EquipmentData weapon)
+        {
+            if (weapon == null || weapon.weaponCurse == null) return;
+            bool applied = enemy.ApplyStatusEffect(weapon.weaponCurse);
+            if (applied)
+                Debug.Log($"[WeaponCurse] {weapon.equipmentName} → {weapon.weaponCurse.effectType} applied");
+        }
+
+        CheckAndApply(equipmentManager.rightHand);
+        if (equipmentManager.leftHand != equipmentManager.rightHand)
+            CheckAndApply(equipmentManager.leftHand);
     }
 
     // -------------------- 적 공격 --------------------

@@ -77,8 +77,12 @@ namespace AbyssdawnBattle
         [Tooltip("최대 HP 보정치")]
         public int hpBonus = 0;
         
-        [Tooltip("최대 MP 보정치")]
+        [Tooltip("최대 MP 고정 보정치")]
         public int mpBonus = 0;
+        
+        [Tooltip("최대 MP 퍼센트 보정치 (0.05 = +5%). 기본 MP × 이 값만큼 최대 MP 증가.")]
+        [Range(0f, 1f)]
+        public float mpBonusPercent = 0f;
         
         [Tooltip("민첩 보정치")]
         public int agiBonus = 0;
@@ -91,6 +95,14 @@ namespace AbyssdawnBattle
         public float accuracyBonus = 0f;
 
         [Space(10)]
+        [Header("━━━━━━━━━━ 방어구 파괴 ━━━━━━━━━━")]
+        [Tooltip("이 무기가 방어력을 퍼센트로 깎아내는 계수입니다.\n" +
+                 "실제 방어 퍼뎀(%) = (공격력 × 이 계수) 입니다.\n" +
+                 "예: 공격력 20, 계수 0.02 → 방어의 40% 만큼 추가 고정 피해")]
+        [Range(0f, 0.1f)]
+        public float armorBreakCoefficient = 0f;
+
+        [Space(10)]
         [Header("━━━━━━━━━━ 특수 효과 ━━━━━━━━━━")]
         [Tooltip("장비 시 자동으로 사용 가능한 무기 효과 스킬")]
         public SkillData weaponEffect;
@@ -98,6 +110,13 @@ namespace AbyssdawnBattle
         [Space(5)]
         [Tooltip("장비 착용 시 배우거나 사용할 수 있는 스킬")]
         public SkillData skill;
+
+        [Space(10)]
+        [Header("━━━━━━━━━━ 무기 상태이상 효과 ━━━━━━━━━━")]
+        [Tooltip("이 무기로 공격 명중 시 적에게 부여하는 상태이상.\n" +
+                 "Curse 폴더의 StatusEffectSO를 연결하세요.\n" +
+                 "부여 확률은 SO 내부의 physicalApplyChance 값을 사용합니다.")]
+        public StatusEffectSO weaponCurse;
     }
 }
 
