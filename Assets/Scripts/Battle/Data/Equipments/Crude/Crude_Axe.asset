@@ -29,8 +29,9 @@ MonoBehaviour:
   agiBonus: 0
   luckBonus: 0
   accuracyBonus: 0
+  armorBreakData: {fileID: 11400000, guid: 8696928f6fafcab4397b4da087e706c6, type: 2}
   armorBreakCoefficient: 0.02
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
   weaponCurse: {fileID: 0}
-  weaponCurseChance: 0

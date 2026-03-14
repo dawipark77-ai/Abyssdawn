@@ -107,10 +107,14 @@ public class BattleSystem : MonoBehaviour
 
         void CheckAndApply(AbyssdawnBattle.EquipmentData weapon)
         {
-            if (weapon == null || weapon.weaponCurse == null) return;
-            bool applied = enemy.ApplyStatusEffect(weapon.weaponCurse);
-            if (applied)
-                Debug.Log($"[WeaponCurse] {weapon.equipmentName} → {weapon.weaponCurse.effectType} applied");
+            if (weapon == null || weapon.weaponCurses == null) return;
+            foreach (var curse in weapon.weaponCurses)
+            {
+                if (curse == null) continue;
+                bool applied = enemy.ApplyStatusEffect(curse);
+                if (applied)
+                    Debug.Log($"[WeaponCurse] {weapon.equipmentName} → {curse.effectType} applied");
+            }
         }
 
         CheckAndApply(equipmentManager.rightHand);

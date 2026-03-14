@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace AbyssdawnBattle
 {
@@ -96,11 +97,29 @@ namespace AbyssdawnBattle
 
         [Space(10)]
         [Header("━━━━━━━━━━ 방어구 파괴 ━━━━━━━━━━")]
-        [Tooltip("이 무기가 방어력을 퍼센트로 깎아내는 계수입니다.\n" +
-                 "실제 방어 퍼뎀(%) = (공격력 × 이 계수) 입니다.\n" +
-                 "예: 공격력 20, 계수 0.02 → 방어의 40% 만큼 추가 고정 피해")]
+        [Tooltip("방어구 파괴 데이터 SO를 연결하세요.\n" +
+                 "끼우면 자동으로 방어구 파괴 로직이 적용됩니다.\n" +
+                 "null이면 방어구 파괴 없음.")]
+        public ArmorBreakDataSO armorBreakData;
+
+        [Tooltip("[레거시] 직접 계수 입력 방식. armorBreakData SO가 없을 때만 사용됩니다.")]
         [Range(0f, 0.1f)]
         public float armorBreakCoefficient = 0f;
+
+        /// <summary>
+        /// 실제 방어구 파괴 계수 반환 (SO 우선, 없으면 레거시 float)
+        /// </summary>
+        public float GetArmorBreakCoefficient()
+        {
+            return armorBreakData != null ? armorBreakData.coefficient : armorBreakCoefficient;
+        }
+
+        [Space(10)]
+        [Header("━━━━━━━━━━ 방패 블록 ━━━━━━━━━━")]
+        [Tooltip("블록 데이터 SO를 연결하세요.\n" +
+                 "끼우면 자동으로 블록 로직이 적용됩니다.\n" +
+                 "null이면 블록 없음.")]
+        public BlockDataSO blockData;
 
         [Space(10)]
         [Header("━━━━━━━━━━ 특수 효과 ━━━━━━━━━━")]
@@ -113,10 +132,10 @@ namespace AbyssdawnBattle
 
         [Space(10)]
         [Header("━━━━━━━━━━ 무기 상태이상 효과 ━━━━━━━━━━")]
-        [Tooltip("이 무기로 공격 명중 시 적에게 부여하는 상태이상.\n" +
-                 "Curse 폴더의 StatusEffectSO를 연결하세요.\n" +
-                 "부여 확률은 SO 내부의 physicalApplyChance 값을 사용합니다.")]
-        public StatusEffectSO weaponCurse;
+        [Tooltip("이 무기로 공격 명중 시 적에게 부여하는 상태이상 목록.\n" +
+                 "Curse 폴더의 StatusEffectSO를 여러 개 추가할 수 있습니다.\n" +
+                 "부여 확률은 각 SO 내부의 physicalApplyChance 값을 사용합니다.")]
+        public List<StatusEffectSO> weaponCurses = new List<StatusEffectSO>();
     }
 }
 

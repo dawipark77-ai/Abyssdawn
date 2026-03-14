@@ -56,6 +56,40 @@ namespace AbyssdawnBattle
         [Tooltip("역효과 등, 시전자에게 상태이상이 걸릴 확률 (마법 전용)")]
         [Range(0f, 1f)]
         public float selfApplyChance = 0f;
+
+        // ─── 헬퍼 메서드 (ArmorBreakDataSO와 동일한 패턴) ───
+
+        /// <summary>
+        /// 물리(무기) 공격으로 상태이상이 부여되는지 확률 체크
+        /// </summary>
+        public bool RollPhysicalApply()
+        {
+            return UnityEngine.Random.value <= physicalApplyChance;
+        }
+
+        /// <summary>
+        /// 마법(스킬)으로 상태이상이 부여되는지 확률 체크
+        /// </summary>
+        public bool RollMagicalApply()
+        {
+            return UnityEngine.Random.value <= magicalApplyChance;
+        }
+
+        /// <summary>
+        /// 물리 기준 턴당 DoT 피해량 계산 (targetMaxHP 기준)
+        /// </summary>
+        public int CalculatePhysicalDot(int targetMaxHP)
+        {
+            return Mathf.Max(1, Mathf.FloorToInt(targetMaxHP * physicalDamagePerTurn));
+        }
+
+        /// <summary>
+        /// 마법 기준 턴당 DoT 피해량 계산 (targetMaxHP 기준)
+        /// </summary>
+        public int CalculateMagicalDot(int targetMaxHP)
+        {
+            return Mathf.Max(1, Mathf.FloorToInt(targetMaxHP * magicalDamagePerTurn));
+        }
     }
 }
 

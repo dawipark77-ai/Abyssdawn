@@ -2221,6 +2221,20 @@ public class BattleManager : MonoBehaviour
                     target.isDefending = false;
                 }
 
+                // 방패 블록 판정
+                if (TryBlock(target, out float blockReduction))
+                {
+                    damage = Mathf.Max(0, Mathf.FloorToInt(damage - blockReduction));
+                    AddMessage($"{target.playerName} blocked the attack! (DR {blockReduction:F0})");
+                    if (damage == 0)
+                    {
+                        AddMessage($"Fully blocked!");
+                        UpdateStatusUI();
+                        CheckBattleEnd();
+                        yield break;
+                    }
+                }
+
                 Debug.Log($"[BattleLog] Enemy Final Damage: {damage}");
 
                 target.TakeDamage(damage);
@@ -3419,18 +3433,47 @@ public class BattleManager : MonoBehaviour
 
         void CheckAndApply(EquipmentData weapon)
         {
-            if (weapon == null || weapon.weaponCurse == null) return;
-            bool applied = target.ApplyStatusEffect(weapon.weaponCurse);
-            if (applied)
+            if (weapon == null || weapon.weaponCurses == null) return;
+            foreach (var curse in weapon.weaponCurses)
             {
-                AddMessage($"{weapon.equipmentName} inflicted {weapon.weaponCurse.effectType} on {target.enemyName}!");
-                Debug.Log($"[WeaponCurse] {weapon.equipmentName} → {weapon.weaponCurse.effectType} applied to {target.enemyName}");
+                if (curse == null) continue;
+                bool applied = target.ApplyStatusEffect(curse);
+                if (applied)
+                {
+                    AddMessage($"{weapon.equipmentName} inflicted {curse.effectType} on {target.enemyName}!");
+                    Debug.Log($"[WeaponCurse] {weapon.equipmentName} → {curse.effectType} applied to {target.enemyName}");
+                }
             }
         }
 
         CheckAndApply(em.rightHand);
         if (em.leftHand != em.rightHand)
             CheckAndApply(em.leftHand);
+    }
+
+    /// <summary>
+    /// 방어자가 방패를 장착했고 블록 판정에 성공했는지 확인.
+    /// 성공 시 피해 감소량을 out으로 반환합니다.
+    /// </summary>
+    private bool TryBlock(PlayerStats defender, out float damageReduction)
+    {
+        damageReduction = 0f;
+        if (defender == null) return false;
+
+        var em = defender.GetComponent<EquipmentManager>();
+        if (em == null) return false;
+
+        // 왼손(방패 슬롯) 또는 오른손에서 blockData 확인
+        EquipmentData shield = em.leftHand ?? em.rightHand;
+        if (shield == null || shield.blockData == null) return false;
+
+        bool blocked = shield.blockData.RollBlock(defender.Defense);
+        if (blocked)
+        {
+            damageReduction = shield.blockData.GetDamageReduction(defender.Defense);
+            Debug.Log($"[Block] {defender.playerName} blocked! DR={damageReduction:F1} (chance={shield.blockData.GetBlockChance(defender.Defense)*100f:F1}%)");
+        }
+        return blocked;
     }
 
     /// <summary>
@@ -3469,8 +3512,8 @@ public class BattleManager : MonoBehaviour
 
         if (isDual)
         {
-            if (eq.rightHand != null) coeff += eq.rightHand.armorBreakCoefficient;
-            if (eq.leftHand != null) coeff += eq.leftHand.armorBreakCoefficient;
+            if (eq.rightHand != null) coeff += eq.rightHand.GetArmorBreakCoefficient();
+            if (eq.leftHand != null)  coeff += eq.leftHand.GetArmorBreakCoefficient();
         }
         else
         {
@@ -3478,7 +3521,7 @@ public class BattleManager : MonoBehaviour
                 (eq.rightHand.equipmentType == AbyssdawnBattle.EquipmentType.Hand ||
                  eq.rightHand.equipmentType == AbyssdawnBattle.EquipmentType.TwoHanded))
             {
-                coeff = eq.rightHand.armorBreakCoefficient;
+                coeff = eq.rightHand.GetArmorBreakCoefficient();
             }
         }
 

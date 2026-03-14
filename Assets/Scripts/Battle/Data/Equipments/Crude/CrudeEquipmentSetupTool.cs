@@ -123,8 +123,9 @@ public static class CrudeEquipmentSetupTool
         e.armourCategory = ArmourCategory.None;
         e.armourType = ArmourType.None;
         e.attackBonus = 2;
-        e.armorBreakCoefficient = 0.02f;
-        e.weaponEffect = AssetDatabase.LoadAssetAtPath<SkillData>("Assets/Scripts/Battle/Data/EquipmentsSkills/ArmorBreak.asset");
+        e.armorBreakData = AssetDatabase.LoadAssetAtPath<ArmorBreakDataSO>("Assets/Scripts/Battle/Data/EquipmentsSkills/ArmorBreak.asset");
+        e.armorBreakCoefficient = 0f; // armorBreakData SO로 대체
+        e.weaponEffect = null; // ArmorBreakDataSO로 통합, 별도 마커 불필요
         e.description = "대충 갈아 만든 도끼. 공격 +2, 방어구 파괴.";
         EditorUtility.SetDirty(e);
     }
@@ -238,8 +239,8 @@ public static class CrudeEquipmentSetupTool
         e.armourCategory = ArmourCategory.None;
         e.armourType = ArmourType.None;
         e.defenseBonus = 0;
-        // 블록/패링 수치는 별도 시스템에서 처리할 예정, 설명에만 기재
-        e.description = "얇은 버클러. 방어 +0, 블록 +3%, 패링 반격 +20%.";
+        e.blockData = AssetDatabase.LoadAssetAtPath<BlockDataSO>("Assets/Scripts/Battle/Data/CombatData/BlockData_Buckler.asset");
+        e.description = "얇은 버클러. 블록 +3% (방어력 반영), 패링 반격 +20%.";
         EditorUtility.SetDirty(e);
     }
 
@@ -252,7 +253,8 @@ public static class CrudeEquipmentSetupTool
         e.armourCategory = ArmourCategory.None;
         e.armourType = ArmourType.None;
         e.defenseBonus = 1;
-        e.description = "조잡한 목제 방패. 방어 +1, 블록 +5%.";
+        e.blockData = AssetDatabase.LoadAssetAtPath<BlockDataSO>("Assets/Scripts/Battle/Data/CombatData/BlockData_Shield.asset");
+        e.description = "조잡한 목제 방패. 방어 +1, 블록 +5% (방어력 반영).";
         EditorUtility.SetDirty(e);
     }
 
@@ -266,7 +268,8 @@ public static class CrudeEquipmentSetupTool
         e.armourType = ArmourType.None;
         e.defenseBonus = 2;
         e.agiBonus = -2;
-        e.description = "무겁고 두꺼운 대방패. 방어 +2, 블록 +8%, 민첩 -2.";
+        e.blockData = AssetDatabase.LoadAssetAtPath<BlockDataSO>("Assets/Scripts/Battle/Data/CombatData/BlockData_Greatshield.asset");
+        e.description = "무겁고 두꺼운 대방패. 방어 +2, 블록 +8% (방어력 반영), 민첩 -2.";
         EditorUtility.SetDirty(e);
     }
 }
