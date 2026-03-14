@@ -86,11 +86,11 @@ namespace AbyssdawnBattle.Editor
             skill.minMult = 1.8f;
             skill.maxMult = 2.3f;
             skill.hitCount = 1;
-            skill.selfCurseChance = 10f;
+            skill.selfStatusEffectChance = 10f;
             skill.effects.Add(new SkillEffect
             {
                 effectType = EffectType.Damage,
-                curseChance = 10f
+                statusEffectChance = 10f
             });
             skill.skillIcon = LoadSpriteByGUID("c43880bdb1e15444a8fe104ce0204f40");
 

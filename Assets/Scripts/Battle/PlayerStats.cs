@@ -6,24 +6,6 @@ using UnityEditor;
 #endif
 using AbyssdawnBattle;
 
-/// <summary>
-/// 활성화된 저주 인스턴스를 추적하는 클래스
-/// </summary>
-[System.Serializable]
-public class CurseInstance
-{
-    public CurseData curseData;
-    public int remainingTurns;
-    public GameObject vfxInstance; // 생성된 이펙트 오브젝트
-
-    public CurseInstance(CurseData data)
-    {
-        curseData = data;
-        remainingTurns = data.duration;
-        vfxInstance = null;
-    }
-}
-
 public class PlayerStats : MonoBehaviour
 {
     [Header("1. 저장 금고 (에셋 파일 연결)")]
@@ -700,13 +682,13 @@ public class PlayerStats : MonoBehaviour
     public float defenceReduction = 0.4f;
     public float defenseBuffAmount = 0f;
 
-    [Header("7. Curse System (저주 시스템)")]
-    [Tooltip("현재 걸린 저주 리스트 (런타임에서 자동 관리)")]
-    public List<CurseInstance> activeCurses = new List<CurseInstance>();
+    [Header("7. Status Effect System (상태이상 시스템)")]
+    [Tooltip("현재 걸린 상태이상 리스트 (런타임에서 자동 관리)")]
+    public List<StatusEffectInstance> activeStatusEffects = new List<StatusEffectInstance>();
 
-    // Legacy compatibility (for old Ignite system)
-    public bool isIgnited => HasCurse(CurseType.Ignite);
-    public int igniteTurnsRemaining => GetCurseRemainingTurns(CurseType.Ignite);
+    // Legacy compatibility
+    public bool isIgnited => HasStatusEffect(StatusEffectType.Ignite);
+    public int igniteTurnsRemaining => GetStatusEffectRemainingTurns(StatusEffectType.Ignite);
 
     void Awake()
     {
@@ -933,222 +915,142 @@ public class PlayerStats : MonoBehaviour
     public void UseMP(int amount) { currentMP = Mathf.Clamp(currentMP - amount, 0, maxMP); }
     void Die() { Debug.Log($"{playerName} 사망"); }
     
-    // --- [Curse System Methods] ---
+    // --- [Status Effect System Methods] ---
 
     /// <summary>
-    /// 저주를 적용합니다
+    /// 상태이상을 적용합니다. Luck 기반 저항 확률 체크 포함.
+    /// SO 기본 physicalDuration을 사용합니다.
     /// </summary>
-    public void ApplyCurse(CurseData curseData)
-    {
-        if (curseData == null)
-        {
-            Debug.LogWarning($"[PlayerStats] {playerName}에게 null Curse를 적용하려 했습니다.");
-            return;
-        }
+    public bool ApplyStatusEffect(StatusEffectSO effect)
+        => ApplyStatusEffect(effect, effect != null ? effect.physicalDuration : 0);
 
-        // Luck 기반 저주 회피 (미세한 확률 보너스)
+    /// <summary>
+    /// 상태이상을 적용합니다. 저장된 상태 복원 등 커스텀 턴 수가 필요할 때 사용합니다.
+    /// </summary>
+    public bool ApplyStatusEffect(StatusEffectSO effect, int customDuration)
+    {
+        if (effect == null || customDuration <= 0) return false;
+
+        // Luck 기반 저항 (최대 25%)
         float resistChance = Mathf.Clamp(Luck * 0.2f, 0f, 25f);
         if (resistChance > 0f && UnityEngine.Random.Range(0f, 100f) < resistChance)
         {
-            Debug.Log($"[Curse] {playerName}가 Luck 보너스로 저주를 회피했습니다. (저항 확률: {resistChance:0.0}%)");
-            return;
+            Debug.Log($"[StatusEffect] {playerName}가 Luck 보너스로 {effect.effectType}을 저항했습니다.");
+            return false;
         }
 
-        // 이미 같은 타입의 저주가 걸려있는지 확인
-        CurseInstance existingCurse = activeCurses.Find(c => c.curseData.type == curseData.type);
-
-        if (existingCurse != null)
+        StatusEffectInstance existing = activeStatusEffects.Find(e => e.data.effectType == effect.effectType);
+        if (existing != null)
         {
-            // 기존 저주의 duration을 갱신 (더 긴 것으로)
-            existingCurse.remainingTurns = Mathf.Max(existingCurse.remainingTurns, curseData.duration);
-            Debug.Log($"[Curse] {playerName}의 {curseData.curseName} 지속시간 갱신: {existingCurse.remainingTurns}턴");
+            existing.remainingTurns = Mathf.Max(existing.remainingTurns, customDuration);
+            Debug.Log($"[StatusEffect] {playerName}의 {effect.effectType} 지속 갱신: {existing.remainingTurns}턴");
         }
         else
         {
-            // 새로운 저주 추가
-            CurseInstance newCurse = new CurseInstance(curseData);
-            activeCurses.Add(newCurse);
-            Debug.Log($"[Curse] {playerName}에게 {curseData.curseName} 적용! (지속: {curseData.duration}턴)");
-
-            // VFX 생성 (선택사항)
-            if (curseData.curseVFX != null)
-            {
-                newCurse.vfxInstance = Instantiate(curseData.curseVFX, transform);
-            }
+            var instance = new StatusEffectInstance(effect);
+            instance.remainingTurns = customDuration;
+            activeStatusEffects.Add(instance);
+            Debug.Log($"[StatusEffect] {playerName}에게 {effect.effectType} 적용! ({customDuration}턴)");
         }
 
-        // 이벤트 발동
         OnStatusChanged?.Invoke();
+        return true;
     }
 
     /// <summary>
-    /// 특정 타입의 저주를 제거합니다
+    /// 특정 타입의 상태이상을 제거합니다.
     /// </summary>
-    public void RemoveCurse(CurseType type)
+    public void RemoveStatusEffect(StatusEffectType type)
     {
-        CurseInstance curse = activeCurses.Find(c => c.curseData.type == type);
-        if (curse != null)
+        StatusEffectInstance se = activeStatusEffects.Find(e => e.data.effectType == type);
+        if (se != null)
         {
-            // VFX 제거
-            if (curse.vfxInstance != null)
-            {
-                Destroy(curse.vfxInstance);
-            }
-
-            activeCurses.Remove(curse);
-            Debug.Log($"[Curse] {playerName}의 {curse.curseData.curseName} 해제됨");
+            activeStatusEffects.Remove(se);
+            Debug.Log($"[StatusEffect] {playerName}의 {type} 해제됨");
             OnStatusChanged?.Invoke();
         }
     }
 
     /// <summary>
-    /// 모든 저주를 제거합니다
+    /// 모든 상태이상을 제거합니다.
     /// </summary>
-    public void RemoveAllCurses()
+    public void RemoveAllStatusEffects()
     {
-        foreach (var curse in activeCurses)
-        {
-            if (curse.vfxInstance != null)
-            {
-                Destroy(curse.vfxInstance);
-            }
-        }
-        activeCurses.Clear();
-        Debug.Log($"[Curse] {playerName}의 모든 저주 해제됨");
+        activeStatusEffects.Clear();
+        Debug.Log($"[StatusEffect] {playerName}의 모든 상태이상 해제됨");
         OnStatusChanged?.Invoke();
     }
 
     /// <summary>
-    /// 특정 타입의 저주가 걸려있는지 확인
+    /// 특정 타입의 상태이상이 걸려있는지 확인
     /// </summary>
-    public bool HasCurse(CurseType type)
+    public bool HasStatusEffect(StatusEffectType type)
+        => activeStatusEffects.Exists(e => e.data.effectType == type);
+
+    /// <summary>
+    /// 특정 타입의 상태이상 남은 턴 수 반환
+    /// </summary>
+    public int GetStatusEffectRemainingTurns(StatusEffectType type)
     {
-        return activeCurses.Exists(c => c.curseData.type == type);
+        StatusEffectInstance se = activeStatusEffects.Find(e => e.data.effectType == type);
+        return se != null ? se.remainingTurns : 0;
     }
 
     /// <summary>
-    /// 특정 타입의 저주 남은 턴 수 반환
+    /// 턴 종료 시 호출: 상태이상 DoT 처리 및 턴 감소
     /// </summary>
-    public int GetCurseRemainingTurns(CurseType type)
+    public void ProcessStatusEffectsEndOfTurn()
     {
-        CurseInstance curse = activeCurses.Find(c => c.curseData.type == type);
-        return curse != null ? curse.remainingTurns : 0;
-    }
+        if (activeStatusEffects.Count == 0 || currentHP <= 0) return;
 
-    /// <summary>
-    /// 턴 종료 시 호출: 모든 저주의 DoT 데미지를 적용하고 duration 감소
-    /// </summary>
-    public void ProcessCursesEndOfTurn()
-    {
-        if (activeCurses.Count == 0 || currentHP <= 0) return;
+        Debug.Log($"[StatusEffect] {playerName}의 상태이상 처리 시작 (수: {activeStatusEffects.Count})");
 
-        Debug.Log($"[Curse] {playerName}의 저주 처리 시작 (저주 수: {activeCurses.Count})");
-
-        // 역순으로 순회하여 안전하게 제거
-        for (int i = activeCurses.Count - 1; i >= 0; i--)
+        for (int i = activeStatusEffects.Count - 1; i >= 0; i--)
         {
-            CurseInstance curse = activeCurses[i];
+            StatusEffectInstance se = activeStatusEffects[i];
 
-            // DoT 데미지 적용
-            if (curse.curseData.dotDamagePercent > 0)
+            if (se.data.physicalDamagePerTurn > 0f)
             {
-                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * (curse.curseData.dotDamagePercent / 100f)));
+                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn));
                 currentHP = Mathf.Max(0, currentHP - dotDamage);
-                Debug.Log($"[Curse] {playerName}이(가) {curse.curseData.curseName}로 {dotDamage} 데미지를 입었습니다. (남은 HP: {currentHP})");
+                Debug.Log($"[StatusEffect] {playerName}이(가) {se.data.effectType}로 {dotDamage} DoT 피해. (남은 HP: {currentHP})");
             }
 
-            // Duration 감소
-            curse.remainingTurns--;
-
-            // Duration이 0이 되면 저주 제거
-            if (curse.remainingTurns <= 0)
+            se.remainingTurns--;
+            if (se.remainingTurns <= 0)
             {
-                Debug.Log($"[Curse] {curse.curseData.curseName} 효과 종료");
-                if (curse.vfxInstance != null)
-                {
-                    Destroy(curse.vfxInstance);
-                }
-                activeCurses.RemoveAt(i);
+                Debug.Log($"[StatusEffect] {playerName}의 {se.data.effectType} 효과 종료");
+                activeStatusEffects.RemoveAt(i);
             }
         }
 
-        // 사망 체크
-        if (currentHP <= 0)
-        {
-            Die();
-        }
-
+        if (currentHP <= 0) Die();
         OnStatusChanged?.Invoke();
     }
 
-    /// <summary>
-    /// 저주로 인한 스탯 디버프를 계산 (총합)
-    /// </summary>
-    public float GetCurseAttackDebuff()
+    /// <summary>공격력 감소 디버프 합산</summary>
+    public float GetStatusEffectAttackDebuff()
     {
         float total = 0f;
-        foreach (var curse in activeCurses)
-        {
-            total += curse.curseData.attackDebuff;
-        }
-        return Mathf.Min(total, 100f); // 최대 100%
-    }
-
-    public float GetCurseDefenseDebuff()
-    {
-        float total = 0f;
-        foreach (var curse in activeCurses)
-        {
-            total += curse.curseData.defenseDebuff;
-        }
+        foreach (var se in activeStatusEffects)
+            total += se.data.attackDebuff;
         return Mathf.Min(total, 100f);
     }
 
-    /// <summary>
-    /// 행동 불가 상태인지 확인 (Stun 등)
-    /// </summary>
-    public bool IsStunned()
+    /// <summary>방어력 감소 디버프 합산</summary>
+    public float GetStatusEffectDefenseDebuff()
     {
-        return activeCurses.Exists(c => c.curseData.preventAction);
+        float total = 0f;
+        foreach (var se in activeStatusEffects)
+            total += se.data.defenseDebuff;
+        return Mathf.Min(total, 100f);
     }
 
-    /// <summary>
-    /// 스킬 사용 불가 상태인지 확인 (Silence 등)
-    /// </summary>
-    public bool IsSilenced()
-    {
-        return activeCurses.Exists(c => c.curseData.preventSkillUse);
-    }
+    /// <summary>행동 불가 상태 확인 (Stun)</summary>
+    public bool IsStunned() => activeStatusEffects.Exists(se => se.data.preventAction);
 
-    // Legacy compatibility method
-    [System.Obsolete("Use ApplyCurse with CurseData instead")]
-    public void SetIgnited(bool ignited, int turns = 5)
-    {
-        if (ignited)
-        {
-            // Ignite curse를 찾아서 적용 (없으면 경고)
-            CurseData igniteCurse = Resources.Load<CurseData>("Curses/Ignite");
-            if (igniteCurse != null)
-            {
-                ApplyCurse(igniteCurse);
-            }
-            else
-            {
-                Debug.LogWarning("[PlayerStats] Ignite CurseData를 찾을 수 없습니다. Resources/Curses/Ignite.asset을 생성하세요.");
-            }
-        }
-        else
-        {
-            RemoveCurse(CurseType.Ignite);
-        }
-    }
-
-    // Legacy compatibility method
-    [System.Obsolete("Use ProcessCursesEndOfTurn instead")]
-    public void ProcessIgniteDamage()
-    {
-        ProcessCursesEndOfTurn();
-    }
+    /// <summary>스킬 사용 불가 상태 확인 (Silence)</summary>
+    public bool IsSilenced() => activeStatusEffects.Exists(se => se.data.preventSkillUse);
 
     public void AddExp(int amount)
     {

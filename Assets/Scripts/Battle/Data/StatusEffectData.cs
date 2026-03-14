@@ -10,7 +10,10 @@ namespace AbyssdawnBattle
         Stun,
         Bleed,
         Poison,
-        Ignite
+        Ignite,
+        Weakness,   // 약화 (공격력/방어력 감소)
+        Slow,       // 둔화 (임시 수치 0 — 추후 민첩 감소)
+        Silence     // 침묵 (스킬 사용 불가)
     }
 
     /// <summary>
@@ -56,6 +59,25 @@ namespace AbyssdawnBattle
         [Tooltip("역효과 등, 시전자에게 상태이상이 걸릴 확률 (마법 전용)")]
         [Range(0f, 1f)]
         public float selfApplyChance = 0f;
+
+        [Header("디버프 효과 (선택사항)")]
+        [Tooltip("공격력 감소 비율 % (0이면 무효)")]
+        [Range(0f, 100f)]
+        public float attackDebuff = 0f;
+
+        [Tooltip("방어력 감소 비율 % (0이면 무효)")]
+        [Range(0f, 100f)]
+        public float defenseDebuff = 0f;
+
+        [Tooltip("행동 불가 여부 (Stun)")]
+        public bool preventAction = false;
+
+        [Tooltip("스킬 사용 불가 여부 (Silence)")]
+        public bool preventSkillUse = false;
+
+        [Header("시각 효과")]
+        [Tooltip("상태이상 이펙트 프리팹")]
+        public GameObject statusVFX;
 
         // ─── 헬퍼 메서드 (ArmorBreakDataSO와 동일한 패턴) ───
 

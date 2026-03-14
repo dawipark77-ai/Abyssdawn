@@ -115,6 +115,25 @@ public class GameManager : MonoBehaviour
         Debug.Log("[GameManager] All party data cleared!");
     }
 
+    /// <summary>
+    /// DungeonPersistentData에 저장된 Ignite 턴 수를 기반으로
+    /// 플레이어에게 Ignite 상태이상을 복원합니다.
+    /// DungeonPersistentData.LoadPlayerState 직후에 호출하세요.
+    /// </summary>
+    public void RestoreIgniteFromDungeon(PlayerStats player)
+    {
+        if (player == null) return;
+        int turns = DungeonPersistentData.heroIgniteTurns;
+        if (turns <= 0) return;
+
+        var ignite = Resources.Load<AbyssdawnBattle.StatusEffectSO>("StatusEffects/Curse_Ignite");
+        if (ignite != null)
+        {
+            player.ApplyStatusEffect(ignite, turns);
+            Debug.Log($"[GameManager] 던전 상태 복원 — {player.playerName}에게 Ignite {turns}턴 적용");
+        }
+    }
+
     void OnValidate()
     {
         if (Application.isPlaying) SyncDebugList();
@@ -176,7 +195,12 @@ public class GameManager : MonoBehaviour
             player.maxExp = data.maxExp;
             player.currentHP = Mathf.Clamp(data.currentHP, 0, player.maxHP);
             player.currentMP = Mathf.Clamp(data.currentMP, 0, player.maxMP);
-            player.SetIgnited(data.isIgnited, data.igniteTurnsRemaining);
+            if (data.isIgnited && data.igniteTurnsRemaining > 0)
+            {
+                var ignite = Resources.Load<AbyssdawnBattle.StatusEffectSO>("StatusEffects/Curse_Ignite");
+                if (ignite != null)
+                    player.ApplyStatusEffect(ignite, data.igniteTurnsRemaining);
+            }
 
             Debug.Log("[SERIALIZATION_FIX] Loaded: " + player.playerName + " HP: " + player.currentHP + "/" + player.maxHP);
         }

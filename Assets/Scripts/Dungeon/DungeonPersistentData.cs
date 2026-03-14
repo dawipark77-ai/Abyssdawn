@@ -54,10 +54,16 @@ public static class DungeonPersistentData
         if (player == null || !hasPlayerStats) return;
 
         player.currentHP = heroHP;
-        // maxHP and maxMP are now read-only properties calculated from CharacterClass SO
         player.currentMP = heroMP;
-        player.SetIgnited(heroIgnited, heroIgniteTurns);
+        // 상태이상 복원(Ignite 등)은 SO 참조가 필요하므로 GameManager가 담당합니다.
+        // 호출 후 GameManager.Instance.RestoreIgniteFromDungeon(player) 를 함께 호출하세요.
 
-        Debug.Log($"[DungeonPersistentData] Loaded Player State: HP {heroHP}/{heroMaxHP}, MP {heroMP}/{heroMaxMP}, Ignited: {heroIgnited}");
+        Debug.Log($"[DungeonPersistentData] Loaded Player State: HP {heroHP}/{heroMaxHP}, MP {heroMP}/{heroMaxMP}, Ignited(turns): {heroIgniteTurns}");
     }
+
+    /// <summary>
+    /// 저장된 Ignite 잔여 턴 수를 반환합니다.
+    /// GameManager.RestoreIgniteFromDungeon()에서 사용합니다.
+    /// </summary>
+    public static int GetIgniteTurns() => heroIgniteTurns;
 }

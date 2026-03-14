@@ -225,10 +225,10 @@ namespace AbyssdawnBattle
         public EffectType effectType = EffectType.None;
         public RecoveryTarget recoveryTarget = RecoveryTarget.HP;
         public float effectAmount = 0f;
-        [Tooltip("대상에게 걸리는 저주 데이터")]
-        public CurseData curseData;
+        [Tooltip("대상에게 걸리는 상태이상 데이터")]
+        public StatusEffectSO statusEffect;
         [Range(0f, 100f)]
-        public float curseChance = 0f;
+        public float statusEffectChance = 0f;
     }
 
     [CreateAssetMenu(fileName = "Skill_", menuName = "Abyssdawn/Skill Data", order = 1)]
@@ -274,17 +274,15 @@ namespace AbyssdawnBattle
         public float selfDmgPercent = 0f;
         [Range(0f, 100f)]
         public float selfDmgChance = 0f;
-        [Tooltip("자신에게 걸리는 저주 데이터")]
-        public CurseData selfCurseData;
+        [Tooltip("자신에게 걸리는 상태이상 데이터 (역효과)")]
+        public StatusEffectSO selfStatusEffect;
         [Range(0f, 100f)]
-        public float selfCurseChance = 0f;
+        public float selfStatusEffectChance = 0f;
 
         [Header("Effects")]
         public List<SkillEffect> effects = new List<SkillEffect>();
 
-        [FormerlySerializedAs("curseData"), HideInInspector, SerializeField]
-        private CurseData legacyCurseData;
-        [FormerlySerializedAs("curseChance"), HideInInspector, SerializeField]
+        [HideInInspector, SerializeField]
         private float legacyCurseChance = 0f;
         [FormerlySerializedAs("effectType"), HideInInspector, SerializeField]
         private EffectType legacyEffectType = EffectType.None;
@@ -363,23 +361,23 @@ namespace AbyssdawnBattle
             }
         }
 
-        public CurseData curseData
+        public StatusEffectSO statusEffect
         {
-            get => PrimaryEffect != null ? PrimaryEffect.curseData : null;
+            get => PrimaryEffect != null ? PrimaryEffect.statusEffect : null;
             set
             {
                 EnsureEffectsSlot();
-                effects[0].curseData = value;
+                effects[0].statusEffect = value;
             }
         }
 
-        public float curseChance
+        public float statusEffectChance
         {
-            get => PrimaryEffect != null ? PrimaryEffect.curseChance : 0f;
+            get => PrimaryEffect != null ? PrimaryEffect.statusEffectChance : 0f;
             set
             {
                 EnsureEffectsSlot();
-                effects[0].curseChance = value;
+                effects[0].statusEffectChance = value;
             }
         }
 
@@ -412,7 +410,6 @@ namespace AbyssdawnBattle
             bool hasLegacyData =
                 legacyEffectType != EffectType.None ||
                 legacyEffectAmount > 0f ||
-                legacyCurseData != null ||
                 legacyCurseChance > 0f;
 
             if (!hasLegacyData) return;
@@ -422,8 +419,7 @@ namespace AbyssdawnBattle
                 effectType = legacyEffectType,
                 recoveryTarget = legacyRecoveryTarget,
                 effectAmount = legacyEffectAmount,
-                curseData = legacyCurseData,
-                curseChance = legacyCurseChance
+                statusEffectChance = legacyCurseChance
             });
         }
     }

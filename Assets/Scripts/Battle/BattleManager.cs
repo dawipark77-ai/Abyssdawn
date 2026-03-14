@@ -2253,35 +2253,34 @@ public class BattleManager : MonoBehaviour
     {
         bool anyCurseDamage = false;
 
-        // 아군 저주 데미지 처리
+        // 아군 상태이상 데미지 처리
         foreach (var member in activePartyMembers)
         {
-            if (member != null && member.activeCurses.Count > 0 && member.currentHP > 0)
+            if (member != null && member.activeStatusEffects.Count > 0 && member.currentHP > 0)
             {
                 int hpBefore = member.currentHP;
-                member.ProcessCursesEndOfTurn();
+                member.ProcessStatusEffectsEndOfTurn();
                 if (member.currentHP < hpBefore)
                 {
                     int damage = hpBefore - member.currentHP;
-                    AddMessage($"{member.playerName} takes {damage} damage from curses!");
-                    // 저주 데미지로 인한 UI 흔들림
+                    AddMessage($"{member.playerName}이(가) 상태이상으로 {damage} 피해를 입었습니다!");
                     ShakePlayerStatusUI(member);
                     anyCurseDamage = true;
                 }
             }
         }
 
-        // 적 저주 데미지 처리
+        // 적 상태이상 데미지 처리
         foreach (var enemy in activeEnemies)
         {
-            if (enemy != null && enemy.activeCurses.Count > 0 && enemy.currentHP > 0 && !enemy.IsDead())
+            if (enemy != null && enemy.activeStatusEffects.Count > 0 && enemy.currentHP > 0 && !enemy.IsDead())
             {
                 int hpBefore = enemy.currentHP;
-                enemy.ProcessCursesEndOfTurn();
+                enemy.ProcessStatusEffectsEndOfTurn();
                 if (enemy.currentHP < hpBefore)
                 {
                     int damage = hpBefore - enemy.currentHP;
-                    AddMessage($"{enemy.enemyName} takes {damage} damage from curses!");
+                    AddMessage($"{enemy.enemyName}이(가) 상태이상으로 {damage} 피해를 입었습니다!");
                     enemy.UpdateStatusUI();
                     anyCurseDamage = true;
                 }
@@ -3647,12 +3646,13 @@ public class BattleManager : MonoBehaviour
 
         foreach (var effect in skill.Effects)
         {
-            if (effect == null || effect.curseData == null || effect.curseChance <= 0f) continue;
+            if (effect == null || effect.statusEffect == null || effect.statusEffectChance <= 0f) continue;
 
-            if (UnityEngine.Random.Range(0f, 100f) < effect.curseChance)
+            if (UnityEngine.Random.Range(0f, 100f) < effect.statusEffectChance)
             {
-                target.ApplyCurse(effect.curseData);
-                AddMessage($"{target.enemyName} is afflicted with {effect.curseData.curseName}!");
+                bool applied = target.ApplyStatusEffect(effect.statusEffect);
+                if (applied)
+                    AddMessage($"{target.enemyName}에게 {effect.statusEffect.effectType} 상태이상 발생!");
             }
         }
     }
@@ -3876,13 +3876,13 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        // 본인 저주 적용 (selfCurseData)
-        if (skill.selfCurseData != null && skill.selfCurseChance > 0)
+        // 본인 상태이상 적용 (selfStatusEffect)
+        if (skill.selfStatusEffect != null && skill.selfStatusEffectChance > 0)
         {
-            if (UnityEngine.Random.Range(0f, 100f) < skill.selfCurseChance)
+            if (UnityEngine.Random.Range(0f, 100f) < skill.selfStatusEffectChance)
             {
-                attacker.ApplyCurse(skill.selfCurseData);
-                AddMessage($"{attacker.playerName} is afflicted with {skill.selfCurseData.curseName} by backlash!");
+                attacker.ApplyStatusEffect(skill.selfStatusEffect);
+                AddMessage($"{attacker.playerName}에게 {skill.selfStatusEffect.effectType} 역효과 발생!");
             }
         }
     }

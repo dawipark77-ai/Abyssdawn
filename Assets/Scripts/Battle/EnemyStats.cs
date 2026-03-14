@@ -46,17 +46,13 @@ public class EnemyStats : MonoBehaviour
     public float hitShakeDuration = 0.2f;
     public float hitShakeMagnitude = 0.1f;
     
-    [Header("Curse System (저주 시스템)")]
-    [Tooltip("현재 걸린 저주 리스트 (런타임에서 자동 관리)")]
-    public List<CurseInstance> activeCurses = new List<CurseInstance>();
-
     [Header("Status Effect System (상태이상 시스템)")]
-    [Tooltip("무기 공격으로 부여된 상태이상 리스트 (런타임에서 자동 관리)")]
+    [Tooltip("현재 걸린 상태이상 리스트 (런타임에서 자동 관리)")]
     public List<StatusEffectInstance> activeStatusEffects = new List<StatusEffectInstance>();
 
-    // Legacy compatibility (for old Ignite system)
-    public bool isIgnited => HasCurse(CurseType.Ignite);
-    public int igniteTurnsRemaining => GetCurseRemainingTurns(CurseType.Ignite);
+    // Legacy compatibility
+    public bool isIgnited => HasStatusEffect(StatusEffectType.Ignite);
+    public int igniteTurnsRemaining => GetStatusEffectRemainingTurns(StatusEffectType.Ignite);
 
     private bool isDead = false;
     private Vector3 originalPosition;
@@ -260,78 +256,6 @@ public class EnemyStats : MonoBehaviour
         shakeCoroutine = null;
     }
 
-    // --- [Curse System Methods] ---
-
-    /// <summary>
-    /// 저주를 적용합니다
-    /// </summary>
-    public void ApplyCurse(CurseData curseData)
-    {
-        if (curseData == null)
-        {
-            Debug.LogWarning($"[EnemyStats] {enemyName}에게 null Curse를 적용하려 했습니다.");
-            return;
-        }
-
-        // 이미 같은 타입의 저주가 걸려있는지 확인
-        CurseInstance existingCurse = activeCurses.Find(c => c.curseData.type == curseData.type);
-
-        if (existingCurse != null)
-        {
-            // 기존 저주의 duration을 갱신 (더 긴 것으로)
-            existingCurse.remainingTurns = Mathf.Max(existingCurse.remainingTurns, curseData.duration);
-            Debug.Log($"[Curse] {enemyName}의 {curseData.curseName} 지속시간 갱신: {existingCurse.remainingTurns}턴");
-        }
-        else
-        {
-            // 새로운 저주 추가
-            CurseInstance newCurse = new CurseInstance(curseData);
-            activeCurses.Add(newCurse);
-            Debug.Log($"[Curse] {enemyName}에게 {curseData.curseName} 적용! (지속: {curseData.duration}턴)");
-
-            // VFX 생성 (선택사항)
-            if (curseData.curseVFX != null)
-            {
-                newCurse.vfxInstance = Instantiate(curseData.curseVFX, transform);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 특정 타입의 저주를 제거합니다
-    /// </summary>
-    public void RemoveCurse(CurseType type)
-    {
-        CurseInstance curse = activeCurses.Find(c => c.curseData.type == type);
-        if (curse != null)
-        {
-            // VFX 제거
-            if (curse.vfxInstance != null)
-            {
-                Destroy(curse.vfxInstance);
-            }
-
-            activeCurses.Remove(curse);
-            Debug.Log($"[Curse] {enemyName}의 {curse.curseData.curseName} 해제됨");
-        }
-    }
-
-    /// <summary>
-    /// 모든 저주를 제거합니다
-    /// </summary>
-    public void RemoveAllCurses()
-    {
-        foreach (var curse in activeCurses)
-        {
-            if (curse.vfxInstance != null)
-            {
-                Destroy(curse.vfxInstance);
-            }
-        }
-        activeCurses.Clear();
-        Debug.Log($"[Curse] {enemyName}의 모든 저주 해제됨");
-    }
-
     // ─────────── StatusEffectSO 기반 상태이상 ───────────
 
     /// <summary>
@@ -407,142 +331,49 @@ public class EnemyStats : MonoBehaviour
     // ─────────────────────────────────────────────────────
 
     /// <summary>
-    /// 특정 타입의 저주가 걸려있는지 확인
+    /// 특정 타입의 상태이상이 걸려있는지 확인 (구 HasCurse 대체)
     /// </summary>
-    public bool HasCurse(CurseType type)
-    {
-        return activeCurses.Exists(c => c.curseData.type == type);
-    }
+    public bool HasCurse(StatusEffectType type) => HasStatusEffect(type);
 
     /// <summary>
-    /// 특정 타입의 저주 남은 턴 수 반환
+    /// 특정 타입의 상태이상 남은 턴 수 반환 (구 GetCurseRemainingTurns 대체)
     /// </summary>
-    public int GetCurseRemainingTurns(CurseType type)
-    {
-        CurseInstance curse = activeCurses.Find(c => c.curseData.type == type);
-        return curse != null ? curse.remainingTurns : 0;
-    }
+    public int GetCurseRemainingTurns(StatusEffectType type) => GetStatusEffectRemainingTurns(type);
 
     /// <summary>
-    /// 턴 종료 시 호출: 모든 저주의 DoT 데미지를 적용하고 duration 감소
+    /// 공격력 감소 디버프 합산
     /// </summary>
-    public void ProcessCursesEndOfTurn()
-    {
-        if (activeCurses.Count == 0 || currentHP <= 0 || isDead) return;
-
-        Debug.Log($"[Curse] {enemyName}의 저주 처리 시작 (저주 수: {activeCurses.Count})");
-
-        // 역순으로 순회하여 안전하게 제거
-        for (int i = activeCurses.Count - 1; i >= 0; i--)
-        {
-            CurseInstance curse = activeCurses[i];
-
-            // DoT 데미지 적용
-            if (curse.curseData.dotDamagePercent > 0)
-            {
-                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * (curse.curseData.dotDamagePercent / 100f)));
-                currentHP = Mathf.Max(0, currentHP - dotDamage);
-                Debug.Log($"[Curse] {enemyName}이(가) {curse.curseData.curseName}로 {dotDamage} 데미지를 입었습니다. (남은 HP: {currentHP})");
-            }
-
-            // Duration 감소
-            curse.remainingTurns--;
-
-            // Duration이 0이 되면 저주 제거
-            if (curse.remainingTurns <= 0)
-            {
-                Debug.Log($"[Curse] {curse.curseData.curseName} 효과 종료");
-                if (curse.vfxInstance != null)
-                {
-                    Destroy(curse.vfxInstance);
-                }
-                activeCurses.RemoveAt(i);
-            }
-        }
-
-        // 사망 체크
-        if (currentHP <= 0)
-        {
-            HandleDeath();
-        }
-    }
-
-    /// <summary>
-    /// 저주로 인한 스탯 디버프를 계산 (총합)
-    /// </summary>
-    public float GetCurseAttackDebuff()
+    public float GetStatusEffectAttackDebuff()
     {
         float total = 0f;
-        foreach (var curse in activeCurses)
-        {
-            total += curse.curseData.attackDebuff;
-        }
-        return Mathf.Min(total, 100f); // 최대 100%
-    }
-
-    public float GetCurseDefenseDebuff()
-    {
-        float total = 0f;
-        foreach (var curse in activeCurses)
-        {
-            total += curse.curseData.defenseDebuff;
-        }
+        foreach (var se in activeStatusEffects)
+            total += se.data.attackDebuff;
         return Mathf.Min(total, 100f);
     }
 
     /// <summary>
-    /// 행동 불가 상태인지 확인 (Stun 등)
+    /// 방어력 감소 디버프 합산
     /// </summary>
-    public bool IsStunned()
+    public float GetStatusEffectDefenseDebuff()
     {
-        return activeCurses.Exists(c => c.curseData.preventAction);
+        float total = 0f;
+        foreach (var se in activeStatusEffects)
+            total += se.data.defenseDebuff;
+        return Mathf.Min(total, 100f);
     }
 
-    /// <summary>
-    /// 스킬 사용 불가 상태인지 확인 (Silence 등)
-    /// </summary>
-    public bool IsSilenced()
-    {
-        return activeCurses.Exists(c => c.curseData.preventSkillUse);
-    }
+    /// <summary>행동 불가 상태 확인 (Stun)</summary>
+    public bool IsStunned() => activeStatusEffects.Exists(se => se.data.preventAction);
 
-    // Legacy compatibility method
-    [System.Obsolete("Use ApplyCurse with CurseData instead")]
-    public void SetIgnited(bool ignited, int turns = 5)
-    {
-        if (ignited)
-        {
-            // Ignite curse를 찾아서 적용 (없으면 경고)
-            CurseData igniteCurse = Resources.Load<CurseData>("Curses/Ignite");
-            if (igniteCurse != null)
-            {
-                ApplyCurse(igniteCurse);
-            }
-            else
-            {
-                Debug.LogWarning("[EnemyStats] Ignite CurseData를 찾을 수 없습니다. Resources/Curses/Ignite.asset을 생성하세요.");
-            }
-        }
-        else
-        {
-            RemoveCurse(CurseType.Ignite);
-        }
-    }
-
-    // Legacy compatibility method
-    [System.Obsolete("Use ProcessCursesEndOfTurn instead")]
-    public void ProcessIgniteDamage()
-    {
-        ProcessCursesEndOfTurn();
-    }
+    /// <summary>스킬 사용 불가 상태 확인 (Silence)</summary>
+    public bool IsSilenced() => activeStatusEffects.Exists(se => se.data.preventSkillUse);
     
     // 죽음 처리
     private void HandleDeath()
     {
         isDead = true;
 
-        // 사망 시 모든 저주 및 상태이상 제거
-        RemoveAllCurses();
+        // 사망 시 모든 상태이상 제거
         activeStatusEffects.Clear();
         
         // 흔들림 중지 및 위치 복원
