@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
   effectType: 3
   variantId: Ignite
-  itemIcon: {fileID: 0}
+  itemIcon: {fileID: 6712674675594986518, guid: bdbe687403c6e7643b238571b21e4a17, type: 3}
   flatIcon: {fileID: -1961051622744284744, guid: af76647fd85b17e4f994520807d8d7ff, type: 3}
   physicalDuration: 2
   magicalDuration: 3
@@ -23,3 +23,8 @@ MonoBehaviour:
   magicalDamagePerTurn: 0.05
   magicalApplyChance: 0.1
   selfApplyChance: 0.05
+  attackDebuff: 0
+  defenseDebuff: 0
+  preventAction: 0
+  preventSkillUse: 0
+  statusVFX: {fileID: 0}

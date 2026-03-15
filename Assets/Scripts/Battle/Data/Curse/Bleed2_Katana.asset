@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
   effectType: 1
   variantId: Bleed2_Katana
-  itemIcon: {fileID: 0}
-  flatIcon: {fileID: -3846654058892167139, guid: 3ee3121df6ab72c48b77d44691d8caa7, type: 3}
+  itemIcon: {fileID: -3846654058892167139, guid: 3ee3121df6ab72c48b77d44691d8caa7, type: 3}
+  flatIcon: {fileID: 4721925508920138281, guid: 6d5e20cb6a9c9ac47b509582ced5339c, type: 3}
   physicalDuration: 3
   magicalDuration: 3
   physicalDamagePerTurn: 0.04
@@ -23,3 +23,8 @@ MonoBehaviour:
   magicalDamagePerTurn: 0.04
   magicalApplyChance: 0.3
   selfApplyChance: 0
+  attackDebuff: 0
+  defenseDebuff: 0
+  preventAction: 0
+  preventSkillUse: 0
+  statusVFX: {fileID: 0}
