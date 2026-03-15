@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AbyssdawnBattle
 {
@@ -30,8 +31,13 @@ namespace AbyssdawnBattle
         [Tooltip("출혈1 / 출혈2 같은 세부 구분용 ID (선택)")]
         public string variantId;
 
-        [Tooltip("상태이상 아이콘")]
-        public Sprite icon;
+        [Header("아이콘")]
+        [Tooltip("아이템창 대표 이미지 (인벤토리/장비 UI 표시용)")]
+        public Sprite itemIcon;
+
+        [FormerlySerializedAs("icon")]
+        [Tooltip("전투 UI 플랫 아이콘 (전투 중 상태이상 표시용)")]
+        public Sprite flatIcon;
 
         [Header("지속 턴 수")]
         [Tooltip("물리(무기)로 부여되었을 때의 기본 지속 턴 수")]

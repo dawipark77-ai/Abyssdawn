@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
   effectType: 2
   variantId: Poison
-  icon: {fileID: -2431352788923946188, guid: d4f097711a598ca419ac65c2722191e3, type: 3}
+  itemIcon: {fileID: 0}
+  flatIcon: {fileID: -2431352788923946188, guid: d4f097711a598ca419ac65c2722191e3, type: 3}
   physicalDuration: 10
   magicalDuration: 10
   physicalDamagePerTurn: 0.02
