@@ -16,6 +16,7 @@ public class InventorySlot : MonoBehaviour
     private static readonly Color RareBorderColor    = new Color(0.85f, 0.70f, 0.10f, 1f);
     private static readonly Color DefaultBorderColor = new Color(0.25f, 0.25f, 0.32f, 0.6f);
     private static readonly Color DawnChaliceColor   = new Color(0.20f, 0.55f, 0.85f, 1f);
+    private static readonly Color PlaceholderColor   = new Color(0.30f, 0.30f, 0.38f, 1f);
 
     // ── 장비 아이템 ───────────────────────────────────────────
     public void Setup(EquipmentData item, Action onClick)
@@ -69,14 +70,16 @@ public class InventorySlot : MonoBehaviour
 
     private void SetIcon(Sprite sprite)
     {
+        iconImage.enabled = true;
         if (sprite != null)
         {
-            iconImage.sprite  = sprite;
-            iconImage.enabled = true;
+            iconImage.sprite = sprite;
+            iconImage.color  = Color.white;
         }
         else
         {
-            iconImage.enabled = false;
+            iconImage.sprite = null;
+            iconImage.color  = PlaceholderColor;
         }
     }
 }

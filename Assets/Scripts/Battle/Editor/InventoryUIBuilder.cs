@@ -16,7 +16,7 @@ public static class InventoryUIBuilder
     private static readonly Color C_HeaderBg       = new Color(0.06f, 0.06f, 0.10f, 1.00f);
     private static readonly Color C_TabActive      = new Color(0.56f, 0.42f, 0.12f, 1.00f);
     private static readonly Color C_TabInactive    = new Color(0.18f, 0.18f, 0.25f, 1.00f);
-    private static readonly Color C_SlotBg         = new Color(0.12f, 0.12f, 0.18f, 1.00f);
+    private static readonly Color C_SlotBg         = new Color(0.20f, 0.20f, 0.28f, 1.00f);
     private static readonly Color C_SlotBorder     = new Color(0.25f, 0.25f, 0.32f, 0.60f);
     private static readonly Color C_DetailBg       = new Color(0.08f, 0.08f, 0.13f, 0.98f);
     private static readonly Color C_HandleBar      = new Color(0.35f, 0.35f, 0.42f, 1.00f);
@@ -171,10 +171,10 @@ public static class InventoryUIBuilder
         scrollRect.horizontal = false;
         scrollRect.vertical   = true;
 
-        // Viewport
-        var viewport = MakeImage("Viewport", scrollObj.transform, new Color(0f, 0f, 0f, 0f));
+        // Viewport — RectMask2D 사용 (Mask+alpha=0 Image 대신, 셰이더 기반 클리핑)
+        var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
+        viewport.transform.SetParent(scrollObj.transform, false);
         Stretch(viewport);
-        viewport.AddComponent<Mask>().showMaskGraphic = false;
         scrollRect.viewport = viewport.GetComponent<RectTransform>();
 
         // Content (GridLayoutGroup)

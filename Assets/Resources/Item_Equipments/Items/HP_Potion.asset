@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
+  m_Name: HP_Potion
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
+  itemName: HP Potion
+  description: Alive is enough.
+  itemIcon: {fileID: 6867248042669577871, guid: 2c97f8b4d39c6364299368f5888da15f, type: 3}
+  flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
+  hpRecoveryPercent: 0.3
+  mpRecoveryPercent: 0
+  cureTypes: 
+  attackBuffPercent: 0
+  agilityBuff: 0
+  evasionBuff: 0
+  escapeChanceBuff: 0
+  buffDuration: 0
+  mpPenaltyPercent: 0
+  maxStack: 5
+  usableInBattle: 1
+  usableOnMap: 1
+  isPermanent: 0
+  isDawnChalice: 0
+  stackGroup: HealthPotion

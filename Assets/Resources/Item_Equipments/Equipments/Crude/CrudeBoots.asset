@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
+  m_Name: CrudeBoots
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  equipmentName: Crude Boots
+  equipmentIcon: {fileID: 7902364575885455685, guid: 8ac240961cc0bcb48a45dff59f198101, type: 3}
+  description: Better than bare feet, but the heels keep rubbing raw.
+  equipmentType: 3
+  isTwoHanded: 0
+  armourCategory: 1
+  armourType: 2
+  attackBonus: 0
+  defenseBonus: 0
+  magicBonus: 0
+  hpBonus: 0
+  mpBonus: 0
+  agiBonus: 1
+  luckBonus: 0
+  accuracyBonus: 0
+  weaponEffect: {fileID: 0}
+  skill: {fileID: 0}

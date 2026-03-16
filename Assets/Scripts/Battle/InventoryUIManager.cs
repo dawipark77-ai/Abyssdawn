@@ -42,10 +42,10 @@ public class InventoryUIManager : MonoBehaviour
     public TextMeshProUGUI  detailTypeText;
     public TextMeshProUGUI  detailDescText;
 
-    [Header("상세 패널 — 스탯 목록")]
+    [Header("Detail Panel — Stat List")]
     public Transform statListContainer;
 
-    [Header("상세 패널 — 액션 버튼")]
+    [Header("Detail Panel — Action Buttons")]
     public Button          primaryButton;
     public TextMeshProUGUI primaryButtonText;
     public Button          discardButton;
@@ -58,9 +58,9 @@ public class InventoryUIManager : MonoBehaviour
     [Header("인벤토리 아이템 목록")]
     public List<EquipmentData> equipmentItems = new List<EquipmentData>();
 
-    [Header("아이템 데이터베이스 (Inspector에서 SO 드래그 등록)")]
-    public List<EquipmentData>    allEquipmentDatabase  = new List<EquipmentData>();
-    public List<ConsumableItemSO> allConsumableDatabase = new List<ConsumableItemSO>();
+    // Resources.LoadAll 로 자동 로드 — Inspector 등록 불필요
+    private List<EquipmentData>    allEquipmentDatabase  = new List<EquipmentData>();
+    private List<ConsumableItemSO> allConsumableDatabase = new List<ConsumableItemSO>();
 
     // ─── 외부 참조 ───────────────────────────────────────────
     [Header("시스템 참조")]
@@ -95,6 +95,27 @@ public class InventoryUIManager : MonoBehaviour
 
         if (itemSlotTemplate != null)
             itemSlotTemplate.SetActive(false);
+
+        LoadItemDatabases();
+    }
+
+    private void LoadItemDatabases()
+    {
+        var eqArr = Resources.LoadAll<EquipmentData>("Item_Equipments/Equipments");
+        allEquipmentDatabase = new List<EquipmentData>(eqArr);
+
+        var conArr = Resources.LoadAll<ConsumableItemSO>("Item_Equipments/Items");
+        allConsumableDatabase = new List<ConsumableItemSO>(conArr);
+
+        Debug.Log($"[DB] 장비 로드: {allEquipmentDatabase.Count}개  " +
+                  $"(경로: Resources/Item_Equipments/Equipments)");
+        Debug.Log($"[DB] 소비 아이템 로드: {allConsumableDatabase.Count}개  " +
+                  $"(경로: Resources/Item_Equipments/Items)");
+
+        if (allEquipmentDatabase.Count == 0)
+            Debug.LogWarning("[DB] 장비 SO 로드 실패 — Resources/Item_Equipments/Equipments 경로 및 .asset 파일 확인 필요");
+        if (allConsumableDatabase.Count == 0)
+            Debug.LogWarning("[DB] 소비 아이템 SO 로드 실패 — Resources/Item_Equipments/Items 경로 및 .asset 파일 확인 필요");
     }
 
     private void Start()
@@ -190,8 +211,8 @@ public class InventoryUIManager : MonoBehaviour
         // 전체 탭: 장비 + 소비 모두 표시
         if (currentTab == InventoryTab.All)
         {
-            PopulateEquipmentGrid();
             PopulateConsumableGrid();
+            PopulateEquipmentGrid();
             return;
         }
 
@@ -200,7 +221,10 @@ public class InventoryUIManager : MonoBehaviour
 
     private void PopulateEquipmentGrid()
     {
-        foreach (var item in GetFilteredEquipment())
+        var filtered = GetFilteredEquipment();
+        Debug.Log($"[Grid] PopulateEquipmentGrid — {filtered.Count}개  " +
+                  $"(allEquipDB: {allEquipmentDatabase.Count}, equipItems: {equipmentItems.Count})");
+        foreach (var item in filtered)
         {
             var slotObj = CreateSlot();
             var slot    = slotObj.GetComponent<InventorySlot>();
@@ -222,6 +246,8 @@ public class InventoryUIManager : MonoBehaviour
             ? allConsumableDatabase
             : null;
 
+        Debug.Log($"[Grid] PopulateConsumableGrid — source: {(source != null ? source.Count + "개" : "null")}");
+
         // 새벽의 잔 — 항상 첫 번째 (isDawnChalice 기준)
         if (source != null)
         {
@@ -240,15 +266,13 @@ public class InventoryUIManager : MonoBehaviour
                 }
             }
 
-            // 일반 소비 아이템
+            // 일반 소비 아이템 — DB에 있으면 수량 0이어도 표시 (미보유 상태로)
             foreach (var item in source)
             {
                 if (item == null || item.isDawnChalice) continue;
                 int qty = consumableInventory != null
                     ? consumableInventory.GetQuantity(item)
                     : 0;
-                // 보유 수량 없고 영구 아이템도 아니면 숨김
-                if (qty <= 0 && !item.isPermanent) continue;
                 var slotObj = CreateSlot();
                 var slot    = slotObj.GetComponent<InventorySlot>();
                 if (slot != null)
@@ -337,7 +361,7 @@ public class InventoryUIManager : MonoBehaviour
     {
         if (detailIcon     != null) detailIcon.sprite    = item.itemIcon != null ? item.itemIcon : item.flatIcon;
         if (detailNameText != null) detailNameText.text  = item.itemName;
-        if (detailTypeText != null) detailTypeText.text  = item.isDawnChalice ? "특수 소비" : "소비 아이템";
+        if (detailTypeText != null) detailTypeText.text  = item.isDawnChalice ? "Special Consumable" : "Consumable";
         if (detailDescText != null) detailDescText.text  = item.description;
 
         BuildConsumableStatRows(item);
@@ -350,29 +374,29 @@ public class InventoryUIManager : MonoBehaviour
         foreach (Transform child in statListContainer) Destroy(child.gameObject);
 
         if (item.hpRecoveryPercent > 0f)
-            AddStatRowFloat("HP 회복", item.hpRecoveryPercent * 100f, "%");
+            AddStatRowFloat("HP Recovery", item.hpRecoveryPercent * 100f, "%");
         if (item.mpRecoveryPercent > 0f)
-            AddStatRowFloat("MP 회복", item.mpRecoveryPercent * 100f, "%");
+            AddStatRowFloat("MP Recovery", item.mpRecoveryPercent * 100f, "%");
         if (item.attackBuffPercent > 0f)
-            AddStatRowFloat("공격력 버프", item.attackBuffPercent * 100f, "%");
+            AddStatRowFloat("ATK Buff", item.attackBuffPercent * 100f, "%");
         if (item.agilityBuff != 0)
-            AddStatRowFloat("민첩 버프", item.agilityBuff);
+            AddStatRowFloat("AGI Buff", item.agilityBuff);
         if (item.evasionBuff > 0f)
-            AddStatRowFloat("회피율 버프", item.evasionBuff * 100f, "%");
+            AddStatRowFloat("Evasion Buff", item.evasionBuff * 100f, "%");
         if (item.escapeChanceBuff > 0f)
-            AddStatRowFloat("도주 확률", item.escapeChanceBuff * 100f, "%");
+            AddStatRowFloat("Escape Chance", item.escapeChanceBuff * 100f, "%");
         if (item.mpPenaltyPercent > 0f)
-            AddStatRowFloat("MP 소모 패널티", -item.mpPenaltyPercent * 100f, "%");
+            AddStatRowFloat("MP Penalty", -item.mpPenaltyPercent * 100f, "%");
         if (item.buffDuration > 0)
-            AddStatRowFloat("지속 턴수", item.buffDuration, "턴");
+            AddStatRowFloat("Duration", item.buffDuration, "turns");
         if (item.cureTypes != null && item.cureTypes.Count > 0)
         {
             string cureList = string.Join(", ", item.cureTypes);
-            AddStatRowText("해제 가능 상태이상", cureList);
+            AddStatRowText("Cures", cureList);
         }
 
         int qty = consumableInventory != null ? consumableInventory.GetQuantity(item) : 0;
-        AddStatRowFloat("보유 수량", qty, "개");
+        AddStatRowFloat("Qty", qty, "");
     }
 
     private void RefreshConsumablePrimaryButton(ConsumableItemSO item)
@@ -380,7 +404,7 @@ public class InventoryUIManager : MonoBehaviour
         if (primaryButton == null) return;
 
         if (primaryButtonText != null)
-            primaryButtonText.text = "사용";
+            primaryButtonText.text = "Use";
 
         bool hasItem  = consumableInventory != null && consumableInventory.HasItem(item);
         // usableInBattle = false이면 비활성 (맵 전용)
@@ -412,13 +436,13 @@ public class InventoryUIManager : MonoBehaviour
         // 장착중이면 비교 없이 단독 표시, 미장착이면 현재 슬롯 장비와 비교
         EquipmentData current = IsEquipped(item) ? null : GetEquippedInSameSlot(item);
 
-        AddCompareRow("공격력", current?.attackBonus   ?? 0, item.attackBonus);
-        AddCompareRow("방어력", current?.defenseBonus  ?? 0, item.defenseBonus);
-        AddCompareRow("마법력", current?.magicBonus    ?? 0, item.magicBonus);
-        AddCompareRow("최대 HP", current?.hpBonus      ?? 0, item.hpBonus);
-        AddCompareRow("최대 MP", current?.mpBonus      ?? 0, item.mpBonus);
-        AddCompareRow("민첩",   current?.agiBonus      ?? 0, item.agiBonus);
-        AddCompareRow("행운",   current?.luckBonus     ?? 0, item.luckBonus);
+        AddCompareRow("ATK",     current?.attackBonus   ?? 0, item.attackBonus);
+        AddCompareRow("DEF",     current?.defenseBonus  ?? 0, item.defenseBonus);
+        AddCompareRow("MAG",     current?.magicBonus    ?? 0, item.magicBonus);
+        AddCompareRow("Max HP",  current?.hpBonus       ?? 0, item.hpBonus);
+        AddCompareRow("Max MP",  current?.mpBonus       ?? 0, item.mpBonus);
+        AddCompareRow("AGI",     current?.agiBonus      ?? 0, item.agiBonus);
+        AddCompareRow("LCK",     current?.luckBonus     ?? 0, item.luckBonus);
 
         float curAcc = current?.accuracyBonus    ?? 0f;
         float curMp  = current?.mpBonusPercent   ?? 0f;
@@ -571,7 +595,7 @@ public class InventoryUIManager : MonoBehaviour
         if (primaryButton == null) return;
         bool equipped = IsEquipped(item);
         if (primaryButtonText != null)
-            primaryButtonText.text = equipped ? "해제" : "장착";
+            primaryButtonText.text = equipped ? "Unequip" : "Equip";
 
         primaryButton.interactable = true;
         primaryButton.onClick.RemoveAllListeners();
@@ -696,49 +720,6 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     // ═════════════════════════════════════════════════════════
-    //  에디터 전용 — DB 자동 등록 (컴포넌트 우클릭 메뉴)
-    // ═════════════════════════════════════════════════════════
-
-#if UNITY_EDITOR
-    [ContextMenu("자동 등록 ▶ 전체 DB 채우기")]
-    private void AutoFillAll()
-    {
-        AutoFillEquipmentDatabase();
-        AutoFillConsumableDatabase();
-    }
-
-    [ContextMenu("자동 등록 ▶ 장비 DB 채우기")]
-    private void AutoFillEquipmentDatabase()
-    {
-        allEquipmentDatabase.Clear();
-        string[] guids = UnityEditor.AssetDatabase.FindAssets("t:EquipmentData");
-        foreach (var guid in guids)
-        {
-            string path  = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-            var    asset = UnityEditor.AssetDatabase.LoadAssetAtPath<EquipmentData>(path);
-            if (asset != null) allEquipmentDatabase.Add(asset);
-        }
-        UnityEditor.EditorUtility.SetDirty(this);
-        Debug.Log($"[InventoryUIManager] 장비 {allEquipmentDatabase.Count}개 자동 등록 완료");
-    }
-
-    [ContextMenu("자동 등록 ▶ 소비 아이템 DB 채우기")]
-    private void AutoFillConsumableDatabase()
-    {
-        allConsumableDatabase.Clear();
-        string[] guids = UnityEditor.AssetDatabase.FindAssets("t:ConsumableItemSO");
-        foreach (var guid in guids)
-        {
-            string path  = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-            var    asset = UnityEditor.AssetDatabase.LoadAssetAtPath<ConsumableItemSO>(path);
-            if (asset != null) allConsumableDatabase.Add(asset);
-        }
-        UnityEditor.EditorUtility.SetDirty(this);
-        Debug.Log($"[InventoryUIManager] 소비 아이템 {allConsumableDatabase.Count}개 자동 등록 완료");
-    }
-#endif
-
-    // ═════════════════════════════════════════════════════════
     //  유틸
     // ═════════════════════════════════════════════════════════
 
@@ -746,10 +727,10 @@ public class InventoryUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case EquipmentType.Hand:       return "한손 무기";
-            case EquipmentType.TwoHanded:  return "양손 무기";
-            case EquipmentType.Armour:     return "방어구";
-            case EquipmentType.Accessory:  return "장신구";
+            case EquipmentType.Hand:       return "One-Handed";
+            case EquipmentType.TwoHanded:  return "Two-Handed";
+            case EquipmentType.Armour:     return "Armour";
+            case EquipmentType.Accessory:  return "Accessory";
             default:                       return type.ToString();
         }
     }
