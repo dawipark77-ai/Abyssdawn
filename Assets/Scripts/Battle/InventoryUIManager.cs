@@ -45,6 +45,29 @@ public class InventoryUIManager : MonoBehaviour
     [Header("Detail Panel — Stat List")]
     public Transform statListContainer;
 
+    [Header("StatRow — Prefab")]
+    [SerializeField] GameObject statRowPrefab;
+
+    [Header("StatRow — Layout")]
+    [SerializeField] float statRowHeight         = 28f;
+    [SerializeField] float statRowSpacing        = 6f;
+    [SerializeField] int   statListPaddingTop    = 4;
+    [SerializeField] int   statListPaddingBottom = 4;
+    [SerializeField] int   statListSideMargin    = 24;
+
+    [Header("StatRow — Font Size")]
+    [SerializeField] int labelFontSize = 17;
+    [SerializeField] int valueFontSize = 15;
+    [SerializeField] int arrowFontSize = 13;
+
+    [Header("StatRow — Colors")]
+    [SerializeField] Color labelColor    = new Color(0.75f, 0.75f, 0.80f, 1f);
+    [SerializeField] Color valueNeutral  = new Color(0.60f, 0.60f, 0.65f, 1f);
+    [SerializeField] Color valuePositive = new Color(0.22f, 0.82f, 0.22f, 1f);
+    [SerializeField] Color valueNegative = new Color(0.90f, 0.22f, 0.22f, 1f);
+    [SerializeField] Color valueText     = new Color(0.85f, 0.75f, 0.40f, 1f);
+    [SerializeField] Color arrowColor    = new Color(0.50f, 0.50f, 0.50f, 1f);
+
     [Header("Detail Panel — Action Buttons")]
     public Button          primaryButton;
     public TextMeshProUGUI primaryButtonText;
@@ -80,9 +103,11 @@ public class InventoryUIManager : MonoBehaviour
     private static readonly Color TabInactive = new Color(0.18f, 0.18f, 0.25f, 1f);
     private static readonly Color TextActive  = Color.white;
     private static readonly Color TextDim     = new Color(0.65f, 0.65f, 0.70f, 1f);
-    private static readonly Color StatPos     = new Color(0.22f, 0.82f, 0.22f, 1f);
-    private static readonly Color StatNeg     = new Color(0.90f, 0.22f, 0.22f, 1f);
-    private static readonly Color StatZero    = new Color(0.60f, 0.60f, 0.65f, 1f);
+
+    // StatPos/StatNeg/StatZero는 SerializeField(valuePositive/valueNegative/valueNeutral)로 이동
+    private Color StatPos  => valuePositive;
+    private Color StatNeg  => valueNegative;
+    private Color StatZero => valueNeutral;
 
     // ═════════════════════════════════════════════════════════
     //  초기화
@@ -478,7 +503,7 @@ public class InventoryUIManager : MonoBehaviour
         AddCompareRowF(label, currentVal, newVal);
     }
 
-    // float 비교 행
+    // float 비교 행 (장비 스탯 비교)
     private void AddCompareRowF(string label, float curVal, float newVal, string suffix = "")
     {
         if (curVal == 0f && newVal == 0f) return;
@@ -492,21 +517,17 @@ public class InventoryUIManager : MonoBehaviour
             : diff > 0f ? $" (+{FormatStat(diff, suffix)})"
                         : $" ({FormatStat(diff, suffix)})";
 
-        var row = new GameObject($"StatRow_{label}", typeof(RectTransform),
-                                                     typeof(HorizontalLayoutGroup));
-        row.transform.SetParent(statListContainer, false);
-        var hlg = row.GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing = 6f; hlg.childForceExpandWidth = false;
-        row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 28f);
+        var row = SpawnRow(label);
+        HideRowChildren(row.transform, "Value"); // 비교 행에선 Value 슬롯 불필요
 
-        CreateTMPChild(row.transform, "Label",   label,                17,
-                       TextAlignmentOptions.Left,  new Color(0.75f, 0.75f, 0.80f, 1f), true);
-        CreateTMPChild(row.transform, "Current", curStr,               15,
-                       TextAlignmentOptions.Right, StatZero, false);
-        CreateTMPChild(row.transform, "Arrow",   "→",                  13,
-                       TextAlignmentOptions.Center, new Color(0.5f, 0.5f, 0.5f, 1f), false);
-        CreateTMPChild(row.transform, "New",     newStr + diffStr,     15,
-                       TextAlignmentOptions.Left,  diffColor, false);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Label",   true),
+                     label,            labelFontSize, TextAlignmentOptions.Left,   labelColor);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Current", false),
+                     curStr,           valueFontSize, TextAlignmentOptions.Right,  StatZero);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Arrow",   false),
+                     "→",              arrowFontSize, TextAlignmentOptions.Center, arrowColor);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "New",     false),
+                     newStr + diffStr, valueFontSize, TextAlignmentOptions.Left,   diffColor);
     }
 
     private string FormatStat(float val, string suffix = "")
@@ -520,70 +541,111 @@ public class InventoryUIManager : MonoBehaviour
             : $"{sign}{value:F1}{suffix}";
         Color  color = value > 0f ? StatPos : (value < 0f ? StatNeg : StatZero);
 
-        var row = new GameObject($"StatRow_{label}", typeof(RectTransform),
-                                                     typeof(HorizontalLayoutGroup));
-        row.transform.SetParent(statListContainer, false);
-        var hlg = row.GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing = 8f; hlg.childForceExpandWidth = false;
-        row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 28f);
+        var row = SpawnRow(label);
+        HideRowChildren(row.transform, "Current", "Arrow", "New"); // 단순 행엔 비교 슬롯 불필요
 
-        CreateTMPChild(row.transform, "Label", label, 18, TextAlignmentOptions.Left,
-                       new Color(0.75f, 0.75f, 0.80f, 1f), true);
-        CreateTMPChild(row.transform, "Value", val, 18, TextAlignmentOptions.Right, color, false);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
+                     label, labelFontSize, TextAlignmentOptions.Left,  labelColor);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Value", false),
+                     val,   valueFontSize, TextAlignmentOptions.Right, color);
     }
 
     private void AddStatRowText(string label, string value)
     {
-        var row = new GameObject($"StatRow_{label}", typeof(RectTransform),
-                                                     typeof(HorizontalLayoutGroup));
-        row.transform.SetParent(statListContainer, false);
-        var hlg = row.GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing = 8f; hlg.childForceExpandWidth = false;
-        row.GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 28f);
+        var row = SpawnRow(label);
+        HideRowChildren(row.transform, "Current", "Arrow", "New"); // 단순 행엔 비교 슬롯 불필요
 
-        CreateTMPChild(row.transform, "Label", label, 18, TextAlignmentOptions.Left,
-                       new Color(0.75f, 0.75f, 0.80f, 1f), true);
-        CreateTMPChild(row.transform, "Value", value, 15, TextAlignmentOptions.Right,
-                       new Color(0.85f, 0.75f, 0.40f, 1f), false);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
+                     label, labelFontSize, TextAlignmentOptions.Left,  labelColor);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Value", false),
+                     value, valueFontSize, TextAlignmentOptions.Right, valueText);
     }
 
     private void AddStatRowFloat(string label, float value)
     {
-        var row = new GameObject($"StatRow_{label}", typeof(RectTransform),
-                                                     typeof(HorizontalLayoutGroup));
-        row.transform.SetParent(statListContainer, false);
-
-        var hlg              = row.GetComponent<HorizontalLayoutGroup>();
-        hlg.spacing          = 8f;
-        hlg.childForceExpandWidth = false;
-
-        var rt               = row.GetComponent<RectTransform>();
-        rt.sizeDelta         = new Vector2(0f, 28f);
-
-        CreateTMPChild(row.transform, "Label", label, 18, TextAlignmentOptions.Left,
-                       new Color(0.75f, 0.75f, 0.80f, 1f), true);
-
         string sign  = value >= 0f ? "+" : "";
         string val   = (value % 1 == 0) ? $"{sign}{(int)value}" : $"{sign}{value:F1}";
         Color  color = value > 0f ? StatPos : (value < 0f ? StatNeg : StatZero);
-        CreateTMPChild(row.transform, "Value", val, 18, TextAlignmentOptions.Right, color, false);
+
+        var row = SpawnRow(label);
+        HideRowChildren(row.transform, "Current", "Arrow", "New"); // 단순 행엔 비교 슬롯 불필요
+
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
+                     label, labelFontSize, TextAlignmentOptions.Left,  labelColor);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Value", false),
+                     val,   valueFontSize, TextAlignmentOptions.Right, color);
     }
 
-    private void CreateTMPChild(Transform parent, string name, string text,
-                                int fontSize, TextAlignmentOptions align, Color color, bool expand)
+    // ── StatRow 헬퍼 ─────────────────────────────────────────
+
+    // 행 오브젝트 생성 (프리팹 우선, 없으면 코드 생성 폴백)
+    private GameObject SpawnRow(string label)
     {
-        var obj = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
+        if (statRowPrefab != null)
+        {
+            // 프리팹 경로 — 프리팹 자체 설정(HLG·RT) 유지, 이름만 교체
+            var row      = Instantiate(statRowPrefab, statListContainer, false);
+            row.name     = $"StatRow_{label}";
+            return row;
+        }
+
+        // 코드 생성 폴백 — SerializeField 값 적용
+        var fallback = new GameObject($"StatRow_{label}", typeof(RectTransform),
+                                                          typeof(HorizontalLayoutGroup));
+        fallback.transform.SetParent(statListContainer, false);
+
+        var hlg = fallback.GetComponent<HorizontalLayoutGroup>();
+        hlg.spacing               = statRowSpacing;
+        hlg.childForceExpandWidth = true;
+
+        var rt       = fallback.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0f, 0f);
+        rt.anchorMax = new Vector2(1f, 0f);
+        rt.sizeDelta = new Vector2(0f, statRowHeight);
+        rt.offsetMin = new Vector2(0f, rt.offsetMin.y);
+        rt.offsetMax = new Vector2(0f, rt.offsetMax.y);
+
+        return fallback;
+    }
+
+    // 프리팹 자식에서 TMP 조회 — 없으면 새로 생성
+    private TextMeshProUGUI GetOrCreateTMP(Transform parent, string childName, bool expand)
+    {
+        var t = parent.Find(childName);
+        if (t != null)
+            return t.GetComponent<TextMeshProUGUI>()
+                ?? t.gameObject.AddComponent<TextMeshProUGUI>();
+
+        var obj = new GameObject(childName, typeof(RectTransform), typeof(TextMeshProUGUI));
         obj.transform.SetParent(parent, false);
-
-        var tmp         = obj.GetComponent<TextMeshProUGUI>();
-        tmp.text        = text;
-        tmp.fontSize    = fontSize;
-        tmp.alignment   = align;
-        tmp.color       = color;
-
-        var le          = obj.AddComponent<LayoutElement>();
+        var le           = obj.AddComponent<LayoutElement>();
         le.flexibleWidth = expand ? 1f : 0f;
         le.minWidth      = expand ? 0f : 60f;
+        return obj.GetComponent<TextMeshProUGUI>();
+    }
+
+    // TMP 텍스트·색상은 항상 적용 / 폰트 크기·정렬은 폴백에서만 적용
+    private void ConfigureTMP(TextMeshProUGUI tmp, string text,
+                               int fontSize, TextAlignmentOptions align, Color color)
+    {
+        tmp.text  = text;   // 텍스트 내용: 항상 코드가 채움
+        tmp.color = color;  // 색상: 양수/음수/Cures 등 런타임 판단 → 항상 적용
+
+        if (statRowPrefab == null) // 레이아웃 스타일은 폴백(코드 생성)에서만 적용
+        {
+            tmp.fontSize  = fontSize;
+            tmp.alignment = align;
+        }
+    }
+
+    // 아이템 타입에 불필요한 자식 오브젝트 비활성화
+    private void HideRowChildren(Transform rowT, params string[] namesToHide)
+    {
+        foreach (var n in namesToHide)
+        {
+            var t = rowT.Find(n);
+            if (t != null) t.gameObject.SetActive(false);
+        }
     }
 
     // ═════════════════════════════════════════════════════════
