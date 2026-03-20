@@ -41,6 +41,7 @@ public class InventoryUIManager : MonoBehaviour
     public TextMeshProUGUI  detailNameText;
     public TextMeshProUGUI  detailTypeText;
     public TextMeshProUGUI  detailDescText;
+    [SerializeField] TextMeshProUGUI qtyText;
 
     [Header("Detail Panel — Stat List")]
     public Transform statListContainer;
@@ -389,6 +390,17 @@ public class InventoryUIManager : MonoBehaviour
         if (detailTypeText != null) detailTypeText.text  = item.isDawnChalice ? "Special Consumable" : "Consumable";
         if (detailDescText != null) detailDescText.text  = item.description;
 
+        if (qtyText != null)
+        {
+            if (item.isChargeable)
+                qtyText.text = $"{item.currentCharges}/{item.maxCharges}";
+            else
+            {
+                int qty = consumableInventory != null ? consumableInventory.GetQuantity(item) : 0;
+                qtyText.text = $"x{qty}";
+            }
+        }
+
         BuildConsumableStatRows(item);
         RefreshConsumablePrimaryButton(item);
     }
@@ -419,9 +431,6 @@ public class InventoryUIManager : MonoBehaviour
             string cureList = string.Join(", ", item.cureTypes);
             AddStatRowText("Cures", cureList);
         }
-
-        int qty = consumableInventory != null ? consumableInventory.GetQuantity(item) : 0;
-        AddStatRowFloat("Qty", qty, "");
     }
 
     private void RefreshConsumablePrimaryButton(ConsumableItemSO item)
@@ -432,8 +441,9 @@ public class InventoryUIManager : MonoBehaviour
             primaryButtonText.text = "Use";
 
         bool hasItem  = consumableInventory != null && consumableInventory.HasItem(item);
-        // usableInBattle = false이면 비활성 (맵 전용)
-        primaryButton.interactable = hasItem && item.usableInBattle;
+        bool hasCharge = !item.isChargeable || item.currentCharges > 0;
+        // usableInBattle = false이면 비활성 (맵 전용) / 충전형은 충전 0이면 비활성
+        primaryButton.interactable = hasItem && item.usableInBattle && hasCharge;
         primaryButton.onClick.RemoveAllListeners();
         primaryButton.onClick.AddListener(() => OnUseConsumableClicked(item));
 
@@ -472,7 +482,7 @@ public class InventoryUIManager : MonoBehaviour
         float curAcc = current?.accuracyBonus    ?? 0f;
         float curMp  = current?.mpBonusPercent   ?? 0f;
         if (curAcc != 0f || item.accuracyBonus != 0f)
-            AddCompareRowF("명중률", curAcc * 100f, item.accuracyBonus * 100f, "%");
+            AddCompareRowF("Accuracy", curAcc * 100f, item.accuracyBonus * 100f, "%");
         if (curMp != 0f || item.mpBonusPercent != 0f)
             AddCompareRowF("MP%", curMp * 100f, item.mpBonusPercent * 100f, "%");
     }

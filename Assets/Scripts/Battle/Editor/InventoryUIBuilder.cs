@@ -101,7 +101,7 @@ public static class InventoryUIBuilder
         var header = MakeImage("Header", parent, C_HeaderBg);
         AnchorRect(header, 0f, 1f, 1f, 1f, 0f, -HEADER_HEIGHT);
 
-        var title = MakeTMP("TitleText", header.transform, "인벤토리",
+        var title = MakeTMP("TitleText", header.transform, "Inventory",
                             24, FontStyles.Bold, C_TextWhite, TextAlignmentOptions.Left);
         AnchorRect(title.gameObject, 0.02f, 0.8f, 0f, 1f, 0f, 0f);
 
@@ -120,7 +120,7 @@ public static class InventoryUIBuilder
         AnchorRect(bar, 0f, 1f, 1f, 1f, -topOff - TAB_HEIGHT, -topOff);
 
         // 탭 3개를 수평으로 균등 배치
-        string[] labels    = { "전체", "장비", "소비" };
+        string[] labels    = { "All", "Equipment", "Consumable" };
         Button[] buttons   = new Button[3];
         TextMeshProUGUI[] texts = new TextMeshProUGUI[3];
 
@@ -321,15 +321,15 @@ public static class InventoryUIBuilder
         textVLG.childForceExpandWidth  = true;
         textVLG.childForceExpandHeight = false;
 
-        mgr.detailNameText = MakeTMP("NameText", textGroup.transform, "아이템 이름",
+        mgr.detailNameText = MakeTMP("NameText", textGroup.transform, "Item Name",
                                      20, FontStyles.Bold, C_TextWhite,
                                      TextAlignmentOptions.TopLeft);
 
-        mgr.detailTypeText = MakeTMP("TypeText", textGroup.transform, "장비 종류",
+        mgr.detailTypeText = MakeTMP("TypeText", textGroup.transform, "Item Type",
                                      15, FontStyles.Normal, C_TextDim,
                                      TextAlignmentOptions.TopLeft);
 
-        mgr.detailDescText = MakeTMP("DescText", textGroup.transform, "아이템 설명",
+        mgr.detailDescText = MakeTMP("DescText", textGroup.transform, "Description",
                                      14, FontStyles.Normal, C_TextDim,
                                      TextAlignmentOptions.TopLeft);
         mgr.detailDescText.enableWordWrapping = true;
@@ -386,16 +386,16 @@ public static class InventoryUIBuilder
         actionHLG.childForceExpandWidth  = true;
         actionHLG.childForceExpandHeight = true;
 
-        // 주 액션 버튼 (장착 / 해제)
+        // 주 액션 버튼 (Equip / Unequip)
         var primaryObj   = MakeButton("PrimaryButton", actionRow.transform,
-                                       C_BtnPrimary, "장착", 18,
+                                       C_BtnPrimary, "Equip", 18,
                                        out var primaryText);
         mgr.primaryButton     = primaryObj.GetComponent<Button>();
         mgr.primaryButtonText = primaryText;
 
-        // 버리기 버튼
+        // Discard button
         var discardObj = MakeButton("DiscardButton", actionRow.transform,
-                                     C_BtnDiscard, "버리기", 18,
+                                     C_BtnDiscard, "Discard", 18,
                                      out _);
         mgr.discardButton = discardObj.GetComponent<Button>();
     }
@@ -408,7 +408,7 @@ public static class InventoryUIBuilder
     {
         var closeObj = MakeButton("CloseButton", parent,
                                    new Color(0.14f, 0.14f, 0.20f, 1f),
-                                   "닫기", 18, out _);
+                                   "Close", 18, out _);
 
         var rt             = closeObj.GetComponent<RectTransform>();
         rt.anchorMin       = new Vector2(0f, 0f);

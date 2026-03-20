@@ -48,5 +48,13 @@ namespace AbyssdawnBattle
 
         [Tooltip("Items sharing the same string share a combined stack limit. e.g. HealthPotion")]
         public string stackGroup = "";
+
+        [Header("Charges")]
+        [Tooltip("If true, this item uses a charge system instead of a quantity stack.")]
+        public bool isChargeable = false;
+        [Tooltip("Maximum number of charges when fully refilled.")]
+        public int  maxCharges   = 0;
+        [Tooltip("Current remaining charges.")]
+        public int  currentCharges = 0;
     }
 }
