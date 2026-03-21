@@ -46,6 +46,12 @@ public class InventoryUIManager : MonoBehaviour
     [Header("Detail Panel — Stat List")]
     public Transform statListContainer;
 
+    [Header("상세 패널 — 메인 스탯 / 저주 / 가격")]
+    [SerializeField] TextMeshProUGUI mainStatText;
+    [SerializeField] Transform       statusEffectRow;
+    [SerializeField] TextMeshProUGUI priceText;
+    [SerializeField] GameObject      statusEffectPrefab;
+
     [Header("StatRow — Prefab")]
     [SerializeField] GameObject statRowPrefab;
 
@@ -401,6 +407,14 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
 
+        // 소모품: MainStatText / StatusEffectRow 비활성화
+        if (mainStatText     != null) mainStatText.gameObject.SetActive(false);
+        if (statusEffectRow  != null) statusEffectRow.gameObject.SetActive(false);
+
+        // 판매 가격
+        if (priceText != null)
+            priceText.text = item.sellPrice > 0 ? $"{item.sellPrice} G" : "—";
+
         BuildConsumableStatRows(item);
         RefreshConsumablePrimaryButton(item);
     }
@@ -459,8 +473,73 @@ public class InventoryUIManager : MonoBehaviour
         if (detailTypeText != null) detailTypeText.text = LocalizeType(item.equipmentType);
         if (detailDescText != null) detailDescText.text = item.description;
 
+        // MainStatText — ATK 또는 DEF 큰 글씨
+        if (mainStatText != null)
+        {
+            mainStatText.gameObject.SetActive(true);
+            if (item.attackBonus != 0)
+                mainStatText.text = $"ATK  {(item.attackBonus > 0 ? "+" : "")}{item.attackBonus}";
+            else if (item.defenseBonus != 0)
+                mainStatText.text = $"DEF  {(item.defenseBonus > 0 ? "+" : "")}{item.defenseBonus}";
+            else
+                mainStatText.text = string.Empty;
+        }
+
+        // StatusEffectRow — weaponCurses 표시
+        BuildWeaponCurseRow(item);
+
+        // 판매 가격
+        if (priceText != null)
+            priceText.text = item.sellPrice > 0 ? $"{item.sellPrice} G" : "—";
+
         BuildStatRows(item);
         RefreshPrimaryButton(item);
+    }
+
+    // weaponCurses 개수만큼 statusEffectPrefab을 Instantiate
+    private void BuildWeaponCurseRow(EquipmentData item)
+    {
+        if (statusEffectRow == null) return;
+
+        // 기존 자식 제거
+        foreach (Transform child in statusEffectRow)
+            Destroy(child.gameObject);
+
+        bool hasCurses = item.weaponCurses != null && item.weaponCurses.Count > 0;
+        statusEffectRow.gameObject.SetActive(hasCurses);
+
+        if (!hasCurses || statusEffectPrefab == null) return;
+
+        foreach (var curse in item.weaponCurses)
+        {
+            if (curse == null) continue;
+
+            var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
+
+            // itemIcon — "ItemIcon" 자식 Image 또는 루트 Image
+            var itemIconT = go.transform.Find("ItemIcon");
+            var itemIconImg = itemIconT != null
+                ? itemIconT.GetComponent<Image>()
+                : go.GetComponent<Image>();
+            if (itemIconImg != null) itemIconImg.sprite = curse.itemIcon;
+
+            // flatIcon — "FlatIcon" 자식 Image
+            var flatIconT = go.transform.Find("FlatIcon");
+            if (flatIconT != null)
+            {
+                var flatImg = flatIconT.GetComponent<Image>();
+                if (flatImg != null) flatImg.sprite = curse.flatIcon;
+            }
+
+            // 부여확률 — "ChanceText" 자식 TMP
+            var chanceT = go.transform.Find("ChanceText");
+            if (chanceT != null)
+            {
+                var tmp = chanceT.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                    tmp.text = $"{Mathf.RoundToInt(curse.physicalApplyChance * 100f)}%";
+            }
+        }
     }
 
     private void BuildStatRows(EquipmentData item)

@@ -56,5 +56,9 @@ namespace AbyssdawnBattle
         public int  maxCharges   = 0;
         [Tooltip("Current remaining charges.")]
         public int  currentCharges = 0;
+
+        [Header("Economy")]
+        [Tooltip("Sell price at shop (gold)")]
+        public int sellPrice = 0;
     }
 }
