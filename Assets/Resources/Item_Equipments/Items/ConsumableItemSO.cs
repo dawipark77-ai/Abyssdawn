@@ -48,5 +48,9 @@ namespace AbyssdawnBattle
 
         [Tooltip("Items sharing the same string share a combined stack limit. e.g. HealthPotion")]
         public string stackGroup = "";
+
+        [Header("Economy")]
+        [Tooltip("Sell price at shop (gold)")]
+        public int sellPrice = 0;
     }
 }

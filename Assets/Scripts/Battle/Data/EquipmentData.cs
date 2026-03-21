@@ -129,6 +129,11 @@ namespace AbyssdawnBattle
         [Header("━━━━━━━━━━ Weapon Status Effects ━━━━━━━━━━")]
         [Tooltip("Status effects applied to the enemy on a successful hit.\nAdd StatusEffectSOs from the Curse folder.\nApplication chance is defined by physicalApplyChance inside each SO.")]
         public List<StatusEffectSO> weaponCurses = new List<StatusEffectSO>();
+
+        [Space(10)]
+        [Header("━━━━━━━━━━ Economy ━━━━━━━━━━")]
+        [Tooltip("Sell price at shop (gold)")]
+        public int sellPrice = 0;
     }
 }
 
