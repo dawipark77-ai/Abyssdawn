@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1076499b2ae04d4b94b2bf3dffc4946, type: 3}
+  m_Name: ArmorBreak
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ArmorBreakDataSO
+  icon: {fileID: -3413831905904081113, guid: 98dbaf71e17d87647b41dc5025a2f15b, type: 3}
+  effectName: "\uBC29\uC5B4\uAD6C \uD30C\uAD34"
+  description: "\uC801 \uBC29\uC5B4\uB825\uC758 \uC77C\uC815 \uBE44\uC728\uB9CC\uD07C
+    \uCD94\uAC00 \uACE0\uC815 \uD53C\uD574\uB97C \uC785\uD799\uB2C8\uB2E4."
+  coefficient: 0.02

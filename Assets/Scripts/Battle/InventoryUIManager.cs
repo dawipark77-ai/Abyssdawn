@@ -516,23 +516,24 @@ public class InventoryUIManager : MonoBehaviour
 
             var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
 
-            // itemIcon — "ItemIcon" 자식 Image 또는 루트 Image
-            var itemIconT = go.transform.Find("ItemIcon");
-            var itemIconImg = itemIconT != null
-                ? itemIconT.GetComponent<Image>()
-                : go.GetComponent<Image>();
-            if (itemIconImg != null) itemIconImg.sprite = curse.itemIcon;
-
-            // flatIcon — "FlatIcon" 자식 Image
-            var flatIconT = go.transform.Find("FlatIcon");
-            if (flatIconT != null)
+            // itemIcon — "ItemIcon (Image)" 자식 Image
+            var itemIconT = go.transform.Find("ItemIcon (Image)");
+            if (itemIconT != null)
             {
-                var flatImg = flatIconT.GetComponent<Image>();
-                if (flatImg != null) flatImg.sprite = curse.flatIcon;
+                var img = itemIconT.GetComponent<Image>();
+                if (img != null) img.sprite = curse.itemIcon;
             }
 
-            // 부여확률 — "ChanceText" 자식 TMP
-            var chanceT = go.transform.Find("ChanceText");
+            // flatIcon — "IFaltcon (Image)" 자식 Image
+            var flatIconT = go.transform.Find("IFaltcon (Image)");
+            if (flatIconT != null)
+            {
+                var img = flatIconT.GetComponent<Image>();
+                if (img != null) img.sprite = curse.flatIcon;
+            }
+
+            // 부여확률 — "Percent" 자식 TMP
+            var chanceT = go.transform.Find("Percent");
             if (chanceT != null)
             {
                 var tmp = chanceT.GetComponent<TextMeshProUGUI>();
@@ -600,23 +601,23 @@ public class InventoryUIManager : MonoBehaviour
         float diff      = newVal - curVal;
         Color diffColor = diff > 0f ? StatPos : (diff < 0f ? StatNeg : StatZero);
 
-        string curStr  = FormatStat(curVal, suffix);
-        string newStr  = FormatStat(newVal, suffix);
-        string diffStr = diff == 0f ? ""
-            : diff > 0f ? $" (+{FormatStat(diff, suffix)})"
-                        : $" ({FormatStat(diff, suffix)})";
+        string newStr   = FormatStat(newVal, suffix);
+        string valueStr = diff == 0f
+            ? newStr
+            : diff > 0f ? $"{newStr} (+{FormatStat(diff, suffix)})"
+                        : $"{newStr} ({FormatStat(diff, suffix)})";
 
         var row = SpawnRow(label);
-        HideRowChildren(row.transform, "Value"); // 비교 행에선 Value 슬롯 불필요
+        HideRowChildren(row.transform, "Current", "Arrow", "New"); // 비교 슬롯 비활성화, Value만 사용
 
-        ConfigureTMP(GetOrCreateTMP(row.transform, "Label",   true),
-                     label,            labelFontSize, TextAlignmentOptions.Left,   labelColor);
-        ConfigureTMP(GetOrCreateTMP(row.transform, "Current", false),
-                     curStr,           valueFontSize, TextAlignmentOptions.Right,  StatZero);
-        ConfigureTMP(GetOrCreateTMP(row.transform, "Arrow",   false),
-                     "→",              arrowFontSize, TextAlignmentOptions.Center, arrowColor);
-        ConfigureTMP(GetOrCreateTMP(row.transform, "New",     false),
-                     newStr + diffStr, valueFontSize, TextAlignmentOptions.Left,   diffColor);
+        // Value가 프리팹에서 비활성화 상태일 수 있으므로 명시적으로 활성화
+        var valueT = row.transform.Find("Value");
+        if (valueT != null) valueT.gameObject.SetActive(true);
+
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
+                     label,     labelFontSize, TextAlignmentOptions.Left,  labelColor);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Value", true),
+                     valueStr,  valueFontSize, TextAlignmentOptions.Right, diffColor);
     }
 
     private string FormatStat(float val, string suffix = "")
