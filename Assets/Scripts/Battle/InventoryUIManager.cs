@@ -473,16 +473,16 @@ public class InventoryUIManager : MonoBehaviour
         if (detailTypeText != null) detailTypeText.text = LocalizeType(item.equipmentType);
         if (detailDescText != null) detailDescText.text = item.description;
 
-        // MainStatText — ATK 또는 DEF 큰 글씨
+        // MainStatText — 무기면 ATK, 방어구면 DEF 큰 글씨
         if (mainStatText != null)
         {
             mainStatText.gameObject.SetActive(true);
-            if (item.attackBonus != 0)
-                mainStatText.text = $"ATK  {(item.attackBonus > 0 ? "+" : "")}{item.attackBonus}";
-            else if (item.defenseBonus != 0)
-                mainStatText.text = $"DEF  {(item.defenseBonus > 0 ? "+" : "")}{item.defenseBonus}";
+            bool isWeapon = item.equipmentType == EquipmentType.Hand ||
+                            item.equipmentType == EquipmentType.TwoHanded;
+            if (isWeapon)
+                mainStatText.text = $"ATK  {(item.attackBonus >= 0 ? "+" : "")}{item.attackBonus}";
             else
-                mainStatText.text = string.Empty;
+                mainStatText.text = $"DEF  {(item.defenseBonus >= 0 ? "+" : "")}{item.defenseBonus}";
         }
 
         // StatusEffectRow — weaponCurses 표시
@@ -496,7 +496,7 @@ public class InventoryUIManager : MonoBehaviour
         RefreshPrimaryButton(item);
     }
 
-    // weaponCurses 개수만큼 statusEffectPrefab을 Instantiate
+    // weaponCurses + armorBreakData를 StatusEffectRow에 Instantiate
     private void BuildWeaponCurseRow(EquipmentData item)
     {
         if (statusEffectRow == null) return;
@@ -505,40 +505,79 @@ public class InventoryUIManager : MonoBehaviour
         foreach (Transform child in statusEffectRow)
             Destroy(child.gameObject);
 
-        bool hasCurses = item.weaponCurses != null && item.weaponCurses.Count > 0;
-        statusEffectRow.gameObject.SetActive(hasCurses);
+        Debug.Log("armorBreakData: " + item.armorBreakData);
+        Debug.Log("weaponCurses count: " + (item.weaponCurses != null ? item.weaponCurses.Count : 0));
 
-        if (!hasCurses || statusEffectPrefab == null) return;
+        bool hasCurses    = item.weaponCurses != null && item.weaponCurses.Count > 0;
+        bool hasArmorBreak = item.armorBreakData != null;
+        statusEffectRow.gameObject.SetActive(hasCurses || hasArmorBreak);
 
-        foreach (var curse in item.weaponCurses)
+        if (statusEffectPrefab == null)
         {
-            if (curse == null) continue;
+            Debug.LogWarning("[BuildWeaponCurseRow] statusEffectPrefab is null — Inspector 연결 확인 필요");
+            return;
+        }
 
+        // ── weaponCurses ──────────────────────────────────────
+        if (hasCurses)
+        {
+            foreach (var curse in item.weaponCurses)
+            {
+                if (curse == null) continue;
+
+                var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
+
+                var itemIconT = go.transform.Find("ItemIcon (Image)");
+                if (itemIconT != null)
+                {
+                    var img = itemIconT.GetComponent<Image>();
+                    if (img != null) img.sprite = curse.itemIcon;
+                }
+
+                var flatIconT = go.transform.Find("Faltcon (Image)");
+                if (flatIconT != null)
+                {
+                    var img = flatIconT.GetComponent<Image>();
+                    if (img != null) img.sprite = curse.flatIcon;
+                }
+
+                var chanceT = go.transform.Find("Percent");
+                if (chanceT != null)
+                {
+                    var tmp = chanceT.GetComponent<TextMeshProUGUI>();
+                    if (tmp != null)
+                        tmp.text = $"{Mathf.RoundToInt(curse.physicalApplyChance * 100f)}%";
+                }
+            }
+        }
+
+        // ── armorBreakData ────────────────────────────────────
+        if (hasArmorBreak)
+        {
+            var ab = item.armorBreakData;
             var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
+            Debug.Log("armorBreak prefab spawned: " + go.name);
 
-            // itemIcon — "ItemIcon (Image)" 자식 Image
             var itemIconT = go.transform.Find("ItemIcon (Image)");
             if (itemIconT != null)
             {
                 var img = itemIconT.GetComponent<Image>();
-                if (img != null) img.sprite = curse.itemIcon;
+                if (img != null) img.sprite = ab.icon;
             }
 
-            // flatIcon — "IFaltcon (Image)" 자식 Image
-            var flatIconT = go.transform.Find("IFaltcon (Image)");
+            var flatIconT = go.transform.Find("Faltcon (Image)");
             if (flatIconT != null)
             {
                 var img = flatIconT.GetComponent<Image>();
-                if (img != null) img.sprite = curse.flatIcon;
+                if (img != null) img.sprite = ab.icon;
             }
 
-            // 부여확률 — "Percent" 자식 TMP
             var chanceT = go.transform.Find("Percent");
             if (chanceT != null)
             {
                 var tmp = chanceT.GetComponent<TextMeshProUGUI>();
                 if (tmp != null)
-                    tmp.text = $"{Mathf.RoundToInt(curse.physicalApplyChance * 100f)}%";
+                    tmp.text = $"{Mathf.RoundToInt(ab.coefficient * 100f)}%";
             }
         }
     }
@@ -551,16 +590,23 @@ public class InventoryUIManager : MonoBehaviour
         // 장착중이면 비교 없이 단독 표시, 미장착이면 현재 슬롯 장비와 비교
         EquipmentData current = IsEquipped(item) ? null : GetEquippedInSameSlot(item);
 
-        AddCompareRow("ATK",     current?.attackBonus   ?? 0, item.attackBonus);
-        AddCompareRow("DEF",     current?.defenseBonus  ?? 0, item.defenseBonus);
-        AddCompareRow("MAG",     current?.magicBonus    ?? 0, item.magicBonus);
-        AddCompareRow("Max HP",  current?.hpBonus       ?? 0, item.hpBonus);
-        AddCompareRow("Max MP",  current?.mpBonus       ?? 0, item.mpBonus);
-        AddCompareRow("AGI",     current?.agiBonus      ?? 0, item.agiBonus);
-        AddCompareRow("LCK",     current?.luckBonus     ?? 0, item.luckBonus);
+        bool isWeapon = item.equipmentType == EquipmentType.Hand ||
+                        item.equipmentType == EquipmentType.TwoHanded;
 
-        float curAcc = current?.accuracyBonus    ?? 0f;
-        float curMp  = current?.mpBonusPercent   ?? 0f;
+        // MainStatText에 표시된 대표 수치는 StatList에서 제외
+        if (!isWeapon)
+            AddCompareRow("ATK", current?.attackBonus  ?? 0, item.attackBonus);
+        if (isWeapon)
+            AddCompareRow("DEF", current?.defenseBonus ?? 0, item.defenseBonus);
+
+        AddCompareRow("MAG",    current?.magicBonus ?? 0, item.magicBonus);
+        AddCompareRow("Max HP", current?.hpBonus    ?? 0, item.hpBonus);
+        AddCompareRow("Max MP", current?.mpBonus    ?? 0, item.mpBonus);
+        AddCompareRow("AGI",    current?.agiBonus   ?? 0, item.agiBonus);
+        AddCompareRow("LCK",    current?.luckBonus  ?? 0, item.luckBonus);
+
+        float curAcc = current?.accuracyBonus  ?? 0f;
+        float curMp  = current?.mpBonusPercent ?? 0f;
         if (curAcc != 0f || item.accuracyBonus != 0f)
             AddCompareRowF("Accuracy", curAcc * 100f, item.accuracyBonus * 100f, "%");
         if (curMp != 0f || item.mpBonusPercent != 0f)

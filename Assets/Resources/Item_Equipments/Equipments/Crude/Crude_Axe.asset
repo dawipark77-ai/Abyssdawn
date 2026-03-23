@@ -35,4 +35,4 @@ MonoBehaviour:
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
   weaponCurses: []
-  sellPrice: 0
+  sellPrice: 10

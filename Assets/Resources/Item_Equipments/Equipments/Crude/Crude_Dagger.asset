@@ -34,5 +34,6 @@ MonoBehaviour:
   blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
-  weaponCurses: []
+  weaponCurses:
+  - {fileID: 11400000, guid: 3b7482c44bdc13540ae7b2744dab3443, type: 2}
   sellPrice: 0

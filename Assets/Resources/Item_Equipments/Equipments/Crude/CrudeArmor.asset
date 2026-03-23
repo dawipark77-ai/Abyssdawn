@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: CrudeArmor
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   equipmentName: Crude Armour
-  equipmentIcon: {fileID: -8949577016260091297, guid: 8fba69845c07a0f47b3fa5ab9b6dcc6a, type: 3}
+  equipmentIcon: {fileID: -2757887451555568444, guid: 84a52d7aedf72e84fa02350546f96582, type: 3}
+  flatIcon: {fileID: 0}
   description: Offers some protection, but movement feels rather stiff.
   equipmentType: 2
   isTwoHanded: 0
@@ -24,8 +25,14 @@ MonoBehaviour:
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
+  mpBonusPercent: 0
   agiBonus: -1
   luckBonus: 0
   accuracyBonus: 0
+  armorBreakData: {fileID: 0}
+  armorBreakCoefficient: 0
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
+  weaponCurses: []
+  sellPrice: 0
