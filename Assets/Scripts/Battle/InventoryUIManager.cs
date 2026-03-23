@@ -527,19 +527,21 @@ public class InventoryUIManager : MonoBehaviour
 
                 var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
 
-                var itemIconT = go.transform.Find("ItemIcon (Image)");
+                var itemIconT = go.transform.Find("ItemIcon Image");
                 if (itemIconT != null)
                 {
                     var img = itemIconT.GetComponent<Image>();
                     if (img != null) img.sprite = curse.itemIcon;
                 }
+                else Debug.LogWarning("[CurseRow] 'ItemIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
-                var flatIconT = go.transform.Find("Faltcon (Image)");
+                var flatIconT = go.transform.Find("FlatIcon Image");
                 if (flatIconT != null)
                 {
                     var img = flatIconT.GetComponent<Image>();
                     if (img != null) img.sprite = curse.flatIcon;
                 }
+                else Debug.LogWarning("[CurseRow] 'FlatIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
                 var chanceT = go.transform.Find("Percent");
                 if (chanceT != null)
@@ -556,21 +558,22 @@ public class InventoryUIManager : MonoBehaviour
         {
             var ab = item.armorBreakData;
             var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
-            Debug.Log("armorBreak prefab spawned: " + go.name);
 
-            var itemIconT = go.transform.Find("ItemIcon (Image)");
+            var itemIconT = go.transform.Find("ItemIcon Image");
             if (itemIconT != null)
             {
                 var img = itemIconT.GetComponent<Image>();
                 if (img != null) img.sprite = ab.icon;
             }
+            else Debug.LogWarning("[CurseRow] 'ItemIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
-            var flatIconT = go.transform.Find("Faltcon (Image)");
+            var flatIconT = go.transform.Find("FlatIcon Image");
             if (flatIconT != null)
             {
                 var img = flatIconT.GetComponent<Image>();
                 if (img != null) img.sprite = ab.icon;
             }
+            else Debug.LogWarning("[CurseRow] 'FlatIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
             var chanceT = go.transform.Find("Percent");
             if (chanceT != null)
