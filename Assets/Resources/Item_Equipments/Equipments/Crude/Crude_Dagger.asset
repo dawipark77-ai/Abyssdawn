@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Crude_Dagger
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   equipmentName: Crude Dagger
-  equipmentIcon: {fileID: 0}
+  equipmentIcon: {fileID: 3545242504023248292, guid: 11f0ac674db4a0d45a1e3dc9fadc7389, type: 3}
+  flatIcon: {fileID: 0}
   description: A crudely made dagger. ATK +1, AGI +1.
   equipmentType: 0
   isTwoHanded: 0
@@ -24,8 +25,14 @@ MonoBehaviour:
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
+  mpBonusPercent: 0
   agiBonus: 1
   luckBonus: 0
   accuracyBonus: 0
+  armorBreakData: {fileID: 0}
+  armorBreakCoefficient: 0
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
+  weaponCurses: []
+  sellPrice: 0

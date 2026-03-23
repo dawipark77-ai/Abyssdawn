@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Crude_Greatsword
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   equipmentName: Crude Greatsword
-  equipmentIcon: {fileID: 0}
+  equipmentIcon: {fileID: -5310964954979329048, guid: 7a47fb9a442c1ff41865e5007785d6d7, type: 3}
+  flatIcon: {fileID: 0}
   description: Heavy and rough. ATK +2.
   equipmentType: 1
   isTwoHanded: 1
@@ -24,8 +25,14 @@ MonoBehaviour:
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
+  mpBonusPercent: 0
   agiBonus: 0
   luckBonus: 0
   accuracyBonus: 0
+  armorBreakData: {fileID: 0}
+  armorBreakCoefficient: 0
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
+  weaponCurses: []
+  sellPrice: 0
