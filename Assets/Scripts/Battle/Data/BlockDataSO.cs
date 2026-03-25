@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AbyssdawnBattle
 {
@@ -18,8 +19,13 @@ namespace AbyssdawnBattle
     public class BlockDataSO : ScriptableObject
     {
         [Header("━━━━━━━━━━ 표시 정보 ━━━━━━━━━━")]
+        [FormerlySerializedAs("icon")]
         [Tooltip("아이템창에 표시될 아이콘")]
-        public Sprite icon;
+        public Sprite itemIcon;
+
+        [FormerlySerializedAs("flaticon")]
+        [Tooltip("효과 설명에 사용될 Flaticon 이미지")]
+        public Sprite flatIcon;
 
         [Tooltip("효과 이름 (아이템창 표시용)")]
         public string effectName = "블록";

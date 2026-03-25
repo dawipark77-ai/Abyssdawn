@@ -527,28 +527,48 @@ public class InventoryUIManager : MonoBehaviour
 
                 var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
 
-                var itemIconT = go.transform.Find("ItemIcon Image");
+                var itemIconT = go.transform.Find("ItemIcon");
                 if (itemIconT != null)
                 {
                     var img = itemIconT.GetComponent<Image>();
                     if (img != null) img.sprite = curse.itemIcon;
                 }
-                else Debug.LogWarning("[CurseRow] 'ItemIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
+                else Debug.LogWarning("[CurseRow] 'ItemIcon' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
-                var flatIconT = go.transform.Find("FlatIcon Image");
+                var flatIconT = go.transform.Find("FlatIcon");
                 if (flatIconT != null)
                 {
                     var img = flatIconT.GetComponent<Image>();
                     if (img != null) img.sprite = curse.flatIcon;
                 }
-                else Debug.LogWarning("[CurseRow] 'FlatIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
+                else Debug.LogWarning("[CurseRow] 'FlatIcon' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
-                var chanceT = go.transform.Find("Percent");
-                if (chanceT != null)
+                var statTextT = go.transform.Find("StatText");
+                if (statTextT != null)
                 {
-                    var tmp = chanceT.GetComponent<TextMeshProUGUI>();
+                    var tmp = statTextT.GetComponent<TextMeshProUGUI>();
                     if (tmp != null)
-                        tmp.text = $"{Mathf.RoundToInt(curse.physicalApplyChance * 100f)}%";
+                    {
+                        string text;
+                        if (curse.physicalDamagePerTurn > 0f)
+                        {
+                            float dmg = curse.physicalDamagePerTurn * 100f;
+                            int   dur = curse.physicalDuration;
+                            int   chc = Mathf.RoundToInt(curse.physicalApplyChance * 100f);
+                            text = $"<color=#E24B4A>DMG {dmg:F1}%</color>  <color=#888780>{dur}TRN</color>  <color=#D9BF66>CHC {chc}%</color>";
+                            if (curse.selfApplyChance > 0f)
+                            {
+                                int slf = Mathf.RoundToInt(curse.selfApplyChance * 100f);
+                                text += $"  <color=#EF9F27>SLF {slf}%</color>";
+                            }
+                        }
+                        else
+                        {
+                            int chc = Mathf.RoundToInt(curse.physicalApplyChance * 100f);
+                            text = $"<color=#D9BF66>CHC {chc}%</color>";
+                        }
+                        tmp.text = text;
+                    }
                 }
             }
         }
@@ -559,28 +579,33 @@ public class InventoryUIManager : MonoBehaviour
             var ab = item.armorBreakData;
             var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
 
-            var itemIconT = go.transform.Find("ItemIcon Image");
+            var itemIconT = go.transform.Find("ItemIcon");
+            Debug.Log("ItemIcon found: " + itemIconT);
             if (itemIconT != null)
             {
                 var img = itemIconT.GetComponent<Image>();
-                if (img != null) img.sprite = ab.icon;
+                if (img != null) img.sprite = ab.itemIcon;
             }
-            else Debug.LogWarning("[CurseRow] 'ItemIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
+            else Debug.LogWarning("[CurseRow] 'ItemIcon' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
-            var flatIconT = go.transform.Find("FlatIcon Image");
+            var flatIconT = go.transform.Find("FlatIcon");
+            Debug.Log("FlatIcon found: " + flatIconT);
             if (flatIconT != null)
             {
                 var img = flatIconT.GetComponent<Image>();
-                if (img != null) img.sprite = ab.icon;
+                if (img != null) img.sprite = ab.flatIcon;
             }
-            else Debug.LogWarning("[CurseRow] 'FlatIcon Image' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
+            else Debug.LogWarning("[CurseRow] 'FlatIcon' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
-            var chanceT = go.transform.Find("Percent");
-            if (chanceT != null)
+            var statTextT = go.transform.Find("StatText");
+            if (statTextT != null)
             {
-                var tmp = chanceT.GetComponent<TextMeshProUGUI>();
+                var tmp = statTextT.GetComponent<TextMeshProUGUI>();
                 if (tmp != null)
-                    tmp.text = $"{Mathf.RoundToInt(ab.coefficient * 100f)}%";
+                {
+                    float coef = ab.coefficient * 100f;
+                    tmp.text = $"<color=#E24B4A>{coef:F1}%</color>/HIT";
+                }
             }
         }
     }

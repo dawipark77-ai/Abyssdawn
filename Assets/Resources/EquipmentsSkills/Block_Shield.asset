@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c230971d5fe4d6748933042f1e9cb3da, type: 3}
   m_Name: Block_Shield
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.BlockDataSO
+  icon: {fileID: -5734956499762448794, guid: 84fa5e3c512886e428998305a0176d5b, type: 3}
+  flaticon: {fileID: 0}
+  effectName: "\uBE14\uB85D"
+  description: "\uC801\uC758 \uACF5\uACA9\uC744 \uB9C9\uC544 \uD53C\uD574\uB97C \uAC10\uC18C\uC2DC\uD0B5\uB2C8\uB2E4."
   baseBlockChance: 0.05
   blockDefenseCoefficient: 0.3
   blockDamageReduction: 1
