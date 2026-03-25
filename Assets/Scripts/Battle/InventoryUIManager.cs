@@ -555,7 +555,7 @@ public class InventoryUIManager : MonoBehaviour
                             float dmg = curse.physicalDamagePerTurn * 100f;
                             int   dur = curse.physicalDuration;
                             int   chc = Mathf.RoundToInt(curse.physicalApplyChance * 100f);
-                            text = $"<color=#E24B4A>DMG {dmg:F1}%</color>  <color=#888780>{dur}TRN</color>  <color=#D9BF66>CHC {chc}%</color>";
+                            text = $"<color=#EF9F27>◆</color> <color=#E24B4A>DMG {dmg:F1}%</color>  <color=#888780>{dur}TRN</color>  <color=#D9BF66>CHC {chc}%</color>";
                             if (curse.selfApplyChance > 0f)
                             {
                                 int slf = Mathf.RoundToInt(curse.selfApplyChance * 100f);
@@ -565,7 +565,7 @@ public class InventoryUIManager : MonoBehaviour
                         else
                         {
                             int chc = Mathf.RoundToInt(curse.physicalApplyChance * 100f);
-                            text = $"<color=#D9BF66>CHC {chc}%</color>";
+                            text = $"<color=#EF9F27>◆</color> <color=#D9BF66>CHC {chc}%</color>";
                         }
                         tmp.text = text;
                     }
@@ -604,7 +604,7 @@ public class InventoryUIManager : MonoBehaviour
                 if (tmp != null)
                 {
                     float coef = ab.coefficient * 100f;
-                    tmp.text = $"<color=#E24B4A>{coef:F1}%</color>/HIT";
+                    tmp.text = $"<color=#EF9F27>◆</color> <color=#E24B4A>{coef:F1}%</color>/HIT";
                 }
             }
         }
@@ -689,10 +689,13 @@ public class InventoryUIManager : MonoBehaviour
         if (valueT != null) valueT.gameObject.SetActive(true);
 
         ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
-                     label,     labelFontSize, TextAlignmentOptions.Left,  labelColor);
+                     NormalLabel(label), labelFontSize, TextAlignmentOptions.Left,  labelColor);
         ConfigureTMP(GetOrCreateTMP(row.transform, "Value", true),
-                     valueStr,  valueFontSize, TextAlignmentOptions.Right, diffColor);
+                     valueStr,           valueFontSize, TextAlignmentOptions.Right, diffColor);
     }
+
+    private static string NormalLabel(string label)  => $"<color=#888780>◆</color> {label}";
+    private static string SpecialLabel(string label) => $"<color=#D9BF66>◆</color> {label}";
 
     private string FormatStat(float val, string suffix = "")
         => val % 1 == 0 ? $"{(int)val}{suffix}" : $"{val:F1}{suffix}";
@@ -709,9 +712,9 @@ public class InventoryUIManager : MonoBehaviour
         HideRowChildren(row.transform, "Current", "Arrow", "New"); // 단순 행엔 비교 슬롯 불필요
 
         ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
-                     label, labelFontSize, TextAlignmentOptions.Left,  labelColor);
+                     NormalLabel(label), labelFontSize, TextAlignmentOptions.Left,  labelColor);
         ConfigureTMP(GetOrCreateTMP(row.transform, "Value", false),
-                     val,   valueFontSize, TextAlignmentOptions.Right, color);
+                     val,                valueFontSize, TextAlignmentOptions.Right, color);
     }
 
     private void AddStatRowText(string label, string value)
@@ -720,9 +723,20 @@ public class InventoryUIManager : MonoBehaviour
         HideRowChildren(row.transform, "Current", "Arrow", "New"); // 단순 행엔 비교 슬롯 불필요
 
         ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
-                     label, labelFontSize, TextAlignmentOptions.Left,  labelColor);
+                     NormalLabel(label), labelFontSize, TextAlignmentOptions.Left,  labelColor);
         ConfigureTMP(GetOrCreateTMP(row.transform, "Value", false),
-                     value, valueFontSize, TextAlignmentOptions.Right, valueText);
+                     value,              valueFontSize, TextAlignmentOptions.Right, valueText);
+    }
+
+    private void AddSpecialStatRowText(string label, string value)
+    {
+        var row = SpawnRow(label);
+        HideRowChildren(row.transform, "Current", "Arrow", "New");
+
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
+                     SpecialLabel(label), labelFontSize, TextAlignmentOptions.Left,  labelColor);
+        ConfigureTMP(GetOrCreateTMP(row.transform, "Value", false),
+                     value,               valueFontSize, TextAlignmentOptions.Right, valueText);
     }
 
     private void AddStatRowFloat(string label, float value)
@@ -735,9 +749,9 @@ public class InventoryUIManager : MonoBehaviour
         HideRowChildren(row.transform, "Current", "Arrow", "New"); // 단순 행엔 비교 슬롯 불필요
 
         ConfigureTMP(GetOrCreateTMP(row.transform, "Label", true),
-                     label, labelFontSize, TextAlignmentOptions.Left,  labelColor);
+                     NormalLabel(label), labelFontSize, TextAlignmentOptions.Left,  labelColor);
         ConfigureTMP(GetOrCreateTMP(row.transform, "Value", false),
-                     val,   valueFontSize, TextAlignmentOptions.Right, color);
+                     val,                valueFontSize, TextAlignmentOptions.Right, color);
     }
 
     // ── StatRow 헬퍼 ─────────────────────────────────────────
