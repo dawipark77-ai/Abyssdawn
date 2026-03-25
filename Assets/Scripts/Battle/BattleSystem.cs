@@ -1,4 +1,5 @@
 using UnityEngine;
+using AbyssdawnBattle;
 
 public class BattleSystem : MonoBehaviour
 {
@@ -155,11 +156,24 @@ public class BattleSystem : MonoBehaviour
     }
 
     // -------------------- 아이템 사용 --------------------
-    public int UsePotion()
+    public int UsePotion(ConsumableItemSO item = null)
     {
-        if (battleEnded || potionCount <= 0) return 0;
+        if (battleEnded) return 0;
 
-        potionCount--;
+        bool used = false;
+        if (ConsumableInventory.Instance != null && item != null)
+        {
+            used = ConsumableInventory.Instance.UseItem(item);
+            potionCount = ConsumableInventory.Instance.GetQuantity(item);
+        }
+        else if (potionCount > 0)
+        {
+            potionCount--;
+            used = true;
+        }
+
+        if (!used) return 0;
+
         player.Heal(potionHealAmount);
         return potionHealAmount;
     }

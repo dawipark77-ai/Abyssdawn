@@ -64,6 +64,10 @@ public class BattleManager : MonoBehaviour
     public int potionCount = 3;
     public bool battleEnded = false;
 
+    [Header("Consumable Inventory")]
+    [Tooltip("전투 중 사용할 아이템 SO (인벤토리 UI에서 선택 시 자동 설정).")]
+    public ConsumableItemSO selectedConsumableItem;
+
     [Header("Replay System")]
     public BattleRecorder battleRecorder;
 
@@ -169,6 +173,7 @@ public class BattleManager : MonoBehaviour
         public SkillData skill;
         public int itemHealAmount;
         public bool consumesPotion;
+        public ConsumableItemSO usedItem;
     }
 
     private List<AllyCommand> pendingCommands = new List<AllyCommand>();
@@ -526,6 +531,9 @@ public class BattleManager : MonoBehaviour
 
         // 파티 초기화
         InitializeParty();
+
+        // 전투 시작 시 potionCount를 인벤토리와 동기화
+        SyncPotionCount();
 
         // 스킬 캐시 초기화
         CacheHeroSkills();
@@ -1722,7 +1730,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void QueueAllyCommand(PlayerStats actor, string actionType, EnemyStats targetEnemy = null, SkillData skill = null, int itemHeal = 0, bool consumesPotion = false)
+    private void QueueAllyCommand(PlayerStats actor, string actionType, EnemyStats targetEnemy = null, SkillData skill = null, int itemHeal = 0, bool consumesPotion = false, ConsumableItemSO usedItem = null)
     {
         if (actor == null) return;
 
@@ -1733,7 +1741,8 @@ public class BattleManager : MonoBehaviour
             targetEnemy = targetEnemy,
             skill = skill,
             itemHealAmount = itemHeal,
-            consumesPotion = consumesPotion
+            consumesPotion = consumesPotion,
+            usedItem = usedItem
         };
 
         pendingCommands.Add(command);
@@ -2065,11 +2074,17 @@ public class BattleManager : MonoBehaviour
                 }
                 break;
             case "item":
-                if (cmd.consumesPotion && potionCount > 0)
+                if (cmd.consumesPotion && cmd.usedItem != null)
                 {
-                    cmd.actor.Heal(cmd.itemHealAmount);
-                    potionCount--;
-                    AddMessage($"{cmd.actor.playerName} used a potion and recovered {cmd.itemHealAmount} HP!");
+                    bool used = ConsumableInventory.Instance != null
+                        ? ConsumableInventory.Instance.UseItem(cmd.usedItem)
+                        : potionCount-- > 0;
+                    if (used)
+                    {
+                        cmd.actor.Heal(cmd.itemHealAmount);
+                        SyncPotionCount();
+                        AddMessage($"{cmd.actor.playerName} used {cmd.usedItem.itemName} and recovered {cmd.itemHealAmount} HP!");
+                    }
                 }
                 break;
             case "defend":
@@ -2628,15 +2643,21 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        if (potionCount <= 0)
+        if (selectedConsumableItem == null)
+        {
+            AddMessage("No item selected!");
+            return;
+        }
+
+        if (!HasPotionAvailable())
         {
             AddMessage("No potions left!");
             return;
         }
 
         turnInProgress = true;
-        int heal = 20;
-        QueueAllyCommand(player, "item", null, null, heal, true);
+        int heal = Mathf.RoundToInt(selectedConsumableItem.hpRecoveryPercent * player.maxHP);
+        QueueAllyCommand(player, "item", null, null, heal, true, selectedConsumableItem);
         HideBackButton();
     }
 
@@ -4611,8 +4632,22 @@ private void CacheHeroSkills()
         UpdateStatusUI();
     }
     
+    private void SyncPotionCount()
+    {
+        if (ConsumableInventory.Instance != null && selectedConsumableItem != null)
+            potionCount = ConsumableInventory.Instance.GetQuantity(selectedConsumableItem);
+    }
+
+    private bool HasPotionAvailable()
+    {
+        if (ConsumableInventory.Instance != null && selectedConsumableItem != null)
+            return ConsumableInventory.Instance.HasItem(selectedConsumableItem);
+        return potionCount > 0;
+    }
+
     private void UpdatePotionUI()
     {
+        SyncPotionCount();
         if (potionCountText != null)
             potionCountText.text = $"Potions: {potionCount}";
     }

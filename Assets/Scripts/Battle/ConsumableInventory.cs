@@ -7,6 +7,15 @@ using AbyssdawnBattle;
 /// </summary>
 public class ConsumableInventory : MonoBehaviour
 {
+    // ─── 싱글톤 ───────────────────────────────────────────────
+    public static ConsumableInventory Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
+
     // ─── 런타임 슬롯 ──────────────────────────────────────────
     [System.Serializable]
     public class ConsumableSlot
@@ -101,6 +110,16 @@ public class ConsumableInventory : MonoBehaviour
 
     public bool HasItem(ConsumableItemSO item, int count = 1)
         => GetQuantity(item) >= count;
+
+    /// <summary>
+    /// 아이템 1개를 사용합니다. 수량이 있으면 감소 처리 후 true를 반환합니다.
+    /// </summary>
+    public bool UseItem(ConsumableItemSO item)
+    {
+        if (item == null) return false;
+        if (!HasItem(item)) return false;
+        return RemoveItem(item, 1);
+    }
 
     /// <summary>
     /// stackGroup 합산 수량을 반환합니다.
