@@ -26,7 +26,7 @@ MonoBehaviour:
   hpBonus: 0
   mpBonus: 0
   mpBonusPercent: 0
-  agiBonus: 0
+  agiBonus: -2
   luckBonus: 0
   accuracyBonus: 0
   armorBreakData: {fileID: 0}

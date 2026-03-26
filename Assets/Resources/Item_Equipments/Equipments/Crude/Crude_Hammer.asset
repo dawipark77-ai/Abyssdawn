@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Crude_Hammer
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   equipmentName: Crude Hammer
-  equipmentIcon: {fileID: 0}
+  equipmentIcon: {fileID: -379583048045806632, guid: a134f401465df9d4f9a341866225b9b5, type: 3}
+  flatIcon: {fileID: 0}
   description: An unbalanced hammer. ATK +2.
   equipmentType: 0
   isTwoHanded: 0
@@ -24,8 +25,14 @@ MonoBehaviour:
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
-  agiBonus: 0
+  mpBonusPercent: 0
+  agiBonus: -2
   luckBonus: 0
   accuracyBonus: 0
+  armorBreakData: {fileID: 0}
+  armorBreakCoefficient: 0
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
+  weaponCurses: []
+  sellPrice: 0
