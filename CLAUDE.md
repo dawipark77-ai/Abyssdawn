@@ -245,6 +245,8 @@ Assets/
 | `SwordSkillTreeManager.cs` | Sword Lore 트리 매니저. LP 관리. 에디터 플레이모드 백업/복원 |
 | `SkillDetailPopup.cs` | 스킬 상세 팝업. Learn 버튼. 배경 클릭/ESC 닫기 |
 | `LoreTreePanelController.cs` | Lore 트리 패널 닫기 버튼 + ESC 키 |
+| `LoreCategoryScroller.cs` | 카테고리 아이콘 띠 좌우 스크롤. Viewport+Content+Mask 구조. BtnTreePrev/Next로 한 칸씩 이동. 첫/마지막 아이콘 양끝 정렬. |
+| `LoreCategoryTabController.cs` | 카테고리 버튼(WEAPONARY/UTILITY/Arcane Mystery 등) 탭 전환. 클릭 시 해당 Viewport만 열고 나머지 닫음. 토글 지원. |
 
 ---
 
@@ -458,4 +460,213 @@ private void SimulateBalance() { ... }
 
 ---
 
-*최종 수정: 2026-03-21*
+## 13. 구현 대기 설계 명세 (미구현 — 반드시 구현할 것)
+
+> 이 섹션은 기획 확정된 시스템 중 아직 코드가 없는 항목을 기록합니다.
+> 새 대화에서도 이 내용을 기반으로 구현을 진행하세요.
+
+---
+
+### 13-A. 마법 역효과(Backlash) 시스템
+
+**핵심 개념:**
+강력한 마법 스킬에는 성공 시에도 **역효과(Backlash)** 가 일정 확률로 발생한다.
+역효과는 시전자에게 HP 손실, MP 손실, 상태이상 부여 등 페널티를 준다.
+역효과 확률은 스킬 SO, 장비, 패시브, 액티브 스킬로 조절할 수 있다.
+
+**`SkillData` 추가 필드 (구현 시):**
+```csharp
+[Header("━━━━━━━━━━ Magic Backlash ━━━━━━━━━━")]
+[Tooltip("역효과 발생 기본 확률 (0.0 ~ 1.0). 0이면 역효과 없음")]
+[Range(0f, 1f)]
+public float backlashChance = 0f;
+
+[Tooltip("역효과 타입 (HP손실/MP손실/상태이상/기절 등)")]
+public BacklashType backlashType = BacklashType.None;
+
+[Tooltip("역효과 강도 (HP손실이면 최대HP 대비 비율, 예: 0.1 = 10%)")]
+[Range(0f, 1f)]
+public float backlashMagnitude = 0f;
+
+[Tooltip("역효과로 부여되는 상태이상 (BacklashType.StatusEffect일 때)")]
+public StatusEffectSO backlashStatusEffect;
+```
+
+```csharp
+public enum BacklashType
+{
+    None,           // 역효과 없음
+    HPLoss,         // 최대HP × magnitude 만큼 HP 손실
+    MPLoss,         // 최대MP × magnitude 만큼 MP 손실
+    StatusEffect,   // 상태이상 부여 (backlashStatusEffect 참조)
+    Stun,           // 다음 턴 행동 불가
+    HPAndMP,        // HP + MP 동시 손실
+}
+```
+
+**역효과 발생 계산 흐름 (BattleSystem.cs 내):**
+```
+최종 역효과 확률 = backlashChance
+                 × (1 - backlashSuppression)  ← 장비/패시브/액티브로 감소
+최소 0, 최대 backlashChance (억제는 감소만, 0 이하로는 안 내려감)
+```
+
+---
+
+### 13-B. 마법 관련 장비 (역효과 억제 & 마법 증폭)
+
+**`EquipmentData.cs`에 추가할 필드 (구현 시):**
+```csharp
+[Space(10)]
+[Header("━━━━━━━━━━ Magic System ━━━━━━━━━━")]
+[Tooltip("마법 증폭 배율. 1.0 = 기본, 1.2 = 마법 데미지 +20%")]
+[Range(1f, 3f)]
+public float magicAmplify = 1f;
+
+[Tooltip("역효과 억제율 (0.0 ~ 1.0). 0.3 = 역효과 확률 30% 감소")]
+[Range(0f, 1f)]
+public float backlashSuppression = 0f;
+```
+
+**장비 예시 목록 (SO 제작 예정):**
+
+| 장비명 | 타입 | magicAmplify | backlashSuppression | 비고 |
+|--------|------|:---:|:---:|------|
+| Arcane Staff | TwoHanded (무기) | 1.4 | 0.0 | 순수 화력, 역효과 그대로 |
+| Spellblade | Hand (무기) | 1.2 | 0.1 | 마법+근접 혼합, 소폭 억제 |
+| Null-Weave Robe | Cloth Armour | 1.1 | 0.3 | 마법사용 천 갑옷, 억제 중점 |
+| Runed Leather | Leather Armour | 1.0 | 0.2 | 기동성 유지, 억제 소폭 |
+| Mana Talisman | Accessory | 1.15 | 0.15 | 악세사리, 균형형 |
+| Backlash Ward | Accessory | 1.0 | 0.4 | 억제 특화, 증폭 없음 |
+| Amplification Gem | Accessory | 1.25 | 0.0 | 순수 증폭, 억제 없음 |
+
+**누적 계산 방식:**
+- `magicAmplify` : 장비 여러 개를 곱셈으로 합산
+  - ex) Staff(1.4) × Talisman(1.15) = ×1.61 최종 마법 배율
+- `backlashSuppression` : 장비 억제율을 **가산** 후 최대 캡 적용 (최대 0.8 → 최소 20% 역효과는 남음)
+  - ex) Robe(0.3) + Ward(0.4) = 0.7 억제 → 역효과 확률 70% 감소
+
+---
+
+### 13-C. 마법사/마법학 패시브 — 역효과 억제
+
+**패시브명:** `Mage_BacklashResilience` (역효과 저항)
+
+**설계:**
+- `PassiveData` SO로 구현
+- `backlashSuppression` 플로트 필드 추가 필요 (현재 PassiveData에 없음)
+- 티어에 따라 억제율 증가
+
+| 티어 | 패시브명 | 억제율 | 조건 |
+|------|---------|:---:|------|
+| T1 | Backlash Resilience I | 0.10 | 마법학 기초 |
+| T2 | Backlash Resilience II | 0.20 | T1 이후 |
+| T3 | Backlash Resilience III | 0.30 | T2 이후 |
+
+**`PassiveData.cs` 추가 필드 (구현 시):**
+```csharp
+[Header("역효과 억제")]
+[Tooltip("마법 역효과 발생 확률 감소율 (0.0 ~ 1.0)")]
+[Range(0f, 1f)]
+public float backlashSuppression = 0f;
+```
+
+**최종 역효과 억제 합산 (PlayerStats.cs):**
+```csharp
+public float TotalBacklashSuppression =>
+    GetEquipmentBacklashSuppression()   // 장비 합산
+    + GetPassiveBacklashSuppression();  // 패시브 합산
+// 최대 0.8 캡
+```
+
+---
+
+### 13-D. 마법사/마법학 액티브 — 역효과 억제 스킬
+
+**스킬명:** `Mana Stabilize` (마나 안정화)
+
+**설계:**
+- `SkillData` SO로 구현 (`Resources/Skills/` 또는 Path Mage 트리)
+- 사용 후 **1턴 동안** 자신(또는 파티)의 역효과 발동률을 크게 감소
+- 역효과가 완전히 사라지지는 않음 (리스크 설계 의도 유지)
+- 1번 사용하면 효과가 소멸 (지속 아님, 소모형 버프)
+
+| 항목 | 값 |
+|------|-----|
+| 타입 | Active (액티브 스킬) |
+| MP 비용 | 15~20 |
+| 대상 | Self (자신) 또는 Ally (단일 아군) |
+| 지속 | 1턴 |
+| 억제율 | 이번 턴 역효과 확률 −70% |
+| 쿨다운 | 3턴 (구현 시 `SkillData`에 cooldown 필드 필요) |
+| 트리 위치 | Path: Mage T2 또는 독립 마법학 Lore |
+
+**구현 방식 (BattleManager.cs):**
+```csharp
+// 버프 상태 추적용 (캐릭터별)
+private Dictionary<int, int> manaStabilizeTurnsLeft; // slotIndex → 남은 턴
+
+// 역효과 계산 시:
+float stabilizeBonus = (manaStabilizeTurnsLeft[slotIndex] > 0) ? 0.7f : 0f;
+float finalBacklashChance = skill.backlashChance
+    * (1f - (character.TotalBacklashSuppression + stabilizeBonus));
+```
+
+---
+
+### 13-E. 활(Bow) 견제사격 (Suppression Shot)
+
+**스킬명:** `Suppression Shot` (견제사격)
+
+**핵심 규칙:**
+1. 적의 **행동이 캔슬되지 않음** — 적은 자기 턴에 정상적으로 행동함
+2. 단, 적이 행동하기 **직전** (턴 시작 타이밍)에 자동으로 공격을 삽입함
+3. 공격에 **크리티컬 적용** 가능 (Luck 기반)
+4. 데미지를 입은 적이 이미 죽으면 행동하지 못함 (취소 아닌 자연스러운 처리)
+
+**설계:**
+| 항목 | 값 |
+|------|-----|
+| 무기 | 활(Bow) 전용 (`allowedCasterSlots = Back` 권장) |
+| 타겟 | 적 단일 |
+| 공격 배율 | 0.7x (약한 데미지 — 메인 딜이 아닌 견제) |
+| 크리티컬 | 적용 (Luck 기반, 정상 크리티컬 계산) |
+| MP 비용 | 0 (기본 스킬) 또는 소량 |
+| 효과 | 적 행동 전 先타격. 행동은 유지됨 |
+| 트리 위치 | Bow Lore T1~T2 |
+
+**구현 방식 (BattleManager.cs):**
+```csharp
+// 현재 턴 순서 큐를 순회할 때:
+// 적 행동 처리 직전에 견제사격 버프가 있는 아군이 있으면 先공격 삽입
+
+// AllyCommand 또는 별도 플래그로 관리:
+// isSuppressShot = true → 적 액션 직전 인터셉트 타이밍에 발동
+// 행동 후 적 액션은 그대로 진행
+```
+
+**턴 타이밍 흐름:**
+```
+[아군 A 행동] → [아군 B 행동] → [적 X 행동 시작 직전]
+  ↳ 견제사격 발동 (先타격, 크리티컬 가능)
+→ [적 X 행동 진행] (취소 안 됨, HP가 0이면 사망으로 자연 종료)
+```
+
+---
+
+### 13-F. 미구현 항목 구현 우선순위
+
+| 우선순위 | 항목 | 의존 시스템 |
+|:---:|------|------|
+| 1 | `SkillData.backlashChance` 필드 추가 | SkillData.cs |
+| 2 | `EquipmentData.magicAmplify / backlashSuppression` 추가 | EquipmentData.cs |
+| 3 | `PassiveData.backlashSuppression` 추가 | PassiveData.cs |
+| 4 | `PlayerStats.TotalBacklashSuppression` 계산 | PlayerStats.cs |
+| 5 | BattleSystem에서 역효과 발동 로직 구현 | BattleSystem.cs |
+| 6 | Mana Stabilize 스킬 SO 및 버프 턴 관리 | BattleManager.cs |
+| 7 | 마법 장비 SO 일괄 제작 | EquipmentData SO |
+| 8 | Bow 견제사격 스킬 SO 및 인터셉트 타이밍 | BattleManager.cs |
+
+---
+
+*최종 수정: 2026-03-29*
