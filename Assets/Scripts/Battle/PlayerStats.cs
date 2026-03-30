@@ -27,6 +27,9 @@ public class PlayerStats : MonoBehaviour
     private bool _isInitialized = false; // 초기화 완료 플래그
     private static bool _isFirstLaunch = true; // 앱 첫 실행 여부
 
+    // [LastStand] 전투당 1회 사망 회피 (Human 종의 특성)
+    private bool _lastStandUsed = false;
+
     // [NEW] 이벤트 시스템 - HP/MP/스탯이 변경될 때마다 발동
     public static event Action OnStatusChanged;
 
@@ -65,7 +68,8 @@ public class PlayerStats : MonoBehaviour
             int baseValue = (characterClass != null) ? characterClass.GetFinalMaxHP(baseHP) : baseHP;
             int passiveBonus = GetPassiveHPBonus();
             int equipmentBonus = GetEquipmentHPBonus();
-            return baseValue + passiveBonus + equipmentBonus;
+            int traitBonus = GetTraitBonus(PassiveBonusStat.HP);
+            return baseValue + passiveBonus + equipmentBonus + traitBonus;
         }
     }
 
@@ -87,7 +91,7 @@ public class PlayerStats : MonoBehaviour
         {
             int pureBase = baseAttack + AllocatedAttack;
             int baseValue = (characterClass != null) ? characterClass.GetFinalAttack(pureBase) : pureBase;
-            return baseValue + GetPassiveAttackBonus() + GetEquipmentAttackBonus();
+            return baseValue + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetTraitBonus(PassiveBonusStat.Attack);
         }
     }
 
@@ -97,7 +101,7 @@ public class PlayerStats : MonoBehaviour
         {
             int pureBase = baseDefense + AllocatedDefense;
             int baseValue = (characterClass != null) ? characterClass.GetFinalDefense(pureBase) : pureBase;
-            return baseValue + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus();
+            return baseValue + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus() + GetTraitBonus(PassiveBonusStat.Defense);
         }
     }
 
@@ -107,7 +111,7 @@ public class PlayerStats : MonoBehaviour
         {
             int pureBase = baseMagic + AllocatedMagic;
             int baseValue = (characterClass != null) ? characterClass.GetFinalMagic(pureBase) : pureBase;
-            return baseValue + GetPassiveMagicBonus() + GetEquipmentMagicBonus();
+            return baseValue + GetPassiveMagicBonus() + GetEquipmentMagicBonus() + GetTraitBonus(PassiveBonusStat.Magic);
         }
     }
 
@@ -117,7 +121,7 @@ public class PlayerStats : MonoBehaviour
         {
             int pureBase = baseAgility + AllocatedAgility;
             int baseValue = (characterClass != null) ? characterClass.GetFinalAgility(pureBase) : pureBase;
-            return baseValue + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus();
+            return baseValue + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility);
         }
     }
 
@@ -127,7 +131,7 @@ public class PlayerStats : MonoBehaviour
         {
             int pureBase = baseLuck + AllocatedLuck;
             int baseValue = (characterClass != null) ? characterClass.GetFinalLuck(pureBase) : pureBase;
-            return baseValue + GetPassiveLuckBonus() + GetEquipmentLuckBonus();
+            return baseValue + GetPassiveLuckBonus() + GetEquipmentLuckBonus() + GetTraitBonus(PassiveBonusStat.Luck);
         }
     }
 
@@ -458,6 +462,22 @@ public class PlayerStats : MonoBehaviour
     /// <summary>
     /// 장비로부터 HP 보정치를 가져옵니다.
     /// </summary>
+    private int GetTraitBonus(PassiveBonusStat stat)
+    {
+        if (statData == null || statData.activeTrait == null) return 0;
+        var t = statData.activeTrait;
+        switch (stat)
+        {
+            case PassiveBonusStat.HP:      return t.hpBonus;
+            case PassiveBonusStat.Attack:  return t.attackBonus;
+            case PassiveBonusStat.Defense: return t.defenseBonus;
+            case PassiveBonusStat.Magic:   return t.magicBonus;
+            case PassiveBonusStat.Agility: return t.agilityBonus;
+            case PassiveBonusStat.Luck:    return t.luckBonus;
+            default: return 0;
+        }
+    }
+
     private List<EquipmentData> GetEquippedItemsList()
     {
         EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
@@ -670,6 +690,9 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"[PlayerStats] ✓ statData 에셋 연결됨: {statData.name}");
 
+        // 종의 기억 세트 효과 런타임 체크 (OnValidate는 에디터 전용이므로 여기서도 실행)
+        statData.CheckAndActivateTrait();
+
         // [NEW] 씬 간 자동 동기화: HeroData의 currentJob을 읽어 characterClass에 할당
         if (statData.currentJob != null)
         {
@@ -843,9 +866,51 @@ public class PlayerStats : MonoBehaviour
         isDefending = false;
         defenseBuffAmount = 0f;
 
-        currentHP = Mathf.Clamp(currentHP - finalDamage, 0, maxHP);
+        int newHP = currentHP - finalDamage;
+
+        // [LastStand] HP가 0 이하로 떨어질 때, Human 종의 특성 발동 체크
+        if (newHP <= 0 && !_lastStandUsed && HasSpecialEffect("LastStand"))
+        {
+            // Luck 기반 생존 확률: 30% 기본 + Luck당 2% (최대 80%)
+            float survivalChance = Mathf.Clamp(30f + Luck * 2f, 30f, 80f);
+            if (UnityEngine.Random.Range(0f, 100f) < survivalChance)
+            {
+                _lastStandUsed = true;
+                currentHP = 1;
+                Debug.Log($"[LastStand] {playerName} Last Stand triggered! Survived with 1 HP. (chance {survivalChance:F0}%)");
+                NotifyStatusChanged();
+                return finalDamage;
+            }
+            else
+            {
+                Debug.Log($"[LastStand] {playerName} Last Stand failed. (chance {survivalChance:F0}%)");
+            }
+        }
+
+        currentHP = Mathf.Clamp(newHP, 0, maxHP);
         if (currentHP <= 0) Die();
         return finalDamage;
+    }
+
+    /// <summary>
+    /// 종의 특성 specialEffectTags에 해당 태그가 있는지 확인
+    /// </summary>
+    public bool HasSpecialEffect(string tag)
+    {
+        if (statData == null || statData.activeTrait == null) return false;
+        var tags = statData.activeTrait.specialEffectTags;
+        if (tags == null) return false;
+        foreach (var t in tags)
+            if (t == tag) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// 전투 시작 시 Last Stand 플래그 초기화
+    /// </summary>
+    public void ResetLastStand()
+    {
+        _lastStandUsed = false;
     }
 
     /// <summary>

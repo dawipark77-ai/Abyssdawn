@@ -68,6 +68,10 @@ public class EnemyStats : MonoBehaviour
 
     private static readonly Vector2 DEFAULT_STATUS_UI_SIZE = new Vector2(120f, 50f);
     private const float DEFAULT_STATUS_UI_SCALE = 0.005f;
+
+    // 상태이상 아이콘 패널
+    private GameObject statusIconPanel;
+    private readonly List<GameObject> statusIconObjects = new List<GameObject>();
     private const float DEFAULT_STATUS_UI_OFFSET_Y = 1.0f;
 
     [Header("Status UI Settings")]
@@ -272,14 +276,48 @@ public class EnemyStats : MonoBehaviour
         if (existing != null)
         {
             existing.remainingTurns = Mathf.Max(existing.remainingTurns, effect.physicalDuration);
-            Debug.Log($"[StatusEffect] {enemyName}의 {effect.effectType} 지속 갱신: {existing.remainingTurns}턴");
+            Debug.Log($"[StatusEffect] {enemyName} {effect.effectType} duration refreshed: {existing.remainingTurns} turns");
         }
         else
         {
             activeStatusEffects.Add(new StatusEffectInstance(effect));
-            Debug.Log($"[StatusEffect] {enemyName}에게 {effect.effectType} 부여! ({effect.physicalDuration}턴)");
+            Debug.Log($"[StatusEffect] {enemyName} afflicted with {effect.effectType}! ({effect.physicalDuration} turns)");
+            RefreshStatusIcons();
         }
         return true;
+    }
+
+    /// <summary>
+    /// 현재 activeStatusEffects 기반으로 아이콘 패널을 다시 그립니다.
+    /// </summary>
+    private void RefreshStatusIcons()
+    {
+        if (statusIconPanel == null)
+        {
+            // UI가 아직 생성 안 됐으면 건너뜀 — UpdateStatusUI()에서 재시도됨
+            return;
+        }
+
+        // 기존 아이콘 제거
+        foreach (var obj in statusIconObjects)
+            if (obj != null) Destroy(obj);
+        statusIconObjects.Clear();
+
+        foreach (var se in activeStatusEffects)
+        {
+            if (se?.data == null) continue;
+            Sprite icon = se.data.flatIcon ?? se.data.itemIcon;
+            if (icon == null) continue;
+
+            GameObject iconObj = new GameObject($"Icon_{se.data.effectType}", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+            iconObj.transform.SetParent(statusIconPanel.transform, false);
+            RectTransform rt = iconObj.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(16f, 16f);
+            UnityEngine.UI.Image img = iconObj.GetComponent<UnityEngine.UI.Image>();
+            img.sprite = icon;
+            img.preserveAspect = true;
+            statusIconObjects.Add(iconObj);
+        }
     }
 
     /// <summary>
@@ -303,11 +341,12 @@ public class EnemyStats : MonoBehaviour
             se.remainingTurns--;
             if (se.remainingTurns <= 0)
             {
-                Debug.Log($"[StatusEffect] {enemyName}의 {se.data.effectType} 효과 종료");
+                Debug.Log($"[StatusEffect] {enemyName} {se.data.effectType} expired.");
                 activeStatusEffects.RemoveAt(i);
             }
         }
 
+        RefreshStatusIcons();
         if (currentHP <= 0) HandleDeath();
     }
 
@@ -471,11 +510,29 @@ public class EnemyStats : MonoBehaviour
         // MP 텍스트는 HP 텍스트와 같은 객체 사용 (두 줄로 표시)
         mpText = hpText;
 
+        // 상태이상 아이콘 패널 (HP/MP 텍스트 아래)
+        statusIconPanel = new GameObject("StatusIconPanel", typeof(RectTransform));
+        statusIconPanel.transform.SetParent(canvasObj.transform, false);
+        RectTransform iconPanelRT = statusIconPanel.GetComponent<RectTransform>();
+        // 캔버스 하단 바깥쪽에 아이콘 띠 배치
+        iconPanelRT.anchorMin = new Vector2(0f, 0f);
+        iconPanelRT.anchorMax = new Vector2(1f, 0f);
+        iconPanelRT.pivot = new Vector2(0.5f, 1f);
+        iconPanelRT.sizeDelta = new Vector2(0f, 18f);
+        iconPanelRT.anchoredPosition = new Vector2(0f, -4f);
+        HorizontalLayoutGroup hlg = statusIconPanel.AddComponent<HorizontalLayoutGroup>();
+        hlg.childAlignment = TextAnchor.MiddleCenter;
+        hlg.spacing = 2f;
+        hlg.childForceExpandWidth = false;
+        hlg.childForceExpandHeight = false;
+        hlg.childControlWidth = false;
+        hlg.childControlHeight = false;
+
         statusUI = canvasObj;
-        
+
         // UI 위치 및 회전 설정
         UpdateStatusUI();
-        
+
         Debug.Log($"[EnemyStats] World space UI created for {enemyName} at position {originalPosition}");
     }
 
@@ -500,11 +557,12 @@ public class EnemyStats : MonoBehaviour
         // HP와 MP를 한 텍스트에 두 줄로 표시
         if (hpText != null)
         {
-            // 명시적으로 두 줄로 표시 (줄바꿈 문자 사용)
             hpText.text = $"HP: {currentHP}/{maxHP}" + System.Environment.NewLine + $"MP: {currentMP}/{maxMP}";
-            // 텍스트가 제대로 표시되도록 강제 업데이트
             hpText.ForceMeshUpdate();
         }
+
+        // 상태이상 아이콘 항상 동기화
+        RefreshStatusIcons();
     }
 
     // 하이라이트 효과

@@ -25,6 +25,6 @@ MonoBehaviour:
   selfApplyChance: 0
   attackDebuff: 0
   defenseDebuff: 0
-  preventAction: 0
-  preventSkillUse: 0
+  preventAction: 1
+  preventSkillUse: 1
   statusVFX: {fileID: 0}

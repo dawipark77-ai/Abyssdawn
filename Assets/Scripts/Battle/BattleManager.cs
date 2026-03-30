@@ -1119,6 +1119,12 @@ public class BattleManager : MonoBehaviour
         Debug.Log("[BattleManager] StartBattle() called.");
         // 전투 상태 초기화
         battleEnded = false;
+
+        // [LastStand] 전투 시작 시 모든 파티 멤버의 Last Stand 플래그 리셋
+        foreach (var member in activePartyMembers)
+        {
+            if (member != null) member.ResetLastStand();
+        }
         currentPhase = BattlePhase.Command;
         playerTurn = false;
         turnInProgress = false;
@@ -1141,6 +1147,12 @@ public class BattleManager : MonoBehaviour
 
         // [중요] 먼저 GameManager에서 HP/MP 로드 (파티 구성 전에 로드하여 덮어쓰지 않도록)
         InitializeParty();
+
+        // [LastStand] InitializeParty 이후 리셋 (파티 확정 후)
+        foreach (var member in activePartyMembers)
+        {
+            if (member != null) member.ResetLastStand();
+        }
         
         // 파티 구성 보정 (InitializeParty 이후에 호출하여 로드된 HP/MP가 보존되도록)
         var desiredMode = startWithFullParty ? PartyMode.Full : PartyMode.Solo;
@@ -1566,8 +1578,12 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        // 민첩 순으로 정렬 (내림차순)
-        turnOrder = turnOrder.OrderByDescending(a => a.agility).ToList();
+        // 민첩 기반 확률 정렬: speedScore = Agility × Random(0.8~1.2)
+        // ±20% 범위 내 민첩 차이만 역전 가능, 그 이상 차이는 절대 역전 불가
+        turnOrder = turnOrder
+            .OrderByDescending(a => a.agility * UnityEngine.Random.Range(0.8f, 1.2f))
+            .ToList();
+        Debug.Log("[TurnOrder] " + string.Join(" > ", turnOrder.Select(a => $"{(a.isPlayer ? a.player.playerName : a.enemy.enemyName)}(Agi:{a.agility})")));
     }
 
     private void StartCommandPhase()
@@ -2100,6 +2116,12 @@ public class BattleManager : MonoBehaviour
             case "skill":
                 if (cmd.skill != null)
                 {
+                    // Silence 체크 — 스킬 사용 불가 상태이상
+                    if (cmd.actor.IsSilenced())
+                    {
+                        AddMessage($"{cmd.actor.playerName} is silenced and cannot use skills!");
+                        break;
+                    }
                     // 타겟이 필요한 스킬인데 타겟이 없거나 죽었으면 실행 불가 (단, 회복/방어 스킬은 타겟 없이(본인) 실행 가능)
                     bool isSelfSkill = IsSelfTargetSkill(cmd.skill);
                     if (isSelfSkill || (cmd.targetEnemy != null && cmd.targetEnemy.currentHP > 0))
@@ -2265,10 +2287,15 @@ public class BattleManager : MonoBehaviour
             {
                 bool critical = CheckCritical(enemy.luck);
 
-                // [DEBUG LOG] 적 공격 데미지 계산 전 스탯 확인
-                Debug.Log($"[BattleLog] Enemy Attack: {enemy.attack}, Player Defense: {target.Defense} (base: {target.baseDefense} + bonus: {target.GetDefenseBonus()}), Critical: {critical}");
+                // 적 상태이상 attackDebuff 적용
+                float attackDebuffPct = enemy.GetStatusEffectAttackDebuff() / 100f;
+                int effectiveAttack = Mathf.Max(0, Mathf.FloorToInt(enemy.attack * (1f - attackDebuffPct)));
+                if (attackDebuffPct > 0f)
+                    Debug.Log($"[StatusDebuff] {enemy.enemyName} attack reduced by {attackDebuffPct * 100f:F0}%: {enemy.attack} → {effectiveAttack}");
 
-                int damage = CalculateDQDamage(enemy.attack, target.Defense, critical);
+                Debug.Log($"[BattleLog] Enemy Attack: {effectiveAttack}, Player Defense: {target.Defense} (base: {target.baseDefense} + bonus: {target.GetDefenseBonus()}), Critical: {critical}");
+
+                int damage = CalculateDQDamage(effectiveAttack, target.Defense, critical);
 
                 if (target.isDefending)
                 {
@@ -2292,9 +2319,15 @@ public class BattleManager : MonoBehaviour
 
                 Debug.Log($"[BattleLog] Enemy Final Damage: {damage}");
 
+                int hpBefore = target.currentHP;
                 target.TakeDamage(damage);
                 AddMessage(critical ? $"{enemy.enemyName} critical hit! {target.playerName} took {damage} damage!" :
                                       $"{enemy.enemyName} attacked {target.playerName} and dealt {damage} damage!");
+                // [LastStand] HP가 0이 아닌 1로 유지됐다면 불굴 발동
+                if (hpBefore > 1 && target.currentHP == 1 && target.HasSpecialEffect("LastStand"))
+                {
+                    AddMessage($"★ {target.playerName}'s Last Stand activates! Death avoided!");
+                }
                 // 아군이 데미지를 받으면 UI 흔들림
                 ShakePlayerStatusUI(target);
             }
@@ -2318,7 +2351,7 @@ public class BattleManager : MonoBehaviour
                 if (member.currentHP < hpBefore)
                 {
                     int damage = hpBefore - member.currentHP;
-                    AddMessage($"{member.playerName}이(가) 상태이상으로 {damage} 피해를 입었습니다!");
+                    AddMessage($"{member.playerName} suffered {damage} damage from status effect!");
                     ShakePlayerStatusUI(member);
                     anyCurseDamage = true;
                 }
@@ -2335,7 +2368,7 @@ public class BattleManager : MonoBehaviour
                 if (enemy.currentHP < hpBefore)
                 {
                     int damage = hpBefore - enemy.currentHP;
-                    AddMessage($"{enemy.enemyName}이(가) 상태이상으로 {damage} 피해를 입었습니다!");
+                    AddMessage($"{enemy.enemyName} suffered {damage} damage from status effect!");
                     enemy.UpdateStatusUI();
                     anyCurseDamage = true;
                 }
@@ -3471,8 +3504,18 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void TryApplyWeaponCurse(PlayerStats attacker, EnemyStats target)
     {
+        EquipmentData rightHand = null, leftHand = null;
         EquipmentManager em = attacker.GetComponent<EquipmentManager>();
-        if (em == null) return;
+        if (em != null)
+        {
+            rightHand = em.rightHand;
+            leftHand  = em.leftHand;
+        }
+        else if (attacker.statData != null)
+        {
+            rightHand = attacker.statData.rightHand;
+            leftHand  = attacker.statData.leftHand;
+        }
 
         void CheckAndApply(EquipmentData weapon)
         {
@@ -3489,9 +3532,9 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        CheckAndApply(em.rightHand);
-        if (em.leftHand != em.rightHand)
-            CheckAndApply(em.leftHand);
+        CheckAndApply(rightHand);
+        if (leftHand != rightHand)
+            CheckAndApply(leftHand);
     }
 
     /// <summary>
@@ -3503,11 +3546,21 @@ public class BattleManager : MonoBehaviour
         damageReduction = 0f;
         if (defender == null) return false;
 
+        EquipmentData leftHand = null, rightHand = null;
         var em = defender.GetComponent<EquipmentManager>();
-        if (em == null) return false;
+        if (em != null)
+        {
+            leftHand  = em.leftHand;
+            rightHand = em.rightHand;
+        }
+        else if (defender.statData != null)
+        {
+            leftHand  = defender.statData.leftHand;
+            rightHand = defender.statData.rightHand;
+        }
 
         // 왼손(방패 슬롯) 또는 오른손에서 blockData 확인
-        EquipmentData shield = em.leftHand ?? em.rightHand;
+        EquipmentData shield = leftHand ?? rightHand;
         if (shield == null || shield.blockData == null) return false;
 
         bool blocked = shield.blockData.RollBlock(defender.Defense);
