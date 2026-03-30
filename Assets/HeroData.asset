@@ -15,7 +15,7 @@ MonoBehaviour:
   currentHP: 105
   currentMP: 10
   level: 1
-  exp: 0
+  exp: 60
   freeStatPoints: 0
   allocatedAttack: 0
   allocatedDefense: 0
@@ -24,9 +24,9 @@ MonoBehaviour:
   allocatedLuck: 0
   currentJob: {fileID: 11400000, guid: 0066eb8cc4bf76c44baa77b0df8897cd, type: 2}
   equippedSkills:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 7834ea8673ceefe42af0dfb44982eee1, type: 2}
+  - {fileID: 11400000, guid: db0cc0a74e55b8647bf22681e22977a7, type: 2}
+  - {fileID: 11400000, guid: 06c485d1d3e2b6142aa0dbd45144d066, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -36,7 +36,7 @@ MonoBehaviour:
   - {fileID: 0}
   learnedSkills: []
   skillPoints: 0
-  rightHand: {fileID: 11400000, guid: 3ff1f34e885371c41a64f2690f64f995, type: 2}
+  rightHand: {fileID: 11400000, guid: d10cb59fd29b1f04db66b22ec725e87b, type: 2}
   leftHand: {fileID: 11400000, guid: f11abdb46a6c8804bbcc6bab1e0cbfd0, type: 2}
   body: {fileID: 11400000, guid: e9a66495ca4098b4aab796c8edf644c4, type: 2}
   accessory1: {fileID: 11400000, guid: 4ed214cc9ca37264da616dbfc05d6960, type: 2}

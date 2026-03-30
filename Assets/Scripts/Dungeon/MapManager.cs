@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 
@@ -162,6 +162,10 @@ public class MapManager : MonoBehaviour
 
     void GenerateMaze()
     {
+        // 던전 생성은 시드로 결정론적이어야 하지만,
+        // 전역 UnityEngine.Random 시퀀스(인카운터/전투 등)를 오염시키면 안 됨.
+        // 따라서 Random.state를 저장/복원하여 던전 생성에서만 시드를 고정한다.
+        var prevState = UnityEngine.Random.state;
         UnityEngine.Random.InitState(DungeonPersistentData.currentSeed);
         
         width = UnityEngine.Random.Range(minWidth, maxWidth + 1);
@@ -217,6 +221,8 @@ public class MapManager : MonoBehaviour
         // 6. 異쒓뎄(?ㅼ쓬 痢? ?꾩튂 ?좎젙: ?쒖옉?먯뿉??媛??癒?湲?0) ?
         exitPos = FindFarthestFloorCell(startPos);
         Debug.Log($"[MapManager] Start at {startPos}, Exit at {exitPos}");
+
+        UnityEngine.Random.state = prevState;
     }
 
     void GenerateRooms()

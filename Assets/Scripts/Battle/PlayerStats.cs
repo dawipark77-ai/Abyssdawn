@@ -176,12 +176,7 @@ public class PlayerStats : MonoBehaviour
     // HP/MP가 변경될 때마다 SO 에셋에 즉시 저장됩니다
     public int currentHP
     {
-        get
-        {
-            int value = (statData != null) ? statData.currentHP : _fallbackCurrentHP;
-            Debug.Log($"[StatusCheck] {playerName} Current HP: {value}/{maxHP}");
-            return value;
-        }
+        get => (statData != null) ? statData.currentHP : _fallbackCurrentHP;
         set
         {
             int oldValue = (statData != null) ? statData.currentHP : _fallbackCurrentHP;
@@ -193,9 +188,7 @@ public class PlayerStats : MonoBehaviour
                 statData.currentHP = newValue;
 #if UNITY_EDITOR
                 EditorUtility.SetDirty(statData);
-                AssetDatabase.SaveAssets();
 #endif
-                Debug.Log($"[PlayerStats] ✓ SO 에셋 저장: currentHP = {newValue}");
             }
 
             _fallbackCurrentHP = newValue;
@@ -235,9 +228,7 @@ public class PlayerStats : MonoBehaviour
                 statData.currentMP = newValue;
 #if UNITY_EDITOR
                 EditorUtility.SetDirty(statData);
-                AssetDatabase.SaveAssets();
 #endif
-                Debug.Log($"[PlayerStats] ✓ SO 에셋 저장: currentMP = {newValue}");
             }
 
             _fallbackCurrentMP = newValue;
@@ -467,20 +458,31 @@ public class PlayerStats : MonoBehaviour
     /// <summary>
     /// 장비로부터 HP 보정치를 가져옵니다.
     /// </summary>
-    public int GetEquipmentHPBonus()
+    private List<EquipmentData> GetEquippedItemsList()
     {
         EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
-        if (equipmentManager == null) return 0;
+        if (equipmentManager != null)
+            return equipmentManager.GetEquippedItems();
 
-        int total = 0;
-        var equippedItems = equipmentManager.GetEquippedItems();
-        foreach (var item in equippedItems)
+        if (statData != null)
         {
-            if (item != null)
-            {
-                total += item.hpBonus;
-            }
+            var list = new List<EquipmentData>();
+            if (statData.rightHand != null)  list.Add(statData.rightHand);
+            if (statData.leftHand != null)   list.Add(statData.leftHand);
+            if (statData.body != null)       list.Add(statData.body);
+            if (statData.accessory1 != null) list.Add(statData.accessory1);
+            if (statData.accessory2 != null) list.Add(statData.accessory2);
+            return list;
         }
+
+        return new List<EquipmentData>();
+    }
+
+    public int GetEquipmentHPBonus()
+    {
+        int total = 0;
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.hpBonus;
         return total;
     }
 
@@ -490,13 +492,9 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     public int GetEquipmentMPBonus(int baseForPercent = 0)
     {
-        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
-        if (equipmentManager == null) return 0;
-
         int total = 0;
         float totalPercent = 0f;
-        var equippedItems = equipmentManager.GetEquippedItems();
-        foreach (var item in equippedItems)
+        foreach (var item in GetEquippedItemsList())
         {
             if (item != null)
             {
@@ -514,18 +512,9 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     public int GetEquipmentAttackBonus()
     {
-        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
-        if (equipmentManager == null) return 0;
-
         int total = 0;
-        var equippedItems = equipmentManager.GetEquippedItems();
-        foreach (var item in equippedItems)
-        {
-            if (item != null)
-            {
-                total += item.attackBonus;
-            }
-        }
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.attackBonus;
         return total;
     }
 
@@ -534,18 +523,9 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     public int GetEquipmentDefenseBonus()
     {
-        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
-        if (equipmentManager == null) return 0;
-
         int total = 0;
-        var equippedItems = equipmentManager.GetEquippedItems();
-        foreach (var item in equippedItems)
-        {
-            if (item != null)
-            {
-                total += item.defenseBonus;
-            }
-        }
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.defenseBonus;
         return total;
     }
 
@@ -554,18 +534,9 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     public int GetEquipmentMagicBonus()
     {
-        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
-        if (equipmentManager == null) return 0;
-
         int total = 0;
-        var equippedItems = equipmentManager.GetEquippedItems();
-        foreach (var item in equippedItems)
-        {
-            if (item != null)
-            {
-                total += item.magicBonus;
-            }
-        }
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.magicBonus;
         return total;
     }
 
@@ -574,18 +545,9 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     public int GetEquipmentAgilityBonus()
     {
-        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
-        if (equipmentManager == null) return 0;
-
         int total = 0;
-        var equippedItems = equipmentManager.GetEquippedItems();
-        foreach (var item in equippedItems)
-        {
-            if (item != null)
-            {
-                total += item.agiBonus;
-            }
-        }
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.agiBonus;
         return total;
     }
 
@@ -594,18 +556,9 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     public int GetEquipmentLuckBonus()
     {
-        EquipmentManager equipmentManager = GetComponent<EquipmentManager>();
-        if (equipmentManager == null) return 0;
-
         int total = 0;
-        var equippedItems = equipmentManager.GetEquippedItems();
-        foreach (var item in equippedItems)
-        {
-            if (item != null)
-            {
-                total += item.luckBonus;
-            }
-        }
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.luckBonus;
         return total;
     }
 

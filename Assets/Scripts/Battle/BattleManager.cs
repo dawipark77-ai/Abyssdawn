@@ -64,6 +64,10 @@ public class BattleManager : MonoBehaviour
     public int potionCount = 3;
     public bool battleEnded = false;
 
+    [Header("Scene Names")]
+    [Tooltip("사망 시 리셋할 1층 던전 씬 이름")]
+    public string startDungeonScene = "Abyssdawn_Dungeon_2D 07";
+
     [Header("Consumable Inventory")]
     [Tooltip("전투 중 사용할 아이템 SO (인벤토리 UI에서 선택 시 자동 설정).")]
     public ConsumableItemSO selectedConsumableItem;
@@ -754,6 +758,7 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(delay);
         
         string sceneToLoad = DungeonEncounter.lastDungeonScene;
+        DungeonEncounter.justReturnedFromBattle = true;
         if (string.IsNullOrEmpty(sceneToLoad))
         {
             Debug.LogWarning("[BattleManager] No last dungeon scene saved. Returning to 0.");
@@ -764,6 +769,31 @@ public class BattleManager : MonoBehaviour
             Debug.Log("[BattleManager] Returning to dungeon: " + sceneToLoad);
             SceneManager.LoadScene(sceneToLoad);
         }
+    }
+
+    private IEnumerator GameOverRoutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        // HP/MP 최대값으로 리셋 (SO에 직접 기록)
+        foreach (var member in activePartyMembers)
+        {
+            if (member != null)
+            {
+                member.currentHP = member.maxHP;
+                member.currentMP = member.maxMP;
+            }
+        }
+
+        // 던전 영속 데이터 전체 초기화 (층수, 안개, 위치, 상태이상)
+        DungeonPersistentData.ClearState();
+
+        // GameManager 파티 데이터 초기화
+        GameManager.EnsureInstance().ClearAllData();
+
+        Debug.Log("[BattleManager] Game Over — resetting to floor 1.");
+        DungeonEncounter.justReturnedFromBattle = false; // 게임오버는 새 시작이므로 쿨다운 없음
+        SceneManager.LoadScene(startDungeonScene);
     }
 
     private void ForceDisableUIPanels()
@@ -2049,6 +2079,11 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteAllyResolution(AllyCommand cmd)
     {
         if (cmd.actor == null || cmd.actor.currentHP <= 0) yield break;
+        if (cmd.actor.IsStunned())
+        {
+            AddMessage($"{cmd.actor.playerName} is stunned and cannot act!");
+            yield break;
+        }
 
         yield return new WaitForSeconds(actionDelay);
 
@@ -2210,6 +2245,11 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteEnemyTurn(EnemyStats enemy)
     {
         if (enemy == null || enemy.currentHP <= 0 || enemy.IsDead()) yield break;
+        if (enemy.IsStunned())
+        {
+            AddMessage($"{enemy.enemyName} is stunned and cannot act!");
+            yield break;
+        }
 
         yield return new WaitForSeconds(actionDelay);
 
@@ -2296,23 +2336,6 @@ public class BattleManager : MonoBehaviour
                 {
                     int damage = hpBefore - enemy.currentHP;
                     AddMessage($"{enemy.enemyName}이(가) 상태이상으로 {damage} 피해를 입었습니다!");
-                    enemy.UpdateStatusUI();
-                    anyCurseDamage = true;
-                }
-            }
-        }
-
-        // 적 상태이상(StatusEffectSO) DoT 처리
-        foreach (var enemy in activeEnemies)
-        {
-            if (enemy != null && enemy.activeStatusEffects.Count > 0 && enemy.currentHP > 0 && !enemy.IsDead())
-            {
-                int hpBefore = enemy.currentHP;
-                enemy.ProcessStatusEffectsEndOfTurn();
-                if (enemy.currentHP < hpBefore)
-                {
-                    int damage = hpBefore - enemy.currentHP;
-                    AddMessage($"{enemy.enemyName} takes {damage} damage from status effects!");
                     enemy.UpdateStatusUI();
                     anyCurseDamage = true;
                 }
@@ -3393,8 +3416,8 @@ public class BattleManager : MonoBehaviour
 
                 shownTotal = applied1 + applied2;
                 AddMessage(critical
-                    ? $"Critical! {attacker.playerName} struck twice for {shownTotal} ({hit1} + {hit2})!"
-                    : $"{attacker.playerName} struck twice for {shownTotal} ({hit1} + {hit2}) damage!");
+                    ? $"Critical! {attacker.playerName} struck twice for {shownTotal}!"
+                    : $"{attacker.playerName} struck twice for {shownTotal} damage!");
             }
             else
             {
@@ -3428,8 +3451,8 @@ public class BattleManager : MonoBehaviour
 
                 shownTotal = applied1 + applied2;
                 AddMessage(critical
-                    ? $"Critical! {attacker.playerName} dealt {shownTotal} ({singleBase} + {singleArmor})!"
-                    : $"{attacker.playerName} struck for {shownTotal} ({singleBase} + {singleArmor}) damage!");
+                    ? $"Critical! {attacker.playerName} dealt {shownTotal}!"
+                    : $"{attacker.playerName} struck for {shownTotal} damage!");
             }
 
             // ───────── 무기 저주 부여 ─────────
@@ -4661,12 +4684,12 @@ private void CacheHeroSkills()
         {
             if (player != null && player.currentHP < 0) player.currentHP = 0;
             UpdateStatusUI();
-              AddMessage("Party was defeated...");
-              if (actionPanel != null) actionPanel.SetActive(false);
-              if (skillPanel != null) skillPanel.SetActive(false);
-              battleEnded = true;
-              ReturnToDungeon(3.0f);
-              return;
+            AddMessage("Party was defeated...");
+            if (actionPanel != null) actionPanel.SetActive(false);
+            if (skillPanel != null) skillPanel.SetActive(false);
+            battleEnded = true;
+            StartCoroutine(GameOverRoutine(3.0f));
+            return;
         }
         else if (AllEnemiesDefeated())
         {

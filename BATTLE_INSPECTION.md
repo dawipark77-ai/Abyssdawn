@@ -1,30 +1,71 @@
 # 전투 시스템 점검 체크리스트
 
-> 작성: 2026-03-30
+> 작성: 2026-03-30 | 최종 수정: 2026-03-30
 > 범례: `[ ]` 미확인 | `[x]` 통과 | `[!]` 버그/문제 | `[?]` 런타임 확인 필요
 > Unity 로그 경로: `C:\Users\User\AppData\Local\Unity\Editor\Editor.log`
+> 메인 저장소: `E:\Dawi\My Programs\Game Maker\Unity\Projects\Abyssdawn 01`
 
 ---
 
-## 긴급 버그 (수정 전 전투 정상 동작 불가)
+## 작업 규칙 (다른 AI가 이어받을 때 필독)
 
-- `[!]` **B-1** `ProcessAllIgniteDamage()` — 적 DoT가 매 라운드 **2번** 처리됨 (이중 루프)
-- `[!]` **B-2** `ExecuteEnemyTurn()` — 스턴된 **적**이 그대로 행동함 (`IsStunned()` 체크 없음)
-- `[!]` **B-3** `ExecuteAllyResolution()` — 스턴된 **아군**이 그대로 행동함 (`IsStunned()` 체크 없음)
-- `[!]` **B-4** `PlayerStats.currentHP` getter — 매 HP 읽기마다 `Debug.Log` → 콘솔 폭주
-- `[!]` **B-5** `PlayerStats.currentHP/MP` setter — 매 변경마다 `AssetDatabase.SaveAssets()` → 전투 중 히치
-- `[?]` **B-6** `BattleSystem.cs` — `PlayerAttack/EnemyAttack` 미호출 (데드코드 여부 확인 필요)
+1. **모든 코드 수정은 메인 저장소에 직접** — worktree(`upbeat-lalande`) 아님
+2. **사용자 승인 없이 모든 작업 진행** — 시스템 파괴 수준 위험만 예외
+3. **테스트 방법**: 사용자가 Unity에서 플레이 → "로그 읽어" 명령 → `Editor.log` 직접 읽어 분석
+4. **체크 완료 즉시 이 파일 업데이트**
+
+---
+
+## 완료된 수정 사항 (이미 코드에 반영됨)
+
+| 파일 | 수정 내용 | 완료 |
+|------|-----------|------|
+| `PlayerStats.cs` | `currentHP` getter `Debug.Log` 제거 (B-4) | ✓ |
+| `PlayerStats.cs` | `currentHP/MP` setter `AssetDatabase.SaveAssets()` 제거 (B-5) — 씬 전환 무한로딩 원인이었음 | ✓ |
+| `PlayerStats.cs` | `GetEquippedItemsList()` 헬퍼 추가 — `EquipmentManager` 없을 때 `statData`에서 직접 장비 읽기 | ✓ |
+| `PlayerStats.cs` | 모든 `GetEquipment*Bonus()` 메서드가 헬퍼 사용하도록 리팩터 — 배틀씬 HP 105(장비보너스+5) 반영 | ✓ |
+| `BattleManager.cs` | `ProcessAllIgniteDamage()` 적 DoT 이중 루프 제거 (B-1) | ✓ |
+| `BattleManager.cs` | `ExecuteAllyResolution()` 스턴 체크 추가 (B-3) | ✓ |
+| `BattleManager.cs` | `ExecuteEnemyTurn()` 스턴 체크 추가 (B-2) | ✓ |
+| `BattleManager.cs` | `GameOverRoutine()` 추가 — 전멸 시 HP리셋+던전초기화+1층씬 로드 | ✓ |
+| `BattleManager.cs` | `startDungeonScene` 필드 추가 (기본값: `"Abyssdawn_Dungeon_2D 07"`) | ✓ |
+| `BattleManager.cs` | 단일 공격/듀얼 공격 데미지 메시지에서 괄호 공식 `(6+0)` 제거 | ✓ |
+
+---
+
+## 알려진 구조적 이슈 (수정 불필요 또는 설계 결정 필요)
+
+| 코드 | 이슈 | 상태 |
+|------|------|------|
+| `DungeonEncounter.cs` | `FindFirstObjectByType<PlayerStats>()`가 `PlayerMarker`(name="None")를 먼저 찾음 — Hero 못 찾음 | 미수정 (SO 경유로 HP 영속은 작동) |
+| `DungeonEncounter.cs` | `battleSceneName = "Abyysborn_Battle 01"` (구버전 씬 로드 중) | Inspector에서 확인 필요 |
+| `PlayerStats.cs` | `PlayerMarker`, `PlayerArea` 오브젝트에 PlayerStats 컴포넌트 부착 — `playerName`이 "None"/""임 | 씬에서 정리 권장 |
+| `BattleSystem.cs` | `PlayerAttack/EnemyAttack` 메서드 — `BattleManager`에서 호출 안 됨 (데드코드) | 설계 결정 필요 |
+| `GameManager.cs` | `SaveFromPlayer()` — `statData != null`이면 조기 리턴, `staticPartyData` 미사용 | SO 경유로 작동하므로 당장 문제 없음 |
+
+---
+
+## 긴급 버그
+
+- `[x]` **B-1** `ProcessAllIgniteDamage()` — 적 DoT 이중 루프 제거 ✓
+- `[x]` **B-2** `ExecuteEnemyTurn()` — 스턴된 적 행동 차단 추가 ✓
+- `[x]` **B-3** `ExecuteAllyResolution()` — 스턴된 아군 행동 차단 추가 ✓
+- `[x]` **B-4** `PlayerStats.currentHP` getter — Debug.Log 제거 ✓
+- `[x]` **B-5** `PlayerStats.currentHP/MP` setter — `AssetDatabase.SaveAssets()` 제거 ✓
+- `[?]` **B-6** `BattleSystem.cs` — `PlayerAttack/EnemyAttack` 미호출 (데드코드 여부 설계 결정 필요)
 - `[?]` **B-7** 동료 HP/MP 씬 전환 미보존 — Solo 모드에선 무관, Full Party 전환 시 문제
 
 ---
 
-## 0단계 — 씬 영속성 (선행 필수)
+## 0단계 — 씬 영속성
 
-- `[ ]` **0-1** 던전 → 전투 씬 전환 시 `staticPartyData` 유지되는가
-- `[ ]` **0-2** 전투 종료 → 던전 복귀 시 HP/MP 올바르게 반영되는가
-- `[ ]` **0-3** `DungeonPersistentData.currentHP/MP` 저장/복원 올바른가
-- `[ ]` **0-4** 전투 중 전원 사망 시 씬 전환이 올바르게 처리되는가
-- `[ ]` **0-5** 여러 번 인카운터 반복해도 데이터 누적 오염 없는가
+- `[x]` **0-1** 던전 → 전투 씬 전환 시 HP/MP 유지 (SO 경유로 정상 영속) ✓
+- `[x]` **0-2** 전투 종료 → 던전 복귀 시 HP/MP 올바르게 반영 (20/105 로그 확인) ✓
+- `[x]` **0-3** SO `currentHP/MP` 저장/복원 정상 (`SO에서 로드한 HP 유지` 로그 확인) ✓
+- `[x]` **0-4** 전멸 → `GameOverRoutine` 정상 동작 (HP 105/105 리셋 + 1층 씬 로드 확인) ✓
+- `[x]` **0-5** 인카운터 반복 정상 — 쿨다운 3칸 + 랜덤 재시드 수정 후 롤 매번 다름 확인 ✓
+
+> **0-4 런타임 테스트 방법**: 전투에서 일부러 전멸 → 1층 던전 씬(`Abyssdawn_Dungeon_2D 07`)으로 이동하는지, HP가 최대값으로 리셋됐는지 확인
 
 ---
 
@@ -32,11 +73,11 @@
 
 - `[x]` **1-1** 기본값 × `CharacterClass` 배율 계산 (computed property 확인)
 - `[x]` **1-2** 장비 장착/해제 시 스탯 즉시 반영
-- `[x]` **1-3** 패시브 보너스 스탯 반영 (단, GetPassiveBonus 내부 Debug.Log 다수 — B-4와 별개로 성능 주의)
+- `[x]` **1-3** 패시브 보너스 스탯 반영
 - `[x]` **1-4** `MemoryOfSpecies` 개별 보너스 반영
 - `[?]` **1-5** `MemoryOfSpecies` 동종 3세트 → `TraitsOfSpecies` 런타임 발동 여부 (`OnValidate` 에디터 전용 우려)
 - `[x]` **1-6** 레벨 성장치 누적 적용
-- `[x]` **1-7** `maxHP/MP` computed property 전투 시작 시 정확도
+- `[x]` **1-7** `maxHP/MP` computed property 전투 시작 시 정확도 (105 확인 ✓)
 - `[x]` **1-8** 양손 무기 장착 시 왼손 자동 해제 후 스탯 반영
 
 ---
@@ -45,9 +86,9 @@
 
 - `[x]` **2-1** Agility 내림차순으로 턴 순서 구성
 - `[x]` **2-2** 동일 Agility 시 아군 먼저 (LINQ stable sort)
-- `[?]` **2-3** 아군/적 교대 vs 민첩 단일 정렬 — **의도된 설계인지 확인 필요** (현재: 민첩 단일 정렬, 교대 없음)
+- `[?]` **2-3** 아군/적 교대 vs 민첩 단일 정렬 — 의도된 설계인지 확인 필요 (현재: 민첩 단일 정렬)
 - `[x]` **2-4** 전열(Slot1~2) / 후열(Slot3~4) 슬롯 구조 정상
-- `[!]` **2-5** 스턴 시 행동 불가 — **미작동** → B-2/B-3
+- `[x]` **2-5** 스턴 시 행동 불가 — B-2/B-3 수정으로 해결 ✓
 - `[x]` **2-6** 캐릭터 사망 시 다음 라운드 턴 큐에서 제거
 - `[x]` **2-7** 전투 종료 조건 (전원 사망) 발동
 - `[x]` **2-8** `battleEnded` 플래그 중복 처리 방지
@@ -57,11 +98,11 @@
 ## 3단계 — 상태이상
 
 - `[x]` **3-1** 부여 확률 `physicalApplyChance` 롤 체크
-- `[!]` **3-2** 적 DoT 매 턴 처리 — **2배 적용** → B-1
+- `[x]` **3-2** 적 DoT 매 턴 처리 — 이중 루프 제거로 해결 ✓
 - `[x]` **3-3** 아군 DoT 매 턴 처리 (아군 루프는 1번)
 - `[x]` **3-4** 지속 턴 만료 시 자동 해제
 - `[x]` **3-5** 중복 부여 시 긴 쪽 지속턴 유지 (갱신 방식)
-- `[!]` **3-6** 스턴 턴 만료 자동 해제는 OK, 실행 중 행동 차단 없음 → B-2/B-3
+- `[x]` **3-6** 스턴 행동 차단 — B-2/B-3 수정으로 해결 ✓
 - `[ ]` **3-7** 상태이상 아이콘 World-Space UI 표시 (런타임 확인)
 - `[ ]` **3-8** `flatIcon` 전투 화면에 올바르게 표시 (런타임 확인)
 
@@ -120,7 +161,7 @@
 
 ---
 
-## 7단계 — UI 연동 (로직 완료 후 진행)
+## 7단계 — UI 연동
 
 - `[ ]` **7-1** HP/MP 바 피해/회복 시 실시간 갱신
 - `[ ]` **7-2** 상태이상 아이콘 부여/해제 표시
@@ -132,7 +173,7 @@
 
 ---
 
-## 8단계 — 미구현 시스템
+## 8단계 — 미구현 시스템 (CLAUDE.md 13섹션 참고)
 
 - `[ ]` **8-1** `SkillData.backlashChance` 등 Backlash 필드 추가
 - `[ ]` **8-2** `EquipmentData.magicAmplify / backlashSuppression` 추가
@@ -145,23 +186,32 @@
 
 ---
 
-## 수정 권장 순서
+## 다음 진행 순서
 
 ```
-1순위 — 전투 동작 자체가 깨짐
-  [!] B-1  DoT 이중처리 수정
-  [!] B-2/3 스턴 체크 추가
+현재 위치: 0단계 진행 중
+  [?] 0-4  전멸 게임오버 → 런타임 확인 (전멸 후 1층으로 가는지)
+  [ ] 0-5  인카운터 반복 데이터 오염 확인
 
-2순위 — 에디터 성능 심각
-  [!] B-4  currentHP getter Debug.Log 제거
-  [!] B-5  HP setter AssetDatabase.SaveAssets() 제거
-
-3순위 — 코드 정리
-  [?] B-6  BattleSystem.cs 데드코드 정리
-  [?] 1-5  MemoryOfSpecies 3세트 런타임 트리거 구현
+완료 후:
+  1단계 → 2단계 → 3단계 → 4단계 → 5단계 순으로 런타임 미확인 항목([?]/[ ]) 테스트
+  6단계 BalanceSimulator는 전투 로직 확정 후 진행
+  8단계 미구현 시스템은 CLAUDE.md 13섹션 명세 기반으로 구현
 ```
 
 ---
 
+## 빌드 프로파일 등록 씬 (2026-03-30 기준)
+
+| 씬 이름 | 용도 |
+|---------|------|
+| `Scenes/SampleScene` | 테스트 씬 |
+| `Abyssdawn_Dungeon_2D 07` | 현재 활성 던전 씬 (게임오버 시 로드 대상) |
+| `Abyysborn_Battle 01` | 현재 활성 전투 씬 (오타 있는 구버전 씬명이 실제 사용 중) |
+
+> ⚠️ `Abyssdawn_Battle 01` (신버전)은 빌드에 미등록 — 현재 `Abyysborn_Battle 01` 사용 중
+
+---
+
 *Unity 로그: `C:\Users\User\AppData\Local\Unity\Editor\Editor.log`*
-*테스트 실행 후 로그 분석으로 `[ ]` 항목 자동 체크 진행*
+*테스트: 사용자 플레이 후 "로그 읽어" → Editor.log 직접 분석*
