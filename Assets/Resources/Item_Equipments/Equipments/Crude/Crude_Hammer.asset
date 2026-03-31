@@ -18,6 +18,7 @@ MonoBehaviour:
   description: An unbalanced hammer. ATK +2.
   equipmentType: 0
   isTwoHanded: 0
+  weaponCategory: 9
   armourCategory: 0
   armourType: 0
   attackBonus: 2
@@ -34,5 +35,6 @@ MonoBehaviour:
   blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
-  weaponCurses: []
+  weaponCurses:
+  - {fileID: 11400000, guid: aaf361967934aec439aed47cefaef31e, type: 2}
   sellPrice: 0

@@ -50,9 +50,12 @@ namespace AbyssdawnBattle
         [Space(5)]
         [Tooltip("Equipment type: Hand, TwoHanded, Armour, Accessory")]
         public EquipmentType equipmentType;
-        
+
         [Tooltip("Two-handed weapon flag (automatically true for TwoHanded type)")]
         public bool isTwoHanded = false;
+
+        [Tooltip("Weapon category for skill compatibility checks.\nNone = not a weapon (armor/accessory) or universal.\nSet to Sword/Dagger/Bow etc. for category-restricted skills.")]
+        public WeaponCategory weaponCategory = WeaponCategory.None;
         
         [Space(5)]
         [Header("━━━━━━━━━━ Armour Category (Armour type only) ━━━━━━━━━━")]

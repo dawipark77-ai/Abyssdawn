@@ -247,6 +247,9 @@ namespace AbyssdawnBattle
         [FormerlySerializedAs("scaleStat")]
         public ScaleStat scalingStat = ScaleStat.Attack;
 
+        [Tooltip("Required weapon category to use this skill.\nNone = works with any weapon (common/universal skills).\nSword/Dagger/Bow etc. = only usable when that weapon type is equipped.")]
+        public WeaponCategory weaponCategory = WeaponCategory.None;
+
         [Header("Targeting")]
         [Tooltip("스킬의 타겟팅 설정\n" +
                  "타겟 종류: 적/아군/자신/모두\n" +

@@ -276,35 +276,59 @@ public class BattleManager : MonoBehaviour
         float startX = -panelWidth / 2f + paddingX + (cellWidth / 2f);
         float startY = panelHeight / 2f - paddingY - (cellHeight / 2f);
 
+        // Determine current actor's equipped weapon category for skill restriction
+        AbyssdawnBattle.WeaponCategory equippedCategory = AbyssdawnBattle.WeaponCategory.None;
+        if (currentControlledMember != null && currentControlledMember.statData != null)
+        {
+            var rh = currentControlledMember.statData.rightHand;
+            if (rh != null) equippedCategory = rh.weaponCategory;
+        }
+
         // 1. 스킬 버튼 배치 (최대 7개)
         for (int i = 0; i < skills.Count; i++)
         {
             SkillData skill = skills[i];
-            
+
+            // Weapon category restriction check
+            // None on skill = universal (any weapon allowed)
+            // Otherwise equipped weapon must match skill requirement
+            bool weaponCompatible = skill.weaponCategory == AbyssdawnBattle.WeaponCategory.None
+                                    || skill.weaponCategory == equippedCategory;
+
             // 버튼 생성
             GameObject btnObj = new GameObject($"SkillButton_{i}", typeof(RectTransform), typeof(UnityEngine.UI.Button), typeof(UnityEngine.UI.Image));
             btnObj.transform.SetParent(skillPanel.transform, false);
-            
+
             // 위치 계산
             // 0,1,2,3 -> 좌측 열 (Col 0)
             // 4,5,6   -> 우측 열 (Col 1)
-            int col = i / 4; 
+            int col = i / 4;
             int row = i % 4;
-            
+
             float x = startX + (col * cellWidth);
             float y = startY - (row * cellHeight);
-            
+
             RectTransform btnRT = btnObj.GetComponent<RectTransform>();
             btnRT.anchorMin = new Vector2(0.5f, 0.5f);
             btnRT.anchorMax = new Vector2(0.5f, 0.5f);
             btnRT.sizeDelta = new Vector2(btnWidth, btnHeight);
             btnRT.anchoredPosition = new Vector2(x, y);
-            
+
             UnityEngine.UI.Button btn = btnObj.GetComponent<UnityEngine.UI.Button>();
             UnityEngine.UI.Image btnImage = btnObj.GetComponent<UnityEngine.UI.Image>();
-            // 버튼 배경은 어두운 색으로 유지
-            btnImage.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
-            
+
+            if (weaponCompatible)
+            {
+                btnImage.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
+                btn.interactable = true;
+            }
+            else
+            {
+                // Grayed out — wrong weapon equipped
+                btnImage.color = new Color(0.12f, 0.12f, 0.12f, 0.7f);
+                btn.interactable = false;
+            }
+
             // 아이콘 추가 (왼쪽에 배치)
             if (skill.skillIcon != null)
             {
@@ -321,8 +345,9 @@ public class BattleManager : MonoBehaviour
                 UnityEngine.UI.Image iconImage = iconObj.GetComponent<UnityEngine.UI.Image>();
                 iconImage.sprite = skill.skillIcon;
                 iconImage.preserveAspect = true;
+                if (!weaponCompatible) iconImage.color = new Color(1f, 1f, 1f, 0.35f);
             }
-            
+
             // 텍스트 추가 (아이콘 오른쪽에 배치)
             GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
             textObj.transform.SetParent(btnObj.transform, false);
@@ -333,22 +358,33 @@ public class BattleManager : MonoBehaviour
             float leftMargin = skill.icon != null ? btnHeight * 0.7f + 15 : 10;
             textRT.offsetMin = new Vector2(leftMargin, 0);
             textRT.offsetMax = new Vector2(-10, 0);
-            
+
             TMPro.TextMeshProUGUI btnText = textObj.GetComponent<TMPro.TextMeshProUGUI>();
             string costText = skill.hpCostPercent > 0 ? $"HP {skill.hpCostPercent}%" : $"MP {skill.mpCost}";
-            // 스킬 이름과 코스트를 줄바꿈으로 분리, 코스트는 더 작은 글씨로
-            btnText.text = $"{skill.skillName}\n<size=16><color=#AAAAAA>{costText}</color></size>";
-            // 메인 폰트 크기를 25pt로 조정
-            btnText.fontSize = Mathf.Min(25, btnHeight * 0.55f); 
-            btnText.alignment = TMPro.TextAlignmentOptions.Left;
-            btnText.color = Color.white;
-            
-            // 리스너 추가
-            SkillData capturedSkill = skill;
-            btn.onClick.AddListener(() =>
+            if (weaponCompatible)
             {
-                UsePlayerSkill(capturedSkill);
-            });
+                btnText.text = $"{skill.skillName}\n<size=16><color=#AAAAAA>{costText}</color></size>";
+                btnText.color = Color.white;
+            }
+            else
+            {
+                string reqLabel = skill.weaponCategory.ToString();
+                btnText.text = $"{skill.skillName}\n<size=14><color=#FF6666>Requires: {reqLabel}</color></size>";
+                btnText.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            }
+            // 메인 폰트 크기를 25pt로 조정
+            btnText.fontSize = Mathf.Min(25, btnHeight * 0.55f);
+            btnText.alignment = TMPro.TextAlignmentOptions.Left;
+
+            // 리스너 추가 (only for compatible skills)
+            if (weaponCompatible)
+            {
+                SkillData capturedSkill = skill;
+                btn.onClick.AddListener(() =>
+                {
+                    UsePlayerSkill(capturedSkill);
+                });
+            }
         }
 
         // 2. Back 버튼 배치 (우측 하단 고정: Col 1, Row 3)
@@ -2648,6 +2684,19 @@ public class BattleManager : MonoBehaviour
         }
 
         if (skill == null) return;
+
+        // Weapon category check (safety guard — button should already be disabled)
+        if (skill.weaponCategory != AbyssdawnBattle.WeaponCategory.None)
+        {
+            AbyssdawnBattle.WeaponCategory equipped = AbyssdawnBattle.WeaponCategory.None;
+            if (currentControlledMember.statData != null && currentControlledMember.statData.rightHand != null)
+                equipped = currentControlledMember.statData.rightHand.weaponCategory;
+            if (equipped != skill.weaponCategory)
+            {
+                AddMessage($"Requires {skill.weaponCategory} equipped!");
+                return;
+            }
+        }
 
         // MP 체크
         if (skill.mpCost > 0 && currentControlledMember.currentMP < skill.mpCost)
