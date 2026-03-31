@@ -19,6 +19,7 @@ MonoBehaviour:
   usageType: 0
   damageType: 0
   scaleStat: 0
+  weaponCategory: 1
   hpCostPercent: 5
   mpCost: 0
   minMult: 1.5

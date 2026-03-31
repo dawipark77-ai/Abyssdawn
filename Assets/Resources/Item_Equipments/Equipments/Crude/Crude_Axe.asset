@@ -18,6 +18,7 @@ MonoBehaviour:
   description: A roughly ground axe. ATK +2.
   equipmentType: 0
   isTwoHanded: 0
+  weaponCategory: 8
   armourCategory: 0
   armourType: 0
   attackBonus: 2
