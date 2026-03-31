@@ -20606,6 +20606,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonEncounter
   encounterChance: 0.09
+  postBattleCooldownSteps: 3
   battleSceneName: Abyysborn_Battle 01
 --- !u!114 &481923467
 MonoBehaviour:
@@ -45957,7 +45958,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &989372225
 RectTransform:
   m_ObjectHideFlags: 0
@@ -66374,8 +66375,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 4540569537938854225, guid: dc43b59c44b519d448078c0111e7c0c8, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

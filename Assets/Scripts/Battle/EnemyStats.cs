@@ -292,16 +292,16 @@ public class EnemyStats : MonoBehaviour
     /// </summary>
     private void RefreshStatusIcons()
     {
-        if (statusIconPanel == null)
-        {
-            // UI가 아직 생성 안 됐으면 건너뜀 — UpdateStatusUI()에서 재시도됨
-            return;
-        }
+        if (statusIconPanel == null) return;
 
-        // 기존 아이콘 제거
+        // 기존 아이콘 즉시 제거
         foreach (var obj in statusIconObjects)
-            if (obj != null) Destroy(obj);
+            if (obj != null) DestroyImmediate(obj);
         statusIconObjects.Clear();
+
+        const float iconSize = 16f;
+        const float spacing = 2f;
+        int count = 0;
 
         foreach (var se in activeStatusEffects)
         {
@@ -309,15 +309,26 @@ public class EnemyStats : MonoBehaviour
             Sprite icon = se.data.flatIcon ?? se.data.itemIcon;
             if (icon == null) continue;
 
-            GameObject iconObj = new GameObject($"Icon_{se.data.effectType}", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+            GameObject iconObj = new GameObject($"Icon_{se.data.effectType}",
+                typeof(RectTransform), typeof(UnityEngine.UI.Image));
             iconObj.transform.SetParent(statusIconPanel.transform, false);
+
             RectTransform rt = iconObj.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(16f, 16f);
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(0f, 0f);
+            rt.pivot = new Vector2(0f, 0f);
+            rt.sizeDelta = new Vector2(iconSize, iconSize);
+            rt.anchoredPosition = new Vector2((iconSize + spacing) * count + 2f, 2f);
+
             UnityEngine.UI.Image img = iconObj.GetComponent<UnityEngine.UI.Image>();
             img.sprite = icon;
             img.preserveAspect = true;
+            img.raycastTarget = false;
             statusIconObjects.Add(iconObj);
+            count++;
         }
+
+        Debug.Log($"[StatusIcon] {enemyName} icons refreshed: {count} active effects");
     }
 
     /// <summary>
@@ -335,7 +346,7 @@ public class EnemyStats : MonoBehaviour
             {
                 int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn));
                 currentHP = Mathf.Max(0, currentHP - dotDamage);
-                Debug.Log($"[StatusEffect] {enemyName}이(가) {se.data.effectType}로 {dotDamage} DoT 피해. (남은 HP: {currentHP})");
+                Debug.Log($"[StatusEffect] {enemyName} took {dotDamage} DoT damage from {se.data.effectType}. (HP: {currentHP})");
             }
 
             se.remainingTurns--;
@@ -470,13 +481,16 @@ public class EnemyStats : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
 
-        // Canvas 크기 설정 (충분한 가로폭 확보)
+        // 캔버스 크기: 상단 50px = HP/MP 텍스트, 하단 20px = 상태이상 아이콘
+        const float canvasW = 120f, textH = 50f, iconH = 20f;
+        float totalH = textH + iconH;
+
         RectTransform canvasRT = statusCanvas.GetComponent<RectTransform>();
-        canvasRT.sizeDelta = statusUISize;
+        canvasRT.sizeDelta = new Vector2(canvasW, totalH);
         canvasRT.localScale = Vector3.one * statusUIScale;
         canvasRT.position = originalPosition + Vector3.up * statusUIOffsetY;
 
-        // 배경 추가 (가독성 향상)
+        // ── 배경 (전체 캔버스) ──
         GameObject bgObj = new GameObject("Background", typeof(RectTransform), typeof(UnityEngine.UI.Image));
         bgObj.transform.SetParent(canvasObj.transform, false);
         RectTransform bgRT = bgObj.GetComponent<RectTransform>();
@@ -484,54 +498,47 @@ public class EnemyStats : MonoBehaviour
         bgRT.anchorMax = Vector2.one;
         bgRT.offsetMin = Vector2.zero;
         bgRT.offsetMax = Vector2.zero;
-        
-        UnityEngine.UI.Image bgImage = bgObj.GetComponent<UnityEngine.UI.Image>();
-        bgImage.color = new Color(0f, 0f, 0f, 0.7f); // 반투명 검은색 배경
+        bgObj.GetComponent<UnityEngine.UI.Image>().color = new Color(0f, 0f, 0f, 0.7f);
 
-        // 단일 텍스트로 HP/MP를 두 줄로 표시
+        // ── HP/MP 텍스트 (상단 textH px) ──
         GameObject textObj = new GameObject("StatusText", typeof(RectTransform), typeof(TextMeshProUGUI));
         textObj.transform.SetParent(canvasObj.transform, false);
         RectTransform textRT = textObj.GetComponent<RectTransform>();
-        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMin = new Vector2(0f, iconH / totalH);
         textRT.anchorMax = Vector2.one;
         textRT.offsetMin = Vector2.zero;
         textRT.offsetMax = Vector2.zero;
-        
+
         hpText = textObj.GetComponent<TextMeshProUGUI>();
         hpText.text = $"HP: {currentHP}/{maxHP}\nMP: {currentMP}/{maxMP}";
         hpText.fontSize = 20;
         hpText.alignment = TextAlignmentOptions.Center;
         hpText.color = Color.white;
         hpText.raycastTarget = false;
-        hpText.textWrappingMode = TMPro.TextWrappingModes.NoWrap; // 강제 줄바꿈 외에는 개행 금지
-        hpText.overflowMode = TMPro.TextOverflowModes.Overflow; // 오버플로우 허용
-        hpText.autoSizeTextContainer = false; // 자동 크기 조정 비활성화
-
-        // MP 텍스트는 HP 텍스트와 같은 객체 사용 (두 줄로 표시)
+        hpText.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+        hpText.overflowMode = TMPro.TextOverflowModes.Overflow;
+        hpText.autoSizeTextContainer = false;
         mpText = hpText;
 
-        // 상태이상 아이콘 패널 (HP/MP 텍스트 아래)
+        // ── 상태이상 아이콘 패널 (하단 iconH px, 캔버스 내부) ──
         statusIconPanel = new GameObject("StatusIconPanel", typeof(RectTransform));
         statusIconPanel.transform.SetParent(canvasObj.transform, false);
         RectTransform iconPanelRT = statusIconPanel.GetComponent<RectTransform>();
-        // 캔버스 하단 바깥쪽에 아이콘 띠 배치
         iconPanelRT.anchorMin = new Vector2(0f, 0f);
-        iconPanelRT.anchorMax = new Vector2(1f, 0f);
-        iconPanelRT.pivot = new Vector2(0.5f, 1f);
-        iconPanelRT.sizeDelta = new Vector2(0f, 18f);
-        iconPanelRT.anchoredPosition = new Vector2(0f, -4f);
-        HorizontalLayoutGroup hlg = statusIconPanel.AddComponent<HorizontalLayoutGroup>();
-        hlg.childAlignment = TextAnchor.MiddleCenter;
-        hlg.spacing = 2f;
-        hlg.childForceExpandWidth = false;
-        hlg.childForceExpandHeight = false;
-        hlg.childControlWidth = false;
-        hlg.childControlHeight = false;
+        iconPanelRT.anchorMax = new Vector2(1f, iconH / totalH);
+        iconPanelRT.offsetMin = Vector2.zero;
+        iconPanelRT.offsetMax = Vector2.zero;
 
         statusUI = canvasObj;
+        statusIconObjects.Clear();
 
-        // UI 위치 및 회전 설정
-        UpdateStatusUI();
+        // UI 위치 및 회전 설정 (RefreshStatusIcons 호출 없이)
+        if (Camera.main != null)
+        {
+            statusCanvas.transform.position = originalPosition + Vector3.up * statusUIOffsetY;
+            statusCanvas.transform.LookAt(Camera.main.transform);
+            statusCanvas.transform.Rotate(0, 180, 0);
+        }
 
         Debug.Log($"[EnemyStats] World space UI created for {enemyName} at position {originalPosition}");
     }
@@ -554,15 +561,12 @@ public class EnemyStats : MonoBehaviour
             CreateWorldSpaceUI();
         }
 
-        // HP와 MP를 한 텍스트에 두 줄로 표시
+        // HP/MP 텍스트 갱신만 담당 — 아이콘은 효과 변경 시에만 RefreshStatusIcons() 호출
         if (hpText != null)
         {
             hpText.text = $"HP: {currentHP}/{maxHP}" + System.Environment.NewLine + $"MP: {currentMP}/{maxMP}";
             hpText.ForceMeshUpdate();
         }
-
-        // 상태이상 아이콘 항상 동기화
-        RefreshStatusIcons();
     }
 
     // 하이라이트 효과

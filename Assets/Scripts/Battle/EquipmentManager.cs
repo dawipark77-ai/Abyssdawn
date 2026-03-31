@@ -71,6 +71,14 @@ public class EquipmentManager : MonoBehaviour
         accessory1 = playerStatData.accessory1;
         accessory2 = playerStatData.accessory2;
 
+        // 양손 무기 규칙 강제 (인스펙터 직접 편집 방어)
+        if (rightHand != null && rightHand.isTwoHanded && leftHand != null)
+        {
+            Debug.Log($"[EquipmentManager] Two-handed rule enforced on load: unequipping '{leftHand.equipmentName}' from left hand.");
+            leftHand = null;
+            playerStatData.leftHand = null;
+        }
+
         Debug.Log("[EquipmentManager] PlayerStatData에서 장비를 로드했습니다.");
         Debug.Log($"  - Right Hand: {(rightHand != null ? rightHand.equipmentName : "None")}");
         Debug.Log($"  - Left Hand: {(leftHand != null ? leftHand.equipmentName : "None")}");

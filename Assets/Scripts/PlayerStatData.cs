@@ -94,7 +94,29 @@ public class PlayerStatData : ScriptableObject
     /// </summary>
     private void OnValidate()
     {
+        EnforceTwoHandedRule();
         CheckAndActivateTrait();
+    }
+
+    /// <summary>
+    /// 양손 무기 장착 규칙 강제 — 오른손이 TwoHanded면 왼손 자동 해제
+    /// 인스펙터 직접 편집 시에도 작동
+    /// </summary>
+    private void EnforceTwoHandedRule()
+    {
+        // 오른손이 양손 무기면 왼손 강제 해제
+        if (rightHand != null && rightHand.isTwoHanded && leftHand != null)
+        {
+            Debug.Log($"[PlayerStatData] Two-handed weapon '{rightHand.equipmentName}' equipped — auto-unequipping left hand '{leftHand.equipmentName}'");
+            leftHand = null;
+        }
+        // 왼손에 양손 무기가 들어온 경우 오른손으로 이동
+        if (leftHand != null && leftHand.isTwoHanded)
+        {
+            Debug.Log($"[PlayerStatData] Two-handed weapon '{leftHand.equipmentName}' moved to right hand, left hand cleared.");
+            rightHand = leftHand;
+            leftHand = null;
+        }
     }
 
     /// <summary>
