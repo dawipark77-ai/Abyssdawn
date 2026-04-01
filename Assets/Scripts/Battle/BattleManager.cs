@@ -3627,14 +3627,15 @@ public class BattleManager : MonoBehaviour
     private bool IsDualWielding(PlayerStats attacker)
     {
         if (attacker == null) return false;
+
+        AbyssdawnBattle.EquipmentData right = null;
+        AbyssdawnBattle.EquipmentData left = null;
+
         var eq = attacker.GetComponent<EquipmentManager>();
-        if (eq == null) return false;
+        if (eq != null) { right = eq.rightHand; left = eq.leftHand; }
+        else if (attacker.statData != null) { right = attacker.statData.rightHand; left = attacker.statData.leftHand; }
 
-        var right = eq.rightHand;
-        var left = eq.leftHand;
         if (right == null || left == null) return false;
-
-        // 둘 다 한손 무기이고, 양손 무기가 아니어야 함
         if (right.equipmentType != AbyssdawnBattle.EquipmentType.Hand) return false;
         if (left.equipmentType != AbyssdawnBattle.EquipmentType.Hand) return false;
 
@@ -3649,24 +3650,30 @@ public class BattleManager : MonoBehaviour
     private float GetArmorBreakCoefficient(PlayerStats attacker)
     {
         if (attacker == null) return 0f;
+
+        AbyssdawnBattle.EquipmentData rightHand = null;
+        AbyssdawnBattle.EquipmentData leftHand = null;
+
         var eq = attacker.GetComponent<EquipmentManager>();
-        if (eq == null) return 0f;
+        if (eq != null) { rightHand = eq.rightHand; leftHand = eq.leftHand; }
+        else if (attacker.statData != null) { rightHand = attacker.statData.rightHand; leftHand = attacker.statData.leftHand; }
+
+        if (rightHand == null) return 0f;
 
         float coeff = 0f;
         bool isDual = IsDualWielding(attacker);
 
         if (isDual)
         {
-            if (eq.rightHand != null) coeff += eq.rightHand.GetArmorBreakCoefficient();
-            if (eq.leftHand != null)  coeff += eq.leftHand.GetArmorBreakCoefficient();
+            coeff += rightHand.GetArmorBreakCoefficient();
+            if (leftHand != null) coeff += leftHand.GetArmorBreakCoefficient();
         }
         else
         {
-            if (eq.rightHand != null &&
-                (eq.rightHand.equipmentType == AbyssdawnBattle.EquipmentType.Hand ||
-                 eq.rightHand.equipmentType == AbyssdawnBattle.EquipmentType.TwoHanded))
+            if (rightHand.equipmentType == AbyssdawnBattle.EquipmentType.Hand ||
+                rightHand.equipmentType == AbyssdawnBattle.EquipmentType.TwoHanded)
             {
-                coeff = eq.rightHand.GetArmorBreakCoefficient();
+                coeff = rightHand.GetArmorBreakCoefficient();
             }
         }
 
@@ -3680,14 +3687,17 @@ public class BattleManager : MonoBehaviour
     private int GetArmorBreakDamage(PlayerStats attacker, int targetDefense)
     {
         if (attacker == null || targetDefense <= 0) return 0;
-        var equipmentManager = attacker.GetComponent<EquipmentManager>();
-        if (equipmentManager == null || equipmentManager.rightHand == null) return 0;
 
-        var weapon = equipmentManager.rightHand;
-        if (weapon.equipmentType != EquipmentType.Hand && weapon.equipmentType != EquipmentType.TwoHanded)
-            return 0;
+        AbyssdawnBattle.EquipmentData weapon = null;
+        var eq = attacker.GetComponent<EquipmentManager>();
+        if (eq != null) weapon = eq.rightHand;
+        else if (attacker.statData != null) weapon = attacker.statData.rightHand;
 
-        float coeff = weapon.armorBreakCoefficient;
+        if (weapon == null) return 0;
+        if (weapon.equipmentType != AbyssdawnBattle.EquipmentType.Hand &&
+            weapon.equipmentType != AbyssdawnBattle.EquipmentType.TwoHanded) return 0;
+
+        float coeff = weapon.GetArmorBreakCoefficient();
         if (coeff <= 0f) return 0;
 
         float percent = attacker.Attack * coeff;
