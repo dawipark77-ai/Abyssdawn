@@ -134,7 +134,7 @@
 - `[v]` **4-9** `DunBreak` 확률 적용
 - `[v]` **4-10** 전투 중 소비 아이템 `ConsumableInventory.UseItem()` 호출 및 수량 차감
 - `[v]` **4-11** 힐량 `hpRecoveryPercent × maxHP` 계산
-- `[?]` **4-12** 아이템 버튼 Hero 전용 (`isHero`) — 동료 사용 불가, 의도된 설계인지 확인
+- `[v]` **4-12** 아이템 버튼 Hero 전용 — 의도된 설계 확정 ✓
 - `[v]` **4-13** `selectedConsumableItem` 인벤토리 클릭 시 BattleManager 자동 연동 완료 ✓
 
 ---
@@ -150,7 +150,7 @@
 - `[v]` **5-7** 명중 계산 공식 확인 — `baseHit × agiModifier + Luck×0.002 + 패시브 + 장비` ✓
 - `[v]` **5-8** 명중률 캡 — Clamp(0.2, 0.98) 코드 확인 (설계 10%/100%와 다르나 의도된 값으로 확정) ✓
 - `[v]` **5-9** 크리티컬 공식 확인 — `roll(0~100) < criticalChance(25) + Luck` ✓
-- `[ ]` **5-10** `BattleRecorder` F6/F7/F8 동작 (런타임 확인)
+- `[-]` **5-10** `BattleRecorder` F6/F7/F8 — 핫키 기능, 현재 우선순위 제외
 - `[v]` **5-11** `BattleSystem.cs` 데드코드 — 완전 미호출 확인, 파일 삭제 완료 ✓
 
 ---
