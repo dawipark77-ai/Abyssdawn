@@ -377,6 +377,10 @@ public class InventoryUIManager : MonoBehaviour
 
         if (!detailPanelVisible) AnimateDetail(true);
         else detailPanel.SetActive(true);
+
+        // 장비 선택 시 BattleManager 소비 아이템 선택 해제
+        var bm = FindFirstObjectByType<BattleManager>();
+        if (bm != null) bm.selectedConsumableItem = null;
     }
 
     private void OnConsumableClicked(ConsumableItemSO item)
@@ -387,6 +391,14 @@ public class InventoryUIManager : MonoBehaviour
 
         if (!detailPanelVisible) AnimateDetail(true);
         else detailPanel.SetActive(true);
+
+        // BattleManager에 선택된 소비 아이템 자동 연동
+        var bm = FindFirstObjectByType<BattleManager>();
+        if (bm != null)
+        {
+            bm.selectedConsumableItem = item;
+            Debug.Log($"[InventoryUIManager] selectedConsumableItem -> {item.itemName}");
+        }
     }
 
     private void PopulateDetailPanelConsumable(ConsumableItemSO item)
