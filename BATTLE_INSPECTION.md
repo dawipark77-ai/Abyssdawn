@@ -116,8 +116,8 @@
 - `[v]` **3-4** 지속 턴 만료 시 자동 해제
 - `[v]` **3-5** 중복 부여 시 긴 쪽 지속턴 유지 (갱신 방식)
 - `[v]` **3-6** 스턴 행동 차단 — B-2/B-3 수정으로 해결 ✓
-- `[!]` **3-7** 상태이상 아이콘 World-Space UI 표시 — 코드 구현 완료, 런타임 버그 수정 중 (출혈 적용 시 HP/MP 패널 사라지는 버그)
-- `[!]` **3-8** `flatIcon` 전투 화면 표시 — 구현 완료, 아이콘 미표시 버그 수정 중
+- `[v]` **3-7** 상태이상 아이콘 World-Space UI 표시 — 정상 작동 확인 ✓
+- `[v]` **3-8** `flatIcon` 전투 화면 표시 — 정상 작동 확인 ✓
 
 ---
 
@@ -147,9 +147,9 @@
 - `[v]` **5-4** 블록 확률 계산
 - `[v]` **5-5** 블록 발동 시 데미지 감소
 - `[v]` **5-6** 방어 행동 `defenceReduction 0.5f` 적용
-- `[ ]` **5-7** 명중 계산 공식 실제 수치 (런타임 로그 확인)
-- `[ ]` **5-8** 명중률 최소 10% / 최대 100% 캡 (런타임 확인)
-- `[ ]` **5-9** 크리티컬 공식 실제 수치 (런타임 로그 확인)
+- `[v]` **5-7** 명중 계산 공식 확인 — `baseHit × agiModifier + Luck×0.002 + 패시브 + 장비` ✓
+- `[v]` **5-8** 명중률 캡 — Clamp(0.2, 0.98) 코드 확인 (설계 10%/100%와 다르나 의도된 값으로 확정) ✓
+- `[v]` **5-9** 크리티컬 공식 확인 — `roll(0~100) < criticalChance(25) + Luck` ✓
 - `[ ]` **5-10** `BattleRecorder` F6/F7/F8 동작 (런타임 확인)
 - `[v]` **5-11** `BattleSystem.cs` 데드코드 — 완전 미호출 확인, 파일 삭제 완료 ✓
 
@@ -188,11 +188,13 @@
 
 ## 8단계 — 미구현 시스템 (CLAUDE.md 13섹션 참고)
 
-- `[ ]` **8-1** `SkillData.backlashChance` 등 Backlash 필드 추가
-- `[ ]` **8-2** `EquipmentData.magicAmplify / backlashSuppression` 추가
-- `[ ]` **8-3** `PassiveData.backlashSuppression` 추가
-- `[ ]` **8-4** `PlayerStats.TotalBacklashSuppression` 계산
-- `[ ]` **8-5** BattleSystem 역효과 발동 로직
+> ⚠️ Backlash → **Backflow(역류)** 로 명칭 정정
+
+- `[ ]` **8-1** `SkillData.backflowChance` 등 Backflow 필드 추가
+- `[ ]` **8-2** `EquipmentData.magicAmplify / backflowSuppression` 추가
+- `[ ]` **8-3** `PassiveData.backflowSuppression` 추가
+- `[ ]` **8-4** `PlayerStats.TotalBackflowSuppression` 계산
+- `[ ]` **8-5** BattleManager 역류 발동 로직
 - `[ ]` **8-6** Mana Stabilize SO + 버프 턴 관리
 - `[ ]` **8-7** 마법 장비 SO 일괄 제작
 - `[ ]` **8-8** Bow 견제사격 + 인터셉트 타이밍
