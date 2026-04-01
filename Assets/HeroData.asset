@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a344a122eb8754989d26c422398af5, type: 3}
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatData
-  currentHP: 64
+  currentHP: 91
   currentMP: 10
   level: 1
   exp: 0
@@ -36,8 +36,8 @@ MonoBehaviour:
   - {fileID: 0}
   learnedSkills: []
   skillPoints: 0
-  rightHand: {fileID: 11400000, guid: af53acb4a6d12384ea29d0ad89928075, type: 2}
-  leftHand: {fileID: 0}
+  rightHand: {fileID: 11400000, guid: d10cb59fd29b1f04db66b22ec725e87b, type: 2}
+  leftHand: {fileID: 11400000, guid: f11abdb46a6c8804bbcc6bab1e0cbfd0, type: 2}
   body: {fileID: 11400000, guid: e9a66495ca4098b4aab796c8edf644c4, type: 2}
   accessory1: {fileID: 11400000, guid: 4ed214cc9ca37264da616dbfc05d6960, type: 2}
   accessory2: {fileID: 11400000, guid: 811620911ec01884bb165042dc142cb8, type: 2}
