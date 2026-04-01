@@ -135,7 +135,7 @@
 - `[v]` **4-10** 전투 중 소비 아이템 `ConsumableInventory.UseItem()` 호출 및 수량 차감
 - `[v]` **4-11** 힐량 `hpRecoveryPercent × maxHP` 계산
 - `[?]` **4-12** 아이템 버튼 Hero 전용 (`isHero`) — 동료 사용 불가, 의도된 설계인지 확인
-- `[!]` **4-13** `selectedConsumableItem` Inspector 수동 연결 — 인벤토리 UI 자동화 미완성
+- `[v]` **4-13** `selectedConsumableItem` 인벤토리 클릭 시 BattleManager 자동 연동 완료 ✓
 
 ---
 
@@ -182,7 +182,7 @@
 - `[ ]` **7-4** 턴 순서 / 현재 액션 캐릭터 포커스
 - `[ ]` **7-5** 파티 상태 패널 파티원 수에 맞게 조정
 - `[ ]` **7-6** StatRow ◆ 컬러 접두어 올바르게 표시
-- `[!]` **7-7** `selectedConsumableItem` 인벤토리 선택 시 자동 설정 (미구현)
+- `[v]` **7-7** `selectedConsumableItem` 인벤토리 선택 시 자동 설정 완료 ✓
 
 ---
 
