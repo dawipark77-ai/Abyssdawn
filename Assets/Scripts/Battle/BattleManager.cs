@@ -3811,17 +3811,35 @@ public class BattleManager : MonoBehaviour
 
     private void ApplyCurseEffects(EnemyStats target, SkillData skill)
     {
-        if (target == null || skill == null || skill.Effects == null) return;
+        if (target == null || skill == null) return;
 
+        // ── 신규 시스템: skill.curseEffect + skill.curseApplyChance ──
+        // 확률은 스킬 단위에서만 1번 굴림 (EnemyStats 내부 이중 롤 없음)
+        if (skill.curseEffect != null && skill.curseApplyChance > 0f)
+        {
+            if (UnityEngine.Random.value < skill.curseApplyChance)
+            {
+                // 마법 스킬이면 magicalDuration, 물리면 physicalDuration 사용
+                bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magical;
+                int dur = isMagic ? skill.curseEffect.magicalDuration : skill.curseEffect.physicalDuration;
+                bool applied = target.ApplyStatusEffectDirect(skill.curseEffect, dur);
+                if (applied)
+                    AddMessage($"{target.enemyName} is afflicted with {skill.curseEffect.variantId}!");
+            }
+        }
+
+        // ── 구버전 시스템: skill.Effects 리스트 (무기 장비 저주 등) ──
+        if (skill.Effects == null) return;
         foreach (var effect in skill.Effects)
         {
             if (effect == null || effect.statusEffect == null || effect.statusEffectChance <= 0f) continue;
 
             if (UnityEngine.Random.Range(0f, 100f) < effect.statusEffectChance)
             {
+                // 구버전은 EnemyStats 내부 physicalApplyChance 롤 유지 (하위 호환)
                 bool applied = target.ApplyStatusEffect(effect.statusEffect);
                 if (applied)
-                    AddMessage($"{target.enemyName}에게 {effect.statusEffect.effectType} 상태이상 발생!");
+                    AddMessage($"{target.enemyName} is afflicted with {effect.statusEffect.effectType}!");
             }
         }
     }
@@ -4123,8 +4141,11 @@ public class BattleManager : MonoBehaviour
         {
             if (UnityEngine.Random.Range(0f, 100f) < skill.selfStatusEffectChance)
             {
-                attacker.ApplyStatusEffect(skill.selfStatusEffect);
-                AddMessage($"{attacker.playerName}에게 {skill.selfStatusEffect.effectType} 역효과 발생!");
+                // 마법 스킬이면 magicalDuration 사용
+                bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magical;
+                int dur = isMagic ? skill.selfStatusEffect.magicalDuration : skill.selfStatusEffect.physicalDuration;
+                attacker.ApplyStatusEffect(skill.selfStatusEffect, dur);
+                AddMessage($"{attacker.playerName} is self-afflicted with {skill.selfStatusEffect.variantId}!");
             }
         }
     }

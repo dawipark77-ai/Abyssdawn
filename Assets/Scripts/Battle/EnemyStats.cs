@@ -272,16 +272,31 @@ public class EnemyStats : MonoBehaviour
 
         if (UnityEngine.Random.value > effect.physicalApplyChance) return false;
 
+        return ApplyStatusEffectDirect(effect, effect.physicalDuration);
+    }
+
+    /// <summary>
+    /// 확률 재롤 없이 상태이상을 직접 적용합니다 (스킬에서 이미 확률을 굴린 경우).
+    /// duration: 0이면 damageType에 따라 physicalDuration/magicalDuration 자동 선택.
+    /// </summary>
+    public bool ApplyStatusEffectDirect(StatusEffectSO effect, int duration = 0)
+    {
+        if (effect == null) return false;
+
+        int turns = duration > 0 ? duration : effect.physicalDuration;
+
         StatusEffectInstance existing = activeStatusEffects.Find(e => e.data.effectType == effect.effectType);
         if (existing != null)
         {
-            existing.remainingTurns = Mathf.Max(existing.remainingTurns, effect.physicalDuration);
+            existing.remainingTurns = Mathf.Max(existing.remainingTurns, turns);
             Debug.Log($"[StatusEffect] {enemyName} {effect.effectType} duration refreshed: {existing.remainingTurns} turns");
         }
         else
         {
-            activeStatusEffects.Add(new StatusEffectInstance(effect));
-            Debug.Log($"[StatusEffect] {enemyName} afflicted with {effect.effectType}! ({effect.physicalDuration} turns)");
+            var instance = new StatusEffectInstance(effect);
+            instance.remainingTurns = turns;
+            activeStatusEffects.Add(instance);
+            Debug.Log($"[StatusEffect] {enemyName} afflicted with {effect.effectType}! ({turns} turns)");
             RefreshStatusIcons();
         }
         return true;
