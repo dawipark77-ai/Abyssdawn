@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 63e72d060cc17974caf0f50d57c79fbe
+guid: 4b13ec4bb09de8441b1870ea17f71066
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7069426175199391720
-    second: 01_Fireball_0
+      213: 3307364228868615354
+    second: 06_Heat Mirage_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 01_Fireball_0
+      name: 06_Heat Mirage_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8efab92a6a5ab1260800000000000000
-      internalID: 7069426175199391720
+      spriteID: abc2c843e3e16ed20800000000000000
+      internalID: 3307364228868615354
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      01_Fireball_0: 7069426175199391720
+      06_Heat Mirage_0: 3307364228868615354
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_04
   skillName: Smoldering Curse
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: -7874233037761765674, guid: 23ad7eee9bb970f41aa81c81a4cd7256, type: 3}
   description: Curses the target with smoldering flames. High ignite chance, no direct
     damage.
   usageType: 0
-  damageType: 1
+  damageType: 2
   scalingStat: 2
   weaponCategory: 0
   targeting:
@@ -49,6 +49,7 @@ MonoBehaviour:
   backflowChance: 0.12
   backflowType: 3
   backflowStatusEffect: {fileID: 11400000, guid: a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6, type: 2}
+  backflowSuppression: 0
   maxRank: 0
   bonusPerRank: []
   backflowPerRank: []

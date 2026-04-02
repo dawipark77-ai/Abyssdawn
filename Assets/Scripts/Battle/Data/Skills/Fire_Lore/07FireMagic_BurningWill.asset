@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_07
   skillName: Burning Will
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 8984675984341511927, guid: 5e45f0b5a8cbe2340a91ff2ac8745178, type: 3}
   description: Passive. When self is ignited, fire skills deal bonus damage. Turns
     weakness into power.
   usageType: 1
-  damageType: 1
+  damageType: 2
   scalingStat: 2
   weaponCategory: 0
   targeting:
@@ -49,6 +49,7 @@ MonoBehaviour:
   backflowChance: 0
   backflowType: 0
   backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
   maxRank: 0
   bonusPerRank: []
   backflowPerRank: []

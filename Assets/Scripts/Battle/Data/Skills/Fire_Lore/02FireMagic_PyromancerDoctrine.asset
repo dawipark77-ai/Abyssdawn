@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_02
   skillName: Pyromaniac Doctrine
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: -6324087370441366954, guid: 440894af2553a0f44b9410b1fc52c368, type: 3}
   description: Passive. Increases fire damage per rank, but also increases backflow
     chance.
   usageType: 1
-  damageType: 1
+  damageType: 2
   scalingStat: 2
   weaponCategory: 0
   targeting:
@@ -49,6 +49,7 @@ MonoBehaviour:
   backflowChance: 0
   backflowType: 0
   backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
   maxRank: 3
   bonusPerRank:
   - 0.15

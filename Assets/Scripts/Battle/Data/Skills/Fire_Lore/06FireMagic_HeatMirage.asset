@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_06
   skillName: Heat Mirage
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 3307364228868615354, guid: 4b13ec4bb09de8441b1870ea17f71066, type: 3}
   description: Creates a heat distortion that confuses enemies. No backflow risk.
   usageType: 0
-  damageType: 1
+  damageType: 2
   scalingStat: 2
   weaponCategory: 0
   targeting:
@@ -48,6 +48,7 @@ MonoBehaviour:
   backflowChance: 0
   backflowType: 0
   backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
   maxRank: 0
   bonusPerRank: []
   backflowPerRank: []

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_03
   skillName: Ember's Greed
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: -3817071420948106756, guid: 320edd8051d78ba44a2b4e061e22f31a, type: 3}
   description: Passive. Each rank amplifies fire magic further, at increasing backflow
     risk.
   usageType: 1
-  damageType: 1
+  damageType: 2
   scalingStat: 2
   weaponCategory: 0
   targeting:
@@ -49,6 +49,7 @@ MonoBehaviour:
   backflowChance: 0
   backflowType: 0
   backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
   maxRank: 5
   bonusPerRank:
   - 0.08
