@@ -45,7 +45,7 @@ MonoBehaviour:
   dunbreakDescription: 
   curseEffect: {fileID: 11400000, guid: e24b03751c878b5468ba77a4dff1af5b, type: 2}
   curseApplyChance: 1
-  backflowChance: 0.05
+  backflowChance: 1
   backflowType: 3
   backflowStatusEffect: {fileID: 11400000, guid: e24b03751c878b5468ba77a4dff1af5b, type: 2}
   backflowSuppression: 0

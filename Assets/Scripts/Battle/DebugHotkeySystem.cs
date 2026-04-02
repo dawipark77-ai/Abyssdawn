@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
@@ -340,28 +340,6 @@ public class DebugHotkeySystem : MonoBehaviour
         return center + right * (index * spawnOffset);
     }
     
-    void OnGUI()
-    {
-        if (!enableDebugMode) return;
-        
-        // ?붾㈃ 醫뚯륫 ?곷떒???붾쾭洹??뺣낫 ?쒖떆
-        GUILayout.BeginArea(new Rect(10, 10, 300, 400));
-        GUILayout.Label("=== DEBUG MODE ===", GUI.skin.box);
-        GUILayout.Label($"State: {currentState}");
-        GUILayout.Label("Hotkeys:");
-        GUILayout.Label("F1: Exploration Mode");
-        GUILayout.Label("F2: Start Battle");
-        GUILayout.Label("F3: Spawn Random Enemy");
-        GUILayout.Label("F4: Spawn 1-4 Enemies (Symmetric)");
-        GUILayout.Label("F5: Clear All Enemies");
-        GUILayout.Label("F6: Heal Player");
-        GUILayout.Label("F7: Damage Player (10)");
-        GUILayout.Label("F8: Reset Battle");
-        GUILayout.Label("F9: Toggle Pause");
-        GUILayout.Label("F10: Log Status");
-        GUILayout.Label("1-9: Spawn Enemy by Index");
-        GUILayout.EndArea();
-    }
 }
 
 

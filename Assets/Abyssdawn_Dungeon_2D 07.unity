@@ -20622,8 +20622,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   statData: {fileID: 11400000, guid: a176c788f5d164441af8bae214804085, type: 2}
   playerName: None
-  baseHP: 100
-  baseMP: 10
+  baseHP: 999
+  baseMP: 999
   baseAttack: 5
   baseDefense: 5
   baseMagic: 5

@@ -78,6 +78,9 @@ public class EnemyStats : MonoBehaviour
     [Tooltip("Check to manually override UI size/scale/offset in Inspector")]
     public bool useCustomStatusUISettings = false;
 
+    [Tooltip("끄면 월드 위에 뜨는 HP/MP UI를 생성하지 않습니다.")]
+    public bool enableWorldSpaceStatusUI = true;
+
     [Tooltip("World-space UI width/height (pixels before scaling)")]
     public Vector2 statusUISize = DEFAULT_STATUS_UI_SIZE;
     [Tooltip("World-space scale applied to the status UI canvas")]
@@ -144,7 +147,10 @@ public class EnemyStats : MonoBehaviour
         originalPosition = transform.position;
         
         // World Space UI 생성 (약간의 지연을 두고 생성하여 위치가 확정된 후 생성)
-        StartCoroutine(DelayedCreateWorldSpaceUI());
+        if (enableWorldSpaceStatusUI)
+        {
+            StartCoroutine(DelayedCreateWorldSpaceUI());
+        }
     }
 
     private void ApplyDefaultStatusUISettingsIfNeeded()
@@ -185,7 +191,7 @@ public class EnemyStats : MonoBehaviour
         }
         
         // UI가 아직 생성되지 않았으면 생성
-        if (statusUI == null && Camera.main != null)
+        if (enableWorldSpaceStatusUI && statusUI == null && Camera.main != null)
         {
             CreateWorldSpaceUI();
         }
@@ -472,6 +478,11 @@ public class EnemyStats : MonoBehaviour
     // World Space UI 생성 (public으로 변경하여 외부에서 호출 가능)
     public void CreateWorldSpaceUI()
     {
+        if (!enableWorldSpaceStatusUI)
+        {
+            return;
+        }
+
         if (Camera.main == null)
         {
             Debug.LogWarning($"[EnemyStats] Camera.main is null! Cannot create world space UI for {enemyName}");
@@ -637,9 +648,23 @@ public class EnemyStats : MonoBehaviour
         }
         
         // UI가 없으면 생성 시도
-        if (statusUI == null && !isDead && Camera.main != null)
+        if (enableWorldSpaceStatusUI && statusUI == null && !isDead && Camera.main != null)
         {
             CreateWorldSpaceUI();
+        }
+    }
+
+    public void SetWorldSpaceStatusUIEnabled(bool enabled)
+    {
+        enableWorldSpaceStatusUI = enabled;
+
+        if (!enabled && statusUI != null)
+        {
+            Destroy(statusUI);
+            statusUI = null;
+            statusCanvas = null;
+            hpText = null;
+            mpText = null;
         }
     }
 

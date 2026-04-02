@@ -133,8 +133,14 @@ public class BattleManager : MonoBehaviour
     private Dictionary<PartyRole, PlayerStats> allyInstances = new Dictionary<PartyRole, PlayerStats>();
     private PlayerStats currentControlledMember;
 
+    private List<RectTransform> playerStatusSlots = new List<RectTransform>();
     private List<TextMeshProUGUI> playerStatusTexts = new List<TextMeshProUGUI>();
+    private List<TextMeshProUGUI> playerStatusNameTexts = new List<TextMeshProUGUI>();
+    private List<TextMeshProUGUI> playerStatusHPTexts = new List<TextMeshProUGUI>();
+    private List<TextMeshProUGUI> playerStatusMPTexts = new List<TextMeshProUGUI>();
     private List<Image> playerStatusBackgrounds = new List<Image>();
+    private List<Transform> playerStatusIconRows = new List<Transform>();
+    private List<List<Image>> playerStatusIconImages = new List<List<Image>>();
     private Dictionary<PlayerStats, Coroutine> playerShakeCoroutines = new Dictionary<PlayerStats, Coroutine>();
 
     // ========== 턴 시스템 ==========
@@ -198,6 +204,17 @@ public class BattleManager : MonoBehaviour
     public float extraSpacingPerEnemy = 0.25f;
 
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
+    private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
+    private List<Image> enemyStatusFrames = new List<Image>();
+    private List<Image> enemyStatusMonsterImages = new List<Image>();
+    private List<TextMeshProUGUI> enemyStatusNameTexts = new List<TextMeshProUGUI>();
+    private List<TextMeshProUGUI> enemyStatusHPTexts = new List<TextMeshProUGUI>();
+    private List<TextMeshProUGUI> enemyStatusMPTexts = new List<TextMeshProUGUI>();
+    private List<List<Image>> enemyStatusIconImages = new List<List<Image>>();
+    private Dictionary<int, Coroutine> enemySlotPulseCoroutines = new Dictionary<int, Coroutine>();
+    private Dictionary<int, Coroutine> enemySlotShakeCoroutines = new Dictionary<int, Coroutine>();
+    private Dictionary<EnemyStats, int> lastEnemyDisplayedHP = new Dictionary<EnemyStats, int>();
+    private bool usingEnemyBarPortraitUI = false;
     private int currentTargetIndex = 0;
 
     // ========== 전열/후열 슬롯 시스템 ==========
@@ -1482,7 +1499,25 @@ public class BattleManager : MonoBehaviour
 
     private void RebuildEnemyStatusPanel()
     {
+        EnsureEnemyStatusPanelReference();
         if (enemyStatusPanel == null) return;
+
+        enemyStatusSlots.Clear();
+        enemyStatusFrames.Clear();
+        enemyStatusMonsterImages.Clear();
+        enemyStatusNameTexts.Clear();
+        enemyStatusHPTexts.Clear();
+        enemyStatusMPTexts.Clear();
+        enemyStatusIconImages.Clear();
+        StopAllEnemySlotEffects();
+        lastEnemyDisplayedHP.Clear();
+        usingEnemyBarPortraitUI = false;
+
+        if (TryBindExistingEnemySlots())
+        {
+            usingEnemyBarPortraitUI = true;
+            return;
+        }
 
         // 기존 슬롯 제거
         for (int i = enemyStatusPanel.childCount - 1; i >= 0; i--)
@@ -1554,6 +1589,92 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    private bool TryBindExistingEnemySlots()
+    {
+        Transform slotRoot = FindExistingEnemyBarRoot();
+        if (slotRoot == null) return false;
+
+        List<Transform> foundSlots = new List<Transform>();
+        for (int i = 0; i < 4; i++)
+        {
+            Transform slot = FindEnemySlot(slotRoot, i);
+            if (slot == null)
+            {
+                return false;
+            }
+
+            foundSlots.Add(slot);
+        }
+
+        foreach (Transform slot in foundSlots)
+        {
+            enemyStatusSlots.Add(slot as RectTransform);
+
+            Image frameImage = FindImageInSlot(slot, "Frame");
+            if (frameImage == null)
+            {
+                frameImage = slot.GetComponent<Image>();
+            }
+
+            Image monsterImage = FindImageInSlot(slot, "MonsterImage");
+            TextMeshProUGUI nameText = FindTextInSlot(slot, "Name", "NameText", "Nametext");
+            TextMeshProUGUI hpText = FindTextInSlot(slot, "HPText", "HP");
+            TextMeshProUGUI mpText = FindTextInSlot(slot, "MPText", "MP");
+            Transform statusIconRow = FindNamedDescendantRecursive(slot, "StatusIconRow");
+
+            enemyStatusFrames.Add(frameImage);
+            enemyStatusMonsterImages.Add(monsterImage);
+            enemyStatusNameTexts.Add(nameText);
+            enemyStatusHPTexts.Add(hpText);
+            enemyStatusMPTexts.Add(mpText);
+            enemyStatusIconImages.Add(BindStatusIcons(statusIconRow));
+
+            Button slotButton = slot.GetComponent<Button>();
+            if (slotButton == null)
+            {
+                slotButton = slot.gameObject.AddComponent<Button>();
+            }
+
+            int capturedIndex = enemyStatusSlots.Count - 1;
+            slotButton.onClick.RemoveAllListeners();
+            slotButton.onClick.AddListener(() =>
+            {
+                if (waitingForTargetSelection && capturedIndex < activeEnemies.Count && activeEnemies[capturedIndex] != null)
+                {
+                    EnemyStats clickedEnemy = activeEnemies[capturedIndex];
+                    if (clickedEnemy.currentHP > 0)
+                    {
+                        if (hoveredEnemy != null && hoveredEnemy != clickedEnemy)
+                        {
+                            hoveredEnemy.SetHighlight(false);
+                        }
+
+                        hoveredEnemy = clickedEnemy;
+                        hoveredEnemy.SetHighlight(true);
+
+                        if (pendingAction == "attack")
+                        {
+                            QueueAllyCommand(currentControlledMember, "attack", clickedEnemy);
+                        }
+                        else if (pendingAction == "skill" && pendingSkill != null)
+                        {
+                            QueueAllyCommand(currentControlledMember, "skill", clickedEnemy, pendingSkill);
+                        }
+
+                        waitingForTargetSelection = false;
+                        pendingAction = "";
+                        pendingSkill = null;
+                    }
+                }
+            });
+
+            Debug.Log($"[BattleManager] Enemy slot bind - {slot.name} | MonsterImage: {(monsterImage != null ? monsterImage.name : "NULL")} | Name: {(nameText != null ? nameText.name : "NULL")} | HP: {(hpText != null ? hpText.name : "NULL")} | MP: {(mpText != null ? mpText.name : "NULL")}");
+        }
+
+        Debug.Log($"[BattleManager] Bound existing EnemyBar slots: {enemyStatusSlots.Count}");
+        return enemyStatusSlots.Count == 4;
+    }
+
     private int ScoreEnemyPrefab(GameObject prefab)
     {
         EnemyStats stats = prefab.GetComponent<EnemyStats>();
@@ -1584,6 +1705,9 @@ public class BattleManager : MonoBehaviour
 
     private void ClearSpawnedEnemies()
     {
+        StopAllEnemySlotEffects();
+        lastEnemyDisplayedHP.Clear();
+
         foreach (var e in activeEnemies)
         {
             if (e != null) Destroy(e.gameObject);
@@ -2235,8 +2359,8 @@ public class BattleManager : MonoBehaviour
         }
         
         // 워리어의 슬롯 찾기
-        string slotName = $"PartySlot_{warriorIndex}";
-        Transform slotTransform = playerStatusPanel.transform.Find(slotName);
+        string slotName = $"PartySlot_{warriorIndex + 1}";
+        Transform slotTransform = GetPartySlotTransform(warriorIndex);
         Debug.Log($"[ShieldWall] Looking for slot: {slotName}, Found: {slotTransform != null}");
         
         if (slotTransform == null)
@@ -4468,13 +4592,27 @@ public class BattleManager : MonoBehaviour
         int uiLayer = LayerMask.NameToLayer("UI");
         if (uiLayer >= 0) playerStatusPanel.gameObject.layer = uiLayer;
 
-        // 기존 슬롯 제거
+        // 기존 바인딩 초기화
+        playerStatusSlots.Clear();
+        playerStatusNameTexts.Clear();
+        playerStatusHPTexts.Clear();
+        playerStatusMPTexts.Clear();
+        playerStatusTexts.Clear();
+        playerStatusBackgrounds.Clear();
+        playerStatusIconRows.Clear();
+        playerStatusIconImages.Clear();
+
+        // 씬에 이미 만든 PartyBar/PartySlot_1~4 구조가 있으면 그대로 사용
+        if (TryBindExistingPartySlots())
+        {
+            ApplyPlayerStatusFontSettings();
+            return;
+        }
+
         foreach (Transform child in playerStatusPanel)
         {
             Destroy(child.gameObject);
         }
-        playerStatusTexts.Clear();
-        playerStatusBackgrounds.Clear();
 
         // 패널 설정 (화면 하단)
         RectTransform panelRT = playerStatusPanel;
@@ -4588,6 +4726,465 @@ public class BattleManager : MonoBehaviour
         ApplyPlayerStatusFontSettings();
     }
 
+    private bool TryBindExistingPartySlots()
+    {
+        Transform slotRoot = FindExistingPartyBarRoot();
+        if (slotRoot == null) return false;
+
+        List<Transform> foundSlots = new List<Transform>();
+        for (int i = 0; i < 4; i++)
+        {
+            Transform slot = FindPartySlot(slotRoot, i);
+            if (slot == null)
+            {
+                return false;
+            }
+            foundSlots.Add(slot);
+        }
+
+        playerStatusTexts.Clear();
+        playerStatusBackgrounds.Clear();
+
+        foreach (Transform slot in foundSlots)
+        {
+            playerStatusSlots.Add(slot as RectTransform);
+
+            Image bg = slot.GetComponent<Image>();
+            if (bg == null)
+            {
+                Transform inner = slot.Find("InnerBackground");
+                if (inner != null) bg = inner.GetComponent<Image>();
+            }
+            playerStatusBackgrounds.Add(bg);
+
+            TextMeshProUGUI nameText = FindTextInSlot(slot, "Nametext", "NameText");
+            TextMeshProUGUI hpText = FindTextInSlot(slot, "HPText");
+            TextMeshProUGUI mpText = FindTextInSlot(slot, "MPText");
+
+            Debug.Log($"[BattleManager] Slot bind - {slot.name} | Name: {(nameText != null ? nameText.name : "NULL")} | HP: {(hpText != null ? hpText.name : "NULL")} | MP: {(mpText != null ? mpText.name : "NULL")}");
+
+            playerStatusNameTexts.Add(nameText);
+            playerStatusHPTexts.Add(hpText);
+            playerStatusMPTexts.Add(mpText);
+
+            Transform statusIconRow = FindNamedDescendantRecursive(slot, "StatusIconRow");
+            playerStatusIconRows.Add(statusIconRow);
+            playerStatusIconImages.Add(BindStatusIcons(statusIconRow));
+
+            // 흔들림/기존 폴백 처리를 위해 대표 텍스트 하나를 유지
+            playerStatusTexts.Add(hpText != null ? hpText : (nameText != null ? nameText : mpText));
+        }
+
+        Debug.Log($"[BattleManager] Bound existing PartyBar slots: {playerStatusSlots.Count}");
+        return playerStatusSlots.Count == 4;
+    }
+
+    private Transform FindExistingPartyBarRoot()
+    {
+        if (playerStatusPanel != null)
+        {
+            Transform nested = playerStatusPanel.transform.Find("PartyBar");
+            if (nested != null) return nested;
+        }
+
+        GameObject globalPartyBar = GameObject.Find("PartyBar");
+        if (globalPartyBar != null) return globalPartyBar.transform;
+
+        if (playerStatusPanel != null)
+        {
+            Transform directSlot = FindPartySlot(playerStatusPanel.transform, 0);
+            if (directSlot != null) return playerStatusPanel.transform;
+        }
+
+        return null;
+    }
+
+    private Transform GetPartySlotTransform(int index)
+    {
+        Transform slotRoot = FindExistingPartyBarRoot();
+
+        return FindPartySlot(slotRoot, index);
+    }
+
+    private Transform FindPartySlot(Transform slotRoot, int index)
+    {
+        if (slotRoot == null) return null;
+
+        string[] candidateNames =
+        {
+            $"PartySlot_{index + 1}",
+            $"PartySlot{index + 1}",
+            $"PartySlot_{index}",
+            $"PartySlot{index}"
+        };
+
+        foreach (string candidate in candidateNames)
+        {
+            Transform found = slotRoot.Find(candidate);
+            if (found != null) return found;
+        }
+
+        return null;
+    }
+
+    private Transform FindExistingEnemyBarRoot()
+    {
+        if (enemyStatusPanel != null)
+        {
+            if (FindEnemySlot(enemyStatusPanel, 0) != null) return enemyStatusPanel;
+
+            Transform nested = enemyStatusPanel.Find("EnemyBar");
+            if (nested != null) return nested;
+        }
+
+        GameObject globalEnemyBar = GameObject.Find("EnemyBar");
+        if (globalEnemyBar != null) return globalEnemyBar.transform;
+
+        if (enemyStatusPanel != null)
+        {
+            Transform directSlot = FindEnemySlot(enemyStatusPanel, 0);
+            if (directSlot != null) return enemyStatusPanel;
+        }
+
+        return null;
+    }
+
+    private void EnsureEnemyStatusPanelReference()
+    {
+        Transform existingEnemyBar = FindExistingEnemyBarRoot();
+        if (existingEnemyBar != null)
+        {
+            enemyStatusPanel = existingEnemyBar;
+            return;
+        }
+
+        GameObject globalEnemyBar = GameObject.Find("EnemyBar");
+        if (globalEnemyBar != null)
+        {
+            enemyStatusPanel = globalEnemyBar.transform;
+        }
+    }
+
+    private Transform FindEnemySlot(Transform slotRoot, int index)
+    {
+        if (slotRoot == null) return null;
+
+        string[] candidateNames =
+        {
+            $"EnemySlot_{index + 1}",
+            $"EnemySlot{index + 1}",
+            $"EnemySlot_{index}",
+            $"EnemySlot{index}"
+        };
+
+        foreach (string candidate in candidateNames)
+        {
+            Transform found = slotRoot.Find(candidate);
+            if (found != null) return found;
+        }
+
+        return null;
+    }
+
+    private TextMeshProUGUI FindTextInSlot(Transform slot, params string[] names)
+    {
+        if (slot == null) return null;
+
+        foreach (string name in names)
+        {
+            Transform child = FindNamedDescendantRecursive(slot, name);
+            if (child != null)
+            {
+                TextMeshProUGUI tmp = child.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    Debug.Log($"[BattleManager] Found text '{name}' directly on {child.name} in slot {slot.name}");
+                    return tmp;
+                }
+
+                tmp = child.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (tmp != null)
+                {
+                    Debug.Log($"[BattleManager] Found text '{name}' under child {child.name} -> TMP {tmp.name} in slot {slot.name}");
+                    return tmp;
+                }
+            }
+        }
+
+        foreach (Transform child in slot)
+        {
+            TextMeshProUGUI tmp = child.GetComponent<TextMeshProUGUI>();
+            if (tmp != null) return tmp;
+        }
+
+        TextMeshProUGUI fallback = slot.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (fallback == null)
+        {
+            Debug.LogWarning($"[BattleManager] No TMP text found in slot {slot.name}");
+        }
+        else
+        {
+            Debug.LogWarning($"[BattleManager] Fallback TMP used for slot {slot.name}: {fallback.name}");
+        }
+
+        return fallback;
+    }
+
+    private Image FindImageInSlot(Transform slot, params string[] names)
+    {
+        if (slot == null) return null;
+
+        foreach (string name in names)
+        {
+            Transform child = FindNamedDescendantRecursive(slot, name);
+            if (child == null) continue;
+
+            Image img = child.GetComponent<Image>();
+            if (img != null)
+            {
+                return img;
+            }
+
+            img = child.GetComponentInChildren<Image>(true);
+            if (img != null)
+            {
+                return img;
+            }
+        }
+
+        return null;
+    }
+
+    private List<Image> BindStatusIcons(Transform statusIconRow)
+    {
+        List<Image> icons = new List<Image>();
+        if (statusIconRow == null) return icons;
+
+        for (int i = 1; i <= 4; i++)
+        {
+            Transform iconTransform = FindNamedDescendantRecursive(statusIconRow, $"StatusIcon_{i}");
+            if (iconTransform == null)
+            {
+                iconTransform = FindNamedDescendantRecursive(statusIconRow, $"StatusIcon{i}");
+            }
+
+            Image iconImage = iconTransform != null ? iconTransform.GetComponent<Image>() : null;
+            if (iconImage != null)
+            {
+                icons.Add(iconImage);
+            }
+        }
+
+        return icons;
+    }
+
+    private void UpdatePlayerStatusIcons(int index, PlayerStats member)
+    {
+        if (index < 0 || index >= playerStatusIconImages.Count) return;
+
+        List<Image> icons = playerStatusIconImages[index];
+        if (icons == null || icons.Count == 0) return;
+
+        for (int i = 0; i < icons.Count; i++)
+        {
+            if (icons[i] == null) continue;
+            icons[i].enabled = false;
+            icons[i].sprite = null;
+            icons[i].color = new Color(1f, 1f, 1f, 0f);
+        }
+
+        if (member == null || member.activeStatusEffects == null) return;
+
+        int shown = 0;
+        foreach (var status in member.activeStatusEffects)
+        {
+            if (shown >= icons.Count) break;
+            if (status == null || status.data == null) continue;
+
+            Sprite iconSprite = status.data.flatIcon != null ? status.data.flatIcon : status.data.itemIcon;
+            if (iconSprite == null) continue;
+
+            Image iconImage = icons[shown];
+            if (iconImage == null) continue;
+
+            iconImage.sprite = iconSprite;
+            iconImage.enabled = true;
+            iconImage.color = Color.white;
+            shown++;
+        }
+    }
+
+    private void UpdateEnemyStatusIcons(int index, EnemyStats enemyStats)
+    {
+        if (index < 0 || index >= enemyStatusIconImages.Count) return;
+
+        List<Image> icons = enemyStatusIconImages[index];
+        if (icons == null || icons.Count == 0) return;
+
+        for (int i = 0; i < icons.Count; i++)
+        {
+            if (icons[i] == null) continue;
+            icons[i].enabled = false;
+            icons[i].sprite = null;
+            icons[i].color = new Color(1f, 1f, 1f, 0f);
+        }
+
+        if (enemyStats == null || enemyStats.activeStatusEffects == null) return;
+
+        int shown = 0;
+        foreach (var status in enemyStats.activeStatusEffects)
+        {
+            if (shown >= icons.Count) break;
+            if (status == null || status.data == null) continue;
+
+            Sprite iconSprite = status.data.flatIcon != null ? status.data.flatIcon : status.data.itemIcon;
+            if (iconSprite == null) continue;
+
+            Image iconImage = icons[shown];
+            if (iconImage == null) continue;
+
+            iconImage.sprite = iconSprite;
+            iconImage.enabled = true;
+            iconImage.color = Color.white;
+            shown++;
+        }
+    }
+
+    private void StopAllEnemySlotEffects()
+    {
+        foreach (var pair in enemySlotPulseCoroutines)
+        {
+            if (pair.Value != null) StopCoroutine(pair.Value);
+        }
+        enemySlotPulseCoroutines.Clear();
+
+        foreach (var pair in enemySlotShakeCoroutines)
+        {
+            if (pair.Value != null) StopCoroutine(pair.Value);
+        }
+        enemySlotShakeCoroutines.Clear();
+
+        for (int i = 0; i < enemyStatusMonsterImages.Count; i++)
+        {
+            ResetEnemySlotVisuals(i);
+        }
+    }
+
+    private void ResetEnemySlotVisuals(int index)
+    {
+        if (index >= 0 && index < enemyStatusMonsterImages.Count && enemyStatusMonsterImages[index] != null)
+        {
+            enemyStatusMonsterImages[index].color = Color.white;
+            enemyStatusMonsterImages[index].rectTransform.localScale = Vector3.one;
+        }
+
+        if (index >= 0 && index < enemyStatusFrames.Count && enemyStatusFrames[index] != null)
+        {
+            Color c = enemyStatusFrames[index].color;
+            c.a = 1f;
+            enemyStatusFrames[index].color = c;
+        }
+
+        if (index >= 0 && index < enemyStatusNameTexts.Count && enemyStatusNameTexts[index] != null)
+        {
+            enemyStatusNameTexts[index].color = Color.white;
+            enemyStatusNameTexts[index].rectTransform.localScale = Vector3.one;
+        }
+    }
+
+    private void SetEnemySlotPulse(int index, bool enabled)
+    {
+        if (enabled)
+        {
+            if (!enemySlotPulseCoroutines.ContainsKey(index))
+            {
+                enemySlotPulseCoroutines[index] = StartCoroutine(EnemySlotPulseRoutine(index));
+            }
+            return;
+        }
+
+        if (enemySlotPulseCoroutines.TryGetValue(index, out Coroutine routine) && routine != null)
+        {
+            StopCoroutine(routine);
+        }
+        enemySlotPulseCoroutines.Remove(index);
+        ResetEnemySlotVisuals(index);
+    }
+
+    private IEnumerator EnemySlotPulseRoutine(int index)
+    {
+        while (index >= 0 && index < enemyStatusNameTexts.Count)
+        {
+            TextMeshProUGUI nameText = enemyStatusNameTexts[index];
+            if (nameText == null) yield break;
+
+            float t = (Mathf.Sin(Time.unscaledTime * 8f) + 1f) * 0.5f;
+            float alpha = Mathf.Lerp(0.45f, 1f, t);
+            float scale = Mathf.Lerp(1f, 1.05f, t);
+
+            nameText.color = new Color(1f, 1f, 1f, alpha);
+            nameText.rectTransform.localScale = Vector3.one * scale;
+
+            yield return null;
+        }
+    }
+
+    private void TriggerEnemySlotShake(int index)
+    {
+        if (index < 0 || index >= enemyStatusMonsterImages.Count) return;
+        Image monsterImage = enemyStatusMonsterImages[index];
+        if (monsterImage == null) return;
+
+        if (enemySlotShakeCoroutines.TryGetValue(index, out Coroutine running) && running != null)
+        {
+            StopCoroutine(running);
+        }
+
+        enemySlotShakeCoroutines[index] = StartCoroutine(EnemySlotShakeRoutine(index));
+    }
+
+    private IEnumerator EnemySlotShakeRoutine(int index)
+    {
+        if (index < 0 || index >= enemyStatusMonsterImages.Count) yield break;
+
+        Image monsterImage = enemyStatusMonsterImages[index];
+        if (monsterImage == null) yield break;
+
+        RectTransform rt = monsterImage.rectTransform;
+        Vector2 basePos = rt.anchoredPosition;
+        float duration = 0.15f;
+        float magnitude = 8f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float offsetX = UnityEngine.Random.Range(-magnitude, magnitude);
+            float offsetY = UnityEngine.Random.Range(-magnitude * 0.35f, magnitude * 0.35f);
+            rt.anchoredPosition = basePos + new Vector2(offsetX, offsetY);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        rt.anchoredPosition = basePos;
+        enemySlotShakeCoroutines.Remove(index);
+    }
+
+    private Transform FindNamedDescendantRecursive(Transform root, string targetName)
+    {
+        if (root == null) return null;
+
+        foreach (Transform child in root)
+        {
+            if (string.Equals(child.name, targetName, System.StringComparison.OrdinalIgnoreCase))
+                return child;
+
+            Transform nested = FindNamedDescendantRecursive(child, targetName);
+            if (nested != null) return nested;
+        }
+
+        return null;
+    }
+
     private void CreateBorderLine(Transform parent, string name, Color color, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
     {
         GameObject lineObj = new GameObject(name, typeof(RectTransform), typeof(Image));
@@ -4611,6 +5208,27 @@ public class BattleManager : MonoBehaviour
             text.fontSize = partySlotFontSize;
             text.lineSpacing = partySlotLineSpacing;
             text.color = new Color(1f, 1f, 1f, 1f); // 완전 불투명 흰색
+        }
+
+        foreach (var text in playerStatusNameTexts)
+        {
+            if (text == null) continue;
+            text.fontSize = partySlotFontSize;
+            text.color = new Color(1f, 1f, 1f, 1f);
+        }
+
+        foreach (var text in playerStatusHPTexts)
+        {
+            if (text == null) continue;
+            text.fontSize = partySlotFontSize;
+            text.color = new Color(1f, 1f, 1f, 1f);
+        }
+
+        foreach (var text in playerStatusMPTexts)
+        {
+            if (text == null) continue;
+            text.fontSize = partySlotFontSize;
+            text.color = new Color(1f, 1f, 1f, 1f);
         }
     }
 
@@ -4731,12 +5349,15 @@ private void CacheHeroSkills()
         string heroHpLine = player != null ? $"HP: {player.currentHP} / {player.maxHP}" : "HP: -";
         string heroMpLine = player != null ? $"MP: {player.currentMP} / {player.maxMP}" : "MP: -";
 
-        bool hasPartyPanel = playerStatusPanel != null && playerStatusTexts.Count > 0;
+        bool hasPartyPanel = playerStatusSlots.Count > 0 &&
+            playerStatusNameTexts.Count > 0 &&
+            playerStatusHPTexts.Count > 0 &&
+            playerStatusMPTexts.Count > 0;
 
         if (hasPartyPanel)
         {
-            if (playerHPText != null) playerHPText.text = heroHpLine;
-            if (playerMPText != null) playerMPText.text = heroMpLine;
+            if (playerHPText != null) playerHPText.text = "";
+            if (playerMPText != null) playerMPText.text = "";
 
             // 스타일 정의 (투명 배경, 흰색 테두리, 흰색 텍스트)
             Color activeSlotColor = new Color(1f, 1f, 1f, 0.1f); // 활성 턴: 아주 연한 흰색 (10%)
@@ -4762,11 +5383,30 @@ private void CacheHeroSkills()
                 if (hasMember)
                 {
                     var member = activePartyMembers[i];
-                    // 드래곤 퀘스트 스타일: 이름, HP, MP (인덱스 제거)
-                    tmp.text = $"{member.playerName}\nHP {member.currentHP}/{member.maxHP}\nMP {member.currentMP}/{member.maxMP}";
+                    bool hasDedicatedSlotTexts =
+                        i < playerStatusNameTexts.Count && i < playerStatusHPTexts.Count && i < playerStatusMPTexts.Count &&
+                        playerStatusNameTexts[i] != null && playerStatusHPTexts[i] != null && playerStatusMPTexts[i] != null;
+
+                    if (hasDedicatedSlotTexts)
+                    {
+                        playerStatusNameTexts[i].text = member.playerName;
+                        playerStatusHPTexts[i].text = $"HP {member.currentHP}/{member.maxHP}";
+                        playerStatusMPTexts[i].text = $"MP {member.currentMP}/{member.maxMP}";
+                    }
+                    else
+                    {
+                        // 드래곤 퀘스트 스타일: 이름, HP, MP (인덱스 제거)
+                        tmp.text = $"{member.playerName}\nHP {member.currentHP}/{member.maxHP}\nMP {member.currentMP}/{member.maxMP}";
+                    }
                     
                     bool isDead = member.currentHP <= 0;
                     tmp.color = isDead ? downedTextColor : aliveTextColor;
+                    if (i < playerStatusNameTexts.Count && playerStatusNameTexts[i] != null)
+                        playerStatusNameTexts[i].color = isDead ? downedTextColor : aliveTextColor;
+                    if (i < playerStatusHPTexts.Count && playerStatusHPTexts[i] != null)
+                        playerStatusHPTexts[i].color = isDead ? downedTextColor : aliveTextColor;
+                    if (i < playerStatusMPTexts.Count && playerStatusMPTexts[i] != null)
+                        playerStatusMPTexts[i].color = isDead ? downedTextColor : aliveTextColor;
 
                     if (bg != null)
                     {
@@ -4774,11 +5414,20 @@ private void CacheHeroSkills()
                         bool isCurrentTurn = !battleEnded && currentControlledMember == member && currentPhase == BattlePhase.Command;
                         bg.color = isCurrentTurn ? activeSlotColor : inactiveSlotColor;
                     }
+
+                    UpdatePlayerStatusIcons(i, member);
                 }
                 else
                 {
                     tmp.text = "";
+                    if (i < playerStatusNameTexts.Count && playerStatusNameTexts[i] != null)
+                        playerStatusNameTexts[i].text = "";
+                    if (i < playerStatusHPTexts.Count && playerStatusHPTexts[i] != null)
+                        playerStatusHPTexts[i].text = "";
+                    if (i < playerStatusMPTexts.Count && playerStatusMPTexts[i] != null)
+                        playerStatusMPTexts[i].text = "";
                     if (bg != null) bg.color = inactiveSlotColor;
+                    UpdatePlayerStatusIcons(i, null);
                 }
             }
         }
@@ -4809,8 +5458,105 @@ private void CacheHeroSkills()
             if (enemyMPText != null) enemyMPText.text = $"MP: {t.currentMP} / {t.maxMP}";
         }
 
-        // 동적 패널 업데이트 (적)
-        if (enemyStatusPanel != null)
+        bool hasEnemyBarPanel =
+            enemyStatusSlots.Count > 0 &&
+            enemyStatusNameTexts.Count > 0 &&
+            enemyStatusHPTexts.Count > 0 &&
+            enemyStatusMPTexts.Count > 0;
+
+        // 기존 하이라키 EnemyBar 업데이트
+        if (hasEnemyBarPanel)
+        {
+            Color enemyTargetColor = new Color(1f, 1f, 1f, 1f);
+            Color enemyInactiveColor = new Color(1f, 1f, 1f, 0.7f);
+            Color enemyDownColor = new Color(0.55f, 0.55f, 0.55f, 0.65f);
+            Color emptySlotColor = new Color(1f, 1f, 1f, 0.2f);
+
+            for (int i = 0; i < enemyStatusSlots.Count; i++)
+            {
+                bool hasEnemy = i < activeEnemies.Count && activeEnemies[i] != null;
+                Image frame = i < enemyStatusFrames.Count ? enemyStatusFrames[i] : null;
+                Image monsterImage = i < enemyStatusMonsterImages.Count ? enemyStatusMonsterImages[i] : null;
+                TextMeshProUGUI nameText = i < enemyStatusNameTexts.Count ? enemyStatusNameTexts[i] : null;
+                TextMeshProUGUI hpText = i < enemyStatusHPTexts.Count ? enemyStatusHPTexts[i] : null;
+                TextMeshProUGUI mpText = i < enemyStatusMPTexts.Count ? enemyStatusMPTexts[i] : null;
+
+                if (hasEnemy)
+                {
+                    EnemyStats es = activeEnemies[i];
+                    bool isDead = es.currentHP <= 0;
+                    bool isCurrentTarget = enemy == es && !isDead;
+                    bool shouldPulse = !isDead && waitingForTargetSelection && hoveredEnemy == es;
+
+                    if (lastEnemyDisplayedHP.TryGetValue(es, out int previousHP))
+                    {
+                        if (es.currentHP < previousHP)
+                        {
+                            TriggerEnemySlotShake(i);
+                        }
+                    }
+                    lastEnemyDisplayedHP[es] = es.currentHP;
+
+                    if (nameText != null) nameText.text = es.enemyName;
+                    if (hpText != null) hpText.text = $"HP {es.currentHP}/{es.maxHP}";
+                    if (mpText != null) mpText.text = $"MP {es.currentMP}/{es.maxMP}";
+
+                    if (nameText != null) nameText.color = isDead ? enemyDownColor : Color.white;
+                    if (hpText != null) hpText.color = isDead ? enemyDownColor : Color.white;
+                    if (mpText != null) mpText.color = isDead ? enemyDownColor : Color.white;
+
+                    if (monsterImage != null)
+                    {
+                        SpriteRenderer sr = es.GetComponent<SpriteRenderer>();
+                        monsterImage.sprite = sr != null ? sr.sprite : null;
+                        monsterImage.enabled = monsterImage.sprite != null;
+                        monsterImage.color = isDead ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
+                        monsterImage.preserveAspect = true;
+                    }
+
+                    if (frame != null)
+                    {
+                        frame.color = isDead
+                            ? enemyDownColor
+                            : (isCurrentTarget ? enemyTargetColor : enemyInactiveColor);
+                    }
+
+                    UpdateEnemyStatusIcons(i, es);
+                    SetEnemySlotPulse(i, shouldPulse);
+
+                    es.SetWorldSpaceStatusUIEnabled(false);
+
+                    SpriteRenderer worldSprite = es.GetComponent<SpriteRenderer>();
+                    if (worldSprite != null)
+                    {
+                        worldSprite.enabled = false;
+                    }
+
+                    if (es.StatusUI != null)
+                    {
+                        es.StatusUI.SetActive(false);
+                    }
+                }
+                else
+                {
+                    if (nameText != null) nameText.text = "";
+                    if (hpText != null) hpText.text = "";
+                    if (mpText != null) mpText.text = "";
+                    if (monsterImage != null)
+                    {
+                        monsterImage.sprite = null;
+                        monsterImage.enabled = false;
+                        monsterImage.color = Color.white;
+                    }
+                    if (frame != null) frame.color = emptySlotColor;
+
+                    UpdateEnemyStatusIcons(i, null);
+                    SetEnemySlotPulse(i, false);
+                }
+            }
+        }
+        // 동적 패널 업데이트 (기존 폴백)
+        else if (enemyStatusPanel != null)
         {
             int childCount = enemyStatusPanel.childCount;
             Color enemyActiveColor = new Color(1f, 1f, 1f, 0.22f);
@@ -4839,11 +5585,20 @@ private void CacheHeroSkills()
         }
 
         // 월드 스페이스 UI 업데이트
-        foreach (var es in activeEnemies)
+        if (!usingEnemyBarPortraitUI)
         {
-            if (es != null)
+            foreach (var es in activeEnemies)
             {
-                es.UpdateStatusUI();
+                if (es != null)
+                {
+                    es.SetWorldSpaceStatusUIEnabled(true);
+                    SpriteRenderer worldSprite = es.GetComponent<SpriteRenderer>();
+                    if (worldSprite != null && es.currentHP > 0)
+                    {
+                        worldSprite.enabled = true;
+                    }
+                    es.UpdateStatusUI();
+                }
             }
         }
     }
