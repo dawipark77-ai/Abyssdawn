@@ -190,11 +190,11 @@
 
 > ⚠️ Backlash → **Backflow(역류)** 로 명칭 정정
 
-- `[ ]` **8-1** `SkillData.backflowChance` 등 Backflow 필드 추가
-- `[ ]` **8-2** `EquipmentData.magicAmplify / backflowSuppression` 추가
-- `[ ]` **8-3** `PassiveData.backflowSuppression` 추가
-- `[ ]` **8-4** `PlayerStats.TotalBackflowSuppression` 계산
-- `[ ]` **8-5** BattleManager 역류 발동 로직
+- `[v]` **8-1** `SkillData.backflowChance` 등 Backflow 필드 추가 ✓
+- `[v]` **8-2** `EquipmentData.magicAmplify / backflowSuppression` 추가 ✓
+- `[v]` **8-3** `PassiveData.backflowSuppression` 추가 ✓
+- `[v]` **8-4** `PlayerStats.TotalBackflowSuppression / MagicAmplify` 계산 ✓
+- `[v]` **8-5** BattleManager `TryApplyBackflow()` 역류 발동 로직 구현 ✓
 - `[ ]` **8-6** Mana Stabilize SO + 버프 턴 관리
 - `[ ]` **8-7** 마법 장비 SO 일괄 제작
 - `[ ]` **8-8** Bow 견제사격 + 인터셉트 타이밍

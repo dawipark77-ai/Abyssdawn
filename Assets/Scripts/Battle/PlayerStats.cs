@@ -603,6 +603,50 @@ public class PlayerStats : MonoBehaviour
     }
 
     /// <summary>
+    /// 마법 데미지 증폭 배율 (장비 magicAmplify 곱셈 합산).
+    /// 1.0이 기본값. 장비 여러 개가 곱해진다.
+    /// </summary>
+    public float MagicAmplify
+    {
+        get
+        {
+            float result = 1f;
+            foreach (var item in GetEquippedItemsList())
+                if (item != null) result *= item.magicAmplify;
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// 총 역류 억제율 (장비 + 패시브 합산, 최대 0.8).
+    /// </summary>
+    public float TotalBackflowSuppression
+    {
+        get
+        {
+            float total = GetEquipmentBackflowSuppression() + GetPassiveBackflowSuppression();
+            return Mathf.Clamp(total, 0f, 0.8f);
+        }
+    }
+
+    private float GetEquipmentBackflowSuppression()
+    {
+        float total = 0f;
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.backflowSuppression;
+        return total;
+    }
+
+    private float GetPassiveBackflowSuppression()
+    {
+        if (statData == null) return 0f;
+        float total = 0f;
+        foreach (var passive in statData.equippedPassives)
+            if (passive != null) total += passive.backflowSuppression;
+        return total;
+    }
+
+    /// <summary>
     /// 스탯 변경 이벤트를 발동합니다. (외부에서 호출 가능)
     /// 장비 장착/해제 등으로 스탯이 변경되었을 때 UI를 업데이트하기 위해 사용합니다.
     /// </summary>

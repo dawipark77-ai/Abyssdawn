@@ -24,4 +24,9 @@ public class PassiveData : ScriptableObject
     [Header("특수 효과")]
     public bool hasSpecialEffect = false;
     public string specialEffectDescription = "";
+
+    [Header("Backflow Suppression")]
+    [Tooltip("Backflow suppression rate (0.0 ~ 1.0). Added across all equipped passives, capped at 0.8.")]
+    [Range(0f, 1f)]
+    public float backflowSuppression = 0f;
 }

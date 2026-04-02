@@ -134,6 +134,16 @@ namespace AbyssdawnBattle
         public List<StatusEffectSO> weaponCurses = new List<StatusEffectSO>();
 
         [Space(10)]
+        [Header("━━━━━━━━━━ Magic System ━━━━━━━━━━")]
+        [Tooltip("Magic damage amplification multiplier. 1.0 = default, 1.2 = +20% magic damage.\nMultiplied together across all equipped items.")]
+        [Range(1f, 3f)]
+        public float magicAmplify = 1f;
+
+        [Tooltip("Backflow suppression rate (0.0 ~ 1.0). 0.3 = reduces backflow chance by 30%.\nAdded across all equipped items, capped at 0.8.")]
+        [Range(0f, 1f)]
+        public float backflowSuppression = 0f;
+
+        [Space(10)]
         [Header("━━━━━━━━━━ Economy ━━━━━━━━━━")]
         [Tooltip("Sell price at shop (gold)")]
         public int sellPrice = 0;

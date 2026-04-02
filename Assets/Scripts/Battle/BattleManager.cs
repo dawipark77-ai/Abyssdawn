@@ -3877,12 +3877,85 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        // 역류(Backflow) 처리
+        TryApplyBackflow(attacker, skill);
+
         // 스킬 사용 시 발동하는 패시브 처리 (Combat Breathing 등)
         ApplyOnSkillUsePassives(attacker, skill);
 
         Debug.Log("[BattleManager] ExecuteSkill finished. Updating status UI.");
         UpdateStatusUI();
         CheckBattleEnd();
+    }
+
+    /// <summary>
+    /// 스킬 사용 후 역류(Backflow) 발동을 시도합니다.
+    /// backflowChance > 0인 스킬만 대상. 억제율은 장비+패시브 합산.
+    /// </summary>
+    private void TryApplyBackflow(PlayerStats attacker, SkillData skill)
+    {
+        if (skill == null || skill.backflowChance <= 0f) return;
+        if (attacker == null) return;
+
+        float suppression = attacker.TotalBackflowSuppression;
+        float finalChance = skill.backflowChance * (1f - suppression);
+        finalChance = Mathf.Max(0f, finalChance);
+
+        if (Random.value > finalChance) return;
+
+        // 역류 발동
+        Debug.Log($"[Backflow] {attacker.playerName} — Backflow triggered! Chance={finalChance:P0} (raw={skill.backflowChance:P0}, suppression={suppression:P0}) Type={skill.backflowType}");
+
+        switch (skill.backflowType)
+        {
+            case BackflowType.HPLoss:
+            {
+                int loss = Mathf.Max(1, Mathf.FloorToInt(attacker.maxHP * 0.1f));
+                attacker.currentHP = Mathf.Max(1, attacker.currentHP - loss);
+                AddLog($"<color=red>[Backflow] {attacker.playerName} loses {loss} HP from magical recoil!</color>");
+                ShakePlayerStatusUI(attacker);
+                break;
+            }
+            case BackflowType.MPLoss:
+            {
+                int loss = Mathf.Max(1, Mathf.FloorToInt(attacker.maxMP * 0.1f));
+                attacker.currentMP = Mathf.Max(0, attacker.currentMP - loss);
+                AddLog($"<color=blue>[Backflow] {attacker.playerName} loses {loss} MP from magical recoil!</color>");
+                break;
+            }
+            case BackflowType.StatusEffect:
+            {
+                if (skill.backflowStatusEffect != null)
+                {
+                    attacker.ApplyStatusEffect(skill.backflowStatusEffect);
+                    AddLog($"<color=orange>[Backflow] {attacker.playerName} is afflicted with {skill.backflowStatusEffect.effectName}!</color>");
+                }
+                break;
+            }
+            case BackflowType.Stun:
+            {
+                // 스턴: 간이 구현 — 다음 행동 취소 (statusEffect 없이 플래그로)
+                AddLog($"<color=yellow>[Backflow] {attacker.playerName} is stunned by magical recoil!</color>");
+                // StatusEffect 방식으로 적용: Curse_Stun 사용 (있을 경우)
+                var stunEffect = skill.backflowStatusEffect;
+                if (stunEffect != null)
+                    attacker.ApplyStatusEffect(stunEffect);
+                break;
+            }
+            case BackflowType.HPAndMP:
+            {
+                int hpLoss = Mathf.Max(1, Mathf.FloorToInt(attacker.maxHP * 0.1f));
+                int mpLoss = Mathf.Max(1, Mathf.FloorToInt(attacker.maxMP * 0.1f));
+                attacker.currentHP = Mathf.Max(1, attacker.currentHP - hpLoss);
+                attacker.currentMP = Mathf.Max(0, attacker.currentMP - mpLoss);
+                AddLog($"<color=red>[Backflow] {attacker.playerName} loses {hpLoss} HP and {mpLoss} MP from magical recoil!</color>");
+                ShakePlayerStatusUI(attacker);
+                break;
+            }
+        }
+
+        var gmSave = GameManager.Instance;
+        if (gmSave != null) gmSave.SaveFromPlayer(attacker);
     }
 
     /// <summary>
