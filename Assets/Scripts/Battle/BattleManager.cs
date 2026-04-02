@@ -3820,7 +3820,7 @@ public class BattleManager : MonoBehaviour
             if (UnityEngine.Random.value < skill.curseApplyChance)
             {
                 // 마법 스킬이면 magicalDuration, 물리면 physicalDuration 사용
-                bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magical;
+                bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magic;
                 int dur = isMagic ? skill.curseEffect.magicalDuration : skill.curseEffect.physicalDuration;
                 bool applied = target.ApplyStatusEffectDirect(skill.curseEffect, dur);
                 if (applied)
@@ -4142,7 +4142,7 @@ public class BattleManager : MonoBehaviour
             if (UnityEngine.Random.Range(0f, 100f) < skill.selfStatusEffectChance)
             {
                 // 마법 스킬이면 magicalDuration 사용
-                bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magical;
+                bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magic;
                 int dur = isMagic ? skill.selfStatusEffect.magicalDuration : skill.selfStatusEffect.physicalDuration;
                 attacker.ApplyStatusEffect(skill.selfStatusEffect, dur);
                 AddMessage($"{attacker.playerName} is self-afflicted with {skill.selfStatusEffect.variantId}!");
