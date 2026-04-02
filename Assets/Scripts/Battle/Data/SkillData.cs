@@ -4,6 +4,16 @@ using UnityEngine.Serialization;
 
 namespace AbyssdawnBattle
 {
+    public enum BacklashType
+    {
+        None,
+        HPLoss,
+        MPLoss,
+        StatusEffect,
+        Stun,
+        HPAndMP
+    }
+
     /// <summary>
     /// 타겟 종류 (적, 아군, 자신, 모두)
     /// </summary>
@@ -306,10 +316,30 @@ namespace AbyssdawnBattle
         [TextArea(1, 3)]
         public string dunbreakDescription = "";
 
+        [Header("━━━━━━━━━━ 상태이상 (저주) ━━━━━━━━━━")]
+        public StatusEffectSO curseEffect;
+        [Range(0f, 1f)]
+        public float curseApplyChance;
+
+        [Header("━━━━━━━━━━ 역류 (Backflow) ━━━━━━━━━━")]
+        [Range(0f, 1f)]
+        public float backlashChance;
+        public BacklashType backlashType;
+        public StatusEffectSO backlashStatusEffect;
+
+        [Header("━━━━━━━━━━ 패시브 랭크 ━━━━━━━━━━")]
+        public int maxRank;
+        public float[] bonusPerRank;
+        public float[] backlashPerRank;
+
+        [Header("━━━━━━━━━━ 특수 조건 ━━━━━━━━━━")]
+        public bool requireTargetIgnited;
+        public bool selfIgnitedBonus;
+
         [Header("Skill Tree")]
         [Tooltip("이 스킬을 배우기 위해 필요한 선행 스킬들")]
         public List<SkillData> prerequisiteSkills = new List<SkillData>();
-        
+
         [Tooltip("이 스킬을 배우는 데 필요한 LP(Lore Point)")]
         public int requiredLorePoints = 1;
 
