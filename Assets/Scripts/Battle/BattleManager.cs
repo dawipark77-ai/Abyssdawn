@@ -3473,8 +3473,13 @@ public class BattleManager : MonoBehaviour
                     remainingDef -= armor1;
                     float armor2 = Mathf.Max(0f, remainingDef) * coeff * f2;
 
-                    armorHit1 = Mathf.RoundToInt(armor1);
-                    armorHit2 = Mathf.RoundToInt(armor2);
+                    armorHit1 = Mathf.Max(1, Mathf.RoundToInt(armor1));
+                    armorHit2 = Mathf.Max(1, Mathf.RoundToInt(armor2));
+
+                    // 방어력 누적 감소 (실제 target.defense 영구 감소)
+                    int totalDefReduced = Mathf.Min(armorHit1 + armorHit2, target.defense);
+                    target.defense = Mathf.Max(0, target.defense - totalDefReduced);
+                    Debug.Log($"[ArmorBreak] Dual — defense reduced by {totalDefReduced}. Remaining: {target.defense}");
                 }
 
                 int hit1 = baseHit1 + armorHit1;
@@ -3509,10 +3514,14 @@ public class BattleManager : MonoBehaviour
 
                 float singleCoeff = GetArmorBreakCoefficient(attacker);
                 int singleArmor = 0;
+                int defenseReduced = 0;
                 if (singleCoeff > 0f && target.defense > 0)
                 {
-                    // fn = 1.0 (한손은 랜덤 배율 없음)
-                    singleArmor = Mathf.RoundToInt(target.defense * singleCoeff);
+                    // 방어구 파괴: 적 방어력의 X% — 최소 1 보장
+                    singleArmor = Mathf.Max(1, Mathf.RoundToInt(target.defense * singleCoeff));
+                    // 방어력 누적 감소 (실제로 target.defense를 영구 감소)
+                    defenseReduced = Mathf.Min(singleArmor, target.defense);
+                    target.defense = Mathf.Max(0, target.defense - defenseReduced);
                 }
 
                 if (critical)
@@ -3522,19 +3531,20 @@ public class BattleManager : MonoBehaviour
                 }
 
                 int singleTotal = singleBase + singleArmor;
-                Debug.Log($"[BattleLog] Single-wield attack - base:{singleBase}, armorBreak:{singleArmor}, total:{singleTotal}");
+                Debug.Log($"[BattleLog] Single-wield attack - base:{singleBase}, armorBreak:{singleArmor}, defReduced:{defenseReduced}, total:{singleTotal}");
 
                 int applied1 = target.TakeDamage(singleBase, critical);
                 int applied2 = 0;
                 if (singleArmor > 0 && !target.IsDead())
                 {
-                    applied2 = target.TakeDamage(singleArmor, critical);
+                    applied2 = target.TakeDamage(singleArmor, false);
                 }
 
                 shownTotal = applied1 + applied2;
+                string armorMsg = defenseReduced > 0 ? $" [Armor Break: DEF -{defenseReduced}]" : "";
                 AddMessage(critical
-                    ? $"Critical! {attacker.playerName} dealt {shownTotal}!"
-                    : $"{attacker.playerName} struck for {shownTotal} damage!");
+                    ? $"Critical! {attacker.playerName} dealt {shownTotal}!{armorMsg}"
+                    : $"{attacker.playerName} struck for {shownTotal} damage!{armorMsg}");
             }
 
             // ───────── 무기 저주 부여 ─────────
@@ -3638,6 +3648,9 @@ public class BattleManager : MonoBehaviour
         if (right == null || left == null) return false;
         if (right.equipmentType != AbyssdawnBattle.EquipmentType.Hand) return false;
         if (left.equipmentType != AbyssdawnBattle.EquipmentType.Hand) return false;
+        // 방패(Shield)는 무기가 아니므로 쌍수에서 제외
+        if (right.weaponCategory == AbyssdawnBattle.WeaponCategory.Shield) return false;
+        if (left.weaponCategory == AbyssdawnBattle.WeaponCategory.Shield) return false;
 
         return true;
     }
