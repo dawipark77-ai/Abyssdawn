@@ -3912,7 +3912,7 @@ public class BattleManager : MonoBehaviour
             {
                 int loss = Mathf.Max(1, Mathf.FloorToInt(attacker.maxHP * 0.1f));
                 attacker.currentHP = Mathf.Max(1, attacker.currentHP - loss);
-                AddLog($"<color=red>[Backflow] {attacker.playerName} loses {loss} HP from magical recoil!</color>");
+                AddMessage($"<color=red>[Backflow] {attacker.playerName} loses {loss} HP from magical recoil!</color>");
                 ShakePlayerStatusUI(attacker);
                 break;
             }
@@ -3920,7 +3920,7 @@ public class BattleManager : MonoBehaviour
             {
                 int loss = Mathf.Max(1, Mathf.FloorToInt(attacker.maxMP * 0.1f));
                 attacker.currentMP = Mathf.Max(0, attacker.currentMP - loss);
-                AddLog($"<color=blue>[Backflow] {attacker.playerName} loses {loss} MP from magical recoil!</color>");
+                AddMessage($"<color=blue>[Backflow] {attacker.playerName} loses {loss} MP from magical recoil!</color>");
                 break;
             }
             case BackflowType.StatusEffect:
@@ -3928,14 +3928,14 @@ public class BattleManager : MonoBehaviour
                 if (skill.backflowStatusEffect != null)
                 {
                     attacker.ApplyStatusEffect(skill.backflowStatusEffect);
-                    AddLog($"<color=orange>[Backflow] {attacker.playerName} is afflicted with {skill.backflowStatusEffect.effectName}!</color>");
+                    AddMessage($"<color=orange>[Backflow] {attacker.playerName} is afflicted with {skill.backflowStatusEffect.variantId}!</color>");
                 }
                 break;
             }
             case BackflowType.Stun:
             {
                 // 스턴: 간이 구현 — 다음 행동 취소 (statusEffect 없이 플래그로)
-                AddLog($"<color=yellow>[Backflow] {attacker.playerName} is stunned by magical recoil!</color>");
+                AddMessage($"<color=yellow>[Backflow] {attacker.playerName} is stunned by magical recoil!</color>");
                 // StatusEffect 방식으로 적용: Curse_Stun 사용 (있을 경우)
                 var stunEffect = skill.backflowStatusEffect;
                 if (stunEffect != null)
@@ -3948,7 +3948,7 @@ public class BattleManager : MonoBehaviour
                 int mpLoss = Mathf.Max(1, Mathf.FloorToInt(attacker.maxMP * 0.1f));
                 attacker.currentHP = Mathf.Max(1, attacker.currentHP - hpLoss);
                 attacker.currentMP = Mathf.Max(0, attacker.currentMP - mpLoss);
-                AddLog($"<color=red>[Backflow] {attacker.playerName} loses {hpLoss} HP and {mpLoss} MP from magical recoil!</color>");
+                AddMessage($"<color=red>[Backflow] {attacker.playerName} loses {hpLoss} HP and {mpLoss} MP from magical recoil!</color>");
                 ShakePlayerStatusUI(attacker);
                 break;
             }

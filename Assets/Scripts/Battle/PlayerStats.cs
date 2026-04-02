@@ -639,8 +639,9 @@ public class PlayerStats : MonoBehaviour
 
     private float GetPassiveBackflowSuppression()
     {
-        if (statData == null) return 0f;
+        if (statData == null || statData.equippedPassives == null) return 0f;
         float total = 0f;
+        // equippedPassives는 SkillData 타입 (패시브 스킬) — backflowSuppression 필드 합산
         foreach (var passive in statData.equippedPassives)
             if (passive != null) total += passive.backflowSuppression;
         return total;

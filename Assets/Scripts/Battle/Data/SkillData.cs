@@ -327,6 +327,10 @@ namespace AbyssdawnBattle
         public BackflowType backflowType;
         public StatusEffectSO backflowStatusEffect;
 
+        [Tooltip("패시브 스킬 전용: 역류 억제율 (0.0 ~ 1.0). 장착 시 시전자의 역류 확률을 이 값만큼 감소.")]
+        [Range(0f, 1f)]
+        public float backflowSuppression;
+
         [Header("━━━━━━━━━━ 패시브 랭크 ━━━━━━━━━━")]
         public int maxRank;
         public float[] bonusPerRank;
