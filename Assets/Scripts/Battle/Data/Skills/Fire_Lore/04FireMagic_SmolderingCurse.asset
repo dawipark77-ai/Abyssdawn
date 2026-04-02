@@ -10,37 +10,49 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: FireMagic_Fireball
+  m_Name: 04FireMagic_SmolderingCurse
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: FireMagic_01
-  skillName: Fireball
+  skillID: FireMagic_04
+  skillName: Smoldering Curse
   skillIcon: {fileID: 0}
-  description: Launches a ball of fire at the target. Has a chance to ignite.
+  description: Curses the target with smoldering flames. High ignite chance, no direct
+    damage.
   usageType: 0
   damageType: 1
-  scaleStat: 2
+  scalingStat: 2
   weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
-  mpCost: 5
-  minMult: 1.8
-  maxMult: 2.0
+  mpCost: 14
+  minMult: 0
+  maxMult: 0
   hitCount: 1
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription:
+  dunbreakDescription: 
   curseEffect: {fileID: 11400000, guid: a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6, type: 2}
-  curseApplyChance: 0.1
-  backlashChance: 0.1
-  backlashType: 3
-  backlashStatusEffect: {fileID: 11400000, guid: a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6, type: 2}
+  curseApplyChance: 0.85
+  backflowChance: 0.12
+  backflowType: 3
+  backflowStatusEffect: {fileID: 11400000, guid: a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6, type: 2}
   maxRank: 0
   bonusPerRank: []
-  backlashPerRank: []
+  backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
   prerequisiteSkills: []
   requiredLorePoints: 1
-  effects: []

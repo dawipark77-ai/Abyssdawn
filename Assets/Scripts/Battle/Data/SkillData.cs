@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 
 namespace AbyssdawnBattle
 {
-    public enum BacklashType
+    public enum BackflowType
     {
         None,
         HPLoss,
@@ -323,14 +323,14 @@ namespace AbyssdawnBattle
 
         [Header("━━━━━━━━━━ 역류 (Backflow) ━━━━━━━━━━")]
         [Range(0f, 1f)]
-        public float backlashChance;
-        public BacklashType backlashType;
-        public StatusEffectSO backlashStatusEffect;
+        public float backflowChance;
+        public BackflowType backflowType;
+        public StatusEffectSO backflowStatusEffect;
 
         [Header("━━━━━━━━━━ 패시브 랭크 ━━━━━━━━━━")]
         public int maxRank;
         public float[] bonusPerRank;
-        public float[] backlashPerRank;
+        public float[] backflowPerRank;
 
         [Header("━━━━━━━━━━ 특수 조건 ━━━━━━━━━━")]
         public bool requireTargetIgnited;

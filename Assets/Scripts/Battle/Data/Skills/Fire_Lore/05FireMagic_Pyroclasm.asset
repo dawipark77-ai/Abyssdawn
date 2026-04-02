@@ -10,37 +10,49 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: FireMagic_HeatMirage
+  m_Name: 05FireMagic_Pyroclasm
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: FireMagic_06
-  skillName: Heat Mirage
+  skillID: FireMagic_05
+  skillName: Pyroclasm
   skillIcon: {fileID: 0}
-  description: Creates a heat distortion that confuses enemies. No backflow risk.
+  description: Massive fire explosion. Only usable on ignited targets. High backflow
+    risk.
   usageType: 0
   damageType: 1
-  scaleStat: 2
+  scalingStat: 2
   weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
-  mpCost: 10
-  minMult: 1.0
-  maxMult: 1.0
+  mpCost: 20
+  minMult: 1
+  maxMult: 1
   hitCount: 1
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription:
+  dunbreakDescription: 
   curseEffect: {fileID: 0}
   curseApplyChance: 0
-  backlashChance: 0
-  backlashType: 0
-  backlashStatusEffect: {fileID: 0}
+  backflowChance: 0.18
+  backflowType: 3
+  backflowStatusEffect: {fileID: 11400000, guid: a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6, type: 2}
   maxRank: 0
   bonusPerRank: []
-  backlashPerRank: []
-  requireTargetIgnited: 0
+  backflowPerRank: []
+  requireTargetIgnited: 1
   selfIgnitedBonus: 0
   prerequisiteSkills: []
   requiredLorePoints: 1
-  effects: []

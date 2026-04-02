@@ -10,16 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: FireMagic_PyromancerDoctrine
+  m_Name: 07FireMagic_BurningWill
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: FireMagic_02
-  skillName: Pyromaniac Doctrine
+  skillID: FireMagic_07
+  skillName: Burning Will
   skillIcon: {fileID: 0}
-  description: Passive. Increases fire damage per rank, but also increases backflow chance.
+  description: Passive. When self is ignited, fire skills deal bonus damage. Turns
+    weakness into power.
   usageType: 1
   damageType: 1
-  scaleStat: 2
+  scalingStat: 2
   weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -28,25 +34,25 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription:
+  dunbreakDescription: 
   curseEffect: {fileID: 0}
   curseApplyChance: 0
-  backlashChance: 0
-  backlashType: 0
-  backlashStatusEffect: {fileID: 0}
-  maxRank: 3
-  bonusPerRank:
-  - 0.15
-  - 0.15
-  - 0.15
-  backlashPerRank:
-  - 0.05
-  - 0.1
-  - 0.15
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
   requireTargetIgnited: 0
-  selfIgnitedBonus: 0
+  selfIgnitedBonus: 1
   prerequisiteSkills: []
   requiredLorePoints: 1
-  effects: []

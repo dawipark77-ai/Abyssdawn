@@ -10,47 +10,48 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: FireMagic_EmbersGreed
+  m_Name: 06FireMagic_HeatMirage
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: FireMagic_03
-  skillName: Ember's Greed
+  skillID: FireMagic_06
+  skillName: Heat Mirage
   skillIcon: {fileID: 0}
-  description: Passive. Each rank amplifies fire magic further, at increasing backflow risk.
-  usageType: 1
+  description: Creates a heat distortion that confuses enemies. No backflow risk.
+  usageType: 0
   damageType: 1
-  scaleStat: 2
+  scalingStat: 2
   weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
-  mpCost: 0
-  minMult: 0
-  maxMult: 0
+  mpCost: 10
+  minMult: 1
+  maxMult: 1
   hitCount: 1
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription:
+  dunbreakDescription: 
   curseEffect: {fileID: 0}
   curseApplyChance: 0
-  backlashChance: 0
-  backlashType: 0
-  backlashStatusEffect: {fileID: 0}
-  maxRank: 5
-  bonusPerRank:
-  - 0.08
-  - 0.1
-  - 0.12
-  - 0.14
-  - 0.16
-  backlashPerRank:
-  - 0.03
-  - 0.05
-  - 0.08
-  - 0.11
-  - 0.15
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
   prerequisiteSkills: []
   requiredLorePoints: 1
-  effects: []
