@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: 04_ArmorRend
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Axe_T1_08
+  skillName: "\uAC11\uC637 \uCC22\uAE30 (Armor Rend)"
+  skillIcon: {fileID: -8959231232942335855, guid: c4993093907b4aa48ac3078c7ea244f3, type: 3}
+  description: "\uC804\uC5F4 1\uBC88/2\uBC88\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5.
+    \uB370\uBBF8\uC9C0 \uC5C6\uC74C. \uC801 \uD604\uC7AC \uBC29\uC5B4\uB825 x20%
+    \uBC29\uC5B4\uD30C\uAD34. HP 4% \uC18C\uBAA8."
+  usageType: 0
+  damageType: 0
+  scalingStat: 0
+  weaponCategory: 8
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 3
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 4
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 1
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects:
+  - effectType: 15
+    recoveryTarget: 0
+    effectAmount: 20
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: "\uC801 \uD604\uC7AC \uBC29\uC5B4\uB825 x20% \uBC29\uC5B4\uD30C\uAD34.
+    \uC2E4\uC804 \uBB34\uB370\uBBF8\uC9C0 \uCC98\uB9AC\uB294 \uC804\uD22C \uB85C\uC9C1
+    \uAD6C\uD604 \uAE30\uC900."
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: a1e8c1d7b24f4b7696cf14a1e9c0d101, type: 2}
+  requiredLorePoints: 1

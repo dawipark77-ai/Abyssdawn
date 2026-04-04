@@ -56,8 +56,18 @@ MonoBehaviour:
   magic: 2
   Agility: 6
   luck: 2
-  isDefending: 0
-  defenceReduction: 0.4
+  currentSlot: 1
+  allowedSlots: 3
+  hitShakeDuration: 0.2
+  hitShakeMagnitude: 0.1
+  activeStatusEffects: []
+  useCustomStatusUISettings: 0
+  enableWorldSpaceStatusUI: 1
+  statusUISize: {x: 120, y: 50}
+  statusUIScale: 0.005
+  statusUIOffsetY: 1
+  level: 1
+  expReward: 10
 --- !u!212 &2379520254073988040
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -105,8 +115,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1338958362059096936, guid: e2c96085db6689442b12981f9f1b6043,
-    type: 3}
+  m_Sprite: {fileID: 1338958362059096936, guid: e2c96085db6689442b12981f9f1b6043, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

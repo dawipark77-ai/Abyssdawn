@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: 03_ThrowingAxe_R1
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Axe_T1_02
+  skillName: "\uD22C\uCC99\uB3C4\uB07C I (Throwing Axe)"
+  skillIcon: {fileID: -8959231232942335855, guid: c4993093907b4aa48ac3078c7ea244f3, type: 3}
+  description: "\uC9C4\uD615 1/2/3/4\uC5D0\uC11C \uC0AC\uC6A9 \uAC00\uB2A5. \uBBFC\uCCA9
+    \uAE30\uBC18 \uC6D0\uAC70\uB9AC \uC120\uC81C \uACF5\uACA9. \uB7AD\uD06C 1: \uBBFC\uCCA9
+    x60%, \uBC29\uC5B4\uD30C\uAD34 1%, HP 3% \uC18C\uBAA8. \uC0AC\uC6A9 \uD6C4 \uC774\uBC88
+    \uD134 \uCD94\uAC00 \uD589\uB3D9 \uC5C6\uC74C."
+  usageType: 0
+  damageType: 1
+  scalingStat: 4
+  weaponCategory: 8
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: -1
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 3
+  mpCost: 0
+  minMult: 0.6
+  maxMult: 0.6
+  hitCount: 1
+  accuracy: 1
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: "\uBC29\uC5B4\uD30C\uAD34 1%. \uC6B0\uC120\uAD8C/\uC6D0\uAC70\uB9AC/\uCD94\uAC00
+    \uD589\uB3D9 \uC5C6\uC74C\uC740 \uC124\uBA85 \uAE30\uC900."
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: a1e8c1d7b24f4b7696cf14a1e9c0d101, type: 2}
+  requiredLorePoints: 1

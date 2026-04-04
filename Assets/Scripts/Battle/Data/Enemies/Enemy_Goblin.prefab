@@ -57,6 +57,7 @@ MonoBehaviour:
   Agility: 12
   luck: 5
   currentSlot: 1
+  allowedSlots: -1
   hitShakeDuration: 0.2
   hitShakeMagnitude: 0.1
   activeStatusEffects: []

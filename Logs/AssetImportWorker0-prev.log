@@ -1,9 +1,9 @@
 [Licensing::Module] Trying to connect to existing licensing client channel...
 Built from '6000.2/staging' branch; Version is '6000.2.13f1 (abdb44fca7f7) revision 11262788'; Using compiler version '194234433'; Build Type 'Release'
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User" at "2026-03-11T14:17:58.8237598Z"
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User" at "2026-04-03T16:45:31.6238075Z"
 OS: 'Windows 10  (10.0.19045) 64bit Professional' Language: 'ko' Physical Memory: 32654 MB
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
-Date: 2026-03-11T14:17:58Z
+Date: 2026-04-03T16:45:31Z
 
 COMMAND LINE ARGUMENTS:
 C:\Program Files\Unity\Hub\Editor\6000.2.13f1\Editor\Unity.exe
@@ -17,7 +17,7 @@ E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01
 -logFile
 Logs/AssetImportWorker0.log
 -srvPort
-53226
+57543
 -licensingIpc
 LicenseClient-User
 -job-worker-count
@@ -65,12 +65,12 @@ E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01
     "memorysetup-temp-allocator-size-gi-baking-worker=262144"
     "memorysetup-temp-allocator-size-gi-baking-worker=262144"
     "memorysetup-temp-allocator-size-gfx=262144"
-Player connection [22276]  Target information:
+Player connection [8600]  Target information:
 
-Player connection [22276]  * "[IP] 221.146.237.131 [Port] 0 [Flags] 2 [Guid] 1301603675 [EditorId] 1301603675 [Version] 1048832 [Id] WindowsEditor(7,User-PC) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+Player connection [8600]  * "[IP] 220.71.48.247 [Port] 0 [Flags] 2 [Guid] 1108443348 [EditorId] 1108443348 [Version] 1048832 [Id] WindowsEditor(7,User-PC) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
 
-Player connection [22276] Host joined multi-casting on [225.0.0.222:54997]...
-Player connection [22276] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Player connection [8600] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8600] Host joined alternative multi-casting on [225.0.0.222:34997]...
 JobSystem: Creating JobQueue using job-worker-count value 3
 Input System module state changed to: Initialized.
 [Physics::Module] Initialized fallback backend.
@@ -82,7 +82,7 @@ Library Redirect Path: Library/
 [Physics::Module] SDK Version: 4.1.2
 [Physics::Module] Integration Version: 1.0.0
 [Physics::Module] Threading Mode: Multi-Threaded
-Refreshing native plugins compatible for Editor in 15.69 ms, found 4 plugins.
+Refreshing native plugins compatible for Editor in 11.24 ms, found 4 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Initialize engine version: 6000.2.13f1 (abdb44fca7f7)
 [Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/Resources/UnitySubsystems
@@ -99,59 +99,59 @@ Initialize mono
 Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/Managed'
 Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
 Mono config path = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/MonoBleedingEdge/etc'
-Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56708
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56980
 Begin MonoManager ReloadAssembly
 Registering precompiled unity dll's ...
 Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
-Registered in 0.004204 seconds.
-- Loaded All Assemblies, in  1.244 seconds
+Registered in 0.003852 seconds.
+- Loaded All Assemblies, in  1.176 seconds
 Native extension for WindowsStandalone target not found
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.652 seconds
-Domain Reload Profiling: 2886ms
-	BeginReloadAssembly (448ms)
+- Finished resetting the current domain, in  1.018 seconds
+Domain Reload Profiling: 2191ms
+	BeginReloadAssembly (442ms)
 		ExecutionOrderSort (0ms)
 		DisableScriptedObjects (0ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
-		CreateAndSetChildDomain (2ms)
+		CreateAndSetChildDomain (1ms)
 	RebuildCommonClasses (107ms)
-	RebuildNativeTypeToScriptingClass (33ms)
-	initialDomainReloadingComplete (124ms)
-	LoadAllAssembliesAndSetupDomain (521ms)
-		LoadAssemblies (447ms)
+	RebuildNativeTypeToScriptingClass (36ms)
+	initialDomainReloadingComplete (110ms)
+	LoadAllAssembliesAndSetupDomain (477ms)
+		LoadAssemblies (440ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (510ms)
-			TypeCache.Refresh (508ms)
-				TypeCache.ScanAssembly (470ms)
+		AnalyzeDomain (467ms)
+			TypeCache.Refresh (464ms)
+				TypeCache.ScanAssembly (430ms)
 			BuildScriptInfoCaches (0ms)
 			ResolveRequiredComponents (1ms)
-	FinalizeReload (1653ms)
+	FinalizeReload (1019ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1503ms)
+		SetupLoadedEditorAssemblies (886ms)
 			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (118ms)
-			SetLoadedEditorAssemblies (10ms)
-			BeforeProcessingInitializeOnLoad (474ms)
-			ProcessInitializeOnLoadAttributes (643ms)
-			ProcessInitializeOnLoadMethodAttributes (256ms)
+			InitializePlatformSupportModulesInManaged (143ms)
+			SetLoadedEditorAssemblies (8ms)
+			BeforeProcessingInitializeOnLoad (208ms)
+			ProcessInitializeOnLoadAttributes (354ms)
+			ProcessInitializeOnLoadMethodAttributes (173ms)
 			AfterProcessingInitializeOnLoad (0ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
 		AwakeInstancesAfterBackupRestoration (0ms)
-[Licensing::Client] Handshaking with LicensingClient:
-  Version:                 1.17.4+4293ba1
-  Session Id:              1093bdda30ea4e1d84b2b3094493f8e4
-  Correlation Id:          19ce961546bcc017d77a723a33b0321c
-  External correlation Id: 2283880311260773346
-  Machine Id:              PqfLONiypRxW53GBMsOvo+/r+k0=
-[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-User" (connect: 0.00s, validation: 0.00s, handshake: 4.85s)
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User-notifications" at "2026-03-11T14:18:03.6732662Z"
-[Licensing::Module] Licensing Background thread has ended after 4.85s
 ========================================================================
 Worker process is ready to serve import requests
 Import Worker Mode flag is 0x00
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.17.4+4293ba1
+  Session Id:              d7a27a2719ef43ed90ebf74c5aded5c2
+  Correlation Id:          f6544bc28e46e04076642c42ffa1528b
+  External correlation Id: 1701154116961667339
+  Machine Id:              PqfLONiypRxW53GBMsOvo+/r+k0=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-User" (connect: 0.00s, validation: 0.00s, handshake: 4.48s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User-notifications" at "2026-04-03T16:45:36.1026856Z"
+[Licensing::Module] Licensing Background thread has ended after 4.48s
 Begin MonoManager ReloadAssembly
 [Licensing::Client] Successfully resolved entitlement details
 [Licensing::Module] License group:
@@ -159,22 +159,9 @@ Begin MonoManager ReloadAssembly
   Product: Unity Personal
   Type: Assigned
   Expiration: Unlimited
-- Loaded All Assemblies, in  1.752 seconds
-Refreshing native plugins compatible for Editor in 2.69 ms, found 4 plugins.
+- Loaded All Assemblies, in  1.865 seconds
+Refreshing native plugins compatible for Editor in 5.44 ms, found 4 plugins.
 Native extension for WindowsStandalone target not found
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
 [ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
 UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
 UnityEngine.StackTraceUtility:ExtractStackTrace ()
@@ -188,532 +175,695 @@ UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
 
 (Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
 
-Package Manager log level set to [2]
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.605 seconds
-Domain Reload Profiling: 3354ms
-	BeginReloadAssembly (404ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (12ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (0ms)
-		CreateAndSetChildDomain (47ms)
-	RebuildCommonClasses (72ms)
-	RebuildNativeTypeToScriptingClass (25ms)
-	initialDomainReloadingComplete (82ms)
-	LoadAllAssembliesAndSetupDomain (1164ms)
-		LoadAssemblies (812ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (616ms)
-			TypeCache.Refresh (450ms)
-				TypeCache.ScanAssembly (420ms)
-			BuildScriptInfoCaches (139ms)
-			ResolveRequiredComponents (22ms)
-	FinalizeReload (1607ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1310ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (2ms)
-			SetLoadedEditorAssemblies (9ms)
-			BeforeProcessingInitializeOnLoad (295ms)
-			ProcessInitializeOnLoadAttributes (759ms)
-			ProcessInitializeOnLoadMethodAttributes (238ms)
-			AfterProcessingInitializeOnLoad (6ms)
-			EditorAssembliesLoaded (0ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (25ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
-Refreshing native plugins compatible for Editor in 3.87 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6903 unused Assets / (4.4 MB). Loaded Objects now: 7631.
-Memory consumption went from 138.3 MB to 133.9 MB.
-Total: 16.329900 ms (FindLiveObjects: 0.955400 ms CreateObjectMapping: 1.409800 ms MarkObjects: 8.941200 ms  DeleteObjects: 5.021400 ms)
-
-========================================================================
-Received Import Request.
-  Time since last request: 26301.919025 seconds.
-  path: Assets/Scripts/Battle/Data/Path/New Folder
-  artifactKey: Guid(168f2e7b0c75c0e48ae1e92c7f1e39a9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Scripts/Battle/Data/Path/New Folder using Guid(168f2e7b0c75c0e48ae1e92c7f1e39a9) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '90aec74d3509e4ebfaa3562d7a35d0f8') in 0.012809 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 10.324231 seconds.
-  path: Assets/Scripts/Battle/Data/Oath&Path
-  artifactKey: Guid(a8549db3ea7cf78438eadc2b7de5ae2e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Scripts/Battle/Data/Oath&Path using Guid(a8549db3ea7cf78438eadc2b7de5ae2e) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '080dca4f837df06b1fa9c19315cdc4e0') in 0.0008428 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 6.959239 seconds.
-  path: Assets/Abyssdawn_Dungeon_2D 07.unity
-  artifactKey: Guid(c52dd636b3113f74c8ad1c4b277d76a3) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Abyssdawn_Dungeon_2D 07.unity using Guid(c52dd636b3113f74c8ad1c4b277d76a3) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'a301585ff7ccf00ce61b8de80590d68e') in 0.3696935 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000031 seconds.
-  path: Assets/Scripts/Dungeon/RoomInfo.cs
-  artifactKey: Guid(7793368465e1ad14e9355b20d1de2e14) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/RoomInfo.cs using Guid(7793368465e1ad14e9355b20d1de2e14) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'a92c7c707d64060bdc3ddd3407c3e26f') in 0.0815689 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000037 seconds.
-  path: Assets/Scripts/Dungeon/Editor/ConnectSkillNodeButtons.cs
-  artifactKey: Guid(671469dbdf1c16948accfb2c50a080d8) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/Editor/ConnectSkillNodeButtons.cs using Guid(671469dbdf1c16948accfb2c50a080d8) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '8e03c1c7a5a07ff3532660f774198067') in 0.0140416 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000018 seconds.
-  path: Assets/Scripts/Dungeon/LoreButtonController.cs
-  artifactKey: Guid(d5e6bb85342a550409e596275518d13b) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/LoreButtonController.cs using Guid(d5e6bb85342a550409e596275518d13b) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'b1188e837761c7e7c50332f6b54cf723') in 0.009522 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000025 seconds.
-  path: Assets/Scripts/Battle/Data/Equipments/CrudeArmor.asset
-  artifactKey: Guid(e9a66495ca4098b4aab796c8edf644c4) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Equipments/CrudeArmor.asset using Guid(e9a66495ca4098b4aab796c8edf644c4) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '08c67fbb96ef3dccbcae43d45b16f694') in 0.0959505 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000032 seconds.
-  path: Assets/Scripts/Battle/Data/Classes/Class_Thief.asset
-  artifactKey: Guid(86173007c73427d4c8dff10b39345910) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Classes/Class_Thief.asset using Guid(86173007c73427d4c8dff10b39345910) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '14c3a9d09a22d67222772f352cfc24d2') in 0.034292 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000020 seconds.
-  path: Assets/Scripts/Dungeon/SkillDetailPopup.cs
-  artifactKey: Guid(4eec4f8f9dc0f5342a664a26d12ba740) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/SkillDetailPopup.cs using Guid(4eec4f8f9dc0f5342a664a26d12ba740) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'f5ec358ac74d8587c50ac413e2fad168') in 0.0081224 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000029 seconds.
-  path: Assets/Scripts/Dungeon/LoreCategoryController.cs
-  artifactKey: Guid(5453b61ed038ea24e980cd50735b0ce3) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/LoreCategoryController.cs using Guid(5453b61ed038ea24e980cd50735b0ce3) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'e372527ab8542eea4813ca1466684f84') in 0.0142228 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000031 seconds.
-  path: Assets/Scripts/Dungeon/Editor/LoreSystemSetup.cs
-  artifactKey: Guid(6015bfd95f7410e43a49b141ff9f81d6) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/Editor/LoreSystemSetup.cs using Guid(6015bfd95f7410e43a49b141ff9f81d6) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '1a6790c23b50bcb026ea91dfabf8c21a') in 0.0061814 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000017 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Metabolism.asset
-  artifactKey: Guid(f44a471e12df4b04a90efe427d476a9d) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Metabolism.asset using Guid(f44a471e12df4b04a90efe427d476a9d) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '7ab39277ba83c7c24db4d15ea4d697a0') in 0.0118469 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000020 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_SubcutaneousFat.asset
-  artifactKey: Guid(a5e4f6c2f112d7e47a50c4b28aa7bcb3) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_SubcutaneousFat.asset using Guid(a5e4f6c2f112d7e47a50c4b28aa7bcb3) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'ca4ffe6b6702ceb8a18c2cf7816cbf70') in 0.0115598 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000026 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_RedBloodCells.asset
-  artifactKey: Guid(7347ba7ce7de63345a71d22a779ce5ad) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_RedBloodCells.asset using Guid(7347ba7ce7de63345a71d22a779ce5ad) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'edaab71e8172ffdc86751e39dbb4f577') in 0.0098215 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000030 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Beard.asset
-  artifactKey: Guid(5ef7393da5b14a2498f0f96a7f2af6dc) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Beard.asset using Guid(5ef7393da5b14a2498f0f96a7f2af6dc) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'c9fef83c692b6ba009ccb5a1319be599') in 0.0106004 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000020 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Greenskin.asset
-  artifactKey: Guid(768dd103216ddb343a2a1834e75f4ebb) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Greenskin.asset using Guid(768dd103216ddb343a2a1834e75f4ebb) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'fda2da8ae5e7892d3451c345582582a1') in 0.0109424 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000027 seconds.
-  path: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs
-  artifactKey: Guid(bd023d3e4d6ab394c88916f86f8afbef) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs using Guid(bd023d3e4d6ab394c88916f86f8afbef) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'ec77f3290907bed5b6a0d0fa6bbb75a1') in 0.0069522 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000023 seconds.
-  path: Assets/Scripts/Battle/Editor/EquipmentSystemValidator.cs
-  artifactKey: Guid(fdedd292416add448ae8ded4038b34af) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Editor/EquipmentSystemValidator.cs using Guid(fdedd292416add448ae8ded4038b34af) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'cfabd4bf29618ac92e52d8b3b6145385') in 0.0080537 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000038 seconds.
-  path: Assets/Scripts/Dungeon/SkillListItem.cs
-  artifactKey: Guid(32c753e7a382670449ff2188fd5a3ce5) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/SkillListItem.cs using Guid(32c753e7a382670449ff2188fd5a3ce5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '420b0416e797a7eb4a5c4047a387afad') in 0.0063746 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000020 seconds.
-  path: Assets/Scripts/Dungeon/SkillListManager.cs
-  artifactKey: Guid(0d21333ba66794f44b0cbbc763a9227b) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/SkillListManager.cs using Guid(0d21333ba66794f44b0cbbc763a9227b) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'fe688471b2d7ffb58e7ca452e0bcd790') in 0.0109979 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000025 seconds.
-  path: Assets/Scripts/Battle/Data/Skills/Warfare/T1_WeaponFamiliarity.asset
-  artifactKey: Guid(2aa582f670799bf419247e96259ff4b8) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Skills/Warfare/T1_WeaponFamiliarity.asset using Guid(2aa582f670799bf419247e96259ff4b8) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '934d4bda7567725f40f166c1dfbb0acd') in 0.0388236 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000025 seconds.
-  path: Assets/Scripts/Dungeon/Editor/SkillDetailPopupSetup.cs
-  artifactKey: Guid(ea6725add48ca8f4bb8a262b06ee3d42) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/Editor/SkillDetailPopupSetup.cs using Guid(ea6725add48ca8f4bb8a262b06ee3d42) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'a325e37834dcf5f236a19e9d8aedc4b6') in 0.0060752 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000041 seconds.
-  path: Assets/Scripts/Dungeon/Editor/LoreUIFixer.cs
-  artifactKey: Guid(bac25f44eee78cf44bc5bc4774db1ae6) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/Editor/LoreUIFixer.cs using Guid(bac25f44eee78cf44bc5bc4774db1ae6) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'a6559ef58cdc3be9640516ed5ccb334f') in 0.0075983 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000016 seconds.
-  path: Assets/Scripts/Battle/Data/Classes/Class_Wizard.asset
-  artifactKey: Guid(c6d7e46e7a49e9745aed874ab8442efe) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Classes/Class_Wizard.asset using Guid(c6d7e46e7a49e9745aed874ab8442efe) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'b203059805f4275b1ead3bd108a9f0aa') in 0.0250553 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000026 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Eye.asset
-  artifactKey: Guid(30be93b2ad9726a4dade20009399970b) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Eye.asset using Guid(30be93b2ad9726a4dade20009399970b) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '5894d5d0343915a785307c6470b5bb51') in 0.0096843 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000026 seconds.
-  path: Assets/Scripts/Battle/Data/Equipments/CrudeShield.asset
-  artifactKey: Guid(f11abdb46a6c8804bbcc6bab1e0cbfd0) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Equipments/CrudeShield.asset using Guid(f11abdb46a6c8804bbcc6bab1e0cbfd0) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '0ba07269662bd188f20e9adcc3fa8448') in 0.0097077 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000023 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Nose.asset
-  artifactKey: Guid(5351c8f238eccb04492971ee883a8330) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Nose.asset using Guid(5351c8f238eccb04492971ee883a8330) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '293d2c1a7f39fc253330d3c01efd33ed') in 0.0110886 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000023 seconds.
-  path: Assets/Scripts/Battle/Data/TraitsOfSpeciesData.cs
-  artifactKey: Guid(df4443b293f06ee47939875ab0dfa057) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/TraitsOfSpeciesData.cs using Guid(df4443b293f06ee47939875ab0dfa057) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '716879a2166dcbf34cc282802a69c2f6') in 0.0059353 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000019 seconds.
-  path: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs
-  artifactKey: Guid(e1101aecd5eaa8546a2b9d581e2ca71e) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs using Guid(e1101aecd5eaa8546a2b9d581e2ca71e) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'fd40bf307d7ff6f62bd5980bf7a97b27') in 0.0082781 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000021 seconds.
-  path: Assets/HeroData.asset
-  artifactKey: Guid(a176c788f5d164441af8bae214804085) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/HeroData.asset using Guid(a176c788f5d164441af8bae214804085) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter)[종의 특성] ✅ Human 특성 활성화! - Last Stand
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
 UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
 UnityEngine.StackTraceUtility:ExtractStackTrace ()
 UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
 UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
 UnityEngine.Logger:Log (UnityEngine.LogType,object)
 UnityEngine.Debug:Log (object)
-PlayerStatData:CheckAndActivateTrait () (at Assets/Scripts/PlayerStatData.cs:117)
-PlayerStatData:OnValidate () (at Assets/Scripts/PlayerStatData.cs:78)
-UnityEditor.AssetDatabase:LoadMainAssetAtPath (string)
-UnityEditor.Search.AssetIndexer:IndexProperties (int&,string&,bool&)
-UnityEditor.Search.AssetIndexer:IndexDocument (string,bool)
-UnityEditor.Search.SearchIndexEntryImporter:OnImportAsset (UnityEditor.AssetImporters.AssetImportContext)
-UnityEditor.AssetImporters.ScriptedImporter:GenerateAssetData (UnityEditor.AssetImporters.AssetImportContext)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
 
-(Filename: Assets/Scripts/PlayerStatData.cs Line: 117)
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
 
- -> (artifact id: 'cbc0494e9965f636d2b31022e43d1744') in 0.0463801 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 19
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000040 seconds.
-  path: Assets/Scripts/Dungeon/Editor/SwordSkillTreeSetup.cs
-  artifactKey: Guid(f7aa2f33cda30f34ba053332d6627bc4) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/Editor/SwordSkillTreeSetup.cs using Guid(f7aa2f33cda30f34ba053332d6627bc4) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '58bbc7ee8780da05e5594b1f4eaee1d9') in 0.0087696 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000022 seconds.
-  path: Assets/Scripts/Battle/Data/SkillData.cs
-  artifactKey: Guid(8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/SkillData.cs using Guid(8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'e2c8d3bd0c5cfd70243f0ba747703d31') in 0.008461 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000025 seconds.
-  path: Assets/Scripts/Dungeon/SkillTreeNode.cs
-  artifactKey: Guid(e8f9a6ee73414ed4fb9766bb595ff55f) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/SkillTreeNode.cs using Guid(e8f9a6ee73414ed4fb9766bb595ff55f) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '2357ab5b050d85c051b12a89b2d83aa4') in 0.0071169 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000036 seconds.
-  path: Assets/Scripts/Battle/EquipmentManager.cs
-  artifactKey: Guid(2961a0ca78aa1854b930094c431eb449) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/EquipmentManager.cs using Guid(2961a0ca78aa1854b930094c431eb449) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '2e04a3941c77ab03fc43f76f696714f2') in 0.0090897 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000026 seconds.
-  path: Assets/Scripts/Dungeon/SelectedSkillPanelUI.cs
-  artifactKey: Guid(c68b9a01388069143b27d0378f9a1bc4) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/SelectedSkillPanelUI.cs using Guid(c68b9a01388069143b27d0378f9a1bc4) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '9b99d1c709dd3512c30f4698a7ef05fa') in 0.0099145 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000018 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Human/Human_Lips.asset
-  artifactKey: Guid(d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Human/Human_Lips.asset using Guid(d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '516f3fa6c2ad2ea0c454c5113926599e') in 0.018962 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+Package Manager log level set to [2]
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.925 seconds
+Domain Reload Profiling: 3783ms
+	BeginReloadAssembly (439ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (13ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (53ms)
+	RebuildCommonClasses (83ms)
+	RebuildNativeTypeToScriptingClass (30ms)
+	initialDomainReloadingComplete (85ms)
+	LoadAllAssembliesAndSetupDomain (1221ms)
+		LoadAssemblies (901ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (593ms)
+			TypeCache.Refresh (437ms)
+				TypeCache.ScanAssembly (407ms)
+			BuildScriptInfoCaches (127ms)
+			ResolveRequiredComponents (23ms)
+	FinalizeReload (1926ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1538ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (4ms)
+			SetLoadedEditorAssemblies (10ms)
+			BeforeProcessingInitializeOnLoad (364ms)
+			ProcessInitializeOnLoadAttributes (855ms)
+			ProcessInitializeOnLoadMethodAttributes (294ms)
+			AfterProcessingInitializeOnLoad (10ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (37ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.06 seconds
+Refreshing native plugins compatible for Editor in 3.70 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6935 unused Assets / (5.0 MB). Loaded Objects now: 7663.
+Memory consumption went from 138.7 MB to 133.6 MB.
+Total: 18.101400 ms (FindLiveObjects: 2.554800 ms CreateObjectMapping: 2.679900 ms MarkObjects: 7.909300 ms  DeleteObjects: 4.955600 ms)
 
 ========================================================================
 Received Import Request.
-  Time since last request: 0.000019 seconds.
-  path: Assets/Scripts/Dungeon/LoreTreePanelController.cs
-  artifactKey: Guid(acdfdafc6d4802a48a7a7078f3cdd7b4) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/LoreTreePanelController.cs using Guid(acdfdafc6d4802a48a7a7078f3cdd7b4) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '00aeb4e62bf56275302431bd3a4c8944') in 0.0072425 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000037 seconds.
-  path: Assets/Scripts/Dungeon/OathPathButtonController.cs
-  artifactKey: Guid(8f7712389edfc7d46bce298065a141c1) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/OathPathButtonController.cs using Guid(8f7712389edfc7d46bce298065a141c1) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '403cdd249061b0d9ece0efabcbf83b4d') in 0.0111467 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000023 seconds.
-  path: Assets/Scripts/Dungeon/PanelBackgroundCloser.cs
-  artifactKey: Guid(02d76e4131b3be8479d8809103b41371) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/PanelBackgroundCloser.cs using Guid(02d76e4131b3be8479d8809103b41371) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '8b5305d8c5a261173bf95cacac9784d9') in 0.0076981 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000025 seconds.
-  path: Assets/Scripts/PlayerStatData.cs
-  artifactKey: Guid(91a344a122eb8754989d26c422398af5) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/PlayerStatData.cs using Guid(91a344a122eb8754989d26c422398af5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'a1ff5af5facc69c8e41f4ec5e80ca609') in 0.0080029 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000042 seconds.
-  path: Assets/Scripts/Battle/EquipmentUIController.cs
-  artifactKey: Guid(7434b36248ce98b4ca44a435c6fea034) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/EquipmentUIController.cs using Guid(7434b36248ce98b4ca44a435c6fea034) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '3057470aa27261267dd3d74c73f5fc77') in 0.0087974 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000024 seconds.
-  path: Assets/Scripts/Dungeon/Editor/TestSkillNodeButtons.cs
-  artifactKey: Guid(7cb660a74425dba43a864ae1f11b21ec) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/Editor/TestSkillNodeButtons.cs using Guid(7cb660a74425dba43a864ae1f11b21ec) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'c13c8ea54e26edaf64a7d26d9d4874a1') in 0.008395 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000023 seconds.
-  path: Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_Strong Slash.asset
-  artifactKey: Guid(777eff5f62c7fb54d80623864d7c0362) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_Strong Slash.asset using Guid(777eff5f62c7fb54d80623864d7c0362) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'b2420e17bd67ea0c5a74f52c4e24d6e1') in 0.0210894 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 5
+  Time since last request: 1312663.409404 seconds.
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Wizard.prefab
+  artifactKey: Guid(c0377a5cd07f17a498859b5e69ac0bff) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Wizard.prefab using Guid(c0377a5cd07f17a498859b5e69ac0bff) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '18d9f892a278c672535b89d2dcc4dc48') in 0.9115115 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
 
 ========================================================================
 Received Import Request.
   Time since last request: 0.000053 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_KneeJoint.asset
-  artifactKey: Guid(f78351bab22f0de4b9407f4479110df3) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_KneeJoint.asset using Guid(f78351bab22f0de4b9407f4479110df3) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '48e481fa9901638b78ff9bb1e90a0f78') in 0.0159547 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab
+  artifactKey: Guid(b0b4651a3a7de7d4ea12eeaae6788d91) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab using Guid(b0b4651a3a7de7d4ea12eeaae6788d91) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '4f9922c895b22743a7339e38d0bc23a3') in 0.0174655 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
 
 ========================================================================
 Received Import Request.
-  Time since last request: 0.000024 seconds.
-  path: Assets/Scripts/Dungeon/SwordSkillTreeManager.cs
-  artifactKey: Guid(b4c3666dbdc76f741abfd500f25247d3) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Dungeon/SwordSkillTreeManager.cs using Guid(b4c3666dbdc76f741abfd500f25247d3) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'db4574ae908c5ef7cf0ce2d2adc3cdcc') in 0.0117544 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+  Time since last request: 0.000044 seconds.
+  path: Assets/TextMesh Pro/Sprites/EmojiOne.png
+  artifactKey: Guid(dffef66376be4fa480fb02b19edbe903) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/TextMesh Pro/Sprites/EmojiOne.png using Guid(dffef66376be4fa480fb02b19edbe903) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'c9277d87c66689c1b12384730fba7d70') in 0.0269741 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
 
 ========================================================================
 Received Import Request.
-  Time since last request: 0.000032 seconds.
-  path: Assets/Scripts/Battle/Data/Oath&Path
-  artifactKey: Guid(a8549db3ea7cf78438eadc2b7de5ae2e) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Oath&Path using Guid(a8549db3ea7cf78438eadc2b7de5ae2e) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'e458035f72849df5769721a130c11fdf') in 0.0066535 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+  Time since last request: 7.882249 seconds.
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Goblin.prefab
+  artifactKey: Guid(baf17fc9dce96a048b50758af51e50c8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Goblin.prefab using Guid(baf17fc9dce96a048b50758af51e50c8) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '9c6521b4a6493709854b72ef894dc308') in 0.020835 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
 
 ========================================================================
 Received Import Request.
-  Time since last request: 0.000040 seconds.
-  path: Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Tusk.asset
-  artifactKey: Guid(35278b1f1ee9f7c47a2e8e55f4f1b031) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Tusk.asset using Guid(35278b1f1ee9f7c47a2e8e55f4f1b031) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'b9263973a701d7aa63f62eb42dfba811') in 0.0129425 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+  Time since last request: 17.964655 seconds.
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab
+  artifactKey: Guid(b0b4651a3a7de7d4ea12eeaae6788d91) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab using Guid(b0b4651a3a7de7d4ea12eeaae6788d91) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '99e7e920631f67b67311ba54283d6699') in 0.0115686 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
 
 ========================================================================
 Received Import Request.
-  Time since last request: 0.189403 seconds.
-  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding
-  artifactKey: Guid(416aea576164f0849b7d2aecb0e87a50) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding using Guid(416aea576164f0849b7d2aecb0e87a50) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '3e9971300a2dff348684d64baf45d22f') in 0.0007792 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+  Time since last request: 5.756394 seconds.
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Slime.prefab
+  artifactKey: Guid(c72c60776c2e58446a9f76ca5817be07) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Slime.prefab using Guid(c72c60776c2e58446a9f76ca5817be07) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '08f158fc0f2545129922e9f22785fb95') in 0.0111499 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
 
 ========================================================================
 Received Import Request.
-  Time since last request: 0.842102 seconds.
-  path: Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding
-  artifactKey: Guid(416aea576164f0849b7d2aecb0e87a50) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Oath&Path/Oath&Binding using Guid(416aea576164f0849b7d2aecb0e87a50) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '7115206ca53df2a3fea36aae9427972d') in 0.005895 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+  Time since last request: 4.942861 seconds.
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Wizard.prefab
+  artifactKey: Guid(c0377a5cd07f17a498859b5e69ac0bff) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Wizard.prefab using Guid(c0377a5cd07f17a498859b5e69ac0bff) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'e9d108780e773fa0295fd64c1345d83d') in 0.0126694 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
+
+========================================================================
+Received Import Request.
+  Time since last request: 27.613871 seconds.
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Wizard.prefab
+  artifactKey: Guid(c0377a5cd07f17a498859b5e69ac0bff) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Wizard.prefab using Guid(c0377a5cd07f17a498859b5e69ac0bff) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '7512725f53b34cae589252c546ec96c9') in 0.0181209 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
+
+========================================================================
+Received Import Request.
+  Time since last request: 16.574989 seconds.
+  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab
+  artifactKey: Guid(b0b4651a3a7de7d4ea12eeaae6788d91) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab using Guid(b0b4651a3a7de7d4ea12eeaae6788d91) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '14a2b78b01c61fdef1d063a0bdfcf41a') in 0.0260989 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
 
 ========================================================================
 Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  1.685 seconds
+Refreshing native plugins compatible for Editor in 2.89 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.317 seconds
+Domain Reload Profiling: 2998ms
+	BeginReloadAssembly (562ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (69ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (113ms)
+	RebuildCommonClasses (79ms)
+	RebuildNativeTypeToScriptingClass (38ms)
+	initialDomainReloadingComplete (60ms)
+	LoadAllAssembliesAndSetupDomain (942ms)
+		LoadAssemblies (823ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (385ms)
+			TypeCache.Refresh (21ms)
+				TypeCache.ScanAssembly (7ms)
+			BuildScriptInfoCaches (333ms)
+			ResolveRequiredComponents (24ms)
+	FinalizeReload (1317ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1009ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (5ms)
+			BeforeProcessingInitializeOnLoad (243ms)
+			ProcessInitializeOnLoadAttributes (629ms)
+			ProcessInitializeOnLoadMethodAttributes (117ms)
+			AfterProcessingInitializeOnLoad (11ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (43ms)
 Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 4.82 ms, found 4 plugins.
+Refreshing native plugins compatible for Editor in 5.61 ms, found 4 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6891 unused Assets / (2.1 MB). Loaded Objects now: 7633.
-Memory consumption went from 137.0 MB to 134.9 MB.
-Total: 119.712400 ms (FindLiveObjects: 1.715900 ms CreateObjectMapping: 1.929600 ms MarkObjects: 111.102200 ms  DeleteObjects: 4.962400 ms)
+Unloading 6933 unused Assets / (4.3 MB). Loaded Objects now: 7701.
+Memory consumption went from 146.4 MB to 142.1 MB.
+Total: 15.079800 ms (FindLiveObjects: 1.505900 ms CreateObjectMapping: 1.863600 ms MarkObjects: 8.257200 ms  DeleteObjects: 3.450700 ms)
 
 Prepare: number of updated asset objects reloaded= 0
 ========================================================================
-Received Import Request.
-  Time since last request: 80.102277 seconds.
-  path: Assets/Scripts/Battle/PlayerStats.cs
-  artifactKey: Guid(6635ad0edf2791042ac1cdda7d1b8b3c) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/PlayerStats.cs using Guid(6635ad0edf2791042ac1cdda7d1b8b3c) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '063be4d93a8c91837a5ea98577b03c6a') in 0.0597629 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+Received Prepare
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  1.730 seconds
+Refreshing native plugins compatible for Editor in 3.46 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
 
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.808 seconds
+Domain Reload Profiling: 3542ms
+	BeginReloadAssembly (528ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (35ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (96ms)
+	RebuildCommonClasses (78ms)
+	RebuildNativeTypeToScriptingClass (26ms)
+	initialDomainReloadingComplete (53ms)
+	LoadAllAssembliesAndSetupDomain (1047ms)
+		LoadAssemblies (874ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (469ms)
+			TypeCache.Refresh (11ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (424ms)
+			ResolveRequiredComponents (26ms)
+	FinalizeReload (1809ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1437ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (8ms)
+			BeforeProcessingInitializeOnLoad (354ms)
+			ProcessInitializeOnLoadAttributes (829ms)
+			ProcessInitializeOnLoadMethodAttributes (232ms)
+			AfterProcessingInitializeOnLoad (9ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (65ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 4.96 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6933 unused Assets / (4.1 MB). Loaded Objects now: 7704.
+Memory consumption went from 146.3 MB to 142.2 MB.
+Total: 24.883800 ms (FindLiveObjects: 2.207500 ms CreateObjectMapping: 2.017200 ms MarkObjects: 13.778800 ms  DeleteObjects: 6.878300 ms)
+
+Prepare: number of updated asset objects reloaded= 0
 ========================================================================
-Received Import Request.
-  Time since last request: 0.000021 seconds.
-  path: Assets/Scripts/PlayerStatData.cs
-  artifactKey: Guid(91a344a122eb8754989d26c422398af5) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/PlayerStatData.cs using Guid(91a344a122eb8754989d26c422398af5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '93b3852f2aab77f925f16be0369019c4') in 0.0055576 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+Received Prepare
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  1.528 seconds
+Refreshing native plugins compatible for Editor in 3.05 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
 
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.713 seconds
+Domain Reload Profiling: 3238ms
+	BeginReloadAssembly (462ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (31ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (81ms)
+	RebuildCommonClasses (75ms)
+	RebuildNativeTypeToScriptingClass (25ms)
+	initialDomainReloadingComplete (51ms)
+	LoadAllAssembliesAndSetupDomain (911ms)
+		LoadAssemblies (761ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (406ms)
+			TypeCache.Refresh (10ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (371ms)
+			ResolveRequiredComponents (19ms)
+	FinalizeReload (1714ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1379ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (5ms)
+			BeforeProcessingInitializeOnLoad (330ms)
+			ProcessInitializeOnLoadAttributes (902ms)
+			ProcessInitializeOnLoadMethodAttributes (132ms)
+			AfterProcessingInitializeOnLoad (6ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (47ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 5.53 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6933 unused Assets / (3.9 MB). Loaded Objects now: 7707.
+Memory consumption went from 146.4 MB to 142.5 MB.
+Total: 19.266400 ms (FindLiveObjects: 2.186100 ms CreateObjectMapping: 3.500200 ms MarkObjects: 10.562800 ms  DeleteObjects: 3.014900 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  1.507 seconds
+Refreshing native plugins compatible for Editor in 3.46 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.782 seconds
+Domain Reload Profiling: 3290ms
+	BeginReloadAssembly (483ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (33ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (81ms)
+	RebuildCommonClasses (63ms)
+	RebuildNativeTypeToScriptingClass (25ms)
+	initialDomainReloadingComplete (55ms)
+	LoadAllAssembliesAndSetupDomain (882ms)
+		LoadAssemblies (764ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (382ms)
+			TypeCache.Refresh (9ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (348ms)
+			ResolveRequiredComponents (19ms)
+	FinalizeReload (1782ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1437ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (5ms)
+			BeforeProcessingInitializeOnLoad (338ms)
+			ProcessInitializeOnLoadAttributes (911ms)
+			ProcessInitializeOnLoadMethodAttributes (168ms)
+			AfterProcessingInitializeOnLoad (11ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (56ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 12.65 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6933 unused Assets / (3.8 MB). Loaded Objects now: 7710.
+Memory consumption went from 146.4 MB to 142.6 MB.
+Total: 18.515300 ms (FindLiveObjects: 1.380100 ms CreateObjectMapping: 2.038000 ms MarkObjects: 10.809600 ms  DeleteObjects: 4.285300 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  1.497 seconds
+Refreshing native plugins compatible for Editor in 3.73 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.803 seconds
+Domain Reload Profiling: 3298ms
+	BeginReloadAssembly (460ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (31ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (82ms)
+	RebuildCommonClasses (75ms)
+	RebuildNativeTypeToScriptingClass (22ms)
+	initialDomainReloadingComplete (50ms)
+	LoadAllAssembliesAndSetupDomain (887ms)
+		LoadAssemblies (739ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (402ms)
+			TypeCache.Refresh (11ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (360ms)
+			ResolveRequiredComponents (25ms)
+	FinalizeReload (1804ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1442ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (5ms)
+			BeforeProcessingInitializeOnLoad (311ms)
+			ProcessInitializeOnLoadAttributes (919ms)
+			ProcessInitializeOnLoadMethodAttributes (193ms)
+			AfterProcessingInitializeOnLoad (9ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (64ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 12.69 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6933 unused Assets / (3.1 MB). Loaded Objects now: 7713.
+Memory consumption went from 146.4 MB to 143.3 MB.
+Total: 25.239200 ms (FindLiveObjects: 3.354800 ms CreateObjectMapping: 5.036400 ms MarkObjects: 11.517700 ms  DeleteObjects: 5.327900 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  1.517 seconds
+Refreshing native plugins compatible for Editor in 3.24 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.721 seconds
+Domain Reload Profiling: 3236ms
+	BeginReloadAssembly (492ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (32ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (88ms)
+	RebuildCommonClasses (62ms)
+	RebuildNativeTypeToScriptingClass (23ms)
+	initialDomainReloadingComplete (49ms)
+	LoadAllAssembliesAndSetupDomain (887ms)
+		LoadAssemblies (758ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (390ms)
+			TypeCache.Refresh (10ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (351ms)
+			ResolveRequiredComponents (23ms)
+	FinalizeReload (1722ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1386ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (7ms)
+			BeforeProcessingInitializeOnLoad (355ms)
+			ProcessInitializeOnLoadAttributes (854ms)
+			ProcessInitializeOnLoadMethodAttributes (157ms)
+			AfterProcessingInitializeOnLoad (9ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (51ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 12.99 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6933 unused Assets / (4.4 MB). Loaded Objects now: 7716.
+Memory consumption went from 146.5 MB to 142.1 MB.
+Total: 21.648200 ms (FindLiveObjects: 1.177700 ms CreateObjectMapping: 2.700800 ms MarkObjects: 11.500400 ms  DeleteObjects: 6.267500 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  4.381 seconds
+Refreshing native plugins compatible for Editor in 7.63 ms, found 4 plugins.
+Native extension for WindowsStandalone target not found
+[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
+
+[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
+System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
+UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
+
+(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
+
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  2.110 seconds
+Domain Reload Profiling: 6494ms
+	BeginReloadAssembly (1155ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (84ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (1ms)
+		CreateAndSetChildDomain (296ms)
+	RebuildCommonClasses (151ms)
+	RebuildNativeTypeToScriptingClass (43ms)
+	initialDomainReloadingComplete (85ms)
+	LoadAllAssembliesAndSetupDomain (2948ms)
+		LoadAssemblies (2023ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (1498ms)
+			TypeCache.Refresh (26ms)
+				TypeCache.ScanAssembly (8ms)
+			BuildScriptInfoCaches (1430ms)
+			ResolveRequiredComponents (33ms)
+	FinalizeReload (2111ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1517ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (3ms)
+			SetLoadedEditorAssemblies (11ms)
+			BeforeProcessingInitializeOnLoad (429ms)
+			ProcessInitializeOnLoadAttributes (934ms)
+			ProcessInitializeOnLoadMethodAttributes (133ms)
+			AfterProcessingInitializeOnLoad (6ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (42ms)
+Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
+Refreshing native plugins compatible for Editor in 7.38 ms, found 4 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6933 unused Assets / (3.5 MB). Loaded Objects now: 7719.
+Memory consumption went from 146.5 MB to 143.1 MB.
+Total: 44.141200 ms (FindLiveObjects: 2.426000 ms CreateObjectMapping: 2.301200 ms MarkObjects: 33.887100 ms  DeleteObjects: 5.524200 ms)
+
+Prepare: number of updated asset objects reloaded= 0
 ========================================================================
 Received Prepare
 Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 4.20 ms, found 4 plugins.
+Refreshing native plugins compatible for Editor in 3.33 ms, found 4 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6891 unused Assets / (3.8 MB). Loaded Objects now: 7633.
-Memory consumption went from 137.0 MB to 133.2 MB.
-Total: 18.794500 ms (FindLiveObjects: 1.676500 ms CreateObjectMapping: 1.625300 ms MarkObjects: 11.893200 ms  DeleteObjects: 3.597500 ms)
+Unloading 6923 unused Assets / (3.9 MB). Loaded Objects now: 7719.
+Memory consumption went from 146.7 MB to 142.8 MB.
+Total: 14.030100 ms (FindLiveObjects: 1.152400 ms CreateObjectMapping: 1.243500 ms MarkObjects: 8.376400 ms  DeleteObjects: 3.255900 ms)
 
 Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Import Request.
-  Time since last request: 878.066772 seconds.
-  path: Assets/Scripts/Battle/PlayerStats.cs
-  artifactKey: Guid(6635ad0edf2791042ac1cdda7d1b8b3c) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/PlayerStats.cs using Guid(6635ad0edf2791042ac1cdda7d1b8b3c) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '547c143a04a79741b25394bfcb5ede6e') in 0.0111309 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 3.805074 seconds.
-  path: Assets/Abyssdawn_Dungeon_2D 07.unity
-  artifactKey: Guid(c52dd636b3113f74c8ad1c4b277d76a3) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Abyssdawn_Dungeon_2D 07.unity using Guid(c52dd636b3113f74c8ad1c4b277d76a3) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '2e107a73e64e7d535d7bbf946dfd86dc') in 0.0270877 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Prepare
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 13.59 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6893 unused Assets / (3.7 MB). Loaded Objects now: 7635.
-Memory consumption went from 137.0 MB to 133.2 MB.
-Total: 20.229300 ms (FindLiveObjects: 1.860100 ms CreateObjectMapping: 1.680400 ms MarkObjects: 12.292700 ms  DeleteObjects: 4.393800 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Import Request.
-  Time since last request: 426.996754 seconds.
-  path: Assets/Scripts/Battle/Data/Oath&Path/OathBindingData.cs
-  artifactKey: Guid(7c6d9afcd7582684582f26da5202eee5) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Oath&Path/OathBindingData.cs using Guid(7c6d9afcd7582684582f26da5202eee5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'b4e2bacf221a26511dfc8ef555f3a023') in 0.0126705 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-

@@ -108,6 +108,15 @@ public class BattleManager : MonoBehaviour
     public float partySlotFontSize = 24f;
     public float partySlotLineSpacing = 28f;
 
+    [Header("━━━━━━━━━━ 아군 파티 UI ━━━━━━━━━━")]
+    [SerializeField] GameObject[] partySlots;           // PartySlot_1~4
+    [SerializeField] TMP_Text[] partyNameTexts;
+    [SerializeField] Image[] partyHPBars;
+    [SerializeField] TMP_Text[] partyHPTexts;
+    [SerializeField] Image[] partyMPBars;
+    [SerializeField] TMP_Text[] partyMPTexts;
+    [SerializeField] Transform[] partyStatusIconRows;
+
     // 파티 관련 구조체 및 열거형
     public enum PartyMode { Solo, Full }
     private PartyMode currentPartyMode = PartyMode.Full;
@@ -200,6 +209,13 @@ public class BattleManager : MonoBehaviour
     public Transform worldRoot;
     public Canvas canvas;
     public Transform enemyStatusPanel;
+
+    [Header("━━━━━━━━━━ 적 진영 UI ━━━━━━━━━━")]
+    [SerializeField] GameObject[] enemySlots;           // EnemySlot_1~4
+    [SerializeField] Image[] enemyMonsterImages;
+    [SerializeField] TMP_Text[] enemyNameTexts;
+    [SerializeField] Transform[] enemyStatusIconRows;
+
     public float spawnOffset = 1f;
     public float extraSpacingPerEnemy = 0.25f;
 
@@ -1302,45 +1318,30 @@ public class BattleManager : MonoBehaviour
         
         float roll = UnityEngine.Random.value; // 0.0 ~ 1.0
 
-        if (currentFloor == 1)
-        {
-            // 1층: 1마리(90%), 2마리(10%)
-            if (roll < 0.9f) count = 1;
-            else count = 2;
-        }
-        else if (currentFloor == 2)
-        {
-            // 2층: 1마리(70%), 2마리(30%)
-            if (roll < 0.7f) count = 1;
-            else count = 2;
-        }
-        else if (currentFloor == 3)
-        {
-            // 3층: 1마리(50%), 2마리(50%)
-            if (roll < 0.5f) count = 1;
-            else count = 2;
-        }
-        else
-        {
-             // 4층 이상: 기본 랜덤 (1~3마리)
-             count = UnityEngine.Random.Range(1, 4);
-        }
+        // [테스트용] 층수 무관하게 1~4마리 랜덤
+        count = UnityEngine.Random.Range(1, 5);
         
         Debug.Log($"[BattleManager] Floor {currentFloor} Spawn Roll: {roll:F2} -> Count: {count}");
 
         // var picks = enemyDatabase.GetRandomEnemies(count);
         
-        // 고블린 프리팹 찾기 (현재는 고블린만 나옴)
-        var goblinPrefab = enemyDatabase.enemyPrefabs.Find(x => x.name.Contains("Goblin"));
+        // 4종 몬스터 중 랜덤으로 count만큼 선택 (중복 허용)
         List<GameObject> picks = new List<GameObject>();
-        if (goblinPrefab != null)
+        var availablePrefabs = enemyDatabase.enemyPrefabs
+            .Where(x => x != null)
+            .ToList();
+
+        if (availablePrefabs.Count == 0)
         {
-            for (int k = 0; k < count; k++) picks.Add(goblinPrefab);
+            picks = enemyDatabase.GetRandomEnemies(count);
         }
         else
         {
-            // 고블린이 없으면 그냥 랜덤 (오류 방지)
-            picks = enemyDatabase.GetRandomEnemies(count);
+            for (int k = 0; k < count; k++)
+            {
+                int randIndex = UnityEngine.Random.Range(0, availablePrefabs.Count);
+                picks.Add(availablePrefabs[randIndex]);
+            }
         }
 
         Debug.Log($"[BattleManager] Requested {count} enemies, got {picks?.Count ?? 0} from database (Total prefabs: {enemyDatabase.enemyPrefabs.Count})");
@@ -1485,13 +1486,60 @@ public class BattleManager : MonoBehaviour
         }
 
         enemyLine.Clear();
-        for (int i = 0; i < activeEnemies.Count && i < 4; i++)
+
+        // 중앙 우선 슬롯 배정 순서 (1명=2번, 2명=2,3번, 3명=1,2,3번, 4명=1,2,3,4번)
+        int[][] centerPriorityOrders = new int[][]
         {
-            var e = activeEnemies[i];
-            if (e == null) continue;
-            int slotIndex = i + 1;
-            e.currentSlot = (BattleSlot)slotIndex;
-            enemyLine.AssignToSlot(e, slotIndex);
+            new int[] { 2 },
+            new int[] { 2, 3 },
+            new int[] { 1, 2, 3 },
+            new int[] { 1, 2, 3, 4 }
+        };
+
+        int enemyCount = Mathf.Min(activeEnemies.Count, 4);
+        int[] slotOrder = centerPriorityOrders[enemyCount - 1];
+
+        int orderIndex = 0;
+        foreach (var e in activeEnemies)
+        {
+            if (e == null || orderIndex >= slotOrder.Length) continue;
+
+            // allowedSlots 범위 안에서 슬롯 찾기
+            int assignedSlot = -1;
+            for (int s = orderIndex; s < slotOrder.Length; s++)
+            {
+                int candidate = slotOrder[s];
+                SlotMask candidateMask = (SlotMask)(1 << (candidate - 1));
+                if ((e.allowedSlots & candidateMask) != 0)
+                {
+                    assignedSlot = candidate;
+                    orderIndex = s + 1;
+                    break;
+                }
+            }
+
+            // allowedSlots에 맞는 슬롯이 없으면 전체 슬롯에서 allowedSlots 범위로 강제 배정
+            if (assignedSlot == -1)
+            {
+                for (int s = 0; s < 4; s++)
+                {
+                    SlotMask candidateMask = (SlotMask)(1 << s);
+                    if ((e.allowedSlots & candidateMask) != 0 && enemyLine.IsEmpty(s + 1))
+                    {
+                        assignedSlot = s + 1;
+                        break;
+                    }
+                }
+                // 그래도 없으면 빈 슬롯 아무데나
+                if (assignedSlot == -1)
+                {
+                    assignedSlot = enemyLine.FindEmptySlot();
+                }
+                orderIndex++;
+            }
+
+            e.currentSlot = (BattleSlot)assignedSlot;
+            enemyLine.AssignToSlot(e, assignedSlot);
         }
 
         Debug.Log($"[BattleManager] BattleLine 초기화 완료. 플레이어: {playerLine}, 적: {enemyLine}");
@@ -1635,37 +1683,30 @@ public class BattleManager : MonoBehaviour
                 slotButton = slot.gameObject.AddComponent<Button>();
             }
 
-            int capturedIndex = enemyStatusSlots.Count - 1;
+            int capturedSlotNumber = enemyStatusSlots.Count; // 1~4 (바인딩 순서 = 슬롯 번호)
             slotButton.onClick.RemoveAllListeners();
             slotButton.onClick.AddListener(() =>
             {
-                if (waitingForTargetSelection && capturedIndex < activeEnemies.Count && activeEnemies[capturedIndex] != null)
-                {
-                    EnemyStats clickedEnemy = activeEnemies[capturedIndex];
-                    if (clickedEnemy.currentHP > 0)
-                    {
-                        if (hoveredEnemy != null && hoveredEnemy != clickedEnemy)
-                        {
-                            hoveredEnemy.SetHighlight(false);
-                        }
+                if (!waitingForTargetSelection) return;
 
-                        hoveredEnemy = clickedEnemy;
-                        hoveredEnemy.SetHighlight(true);
+                // 해당 슬롯 번호에 배정된 몬스터를 enemyLine에서 찾기
+                EnemyStats clickedEnemy = enemyLine.GetAt(capturedSlotNumber) as EnemyStats;
+                if (clickedEnemy == null || clickedEnemy.currentHP <= 0) return;
 
-                        if (pendingAction == "attack")
-                        {
-                            QueueAllyCommand(currentControlledMember, "attack", clickedEnemy);
-                        }
-                        else if (pendingAction == "skill" && pendingSkill != null)
-                        {
-                            QueueAllyCommand(currentControlledMember, "skill", clickedEnemy, pendingSkill);
-                        }
+                if (hoveredEnemy != null && hoveredEnemy != clickedEnemy)
+                    hoveredEnemy.SetHighlight(false);
 
-                        waitingForTargetSelection = false;
-                        pendingAction = "";
-                        pendingSkill = null;
-                    }
-                }
+                hoveredEnemy = clickedEnemy;
+                hoveredEnemy.SetHighlight(true);
+
+                if (pendingAction == "attack")
+                    QueueAllyCommand(currentControlledMember, "attack", clickedEnemy);
+                else if (pendingAction == "skill" && pendingSkill != null)
+                    QueueAllyCommand(currentControlledMember, "skill", clickedEnemy, pendingSkill);
+
+                waitingForTargetSelection = false;
+                pendingAction = "";
+                pendingSkill = null;
             });
 
             Debug.Log($"[BattleManager] Enemy slot bind - {slot.name} | MonsterImage: {(monsterImage != null ? monsterImage.name : "NULL")} | Name: {(nameText != null ? nameText.name : "NULL")} | HP: {(hpText != null ? hpText.name : "NULL")} | MP: {(mpText != null ? mpText.name : "NULL")}");
@@ -2701,15 +2742,7 @@ public class BattleManager : MonoBehaviour
                 if (enemyStats != null)
                 {
                     enemyStats.SetOriginalPosition(newPos);
-                    // UI 업데이트 (UI가 없으면 생성)
-                    if (enemyStats.StatusUI == null)
-                    {
-                        enemyStats.CreateWorldSpaceUI();
-                    }
-                    else
-                    {
-                        enemyStats.UpdateStatusUI();
-                    }
+                    enemyStats.SetWorldSpaceStatusUIEnabled(false);
                 }
             }
         }
@@ -5474,7 +5507,10 @@ private void CacheHeroSkills()
 
             for (int i = 0; i < enemyStatusSlots.Count; i++)
             {
-                bool hasEnemy = i < activeEnemies.Count && activeEnemies[i] != null;
+                int slotNumber = i + 1; // UI 슬롯 번호 (1~4)
+                EnemyStats es = enemyLine.GetAt(slotNumber) as EnemyStats;
+                bool hasEnemy = es != null && !es.IsDead();
+
                 Image frame = i < enemyStatusFrames.Count ? enemyStatusFrames[i] : null;
                 Image monsterImage = i < enemyStatusMonsterImages.Count ? enemyStatusMonsterImages[i] : null;
                 TextMeshProUGUI nameText = i < enemyStatusNameTexts.Count ? enemyStatusNameTexts[i] : null;
@@ -5483,7 +5519,6 @@ private void CacheHeroSkills()
 
                 if (hasEnemy)
                 {
-                    EnemyStats es = activeEnemies[i];
                     bool isDead = es.currentHP <= 0;
                     bool isCurrentTarget = enemy == es && !isDead;
                     bool shouldPulse = !isDead && waitingForTargetSelection && hoveredEnemy == es;
@@ -5491,9 +5526,7 @@ private void CacheHeroSkills()
                     if (lastEnemyDisplayedHP.TryGetValue(es, out int previousHP))
                     {
                         if (es.currentHP < previousHP)
-                        {
                             TriggerEnemySlotShake(i);
-                        }
                     }
                     lastEnemyDisplayedHP[es] = es.currentHP;
 
@@ -5525,17 +5558,9 @@ private void CacheHeroSkills()
                     SetEnemySlotPulse(i, shouldPulse);
 
                     es.SetWorldSpaceStatusUIEnabled(false);
-
                     SpriteRenderer worldSprite = es.GetComponent<SpriteRenderer>();
-                    if (worldSprite != null)
-                    {
-                        worldSprite.enabled = false;
-                    }
-
-                    if (es.StatusUI != null)
-                    {
-                        es.StatusUI.SetActive(false);
-                    }
+                    if (worldSprite != null) worldSprite.enabled = false;
+                    if (es.StatusUI != null) es.StatusUI.SetActive(false);
                 }
                 else
                 {
@@ -5601,6 +5626,135 @@ private void CacheHeroSkills()
                 }
             }
         }
+
+        // SerializeField 파티/적 UI 동기화
+        UpdatePartyUI();
+    }
+
+    // ========== 파티/적 진영 SerializeField UI 업데이트 ==========
+    private void UpdatePartyUI()
+    {
+        // ── 아군 슬롯 ──
+        if (partySlots != null)
+        {
+            for (int i = 0; i < partySlots.Length; i++)
+            {
+                bool hasMember = i < activePartyMembers.Count && activePartyMembers[i] != null;
+
+                if (partySlots[i] != null)
+                    partySlots[i].SetActive(hasMember);
+
+                if (!hasMember) continue;
+
+                PlayerStats m = activePartyMembers[i];
+                bool isDead = m.currentHP <= 0;
+                Color textColor = isDead ? new Color(1f, 0.5f, 0.5f, 1f) : Color.white;
+
+                if (partyNameTexts != null && i < partyNameTexts.Length && partyNameTexts[i] != null)
+                {
+                    partyNameTexts[i].text = m.playerName;
+                    partyNameTexts[i].color = textColor;
+                }
+
+                if (partyHPBars != null && i < partyHPBars.Length && partyHPBars[i] != null)
+                    partyHPBars[i].fillAmount = m.maxHP > 0 ? Mathf.Clamp01((float)m.currentHP / m.maxHP) : 0f;
+
+                if (partyHPTexts != null && i < partyHPTexts.Length && partyHPTexts[i] != null)
+                {
+                    partyHPTexts[i].text = $"{m.currentHP}/{m.maxHP}";
+                    partyHPTexts[i].color = textColor;
+                }
+
+                if (partyMPBars != null && i < partyMPBars.Length && partyMPBars[i] != null)
+                    partyMPBars[i].fillAmount = m.maxMP > 0 ? Mathf.Clamp01((float)m.currentMP / m.maxMP) : 0f;
+
+                if (partyMPTexts != null && i < partyMPTexts.Length && partyMPTexts[i] != null)
+                {
+                    partyMPTexts[i].text = $"{m.currentMP}/{m.maxMP}";
+                    partyMPTexts[i].color = textColor;
+                }
+
+                // 상태이상 아이콘 행
+                if (partyStatusIconRows != null && i < partyStatusIconRows.Length && partyStatusIconRows[i] != null)
+                {
+                    Image[] icons = partyStatusIconRows[i].GetComponentsInChildren<Image>(true);
+                    var effects = m.activeStatusEffects;
+                    for (int k = 0; k < icons.Length; k++)
+                    {
+                        if (k < effects.Count && effects[k] != null && effects[k].data != null)
+                        {
+                            icons[k].sprite = effects[k].data.flatIcon;
+                            icons[k].gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            icons[k].gameObject.SetActive(false);
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── 적 슬롯 (currentSlot 기반으로 올바른 UI 슬롯에 배치) ──
+        if (enemySlots != null)
+        {
+            // 먼저 전체 슬롯 비활성화
+            for (int i = 0; i < enemySlots.Length; i++)
+            {
+                if (enemySlots[i] != null)
+                    enemySlots[i].SetActive(false);
+            }
+
+            // currentSlot 기준으로 올바른 슬롯 UI 활성화
+            foreach (var es in activeEnemies)
+            {
+                if (es == null) continue;
+                int slotIndex = (int)es.currentSlot - 1; // BattleSlot은 1~4, 배열은 0~3
+                if (slotIndex < 0 || slotIndex >= enemySlots.Length) continue;
+                if (enemySlots[slotIndex] != null)
+                    enemySlots[slotIndex].SetActive(true);
+            }
+        }
+
+            // currentSlot 기준으로 이름/이미지/아이콘 업데이트
+            foreach (var es in activeEnemies)
+            {
+                if (es == null) continue;
+                int slotIndex = (int)es.currentSlot - 1;
+                if (slotIndex < 0) continue;
+
+                if (enemyNameTexts != null && slotIndex < enemyNameTexts.Length && enemyNameTexts[slotIndex] != null)
+                    enemyNameTexts[slotIndex].text = es.enemyName;
+
+                if (enemyMonsterImages != null && slotIndex < enemyMonsterImages.Length && enemyMonsterImages[slotIndex] != null)
+                {
+                    SpriteRenderer sr = es.GetComponent<SpriteRenderer>();
+                    if (sr != null)
+                    {
+                        enemyMonsterImages[slotIndex].sprite = sr.sprite;
+                        enemyMonsterImages[slotIndex].color = es.currentHP > 0 ? Color.white : new Color(0.55f, 0.55f, 0.55f, 0.65f);
+                    }
+                }
+
+                // 상태이상 아이콘 행
+                if (enemyStatusIconRows != null && slotIndex < enemyStatusIconRows.Length && enemyStatusIconRows[slotIndex] != null)
+                {
+                    Image[] icons = enemyStatusIconRows[slotIndex].GetComponentsInChildren<Image>(true);
+                    var effects = es.activeStatusEffects;
+                    for (int k = 0; k < icons.Length; k++)
+                    {
+                        if (k < effects.Count && effects[k] != null && effects[k].data != null)
+                        {
+                            icons[k].sprite = effects[k].data.flatIcon;
+                            icons[k].gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            icons[k].gameObject.SetActive(false);
+                        }
+                    }
+                }
+            }
     }
 
     // 전투 시작 시 모든 파티 멤버의 HP/MP를 최대값으로 초기화

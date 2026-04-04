@@ -39,6 +39,9 @@ public class EnemyStats : MonoBehaviour
     [Tooltip("현재 슬롯 위치 (BattleLine에서 자동 설정됨). 슬롯 1,2 = 전열, 슬롯 3,4 = 후열.")]
     public BattleSlot currentSlot = BattleSlot.Slot1;
 
+    [Tooltip("이 적이 배치될 수 있는 슬롯 범위. Inspector에서 직접 지정.")]
+    public SlotMask allowedSlots = SlotMask.Any;
+
     public bool IsFrontRow => SlotHelper.IsFrontRow(currentSlot);
     public bool IsBackRow => SlotHelper.IsBackRow(currentSlot);
 

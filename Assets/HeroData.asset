@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a344a122eb8754989d26c422398af5, type: 3}
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatData
-  currentHP: 59
-  currentMP: 9
+  currentHP: 80
+  currentMP: 14
   level: 1
   exp: 30
   freeStatPoints: 0
