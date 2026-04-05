@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 74ff9a0e4e7735e4fa8a37eccf9e522c
+guid: 4a6d1b4fb0643fe4ea525967a4a34be5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2457856163877591424
-    second: Goblin 01_0
+      213: 8749302817991680212
+    second: Goblin_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Goblin 01_0
+      name: Goblin_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 886
-        height: 868
+        width: 313
+        height: 529
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 086621b57d0f3edd0800000000000000
-      internalID: -2457856163877591424
+      spriteID: 4d0e7b2ae84cb6970800000000000000
+      internalID: 8749302817991680212
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Goblin 01_0: -2457856163877591424
+      Goblin_0: 8749302817991680212
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

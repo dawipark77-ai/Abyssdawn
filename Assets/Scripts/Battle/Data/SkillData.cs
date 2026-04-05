@@ -340,6 +340,43 @@ namespace AbyssdawnBattle
         public bool requireTargetIgnited;
         public bool selfIgnitedBonus;
 
+        [Header("━━━━━━━━━━ 확장 전투 필드 ━━━━━━━━━━")]
+        [Tooltip("스킬 고유 방어구 파괴 비율 (예: 8 = 적 현재 방어력의 8%)")]
+        [Range(0f, 100f)]
+        public float armorBreakPercent = 0f;
+
+        [Tooltip("직전에 사용되어야 하는 스킬 ID")]
+        public string requiresPreviousSkillId = "";
+
+        [Tooltip("직전 스킬과 같은 대상을 요구하는지 여부")]
+        public bool requiresSameTarget = false;
+
+        [Tooltip("선제 행동 여부")]
+        public bool preemptive = false;
+
+        [Tooltip("사용 후 이번 턴 추가 행동 없이 종료하는지 여부")]
+        public bool endsTurnImmediately = false;
+
+        [Tooltip("추가 크리티컬 확률 보너스 (예: 5 = +5%)")]
+        [Range(0f, 100f)]
+        public float critBonusPercent = 0f;
+
+        [Tooltip("파티 전체 물리 공격력 버프 비율 (예: 5 = +5%)")]
+        [Range(0f, 100f)]
+        public float partyPhysicalBuffPercent = 0f;
+
+        [Tooltip("파티 전체 물리 공격력 버프 지속 턴")]
+        public int partyPhysicalBuffTurns = 0;
+
+        [Tooltip("자신에게 부여되는 민첩 패널티 값")]
+        public float selfAgilityPenalty = 0f;
+
+        [Tooltip("자신 민첩 패널티 지속 턴")]
+        public int selfAgilityPenaltyTurns = 0;
+
+        [Tooltip("방어력 감소 구간별 출혈 확률 보너스 배열. 20/40/60/80/100% 순서로 입력.")]
+        public float[] bleedChanceByArmorBroken = new float[0];
+
         [Header("Skill Tree")]
         [Tooltip("이 스킬을 배우기 위해 필요한 선행 스킬들")]
         public List<SkillData> prerequisiteSkills = new List<SkillData>();

@@ -3018,10 +3018,10 @@ MonoBehaviour:
   partySlotFontSize: 40
   partySlotLineSpacing: 40
   partySlots:
-  - {fileID: 1421405511}
-  - {fileID: 1210145777}
-  - {fileID: 972244768}
-  - {fileID: 1197461788}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   partyNameTexts: []
   partyHPBars: []
   partyHPTexts: []
@@ -3032,7 +3032,7 @@ MonoBehaviour:
   spawnCenter: {fileID: 1130131489}
   worldRoot: {fileID: 1687753668}
   canvas: {fileID: 779149225}
-  enemyStatusPanel: {fileID: 0}
+  enemyStatusPanel: {fileID: 549108767}
   enemySlots:
   - {fileID: 251429990}
   - {fileID: 1730368367}

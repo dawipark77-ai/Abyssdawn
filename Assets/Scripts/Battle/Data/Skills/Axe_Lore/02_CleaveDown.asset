@@ -58,6 +58,17 @@ MonoBehaviour:
   backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
+  armorBreakPercent: 8
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: a1e8c1d7b24f4b7696cf14a1e9c0d101, type: 2}
   requiredLorePoints: 1
