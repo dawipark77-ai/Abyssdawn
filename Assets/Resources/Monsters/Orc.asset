@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c4b8e1f7a23c5e8f1a4b6d2c9e0f7a, type: 3}
+  m_Name: Orc
+  m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
+  monsterName: Orc
+  sprite: {fileID: 0}
+  type: 0
+  hp: 150
+  mp: 0
+  atk: 25
+  def: 8
+  mag: 2
+  agi: 6
+  luk: 2
+  physResist: 1
+  magResist: 1
+  statusResist: 1
+  activeSkills: []
+  passiveSkills: []
+  aiPattern: 0
+  allowedSlots: 3
+  minFloor: 1
+  maxFloor: 1
+  spawnWeight: 1
+  expReward: 10
+  goldReward: 0
+  dropTable: []
+  companionChance: 0
+  companionData: {fileID: 0}

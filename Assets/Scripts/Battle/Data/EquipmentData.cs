@@ -31,22 +31,21 @@ namespace AbyssdawnBattle
     }
 
     [CreateAssetMenu(fileName = "Equipment_", menuName = "Abyssdawn/Equipment Data", order = 2)]
-    public class EquipmentData : ScriptableObject
+    public class EquipmentData : BaseItemSO
     {
+        // description → BaseItemSO.description (필드명 동일, 직렬화 보존)
+        // equipmentName / equipmentIcon 은 BaseItemSO.itemName / icon 과 이름이 달라 그대로 유지
+
         [Header("━━━━━━━━━━ Basic Info ━━━━━━━━━━")]
         [Tooltip("Equipment name")]
         public string equipmentName;
-        
+
         [Tooltip("Icon shown in the inventory screen")]
         public Sprite equipmentIcon;
 
         [Tooltip("Flat icon for battle UI (falls back to equipmentIcon if empty)")]
         public Sprite flatIcon;
-        
-        [TextArea(2, 4)]
-        [Tooltip("Equipment description")]
-        public string description;
-        
+
         [Space(5)]
         [Tooltip("Equipment type: Hand, TwoHanded, Armour, Accessory")]
         public EquipmentType equipmentType;

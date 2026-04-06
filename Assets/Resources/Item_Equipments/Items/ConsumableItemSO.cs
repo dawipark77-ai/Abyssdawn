@@ -5,17 +5,16 @@ using UnityEngine.Serialization;
 namespace AbyssdawnBattle
 {
     [CreateAssetMenu(fileName = "ConsumableItem_", menuName = "Abyssdawn/Consumable Item", order = 30)]
-    public class ConsumableItemSO : ScriptableObject
+    public class ConsumableItemSO : BaseItemSO
     {
-        [Header("Basic Info")]
-        public string itemName;
-        [TextArea(2, 4)]
-        public string description;
+        // itemName   → BaseItemSO.itemName  (필드명 동일, 직렬화 보존)
+        // description → BaseItemSO.description (필드명 동일, 직렬화 보존)
+        // itemIcon / flatIcon 은 BaseItemSO.icon 과 이름이 달라 그대로 유지
 
         [Header("Icons")]
-        public Sprite itemIcon;   // inventory screen icon
+        public Sprite itemIcon;   // 인벤토리 화면 아이콘
         [FormerlySerializedAs("icon")]
-        public Sprite flatIcon;   // battle UI flat icon
+        public Sprite flatIcon;   // 전투 UI 플랫 아이콘
 
         [Header("Recovery")]
         [Range(0f, 1f)] public float hpRecoveryPercent;
