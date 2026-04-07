@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using AbyssdawnBattle;
+using Abyssdawn;
 using SkillData = AbyssdawnBattle.SkillData;
 
 public class BattleManager : MonoBehaviour
@@ -218,6 +219,13 @@ public class BattleManager : MonoBehaviour
 
     public float spawnOffset = 1f;
     public float extraSpacingPerEnemy = 0.25f;
+
+    [Header("몬스터 스폰 - SlotPoint")]
+    [SerializeField] private RectTransform slotPointCenter;
+    [SerializeField] private RectTransform[] slotPoints; // 4개, 인덱스 0~3
+
+    [Header("몬스터 스폰 - 공용 프리팹")]
+    [SerializeField] private GameObject monsterPrefab;
 
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
@@ -1312,136 +1320,91 @@ public class BattleManager : MonoBehaviour
             Debug.LogWarning($"[BattleManager] EnemyDatabase has {nullPrefabCount} null prefab(s) out of {enemyDatabase.enemyPrefabs.Count} total.");
         }
 
+        /* ── [구 EnemyDatabase 스폰 로직 — 비활성화] ──────────────────────────────
         // [User Request] 층별 적 등장 수 확률 조정
+        // int currentFloor = DungeonPersistentData.currentFloor;
+        // int count = 1;
+        // float roll = UnityEngine.Random.value;
+        // count = UnityEngine.Random.Range(1, 5);
+        // Debug.Log($"[BattleManager] Floor {currentFloor} Spawn Roll: {roll:F2} -> Count: {count}");
+        // List<GameObject> picks = new List<GameObject>();
+        // var availablePrefabs = enemyDatabase.enemyPrefabs.Where(x => x != null).ToList();
+        // if (availablePrefabs.Count == 0) { picks = enemyDatabase.GetRandomEnemies(count); }
+        // else { for (int k = 0; k < count; k++) { int randIndex = UnityEngine.Random.Range(0, availablePrefabs.Count); picks.Add(availablePrefabs[randIndex]); } }
+        // picks = picks.OrderByDescending(go => ScoreEnemyPrefab(go)).ToList();
+        // Vector3 center = spawnCenter != null ? spawnCenter.position : Vector3.zero;
+        // float spacing = spawnOffset;
+        // if (picks.Count > 1) { spacing += extraSpacingPerEnemy * (picks.Count - 1); }
+        // spacing = Mathf.Max(0.1f, spacing);
+        // float baseY = center.y;
+        // List<GameObject> spawnedEnemies = new List<GameObject>();
+        // List<EnemyStats> spawnedEnemyStats = new List<EnemyStats>();
+        // int spawnedCount = 0; int skippedNullCount = 0;
+        // for (int i = 0; i < picks.Count; i++) { ... Instantiate(enemyPrefab, spawnPos, ...) ... }
+        // foreach (EnemyStats enemyStats in spawnedEnemyStats) { activeEnemies.Add(enemyStats); ... }
+        // if (spawnedEnemies.Count > 0) { StartCoroutine(AdjustEnemyPositions(spawnedEnemies, baseY)); }
+        ── [구 EnemyDatabase 스폰 로직 끝] ────────────────────────────────────── */
+
+        // ── [MonsterSO 기반 스폰 로직] ─────────────────────────────────────────
         int currentFloor = DungeonPersistentData.currentFloor;
-        int count = 1;
-        
-        float roll = UnityEngine.Random.value; // 0.0 ~ 1.0
+        MonsterSO[] monsterSOs = LoadMonsterSOsForFloor(currentFloor);
 
-        // [테스트용] 층수 무관하게 1~4마리 랜덤
-        count = UnityEngine.Random.Range(1, 5);
-        
-        Debug.Log($"[BattleManager] Floor {currentFloor} Spawn Roll: {roll:F2} -> Count: {count}");
-
-        // var picks = enemyDatabase.GetRandomEnemies(count);
-        
-        // 4종 몬스터 중 랜덤으로 count만큼 선택 (중복 허용)
-        List<GameObject> picks = new List<GameObject>();
-        var availablePrefabs = enemyDatabase.enemyPrefabs
-            .Where(x => x != null)
-            .ToList();
-
-        if (availablePrefabs.Count == 0)
+        if (monsterSOs == null || monsterSOs.Length == 0)
         {
-            picks = enemyDatabase.GetRandomEnemies(count);
-        }
-        else
-        {
-            for (int k = 0; k < count; k++)
-            {
-                int randIndex = UnityEngine.Random.Range(0, availablePrefabs.Count);
-                picks.Add(availablePrefabs[randIndex]);
-            }
-        }
-
-        Debug.Log($"[BattleManager] Requested {count} enemies, got {picks?.Count ?? 0} from database (Total prefabs: {enemyDatabase.enemyPrefabs.Count})");
-
-        if (picks == null || picks.Count == 0)
-        {
-            Debug.LogError("[BattleManager] EnemyDatabase.GetRandomEnemies returned null or empty list!");
-            AddMessage("Error: No enemy prefabs in database!");
+            Debug.LogError("[BattleManager] LoadMonsterSOsForFloor returned empty. Cannot spawn enemies.");
+            AddMessage("ERROR: No monsters available for this floor!");
             return;
         }
 
-        // 적 정렬 (방어력/HP 기준, 탱커가 왼쪽)
-        picks = picks.OrderByDescending(go => ScoreEnemyPrefab(go)).ToList();
-
-        Vector3 center = spawnCenter != null ? spawnCenter.position : Vector3.zero;
-
-        // Inspector에서 조절 가능한 간격 (spawnOffset + extraSpacingPerEnemy) 반영
-        float spacing = spawnOffset;
-        if (picks.Count > 1)
+        if (monsterPrefab == null)
         {
-            spacing += extraSpacingPerEnemy * (picks.Count - 1);
-        }
-        spacing = Mathf.Max(0.1f, spacing);
-
-        // 적들의 Y 좌표를 통일 (발끝이 같은 선상에 위치)
-        float baseY = center.y;
-        List<GameObject> spawnedEnemies = new List<GameObject>();
-        List<EnemyStats> spawnedEnemyStats = new List<EnemyStats>();
-
-        // 1단계: 모든 적 스폰
-        int spawnedCount = 0;
-        int skippedNullCount = 0;
-        for (int i = 0; i < picks.Count; i++)
-        {
-            try
-            {
-                GameObject enemyPrefab = picks[i];
-                if (enemyPrefab == null)
-                {
-                    skippedNullCount++;
-                    Debug.LogWarning($"[BattleManager] Skipping null prefab at index {i}");
-                    continue;
-                }
-
-                float offset = (i - (picks.Count - 1) / 2f) * spacing;
-                Vector3 spawnPos = new Vector3(center.x + offset, baseY, center.z);
-
-                GameObject enemyObj = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
-                if (enemyObj == null)
-                {
-                    Debug.LogError($"[BattleManager] Instantiate failed for prefab: {enemyPrefab.name}");
-                    continue;
-                }
-
-                if (worldRoot != null)
-                {
-                    enemyObj.transform.SetParent(worldRoot, false);
-                }
-
-                EnemyStats enemyStats = enemyObj.GetComponent<EnemyStats>();
-                if (enemyStats == null)
-                {
-                    enemyStats = enemyObj.AddComponent<EnemyStats>();
-                }
-
-                spawnedEnemies.Add(enemyObj);
-                spawnedEnemyStats.Add(enemyStats);
-                spawnedCount++;
-                Debug.Log($"[BattleManager] Successfully spawned enemy {spawnedCount}: {enemyPrefab.name} at {spawnPos}");
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogError($"[BattleManager] Exception while spawning enemy at index {i}: {ex.Message}\n{ex.StackTrace}");
-            }
+            Debug.LogError("[BattleManager] monsterPrefab is not assigned in Inspector!");
+            AddMessage("ERROR: monsterPrefab not assigned!");
+            return;
         }
 
-        Debug.Log($"[BattleManager] Spawn summary: {spawnedCount} spawned, {skippedNullCount} skipped (null prefabs)");
+        Debug.Log($"[BattleManager][MonsterSO] Spawning {monsterSOs.Length} monster(s) on floor {currentFloor}");
 
-        // 4단계: activeEnemies에 추가
-        foreach (EnemyStats enemyStats in spawnedEnemyStats)
+        for (int i = 0; i < monsterSOs.Length; i++)
         {
+            MonsterSO so = monsterSOs[i];
+            if (so == null) continue;
+
+            // 슬롯 결정: 1마리면 slotPointCenter, 2~4마리면 slotPoints 배열
+            RectTransform slot = null;
+            if (monsterSOs.Length == 1)
+            {
+                slot = slotPointCenter;
+            }
+            else if (slotPoints != null && i < slotPoints.Length)
+            {
+                slot = slotPoints[i];
+            }
+
+            Transform parentTransform = slot != null
+                ? slot.transform
+                : (worldRoot != null ? worldRoot : transform);
+
+            GameObject enemyObj = Instantiate(monsterPrefab);
+            enemyObj.transform.SetParent(parentTransform, false);
+
+            EnemyStats enemyStats = enemyObj.GetComponent<EnemyStats>();
+            if (enemyStats == null)
+                enemyStats = enemyObj.AddComponent<EnemyStats>();
+
+            enemyStats.Init(so);
+
             activeEnemies.Add(enemyStats);
 
-            // 적을 Recorder에 등록
             if (battleRecorder != null)
-            {
                 battleRecorder.RegisterTarget(enemyStats.transform);
-            }
-        }
 
-        // 5단계: 모든 적의 발끝이 baseY에 오도록 위치 조정 (한 프레임 후 실행)
-        if (spawnedEnemies.Count > 0)
-        {
-            StartCoroutine(AdjustEnemyPositions(spawnedEnemies, baseY));
+            Debug.Log($"[BattleManager][MonsterSO] Spawned [{i}] {so.MonsterName} → slot: {(slot != null ? slot.name : "worldRoot")}");
         }
 
         if (activeEnemies.Count == 0)
         {
-            Debug.LogError($"[BattleManager] No enemies spawned! Summary: {spawnedCount} spawned, {skippedNullCount} skipped. " +
-                $"EnemyDatabase has {enemyDatabase.enemyPrefabs.Count} prefabs. Check console for details.");
+            Debug.LogError("[BattleManager] No enemies spawned after MonsterSO spawn loop. Check console for details.");
             AddMessage("ERROR: No enemies spawned! Check console for details.");
             return;
         }
@@ -1721,6 +1684,56 @@ public class BattleManager : MonoBehaviour
         EnemyStats stats = prefab.GetComponent<EnemyStats>();
         if (stats == null) return 0;
         return stats.defense * 10 + stats.maxHP;
+    }
+
+    /// <summary>
+    /// 지정 층에 등장 가능한 MonsterSO 목록에서 SpawnWeight 가중치로 1~4마리를 선택합니다.
+    /// Resources/Monsters 폴더의 모든 MonsterSO를 로드하며, CanSpawnOnFloor 필터를 적용합니다.
+    /// </summary>
+    private MonsterSO[] LoadMonsterSOsForFloor(int floor)
+    {
+        MonsterSO[] all = Resources.LoadAll<MonsterSO>("Monsters");
+        if (all == null || all.Length == 0)
+        {
+            Debug.LogWarning("[BattleManager] Resources.LoadAll<MonsterSO>(\"Monsters\") returned empty.");
+            return new MonsterSO[0];
+        }
+
+        // 층 조건 필터
+        var candidates = all.Where(so => so != null && so.CanSpawnOnFloor(floor)).ToList();
+        if (candidates.Count == 0)
+        {
+            Debug.LogWarning($"[BattleManager] No MonsterSO passes CanSpawnOnFloor({floor}). Falling back to all loaded SOs.");
+            candidates = all.Where(so => so != null).ToList();
+        }
+
+        if (candidates.Count == 0)
+            return new MonsterSO[0];
+
+        // SpawnWeight 합산
+        float totalWeight = candidates.Sum(so => Mathf.Max(0f, so.SpawnWeight));
+        if (totalWeight <= 0f)
+            totalWeight = candidates.Count; // 가중치가 모두 0이면 균등 분배
+
+        // 스폰 수: 1~4마리 랜덤
+        int count = UnityEngine.Random.Range(1, 5);
+        Debug.Log($"[BattleManager] LoadMonsterSOsForFloor({floor}) → candidates: {candidates.Count}, count: {count}");
+
+        List<MonsterSO> result = new List<MonsterSO>();
+        for (int k = 0; k < count; k++)
+        {
+            float r = UnityEngine.Random.Range(0f, totalWeight);
+            float acc = 0f;
+            MonsterSO picked = candidates[0];
+            foreach (var so in candidates)
+            {
+                acc += Mathf.Max(0f, so.SpawnWeight);
+                if (r <= acc) { picked = so; break; }
+            }
+            result.Add(picked);
+        }
+
+        return result.ToArray();
     }
 
     private EnemyStats GetCurrentTarget()

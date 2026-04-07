@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using AbyssdawnBattle;
+using Abyssdawn;
 
 /// <summary>
 /// 무기(물리) 상태이상 인스턴스 — StatusEffectSO 기반 추적용
@@ -110,6 +111,32 @@ public class EnemyStats : MonoBehaviour
         ConfigureStatsByName();
 
         ApplyDefaultStatusUISettingsIfNeeded();
+    }
+
+    /// <summary>
+    /// MonsterSO 데이터로 스탯을 초기화합니다.
+    /// ConfigureStatsByName()은 호출하지 않으며, SO 데이터가 모든 기본값을 덮어씁니다.
+    /// </summary>
+    public void Init(MonsterSO so)
+    {
+        if (so == null)
+        {
+            Debug.LogWarning("[EnemyStats] Init() called with null MonsterSO.");
+            return;
+        }
+
+        enemyName    = so.MonsterName;
+        maxHP        = so.HP;
+        currentHP    = so.HP;
+        maxMP        = so.MP;
+        currentMP    = so.MP;
+        attack       = so.ATK;
+        defense      = so.DEF;
+        magic        = so.MAG;
+        Agility      = so.AGI;
+        luck         = so.LUK;
+        allowedSlots = so.AllowedSlots;
+        expReward    = so.ExpReward;
     }
 
     private void ConfigureStatsByName()
