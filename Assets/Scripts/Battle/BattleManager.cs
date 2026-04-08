@@ -1260,12 +1260,18 @@ public class BattleManager : MonoBehaviour
                 slot = enemySlots[i];
             }
 
-            Transform parentTransform = slot != null
-                ? slot.transform
-                : (worldRoot != null ? worldRoot : transform);
+            // SlotPoint 월드 좌표 추출 (slot이 없으면 worldRoot 또는 Vector3.zero)
+            Vector3 worldPos = slot != null
+                ? slot.transform.position
+                : (worldRoot != null ? worldRoot.position : Vector3.zero);
 
-            GameObject enemyObj = Instantiate(monsterPrefab);
-            enemyObj.transform.SetParent(parentTransform, false);
+            // WorldRoot 하위에 월드 좌표로 소환
+            Transform spawnParent = worldRoot != null ? worldRoot : transform;
+            GameObject enemyObj = Instantiate(monsterPrefab, worldPos, Quaternion.identity, spawnParent);
+
+            // 기존 Canvas SetParent 방식 (비활성화)
+            // Transform parentTransform = slot != null ? slot.transform : (worldRoot != null ? worldRoot : transform);
+            // enemyObj.transform.SetParent(parentTransform, false);
 
             EnemyStats enemyStats = enemyObj.GetComponent<EnemyStats>();
             if (enemyStats == null)
@@ -1279,10 +1285,6 @@ public class BattleManager : MonoBehaviour
             SpriteRenderer sr = enemyObj.GetComponent<SpriteRenderer>();
             if (sr != null) sr.sprite = so.Sprite;
             else Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {so.MonsterName}");
-
-            Image img = enemyObj.GetComponent<Image>();
-            if (img != null) img.sprite = so.Sprite;
-            else Debug.LogWarning($"[SPRITE_DEBUG] Image 컴포넌트 없음: {so.MonsterName}");
 
             activeEnemies.Add(enemyStats);
 
