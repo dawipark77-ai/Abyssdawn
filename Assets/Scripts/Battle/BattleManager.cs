@@ -1275,6 +1275,15 @@ public class BattleManager : MonoBehaviour
             enemyStats.Init(so);
             Debug.Log($"[MONSTER_DEBUG] Init 완료: {so.MonsterName} → HP:{enemyStats.maxHP}");
 
+            // 스프라이트 주입
+            SpriteRenderer sr = enemyObj.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.sprite = so.Sprite;
+            else Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {so.MonsterName}");
+
+            Image img = enemyObj.GetComponent<Image>();
+            if (img != null) img.sprite = so.Sprite;
+            else Debug.LogWarning($"[SPRITE_DEBUG] Image 컴포넌트 없음: {so.MonsterName}");
+
             activeEnemies.Add(enemyStats);
 
             if (battleRecorder != null)
