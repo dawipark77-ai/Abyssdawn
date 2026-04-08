@@ -137,6 +137,8 @@ public class EnemyStats : MonoBehaviour
         luck         = so.LUK;
         allowedSlots = so.AllowedSlots;
         expReward    = so.ExpReward;
+
+        Debug.Log($"[ENEMY_STATS] Init 완료: {enemyName}, HP:{maxHP}");
     }
 
     private void ConfigureStatsByName()
