@@ -1572,7 +1572,9 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private MonsterSO[] LoadMonsterSOsForFloor(int floor)
     {
+        Debug.Log($"[FLOOR_DEBUG] LoadMonsterSOsForFloor 호출, floor: {floor}");
         MonsterSO[] all = Resources.LoadAll<MonsterSO>("Monsters");
+        Debug.Log($"[FLOOR_DEBUG] 로드된 SO 수: {all?.Length ?? 0}");
         if (all == null || all.Length == 0)
         {
             Debug.LogWarning("[BattleManager] Resources.LoadAll<MonsterSO>(\"Monsters\") returned empty.");
