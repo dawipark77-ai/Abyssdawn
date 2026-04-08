@@ -1101,6 +1101,7 @@ public class BattleManager : MonoBehaviour
 
     public void StartBattle()
     {
+        Debug.Log("[BATTLE_DEBUG] StartBattle() 시작");
         Debug.Log("[BattleManager] StartBattle() called.");
         // 전투 상태 초기화
         battleEnded = false;
@@ -1572,6 +1573,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private MonsterSO[] LoadMonsterSOsForFloor(int floor)
     {
+        Debug.Log("[BATTLE_DEBUG] LoadMonsterSOsForFloor 진입");
         Debug.Log($"[FLOOR_DEBUG] LoadMonsterSOsForFloor 호출, floor: {floor}");
         MonsterSO[] all = Resources.LoadAll<MonsterSO>("Monsters");
         Debug.Log($"[FLOOR_DEBUG] 로드된 SO 수: {all?.Length ?? 0}");
