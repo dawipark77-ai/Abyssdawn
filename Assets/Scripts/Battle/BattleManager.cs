@@ -205,7 +205,6 @@ public class BattleManager : MonoBehaviour
 
     // ========== 적 시스템 ==========
     [Header("Enemy System")]
-    public EnemyDatabase enemyDatabase;
     public Transform spawnCenter;
     public Transform worldRoot;
     public Canvas canvas;
@@ -213,15 +212,13 @@ public class BattleManager : MonoBehaviour
 
     [Header("━━━━━━━━━━ 적 진영 UI ━━━━━━━━━━")]
     [SerializeField] GameObject[] enemySlots;           // EnemySlot_1~4
+    [SerializeField] private GameObject slotCenter;     // 1마리 스폰 시 사용할 Center 슬롯
     [SerializeField] Image[] enemyMonsterImages;
     [SerializeField] TMP_Text[] enemyNameTexts;
     [SerializeField] Transform[] enemyStatusIconRows;
 
     public float spawnOffset = 1f;
     public float extraSpacingPerEnemy = 0.25f;
-
-    [Header("몬스터 스폰 - SlotPoint")]
-    [SerializeField] private GameObject slotPointCenter;
 
     [Header("몬스터 스폰 - 공용 프리팹")]
     [SerializeField] private GameObject monsterPrefab;
@@ -468,10 +465,10 @@ public class BattleManager : MonoBehaviour
         startWithFullParty = false; // [Anti-Gravity] 강제 Solo 모드 설정 (인스펙터 값 무시)
         ForceDisableUIPanels();
         
-        // EnemyDatabase 미리 로드 시도
-        LoadEnemyDatabase();
+        // EnemyDatabase 미리 로드 시도 (비활성화 — MonsterSO 기반으로 전환)
+        // LoadEnemyDatabase();
 
-        Debug.Log($"[SLOT_DEBUG] slotPointCenter: {slotPointCenter}, enemySlots length: {enemySlots?.Length}");
+        Debug.Log($"[SLOT_DEBUG] slotCenter: {slotCenter}, enemySlots length: {enemySlots?.Length}");
         for (int i = 0; i < enemySlots?.Length; i++)
             Debug.Log($"[SLOT_DEBUG] enemySlots[{i}]: {enemySlots[i]}");
 
@@ -479,107 +476,15 @@ public class BattleManager : MonoBehaviour
         TryAutoAssignPaginationUI();
     }
     
+    /* ── [LoadEnemyDatabase 비활성화 — MonsterSO 기반으로 전환] ──────────────────
     /// <summary>
     /// EnemyDatabase를 자동으로 로드하는 메서드
     /// </summary>
     void LoadEnemyDatabase()
     {
-        if (enemyDatabase != null)
-        {
-            Debug.Log($"[BattleManager] EnemyDatabase already assigned: {enemyDatabase.name}");
-            return;
-        }
-        
-        Debug.Log("[BattleManager] EnemyDatabase not assigned. Attempting to auto-load...");
-        
-        // 방법 1: Editor 모드에서 AssetDatabase로 직접 찾기 (가장 확실한 방법)
-        #if UNITY_EDITOR
-        try
-        {
-            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:EnemyDatabase");
-            Debug.Log($"[BattleManager] AssetDatabase.FindAssets found {guids.Length} EnemyDatabase asset(s)");
-            
-            if (guids.Length > 0)
-            {
-                for (int i = 0; i < guids.Length; i++)
-                {
-                    string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[i]);
-                    Debug.Log($"[BattleManager] Trying to load EnemyDatabase from path: {path}");
-                    
-                    EnemyDatabase db = UnityEditor.AssetDatabase.LoadAssetAtPath<EnemyDatabase>(path);
-                    if (db != null)
-                    {
-                        Debug.Log($"[BattleManager] ✓ Found EnemyDatabase via AssetDatabase: {path}");
-                        Debug.Log($"[BattleManager] EnemyDatabase name: {db.name}, prefab count: {db.enemyPrefabs?.Count ?? 0}");
-                        
-                        // Editor 모드에서는 직접 할당 (플레이 모드에서도 작동)
-                        enemyDatabase = db;
-                        
-                        // Resources 폴더에 있으면 Resources 경로로도 로드 시도 (확인용)
-                        if (path.Contains("Resources"))
-                        {
-                            string resourcesPath = path.Substring(path.IndexOf("Resources/") + 10); // "Resources/" 이후 경로
-                            resourcesPath = resourcesPath.Replace(".asset", ""); // 확장자 제거
-                            Debug.Log($"[BattleManager] Resources path would be: {resourcesPath}");
-                            
-                            EnemyDatabase resourcesDb = Resources.Load<EnemyDatabase>(resourcesPath);
-                            if (resourcesDb != null)
-                            {
-                                Debug.Log($"[BattleManager] ✓ Resources.Load also works: {resourcesPath}");
-                            }
-                            else
-                            {
-                                Debug.LogWarning($"[BattleManager] Resources.Load failed for path: {resourcesPath}");
-                            }
-                        }
-                        
-                        Debug.Log($"[BattleManager] ✓ EnemyDatabase assigned: {enemyDatabase.name}, prefabs: {enemyDatabase.enemyPrefabs?.Count ?? 0}");
-                        return;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[BattleManager] LoadAssetAtPath returned null for path: {path}");
-                    }
-                }
-            }
-            else
-            {
-                Debug.LogWarning("[BattleManager] AssetDatabase: No EnemyDatabase assets found in project!");
-            }
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[BattleManager] Exception in Editor mode load: {ex.Message}\n{ex.StackTrace}");
-        }
-        #endif
-        
-        // 방법 2: 기본 Resources 경로로 로드 (빌드 시 사용)
-        enemyDatabase = Resources.Load<EnemyDatabase>("EnemyDatabase");
-        if (enemyDatabase != null)
-        {
-            Debug.Log($"[BattleManager] Successfully loaded EnemyDatabase from Resources: {enemyDatabase.name}");
-            return;
-        }
-        else
-        {
-            Debug.LogWarning("[BattleManager] Resources.Load<EnemyDatabase>(\"EnemyDatabase\") returned null");
-        }
-        
-        // 방법 3: Resources 폴더 전체에서 검색
-        EnemyDatabase[] allDatabases = Resources.LoadAll<EnemyDatabase>("");
-        if (allDatabases != null && allDatabases.Length > 0)
-        {
-            enemyDatabase = allDatabases[0];
-            Debug.Log($"[BattleManager] Found EnemyDatabase via LoadAll: {enemyDatabase.name} (found {allDatabases.Length} total)");
-            return;
-        }
-        else
-        {
-            Debug.LogWarning("[BattleManager] Resources.LoadAll<EnemyDatabase> returned null or empty");
-        }
-        
-        Debug.LogError("[BattleManager] Failed to load EnemyDatabase! Please assign it manually in Inspector.");
+        // ... (생략) ...
     }
+    ── [LoadEnemyDatabase 끝] ────────────────────────────────────────────────── */
 
     void OnEnable()
     {
@@ -1284,44 +1189,14 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        /* ── [구 EnemyDatabase 검증 로직 — 비활성화] ──────────────────────────────
         // Awake()에서 이미 로드 시도했지만, 혹시 모를 경우를 대비해 다시 시도
-        if (enemyDatabase == null)
-        {
-            Debug.LogWarning("[BattleManager] EnemyDatabase is still null in StartBattle(). Attempting to load again...");
-            LoadEnemyDatabase();
-        }
-
-        // 적 스폰
-        if (enemyDatabase == null)
-        {
-            Debug.LogError("[BattleManager] EnemyDatabase is null! Cannot spawn enemies.\n" +
-                "Please assign EnemyDatabase in BattleManager Inspector or ensure it exists in Resources folder.");
-            AddMessage("Error: Enemy Database not found! Please assign in Inspector.");
-            ReturnToDungeon(3.0f); // Return to dungeon if we can't start battle
-            return;
-        }
-
-        // EnemyDatabase 상태 확인
-        if (enemyDatabase.enemyPrefabs == null || enemyDatabase.enemyPrefabs.Count == 0)
-        {
-            Debug.LogError($"[BattleManager] EnemyDatabase.enemyPrefabs is null or empty! (Count: {enemyDatabase.enemyPrefabs?.Count ?? 0})");
-            AddMessage("Error: EnemyDatabase has no enemy prefabs assigned!");
-            return;
-        }
-
-        // null 프리팹 체크
-        int nullPrefabCount = 0;
-        for (int i = 0; i < enemyDatabase.enemyPrefabs.Count; i++)
-        {
-            if (enemyDatabase.enemyPrefabs[i] == null)
-            {
-                nullPrefabCount++;
-            }
-        }
-        if (nullPrefabCount > 0)
-        {
-            Debug.LogWarning($"[BattleManager] EnemyDatabase has {nullPrefabCount} null prefab(s) out of {enemyDatabase.enemyPrefabs.Count} total.");
-        }
+        // if (enemyDatabase == null) { LoadEnemyDatabase(); }
+        // if (enemyDatabase == null) { ReturnToDungeon(3.0f); return; }
+        // if (enemyDatabase.enemyPrefabs == null || enemyDatabase.enemyPrefabs.Count == 0) { return; }
+        // int nullPrefabCount = 0;
+        // for (int i = 0; i < enemyDatabase.enemyPrefabs.Count; i++) { if (enemyDatabase.enemyPrefabs[i] == null) nullPrefabCount++; }
+        ── [구 EnemyDatabase 검증 끝] ──────────────────────────────────────────── */
 
         /* ── [구 EnemyDatabase 스폰 로직 — 비활성화] ──────────────────────────────
         // [User Request] 층별 적 등장 수 확률 조정
@@ -1373,11 +1248,11 @@ public class BattleManager : MonoBehaviour
             MonsterSO so = monsterSOs[i];
             if (so == null) continue;
 
-            // 슬롯 결정: 1마리면 slotPointCenter, 2~4마리면 enemySlots 배열 인덱스 순
+            // 슬롯 결정: 1마리면 slotCenter, 2~4마리면 enemySlots 배열 인덱스 순
             GameObject slot = null;
             if (monsterSOs.Length == 1)
             {
-                slot = slotPointCenter;
+                slot = slotCenter;
             }
             else if (enemySlots != null && i < enemySlots.Length)
             {
