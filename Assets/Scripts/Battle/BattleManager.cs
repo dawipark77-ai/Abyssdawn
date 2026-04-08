@@ -221,8 +221,7 @@ public class BattleManager : MonoBehaviour
     public float extraSpacingPerEnemy = 0.25f;
 
     [Header("몬스터 스폰 - SlotPoint")]
-    [SerializeField] private RectTransform slotPointCenter;
-    [SerializeField] private RectTransform[] slotPoints; // 4개, 인덱스 0~3
+    [SerializeField] private GameObject slotPointCenter;
 
     [Header("몬스터 스폰 - 공용 프리팹")]
     [SerializeField] private GameObject monsterPrefab;
@@ -471,6 +470,10 @@ public class BattleManager : MonoBehaviour
         
         // EnemyDatabase 미리 로드 시도
         LoadEnemyDatabase();
+
+        Debug.Log($"[SLOT_DEBUG] slotPointCenter: {slotPointCenter}, enemySlots length: {enemySlots?.Length}");
+        for (int i = 0; i < enemySlots?.Length; i++)
+            Debug.Log($"[SLOT_DEBUG] enemySlots[{i}]: {enemySlots[i]}");
 
         // 페이지네이션 UI 자동 연결 시도
         TryAutoAssignPaginationUI();
@@ -1370,15 +1373,15 @@ public class BattleManager : MonoBehaviour
             MonsterSO so = monsterSOs[i];
             if (so == null) continue;
 
-            // 슬롯 결정: 1마리면 slotPointCenter, 2~4마리면 slotPoints 배열
-            RectTransform slot = null;
+            // 슬롯 결정: 1마리면 slotPointCenter, 2~4마리면 enemySlots 배열 인덱스 순
+            GameObject slot = null;
             if (monsterSOs.Length == 1)
             {
                 slot = slotPointCenter;
             }
-            else if (slotPoints != null && i < slotPoints.Length)
+            else if (enemySlots != null && i < enemySlots.Length)
             {
-                slot = slotPoints[i];
+                slot = enemySlots[i];
             }
 
             Transform parentTransform = slot != null
@@ -1392,7 +1395,9 @@ public class BattleManager : MonoBehaviour
             if (enemyStats == null)
                 enemyStats = enemyObj.AddComponent<EnemyStats>();
 
+            Debug.Log($"[MONSTER_DEBUG] Init 호출: {so.MonsterName}");
             enemyStats.Init(so);
+            Debug.Log($"[MONSTER_DEBUG] Init 완료: {so.MonsterName} → HP:{enemyStats.maxHP}");
 
             activeEnemies.Add(enemyStats);
 
