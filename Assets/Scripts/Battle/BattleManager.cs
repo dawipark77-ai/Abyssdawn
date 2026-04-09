@@ -1283,8 +1283,15 @@ public class BattleManager : MonoBehaviour
 
             // 스프라이트 주입
             SpriteRenderer sr = enemyObj.GetComponent<SpriteRenderer>();
-            if (sr != null) sr.sprite = so.Sprite;
-            else Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {so.MonsterName}");
+            if (sr != null)
+            {
+                sr.sprite = so.Sprite;
+                Debug.Log($"[SPRITE_DEBUG] 스프라이트 주입 완료: {so.MonsterName}");
+            }
+            else
+            {
+                Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {so.MonsterName}");
+            }
 
             activeEnemies.Add(enemyStats);
 
