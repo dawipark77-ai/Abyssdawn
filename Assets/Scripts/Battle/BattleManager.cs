@@ -1269,28 +1269,6 @@ public class BattleManager : MonoBehaviour
             Transform spawnParent = worldRoot != null ? worldRoot : transform;
             GameObject enemyObj = Instantiate(monsterPrefab, worldPos, Quaternion.identity, spawnParent);
 
-            // 슬롯 크기에 맞게 스케일 조정
-            RectTransform slotRect = slot != null ? slot.GetComponent<RectTransform>() : null;
-            if (slotRect != null)
-            {
-                float targetWidth = slotRect.rect.width;
-                float targetHeight = slotRect.rect.height;
-
-                SpriteRenderer srScale = enemyObj.GetComponent<SpriteRenderer>();
-                if (srScale != null && srScale.sprite != null)
-                {
-                    float spriteWidth = srScale.sprite.bounds.size.x;
-                    float spriteHeight = srScale.sprite.bounds.size.y;
-
-                    float scaleX = targetWidth / (spriteWidth * 100f);
-                    float scaleY = targetHeight / (spriteHeight * 100f);
-                    float scale = Mathf.Min(scaleX, scaleY);
-
-                    enemyObj.transform.localScale = new Vector3(scale, scale, 1f);
-                    Debug.Log($"[SCALE_DEBUG] {so.MonsterName} 스케일: {scale}");
-                }
-            }
-
             // 기존 Canvas SetParent 방식 (비활성화)
             // Transform parentTransform = slot != null ? slot.transform : (worldRoot != null ? worldRoot : transform);
             // enemyObj.transform.SetParent(parentTransform, false);
@@ -1313,6 +1291,24 @@ public class BattleManager : MonoBehaviour
             else
             {
                 Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {so.MonsterName}");
+            }
+
+            // 슬롯 크기에 맞게 스케일 조정 (스프라이트 주입 후 실행)
+            RectTransform slotRect = slot != null ? slot.GetComponent<RectTransform>() : null;
+            if (slotRect != null && sr != null && sr.sprite != null)
+            {
+                float targetWidth = slotRect.rect.width;
+                float targetHeight = slotRect.rect.height;
+
+                float spriteWidth = sr.sprite.bounds.size.x;
+                float spriteHeight = sr.sprite.bounds.size.y;
+
+                float scaleX = targetWidth / (spriteWidth * 100f);
+                float scaleY = targetHeight / (spriteHeight * 100f);
+                float scale = Mathf.Min(scaleX, scaleY);
+
+                enemyObj.transform.localScale = new Vector3(scale, scale, 1f);
+                Debug.Log($"[SCALE_DEBUG] {so.MonsterName} 스케일: {scale}");
             }
 
             activeEnemies.Add(enemyStats);
