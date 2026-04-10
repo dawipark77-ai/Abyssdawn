@@ -222,6 +222,8 @@ public class BattleManager : MonoBehaviour
 
     [Header("몬스터 스폰 - 공용 프리팹")]
     [SerializeField] private GameObject monsterPrefab;
+    [Tooltip("스폰된 몬스터의 월드 스케일 (Inspector에서 직접 조정)")]
+    [SerializeField] private float monsterSizeScale = 1f;
 
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
@@ -477,11 +479,11 @@ public class BattleManager : MonoBehaviour
             if (enemyBar != null)
             {
                 var found = new System.Collections.Generic.List<GameObject>();
-                for (int i = 1; i <= 4; i++)
+                for (int i = 0; i <= 3; i++)
                 {
-                    Transform slot = enemyBar.Find($"Enemy_SlotPoint_{i}");
+                    Transform slot = enemyBar.Find($"EnemySlot_{i}");
                     if (slot != null) found.Add(slot.gameObject);
-                    else Debug.LogWarning($"[SLOT_DEBUG] Enemy_SlotPoint_{i} not found under EnemyBar");
+                    else Debug.LogWarning($"[SLOT_DEBUG] EnemySlot_{i} not found under EnemyBar");
                 }
                 if (found.Count > 0) enemySlots = found.ToArray();
                 Debug.Log($"[SLOT_DEBUG] Auto-assigned {enemySlots?.Length ?? 0} enemySlots");
@@ -495,9 +497,11 @@ public class BattleManager : MonoBehaviour
             Transform enemyBar = transform.Find("Canvas/EnemyBar");
             if (enemyBar != null)
             {
-                Transform center = enemyBar.Find("Enemy_SlotPoint_C");
-                if (center != null) { slotCenter = center.gameObject; Debug.Log("[SLOT_DEBUG] slotCenter 자동 할당: Enemy_SlotPoint_C"); }
-                else Debug.LogWarning("[SLOT_DEBUG] Enemy_SlotPoint_C not found under EnemyBar");
+                // 전용 Center 슬롯 우선, 없으면 EnemySlot_0 사용
+                Transform center = enemyBar.Find("EnemySlot_Center");
+                if (center == null) center = enemyBar.Find("EnemySlot_0");
+                if (center != null) { slotCenter = center.gameObject; Debug.Log($"[SLOT_DEBUG] slotCenter 자동 할당: {center.name}"); }
+                else Debug.LogWarning("[SLOT_DEBUG] slotCenter 후보 없음");
             }
         }
 
@@ -1337,28 +1341,9 @@ public class BattleManager : MonoBehaviour
                 Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {so.MonsterName}");
             }
 
-            // 슬롯 크기에 맞게 스케일 조정 (스프라이트 주입 후 실행)
-            RectTransform slotRect = slot != null ? slot.GetComponent<RectTransform>() : null;
-            if (slotRect != null && sr != null && sr.sprite != null)
-            {
-                float targetWidth = slotRect.rect.width;
-                float targetHeight = slotRect.rect.height;
-
-                float spriteWidth = sr.sprite.bounds.size.x;
-                float spriteHeight = sr.sprite.bounds.size.y;
-
-                // 카메라 PPU 기반으로 슬롯 픽셀 크기 → 월드 유닛 변환
-                float pixelsPerUnit = Screen.height / (Camera.main.orthographicSize * 2f);
-                float slotWorldWidth  = targetWidth  / pixelsPerUnit;
-                float slotWorldHeight = targetHeight / pixelsPerUnit;
-                float scaleX = slotWorldWidth  / spriteWidth;
-                float scaleY = slotWorldHeight / spriteHeight;
-                float scale = Mathf.Min(scaleX, scaleY);
-
-                enemyObj.transform.localScale = new Vector3(scale, scale, 1f);
-                Debug.Log($"[SCALE_DEBUG] {so.MonsterName} 스케일: {scale}");
-                Debug.Log($"[SCALE_DEBUG] 적용 후 실제 스케일: {enemyObj.transform.localScale}");
-            }
+            // 스케일 적용 (Inspector의 monsterSizeScale 값 사용 — Scene에서 직접 조정 가능)
+            enemyObj.transform.localScale = new Vector3(monsterSizeScale, monsterSizeScale, 1f);
+            Debug.Log($"[SCALE_DEBUG] {so.MonsterName} 스케일: {monsterSizeScale}");
 
             activeEnemies.Add(enemyStats);
 
