@@ -1309,6 +1309,7 @@ public class BattleManager : MonoBehaviour
 
                 enemyObj.transform.localScale = new Vector3(scale, scale, 1f);
                 Debug.Log($"[SCALE_DEBUG] {so.MonsterName} 스케일: {scale}");
+                Debug.Log($"[SCALE_DEBUG] 적용 후 실제 스케일: {enemyObj.transform.localScale}");
             }
 
             activeEnemies.Add(enemyStats);
