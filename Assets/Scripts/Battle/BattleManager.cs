@@ -1293,15 +1293,15 @@ public class BattleManager : MonoBehaviour
                 slot = enemySlots[i];
             }
 
-            // SlotPoint의 스크린 좌표를 월드 좌표로 변환
+            // SlotPoint 스크린 좌표 → 월드 좌표 변환
+            // Overlay Canvas에서 position은 이미 스크린 픽셀 좌표이므로 직접 변환
             Vector3 worldPos = Vector3.zero;
             if (slot != null)
             {
                 RectTransform slotRectForPos = slot.GetComponent<RectTransform>();
                 if (slotRectForPos != null)
                 {
-                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(
-                        Camera.main, slotRectForPos.position);
+                    Vector3 screenPos = slotRectForPos.position; // 이미 스크린 픽셀 좌표
                     worldPos = Camera.main.ScreenToWorldPoint(
                         new Vector3(screenPos.x, screenPos.y,
                         Mathf.Abs(Camera.main.transform.position.z)));
@@ -1347,8 +1347,12 @@ public class BattleManager : MonoBehaviour
                 float spriteWidth = sr.sprite.bounds.size.x;
                 float spriteHeight = sr.sprite.bounds.size.y;
 
-                float scaleX = targetWidth / (spriteWidth * 100f);
-                float scaleY = targetHeight / (spriteHeight * 100f);
+                // 카메라 PPU 기반으로 슬롯 픽셀 크기 → 월드 유닛 변환
+                float pixelsPerUnit = Screen.height / (Camera.main.orthographicSize * 2f);
+                float slotWorldWidth  = targetWidth  / pixelsPerUnit;
+                float slotWorldHeight = targetHeight / pixelsPerUnit;
+                float scaleX = slotWorldWidth  / spriteWidth;
+                float scaleY = slotWorldHeight / spriteHeight;
                 float scale = Mathf.Min(scaleX, scaleY);
 
                 enemyObj.transform.localScale = new Vector3(scale, scale, 1f);
