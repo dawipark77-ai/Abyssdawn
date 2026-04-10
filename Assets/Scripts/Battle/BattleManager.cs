@@ -468,23 +468,37 @@ public class BattleManager : MonoBehaviour
         // EnemyDatabase 미리 로드 시도 (비활성화 — MonsterSO 기반으로 전환)
         // LoadEnemyDatabase();
 
-        // EnemySlot 자동 탐색
-        if (enemySlots == null || enemySlots.Length == 0)
+        // EnemySlot 자동 탐색 (Missing 포함 조건 체크)
+        bool slotsNeedAutoFind = enemySlots == null || enemySlots.Length == 0
+            || System.Array.Exists(enemySlots, s => s == null);
+        if (slotsNeedAutoFind)
         {
             Transform enemyBar = transform.Find("Canvas/EnemyBar");
             if (enemyBar != null)
             {
                 var found = new System.Collections.Generic.List<GameObject>();
-                for (int i = 0; i <= 3; i++)
+                for (int i = 1; i <= 4; i++)
                 {
-                    Transform slot = enemyBar.Find($"EnemySlot_{i}");
+                    Transform slot = enemyBar.Find($"Enemy_SlotPoint_{i}");
                     if (slot != null) found.Add(slot.gameObject);
-                    else Debug.LogWarning($"[SLOT_DEBUG] EnemySlot_{i} not found under EnemyBar");
+                    else Debug.LogWarning($"[SLOT_DEBUG] Enemy_SlotPoint_{i} not found under EnemyBar");
                 }
                 if (found.Count > 0) enemySlots = found.ToArray();
                 Debug.Log($"[SLOT_DEBUG] Auto-assigned {enemySlots?.Length ?? 0} enemySlots");
             }
             else Debug.LogWarning("[SLOT_DEBUG] Canvas/EnemyBar not found on BattleManager");
+        }
+
+        // slotCenter 자동 탐색
+        if (slotCenter == null)
+        {
+            Transform enemyBar = transform.Find("Canvas/EnemyBar");
+            if (enemyBar != null)
+            {
+                Transform center = enemyBar.Find("Enemy_SlotPoint_C");
+                if (center != null) { slotCenter = center.gameObject; Debug.Log("[SLOT_DEBUG] slotCenter 자동 할당: Enemy_SlotPoint_C"); }
+                else Debug.LogWarning("[SLOT_DEBUG] Enemy_SlotPoint_C not found under EnemyBar");
+            }
         }
 
         Debug.Log($"[SLOT_DEBUG] slotCenter: {slotCenter}, enemySlots length: {enemySlots?.Length}");
