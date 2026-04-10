@@ -468,6 +468,25 @@ public class BattleManager : MonoBehaviour
         // EnemyDatabase 미리 로드 시도 (비활성화 — MonsterSO 기반으로 전환)
         // LoadEnemyDatabase();
 
+        // EnemySlot 자동 탐색
+        if (enemySlots == null || enemySlots.Length == 0)
+        {
+            Transform enemyBar = transform.Find("Canvas/EnemyBar");
+            if (enemyBar != null)
+            {
+                var found = new System.Collections.Generic.List<GameObject>();
+                for (int i = 0; i <= 3; i++)
+                {
+                    Transform slot = enemyBar.Find($"EnemySlot_{i}");
+                    if (slot != null) found.Add(slot.gameObject);
+                    else Debug.LogWarning($"[SLOT_DEBUG] EnemySlot_{i} not found under EnemyBar");
+                }
+                if (found.Count > 0) enemySlots = found.ToArray();
+                Debug.Log($"[SLOT_DEBUG] Auto-assigned {enemySlots?.Length ?? 0} enemySlots");
+            }
+            else Debug.LogWarning("[SLOT_DEBUG] Canvas/EnemyBar not found on BattleManager");
+        }
+
         Debug.Log($"[SLOT_DEBUG] slotCenter: {slotCenter}, enemySlots length: {enemySlots?.Length}");
         for (int i = 0; i < enemySlots?.Length; i++)
             Debug.Log($"[SLOT_DEBUG] enemySlots[{i}]: {enemySlots[i]}");
