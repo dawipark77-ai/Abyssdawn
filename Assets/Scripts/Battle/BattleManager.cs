@@ -1260,10 +1260,21 @@ public class BattleManager : MonoBehaviour
                 slot = enemySlots[i];
             }
 
-            // SlotPoint 월드 좌표 추출 (slot이 없으면 worldRoot 또는 Vector3.zero)
-            Vector3 worldPos = slot != null
-                ? slot.transform.position
-                : (worldRoot != null ? worldRoot.position : Vector3.zero);
+            // SlotPoint의 스크린 좌표를 월드 좌표로 변환
+            Vector3 worldPos = Vector3.zero;
+            if (slot != null)
+            {
+                RectTransform slotRect = slot.GetComponent<RectTransform>();
+                if (slotRect != null)
+                {
+                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(
+                        Camera.main, slotRect.position);
+                    worldPos = Camera.main.ScreenToWorldPoint(
+                        new Vector3(screenPos.x, screenPos.y,
+                        Mathf.Abs(Camera.main.transform.position.z)));
+                    worldPos.z = 0f;
+                }
+            }
 
             // WorldRoot 하위에 월드 좌표로 소환
             Transform spawnParent = worldRoot != null ? worldRoot : transform;
