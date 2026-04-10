@@ -1329,16 +1329,19 @@ public class BattleManager : MonoBehaviour
             enemyStats.Init(so);
             Debug.Log($"[MONSTER_DEBUG] Init 완료: {so.MonsterName} → HP:{enemyStats.maxHP}");
 
-            // 스프라이트 주입
-            SpriteRenderer sr = enemyObj.GetComponent<SpriteRenderer>();
+            // 스프라이트 주입 (루트 → 자식 순서로 탐색)
+            SpriteRenderer sr = enemyObj.GetComponent<SpriteRenderer>()
+                             ?? enemyObj.GetComponentInChildren<SpriteRenderer>();
             if (sr != null)
             {
                 sr.sprite = so.Sprite;
-                Debug.Log($"[SPRITE_DEBUG] 스프라이트 주입 완료: {so.MonsterName}");
+                sr.sortingLayerName = "Default";
+                sr.sortingOrder = 10; // 배경보다 위에 렌더링
+                Debug.Log($"[SPRITE_DEBUG] 스프라이트 주입 완료: {so.MonsterName}, SR on: {sr.gameObject.name}");
             }
             else
             {
-                Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {so.MonsterName}");
+                Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음 (루트+자식 모두): {so.MonsterName}");
             }
 
             // 스케일 적용 (Inspector의 monsterSizeScale 값 사용 — Scene에서 직접 조정 가능)
