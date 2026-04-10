@@ -1264,11 +1264,11 @@ public class BattleManager : MonoBehaviour
             Vector3 worldPos = Vector3.zero;
             if (slot != null)
             {
-                RectTransform slotRect = slot.GetComponent<RectTransform>();
-                if (slotRect != null)
+                RectTransform slotRectForPos = slot.GetComponent<RectTransform>();
+                if (slotRectForPos != null)
                 {
                     Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(
-                        Camera.main, slotRect.position);
+                        Camera.main, slotRectForPos.position);
                     worldPos = Camera.main.ScreenToWorldPoint(
                         new Vector3(screenPos.x, screenPos.y,
                         Mathf.Abs(Camera.main.transform.position.z)));
