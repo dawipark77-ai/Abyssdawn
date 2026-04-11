@@ -1247,6 +1247,11 @@ public class BattleManager : MonoBehaviour
                 sr.sprite = monsters[i].Sprite;
                 sr.sortingLayerName = "Default";
                 sr.sortingOrder = 10;
+                Debug.Log($"[SPRITE_DEBUG] 주입 완료: {monsters[i].MonsterName}");
+            }
+            else
+            {
+                Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {monsters[i].MonsterName}");
             }
 
             obj.transform.localScale = Vector3.one * 2f;
