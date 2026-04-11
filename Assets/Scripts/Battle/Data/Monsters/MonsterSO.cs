@@ -69,6 +69,9 @@ namespace Abyssdawn
         [Tooltip("전투 화면에 표시할 스프라이트")]
         [SerializeField] private Sprite sprite;
 
+        [Header("비주얼")]
+        [SerializeField] private float scaleMultiplier = 1f;
+
         [Tooltip("몬스터 등급 (Normal / Elite / Boss)")]
         [SerializeField] private MonsterType type = MonsterType.Normal;
 
@@ -193,6 +196,9 @@ namespace Abyssdawn
 
         /// <summary>전투 스프라이트</summary>
         public Sprite Sprite => sprite;
+
+        /// <summary>스케일 배율</summary>
+        public float ScaleMultiplier => scaleMultiplier;
 
         /// <summary>몬스터 등급</summary>
         public MonsterType Type => type;
