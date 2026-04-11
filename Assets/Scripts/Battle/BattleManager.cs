@@ -222,6 +222,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform[] slotPoints;
     [SerializeField] private Transform slotPointCenter;
     [SerializeField] private GameObject monsterPrefab;
+    [SerializeField] private float monsterScaleMultiplier = 1f;
 
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
@@ -1275,8 +1276,9 @@ public class BattleManager : MonoBehaviour
                 float scaleY = slotWorldHeight / spriteHeight;
                 float scale = Mathf.Min(scaleX, scaleY);
 
-                obj.transform.localScale = new Vector3(scale, scale, 1f);
-                Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 스케일: {scale}");
+                float finalScale = scale * monsterScaleMultiplier * monsters[i].ScaleMultiplier;
+                obj.transform.localScale = new Vector3(finalScale, finalScale, 1f);
+                Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 최종 스케일: {finalScale}");
             }
 
             if (stats != null)
