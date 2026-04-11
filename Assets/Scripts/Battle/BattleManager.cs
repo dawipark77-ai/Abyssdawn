@@ -464,7 +464,36 @@ public class BattleManager : MonoBehaviour
         Debug.Log("[PERSISTENCE_DEBUG] BattleManager.Awake RUNNING");
         startWithFullParty = false; // [Anti-Gravity] 강제 Solo 모드 설정 (인스펙터 값 무시)
         ForceDisableUIPanels();
-        
+
+        // SlotPoint 자동 탐색
+        if (slotPoints == null || slotPoints.Length == 0)
+        {
+            Transform enemySpawnRoot = null;
+
+            // WorldRoot 하위에서 EnemySpawnRoot 찾기
+            foreach (Transform child in worldRoot)
+            {
+                if (child.name == "EnemySpawnRoot")
+                {
+                    enemySpawnRoot = child;
+                    break;
+                }
+            }
+
+            if (enemySpawnRoot != null)
+            {
+                List<Transform> found = new List<Transform>();
+                for (int i = 1; i <= 4; i++)
+                {
+                    Transform slot = enemySpawnRoot.Find($"SlotPoint_{i}");
+                    if (slot != null) found.Add(slot);
+                }
+                slotPoints = found.ToArray();
+                slotPointCenter = enemySpawnRoot.Find("SlotPoint_Center");
+                Debug.Log($"[SLOT_AUTO] 슬롯 자동 탐색: {slotPoints.Length}개, Center: {slotPointCenter}");
+            }
+        }
+
         // 페이지네이션 UI 자동 연결 시도
         TryAutoAssignPaginationUI();
     }
