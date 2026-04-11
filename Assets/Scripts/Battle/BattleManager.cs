@@ -211,8 +211,6 @@ public class BattleManager : MonoBehaviour
     public Transform enemyStatusPanel;
 
     [Header("━━━━━━━━━━ 적 진영 UI ━━━━━━━━━━")]
-    [SerializeField] GameObject[] enemySlots;           // EnemySlot_1~4
-    [SerializeField] private GameObject slotCenter;     // 1마리 스폰 시 사용할 Center 슬롯
     [SerializeField] Image[] enemyMonsterImages;
     [SerializeField] TMP_Text[] enemyNameTexts;
     [SerializeField] Transform[] enemyStatusIconRows;
@@ -220,10 +218,10 @@ public class BattleManager : MonoBehaviour
     public float spawnOffset = 1f;
     public float extraSpacingPerEnemy = 0.25f;
 
-    [Header("몬스터 스폰 - 공용 프리팹")]
+    [Header("몬스터 스폰")]
+    [SerializeField] private Transform[] slotPoints;
+    [SerializeField] private Transform slotPointCenter;
     [SerializeField] private GameObject monsterPrefab;
-    [Tooltip("스폰된 몬스터의 월드 스케일 (Inspector에서 직접 조정)")]
-    [SerializeField] private float monsterSizeScale = 1f;
 
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
@@ -467,62 +465,10 @@ public class BattleManager : MonoBehaviour
         startWithFullParty = false; // [Anti-Gravity] 강제 Solo 모드 설정 (인스펙터 값 무시)
         ForceDisableUIPanels();
         
-        // EnemyDatabase 미리 로드 시도 (비활성화 — MonsterSO 기반으로 전환)
-        // LoadEnemyDatabase();
-
-        // EnemySlot 자동 탐색 (Missing 포함 조건 체크)
-        bool slotsNeedAutoFind = enemySlots == null || enemySlots.Length == 0
-            || System.Array.Exists(enemySlots, s => s == null);
-        if (slotsNeedAutoFind)
-        {
-            Transform enemyBar = transform.Find("Canvas/EnemyBar");
-            if (enemyBar != null)
-            {
-                var found = new System.Collections.Generic.List<GameObject>();
-                for (int i = 0; i <= 3; i++)
-                {
-                    Transform slot = enemyBar.Find($"EnemySlot_{i}");
-                    if (slot != null) found.Add(slot.gameObject);
-                    else Debug.LogWarning($"[SLOT_DEBUG] EnemySlot_{i} not found under EnemyBar");
-                }
-                if (found.Count > 0) enemySlots = found.ToArray();
-                Debug.Log($"[SLOT_DEBUG] Auto-assigned {enemySlots?.Length ?? 0} enemySlots");
-            }
-            else Debug.LogWarning("[SLOT_DEBUG] Canvas/EnemyBar not found on BattleManager");
-        }
-
-        // slotCenter 자동 탐색
-        if (slotCenter == null)
-        {
-            Transform enemyBar = transform.Find("Canvas/EnemyBar");
-            if (enemyBar != null)
-            {
-                // 전용 Center 슬롯 우선, 없으면 EnemySlot_0 사용
-                Transform center = enemyBar.Find("EnemySlot_Center");
-                if (center == null) center = enemyBar.Find("EnemySlot_0");
-                if (center != null) { slotCenter = center.gameObject; Debug.Log($"[SLOT_DEBUG] slotCenter 자동 할당: {center.name}"); }
-                else Debug.LogWarning("[SLOT_DEBUG] slotCenter 후보 없음");
-            }
-        }
-
-        Debug.Log($"[SLOT_DEBUG] slotCenter: {slotCenter}, enemySlots length: {enemySlots?.Length}");
-        for (int i = 0; i < enemySlots?.Length; i++)
-            Debug.Log($"[SLOT_DEBUG] enemySlots[{i}]: {enemySlots[i]}");
-
         // 페이지네이션 UI 자동 연결 시도
         TryAutoAssignPaginationUI();
     }
     
-    /* ── [LoadEnemyDatabase 비활성화 — MonsterSO 기반으로 전환] ──────────────────
-    /// <summary>
-    /// EnemyDatabase를 자동으로 로드하는 메서드
-    /// </summary>
-    void LoadEnemyDatabase()
-    {
-        // ... (생략) ...
-    }
-    ── [LoadEnemyDatabase 끝] ────────────────────────────────────────────────── */
-
     void OnEnable()
     {
         ForceDisableUIPanels();
@@ -1227,45 +1173,10 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        /* ── [구 EnemyDatabase 검증 로직 — 비활성화] ──────────────────────────────
-        // Awake()에서 이미 로드 시도했지만, 혹시 모를 경우를 대비해 다시 시도
-        // if (enemyDatabase == null) { LoadEnemyDatabase(); }
-        // if (enemyDatabase == null) { ReturnToDungeon(3.0f); return; }
-        // if (enemyDatabase.enemyPrefabs == null || enemyDatabase.enemyPrefabs.Count == 0) { return; }
-        // int nullPrefabCount = 0;
-        // for (int i = 0; i < enemyDatabase.enemyPrefabs.Count; i++) { if (enemyDatabase.enemyPrefabs[i] == null) nullPrefabCount++; }
-        ── [구 EnemyDatabase 검증 끝] ──────────────────────────────────────────── */
-
-        /* ── [구 EnemyDatabase 스폰 로직 — 비활성화] ──────────────────────────────
-        // [User Request] 층별 적 등장 수 확률 조정
-        // int currentFloor = DungeonPersistentData.currentFloor;
-        // int count = 1;
-        // float roll = UnityEngine.Random.value;
-        // count = UnityEngine.Random.Range(1, 5);
-        // Debug.Log($"[BattleManager] Floor {currentFloor} Spawn Roll: {roll:F2} -> Count: {count}");
-        // List<GameObject> picks = new List<GameObject>();
-        // var availablePrefabs = enemyDatabase.enemyPrefabs.Where(x => x != null).ToList();
-        // if (availablePrefabs.Count == 0) { picks = enemyDatabase.GetRandomEnemies(count); }
-        // else { for (int k = 0; k < count; k++) { int randIndex = UnityEngine.Random.Range(0, availablePrefabs.Count); picks.Add(availablePrefabs[randIndex]); } }
-        // picks = picks.OrderByDescending(go => ScoreEnemyPrefab(go)).ToList();
-        // Vector3 center = spawnCenter != null ? spawnCenter.position : Vector3.zero;
-        // float spacing = spawnOffset;
-        // if (picks.Count > 1) { spacing += extraSpacingPerEnemy * (picks.Count - 1); }
-        // spacing = Mathf.Max(0.1f, spacing);
-        // float baseY = center.y;
-        // List<GameObject> spawnedEnemies = new List<GameObject>();
-        // List<EnemyStats> spawnedEnemyStats = new List<EnemyStats>();
-        // int spawnedCount = 0; int skippedNullCount = 0;
-        // for (int i = 0; i < picks.Count; i++) { ... Instantiate(enemyPrefab, spawnPos, ...) ... }
-        // foreach (EnemyStats enemyStats in spawnedEnemyStats) { activeEnemies.Add(enemyStats); ... }
-        // if (spawnedEnemies.Count > 0) { StartCoroutine(AdjustEnemyPositions(spawnedEnemies, baseY)); }
-        ── [구 EnemyDatabase 스폰 로직 끝] ────────────────────────────────────── */
-
-        // ── [MonsterSO 기반 스폰 로직] ─────────────────────────────────────────
         int currentFloor = DungeonPersistentData.currentFloor;
-        MonsterSO[] monsterSOs = LoadMonsterSOsForFloor(currentFloor);
+        MonsterSO[] monsters = LoadMonsterSOsForFloor(currentFloor);
 
-        if (monsterSOs == null || monsterSOs.Length == 0)
+        if (monsters == null || monsters.Length == 0)
         {
             Debug.LogError("[BattleManager] LoadMonsterSOsForFloor returned empty. Cannot spawn enemies.");
             AddMessage("ERROR: No monsters available for this floor!");
@@ -1279,81 +1190,37 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[BattleManager][MonsterSO] Spawning {monsterSOs.Length} monster(s) on floor {currentFloor}");
-
-        for (int i = 0; i < monsterSOs.Length; i++)
+        for (int i = 0; i < monsters.Length; i++)
         {
-            MonsterSO so = monsterSOs[i];
-            if (so == null) continue;
+            Transform slot = monsters.Length == 1
+                ? slotPointCenter
+                : (i < slotPoints.Length ? slotPoints[i] : null);
 
-            // 슬롯 결정: 1마리면 slotCenter, 2~4마리면 enemySlots 배열 인덱스 순
-            GameObject slot = null;
-            if (monsterSOs.Length == 1)
-            {
-                slot = slotCenter;
-            }
-            else if (enemySlots != null && i < enemySlots.Length)
-            {
-                slot = enemySlots[i];
-            }
+            if (slot == null) continue;
 
-            // SlotPoint 스크린 좌표 → 월드 좌표 변환
-            // Overlay Canvas에서 position은 이미 스크린 픽셀 좌표이므로 직접 변환
-            Vector3 worldPos = Vector3.zero;
-            if (slot != null)
-            {
-                RectTransform slotRectForPos = slot.GetComponent<RectTransform>();
-                if (slotRectForPos != null)
-                {
-                    Vector3 screenPos = slotRectForPos.position; // 이미 스크린 픽셀 좌표
-                    worldPos = Camera.main.ScreenToWorldPoint(
-                        new Vector3(screenPos.x, screenPos.y,
-                        Mathf.Abs(Camera.main.transform.position.z)));
-                    worldPos.z = 0f;
-                }
-            }
+            GameObject obj = Instantiate(monsterPrefab,
+                slot.position, Quaternion.identity, worldRoot);
 
-            // WorldRoot 하위에 월드 좌표로 소환
-            Transform spawnParent = worldRoot != null ? worldRoot : transform;
-            GameObject enemyObj = Instantiate(monsterPrefab, worldPos, Quaternion.identity, spawnParent);
+            EnemyStats stats = obj.GetComponent<EnemyStats>();
+            if (stats != null) stats.Init(monsters[i]);
 
-            // 기존 Canvas SetParent 방식 (비활성화)
-            // Transform parentTransform = slot != null ? slot.transform : (worldRoot != null ? worldRoot : transform);
-            // enemyObj.transform.SetParent(parentTransform, false);
-
-            EnemyStats enemyStats = enemyObj.GetComponent<EnemyStats>();
-            if (enemyStats == null)
-                enemyStats = enemyObj.AddComponent<EnemyStats>();
-
-            Debug.Log($"[MONSTER_DEBUG] Init 호출: {so.MonsterName}");
-            enemyStats.Init(so);
-            Debug.Log($"[MONSTER_DEBUG] Init 완료: {so.MonsterName} → HP:{enemyStats.maxHP}");
-
-            // 스프라이트 주입 (루트 → 자식 순서로 탐색)
-            SpriteRenderer sr = enemyObj.GetComponent<SpriteRenderer>()
-                             ?? enemyObj.GetComponentInChildren<SpriteRenderer>();
+            SpriteRenderer sr = obj.GetComponent<SpriteRenderer>()
+                             ?? obj.GetComponentInChildren<SpriteRenderer>();
             if (sr != null)
             {
-                sr.sprite = so.Sprite;
+                sr.sprite = monsters[i].Sprite;
                 sr.sortingLayerName = "Default";
-                sr.sortingOrder = 10; // 배경보다 위에 렌더링
-                Debug.Log($"[SPRITE_DEBUG] 스프라이트 주입 완료: {so.MonsterName}, SR on: {sr.gameObject.name}");
+                sr.sortingOrder = 10;
             }
-            else
+
+            obj.transform.localScale = Vector3.one * 2f;
+
+            if (stats != null)
             {
-                Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음 (루트+자식 모두): {so.MonsterName}");
+                activeEnemies.Add(stats);
+                if (battleRecorder != null) battleRecorder.RegisterTarget(stats.transform);
             }
-
-            // 스케일 적용 (Inspector의 monsterSizeScale 값 사용 — Scene에서 직접 조정 가능)
-            enemyObj.transform.localScale = new Vector3(monsterSizeScale, monsterSizeScale, 1f);
-            Debug.Log($"[SCALE_DEBUG] {so.MonsterName} 스케일: {monsterSizeScale}");
-
-            activeEnemies.Add(enemyStats);
-
-            if (battleRecorder != null)
-                battleRecorder.RegisterTarget(enemyStats.transform);
-
-            Debug.Log($"[BattleManager][MonsterSO] Spawned [{i}] {so.MonsterName} → slot: {(slot != null ? slot.name : "worldRoot")}");
+            Debug.Log($"[BattleManager] Spawned {monsters[i].MonsterName} at slot {slot.name}");
         }
 
         if (activeEnemies.Count == 0)
@@ -5662,27 +5529,6 @@ private void CacheHeroSkills()
                         }
                     }
                 }
-            }
-        }
-
-        // ── 적 슬롯 (currentSlot 기반으로 올바른 UI 슬롯에 배치) ──
-        if (enemySlots != null)
-        {
-            // 먼저 전체 슬롯 비활성화
-            for (int i = 0; i < enemySlots.Length; i++)
-            {
-                if (enemySlots[i] != null)
-                    enemySlots[i].SetActive(false);
-            }
-
-            // currentSlot 기준으로 올바른 슬롯 UI 활성화
-            foreach (var es in activeEnemies)
-            {
-                if (es == null) continue;
-                int slotIndex = (int)es.currentSlot - 1; // BattleSlot은 1~4, 배열은 0~3
-                if (slotIndex < 0 || slotIndex >= enemySlots.Length) continue;
-                if (enemySlots[slotIndex] != null)
-                    enemySlots[slotIndex].SetActive(true);
             }
         }
 
