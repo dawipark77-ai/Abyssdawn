@@ -1,9 +1,9 @@
 [Licensing::Module] Trying to connect to existing licensing client channel...
 Built from '6000.2/staging' branch; Version is '6000.2.13f1 (abdb44fca7f7) revision 11262788'; Using compiler version '194234433'; Build Type 'Release'
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User" at "2026-04-06T17:22:38.1313951Z"
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User" at "2026-04-11T16:17:52.0888206Z"
 OS: 'Windows 10  (10.0.19045) 64bit Professional' Language: 'ko' Physical Memory: 32654 MB
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
-Date: 2026-04-06T17:22:38Z
+Date: 2026-04-11T16:17:52Z
 
 COMMAND LINE ARGUMENTS:
 C:\Program Files\Unity\Hub\Editor\6000.2.13f1\Editor\Unity.exe
@@ -17,7 +17,7 @@ E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01
 -logFile
 Logs/AssetImportWorker0.log
 -srvPort
-53611
+52428
 -licensingIpc
 LicenseClient-User
 -job-worker-count
@@ -65,12 +65,12 @@ E:/Dawi/My Programs/Game Maker/Unity/Projects/Abyssdawn 01
     "memorysetup-temp-allocator-size-gi-baking-worker=262144"
     "memorysetup-temp-allocator-size-gi-baking-worker=262144"
     "memorysetup-temp-allocator-size-gfx=262144"
-Player connection [15000]  Target information:
+Player connection [7388]  Target information:
 
-Player connection [15000]  * "[IP] 220.71.48.247 [Port] 0 [Flags] 2 [Guid] 3856346443 [EditorId] 3856346443 [Version] 1048832 [Id] WindowsEditor(7,User-PC) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+Player connection [7388]  * "[IP] 220.71.48.247 [Port] 0 [Flags] 2 [Guid] 2978515776 [EditorId] 2978515776 [Version] 1048832 [Id] WindowsEditor(7,User-PC) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
 
-Player connection [15000] Host joined multi-casting on [225.0.0.222:54997]...
-Player connection [15000] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Player connection [7388] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [7388] Host joined alternative multi-casting on [225.0.0.222:34997]...
 JobSystem: Creating JobQueue using job-worker-count value 3
 Input System module state changed to: Initialized.
 [Physics::Module] Initialized fallback backend.
@@ -82,7 +82,7 @@ Library Redirect Path: Library/
 [Physics::Module] SDK Version: 4.1.2
 [Physics::Module] Integration Version: 1.0.0
 [Physics::Module] Threading Mode: Multi-Threaded
-Refreshing native plugins compatible for Editor in 10.26 ms, found 4 plugins.
+Refreshing native plugins compatible for Editor in 11.08 ms, found 4 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Initialize engine version: 6000.2.13f1 (abdb44fca7f7)
 [Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/Resources/UnitySubsystems
@@ -99,43 +99,43 @@ Initialize mono
 Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/Managed'
 Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
 Mono config path = 'C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/MonoBleedingEdge/etc'
-Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56904
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56608
 Begin MonoManager ReloadAssembly
 Registering precompiled unity dll's ...
 Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.2.13f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
-Registered in 0.003402 seconds.
-- Loaded All Assemblies, in  1.071 seconds
+Registered in 0.006260 seconds.
+- Loaded All Assemblies, in  1.130 seconds
 Native extension for WindowsStandalone target not found
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  0.931 seconds
-Domain Reload Profiling: 2000ms
-	BeginReloadAssembly (415ms)
+- Finished resetting the current domain, in  1.046 seconds
+Domain Reload Profiling: 2173ms
+	BeginReloadAssembly (427ms)
 		ExecutionOrderSort (0ms)
 		DisableScriptedObjects (0ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
 		CreateAndSetChildDomain (1ms)
-	RebuildCommonClasses (106ms)
-	RebuildNativeTypeToScriptingClass (33ms)
-	initialDomainReloadingComplete (101ms)
-	LoadAllAssembliesAndSetupDomain (414ms)
-		LoadAssemblies (411ms)
+	RebuildCommonClasses (121ms)
+	RebuildNativeTypeToScriptingClass (37ms)
+	initialDomainReloadingComplete (118ms)
+	LoadAllAssembliesAndSetupDomain (422ms)
+		LoadAssemblies (423ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (406ms)
-			TypeCache.Refresh (402ms)
-				TypeCache.ScanAssembly (374ms)
+		AnalyzeDomain (414ms)
+			TypeCache.Refresh (411ms)
+				TypeCache.ScanAssembly (376ms)
 			BuildScriptInfoCaches (0ms)
 			ResolveRequiredComponents (1ms)
-	FinalizeReload (932ms)
+	FinalizeReload (1047ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (806ms)
+		SetupLoadedEditorAssemblies (909ms)
 			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (112ms)
-			SetLoadedEditorAssemblies (8ms)
-			BeforeProcessingInitializeOnLoad (189ms)
-			ProcessInitializeOnLoadAttributes (324ms)
-			ProcessInitializeOnLoadMethodAttributes (173ms)
+			InitializePlatformSupportModulesInManaged (146ms)
+			SetLoadedEditorAssemblies (14ms)
+			BeforeProcessingInitializeOnLoad (212ms)
+			ProcessInitializeOnLoadAttributes (371ms)
+			ProcessInitializeOnLoadMethodAttributes (165ms)
 			AfterProcessingInitializeOnLoad (0ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
@@ -143,26 +143,24 @@ Domain Reload Profiling: 2000ms
 ========================================================================
 Worker process is ready to serve import requests
 Import Worker Mode flag is 0x00
-Begin MonoManager ReloadAssembly
-[Licensing::Module] Licensing is not yet initialized.
 [Licensing::Client] Handshaking with LicensingClient:
   Version:                 1.17.4+4293ba1
-  Session Id:              a8cb02c70bcc41afac506beb7acb4f36
-  Correlation Id:          44bdf1db7bf80ef0ab27ba226675bdc6
-  External correlation Id: 580210945763479689
+  Session Id:              89537e5b329941c0ba935a90a318fa50
+  Correlation Id:          7cd9179c21fee693c5c303ed9f5b3144
+  External correlation Id: 7213057004017756060
   Machine Id:              PqfLONiypRxW53GBMsOvo+/r+k0=
-[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-User" (connect: 0.00s, validation: 0.00s, handshake: 4.52s)
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User-notifications" at "2026-04-06T17:22:42.6496219Z"
-[Licensing::Module] Licensing Background thread has ended after 4.52s
-[Licensing::Module] Licensing is initialized (took 0.12s).
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-User" (connect: 0.00s, validation: 0.00s, handshake: 4.40s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-User-notifications" at "2026-04-11T16:17:56.492842Z"
+[Licensing::Module] Licensing Background thread has ended after 4.40s
+Begin MonoManager ReloadAssembly
 [Licensing::Client] Successfully resolved entitlement details
 [Licensing::Module] License group:
   Id: 14569675034098-UnityPersXXXX
   Product: Unity Personal
   Type: Assigned
   Expiration: Unlimited
-- Loaded All Assemblies, in  1.857 seconds
-Refreshing native plugins compatible for Editor in 4.55 ms, found 4 plugins.
+- Loaded All Assemblies, in  2.003 seconds
+Refreshing native plugins compatible for Editor in 4.42 ms, found 4 plugins.
 Native extension for WindowsStandalone target not found
 [ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
 UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
@@ -195,1086 +193,61 @@ Package Manager log level set to [2]
 [Package Manager] Unable to send message (not connected to server process).
 [Package Manager] Cannot connect to Unity Package Manager local server
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.804 seconds
-Domain Reload Profiling: 3658ms
-	BeginReloadAssembly (569ms)
+- Finished resetting the current domain, in  1.988 seconds
+Domain Reload Profiling: 3986ms
+	BeginReloadAssembly (532ms)
 		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (20ms)
+		DisableScriptedObjects (15ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
-		CreateAndSetChildDomain (56ms)
-	RebuildCommonClasses (90ms)
-	RebuildNativeTypeToScriptingClass (23ms)
-	initialDomainReloadingComplete (75ms)
-	LoadAllAssembliesAndSetupDomain (1096ms)
-		LoadAssemblies (826ms)
+		CreateAndSetChildDomain (65ms)
+	RebuildCommonClasses (70ms)
+	RebuildNativeTypeToScriptingClass (25ms)
+	initialDomainReloadingComplete (78ms)
+	LoadAllAssembliesAndSetupDomain (1292ms)
+		LoadAssemblies (962ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (550ms)
-			TypeCache.Refresh (400ms)
-				TypeCache.ScanAssembly (375ms)
-			BuildScriptInfoCaches (122ms)
-			ResolveRequiredComponents (23ms)
-	FinalizeReload (1805ms)
+		AnalyzeDomain (683ms)
+			TypeCache.Refresh (512ms)
+				TypeCache.ScanAssembly (483ms)
+			BuildScriptInfoCaches (135ms)
+			ResolveRequiredComponents (27ms)
+	FinalizeReload (1989ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1474ms)
+		SetupLoadedEditorAssemblies (1640ms)
 			LogAssemblyErrors (0ms)
 			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (6ms)
-			BeforeProcessingInitializeOnLoad (337ms)
-			ProcessInitializeOnLoadAttributes (861ms)
-			ProcessInitializeOnLoadMethodAttributes (260ms)
-			AfterProcessingInitializeOnLoad (6ms)
+			SetLoadedEditorAssemblies (7ms)
+			BeforeProcessingInitializeOnLoad (382ms)
+			ProcessInitializeOnLoadAttributes (941ms)
+			ProcessInitializeOnLoadMethodAttributes (299ms)
+			AfterProcessingInitializeOnLoad (8ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (33ms)
+		AwakeInstancesAfterBackupRestoration (34ms)
 Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
-Refreshing native plugins compatible for Editor in 18.62 ms, found 4 plugins.
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.04 seconds
+Refreshing native plugins compatible for Editor in 6.43 ms, found 4 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6935 unused Assets / (4.1 MB). Loaded Objects now: 7663.
-Memory consumption went from 138.6 MB to 134.6 MB.
-Total: 22.852000 ms (FindLiveObjects: 2.513400 ms CreateObjectMapping: 3.401500 ms MarkObjects: 11.304700 ms  DeleteObjects: 5.629700 ms)
+Unloading 6940 unused Assets / (4.9 MB). Loaded Objects now: 7668.
+Memory consumption went from 138.6 MB to 133.7 MB.
+Total: 25.451000 ms (FindLiveObjects: 2.185000 ms CreateObjectMapping: 2.309800 ms MarkObjects: 14.871600 ms  DeleteObjects: 6.082000 ms)
 
 ========================================================================
 Received Import Request.
-  Time since last request: 1570503.164233 seconds.
-  path: Assets/Items/Enemy_Orc.prefab
-  artifactKey: Guid(1ab0e731a9d96e0459a63b174d435a53) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Items/Enemy_Orc.prefab using Guid(1ab0e731a9d96e0459a63b174d435a53) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '1fc3950d1c61a33eea1bad0d25eba3f3') in 0.8355877 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
-
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  2.645 seconds
-Refreshing native plugins compatible for Editor in 3.75 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  2.012 seconds
-Domain Reload Profiling: 4649ms
-	BeginReloadAssembly (937ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (55ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (147ms)
-	RebuildCommonClasses (157ms)
-	RebuildNativeTypeToScriptingClass (55ms)
-	initialDomainReloadingComplete (523ms)
-	LoadAllAssembliesAndSetupDomain (964ms)
-		LoadAssemblies (1184ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (409ms)
-			TypeCache.Refresh (11ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (369ms)
-			ResolveRequiredComponents (24ms)
-	FinalizeReload (2013ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1571ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (6ms)
-			BeforeProcessingInitializeOnLoad (411ms)
-			ProcessInitializeOnLoadAttributes (987ms)
-			ProcessInitializeOnLoadMethodAttributes (154ms)
-			AfterProcessingInitializeOnLoad (11ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (56ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 4.82 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (3.8 MB). Loaded Objects now: 7699.
-Memory consumption went from 146.4 MB to 142.6 MB.
-Total: 22.679500 ms (FindLiveObjects: 4.125000 ms CreateObjectMapping: 2.652500 ms MarkObjects: 11.457200 ms  DeleteObjects: 4.441500 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Import Request.
-  Time since last request: 47.061589 seconds.
-  path: Assets/Scripts/Battle/Data/Enemies/Goblin.png
-  artifactKey: Guid(4a6d1b4fb0643fe4ea525967a4a34be5) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Enemies/Goblin.png using Guid(4a6d1b4fb0643fe4ea525967a4a34be5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '04ab004167f2a2c52fcaf17b40cc0e4b') in 0.51866 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000029 seconds.
-  path: Assets/Items/Enemy_Orc.prefab
-  artifactKey: Guid(1ab0e731a9d96e0459a63b174d435a53) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Items/Enemy_Orc.prefab using Guid(1ab0e731a9d96e0459a63b174d435a53) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '1cba85a2f741af60265560a28e5e2b30') in 0.1098899 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
+  Time since last request: 2002245.208781 seconds.
+  path: Assets/Resources/Monsters/Orc.asset
+  artifactKey: Guid(8c48f9a85dea7b344b45220f0b416896) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Resources/Monsters/Orc.asset using Guid(8c48f9a85dea7b344b45220f0b416896) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'bd25a43483a5947cc82301d7b456c29b') in 0.0407663 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
 
 ========================================================================
 Received Import Request.
   Time since last request: 0.000041 seconds.
-  path: Assets/Scripts/Battle/Data/SkillData.cs
-  artifactKey: Guid(8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/SkillData.cs using Guid(8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '0d2a98bd24e1ce501dda98ae0d63af87') in 0.0080192 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 9.992979 seconds.
-  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab
-  artifactKey: Guid(cdbbe68c9e3cc8a4f92f88258b3d020a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab using Guid(cdbbe68c9e3cc8a4f92f88258b3d020a) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '924bfdfdc414a73132487322079d51f6') in 0.7416916 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.148802 seconds.
-  path: Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab
-  artifactKey: Guid(cdbbe68c9e3cc8a4f92f88258b3d020a) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Scripts/Battle/Data/Enemies/Enemy_Orc.prefab using Guid(cdbbe68c9e3cc8a4f92f88258b3d020a) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '77bba9696b9f577101014ca896082c4a') in 0.0236036 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 9
-
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-[Licensing::Client] Successfully resolved entitlement details
-- Loaded All Assemblies, in  1.501 seconds
-Refreshing native plugins compatible for Editor in 3.41 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.555 seconds
-Domain Reload Profiling: 3057ms
-	BeginReloadAssembly (511ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (51ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (121ms)
-	RebuildCommonClasses (66ms)
-	RebuildNativeTypeToScriptingClass (24ms)
-	initialDomainReloadingComplete (47ms)
-	LoadAllAssembliesAndSetupDomain (854ms)
-		LoadAssemblies (704ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (396ms)
-			TypeCache.Refresh (9ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (362ms)
-			ResolveRequiredComponents (19ms)
-	FinalizeReload (1556ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1214ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (6ms)
-			BeforeProcessingInitializeOnLoad (310ms)
-			ProcessInitializeOnLoadAttributes (724ms)
-			ProcessInitializeOnLoadMethodAttributes (158ms)
-			AfterProcessingInitializeOnLoad (12ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (55ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 9.74 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (4.9 MB). Loaded Objects now: 7722.
-Memory consumption went from 146.5 MB to 141.6 MB.
-Total: 18.698100 ms (FindLiveObjects: 1.090900 ms CreateObjectMapping: 2.334600 ms MarkObjects: 10.876600 ms  DeleteObjects: 4.393800 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  1.503 seconds
-Refreshing native plugins compatible for Editor in 4.51 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.533 seconds
-Domain Reload Profiling: 3038ms
-	BeginReloadAssembly (465ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (32ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (87ms)
-	RebuildCommonClasses (70ms)
-	RebuildNativeTypeToScriptingClass (26ms)
-	initialDomainReloadingComplete (51ms)
-	LoadAllAssembliesAndSetupDomain (892ms)
-		LoadAssemblies (751ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (395ms)
-			TypeCache.Refresh (9ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (352ms)
-			ResolveRequiredComponents (28ms)
-	FinalizeReload (1534ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1184ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (6ms)
-			BeforeProcessingInitializeOnLoad (300ms)
-			ProcessInitializeOnLoadAttributes (705ms)
-			ProcessInitializeOnLoadMethodAttributes (161ms)
-			AfterProcessingInitializeOnLoad (9ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (54ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 4.75 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (3.9 MB). Loaded Objects now: 7725.
-Memory consumption went from 146.3 MB to 142.5 MB.
-Total: 12.054800 ms (FindLiveObjects: 1.067600 ms CreateObjectMapping: 0.976100 ms MarkObjects: 6.619800 ms  DeleteObjects: 3.389200 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  1.490 seconds
-Refreshing native plugins compatible for Editor in 3.42 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.557 seconds
-Domain Reload Profiling: 3049ms
-	BeginReloadAssembly (466ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (33ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (81ms)
-	RebuildCommonClasses (72ms)
-	RebuildNativeTypeToScriptingClass (28ms)
-	initialDomainReloadingComplete (49ms)
-	LoadAllAssembliesAndSetupDomain (877ms)
-		LoadAssemblies (729ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (403ms)
-			TypeCache.Refresh (10ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (368ms)
-			ResolveRequiredComponents (19ms)
-	FinalizeReload (1557ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1193ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (7ms)
-			BeforeProcessingInitializeOnLoad (276ms)
-			ProcessInitializeOnLoadAttributes (725ms)
-			ProcessInitializeOnLoadMethodAttributes (172ms)
-			AfterProcessingInitializeOnLoad (9ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (59ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 3.66 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (4.2 MB). Loaded Objects now: 7728.
-Memory consumption went from 146.4 MB to 142.2 MB.
-Total: 12.791900 ms (FindLiveObjects: 1.063700 ms CreateObjectMapping: 1.465100 ms MarkObjects: 7.028000 ms  DeleteObjects: 3.233100 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  1.522 seconds
-Refreshing native plugins compatible for Editor in 3.04 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.574 seconds
-Domain Reload Profiling: 3099ms
-	BeginReloadAssembly (471ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (29ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (87ms)
-	RebuildCommonClasses (72ms)
-	RebuildNativeTypeToScriptingClass (23ms)
-	initialDomainReloadingComplete (51ms)
-	LoadAllAssembliesAndSetupDomain (906ms)
-		LoadAssemblies (761ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (402ms)
-			TypeCache.Refresh (10ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (365ms)
-			ResolveRequiredComponents (20ms)
-	FinalizeReload (1576ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1205ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (4ms)
-			SetLoadedEditorAssemblies (8ms)
-			BeforeProcessingInitializeOnLoad (287ms)
-			ProcessInitializeOnLoadAttributes (730ms)
-			ProcessInitializeOnLoadMethodAttributes (165ms)
-			AfterProcessingInitializeOnLoad (9ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (62ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 4.73 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (4.2 MB). Loaded Objects now: 7731.
-Memory consumption went from 146.4 MB to 142.3 MB.
-Total: 22.401300 ms (FindLiveObjects: 1.908200 ms CreateObjectMapping: 2.373600 ms MarkObjects: 13.502500 ms  DeleteObjects: 4.613900 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  1.490 seconds
-Refreshing native plugins compatible for Editor in 3.77 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.597 seconds
-Domain Reload Profiling: 3090ms
-	BeginReloadAssembly (472ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (27ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (83ms)
-	RebuildCommonClasses (67ms)
-	RebuildNativeTypeToScriptingClass (23ms)
-	initialDomainReloadingComplete (55ms)
-	LoadAllAssembliesAndSetupDomain (874ms)
-		LoadAssemblies (743ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (397ms)
-			TypeCache.Refresh (10ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (360ms)
-			ResolveRequiredComponents (22ms)
-	FinalizeReload (1598ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1251ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (2ms)
-			SetLoadedEditorAssemblies (6ms)
-			BeforeProcessingInitializeOnLoad (288ms)
-			ProcessInitializeOnLoadAttributes (785ms)
-			ProcessInitializeOnLoadMethodAttributes (161ms)
-			AfterProcessingInitializeOnLoad (8ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (59ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 5.60 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (4.3 MB). Loaded Objects now: 7734.
-Memory consumption went from 146.5 MB to 142.2 MB.
-Total: 14.294700 ms (FindLiveObjects: 1.778800 ms CreateObjectMapping: 1.746000 ms MarkObjects: 7.375200 ms  DeleteObjects: 3.392200 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-[Licensing::Client] Successfully resolved entitlement details
-- Loaded All Assemblies, in  2.881 seconds
-Refreshing native plugins compatible for Editor in 5.17 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  2.735 seconds
-Domain Reload Profiling: 5619ms
-	BeginReloadAssembly (690ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (47ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (108ms)
-	RebuildCommonClasses (117ms)
-	RebuildNativeTypeToScriptingClass (38ms)
-	initialDomainReloadingComplete (74ms)
-	LoadAllAssembliesAndSetupDomain (1963ms)
-		LoadAssemblies (1233ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (1114ms)
-			TypeCache.Refresh (16ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (1053ms)
-			ResolveRequiredComponents (37ms)
-	FinalizeReload (2737ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (2196ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (4ms)
-			SetLoadedEditorAssemblies (10ms)
-			BeforeProcessingInitializeOnLoad (721ms)
-			ProcessInitializeOnLoadAttributes (1192ms)
-			ProcessInitializeOnLoadMethodAttributes (249ms)
-			AfterProcessingInitializeOnLoad (19ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (86ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 7.30 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (3.4 MB). Loaded Objects now: 7737.
-Memory consumption went from 146.5 MB to 143.1 MB.
-Total: 25.066500 ms (FindLiveObjects: 2.203100 ms CreateObjectMapping: 3.029300 ms MarkObjects: 14.730100 ms  DeleteObjects: 5.101600 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Import Request.
-  Time since last request: 1147.079016 seconds.
-  path: Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_BloodFeast.asset
-  artifactKey: Guid(11828cb4c2ec5c941b1d7a146e7cc7bf) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Scripts/Battle/Data/Skills/Dual_Lore/Dual_BloodFeast.asset using Guid(11828cb4c2ec5c941b1d7a146e7cc7bf) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'e2d59de0c8928c86f0c3fbfef436a110') in 0.1005691 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000040 seconds.
-  path: Assets/Scripts/Battle/Data/TraitsofSpecies/Human/Human_LastStand.asset
-  artifactKey: Guid(7b25a3d95148adf4aaa9a641dc7c13db) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Scripts/Battle/Data/TraitsofSpecies/Human/Human_LastStand.asset using Guid(7b25a3d95148adf4aaa9a641dc7c13db) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '499f65b97aa610876e28808c6bf68702') in 0.0032409 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
-
-========================================================================
-Received Import Request.
-  Time since last request: 24.665717 seconds.
-  path: Assets/Resources
-  artifactKey: Guid(902524d0e80904247a042cb7e6d0f856) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Resources using Guid(902524d0e80904247a042cb7e6d0f856) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'c2fb1d54ae6d6ab3974880c9c28d397d') in 0.0007889 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 5.267343 seconds.
-  path: Assets/Resources/Monster
-  artifactKey: Guid(5d80c0de548e7834e9febe802d7084be) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Resources/Monster using Guid(5d80c0de548e7834e9febe802d7084be) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '7f694633600f86f8391442a2d3c530cc') in 0.0009316 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.858600 seconds.
-  path: Assets/Resources/Monster
-  artifactKey: Guid(5d80c0de548e7834e9febe802d7084be) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Resources/Monster using Guid(5d80c0de548e7834e9febe802d7084be) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '2867c55be72d8b4f4d2d941497ff64b9') in 0.2393246 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 7.277505 seconds.
-  path: Assets/Resources/Monsters
-  artifactKey: Guid(5d80c0de548e7834e9febe802d7084be) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Resources/Monsters using Guid(5d80c0de548e7834e9febe802d7084be) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '83fbe3e65a44816c738a900b086fa32b') in 0.0008205 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.890756 seconds.
-  path: Assets/Resources/Monsters
-  artifactKey: Guid(5d80c0de548e7834e9febe802d7084be) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Resources/Monsters using Guid(5d80c0de548e7834e9febe802d7084be) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '45a1b4fbca39882fc05c4d780d27102c') in 0.0073811 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-[Licensing::Client] Successfully resolved entitlement details
-- Loaded All Assemblies, in  1.603 seconds
-Refreshing native plugins compatible for Editor in 3.40 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.541 seconds
-Domain Reload Profiling: 3148ms
-	BeginReloadAssembly (553ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (47ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (135ms)
-	RebuildCommonClasses (74ms)
-	RebuildNativeTypeToScriptingClass (24ms)
-	initialDomainReloadingComplete (57ms)
-	LoadAllAssembliesAndSetupDomain (898ms)
-		LoadAssemblies (772ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (397ms)
-			TypeCache.Refresh (13ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (359ms)
-			ResolveRequiredComponents (20ms)
-	FinalizeReload (1542ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1182ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (6ms)
-			BeforeProcessingInitializeOnLoad (306ms)
-			ProcessInitializeOnLoadAttributes (719ms)
-			ProcessInitializeOnLoadMethodAttributes (140ms)
-			AfterProcessingInitializeOnLoad (7ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (47ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 5.62 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (4.2 MB). Loaded Objects now: 7740.
-Memory consumption went from 146.6 MB to 142.4 MB.
-Total: 12.169400 ms (FindLiveObjects: 1.095600 ms CreateObjectMapping: 1.433400 ms MarkObjects: 6.520700 ms  DeleteObjects: 3.117800 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-[Licensing::Client] Successfully resolved entitlement details
-- Loaded All Assemblies, in  1.520 seconds
-Refreshing native plugins compatible for Editor in 4.24 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.693 seconds
-Domain Reload Profiling: 3213ms
-	BeginReloadAssembly (471ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (35ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (84ms)
-	RebuildCommonClasses (67ms)
-	RebuildNativeTypeToScriptingClass (38ms)
-	initialDomainReloadingComplete (61ms)
-	LoadAllAssembliesAndSetupDomain (883ms)
-		LoadAssemblies (725ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (406ms)
-			TypeCache.Refresh (13ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (367ms)
-			ResolveRequiredComponents (20ms)
-	FinalizeReload (1694ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1350ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (5ms)
-			BeforeProcessingInitializeOnLoad (335ms)
-			ProcessInitializeOnLoadAttributes (825ms)
-			ProcessInitializeOnLoadMethodAttributes (171ms)
-			AfterProcessingInitializeOnLoad (10ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (60ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 4.76 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (3.9 MB). Loaded Objects now: 7743.
-Memory consumption went from 146.6 MB to 142.7 MB.
-Total: 16.420700 ms (FindLiveObjects: 1.230700 ms CreateObjectMapping: 2.187000 ms MarkObjects: 8.572400 ms  DeleteObjects: 4.427800 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Import Request.
-  Time since last request: 1706.325091 seconds.
-  path: Assets/HeroData.asset
-  artifactKey: Guid(a176c788f5d164441af8bae214804085) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/HeroData.asset using Guid(a176c788f5d164441af8bae214804085) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter)[종의 특성] ✅ Human 특성 활성화! - Last Stand
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayerStatData:CheckAndActivateTrait () (at Assets/Scripts/PlayerStatData.cs:158)
-PlayerStatData:OnValidate () (at Assets/Scripts/PlayerStatData.cs:98)
-UnityEditor.AssetDatabase:LoadMainAssetAtPath (string)
-UnityEditor.Search.AssetIndexer:IndexProperties (int&,string&,bool&)
-UnityEditor.Search.AssetIndexer:IndexDocument (string,bool)
-UnityEditor.Search.SearchIndexEntryImporter:OnImportAsset (UnityEditor.AssetImporters.AssetImportContext)
-UnityEditor.AssetImporters.ScriptedImporter:GenerateAssetData (UnityEditor.AssetImporters.AssetImportContext)
-
-(Filename: Assets/Scripts/PlayerStatData.cs Line: 158)
-
- -> (artifact id: 'e7488571a4c119bff1fe91ec1525e176') in 0.6047338 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 34
-
-========================================================================
-Received Import Request.
-  Time since last request: 13.010799 seconds.
-  path: Assets/Resources/Monsters/Orc.png
-  artifactKey: Guid(3c41cdba3f59e1947a7e393f738b7626) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Resources/Monsters/Orc.png using Guid(3c41cdba3f59e1947a7e393f738b7626) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '24b695336724f9b34ec7d0d4f6fb900a') in 0.1390117 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000032 seconds.
-  path: Assets/Resources/Monsters/Goblin.png
-  artifactKey: Guid(4a6d1b4fb0643fe4ea525967a4a34be5) Importer(2089858483,192608db42251d675da83286b1cce702)
-Start importing Assets/Resources/Monsters/Goblin.png using Guid(4a6d1b4fb0643fe4ea525967a4a34be5) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '3f60603efd608a4bd6305bb240bb07c9') in 0.0240534 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
-
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-[Licensing::Client] Successfully resolved entitlement details
-- Loaded All Assemblies, in  1.583 seconds
-Refreshing native plugins compatible for Editor in 4.06 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  1.597 seconds
-Domain Reload Profiling: 3182ms
-	BeginReloadAssembly (527ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (36ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (115ms)
-	RebuildCommonClasses (74ms)
-	RebuildNativeTypeToScriptingClass (28ms)
-	initialDomainReloadingComplete (51ms)
-	LoadAllAssembliesAndSetupDomain (903ms)
-		LoadAssemblies (771ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (406ms)
-			TypeCache.Refresh (9ms)
-				TypeCache.ScanAssembly (0ms)
-			BuildScriptInfoCaches (371ms)
-			ResolveRequiredComponents (20ms)
-	FinalizeReload (1598ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1270ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (3ms)
-			SetLoadedEditorAssemblies (5ms)
-			BeforeProcessingInitializeOnLoad (326ms)
-			ProcessInitializeOnLoadAttributes (789ms)
-			ProcessInitializeOnLoadMethodAttributes (140ms)
-			AfterProcessingInitializeOnLoad (6ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (43ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 6.42 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6933 unused Assets / (3.9 MB). Loaded Objects now: 7746.
-Memory consumption went from 146.7 MB to 142.9 MB.
-Total: 15.662200 ms (FindLiveObjects: 2.052500 ms CreateObjectMapping: 2.004900 ms MarkObjects: 8.367700 ms  DeleteObjects: 3.234700 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Import Request.
-  Time since last request: 331.631297 seconds.
-  path: Assets/Resources/Monsters/Wizard.png
-  artifactKey: Guid(0223a0d8ac4a6de4690947b56f0eb6b6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Resources/Monsters/Wizard.png using Guid(0223a0d8ac4a6de4690947b56f0eb6b6) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'ecc8c64efb170728974062b2ff732e33') in 0.1676604 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
-
-========================================================================
-Received Prepare
-Begin MonoManager ReloadAssembly
-[Licensing::Client] Successfully resolved entitlement details
-- Loaded All Assemblies, in  1.620 seconds
-Refreshing native plugins compatible for Editor in 4.75 ms, found 4 plugins.
-Native extension for WindowsStandalone target not found
-[ScriptExecutionOrderSetup] Script execution order configured: EquipmentManager (-50) < PlayerStats (0)
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-ScriptExecutionOrderSetup:.cctor () (at Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs:19)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Battle/Editor/ScriptExecutionOrderSetup.cs Line: 19)
-
-[PlayModeRestoreSkills] 🔄 자동 복원 시스템 활성화
-UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
-UnityEngine.StackTraceUtility:ExtractStackTrace ()
-UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
-UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
-UnityEngine.Logger:Log (UnityEngine.LogType,object)
-UnityEngine.Debug:Log (object)
-PlayModeRestoreSkills:.cctor () (at Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs:22)
-System.Runtime.CompilerServices.RuntimeHelpers:RunClassConstructor (System.RuntimeTypeHandle)
-UnityEditor.EditorAssemblies:ProcessInitializeOnLoadAttributes (System.Type[])
-
-(Filename: Assets/Scripts/Dungeon/Editor/PlayModeRestoreSkills.cs Line: 22)
-
-[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
-[Package Manager] Unable to send message (not connected to server process).
-[Package Manager] Cannot connect to Unity Package Manager local server
-Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  2.259 seconds
-Domain Reload Profiling: 3880ms
-	BeginReloadAssembly (496ms)
-		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (33ms)
-		BackupInstance (0ms)
-		ReleaseScriptingObjects (1ms)
-		CreateAndSetChildDomain (93ms)
-	RebuildCommonClasses (79ms)
-	RebuildNativeTypeToScriptingClass (33ms)
-	initialDomainReloadingComplete (55ms)
-	LoadAllAssembliesAndSetupDomain (956ms)
-		LoadAssemblies (783ms)
-		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (444ms)
-			TypeCache.Refresh (24ms)
-				TypeCache.ScanAssembly (7ms)
-			BuildScriptInfoCaches (392ms)
-			ResolveRequiredComponents (23ms)
-	FinalizeReload (2260ms)
-		ReleaseScriptCaches (0ms)
-		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (1726ms)
-			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (5ms)
-			SetLoadedEditorAssemblies (11ms)
-			BeforeProcessingInitializeOnLoad (555ms)
-			ProcessInitializeOnLoadAttributes (987ms)
-			ProcessInitializeOnLoadMethodAttributes (159ms)
-			AfterProcessingInitializeOnLoad (8ms)
-			EditorAssembliesLoaded (1ms)
-		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (53ms)
-Shader Hidden/ProbeVolume/VoxelizeScene is not supported: GPU does not support conservative rasterization
-Refreshing native plugins compatible for Editor in 10.56 ms, found 4 plugins.
-Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 6936 unused Assets / (3.5 MB). Loaded Objects now: 7755.
-Memory consumption went from 146.8 MB to 143.3 MB.
-Total: 19.682900 ms (FindLiveObjects: 1.266400 ms CreateObjectMapping: 2.091300 ms MarkObjects: 12.316300 ms  DeleteObjects: 4.006400 ms)
-
-Prepare: number of updated asset objects reloaded= 0
-========================================================================
-Received Import Request.
-  Time since last request: 308.458004 seconds.
-  path: Assets/Resources/Monsters/Wizard.asset
-  artifactKey: Guid(fe04afaf1037fa64c93d735092ef46cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Resources/Monsters/Wizard.asset using Guid(fe04afaf1037fa64c93d735092ef46cd) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '848815c05f7da32f26e2c5c574cf0327') in 0.0561894 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 0.000026 seconds.
   path: Assets/Resources/Monsters/Slime.asset
   artifactKey: Guid(6752af15528a12c4baf98e5b1636cec9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Resources/Monsters/Slime.asset using Guid(6752af15528a12c4baf98e5b1636cec9) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'bb13fac5871557c878a0d77736fcd8c6') in 0.0020821 seconds
-Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
-
-========================================================================
-Received Import Request.
-  Time since last request: 304.947701 seconds.
-  path: Assets/Resources/Monsters/Orc.asset
-  artifactKey: Guid(8c48f9a85dea7b344b45220f0b416896) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
-Start importing Assets/Resources/Monsters/Orc.asset using Guid(8c48f9a85dea7b344b45220f0b416896) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '11ddb8b6bb90f22e50a12a4e9895be88') in 0.003113 seconds
+Start importing Assets/Resources/Monsters/Slime.asset using Guid(6752af15528a12c4baf98e5b1636cec9) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '2f906eccccd10d6101ffaf65361e4b4c') in 0.0021458 seconds
 Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
 
