@@ -1190,11 +1190,18 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
+        Debug.Log($"[SPAWN_DEBUG] monsters 수: {monsters.Length}");
+        Debug.Log($"[SPAWN_DEBUG] monsterPrefab: {monsterPrefab}");
+        Debug.Log($"[SPAWN_DEBUG] slotPoints 길이: {slotPoints?.Length}");
+        Debug.Log($"[SPAWN_DEBUG] slotPointCenter: {slotPointCenter}");
+
         for (int i = 0; i < monsters.Length; i++)
         {
             Transform slot = monsters.Length == 1
                 ? slotPointCenter
                 : (i < slotPoints.Length ? slotPoints[i] : null);
+
+            Debug.Log($"[SPAWN_DEBUG] {i}번 몬스터: {monsters[i].MonsterName}, slot: {slot}");
 
             if (slot == null) continue;
 
@@ -1539,8 +1546,8 @@ public class BattleManager : MonoBehaviour
         if (totalWeight <= 0f)
             totalWeight = candidates.Count; // 가중치가 모두 0이면 균등 분배
 
-        // 스폰 수: 1~4마리 랜덤
-        int count = UnityEngine.Random.Range(1, 5);
+        // 스폰 수: 1~4마리 랜덤, 최대 4마리 제한
+        int count = Mathf.Clamp(UnityEngine.Random.Range(1, 5), 1, 4);
         Debug.Log($"[BattleManager] LoadMonsterSOsForFloor({floor}) → candidates: {candidates.Count}, count: {count}");
 
         List<MonsterSO> result = new List<MonsterSO>();
