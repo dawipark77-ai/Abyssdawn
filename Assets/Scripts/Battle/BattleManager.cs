@@ -1254,7 +1254,30 @@ public class BattleManager : MonoBehaviour
                 Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {monsters[i].MonsterName}");
             }
 
-            obj.transform.localScale = Vector3.one * 2f;
+            // 스프라이트 크기를 슬롯 크기에 맞게 자동 계산
+            if (sr != null && sr.sprite != null)
+            {
+                // 카메라가 보는 월드 높이 계산
+                Camera cam = Camera.main;
+                float worldHeight = cam.orthographicSize * 2f;
+                float worldWidth = worldHeight * cam.aspect;
+
+                // 슬롯 하나의 크기 = 전체 너비 / 4
+                float slotWorldWidth = worldWidth / 4f;
+                float slotWorldHeight = worldHeight / 3f;
+
+                // 스프라이트 원본 크기
+                float spriteWidth = sr.sprite.bounds.size.x;
+                float spriteHeight = sr.sprite.bounds.size.y;
+
+                // 슬롯에 맞는 스케일
+                float scaleX = slotWorldWidth / spriteWidth;
+                float scaleY = slotWorldHeight / spriteHeight;
+                float scale = Mathf.Min(scaleX, scaleY);
+
+                obj.transform.localScale = new Vector3(scale, scale, 1f);
+                Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 스케일: {scale}");
+            }
 
             if (stats != null)
             {
