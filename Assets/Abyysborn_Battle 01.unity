@@ -2021,7 +2021,7 @@ Transform:
   m_GameObject: {fileID: 253802898}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.161, y: 0, z: 0}
+  m_LocalPosition: {x: 1.161, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3764,19 +3764,15 @@ MonoBehaviour:
   worldRoot: {fileID: 1687753668}
   canvas: {fileID: 779149225}
   enemyStatusPanel: {fileID: 0}
-  enemySlots:
-  - {fileID: 1561015476}
-  - {fileID: 1992404241}
-  - {fileID: 1926948747}
-  - {fileID: 253802898}
-  slotCenter: {fileID: 579939851}
   enemyMonsterImages: []
   enemyNameTexts: []
   enemyStatusIconRows: []
   spawnOffset: 0.6
   extraSpacingPerEnemy: 0.05
+  slotPoints: []
+  slotPointCenter: {fileID: 0}
   monsterPrefab: {fileID: 8485766569274193756, guid: 37868a6739746b649a169a7b18e02ead, type: 3}
-  monsterSizeScale: 1
+  monsterScaleMultiplier: 1
   skillLibrary: {fileID: 11400000, guid: 43273dc8b45e5d044b8dc85df9b0c6d5, type: 2}
   fireballSkill: {fileID: 0}
   turnDelay: 0.3
@@ -4515,7 +4511,7 @@ Transform:
   m_GameObject: {fileID: 579939851}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.079, y: 0, z: 0}
+  m_LocalPosition: {x: -0.13, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10951,7 +10947,7 @@ Transform:
   m_GameObject: {fileID: 1561015476}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.419, y: 0, z: 0}
+  m_LocalPosition: {x: -1.391, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13230,7 +13226,7 @@ Transform:
   m_GameObject: {fileID: 1926948747}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.526, y: 0, z: 0}
+  m_LocalPosition: {x: 0.526, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13655,7 +13651,7 @@ Transform:
   m_GameObject: {fileID: 1992404241}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.794, y: 0, z: 0}
+  m_LocalPosition: {x: -0.794, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

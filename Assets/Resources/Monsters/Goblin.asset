@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Goblin
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Goblin
-  sprite: {fileID: 0}
+  sprite: {fileID: 8749302817991680212, guid: 4a6d1b4fb0643fe4ea525967a4a34be5, type: 3}
   type: 0
   hp: 60
   mp: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Orc
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Orc
-  sprite: {fileID: 0}
+  sprite: {fileID: -4535073206308908804, guid: 422999896697137459e3749861fed5ec, type: 3}
   type: 0
   hp: 150
   mp: 0
