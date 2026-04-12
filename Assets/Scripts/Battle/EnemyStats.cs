@@ -58,6 +58,14 @@ public class EnemyStats : MonoBehaviour
     public bool isIgnited => HasStatusEffect(StatusEffectType.Ignite);
     public int igniteTurnsRemaining => GetStatusEffectRemainingTurns(StatusEffectType.Ignite);
 
+    [Header("UI 프리팹")]
+    [SerializeField] private GameObject enemyUIPrefab;
+
+    // 런타임 UI 참조
+    private GameObject uiInstance;
+    private Image monsterImage;
+    private TextMeshProUGUI nameText;
+
     private bool isDead = false;
     private Vector3 originalPosition;
     private Coroutine shakeCoroutine;
@@ -138,6 +146,29 @@ public class EnemyStats : MonoBehaviour
         allowedSlots = so.AllowedSlots;
         expReward    = so.ExpReward;
 
+        // UI 인스턴스 생성
+        if (enemyUIPrefab != null)
+        {
+            Canvas mainCanvas = FindObjectOfType<Canvas>();
+            uiInstance = Instantiate(enemyUIPrefab, mainCanvas.transform);
+
+            // UI 컴포넌트 연결
+            monsterImage = uiInstance.GetComponentInChildren<Image>();
+            TextMeshProUGUI[] texts = uiInstance.GetComponentsInChildren<TextMeshProUGUI>();
+            foreach (var t in texts)
+            {
+                if (t.name == "Nametext") nameText = t;
+                if (t.name == "HPText")   hpText   = t;
+                if (t.name == "MPText")   mpText   = t;
+            }
+
+            // 데이터 주입
+            if (monsterImage != null) monsterImage.sprite    = so.Sprite;
+            if (nameText     != null) nameText.text           = so.MonsterName;
+            if (hpText       != null) hpText.text             = $"HP {currentHP}/{maxHP}";
+            if (mpText       != null) mpText.text             = $"MP {currentMP}/{maxMP}";
+        }
+
         Debug.Log($"[ENEMY_STATS] Init 완료: {enemyName}, HP:{maxHP}");
     }
 
@@ -207,7 +238,7 @@ public class EnemyStats : MonoBehaviour
             originalPosition = transform.position;
         }
         
-        CreateWorldSpaceUI();
+        // CreateWorldSpaceUI();
     }
 
     // originalPosition 설정 (외부에서 호출 가능)
@@ -223,10 +254,10 @@ public class EnemyStats : MonoBehaviour
         }
         
         // UI가 아직 생성되지 않았으면 생성
-        if (enableWorldSpaceStatusUI && statusUI == null && Camera.main != null)
-        {
-            CreateWorldSpaceUI();
-        }
+        // if (enableWorldSpaceStatusUI && statusUI == null && Camera.main != null)
+        // {
+        //     CreateWorldSpaceUI();
+        // }
     }
 
     // 데미지 처리
@@ -613,11 +644,10 @@ public class EnemyStats : MonoBehaviour
             statusCanvas.transform.LookAt(Camera.main.transform);
             statusCanvas.transform.Rotate(0, 180, 0);
         }
-        else if (statusUI == null && Camera.main != null)
-        {
-            // UI가 없으면 생성
-            CreateWorldSpaceUI();
-        }
+        // else if (statusUI == null && Camera.main != null)
+        // {
+        //     CreateWorldSpaceUI();
+        // }
 
         // HP/MP 텍스트 갱신만 담당 — 아이콘은 효과 변경 시에만 RefreshStatusIcons() 호출
         if (hpText != null)
@@ -678,12 +708,19 @@ public class EnemyStats : MonoBehaviour
             statusCanvas.transform.LookAt(Camera.main.transform);
             statusCanvas.transform.Rotate(0, 180, 0);
         }
+
+        // uiInstance 위치 동기화 (몬스터 월드 위치 → 스크린 좌표)
+        if (uiInstance != null)
+        {
+            Vector2 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+            uiInstance.GetComponent<RectTransform>().position = screenPos;
+        }
         
         // UI가 없으면 생성 시도
-        if (enableWorldSpaceStatusUI && statusUI == null && !isDead && Camera.main != null)
-        {
-            CreateWorldSpaceUI();
-        }
+        // if (enableWorldSpaceStatusUI && statusUI == null && !isDead && Camera.main != null)
+        // {
+        //     CreateWorldSpaceUI();
+        // }
     }
 
     public void SetWorldSpaceStatusUIEnabled(bool enabled)
