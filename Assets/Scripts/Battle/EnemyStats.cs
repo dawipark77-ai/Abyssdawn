@@ -712,8 +712,26 @@ public class EnemyStats : MonoBehaviour
         // uiInstance 위치 동기화 (몬스터 월드 위치 → 스크린 좌표)
         if (uiInstance != null)
         {
-            Vector2 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-            uiInstance.GetComponent<RectTransform>().position = screenPos;
+            // 몬스터 월드 위치를 스크린 좌표로 변환
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 1.5f);
+
+            RectTransform uiRect = uiInstance.GetComponent<RectTransform>();
+            Canvas canvas = uiInstance.GetComponentInParent<Canvas>();
+
+            if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+            {
+                uiRect.position = screenPos;
+            }
+            else if (canvas != null)
+            {
+                Vector2 anchoredPos;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    canvas.GetComponent<RectTransform>(),
+                    screenPos,
+                    canvas.worldCamera,
+                    out anchoredPos);
+                uiRect.anchoredPosition = anchoredPos;
+            }
         }
         
         // UI가 없으면 생성 시도
