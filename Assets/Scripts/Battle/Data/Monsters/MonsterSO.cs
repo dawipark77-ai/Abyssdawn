@@ -15,9 +15,7 @@ namespace Abyssdawn
     {
         Normal,
         Elite,
-        Boss,
-        Beast,
-        Undead
+        Boss
     }
 
     /// <summary>
@@ -69,7 +67,7 @@ namespace Abyssdawn
         [SerializeField] private string monsterName;
 
         [Tooltip("전투 화면에 표시할 스프라이트")]
-        public Sprite sprite;
+        [SerializeField] private Sprite sprite;
 
         [Header("비주얼")]
         [SerializeField] private float scaleMultiplier = 1f;
