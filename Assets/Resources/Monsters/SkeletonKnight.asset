@@ -10,35 +10,35 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d9c4b8e1f7a23c5e8f1a4b6d2c9e0f7a, type: 3}
-  m_Name: Skeleton
+  m_Name: SkeletonKnight
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
-  monsterName: Skeleton
+  monsterName: SkeletonKnight
   sprites:
-  - {fileID: -1267830999890682014, guid: 696f4d9b09bb9444d82af2ae8f0f0e71, type: 3}
+  - {fileID: 454009205973811108, guid: 8a0eaf3689f1b7e4e883c6046533a5d2, type: 3}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   scaleMultiplier: 1
   type: 4
-  hp: 75
+  hp: 180
   mp: 0
-  atk: 18
-  def: 6
+  atk: 26
+  def: 16
   mag: 0
-  agi: 5
+  agi: 6
   luk: 2
   physResist: 0.2
   magResist: 0
   statusResist: 0
   activeSkills: []
   passiveSkills: []
-  aiPattern: 0
-  allowedSlots: -1
-  minFloor: 3
-  maxFloor: 6
-  spawnWeight: 5
+  aiPattern: 1
+  allowedSlots: 0
+  minFloor: 5
+  maxFloor: 10
+  spawnWeight: 3
   expReward: 0
   goldReward: 0
   dropTable: []
-  companionChance: 0.2
+  companionChance: 0.1
   companionData: {fileID: 0}

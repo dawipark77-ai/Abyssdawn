@@ -224,6 +224,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject monsterPrefab;
     [SerializeField] private float monsterScaleMultiplier = 1f;
 
+    [Header("적 UI 패널")]
+    [SerializeField] private GameObject[] enemyUIPanels;
+    [SerializeField] private GameObject enemyUIPanelCenter;
+
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
     private List<Image> enemyStatusFrames = new List<Image>();
@@ -1225,6 +1229,31 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[SPAWN_DEBUG] slotPoints 길이: {slotPoints?.Length}");
         Debug.Log($"[SPAWN_DEBUG] slotPointCenter: {slotPointCenter}");
 
+        // 모든 적 UI 패널 초기화
+        if (enemyUIPanels != null)
+            foreach (var panel in enemyUIPanels)
+                if (panel != null) panel.SetActive(false);
+
+        if (enemyUIPanelCenter != null)
+            enemyUIPanelCenter.SetActive(false);
+
+        if (monsters.Length == 1 && enemyUIPanelCenter != null)
+        {
+            enemyUIPanelCenter.SetActive(true);
+            TextMeshProUGUI[] texts = enemyUIPanelCenter.GetComponentsInChildren<TextMeshProUGUI>();
+            foreach (var t in texts)
+            {
+                if (t.name == "Nametext") t.text = monsters[0].MonsterName;
+                if (t.name == "HPText") t.text = $"HP {monsters[0].HP}/{monsters[0].HP}";
+                if (t.name == "MPText") t.text = $"MP {monsters[0].MP}/{monsters[0].MP}";
+            }
+            Image[] images = enemyUIPanelCenter.GetComponentsInChildren<Image>();
+            foreach (var img in images)
+            {
+                if (img.name == "MonsterImage") img.sprite = monsters[0].Sprite;
+            }
+        }
+
         for (int i = 0; i < monsters.Length; i++)
         {
             Transform slot = monsters.Length == 1
@@ -1237,9 +1266,38 @@ public class BattleManager : MonoBehaviour
 
             GameObject obj = Instantiate(monsterPrefab,
                 slot.position, Quaternion.identity, worldRoot);
+            Debug.Log($"[SPAWN] {i}번 슬롯에 소환: {monsters[i].MonsterName}, 스프라이트: {monsters[i].Sprite?.name}");
 
             EnemyStats stats = obj.GetComponent<EnemyStats>();
-            if (stats != null) stats.Init(monsters[i]);
+            if (stats != null)
+            {
+                GameObject panelForInit = monsters.Length == 1
+                    ? enemyUIPanelCenter
+                    : (i < enemyUIPanels.Length ? enemyUIPanels[i] : null);
+                stats.Init(monsters[i], panelForInit);
+            }
+
+            // 2마리 이상일 때만 슬롯 UI 패널 활성화 (1마리는 Center 패널만 사용)
+            Debug.Log($"[UI_DEBUG] 패널 활성화 시도: {i}번, 패널 수: {enemyUIPanels?.Length}");
+            Debug.Log($"[UI_DEBUG] {i}번 패널: {(enemyUIPanels != null && i < enemyUIPanels.Length ? enemyUIPanels[i]?.name : "null")}");
+            if (monsters.Length > 1 && i < enemyUIPanels.Length && enemyUIPanels[i] != null)
+            {
+                enemyUIPanels[i].SetActive(true);
+
+                TextMeshProUGUI[] texts = enemyUIPanels[i].GetComponentsInChildren<TextMeshProUGUI>();
+                foreach (var t in texts)
+                {
+                    if (t.name == "Nametext") t.text = monsters[i].MonsterName;
+                    if (t.name == "HPText") t.text = $"HP {monsters[i].HP}/{monsters[i].HP}";
+                    if (t.name == "MPText") t.text = $"MP {monsters[i].MP}/{monsters[i].MP}";
+                }
+
+                Image[] images = enemyUIPanels[i].GetComponentsInChildren<Image>();
+                foreach (var img in images)
+                {
+                    if (img.name == "MonsterImage") img.sprite = monsters[i].Sprite;
+                }
+            }
 
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>()
                              ?? obj.GetComponentInChildren<SpriteRenderer>();
@@ -1610,17 +1668,24 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[BattleManager] LoadMonsterSOsForFloor({floor}) → candidates: {candidates.Count}, count: {count}");
 
         List<MonsterSO> result = new List<MonsterSO>();
+        List<MonsterSO> pool = new List<MonsterSO>(candidates);
         for (int k = 0; k < count; k++)
         {
-            float r = UnityEngine.Random.Range(0f, totalWeight);
+            if (pool.Count == 0) break;
+
+            float poolWeight = pool.Sum(so => Mathf.Max(0f, so.SpawnWeight));
+            if (poolWeight <= 0f) poolWeight = pool.Count;
+
+            float r = UnityEngine.Random.Range(0f, poolWeight);
             float acc = 0f;
-            MonsterSO picked = candidates[0];
-            foreach (var so in candidates)
+            MonsterSO picked = pool[0];
+            foreach (var so in pool)
             {
                 acc += Mathf.Max(0f, so.SpawnWeight);
                 if (r <= acc) { picked = so; break; }
             }
             result.Add(picked);
+            pool.Remove(picked);
         }
 
         return result.ToArray();
@@ -5534,6 +5599,46 @@ private void CacheHeroSkills()
         UpdatePartyUI();
     }
 
+    private void UpdateEnemyUIPanelText(GameObject panel, EnemyStats es)
+    {
+        if (panel == null || es == null) return;
+
+        TextMeshProUGUI nameText = null;
+        TextMeshProUGUI hpText = null;
+        TextMeshProUGUI mpText = null;
+
+        Transform nameTransform = FindNamedDescendantRecursive(panel.transform, "Nametext");
+        if (nameTransform != null) nameText = nameTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform hpTransform = FindNamedDescendantRecursive(panel.transform, "HPText");
+        if (hpTransform != null) hpText = hpTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform mpTransform = FindNamedDescendantRecursive(panel.transform, "MPText");
+        if (mpTransform != null) mpText = mpTransform.GetComponent<TextMeshProUGUI>();
+
+        Color textColor = es.currentHP > 0
+            ? Color.white
+            : new Color(0.55f, 0.55f, 0.55f, 0.65f);
+
+        if (nameText != null)
+        {
+            nameText.text = es.enemyName;
+            nameText.color = textColor;
+        }
+
+        if (hpText != null)
+        {
+            hpText.text = $"HP {es.currentHP}/{es.maxHP}";
+            hpText.color = textColor;
+        }
+
+        if (mpText != null)
+        {
+            mpText.text = $"MP {es.currentMP}/{es.maxMP}";
+            mpText.color = textColor;
+        }
+    }
+
     // ========== 파티/적 진영 SerializeField UI 업데이트 ==========
     private void UpdatePartyUI()
     {
@@ -5598,45 +5703,54 @@ private void CacheHeroSkills()
             }
         }
 
-            // currentSlot 기준으로 이름/이미지/아이콘 업데이트
-            foreach (var es in activeEnemies)
+        // currentSlot 기준으로 이름/이미지/아이콘 업데이트
+        foreach (var es in activeEnemies)
+        {
+            if (es == null) continue;
+            int slotIndex = (int)es.currentSlot - 1;
+            if (slotIndex < 0) continue;
+
+            if (enemyNameTexts != null && slotIndex < enemyNameTexts.Length && enemyNameTexts[slotIndex] != null)
+                enemyNameTexts[slotIndex].text = es.enemyName;
+
+            if (enemyMonsterImages != null && slotIndex < enemyMonsterImages.Length && enemyMonsterImages[slotIndex] != null)
             {
-                if (es == null) continue;
-                int slotIndex = (int)es.currentSlot - 1;
-                if (slotIndex < 0) continue;
-
-                if (enemyNameTexts != null && slotIndex < enemyNameTexts.Length && enemyNameTexts[slotIndex] != null)
-                    enemyNameTexts[slotIndex].text = es.enemyName;
-
-                if (enemyMonsterImages != null && slotIndex < enemyMonsterImages.Length && enemyMonsterImages[slotIndex] != null)
+                SpriteRenderer sr = es.GetComponent<SpriteRenderer>();
+                if (sr != null)
                 {
-                    SpriteRenderer sr = es.GetComponent<SpriteRenderer>();
-                    if (sr != null)
-                    {
-                        enemyMonsterImages[slotIndex].sprite = sr.sprite;
-                        enemyMonsterImages[slotIndex].color = es.currentHP > 0 ? Color.white : new Color(0.55f, 0.55f, 0.55f, 0.65f);
-                    }
+                    enemyMonsterImages[slotIndex].sprite = sr.sprite;
+                    enemyMonsterImages[slotIndex].color = es.currentHP > 0 ? Color.white : new Color(0.55f, 0.55f, 0.55f, 0.65f);
                 }
+            }
 
-                // 상태이상 아이콘 행
-                if (enemyStatusIconRows != null && slotIndex < enemyStatusIconRows.Length && enemyStatusIconRows[slotIndex] != null)
+            if (activeEnemies.Count == 1)
+            {
+                UpdateEnemyUIPanelText(enemyUIPanelCenter, es);
+            }
+            else if (enemyUIPanels != null && slotIndex < enemyUIPanels.Length)
+            {
+                UpdateEnemyUIPanelText(enemyUIPanels[slotIndex], es);
+            }
+
+            // 상태이상 아이콘 행
+            if (enemyStatusIconRows != null && slotIndex < enemyStatusIconRows.Length && enemyStatusIconRows[slotIndex] != null)
+            {
+                Image[] icons = enemyStatusIconRows[slotIndex].GetComponentsInChildren<Image>(true);
+                var effects = es.activeStatusEffects;
+                for (int k = 0; k < icons.Length; k++)
                 {
-                    Image[] icons = enemyStatusIconRows[slotIndex].GetComponentsInChildren<Image>(true);
-                    var effects = es.activeStatusEffects;
-                    for (int k = 0; k < icons.Length; k++)
+                    if (k < effects.Count && effects[k] != null && effects[k].data != null)
                     {
-                        if (k < effects.Count && effects[k] != null && effects[k].data != null)
-                        {
-                            icons[k].sprite = effects[k].data.flatIcon;
-                            icons[k].gameObject.SetActive(true);
-                        }
-                        else
-                        {
-                            icons[k].gameObject.SetActive(false);
-                        }
+                        icons[k].sprite = effects[k].data.flatIcon;
+                        icons[k].gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        icons[k].gameObject.SetActive(false);
                     }
                 }
             }
+        }
     }
 
     // 전투 시작 시 모든 파티 멤버의 HP/MP를 최대값으로 초기화

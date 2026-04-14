@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine.UI;
 using AbyssdawnBattle;
@@ -25,16 +26,16 @@ public class StatusEffectInstance
 public class EnemyStats : MonoBehaviour
 {
     [Header("Base Stats")]
-    public string enemyName = "Slime";
-    public int maxHP = 130;
+    public string enemyName = "";
+    public int maxHP = 0;
     public int currentHP;
     public int maxMP = 0;
     public int currentMP;
-    public int attack = 15;
-    public int defense = 5;
+    public int attack = 0;
+    public int defense = 0;
     public int magic = 0;
-    public int Agility = 5;
-    public int luck = 1;
+    public int Agility = 0;
+    public int luck = 0;
 
     [Header("Battle Position")]
     [Tooltip("현재 슬롯 위치 (BattleLine에서 자동 설정됨). 슬롯 1,2 = 전열, 슬롯 3,4 = 후열.")]
@@ -57,6 +58,10 @@ public class EnemyStats : MonoBehaviour
     // Legacy compatibility
     public bool isIgnited => HasStatusEffect(StatusEffectType.Ignite);
     public int igniteTurnsRemaining => GetStatusEffectRemainingTurns(StatusEffectType.Ignite);
+
+    // 런타임 UI 참조
+    private Image monsterImage;
+    private TextMeshProUGUI nameText;
 
     private bool isDead = false;
     private Vector3 originalPosition;
@@ -107,9 +112,6 @@ public class EnemyStats : MonoBehaviour
         originalPosition = transform.position;
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // [Anti-Gravity] 이름에 따른 레벨/경험치 자동 설정 (프리팹 데이터 대신 코드로 강제)
-        ConfigureStatsByName();
-
         ApplyDefaultStatusUISettingsIfNeeded();
     }
 
@@ -117,7 +119,7 @@ public class EnemyStats : MonoBehaviour
     /// MonsterSO 데이터로 스탯을 초기화합니다.
     /// ConfigureStatsByName()은 호출하지 않으며, SO 데이터가 모든 기본값을 덮어씁니다.
     /// </summary>
-    public void Init(MonsterSO so)
+    public void Init(MonsterSO so, GameObject uiPanel = null)
     {
         if (so == null)
         {
@@ -138,8 +140,32 @@ public class EnemyStats : MonoBehaviour
         allowedSlots = so.AllowedSlots;
         expReward    = so.ExpReward;
 
+        // 스프라이트는 BattleManager에서 selectedSprites[i]로 직접 주입 — 여기서 건드리지 않음
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+        // 박스 콜라이더 크기를 스프라이트에 맞게 자동 설정 (BattleManager가 sr.sprite 주입 후 적용됨)
+        BoxCollider2D col = GetComponent<BoxCollider2D>();
+        if (col != null && spriteRenderer != null && spriteRenderer.sprite != null)
+        {
+            col.size = spriteRenderer.sprite.bounds.size;
+        }
+
+        // UI 패널에서 hpText/mpText/nameText 연결
+        if (uiPanel != null)
+        {
+            TextMeshProUGUI[] texts = uiPanel.GetComponentsInChildren<TextMeshProUGUI>();
+            foreach (var t in texts)
+            {
+                if (t.name == "Nametext") nameText = t;
+                if (t.name == "HPText")   hpText   = t;
+                if (t.name == "MPText")   mpText   = t;
+            }
+        }
+
         Debug.Log($"[ENEMY_STATS] Init 완료: {enemyName}, HP:{maxHP}");
     }
+
+
 
     private void ConfigureStatsByName()
     {
@@ -207,7 +233,7 @@ public class EnemyStats : MonoBehaviour
             originalPosition = transform.position;
         }
         
-        CreateWorldSpaceUI();
+        // CreateWorldSpaceUI();
     }
 
     // originalPosition 설정 (외부에서 호출 가능)
@@ -223,10 +249,10 @@ public class EnemyStats : MonoBehaviour
         }
         
         // UI가 아직 생성되지 않았으면 생성
-        if (enableWorldSpaceStatusUI && statusUI == null && Camera.main != null)
-        {
-            CreateWorldSpaceUI();
-        }
+        // if (enableWorldSpaceStatusUI && statusUI == null && Camera.main != null)
+        // {
+        //     CreateWorldSpaceUI();
+        // }
     }
 
     // 데미지 처리
@@ -237,7 +263,13 @@ public class EnemyStats : MonoBehaviour
         int appliedDamage = Mathf.Min(damage, currentHP);
         currentHP -= damage;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
-        
+
+        // UI 패널 HP 텍스트 업데이트
+        if (hpText != null)
+            hpText.text = $"HP {currentHP}/{maxHP}";
+        if (mpText != null)
+            mpText.text = $"MP {currentMP}/{maxMP}";
+
         Debug.Log($"{enemyName} took {damage} damage. HP: {currentHP}/{maxHP}");
 
         if (currentHP <= 0)
@@ -259,6 +291,13 @@ public class EnemyStats : MonoBehaviour
         
         currentHP += amount;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
+
+        // UI 패널 HP 텍스트 업데이트
+        if (hpText != null)
+            hpText.text = $"HP {currentHP}/{maxHP}";
+        if (mpText != null)
+            mpText.text = $"MP {currentMP}/{maxMP}";
+
         Debug.Log($"{enemyName} healed {amount}. HP: {currentHP}/{maxHP}");
     }
 
@@ -613,11 +652,10 @@ public class EnemyStats : MonoBehaviour
             statusCanvas.transform.LookAt(Camera.main.transform);
             statusCanvas.transform.Rotate(0, 180, 0);
         }
-        else if (statusUI == null && Camera.main != null)
-        {
-            // UI가 없으면 생성
-            CreateWorldSpaceUI();
-        }
+        // else if (statusUI == null && Camera.main != null)
+        // {
+        //     CreateWorldSpaceUI();
+        // }
 
         // HP/MP 텍스트 갱신만 담당 — 아이콘은 효과 변경 시에만 RefreshStatusIcons() 호출
         if (hpText != null)
@@ -678,12 +716,12 @@ public class EnemyStats : MonoBehaviour
             statusCanvas.transform.LookAt(Camera.main.transform);
             statusCanvas.transform.Rotate(0, 180, 0);
         }
-        
+
         // UI가 없으면 생성 시도
-        if (enableWorldSpaceStatusUI && statusUI == null && !isDead && Camera.main != null)
-        {
-            CreateWorldSpaceUI();
-        }
+        // if (enableWorldSpaceStatusUI && statusUI == null && !isDead && Camera.main != null)
+        // {
+        //     CreateWorldSpaceUI();
+        // }
     }
 
     public void SetWorldSpaceStatusUIEnabled(bool enabled)
