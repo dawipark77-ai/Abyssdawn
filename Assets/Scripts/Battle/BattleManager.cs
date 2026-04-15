@@ -1237,23 +1237,6 @@ public class BattleManager : MonoBehaviour
         if (enemyUIPanelCenter != null)
             enemyUIPanelCenter.SetActive(false);
 
-        if (monsters.Length == 1 && enemyUIPanelCenter != null)
-        {
-            enemyUIPanelCenter.SetActive(true);
-            TextMeshProUGUI[] texts = enemyUIPanelCenter.GetComponentsInChildren<TextMeshProUGUI>();
-            foreach (var t in texts)
-            {
-                if (t.name == "Nametext") t.text = monsters[0].MonsterName;
-                if (t.name == "HPText") t.text = $"HP {monsters[0].HP}/{monsters[0].HP}";
-                if (t.name == "MPText") t.text = $"MP {monsters[0].MP}/{monsters[0].MP}";
-            }
-            Image[] images = enemyUIPanelCenter.GetComponentsInChildren<Image>();
-            foreach (var img in images)
-            {
-                if (img.name == "MonsterImage") img.sprite = monsters[0].Sprite;
-            }
-        }
-
         for (int i = 0; i < monsters.Length; i++)
         {
             Transform slot = monsters.Length == 1
@@ -1271,32 +1254,7 @@ public class BattleManager : MonoBehaviour
             EnemyStats stats = obj.GetComponent<EnemyStats>();
             if (stats != null)
             {
-                GameObject panelForInit = monsters.Length == 1
-                    ? enemyUIPanelCenter
-                    : (i < enemyUIPanels.Length ? enemyUIPanels[i] : null);
-                stats.Init(monsters[i], panelForInit);
-            }
-
-            // 2마리 이상일 때만 슬롯 UI 패널 활성화 (1마리는 Center 패널만 사용)
-            Debug.Log($"[UI_DEBUG] 패널 활성화 시도: {i}번, 패널 수: {enemyUIPanels?.Length}");
-            Debug.Log($"[UI_DEBUG] {i}번 패널: {(enemyUIPanels != null && i < enemyUIPanels.Length ? enemyUIPanels[i]?.name : "null")}");
-            if (monsters.Length > 1 && i < enemyUIPanels.Length && enemyUIPanels[i] != null)
-            {
-                enemyUIPanels[i].SetActive(true);
-
-                TextMeshProUGUI[] texts = enemyUIPanels[i].GetComponentsInChildren<TextMeshProUGUI>();
-                foreach (var t in texts)
-                {
-                    if (t.name == "Nametext") t.text = monsters[i].MonsterName;
-                    if (t.name == "HPText") t.text = $"HP {monsters[i].HP}/{monsters[i].HP}";
-                    if (t.name == "MPText") t.text = $"MP {monsters[i].MP}/{monsters[i].MP}";
-                }
-
-                Image[] images = enemyUIPanels[i].GetComponentsInChildren<Image>();
-                foreach (var img in images)
-                {
-                    if (img.name == "MonsterImage") img.sprite = monsters[i].Sprite;
-                }
+                stats.Init(monsters[i]);
             }
 
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>()
@@ -1306,7 +1264,11 @@ public class BattleManager : MonoBehaviour
                 sr.sprite = monsters[i].Sprite;
                 sr.sortingLayerName = "Default";
                 sr.sortingOrder = 10;
-                Debug.Log($"[SPRITE_DEBUG] 주입 완료: {monsters[i].MonsterName}");
+
+                if (sr.sprite == null)
+                    Debug.LogWarning($"[SPRITE_DEBUG] 스프라이트 NULL: {monsters[i].MonsterName} — MonsterSO의 Sprite 필드를 확인하세요.");
+                else
+                    Debug.Log($"[SPRITE_DEBUG] 주입 완료: {monsters[i].MonsterName}, 스프라이트: {sr.sprite.name}");
             }
             else
             {
@@ -1337,6 +1299,14 @@ public class BattleManager : MonoBehaviour
                 float finalScale = scale * monsterScaleMultiplier * monsters[i].ScaleMultiplier;
                 obj.transform.localScale = new Vector3(finalScale, finalScale, 1f);
                 Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 최종 스케일: {finalScale}");
+            }
+
+            // 스프라이트·스케일 확정 후 BoxCollider2D를 스프라이트 크기에 맞게 설정
+            if (sr != null && sr.sprite != null)
+            {
+                BoxCollider2D col = obj.GetComponent<BoxCollider2D>();
+                if (col != null)
+                    col.size = sr.sprite.bounds.size;
             }
 
             if (stats != null)
@@ -5525,10 +5495,7 @@ private void CacheHeroSkills()
                     UpdateEnemyStatusIcons(i, es);
                     SetEnemySlotPulse(i, shouldPulse);
 
-                    es.SetWorldSpaceStatusUIEnabled(false);
-                    SpriteRenderer worldSprite = es.GetComponent<SpriteRenderer>();
-                    if (worldSprite != null) worldSprite.enabled = false;
-                    if (es.StatusUI != null) es.StatusUI.SetActive(false);
+                    es.UpdateStatusUI();
                 }
                 else
                 {

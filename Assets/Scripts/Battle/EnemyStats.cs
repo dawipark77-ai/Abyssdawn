@@ -71,6 +71,8 @@ public class EnemyStats : MonoBehaviour
     private Canvas statusCanvas;
     private TextMeshProUGUI hpText;
     private TextMeshProUGUI mpText;
+    private bool usesEmbeddedStatusUI = false;
+    private bool runtimeGeneratedStatusUI = false;
     private Material originalMaterial;
     private Material highlightMaterial;
     private bool isHighlighted = false;
@@ -113,6 +115,7 @@ public class EnemyStats : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         ApplyDefaultStatusUISettingsIfNeeded();
+        TryBindEmbeddedStatusUI();
     }
 
     /// <summary>
@@ -150,19 +153,72 @@ public class EnemyStats : MonoBehaviour
             col.size = spriteRenderer.sprite.bounds.size;
         }
 
-        // UI 패널에서 hpText/mpText/nameText 연결
-        if (uiPanel != null)
+        // 프리팹 내부에 부착된 UI를 우선 사용
+        TryBindEmbeddedStatusUI();
+
+        // 내장 UI가 없을 때만 외부 패널 연결(레거시 호환)
+        if (!usesEmbeddedStatusUI && uiPanel != null)
         {
             TextMeshProUGUI[] texts = uiPanel.GetComponentsInChildren<TextMeshProUGUI>();
             foreach (var t in texts)
             {
-                if (t.name == "Nametext") nameText = t;
+                if (t.name == "Nametext" || t.name == "NameText") nameText = t;
                 if (t.name == "HPText")   hpText   = t;
                 if (t.name == "MPText")   mpText   = t;
             }
+            statusUI = uiPanel;
+            statusCanvas = uiPanel.GetComponentInChildren<Canvas>(true);
         }
 
+        UpdateStatusUI();
+        RefreshStatusIcons();
         Debug.Log($"[ENEMY_STATS] Init 완료: {enemyName}, HP:{maxHP}");
+    }
+
+    private void TryBindEmbeddedStatusUI()
+    {
+        Transform uiRoot = FindNamedDescendantRecursive(transform, "EnemyUIPrefab");
+        if (uiRoot == null)
+        {
+            usesEmbeddedStatusUI = false;
+            return;
+        }
+
+        statusUI = uiRoot.gameObject;
+        statusCanvas = uiRoot.GetComponent<Canvas>();
+        if (statusCanvas != null && statusCanvas.renderMode == RenderMode.WorldSpace && Camera.main != null)
+        {
+            statusCanvas.worldCamera = Camera.main;
+        }
+
+        Transform nameTransform = FindNamedDescendantRecursive(uiRoot, "NameText")
+            ?? FindNamedDescendantRecursive(uiRoot, "Nametext");
+        if (nameTransform != null) nameText = nameTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform hpTransform = FindNamedDescendantRecursive(uiRoot, "HPText");
+        if (hpTransform != null) hpText = hpTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform mpTransform = FindNamedDescendantRecursive(uiRoot, "MPText");
+        if (mpTransform != null) mpText = mpTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform statusIconTransform = FindNamedDescendantRecursive(uiRoot, "StatusIconRow");
+        if (statusIconTransform != null) statusIconPanel = statusIconTransform.gameObject;
+
+        usesEmbeddedStatusUI = statusUI != null;
+    }
+
+    private Transform FindNamedDescendantRecursive(Transform root, string targetName)
+    {
+        if (root == null) return null;
+        if (root.name == targetName) return root;
+
+        foreach (Transform child in root)
+        {
+            Transform found = FindNamedDescendantRecursive(child, targetName);
+            if (found != null) return found;
+        }
+
+        return null;
     }
 
 
@@ -264,11 +320,7 @@ public class EnemyStats : MonoBehaviour
         currentHP -= damage;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
 
-        // UI 패널 HP 텍스트 업데이트
-        if (hpText != null)
-            hpText.text = $"HP {currentHP}/{maxHP}";
-        if (mpText != null)
-            mpText.text = $"MP {currentMP}/{maxMP}";
+        UpdateStatusUI();
 
         Debug.Log($"{enemyName} took {damage} damage. HP: {currentHP}/{maxHP}");
 
@@ -292,11 +344,7 @@ public class EnemyStats : MonoBehaviour
         currentHP += amount;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
 
-        // UI 패널 HP 텍스트 업데이트
-        if (hpText != null)
-            hpText.text = $"HP {currentHP}/{maxHP}";
-        if (mpText != null)
-            mpText.text = $"MP {currentMP}/{maxMP}";
+        UpdateStatusUI();
 
         Debug.Log($"{enemyName} healed {amount}. HP: {currentHP}/{maxHP}");
     }
@@ -388,7 +436,11 @@ public class EnemyStats : MonoBehaviour
 
         // 기존 아이콘 즉시 제거
         foreach (var obj in statusIconObjects)
-            if (obj != null) DestroyImmediate(obj);
+        {
+            if (obj == null) continue;
+            if (Application.isPlaying) Destroy(obj);
+            else DestroyImmediate(obj);
+        }
         statusIconObjects.Clear();
 
         const float iconSize = 16f;
@@ -420,6 +472,7 @@ public class EnemyStats : MonoBehaviour
             count++;
         }
 
+        UpdateStatusUI();
         Debug.Log($"[StatusIcon] {enemyName} icons refreshed: {count} active effects");
     }
 
@@ -450,6 +503,7 @@ public class EnemyStats : MonoBehaviour
         }
 
         RefreshStatusIcons();
+        UpdateStatusUI();
         if (currentHP <= 0) HandleDeath();
     }
 
@@ -560,6 +614,13 @@ public class EnemyStats : MonoBehaviour
             return;
         }
 
+        // 프리팹 내부 UI가 있으면 런타임 생성 UI는 만들지 않음
+        if (usesEmbeddedStatusUI)
+        {
+            UpdateStatusUI();
+            return;
+        }
+
         // 이미 UI가 있으면 제거
         if (statusUI != null)
         {
@@ -627,6 +688,7 @@ public class EnemyStats : MonoBehaviour
         iconPanelRT.offsetMax = Vector2.zero;
 
         statusUI = canvasObj;
+        runtimeGeneratedStatusUI = true;
         statusIconObjects.Clear();
 
         // UI 위치 및 회전 설정 (RefreshStatusIcons 호출 없이)
@@ -645,8 +707,13 @@ public class EnemyStats : MonoBehaviour
     {
         if (isDead) return;
 
-        // originalPosition 기준으로 UI 위치 업데이트 (흔들리지 않도록)
-        if (statusCanvas != null && Camera.main != null)
+        if (nameText != null)
+        {
+            nameText.text = enemyName;
+        }
+
+        // originalPosition 기준으로 UI 위치 업데이트 (런타임 생성 UI만 위치·회전 조정)
+        if (statusCanvas != null && Camera.main != null && runtimeGeneratedStatusUI)
         {
             statusCanvas.transform.position = originalPosition + Vector3.up * statusUIOffsetY;
             statusCanvas.transform.LookAt(Camera.main.transform);
@@ -658,7 +725,14 @@ public class EnemyStats : MonoBehaviour
         // }
 
         // HP/MP 텍스트 갱신만 담당 — 아이콘은 효과 변경 시에만 RefreshStatusIcons() 호출
-        if (hpText != null)
+        if (hpText != null && mpText != null && hpText != mpText)
+        {
+            hpText.text = $"HP {currentHP}/{maxHP}";
+            mpText.text = $"MP {currentMP}/{maxMP}";
+            hpText.ForceMeshUpdate();
+            mpText.ForceMeshUpdate();
+        }
+        else if (hpText != null)
         {
             hpText.text = $"HP: {currentHP}/{maxHP}" + System.Environment.NewLine + $"MP: {currentMP}/{maxMP}";
             hpText.ForceMeshUpdate();
@@ -709,8 +783,8 @@ public class EnemyStats : MonoBehaviour
 
     void Update()
     {
-        // UI가 카메라를 향하도록 업데이트
-        if (statusCanvas != null && !isDead && Camera.main != null)
+        // UI가 카메라를 향하도록 업데이트 (런타임 생성 UI만)
+        if (statusCanvas != null && !isDead && Camera.main != null && runtimeGeneratedStatusUI)
         {
             statusCanvas.transform.position = originalPosition + Vector3.up * statusUIOffsetY;
             statusCanvas.transform.LookAt(Camera.main.transform);
@@ -726,6 +800,15 @@ public class EnemyStats : MonoBehaviour
 
     public void SetWorldSpaceStatusUIEnabled(bool enabled)
     {
+        if (usesEmbeddedStatusUI)
+        {
+            if (statusUI != null)
+            {
+                statusUI.SetActive(true);
+            }
+            return;
+        }
+
         enableWorldSpaceStatusUI = enabled;
 
         if (!enabled && statusUI != null)
@@ -735,6 +818,11 @@ public class EnemyStats : MonoBehaviour
             statusCanvas = null;
             hpText = null;
             mpText = null;
+            runtimeGeneratedStatusUI = false;
+        }
+        else if (enabled && statusUI == null)
+        {
+            CreateWorldSpaceUI();
         }
     }
 
@@ -747,7 +835,7 @@ public class EnemyStats : MonoBehaviour
         }
 
         // UI 정리
-        if (statusUI != null)
+        if (runtimeGeneratedStatusUI && statusUI != null)
         {
             Destroy(statusUI);
         }
