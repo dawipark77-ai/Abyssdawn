@@ -288,6 +288,7 @@ namespace AbyssdawnBattle
         [Range(0f, 100f)]
         public float selfDmgChance = 0f;
         [Tooltip("자신에게 걸리는 상태이상 데이터 (역효과)")]
+        [FormerlySerializedAs("selfCurseData")]
         public StatusEffectSO selfStatusEffect;
         [Range(0f, 100f)]
         public float selfStatusEffectChance = 0f;
@@ -317,6 +318,7 @@ namespace AbyssdawnBattle
         public string dunbreakDescription = "";
 
         [Header("━━━━━━━━━━ 상태이상 (저주) ━━━━━━━━━━")]
+        [FormerlySerializedAs("curseData")]
         public StatusEffectSO curseEffect;
         [Range(0f, 1f)]
         public float curseApplyChance;

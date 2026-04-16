@@ -2236,7 +2236,7 @@ public class BattleManager : MonoBehaviour
         if (cmd.actor == null || cmd.actor.currentHP <= 0) yield break;
         if (cmd.actor.IsStunned())
         {
-            AddMessage($"{cmd.actor.playerName} is stunned and cannot act!");
+            AddMessage($"{cmd.actor.playerName} is <color=#FFD700>stunned</color> and cannot act!");
             yield break;
         }
 
@@ -2408,7 +2408,7 @@ public class BattleManager : MonoBehaviour
         if (enemy == null || enemy.currentHP <= 0 || enemy.IsDead()) yield break;
         if (enemy.IsStunned())
         {
-            AddMessage($"{enemy.enemyName} is stunned and cannot act!");
+            AddMessage($"{enemy.enemyName} is <color=#FFD700>stunned</color> and cannot act!");
             yield break;
         }
 
@@ -2485,12 +2485,22 @@ public class BattleManager : MonoBehaviour
         {
             if (member != null && member.activeStatusEffects.Count > 0 && member.currentHP > 0)
             {
+                // 이번 턴 DoT를 발생시킬 효과 미리 스냅샷 (appliedThisTurn=false && DoT > 0)
+                var dotEffects = member.activeStatusEffects
+                    .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
+                    .ToList();
+
                 int hpBefore = member.currentHP;
                 member.ProcessStatusEffectsEndOfTurn();
+
                 if (member.currentHP < hpBefore)
                 {
-                    int damage = hpBefore - member.currentHP;
-                    AddMessage($"{member.playerName} suffered {damage} damage from status effect!");
+                    foreach (var se in dotEffects)
+                    {
+                        int dmg = Mathf.Max(1, Mathf.FloorToInt(member.maxHP * se.data.physicalDamagePerTurn));
+                        string col = GetStatusColor(se.data.effectType);
+                        AddMessage($"{member.playerName} suffered <color={col}>{dmg} damage</color> from <color={col}>{se.data.effectType}</color>!");
+                    }
                     ShakePlayerStatusUI(member);
                     anyCurseDamage = true;
                 }
@@ -2502,12 +2512,21 @@ public class BattleManager : MonoBehaviour
         {
             if (enemy != null && enemy.activeStatusEffects.Count > 0 && enemy.currentHP > 0 && !enemy.IsDead())
             {
+                var dotEffects = enemy.activeStatusEffects
+                    .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
+                    .ToList();
+
                 int hpBefore = enemy.currentHP;
                 enemy.ProcessStatusEffectsEndOfTurn();
+
                 if (enemy.currentHP < hpBefore)
                 {
-                    int damage = hpBefore - enemy.currentHP;
-                    AddMessage($"{enemy.enemyName} suffered {damage} damage from status effect!");
+                    foreach (var se in dotEffects)
+                    {
+                        int dmg = Mathf.Max(1, Mathf.FloorToInt(enemy.maxHP * se.data.physicalDamagePerTurn));
+                        string col = GetStatusColor(se.data.effectType);
+                        AddMessage($"{enemy.enemyName} suffered <color={col}>{dmg} damage</color> from <color={col}>{se.data.effectType}</color>!");
+                    }
                     enemy.UpdateStatusUI();
                     anyCurseDamage = true;
                 }
@@ -3680,7 +3699,8 @@ public class BattleManager : MonoBehaviour
                 bool applied = target.ApplyStatusEffect(curse);
                 if (applied)
                 {
-                    AddMessage($"{weapon.equipmentName} inflicted {curse.effectType} on {target.enemyName}!");
+                    string wCol = GetStatusColor(curse.effectType);
+                    AddMessage($"{weapon.equipmentName} inflicted <color={wCol}>{curse.effectType}</color> on {target.enemyName}!");
                     Debug.Log($"[WeaponCurse] {weapon.equipmentName} → {curse.effectType} applied to {target.enemyName}");
                 }
             }
@@ -3919,7 +3939,10 @@ public class BattleManager : MonoBehaviour
                 int dur = isMagic ? skill.curseEffect.magicalDuration : skill.curseEffect.physicalDuration;
                 bool applied = target.ApplyStatusEffectDirect(skill.curseEffect, dur);
                 if (applied)
-                    AddMessage($"{target.enemyName} is afflicted with {skill.curseEffect.variantId}!");
+                {
+                    string cCol = GetStatusColor(skill.curseEffect.effectType);
+                    AddMessage($"{target.enemyName} is afflicted with <color={cCol}>{skill.curseEffect.variantId}</color>!");
+                }
             }
         }
 
@@ -3934,7 +3957,10 @@ public class BattleManager : MonoBehaviour
                 // 구버전은 EnemyStats 내부 physicalApplyChance 롤 유지 (하위 호환)
                 bool applied = target.ApplyStatusEffect(effect.statusEffect);
                 if (applied)
-                    AddMessage($"{target.enemyName} is afflicted with {effect.statusEffect.effectType}!");
+                {
+                    string eCol = GetStatusColor(effect.statusEffect.effectType);
+                    AddMessage($"{target.enemyName} is afflicted with <color={eCol}>{effect.statusEffect.effectType}</color>!");
+                }
             }
         }
     }
@@ -4240,7 +4266,8 @@ public class BattleManager : MonoBehaviour
                 bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magic;
                 int dur = isMagic ? skill.selfStatusEffect.magicalDuration : skill.selfStatusEffect.physicalDuration;
                 attacker.ApplyStatusEffect(skill.selfStatusEffect, dur);
-                AddMessage($"{attacker.playerName} is self-afflicted with {skill.selfStatusEffect.variantId}!");
+                string sCol = GetStatusColor(skill.selfStatusEffect.effectType);
+                AddMessage($"{attacker.playerName} is <color={sCol}>self-afflicted</color> with <color={sCol}>{skill.selfStatusEffect.variantId}</color>!");
             }
         }
     }
@@ -4480,6 +4507,21 @@ public class BattleManager : MonoBehaviour
         messageText.text = string.Join("\n", messageQueue.ToArray());
         Canvas.ForceUpdateCanvases();
         scrollRect.verticalNormalizedPosition = 0f;
+    }
+
+    /// <summary>
+    /// 상태이상 타입에 대응하는 TMP 색상 hex 코드를 반환합니다.
+    /// </summary>
+    private static string GetStatusColor(AbyssdawnBattle.StatusEffectType type)
+    {
+        return type switch
+        {
+            AbyssdawnBattle.StatusEffectType.Ignite  => "#FF6600",
+            AbyssdawnBattle.StatusEffectType.Bleed   => "#8B0000",
+            AbyssdawnBattle.StatusEffectType.Stun    => "#FFD700",
+            AbyssdawnBattle.StatusEffectType.Poison  => "#4B6B2A",
+            _                                        => "#FFFFFF",
+        };
     }
 
 

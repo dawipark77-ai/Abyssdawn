@@ -1072,6 +1072,14 @@ public class PlayerStats : MonoBehaviour
         {
             StatusEffectInstance se = activeStatusEffects[i];
 
+            // 적용된 턴에는 DoT/차감 없이 플래그만 해제
+            if (se.appliedThisTurn)
+            {
+                se.appliedThisTurn = false;
+                Debug.Log($"[StatusEffect] {playerName}의 {se.data.effectType} 적용된 턴 — DoT/차감 건너뜀.");
+                continue;
+            }
+
             if (se.data.physicalDamagePerTurn > 0f)
             {
                 int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn));

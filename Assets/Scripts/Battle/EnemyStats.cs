@@ -15,6 +15,10 @@ public class StatusEffectInstance
 {
     public StatusEffectSO data;
     public int remainingTurns;
+    /// <summary>
+    /// 적용된 턴에는 DoT/차감을 건너뜁니다. 다음 턴부터 정상 처리합니다.
+    /// </summary>
+    public bool appliedThisTurn = true;
 
     public StatusEffectInstance(StatusEffectSO effectData)
     {
@@ -486,6 +490,14 @@ public class EnemyStats : MonoBehaviour
         for (int i = activeStatusEffects.Count - 1; i >= 0; i--)
         {
             StatusEffectInstance se = activeStatusEffects[i];
+
+            // 적용된 턴에는 DoT/차감 없이 플래그만 해제
+            if (se.appliedThisTurn)
+            {
+                se.appliedThisTurn = false;
+                Debug.Log($"[StatusEffect] {enemyName} {se.data.effectType} applied this turn — skip DoT/decrement.");
+                continue;
+            }
 
             if (se.data.physicalDamagePerTurn > 0f)
             {
