@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Slime
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Slime
-  sprite: {fileID: -7282886668606283007, guid: 8a333f9ce9f02ec4a9ee89da61abafea, type: 3}
+  sprite: {fileID: -691275006349873449, guid: a291bd318076d264eb6c7547cfa65db5, type: 3}
+  scaleMultiplier: 1
   type: 0
   hp: 130
   mp: 0

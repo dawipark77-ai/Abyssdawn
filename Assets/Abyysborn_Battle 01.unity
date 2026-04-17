@@ -2021,7 +2021,7 @@ Transform:
   m_GameObject: {fileID: 253802898}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.161, y: 0.268, z: 0}
+  m_LocalPosition: {x: 1.073, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3771,8 +3771,10 @@ MonoBehaviour:
   extraSpacingPerEnemy: 0.05
   slotPoints: []
   slotPointCenter: {fileID: 0}
-  monsterPrefab: {fileID: 8485766569274193756, guid: 37868a6739746b649a169a7b18e02ead, type: 3}
+  monsterPrefab: {fileID: 1103248068144703498, guid: 9954834ce4649624c9d03ea9d2454e13, type: 3}
   monsterScaleMultiplier: 1
+  enemyUIPanels: []
+  enemyUIPanelCenter: {fileID: 0}
   skillLibrary: {fileID: 11400000, guid: 43273dc8b45e5d044b8dc85df9b0c6d5, type: 2}
   fireballSkill: {fileID: 0}
   turnDelay: 0.3
@@ -10947,7 +10949,7 @@ Transform:
   m_GameObject: {fileID: 1561015476}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.391, y: 0.268, z: 0}
+  m_LocalPosition: {x: -1.32, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11280,7 +11282,7 @@ MonoBehaviour:
   Agility: 5
   luck: 1
   currentSlot: 1
-  allowedSlots: 15
+  allowedSlots: -1
   hitShakeDuration: 0.2
   hitShakeMagnitude: 0.1
   activeStatusEffects: []
@@ -13226,7 +13228,7 @@ Transform:
   m_GameObject: {fileID: 1926948747}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.526, y: 0.268, z: 0}
+  m_LocalPosition: {x: 0.253, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13651,7 +13653,7 @@ Transform:
   m_GameObject: {fileID: 1992404241}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.794, y: 0.268, z: 0}
+  m_LocalPosition: {x: -0.538, y: 0.268, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -15,7 +15,7 @@ MonoBehaviour:
   effectType: 1
   variantId: Bleed1_Dagger
   itemIcon: {fileID: 517063575178413848, guid: c7cd013b2597a524e8bfd3714be4ea51, type: 3}
-  flatIcon: {fileID: 7886678303301008143, guid: 890ca33d0d795014d938be67201f8823, type: 3}
+  flatIcon: {fileID: 7855066983133617048, guid: e4fe768d5c75bf44cbca736949c6b66e, type: 3}
   physicalDuration: 2
   magicalDuration: 2
   physicalDamagePerTurn: 0.015

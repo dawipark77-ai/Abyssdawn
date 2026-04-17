@@ -13,11 +13,7 @@ MonoBehaviour:
   m_Name: SkeletonKnight
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: SkeletonKnight
-  sprites:
-  - {fileID: 454009205973811108, guid: 8a0eaf3689f1b7e4e883c6046533a5d2, type: 3}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  sprite: {fileID: 454009205973811108, guid: 8a0eaf3689f1b7e4e883c6046533a5d2, type: 3}
   scaleMultiplier: 1
   type: 4
   hp: 180

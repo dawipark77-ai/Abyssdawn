@@ -13,11 +13,7 @@ MonoBehaviour:
   m_Name: Bat
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Bat
-  sprites:
-  - {fileID: 2268075102587228266, guid: cab0d99d89801d945bc7dc2c5b108ea5, type: 3}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  sprite: {fileID: -6836219357644894738, guid: 91837e6a8989abb438a98ea2fbbd2681, type: 3}
   scaleMultiplier: 1
   type: 3
   hp: 30
