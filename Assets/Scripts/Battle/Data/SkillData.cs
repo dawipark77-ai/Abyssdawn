@@ -320,6 +320,7 @@ namespace AbyssdawnBattle
         [Header("━━━━━━━━━━ 상태이상 (저주) ━━━━━━━━━━")]
         [FormerlySerializedAs("curseData")]
         public StatusEffectSO curseEffect;
+        [FormerlySerializedAs("curseChance")]
         [Range(0f, 1f)]
         public float curseApplyChance;
 

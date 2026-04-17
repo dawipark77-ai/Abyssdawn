@@ -224,10 +224,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject monsterPrefab;
     [SerializeField] private float monsterScaleMultiplier = 1f;
 
-    [Header("적 UI 패널")]
-    [SerializeField] private GameObject[] enemyUIPanels;
-    [SerializeField] private GameObject enemyUIPanelCenter;
-
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
     private List<Image> enemyStatusFrames = new List<Image>();
@@ -1228,14 +1224,6 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[SPAWN_DEBUG] monsterPrefab: {monsterPrefab}");
         Debug.Log($"[SPAWN_DEBUG] slotPoints 길이: {slotPoints?.Length}");
         Debug.Log($"[SPAWN_DEBUG] slotPointCenter: {slotPointCenter}");
-
-        // 모든 적 UI 패널 초기화
-        if (enemyUIPanels != null)
-            foreach (var panel in enemyUIPanels)
-                if (panel != null) panel.SetActive(false);
-
-        if (enemyUIPanelCenter != null)
-            enemyUIPanelCenter.SetActive(false);
 
         for (int i = 0; i < monsters.Length; i++)
         {
@@ -5608,46 +5596,6 @@ private void CacheHeroSkills()
         UpdatePartyUI();
     }
 
-    private void UpdateEnemyUIPanelText(GameObject panel, EnemyStats es)
-    {
-        if (panel == null || es == null) return;
-
-        TextMeshProUGUI nameText = null;
-        TextMeshProUGUI hpText = null;
-        TextMeshProUGUI mpText = null;
-
-        Transform nameTransform = FindNamedDescendantRecursive(panel.transform, "Nametext");
-        if (nameTransform != null) nameText = nameTransform.GetComponent<TextMeshProUGUI>();
-
-        Transform hpTransform = FindNamedDescendantRecursive(panel.transform, "HPText");
-        if (hpTransform != null) hpText = hpTransform.GetComponent<TextMeshProUGUI>();
-
-        Transform mpTransform = FindNamedDescendantRecursive(panel.transform, "MPText");
-        if (mpTransform != null) mpText = mpTransform.GetComponent<TextMeshProUGUI>();
-
-        Color textColor = es.currentHP > 0
-            ? Color.white
-            : new Color(0.55f, 0.55f, 0.55f, 0.65f);
-
-        if (nameText != null)
-        {
-            nameText.text = es.enemyName;
-            nameText.color = textColor;
-        }
-
-        if (hpText != null)
-        {
-            hpText.text = $"HP {es.currentHP}/{es.maxHP}";
-            hpText.color = textColor;
-        }
-
-        if (mpText != null)
-        {
-            mpText.text = $"MP {es.currentMP}/{es.maxMP}";
-            mpText.color = textColor;
-        }
-    }
-
     // ========== 파티/적 진영 SerializeField UI 업데이트 ==========
     private void UpdatePartyUI()
     {
@@ -5730,15 +5678,6 @@ private void CacheHeroSkills()
                     enemyMonsterImages[slotIndex].sprite = sr.sprite;
                     enemyMonsterImages[slotIndex].color = es.currentHP > 0 ? Color.white : new Color(0.55f, 0.55f, 0.55f, 0.65f);
                 }
-            }
-
-            if (activeEnemies.Count == 1)
-            {
-                UpdateEnemyUIPanelText(enemyUIPanelCenter, es);
-            }
-            else if (enemyUIPanels != null && slotIndex < enemyUIPanels.Length)
-            {
-                UpdateEnemyUIPanelText(enemyUIPanels[slotIndex], es);
             }
 
             // 상태이상 아이콘 행

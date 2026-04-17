@@ -447,8 +447,8 @@ public class EnemyStats : MonoBehaviour
         }
         statusIconObjects.Clear();
 
-        const float iconSize = 16f;
-        const float spacing = 2f;
+        const float iconSize = 50f;   // Canvas scale 0.005 기준 → 0.25 world units
+        const float spacing = 6f;
         int count = 0;
 
         foreach (var se in activeStatusEffects)
@@ -466,7 +466,7 @@ public class EnemyStats : MonoBehaviour
             rt.anchorMax = new Vector2(0f, 0f);
             rt.pivot = new Vector2(0f, 0f);
             rt.sizeDelta = new Vector2(iconSize, iconSize);
-            rt.anchoredPosition = new Vector2((iconSize + spacing) * count + 2f, 2f);
+            rt.anchoredPosition = new Vector2((iconSize + spacing) * count + spacing, spacing);
 
             UnityEngine.UI.Image img = iconObj.GetComponent<UnityEngine.UI.Image>();
             img.sprite = icon;
@@ -651,8 +651,8 @@ public class EnemyStats : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
 
-        // 캔버스 크기: 상단 50px = HP/MP 텍스트, 하단 20px = 상태이상 아이콘
-        const float canvasW = 120f, textH = 50f, iconH = 20f;
+        // 캔버스 크기: 상단 50px = HP/MP 텍스트, 하단 60px = 상태이상 아이콘
+        const float canvasW = 120f, textH = 50f, iconH = 60f;
         float totalH = textH + iconH;
 
         RectTransform canvasRT = statusCanvas.GetComponent<RectTransform>();
