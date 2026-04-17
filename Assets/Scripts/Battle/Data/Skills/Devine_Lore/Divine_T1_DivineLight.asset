@@ -26,7 +26,7 @@ MonoBehaviour:
     allowedTargetSlots: 1
     specificSlots: 
   hpCostPercent: 0
-  mpCost: 4
+  mpCost: 3
   minMult: 0
   maxMult: 0
   hitCount: 1
