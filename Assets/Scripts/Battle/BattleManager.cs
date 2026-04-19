@@ -219,8 +219,12 @@ public class BattleManager : MonoBehaviour
     public float extraSpacingPerEnemy = 0.25f;
 
     [Header("몬스터 스폰")]
-    [SerializeField] private Transform[] slotPoints;
+    [Tooltip("SlotPoint_Center — 단독 몬스터(Single) 배치용")]
     [SerializeField] private Transform slotPointCenter;
+    [Tooltip("SlotPoint_1 ~ SlotPoint_4 (전열, 왼쪽부터)")]
+    [SerializeField] private Transform[] slotPointsFront = new Transform[4];
+    [Tooltip("SlotPoint_5 ~ SlotPoint_7 (후열, 왼쪽부터)")]
+    [SerializeField] private Transform[] slotPointsBack = new Transform[3];
     [SerializeField] private GameObject monsterPrefab;
     [SerializeField] private float monsterScaleMultiplier = 1f;
 
@@ -466,37 +470,89 @@ public class BattleManager : MonoBehaviour
         startWithFullParty = false; // [Anti-Gravity] 강제 Solo 모드 설정 (인스펙터 값 무시)
         ForceDisableUIPanels();
 
-        // SlotPoint 자동 탐색
-        if (slotPoints == null || slotPoints.Length == 0)
-        {
-            Transform enemySpawnRoot = null;
-
-            // WorldRoot 하위에서 EnemySpawnRoot 찾기
-            foreach (Transform child in worldRoot)
-            {
-                if (child.name == "EnemySpawnRoot")
-                {
-                    enemySpawnRoot = child;
-                    break;
-                }
-            }
-
-            if (enemySpawnRoot != null)
-            {
-                List<Transform> found = new List<Transform>();
-                for (int i = 1; i <= 4; i++)
-                {
-                    Transform slot = enemySpawnRoot.Find($"SlotPoint_{i}");
-                    if (slot != null) found.Add(slot);
-                }
-                slotPoints = found.ToArray();
-                slotPointCenter = enemySpawnRoot.Find("SlotPoint_Center");
-                Debug.Log($"[SLOT_AUTO] 슬롯 자동 탐색: {slotPoints.Length}개, Center: {slotPointCenter}");
-            }
-        }
+        AutoAssignSlotPoints();
 
         // 페이지네이션 UI 자동 연결 시도
         TryAutoAssignPaginationUI();
+    }
+
+    /// <summary>
+    /// EnemySpawnRoot 하위에서 SlotPoint_Center, SlotPoint_1~7을 이름으로 자동 탐색.
+    /// 이미 인스펙터로 할당된 슬롯은 덮어쓰지 않는다.
+    /// </summary>
+    private void AutoAssignSlotPoints()
+    {
+        if (worldRoot == null)
+        {
+            Debug.LogWarning("[SLOT_AUTO] worldRoot가 null이라 SlotPoint 자동 탐색 생략");
+            return;
+        }
+
+        Transform enemySpawnRoot = null;
+        foreach (Transform child in worldRoot)
+        {
+            if (child.name == "EnemySpawnRoot") { enemySpawnRoot = child; break; }
+        }
+
+        if (enemySpawnRoot == null)
+        {
+            Debug.LogWarning("[SLOT_AUTO] EnemySpawnRoot를 worldRoot 하위에서 찾지 못함");
+            return;
+        }
+
+        if (slotPointCenter == null)
+            slotPointCenter = enemySpawnRoot.Find("SlotPoint_Center");
+
+        if (slotPointsFront == null || slotPointsFront.Length != 4)
+            slotPointsFront = new Transform[4];
+        for (int i = 0; i < 4; i++)
+        {
+            if (slotPointsFront[i] == null)
+                slotPointsFront[i] = enemySpawnRoot.Find($"SlotPoint_{i + 1}");
+        }
+
+        if (slotPointsBack == null || slotPointsBack.Length != 3)
+            slotPointsBack = new Transform[3];
+        for (int i = 0; i < 3; i++)
+        {
+            if (slotPointsBack[i] == null)
+                slotPointsBack[i] = enemySpawnRoot.Find($"SlotPoint_{i + 5}");
+        }
+
+        Debug.Log($"[SLOT_AUTO] Center={slotPointCenter?.name}, Front=[{string.Join(",", System.Array.ConvertAll(slotPointsFront, t => t?.name ?? "null"))}], Back=[{string.Join(",", System.Array.ConvertAll(slotPointsBack, t => t?.name ?? "null"))}]");
+    }
+
+    /// <summary>
+    /// FormationType에 대응하는 슬롯 Transform 배열을 반환.
+    /// 반환 배열의 인덱스 순서대로 monsters[i]를 배치한다.
+    /// Single=[Center], All_Front=[1,2,3,4], Three_Front=[1,2,3,5],
+    /// Two_Two=[1,2,5,6], One_Front=[1,5,6,7]
+    /// </summary>
+    private Transform[] GetSlotsForFormation(FormationType formation)
+    {
+        Transform F(int idx1Based) =>
+            (slotPointsFront != null && idx1Based >= 1 && idx1Based <= slotPointsFront.Length)
+                ? slotPointsFront[idx1Based - 1] : null;
+        Transform B(int idx1Based) =>
+            (slotPointsBack != null && idx1Based >= 5 && idx1Based - 5 < slotPointsBack.Length)
+                ? slotPointsBack[idx1Based - 5] : null;
+
+        switch (formation)
+        {
+            case FormationType.Single:
+                return new[] { slotPointCenter };
+            case FormationType.All_Front:
+                return new[] { F(1), F(2), F(3), F(4) };
+            case FormationType.Three_Front:
+                return new[] { F(1), F(2), F(3), B(5) };
+            case FormationType.Two_Two:
+                // 전열 중앙 2칸(2,3)과 후열(5,6)이 엇갈림 배치되도록
+                return new[] { F(2), F(3), B(5), B(6) };
+            case FormationType.One_Front:
+                return new[] { F(1), B(5), B(6), B(7) };
+            default:
+                return new[] { slotPointCenter };
+        }
     }
     
     void OnEnable()
@@ -1220,20 +1276,37 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[SPAWN_DEBUG] monsters 수: {monsters.Length}");
+        // ── Formation 시스템: monsters[0].Formation이 슬롯 레이아웃 결정 ──
+        FormationType formation = monsters[0].Formation;
+        Transform[] formationSlots = GetSlotsForFormation(formation);
+        int slotCount = formationSlots.Length;
+        int monsterCount = monsters.Length;
+
+        Debug.Log($"[SPAWN_DEBUG] monsters 수: {monsterCount}, Formation: {formation}, 슬롯 수: {slotCount}");
         Debug.Log($"[SPAWN_DEBUG] monsterPrefab: {monsterPrefab}");
-        Debug.Log($"[SPAWN_DEBUG] slotPoints 길이: {slotPoints?.Length}");
-        Debug.Log($"[SPAWN_DEBUG] slotPointCenter: {slotPointCenter}");
+        Debug.Log($"[SPAWN_DEBUG] Formation {formation}, 할당된 슬롯 배열: {string.Join(",", formationSlots.Select(s => s?.name ?? "null"))}");
 
-        for (int i = 0; i < monsters.Length; i++)
+        if (monsterCount < slotCount)
         {
-            Transform slot = monsters.Length == 1
-                ? slotPointCenter
-                : (i < slotPoints.Length ? slotPoints[i] : null);
+            Debug.LogWarning($"[SPAWN_WARN] Formation {formation}은 {slotCount}개 슬롯 필요, 현재 몬스터 {monsterCount}명. 슬롯 {slotCount - monsterCount}개 비어있음");
+        }
+        else if (monsterCount > slotCount)
+        {
+            Debug.LogWarning($"[SPAWN_WARN] Formation {formation}은 {slotCount}개 슬롯만 지원, 몬스터 {monsterCount}명 중 {monsterCount - slotCount}명 스폰 누락");
+        }
 
-            Debug.Log($"[SPAWN_DEBUG] {i}번 몬스터: {monsters[i].MonsterName}, slot: {slot}");
+        int spawnLimit = System.Math.Min(monsterCount, slotCount);
+        for (int i = 0; i < spawnLimit; i++)
+        {
+            Transform slot = formationSlots[i];
 
-            if (slot == null) continue;
+            if (slot == null)
+            {
+                Debug.LogWarning($"[SPAWN_WARN] Formation {formation}의 슬롯 {i}이(가) null. 씬에 SlotPoint가 존재하는지 확인");
+                continue;
+            }
+
+            Debug.Log($"[SPAWN_DEBUG] {i}번 몬스터 {monsters[i].MonsterName} → 슬롯 이름: {slot.name}, 위치: {slot.position}");
 
             GameObject obj = Instantiate(monsterPrefab,
                 slot.position, Quaternion.identity, worldRoot);

@@ -47,7 +47,8 @@ namespace AbyssdawnBattle
     }
 
     /// <summary>
-    /// 슬롯 번호 (1-4, 인덱스 기반)
+    /// 슬롯 번호 (1-7 + Center, 인덱스 기반)
+    /// Slot1~4 = 전열, Slot5~7 = 후열, Center = 단독 중앙
     /// </summary>
     public enum BattleSlot
     {
@@ -55,12 +56,18 @@ namespace AbyssdawnBattle
         Slot1 = 1,
         Slot2 = 2,
         Slot3 = 3,
-        Slot4 = 4
+        Slot4 = 4,
+        Slot5 = 5,
+        Slot6 = 6,
+        Slot7 = 7,
+        Center = 8
     }
 
     /// <summary>
     /// 슬롯 마스크 (Flags enum) - 스킬 조건 표현용
     /// 예: SlotMask.Front | SlotMask.Slot3 = 전열 + 3번 슬롯
+    /// Front/Back/Any의 의미는 레거시 호환을 위해 유지 (Slot1~4만 포함).
+    /// Slot5~7, Center는 별도 비트로 추가됨.
     /// </summary>
     [System.Flags]
     public enum SlotMask
@@ -70,9 +77,13 @@ namespace AbyssdawnBattle
         Slot2 = 1 << 1,      // 2
         Slot3 = 1 << 2,      // 4
         Slot4 = 1 << 3,      // 8
-        Front = Slot1 | Slot2,   // 전열 (1, 2)
-        Back = Slot3 | Slot4,    // 후열 (3, 4)
-        Any = Front | Back      // 전체 (1, 2, 3, 4)
+        Slot5 = 1 << 4,      // 16
+        Slot6 = 1 << 5,      // 32
+        Slot7 = 1 << 6,      // 64
+        Center = 1 << 7,     // 128
+        Front = Slot1 | Slot2 | Slot3 | Slot4,   // 전열 (1, 2, 3, 4)
+        Back = Slot5 | Slot6 | Slot7,            // 후열 (5, 6, 7)
+        Any = Front | Back                       // 전체 (1~7)
     }
 
     /// <summary>
@@ -81,52 +92,58 @@ namespace AbyssdawnBattle
     public static class SlotHelper
     {
         /// <summary>
-        /// 슬롯 인덱스(1-4)로부터 전열/후열 타입 반환
+        /// 슬롯 인덱스(1-7)로부터 전열/후열 타입 반환. Slot1~4 = Front, Slot5~7 = Back.
         /// </summary>
         public static RowType GetRow(int slotIndex)
         {
-            return slotIndex <= 2 ? RowType.Front : RowType.Back;
+            return slotIndex <= 4 ? RowType.Front : RowType.Back;
         }
 
         /// <summary>
-        /// BattleSlot enum으로부터 전열/후열 타입 반환
+        /// BattleSlot enum으로부터 전열/후열 타입 반환. Center는 Front로 간주.
         /// </summary>
         public static RowType GetRow(BattleSlot slot)
         {
+            if (slot == BattleSlot.Center) return RowType.Front;
             int index = (int)slot;
-            return index <= 2 ? RowType.Front : RowType.Back;
+            return index <= 4 ? RowType.Front : RowType.Back;
         }
 
         /// <summary>
-        /// 슬롯 인덱스(1-4)가 전열인지 확인
+        /// 슬롯 인덱스(1-7)가 전열(1~4)인지 확인
         /// </summary>
         public static bool IsFrontRow(int slotIndex)
         {
-            return slotIndex <= 2;
+            return slotIndex >= 1 && slotIndex <= 4;
         }
 
         /// <summary>
-        /// BattleSlot이 전열인지 확인
+        /// BattleSlot이 전열(Slot1~4)인지 확인. Center는 전열로 간주하지 않음.
         /// </summary>
         public static bool IsFrontRow(BattleSlot slot)
         {
-            return slot == BattleSlot.Slot1 || slot == BattleSlot.Slot2;
+            return slot == BattleSlot.Slot1
+                || slot == BattleSlot.Slot2
+                || slot == BattleSlot.Slot3
+                || slot == BattleSlot.Slot4;
         }
 
         /// <summary>
-        /// 슬롯 인덱스(1-4)가 후열인지 확인
+        /// 슬롯 인덱스(1-7)가 후열(5~7)인지 확인
         /// </summary>
         public static bool IsBackRow(int slotIndex)
         {
-            return slotIndex > 2;
+            return slotIndex >= 5 && slotIndex <= 7;
         }
 
         /// <summary>
-        /// BattleSlot이 후열인지 확인
+        /// BattleSlot이 후열(Slot5~7)인지 확인
         /// </summary>
         public static bool IsBackRow(BattleSlot slot)
         {
-            return slot == BattleSlot.Slot3 || slot == BattleSlot.Slot4;
+            return slot == BattleSlot.Slot5
+                || slot == BattleSlot.Slot6
+                || slot == BattleSlot.Slot7;
         }
 
         /// <summary>

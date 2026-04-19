@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rat
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Rat
-  sprite: {fileID: -3882002067681905023, guid: df0c6636c362af94281ba8d050c43cb8, type: 3}
+  sprite: {fileID: -949612300328828122, guid: 80ee591a698bd0545ac6fe36fb4ec40f, type: 3}
   scaleMultiplier: 1
   type: 3
   hp: 35
@@ -30,6 +30,7 @@ MonoBehaviour:
   passiveSkills: []
   aiPattern: 0
   allowedSlots: 3
+  formation: 3
   minFloor: 1
   maxFloor: 3
   spawnWeight: 5

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Wizard
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Wizard
-  sprite: {fileID: 7821656820451631109, guid: 735ba7a23f000bf4490909f0b71770a1, type: 3}
+  sprite: {fileID: 3500586531716175808, guid: 613aba41a3b838444b3db6fe9ce003e1, type: 3}
+  scaleMultiplier: 1
   type: 0
   hp: 80
   mp: 25
@@ -28,7 +29,8 @@ MonoBehaviour:
   activeSkills: []
   passiveSkills: []
   aiPattern: 1
-  allowedSlots: 12
+  allowedSlots: 112
+  formation: 3
   minFloor: 1
   maxFloor: 1
   spawnWeight: 1

@@ -29,7 +29,8 @@ MonoBehaviour:
   activeSkills: []
   passiveSkills: []
   aiPattern: 1
-  allowedSlots: 0
+  allowedSlots: 3
+  formation: 3
   minFloor: 5
   maxFloor: 10
   spawnWeight: 3

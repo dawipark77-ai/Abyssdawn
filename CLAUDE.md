@@ -669,4 +669,119 @@ float finalBacklashChance = skill.backlashChance
 
 ---
 
-*최종 수정: 2026-03-29*
+## 14. 현재 구현 상태 및 작업 핸드오프 (2026-04-19)
+
+### 14-A. 완료된 작업
+
+- **MonsterSO 기반 스폰 시스템** — `Resources/Monsters/`의 `MonsterSO` 에셋으로 몬스터 정의
+- **EnemyPrefab_World 월드 스폰 구조** — `WorldRoot/EnemySpawnRoot/` 하위에 몬스터 월드 오브젝트 배치
+- **EnemyPrefab_World 내장 UI** — World Space Canvas로 HP/MP/이름 표시
+- **상태이상 시스템** — 점화(Ignite), 출혈(Bleed), 독(Poison), 스턴(Stun)
+- **상태이상 턴 카운트 수정** — `appliedThisTurn` 플래그로 부여 직후 턴에서 카운트가 깎이지 않도록
+- **상태이상 로그 색상 태그** — 점화 주황, 출혈 빨강, 스턴 노랑, 독 녹색
+- **`FormerlySerializedAs` 마이그레이션** — `curseData` → `curseEffect` 필드명 변경 호환
+- **MP 코스트 밸런스 조정** — `Fire_Lore`, `Devine_Lore` 스킬 MP 코스트 하향
+- **SlotPoint 8개 고정 방식 포지션 시스템** — 레거시 Formation 오브젝트 방식 폐기
+- **`FormationType` 5종** — `Single`, `All_Front`, `Three_Front`, `Two_Two`, `One_Front`
+
+### 14-B. 포지션 시스템 상세
+
+**SlotPoint 구조** (씬: `EnemySpawnRoot` 하위)
+- `SlotPoint_Center` — 단독 1마리용
+- `SlotPoint_1 ~ 4` — 전열, 왼쪽부터
+- `SlotPoint_5 ~ 7` — 후열, 왼쪽부터
+
+**FormationType별 슬롯 매핑**
+
+| Formation | 배치 비율 | 사용 슬롯 |
+|---|---|---|
+| `Single` | 단독 | `[Center]` |
+| `All_Front` | 4/0 | `[1, 2, 3, 4]` |
+| `Three_Front` | 3/1 | `[1, 2, 3, 5]` |
+| `Two_Two` | 2/2 | `[2, 3, 5, 6]` ← 전열 중앙 2칸으로 몰아 후열(5,6)과 엇갈림 배치 |
+| `One_Front` | 1/3 | `[1, 5, 6, 7]` |
+
+구현 위치: `BattleManager.cs` `GetSlotsForFormation(FormationType)`
+
+### 14-C. 네임스페이스 규칙
+
+| 네임스페이스 | 담당 |
+|---|---|
+| `Abyssdawn` | `MonsterSO`, `SkillData`, `FormationType`, 데이터 SO 전반 |
+| `AbyssdawnBattle` | `EnemyStats`, `BattleManager`, 런타임 전투 컴포넌트 |
+
+`BattleManager.cs`는 `using Abyssdawn;` + `using AbyssdawnBattle;` 모두 import하며, 이름 충돌 시 `using SkillData = AbyssdawnBattle.SkillData;` 와 같이 alias로 해소한다.
+
+### 14-D. 앞으로 할 작업 (우선순위 순)
+
+**우선순위 1 — 시각 조정**
+- SlotPoint 8개 Z축 엇갈림 좌표 조정 (Scene 뷰 드래그)
+- 전열 크게 / 후열 작게 스케일 차등 적용
+- 배경 이미지 `SpriteRenderer` 방식으로 통일
+
+**우선순위 2 — 기능 추가**
+- 몬스터 이름에 슬롯 번호 표시 (예: `1 오크`, `2 쥐`)
+- 사망 시 라인 붕괴(Collapse) 시스템
+  - `BattleLine`에 `Collapse()` 메서드 추가
+  - 전열 사망 시 후열이 자동 이동
+  - 사망 이벤트에서 호출
+
+**우선순위 3 — 포지션 이동 시스템**
+- `BattleLine`에 Move/Swap 로직은 이미 존재
+- 이동 규칙: 1칸만 가능 (`1↔2`, `2↔3`, `3↔4`)
+- 빈 슬롯 → Move, 점유 슬롯 → Swap
+- 디버그 버튼 UI 제작 (테스트용)
+
+**우선순위 4 — 스킬 인디케이터 시스템**
+- `SkillData` SO에 `positionIndicator` 필드 추가 (Sprite)
+- 인디케이터 이미지 위치 규칙
+  - 아래: 전열 대상
+  - 위: 후열 대상
+  - 중앙 (구분선 없음): 전체 대상
+- 이미지 타입: A자형(전체), 숫자형(단일), 그리드형(특정 조합)
+
+**우선순위 5 — 스킬 대상 시스템**
+- 플레이어가 모든 대상 선택
+- `targetType` 필드로 실제 타겟 계산
+- "전열 2명" 스킬은 연속 2명 그룹 선택 UI 필요
+
+### 14-E. 중요 규칙
+
+**코드 수정 위치 (엄수)**
+- 모든 수정은 **메인 저장소에 직접 적용**
+- 경로: `E:\Dawi\My Programs\Game Maker\Unity\Projects\Abyssdawn 01`
+- **worktree 폴더에 작업 금지** (`.claude/worktrees/*`는 Unity가 보지 않음)
+
+**사용자 커뮤니케이션**
+- 존댓말, 영국 집사 스타일
+- 추상적 표현 금지 — 구체적으로 설명
+- 확실하지 않은 것은 "추측"이라고 명시
+- 사용자 생각이 틀렸다고 판단되면 **"아니오"** 라고 명확히 말할 것
+- 사실 확인 없이 단정하지 말 것
+
+**디버깅 원칙**
+- 추측하지 말고 **로그로 데이터 확인**
+- `git diff`로 실제 파일 상태 확인
+- 메인 저장소 경로인지 재확인
+
+### 14-F. 과거 발생한 주요 이슈
+
+| 이슈 | 내용 |
+|---|---|
+| **worktree 혼동** | 수정이 메인 저장소에 반영되지 않아 Unity에서 변경이 적용 안 된 사건. 항상 메인 저장소 경로 확인 필요 |
+| **UI Background에 캐릭터 일러 박힘** | 몬스터 이미지와 겹쳐 시각 혼란 유발 |
+| **슬롯 이동 시스템 롤백** | 커밋 `3afc0e3`의 포지션 겹침 버그로 `b1bbea3`로 되돌림 |
+
+### 14-G. 최근 Git 커밋 기록
+
+```
+b1bbea3 chore: worktree 폴더 gitignore 추가
+1fe8aee 상태이상 아이콘 UI, MP 코스트 조정, 로그 색상 태그 적용
+f05a9d3 refactor: 레거시 EnemyUIPanel 제거, 상태이상 아이콘 크기 조정, FormerlySerializedAs 추가
+e9c53cd balance: Fire/Divine Lore 스킬 MP 코스트 하향 조정
+ae40dbd 상태이상 시스템 수정: 턴 카운트, 색상 태그, FormerlySerializedAs 마이그레이션
+```
+
+---
+
+*최종 수정: 2026-04-19*

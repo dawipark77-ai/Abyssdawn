@@ -31,6 +31,20 @@ namespace Abyssdawn
         Support
     }
 
+    /// <summary>
+    /// 적 파티의 전투 진형(Formation).
+    /// 이 몬스터가 대표(Boss > Elite > 첫 번째)일 때 전투 배치가 결정됩니다.
+    /// Single = 단독 1마리 / All_Front = 4·0 / Three_Front = 3·1 / Two_Two = 2·2 / One_Front = 1·3
+    /// </summary>
+    public enum FormationType
+    {
+        Single,
+        All_Front,
+        Three_Front,
+        Two_Two,
+        One_Front
+    }
+
     // ──────────────────────────────────────────
     // 드롭 엔트리 (직렬화 가능 내부 클래스)
     // ──────────────────────────────────────────
@@ -147,6 +161,9 @@ namespace Abyssdawn
         [Tooltip("이 몬스터가 배치될 수 있는 슬롯 (SlotMask 비트 마스크)")]
         [SerializeField] private SlotMask allowedSlots = SlotMask.Any;
 
+        [Tooltip("이 몬스터가 대표(Boss/Elite/첫 번째)일 때 전투 파티에 적용할 진형")]
+        [SerializeField] private FormationType formation = FormationType.Two_Two;
+
         // ──────────────────────────────────────────
         // 등장 조건
         // ──────────────────────────────────────────
@@ -251,6 +268,9 @@ namespace Abyssdawn
         // 배치
         /// <summary>배치 가능 슬롯 마스크</summary>
         public SlotMask AllowedSlots => allowedSlots;
+
+        /// <summary>대표 몬스터일 때 적용될 전투 진형</summary>
+        public FormationType Formation => formation;
 
         // 등장 조건
         /// <summary>등장 최소 층</summary>
