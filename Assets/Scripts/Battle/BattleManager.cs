@@ -228,6 +228,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject monsterPrefab;
     [SerializeField] private float monsterScaleMultiplier = 1f;
 
+    [Tooltip("후열(Slot5~7) 몬스터에 추가로 곱하는 스케일 배율 (원근감용). 1 = 그대로, 0.75 = 25% 축소.")]
+    [Range(0.1f, 1f)]
+    [SerializeField] private float backRowScaleMultiplier = 0.75f;
+
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
     private List<Image> enemyStatusFrames = new List<Image>();
@@ -522,11 +526,159 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[SLOT_AUTO] Center={slotPointCenter?.name}, Front=[{string.Join(",", System.Array.ConvertAll(slotPointsFront, t => t?.name ?? "null"))}], Back=[{string.Join(",", System.Array.ConvertAll(slotPointsBack, t => t?.name ?? "null"))}]");
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // AllowedSlots 기반 배치 알고리즘 (n명별 고정 템플릿)
+    // Formation 필드는 더 이상 참조하지 않음. 몬스터 수에 따라 템플릿 슬롯을
+    // 정하고, 그 안에서 각 MonsterSO의 AllowedSlots로 개별 위치를 결정.
+    // ─────────────────────────────────────────────────────────────
+
     /// <summary>
-    /// FormationType에 대응하는 슬롯 Transform 배열을 반환.
-    /// 반환 배열의 인덱스 순서대로 monsters[i]를 배치한다.
-    /// Single=[Center], All_Front=[1,2,3,4], Three_Front=[1,2,3,5],
-    /// Two_Two=[1,2,5,6], One_Front=[1,5,6,7]
+    /// 몬스터 수(n)별 슬롯 템플릿. 1-based 인덱스. 0 = Center 특수값.
+    /// n=1 → Center / n=2 → [2,3] / n=3 → [2,3,6] / n=4 → [2,3,5,6] 등.
+    /// </summary>
+    private static readonly int[][] SLOT_TEMPLATES = new int[][]
+    {
+        null,                             // index 0 (미사용)
+        new[] { 0 },                      // n=1 : Center
+        new[] { 2, 3 },                   // n=2
+        new[] { 2, 3, 6 },                // n=3
+        new[] { 2, 3, 5, 6 },             // n=4
+        new[] { 1, 2, 3, 4, 6 },          // n=5
+        new[] { 1, 2, 3, 4, 5, 6 },       // n=6
+        new[] { 1, 2, 3, 4, 5, 6, 7 },    // n=7
+    };
+
+    /// <summary>
+    /// monsters 배열 순서대로 대응하는 Transform 슬롯을 반환한다.
+    /// 몬스터 수별 템플릿 슬롯을 정하고, 그 안에서 각 몬스터의 AllowedSlots로 배치한다.
+    /// 반환 배열 i번째 = monsters[i]에 할당된 슬롯. 배치 실패면 null.
+    /// </summary>
+    private Transform[] AssignSlotsByAllowedSlots(MonsterSO[] monsters)
+    {
+        int n = monsters.Length;
+        Transform[] result = new Transform[n];
+
+        if (n <= 0) return result;
+        if (n >= SLOT_TEMPLATES.Length)
+        {
+            Debug.LogWarning($"[SPAWN_WARN] 몬스터 수 {n}은 템플릿 최대치({SLOT_TEMPLATES.Length - 1})를 초과합니다.");
+            return result;
+        }
+
+        int[] template = SLOT_TEMPLATES[n];
+
+        // n=1 규칙: AllowedSlots 무관하게 무조건 Center
+        if (n == 1 && template.Length == 1 && template[0] == 0)
+        {
+            result[0] = slotPointCenter;
+            if (result[0] == null)
+                Debug.LogWarning("[SPAWN_WARN] slotPointCenter가 null입니다. EnemySpawnRoot 하위에 SlotPoint_Center를 배치하세요.");
+            return result;
+        }
+
+        // 템플릿을 전열/후열로 분류
+        List<int> frontIdx = new List<int>();
+        List<int> backIdx = new List<int>();
+        foreach (int idx in template)
+        {
+            if (idx >= 1 && idx <= 4) frontIdx.Add(idx);
+            else if (idx >= 5 && idx <= 7) backIdx.Add(idx);
+        }
+
+        bool[] usedFront = new bool[frontIdx.Count];
+        bool[] usedBack = new bool[backIdx.Count];
+
+        // 1단계: Back 전용 몬스터 → 템플릿 후열 슬롯
+        for (int i = 0; i < n; i++)
+        {
+            if (!IsBackOnly(monsters[i].AllowedSlots)) continue;
+            int picked = TakeFirstFree(backIdx, usedBack);
+            if (picked > 0) result[i] = SlotTransformByIndex(picked);
+        }
+
+        // 2단계: Front 전용 몬스터 → 템플릿 전열 슬롯
+        for (int i = 0; i < n; i++)
+        {
+            if (result[i] != null) continue;
+            if (!IsFrontOnly(monsters[i].AllowedSlots)) continue;
+            int picked = TakeFirstFree(frontIdx, usedFront);
+            if (picked > 0) result[i] = SlotTransformByIndex(picked);
+        }
+
+        // 3단계: Any / 혼합 몬스터 → 전열 남는 자리 우선, 없으면 후열
+        for (int i = 0; i < n; i++)
+        {
+            if (result[i] != null) continue;
+            int picked = TakeFirstFree(frontIdx, usedFront);
+            if (picked <= 0) picked = TakeFirstFree(backIdx, usedBack);
+            if (picked > 0) result[i] = SlotTransformByIndex(picked);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 리스트에서 used[]가 false인 첫 번째 슬롯 인덱스를 꺼내 사용 처리하고 반환. 없으면 0.
+    /// </summary>
+    private int TakeFirstFree(List<int> indexList, bool[] used)
+    {
+        for (int k = 0; k < indexList.Count; k++)
+        {
+            if (!used[k])
+            {
+                used[k] = true;
+                return indexList[k];
+            }
+        }
+        return 0;
+    }
+
+    /// <summary>
+    /// 후열 슬롯(5,6,7)만 체크되어 있고 전열/Center 비트는 없는지 확인
+    /// </summary>
+    private bool IsBackOnly(SlotMask a)
+    {
+        return (a & SlotMask.Back) != 0 && (a & SlotMask.Front) == 0;
+    }
+
+    /// <summary>
+    /// 전열 슬롯(1,2,3,4)만 체크되어 있고 후열 비트는 없는지 확인
+    /// </summary>
+    private bool IsFrontOnly(SlotMask a)
+    {
+        return (a & SlotMask.Front) != 0 && (a & SlotMask.Back) == 0;
+    }
+
+    /// <summary>
+    /// 1-based 슬롯 인덱스(1~7)를 실제 Transform으로 변환. Center는 제외.
+    /// </summary>
+    private Transform SlotTransformByIndex(int idx1Based)
+    {
+        if (idx1Based >= 1 && idx1Based <= 4 && slotPointsFront != null && slotPointsFront.Length >= 4)
+            return slotPointsFront[idx1Based - 1];
+        if (idx1Based >= 5 && idx1Based <= 7 && slotPointsBack != null && slotPointsBack.Length >= 3)
+            return slotPointsBack[idx1Based - 5];
+        return null;
+    }
+
+    /// <summary>
+    /// 주어진 Transform이 slotPointsBack(Slot5~7)에 속하는지 확인.
+    /// 원근감용 후열 스케일 적용 여부를 판단한다.
+    /// </summary>
+    private bool IsSlotInBackRow(Transform slot)
+    {
+        if (slot == null || slotPointsBack == null) return false;
+        for (int b = 0; b < slotPointsBack.Length; b++)
+        {
+            if (slot == slotPointsBack[b]) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// FormationType에 대응하는 슬롯 Transform 배열을 반환 (레거시).
+    /// 현재 스폰 로직은 AssignSlotsByAllowedSlots()로 대체되어 직접 호출되지 않지만,
+    /// 외부 참조 및 FormationType enum 호환성을 위해 남겨둠.
     /// </summary>
     private Transform[] GetSlotsForFormation(FormationType formation)
     {
@@ -1276,33 +1428,29 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        // ── Formation 시스템: monsters[0].Formation이 슬롯 레이아웃 결정 ──
-        FormationType formation = monsters[0].Formation;
-        Transform[] formationSlots = GetSlotsForFormation(formation);
-        int slotCount = formationSlots.Length;
+        // ── AllowedSlots 기반 배치 알고리즘 ──
+        // 각 몬스터의 AllowedSlots를 기반으로 슬롯 자동 배정.
+        // Back 전용 → Front 전용 → 혼합/Any 순으로 슬롯 선점.
+        Transform[] formationSlots = AssignSlotsByAllowedSlots(monsters);
         int monsterCount = monsters.Length;
 
-        Debug.Log($"[SPAWN_DEBUG] monsters 수: {monsterCount}, Formation: {formation}, 슬롯 수: {slotCount}");
+        Debug.Log($"[SPAWN_DEBUG] monsters 수: {monsterCount} (AllowedSlots 기반 배치)");
         Debug.Log($"[SPAWN_DEBUG] monsterPrefab: {monsterPrefab}");
-        Debug.Log($"[SPAWN_DEBUG] Formation {formation}, 할당된 슬롯 배열: {string.Join(",", formationSlots.Select(s => s?.name ?? "null"))}");
-
-        if (monsterCount < slotCount)
+        for (int dbg = 0; dbg < monsterCount; dbg++)
         {
-            Debug.LogWarning($"[SPAWN_WARN] Formation {formation}은 {slotCount}개 슬롯 필요, 현재 몬스터 {monsterCount}명. 슬롯 {slotCount - monsterCount}개 비어있음");
-        }
-        else if (monsterCount > slotCount)
-        {
-            Debug.LogWarning($"[SPAWN_WARN] Formation {formation}은 {slotCount}개 슬롯만 지원, 몬스터 {monsterCount}명 중 {monsterCount - slotCount}명 스폰 누락");
+            string name = monsters[dbg]?.MonsterName ?? "null";
+            SlotMask a = monsters[dbg]?.AllowedSlots ?? SlotMask.None;
+            string slotName = formationSlots[dbg]?.name ?? "null";
+            Debug.Log($"[SPAWN_DEBUG] {dbg}번 {name} (AllowedSlots={a}) → {slotName}");
         }
 
-        int spawnLimit = System.Math.Min(monsterCount, slotCount);
-        for (int i = 0; i < spawnLimit; i++)
+        for (int i = 0; i < monsterCount; i++)
         {
             Transform slot = formationSlots[i];
 
             if (slot == null)
             {
-                Debug.LogWarning($"[SPAWN_WARN] Formation {formation}의 슬롯 {i}이(가) null. 씬에 SlotPoint가 존재하는지 확인");
+                Debug.LogWarning($"[SPAWN_WARN] {monsters[i].MonsterName}에 할당 가능한 빈 슬롯이 없어 스폰 누락 (AllowedSlots={monsters[i].AllowedSlots}).");
                 continue;
             }
 
@@ -1357,9 +1505,13 @@ public class BattleManager : MonoBehaviour
                 float scaleY = slotWorldHeight / spriteHeight;
                 float scale = Mathf.Min(scaleX, scaleY);
 
-                float finalScale = scale * monsterScaleMultiplier * monsters[i].ScaleMultiplier;
+                // 후열(slotPointsBack에 속하는 슬롯)이면 추가 축소 배율 적용
+                bool isBackRow = IsSlotInBackRow(slot);
+                float rowMultiplier = isBackRow ? backRowScaleMultiplier : 1f;
+
+                float finalScale = scale * monsterScaleMultiplier * monsters[i].ScaleMultiplier * rowMultiplier;
                 obj.transform.localScale = new Vector3(finalScale, finalScale, 1f);
-                Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 최종 스케일: {finalScale}");
+                Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 최종 스케일: {finalScale} (후열 배율={(isBackRow ? backRowScaleMultiplier : 1f)})");
             }
 
             // 스프라이트·스케일 확정 후 BoxCollider2D를 스프라이트 크기에 맞게 설정
