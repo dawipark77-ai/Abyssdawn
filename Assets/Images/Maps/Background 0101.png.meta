@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 422999896697137459e3749861fed5ec
+guid: 40a113c28f1e7ae4b8a03533189f1bd6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4535073206308908804
-    second: Orc01_0
+      213: 8881522295864345018
+    second: Background 0101_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Orc01_0
+      name: Background 0101_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 723
-        height: 1158
+        width: 768
+        height: 1376
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cf0d09b52fe2011c0800000000000000
-      internalID: -4535073206308908804
+      spriteID: ab1c4b5c871814b70800000000000000
+      internalID: 8881522295864345018
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Orc01_0: -4535073206308908804
+      Background 0101_0: 8881522295864345018
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

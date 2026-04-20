@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 91837e6a8989abb438a98ea2fbbd2681
+guid: c5fbcadcb3264ee468544a6a2e1c94dd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6836219357644894738
-    second: Bat011_0
+      213: -6562752228835149127
+    second: Background 01010101_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Bat011_0
+      name: Background 01010101_0
       rect:
         serializedVersion: 2
-        x: 36
-        y: 1194
-        width: 786
-        height: 1128
+        x: 0
+        y: 0
+        width: 768
+        height: 1376
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eed4decc6bed021a0800000000000000
-      internalID: -6836219357644894738
+      spriteID: 9bab06b6e9b6ce4a0800000000000000
+      internalID: -6562752228835149127
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 037d4c8c64f320e4599d2c33e1573685
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Bat011_0: -6836219357644894738
+      Background 01010101_0: -6562752228835149127
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

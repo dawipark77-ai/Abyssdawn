@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 422999896697137459e3749861fed5ec
+guid: f6681240894ee5644b3303ee1e5b6479
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4535073206308908804
-    second: Orc01_0
+      213: -3562746923108113168
+    second: Bat01]]_0
+  - first:
+      213: 8260294264879230190
+    second: Bat01]]_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,23 +103,45 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Orc01_0
+      name: Bat01]]_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 723
-        height: 1158
+        x: 110
+        y: 1
+        width: 639
+        height: 1856
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cf0d09b52fe2011c0800000000000000
-      internalID: -4535073206308908804
+      spriteID: 0f46687bc849e8ec0800000000000000
+      internalID: -3562746923108113168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bat01]]_1
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 0
+        width: 443
+        height: 202
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eeca2567ed572a270800000000000000
+      internalID: 8260294264879230190
       vertices: []
       indices: 
       edges: []
@@ -125,7 +150,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9e15c8c85c448174b85610b3c2cf5f1b
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +160,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Orc01_0: -4535073206308908804
+      Bat01]]_0: -3562746923108113168
+      Bat01]]_1: 8260294264879230190
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

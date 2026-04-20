@@ -88,6 +88,9 @@ namespace Abyssdawn
         [Header("비주얼")]
         [SerializeField] private float scaleMultiplier = 1f;
 
+        [Tooltip("스폰 위치로부터 Y축 오프셋(월드 단위). 공중 부양 효과용. 0=지상, 양수=공중에 뜸")]
+        [SerializeField] private float hoverOffsetY = 0f;
+
         [Tooltip("몬스터 등급 (Normal / Elite / Boss)")]
         [SerializeField] private MonsterType type = MonsterType.Normal;
 
@@ -218,6 +221,9 @@ namespace Abyssdawn
 
         /// <summary>스케일 배율</summary>
         public float ScaleMultiplier => scaleMultiplier;
+
+        /// <summary>공중 부양 Y 오프셋 (월드 단위)</summary>
+        public float HoverOffsetY => hoverOffsetY;
 
         /// <summary>몬스터 등급</summary>
         public MonsterType Type => type;

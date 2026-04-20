@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Wizard
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Wizard
-  sprite: {fileID: 3500586531716175808, guid: 613aba41a3b838444b3db6fe9ce003e1, type: 3}
+  sprite: {fileID: 5137438329694563104, guid: f792ec45ba1cfb840b58bfcea864434b, type: 3}
   scaleMultiplier: 1
+  hoverOffsetY: 0
   type: 0
   hp: 80
   mp: 25

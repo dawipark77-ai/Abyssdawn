@@ -232,6 +232,30 @@ public class BattleManager : MonoBehaviour
     [Range(0.1f, 1f)]
     [SerializeField] private float backRowScaleMultiplier = 0.75f;
 
+    [Header("전/후열 분단선 (실제 배치 기준 자동 토글)")]
+    [Tooltip("전열 몬스터 1마리 + 후열 1마리 이상일 때 활성화")]
+    public GameObject divider_1;
+    [Tooltip("전열 몬스터 2마리 + 후열 1마리 이상일 때 활성화 (2/1, 2/2 등)")]
+    public GameObject divider_2;
+    [Tooltip("전열 몬스터 3마리 + 후열 1마리 이상일 때 활성화")]
+    public GameObject divider_3;
+    [Tooltip("전열 몬스터 4마리 + 후열 1마리 이상일 때 활성화 (선택 — 5마리 이상 전투에서 사용)")]
+    public GameObject divider_4;
+
+    [Tooltip("씬에 수동 배치하는 적 UI 앵커. 순번(1,2,3,...) 순서대로 몬스터 UI가 해당 앵커 위치로 고정됩니다.\n" +
+             "비워두면 아래 자동 배치 설정이 사용됩니다.")]
+    [SerializeField] private Transform[] enemyUIAnchors;
+
+    [Header("Enemy UI Auto Layout (앵커 비어있을 때)")]
+    [Tooltip("TRUE: 순번을 기준으로 코드가 자동 등간격 배치. FALSE: EnemyUIDisplay의 Fixed World Y / 스프라이트 추적 모드 사용")]
+    [SerializeField] private bool useAutoUILayout = true;
+
+    [Tooltip("UI 순번 1이 위치할 월드 좌표 (좌측 첫 UI 기준점)")]
+    [SerializeField] private Vector3 uiLayoutOrigin = new Vector3(-3f, 3.5f, 0f);
+
+    [Tooltip("UI 사이의 X 간격 (월드 단위)")]
+    [SerializeField] private float uiLayoutSpacingX = 1.5f;
+
     private List<EnemyStats> activeEnemies = new List<EnemyStats>();
     private List<RectTransform> enemyStatusSlots = new List<RectTransform>();
     private List<Image> enemyStatusFrames = new List<Image>();
@@ -533,19 +557,77 @@ public class BattleManager : MonoBehaviour
     // ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 몬스터 수(n)별 슬롯 템플릿. 1-based 인덱스. 0 = Center 특수값.
-    /// n=1 → Center / n=2 → [2,3] / n=3 → [2,3,6] / n=4 → [2,3,5,6] 등.
+    /// 몬스터 수(n)별 슬롯 템플릿 풀. 각 n에 여러 후보가 있어 전투마다 다양한 포메이션이 나온다.
+    /// 1-based 슬롯 인덱스. Front = 1~4, Back = 5~7. 0 = Center 특수값.
+    /// 런타임에 뽑힌 MonsterSO들의 AllowedSlots와 호환되는 템플릿 중 하나를 랜덤 선택한다.
     /// </summary>
-    private static readonly int[][] SLOT_TEMPLATES = new int[][]
+    private static readonly int[][][] SLOT_TEMPLATE_POOLS = new int[][][]
     {
-        null,                             // index 0 (미사용)
-        new[] { 0 },                      // n=1 : Center
-        new[] { 2, 3 },                   // n=2
-        new[] { 2, 3, 6 },                // n=3
-        new[] { 2, 3, 5, 6 },             // n=4
-        new[] { 1, 2, 3, 4, 6 },          // n=5
-        new[] { 1, 2, 3, 4, 5, 6 },       // n=6
-        new[] { 1, 2, 3, 4, 5, 6, 7 },    // n=7
+        null,                                     // index 0 (미사용)
+
+        // n=1 : 단독 (Center 고정)
+        new int[][]
+        {
+            new[] { 0 },                          // Center
+        },
+
+        // n=2 : 2명
+        new int[][]
+        {
+            new[] { 2, 3 },                       // 2/0 전열 중앙
+            new[] { 1, 4 },                       // 2/0 전열 양끝
+            new[] { 3, 5 },                       // 1/1 좌측형
+            new[] { 2, 7 },                       // 1/1 우측형
+            new[] { 5, 7 },                       // 0/2 후열 양끝
+        },
+
+        // n=3 : 3명
+        new int[][]
+        {
+            new[] { 2, 3, 6 },                    // 2/1 중앙 뒤
+            new[] { 1, 4, 6 },                    // 2/1 양끝 + 중앙 뒤
+            new[] { 1, 2, 3 },                    // 3/0 좌측 전열
+            new[] { 2, 3, 4 },                    // 3/0 중앙 전열
+            new[] { 3, 5, 7 },                    // 1/2 한 명 전열
+            new[] { 2, 5, 7 },                    // 1/2 한 명 전열 (좌)
+            new[] { 5, 6, 7 },                    // 0/3 후열 전체
+        },
+
+        // n=4 : 4명 (다양성의 핵심 — 기존 2/2 고정 탈피)
+        new int[][]
+        {
+            new[] { 2, 3, 5, 7 },                 // 2/2 표준
+            new[] { 1, 4, 5, 7 },                 // 2/2 양끝 전열
+            new[] { 1, 2, 3, 4 },                 // 4/0 전열 꽉
+            new[] { 2, 3, 4, 6 },                 // 3/1 전열 우측 3 + 중앙 뒤
+            new[] { 1, 2, 3, 6 },                 // 3/1 전열 좌측 3 + 중앙 뒤
+            new[] { 1, 3, 4, 6 },                 // 3/1 변형
+            new[] { 3, 5, 6, 7 },                 // 1/3 전열 한 명
+            new[] { 2, 5, 6, 7 },                 // 1/3 변형
+        },
+
+        // n=5 : 5명
+        new int[][]
+        {
+            new[] { 1, 2, 3, 4, 6 },              // 4/1
+            new[] { 2, 3, 4, 5, 7 },              // 3/2
+            new[] { 1, 2, 3, 5, 7 },              // 3/2 변형
+            new[] { 2, 3, 5, 6, 7 },              // 2/3
+        },
+
+        // n=6 : 6명
+        new int[][]
+        {
+            new[] { 1, 2, 3, 4, 5, 7 },           // 4/2
+            new[] { 1, 2, 3, 4, 5, 6 },           // 4/2 변형
+            new[] { 2, 3, 4, 5, 6, 7 },           // 3/3
+        },
+
+        // n=7 : 7명 (모든 슬롯)
+        new int[][]
+        {
+            new[] { 1, 2, 3, 4, 5, 6, 7 },        // 4/3 풀
+        },
     };
 
     /// <summary>
@@ -559,16 +641,14 @@ public class BattleManager : MonoBehaviour
         Transform[] result = new Transform[n];
 
         if (n <= 0) return result;
-        if (n >= SLOT_TEMPLATES.Length)
+        if (n >= SLOT_TEMPLATE_POOLS.Length || SLOT_TEMPLATE_POOLS[n] == null || SLOT_TEMPLATE_POOLS[n].Length == 0)
         {
-            Debug.LogWarning($"[SPAWN_WARN] 몬스터 수 {n}은 템플릿 최대치({SLOT_TEMPLATES.Length - 1})를 초과합니다.");
+            Debug.LogWarning($"[SPAWN_WARN] 몬스터 수 {n}에 대한 템플릿 풀이 비어있거나 정의되지 않음.");
             return result;
         }
 
-        int[] template = SLOT_TEMPLATES[n];
-
         // n=1 규칙: AllowedSlots 무관하게 무조건 Center
-        if (n == 1 && template.Length == 1 && template[0] == 0)
+        if (n == 1)
         {
             result[0] = slotPointCenter;
             if (result[0] == null)
@@ -576,45 +656,234 @@ public class BattleManager : MonoBehaviour
             return result;
         }
 
-        // 템플릿을 전열/후열로 분류
-        List<int> frontIdx = new List<int>();
-        List<int> backIdx = new List<int>();
-        foreach (int idx in template)
+        // 풀에서 호환되는 템플릿을 랜덤 순서로 시도한다.
+        int[][] pool = SLOT_TEMPLATE_POOLS[n];
+        List<int[]> shuffled = new List<int[]>(pool);
+        // Fisher–Yates 셔플
+        for (int s = shuffled.Count - 1; s > 0; s--)
         {
-            if (idx >= 1 && idx <= 4) frontIdx.Add(idx);
-            else if (idx >= 5 && idx <= 7) backIdx.Add(idx);
+            int r = UnityEngine.Random.Range(0, s + 1);
+            (shuffled[s], shuffled[r]) = (shuffled[r], shuffled[s]);
         }
 
-        bool[] usedFront = new bool[frontIdx.Count];
-        bool[] usedBack = new bool[backIdx.Count];
+        Transform[] bestResult = null;
+        int bestPlacedCount = -1;
+        int[] bestTemplate = null;
 
-        // 1단계: Back 전용 몬스터 → 템플릿 후열 슬롯
-        for (int i = 0; i < n; i++)
+        foreach (int[] template in shuffled)
         {
-            if (!IsBackOnly(monsters[i].AllowedSlots)) continue;
-            int picked = TakeFirstFree(backIdx, usedBack);
-            if (picked > 0) result[i] = SlotTransformByIndex(picked);
+            Transform[] attempt = TryPlaceWithTemplate(monsters, template, out int placedCount);
+            if (placedCount == n)
+            {
+                // 완전 배치 성공 → 즉시 사용
+                Debug.Log($"[SPAWN] 포메이션 선택: [{string.Join(",", template)}] (n={n}, 전원 배치)");
+                return attempt;
+            }
+
+            // 완전히 맞는 게 없으면 가장 많이 배치된 템플릿을 예비로 보관
+            if (placedCount > bestPlacedCount)
+            {
+                bestPlacedCount = placedCount;
+                bestResult = attempt;
+                bestTemplate = template;
+            }
         }
 
-        // 2단계: Front 전용 몬스터 → 템플릿 전열 슬롯
-        for (int i = 0; i < n; i++)
+        // 완전 배치 가능한 템플릿이 없으면 차선책 반환 (일부 몬스터 스폰 누락 가능)
+        if (bestResult != null)
         {
-            if (result[i] != null) continue;
-            if (!IsFrontOnly(monsters[i].AllowedSlots)) continue;
-            int picked = TakeFirstFree(frontIdx, usedFront);
-            if (picked > 0) result[i] = SlotTransformByIndex(picked);
-        }
-
-        // 3단계: Any / 혼합 몬스터 → 전열 남는 자리 우선, 없으면 후열
-        for (int i = 0; i < n; i++)
-        {
-            if (result[i] != null) continue;
-            int picked = TakeFirstFree(frontIdx, usedFront);
-            if (picked <= 0) picked = TakeFirstFree(backIdx, usedBack);
-            if (picked > 0) result[i] = SlotTransformByIndex(picked);
+            Debug.LogWarning(
+                $"[SPAWN_WARN] n={n} 중 완전 배치 가능한 템플릿이 없음. " +
+                $"차선책 [{string.Join(",", bestTemplate)}] 사용 ({bestPlacedCount}/{n} 배치)");
+            return bestResult;
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// 주어진 템플릿에 MonsterSO 배열을 MRV 방식으로 배치 시도한다.
+    /// placedCount에는 성공적으로 슬롯을 받은 몬스터 수가 담긴다.
+    /// </summary>
+    private Transform[] TryPlaceWithTemplate(MonsterSO[] monsters, int[] template, out int placedCount)
+    {
+        int n = monsters.Length;
+        Transform[] result = new Transform[n];
+        placedCount = 0;
+
+        List<int> available = new List<int>(template);
+        List<int> remaining = new List<int>();
+        for (int i = 0; i < n; i++) remaining.Add(i);
+
+        while (remaining.Count > 0)
+        {
+            int pickMonster = -1;
+            int pickSlot = -1;
+            int pickRemIdx = -1;
+            int bestCount = int.MaxValue;
+
+            for (int k = 0; k < remaining.Count; k++)
+            {
+                int i = remaining[k];
+                SlotMask a = monsters[i].AllowedSlots;
+
+                int validCount = 0;
+                int firstValid = -1;
+                for (int s = 0; s < available.Count; s++)
+                {
+                    int slotIdx = available[s];
+                    if (SlotIsAllowed(slotIdx, a))
+                    {
+                        validCount++;
+                        if (firstValid == -1) firstValid = slotIdx;
+                    }
+                }
+
+                if (validCount > 0 && validCount < bestCount)
+                {
+                    bestCount = validCount;
+                    pickMonster = i;
+                    pickSlot = firstValid;
+                    pickRemIdx = k;
+                }
+            }
+
+            if (pickMonster == -1) break; // 더 이상 배치 불가
+
+            result[pickMonster] = SlotTransformByIndex(pickSlot);
+            available.Remove(pickSlot);
+            remaining.RemoveAt(pickRemIdx);
+            placedCount++;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 전열(1~4) 좌→우, 후열(5~7) 좌→우 순서로 활성 몬스터에게 순번(1부터)을 부여하고
+    /// EnemyUIDisplay.SetNumber를 통해 UI Number 텍스트를 갱신한다.
+    /// 정렬 키는 EnemyStats.currentSlot(BattleSlot enum)이며, 스폰 시점에 세팅된 값을 사용한다.
+    /// (HoverOffsetY 때문에 위치가 슬롯 좌표와 어긋나도 영향을 받지 않는다.)
+    /// </summary>
+    private void AssignDisplayNumbers()
+    {
+        if (activeEnemies == null || activeEnemies.Count == 0) return;
+
+        // 슬롯 번호(BattleSlot enum 정수값)로 정렬하기 위한 리스트 구성
+        // Slot1=1, Slot2=2, ..., Slot7=7, Center=8 → 단순 오름차순
+        List<(EnemyStats stats, int slotKey)> ordered = new List<(EnemyStats, int)>();
+        foreach (EnemyStats es in activeEnemies)
+        {
+            if (es == null) continue;
+            int key = (int)es.currentSlot;
+            // None(0)인 경우는 맨 뒤로 (정상이면 발생하지 않음)
+            if (key == 0) key = int.MaxValue;
+            ordered.Add((es, key));
+        }
+
+        ordered.Sort((a, b) => a.slotKey.CompareTo(b.slotKey));
+
+        for (int n = 0; n < ordered.Count; n++)
+        {
+            EnemyStats es = ordered[n].stats;
+            if (es == null) continue;
+            EnemyUIDisplay ui = es.GetComponent<EnemyUIDisplay>()
+                               ?? es.GetComponentInChildren<EnemyUIDisplay>();
+            if (ui == null) continue;
+
+            ui.SetNumber(n + 1);
+
+            // UI 위치 결정: 씬 앵커 우선 → 자동 레이아웃 → 아무것도 없으면 EnemyUIDisplay 기본 모드
+            if (enemyUIAnchors != null && n < enemyUIAnchors.Length && enemyUIAnchors[n] != null)
+            {
+                ui.SetUIAnchor(enemyUIAnchors[n]);
+            }
+            else if (useAutoUILayout)
+            {
+                Vector3 pos = uiLayoutOrigin + Vector3.right * (n * uiLayoutSpacingX);
+                ui.SetUIAnchorPosition(pos);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 슬롯 Transform을 참조 비교(== 연산자)로 대조해 BattleSlot enum 값을 반환한다.
+    /// 위치 비교가 아니므로 HoverOffsetY 등으로 몬스터 월드 좌표가 흔들려도 정확하다.
+    /// 매칭 실패 시 BattleSlot.None 반환.
+    /// </summary>
+    private BattleSlot GetBattleSlotFromTransform(Transform slot)
+    {
+        if (slot == null) return BattleSlot.None;
+
+        if (slotPointsFront != null)
+        {
+            for (int k = 0; k < slotPointsFront.Length; k++)
+            {
+                if (slotPointsFront[k] == slot) return (BattleSlot)(k + 1); // Slot1~Slot4
+            }
+        }
+        if (slotPointsBack != null)
+        {
+            for (int k = 0; k < slotPointsBack.Length; k++)
+            {
+                if (slotPointsBack[k] == slot) return (BattleSlot)(k + 5); // Slot5~Slot7
+            }
+        }
+        if (slotPointCenter == slot) return BattleSlot.Center;
+        return BattleSlot.None;
+    }
+
+    /// <summary>
+    /// 주어진 Transform이 어느 SlotPoint에 배치되어 있는지 1-based 번호로 반환.
+    /// 전열=1~4, 후열=5~7, Center=0, 알 수 없음=0.
+    /// Transform 자체가 아닌 위치 기반 비교로 동작한다.
+    /// </summary>
+    private int GetSlotIndexFromPosition(Transform target)
+    {
+        if (target == null) return 0;
+        const float eps = 0.01f;
+
+        if (slotPointsFront != null)
+        {
+            for (int k = 0; k < slotPointsFront.Length; k++)
+            {
+                if (slotPointsFront[k] == null) continue;
+                if ((slotPointsFront[k].position - target.position).sqrMagnitude < eps)
+                    return k + 1; // 1~4
+            }
+        }
+        if (slotPointsBack != null)
+        {
+            for (int k = 0; k < slotPointsBack.Length; k++)
+            {
+                if (slotPointsBack[k] == null) continue;
+                if ((slotPointsBack[k].position - target.position).sqrMagnitude < eps)
+                    return k + 5; // 5~7
+            }
+        }
+        if (slotPointCenter != null &&
+            (slotPointCenter.position - target.position).sqrMagnitude < eps)
+            return 0; // Center
+        return 0;
+    }
+
+    /// <summary>
+    /// 1-based 슬롯 인덱스(1~7)가 주어진 SlotMask에 허용되는지 확인.
+    /// </summary>
+    private bool SlotIsAllowed(int slotIdx1Based, SlotMask mask)
+    {
+        SlotMask bit = slotIdx1Based switch
+        {
+            1 => SlotMask.Slot1,
+            2 => SlotMask.Slot2,
+            3 => SlotMask.Slot3,
+            4 => SlotMask.Slot4,
+            5 => SlotMask.Slot5,
+            6 => SlotMask.Slot6,
+            7 => SlotMask.Slot7,
+            _ => SlotMask.None
+        };
+        return bit != SlotMask.None && (mask & bit) != 0;
     }
 
     /// <summary>
@@ -673,6 +942,68 @@ public class BattleManager : MonoBehaviour
             if (slot == slotPointsBack[b]) return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// 현재 활성 몬스터들의 실제 배치 상태(currentSlot 기반)를 집계하여
+    /// 전열 몬스터 수에 대응하는 Divider만 활성화한다.
+    /// MonsterSO.Formation 레거시 필드에 의존하지 않는 "진실의 원천은 실제 슬롯" 방식.
+    /// - 후열 0마리(Single, 전열만)인 경우 모든 Divider 비활성
+    /// - 전열 N마리 + 후열 1마리 이상 → divider_N 활성 (N=1~4)
+    /// - 호출 시점은 스폰 완료 후(AssignDisplayNumbers 직후)여야 한다.
+    /// </summary>
+    private void UpdateDividerFromActualLayout()
+    {
+        // 우선 모든 Divider 비활성화 (null 안전)
+        if (divider_1 != null) divider_1.SetActive(false);
+        if (divider_2 != null) divider_2.SetActive(false);
+        if (divider_3 != null) divider_3.SetActive(false);
+        if (divider_4 != null) divider_4.SetActive(false);
+
+        if (activeEnemies == null || activeEnemies.Count == 0)
+        {
+            Debug.Log("[DIVIDER] 활성 몬스터 없음 → 모든 Divider off");
+            return;
+        }
+
+        // 실제 배치된 currentSlot으로 전/후열 수 집계
+        int frontCount = 0;
+        int backCount = 0;
+        foreach (EnemyStats es in activeEnemies)
+        {
+            if (es == null) continue;
+            if (SlotHelper.IsFrontRow(es.currentSlot)) frontCount++;
+            else if (SlotHelper.IsBackRow(es.currentSlot)) backCount++;
+            // Center / None은 두 카운트 모두 제외 (단독 전투 등)
+        }
+
+        // 후열이 0이면 구분선 자체가 의미 없음 (Single / All_Front / n=2 전열만 등)
+        if (backCount == 0)
+        {
+            Debug.Log($"[DIVIDER] 전열 {frontCount} / 후열 0 → 분단선 없음");
+            return;
+        }
+
+        GameObject target = frontCount switch
+        {
+            1 => divider_1,
+            2 => divider_2,
+            3 => divider_3,
+            4 => divider_4,
+            _ => null
+        };
+
+        if (target != null)
+        {
+            target.SetActive(true);
+            Debug.Log($"[DIVIDER] 전열 {frontCount} / 후열 {backCount} → {target.name} 활성화");
+        }
+        else
+        {
+            Debug.LogWarning(
+                $"[DIVIDER] 전열 {frontCount} / 후열 {backCount} 포메이션에 대응하는 Divider가 할당되지 않음. " +
+                $"Inspector에서 divider_{frontCount} 슬롯을 연결하세요.");
+        }
     }
 
     /// <summary>
@@ -1456,14 +1787,19 @@ public class BattleManager : MonoBehaviour
 
             Debug.Log($"[SPAWN_DEBUG] {i}번 몬스터 {monsters[i].MonsterName} → 슬롯 이름: {slot.name}, 위치: {slot.position}");
 
+            // MonsterSO.HoverOffsetY 만큼 월드 Y로 띄워서 스폰 (공중 부양 효과)
+            Vector3 spawnPos = slot.position + Vector3.up * monsters[i].HoverOffsetY;
             GameObject obj = Instantiate(monsterPrefab,
-                slot.position, Quaternion.identity, worldRoot);
-            Debug.Log($"[SPAWN] {i}번 슬롯에 소환: {monsters[i].MonsterName}, 스프라이트: {monsters[i].Sprite?.name}");
+                spawnPos, Quaternion.identity, worldRoot);
+            Debug.Log($"[SPAWN] {i}번 슬롯에 소환: {monsters[i].MonsterName}, 스프라이트: {monsters[i].Sprite?.name}, HoverY: {monsters[i].HoverOffsetY}");
 
             EnemyStats stats = obj.GetComponent<EnemyStats>();
             if (stats != null)
             {
                 stats.Init(monsters[i]);
+                // 스폰된 슬롯 Transform을 참조 비교로 BattleSlot enum에 저장.
+                // AssignDisplayNumbers() 등 이후 로직이 이 값을 정렬 키로 쓴다.
+                stats.currentSlot = GetBattleSlotFromTransform(slot);
             }
 
             SpriteRenderer sr = obj.GetComponent<SpriteRenderer>()
@@ -1472,7 +1808,8 @@ public class BattleManager : MonoBehaviour
             {
                 sr.sprite = monsters[i].Sprite;
                 sr.sortingLayerName = "Default";
-                sr.sortingOrder = 10;
+                // 전열(Slot1~4)은 후열(Slot5~7)보다 앞에 렌더링되도록 sortingOrder 차등 부여
+                sr.sortingOrder = IsSlotInBackRow(slot) ? 10 : 20;
 
                 if (sr.sprite == null)
                     Debug.LogWarning($"[SPRITE_DEBUG] 스프라이트 NULL: {monsters[i].MonsterName} — MonsterSO의 Sprite 필드를 확인하세요.");
@@ -1482,6 +1819,18 @@ public class BattleManager : MonoBehaviour
             else
             {
                 Debug.LogWarning($"[SPRITE_DEBUG] SpriteRenderer 없음: {monsters[i].MonsterName}");
+            }
+
+            // World Space Canvas (이름/HP/MP UI) 정렬. SpriteRenderer와 같은 sortingOrder 규칙 적용.
+            // 단, 몬스터 스프라이트보다 UI가 항상 앞에 오도록 +5 오프셋을 둔다.
+            Canvas[] canvases = obj.GetComponentsInChildren<Canvas>(includeInactive: true);
+            int canvasOrder = IsSlotInBackRow(slot) ? 15 : 25;
+            foreach (Canvas cv in canvases)
+            {
+                if (cv == null) continue;
+                cv.overrideSorting = true;
+                cv.sortingLayerName = "Default";
+                cv.sortingOrder = canvasOrder;
             }
 
             // 스프라이트 크기를 슬롯 크기에 맞게 자동 계산
@@ -1536,6 +1885,14 @@ public class BattleManager : MonoBehaviour
             AddMessage("ERROR: No enemies spawned! Check console for details.");
             return;
         }
+
+        // 슬롯 순번(Number UI) 부여: 전열(Slot1~4) 좌→우 먼저, 후열(Slot5~7) 좌→우 나중.
+        // 실제 사용 중인 슬롯 번호(2,3,5,6 등)와 무관하게 1부터 연속 증가한다.
+        AssignDisplayNumbers();
+
+        // 전/후열 분단선 토글 — 실제 배치된 currentSlot 집계 기반
+        // (반드시 activeEnemies 채워지고 currentSlot이 세팅된 뒤 호출)
+        UpdateDividerFromActualLayout();
 
         Debug.Log($"[BattleManager] Battle started successfully with {activeEnemies.Count} enemy/enemies.");
 
@@ -1850,25 +2207,20 @@ public class BattleManager : MonoBehaviour
         int count = Mathf.Clamp(UnityEngine.Random.Range(1, 5), 1, 4);
         Debug.Log($"[BattleManager] LoadMonsterSOsForFloor({floor}) → candidates: {candidates.Count}, count: {count}");
 
+        // 중복 허용: 같은 몬스터가 여러 번 뽑힐 수 있도록 pool에서 제거하지 않는다.
+        // 예) 4마리 전투에서 Rat × 4 같은 조합도 가능.
         List<MonsterSO> result = new List<MonsterSO>();
-        List<MonsterSO> pool = new List<MonsterSO>(candidates);
         for (int k = 0; k < count; k++)
         {
-            if (pool.Count == 0) break;
-
-            float poolWeight = pool.Sum(so => Mathf.Max(0f, so.SpawnWeight));
-            if (poolWeight <= 0f) poolWeight = pool.Count;
-
-            float r = UnityEngine.Random.Range(0f, poolWeight);
+            float r = UnityEngine.Random.Range(0f, totalWeight);
             float acc = 0f;
-            MonsterSO picked = pool[0];
-            foreach (var so in pool)
+            MonsterSO picked = candidates[0];
+            foreach (var so in candidates)
             {
                 acc += Mathf.Max(0f, so.SpawnWeight);
                 if (r <= acc) { picked = so; break; }
             }
             result.Add(picked);
-            pool.Remove(picked);
         }
 
         return result.ToArray();

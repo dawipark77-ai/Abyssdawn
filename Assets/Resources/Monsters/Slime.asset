@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Slime
   sprite: {fileID: -691275006349873449, guid: a291bd318076d264eb6c7547cfa65db5, type: 3}
-  scaleMultiplier: 1
+  scaleMultiplier: 0.8
+  hoverOffsetY: -0.5
   type: 0
   hp: 130
   mp: 0
@@ -29,7 +30,7 @@ MonoBehaviour:
   activeSkills: []
   passiveSkills: []
   aiPattern: 0
-  allowedSlots: 3
+  allowedSlots: 15
   formation: 1
   minFloor: 1
   maxFloor: 1

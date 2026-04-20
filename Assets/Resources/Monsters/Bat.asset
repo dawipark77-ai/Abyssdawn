@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Bat
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
   monsterName: Bat
-  sprite: {fileID: -6836219357644894738, guid: 91837e6a8989abb438a98ea2fbbd2681, type: 3}
-  scaleMultiplier: 1
+  sprite: {fileID: -3562746923108113168, guid: f6681240894ee5644b3303ee1e5b6479, type: 3}
+  scaleMultiplier: 0.8
+  hoverOffsetY: 0
   type: 3
   hp: 30
   mp: 0
@@ -29,7 +30,7 @@ MonoBehaviour:
   activeSkills: []
   passiveSkills: []
   aiPattern: 0
-  allowedSlots: 3
+  allowedSlots: -1
   formation: 1
   minFloor: 1
   maxFloor: 3

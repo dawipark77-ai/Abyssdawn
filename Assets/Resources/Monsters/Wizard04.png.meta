@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 613aba41a3b838444b3db6fe9ce003e1
+guid: f792ec45ba1cfb840b58bfcea864434b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3500586531716175808
-    second: Wizard04_0
+      213: 5137438329694563104
+    second: Wizard04 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Wizard04_0
+      name: Wizard04 1_0
       rect:
         serializedVersion: 2
         x: 0
@@ -108,15 +108,15 @@ TextureImporter:
         width: 780
         height: 1186
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0c7957857e4949030800000000000000
-      internalID: 3500586531716175808
+      spriteID: 02babe801f8db4740800000000000000
+      internalID: 5137438329694563104
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: e9164854dc25b964b9143d1bbf97dc28
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Wizard04_0: 3500586531716175808
+      Wizard04 1_0: 5137438329694563104
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
