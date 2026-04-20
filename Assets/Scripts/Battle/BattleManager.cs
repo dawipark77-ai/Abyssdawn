@@ -572,20 +572,20 @@ public class BattleManager : MonoBehaviour
         },
 
         // n=2 : 2명
+        // ※ 규칙: 전열 2명은 항상 Slot2+Slot3 (중앙 2칸). 양끝(1,4) 배치는 사용하지 않음.
         new int[][]
         {
             new[] { 2, 3 },                       // 2/0 전열 중앙
-            new[] { 1, 4 },                       // 2/0 전열 양끝
             new[] { 2, 6 },                       // 1/1 전열 좌중앙 + 후열 중앙
             new[] { 3, 6 },                       // 1/1 전열 우중앙 + 후열 중앙
             new[] { 5, 7 },                       // 0/2 후열 양끝
         },
 
         // n=3 : 3명
+        // ※ 규칙: 전열 2명 구성은 항상 Slot2+Slot3 (양끝 1,4 금지).
         new int[][]
         {
             new[] { 2, 3, 6 },                    // 2/1 중앙 뒤
-            new[] { 1, 4, 6 },                    // 2/1 양끝 + 중앙 뒤
             new[] { 1, 2, 3 },                    // 3/0 좌측 전열
             new[] { 2, 3, 4 },                    // 3/0 중앙 전열
             new[] { 3, 5, 7 },                    // 1/2 한 명 전열
@@ -594,10 +594,10 @@ public class BattleManager : MonoBehaviour
         },
 
         // n=4 : 4명 (다양성의 핵심 — 기존 2/2 고정 탈피)
+        // ※ 규칙: 전열 2명 구성은 항상 Slot2+Slot3 (양끝 1,4 금지).
         new int[][]
         {
             new[] { 2, 3, 5, 7 },                 // 2/2 표준
-            new[] { 1, 4, 5, 7 },                 // 2/2 양끝 전열
             new[] { 1, 2, 3, 4 },                 // 4/0 전열 꽉
             new[] { 2, 3, 4, 6 },                 // 3/1 전열 우측 3 + 중앙 뒤
             new[] { 1, 2, 3, 6 },                 // 3/1 전열 좌측 3 + 중앙 뒤
@@ -757,6 +757,197 @@ public class BattleManager : MonoBehaviour
         }
 
         return result;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // ● 이동 시스템 — Phase 1: 조회 API (Read-only)
+    //   상태 변경 없이 현재 포메이션을 조회한다.
+    //   이 메서드들은 어떤 필드도 수정하지 않으며, 실패 시 null/false를
+    //   반환할 뿐 부작용이 없다. 이동 로직 테스트의 진단용으로 사용.
+    // ══════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// 지정된 슬롯에 있는 살아있는 몬스터를 반환. 없으면 null.
+    /// currentSlot(BattleSlot enum) 기준 참조 매칭이라 월드 좌표 영향 없음.
+    /// </summary>
+    public EnemyStats GetMonsterAtSlot(BattleSlot slot)
+    {
+        if (slot == BattleSlot.None) return null;
+        if (activeEnemies == null) return null;
+
+        foreach (EnemyStats es in activeEnemies)
+        {
+            if (es == null) continue;
+            if (es.IsDead()) continue;
+            if (es.currentSlot == slot) return es;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// UI 디스플레이 번호(1-based, AssignDisplayNumbers와 동일 규칙)로 몬스터 조회.
+    /// 규칙: 살아있는 몬스터를 currentSlot 오름차순 정렬 후 n번째를 반환.
+    /// 범위 밖이면 null.
+    /// </summary>
+    public EnemyStats GetMonsterByNumber(int displayNumber)
+    {
+        if (displayNumber < 1) return null;
+        if (activeEnemies == null) return null;
+
+        List<(EnemyStats stats, int slotKey)> ordered = new List<(EnemyStats, int)>();
+        foreach (EnemyStats es in activeEnemies)
+        {
+            if (es == null) continue;
+            if (es.IsDead()) continue;
+            int key = (int)es.currentSlot;
+            if (key == 0) key = int.MaxValue;
+            ordered.Add((es, key));
+        }
+        ordered.Sort((a, b) => a.slotKey.CompareTo(b.slotKey));
+
+        int idx = displayNumber - 1;
+        if (idx >= ordered.Count) return null;
+        return ordered[idx].stats;
+    }
+
+    /// <summary>
+    /// 현재 포메이션을 콘솔에 출력한다. 디버그 전용, 상태 변경 없음.
+    /// 출력 예:
+    ///   [FORMATION] 총 3마리 / 전열 2 : 후열 1
+    ///     전열: Slot1=Skeleton(#1, HP 75/75) Slot2=- Slot3=Bat(#2, HP 30/30) Slot4=-
+    ///     후열: Slot5=- Slot6=Goblin(#3, HP 60/60) Slot7=-
+    /// </summary>
+    public void DebugPrintFormation()
+    {
+        if (activeEnemies == null || activeEnemies.Count == 0)
+        {
+            Debug.Log("[FORMATION] 활성 몬스터 없음");
+            return;
+        }
+
+        // 살아있는 몬스터를 슬롯 오름차순으로 정렬
+        List<(EnemyStats stats, int slotKey)> ordered = new List<(EnemyStats, int)>();
+        foreach (EnemyStats es in activeEnemies)
+        {
+            if (es == null) continue;
+            if (es.IsDead()) continue;
+            int key = (int)es.currentSlot;
+            if (key == 0) key = int.MaxValue;
+            ordered.Add((es, key));
+        }
+        ordered.Sort((a, b) => a.slotKey.CompareTo(b.slotKey));
+
+        // 슬롯 → (몬스터, 번호) 맵 구축 (디스플레이 번호는 AssignDisplayNumbers와 동일 규칙)
+        Dictionary<BattleSlot, (EnemyStats stats, int number)> map = new Dictionary<BattleSlot, (EnemyStats, int)>();
+        for (int i = 0; i < ordered.Count; i++)
+        {
+            map[ordered[i].stats.currentSlot] = (ordered[i].stats, i + 1);
+        }
+
+        System.Text.StringBuilder front = new System.Text.StringBuilder("전열: ");
+        for (int i = 1; i <= 4; i++)
+        {
+            BattleSlot s = (BattleSlot)i;
+            if (map.TryGetValue(s, out var pair))
+                front.Append($"Slot{i}={pair.stats.enemyName}(#{pair.number}, HP {pair.stats.currentHP}/{pair.stats.maxHP}) ");
+            else
+                front.Append($"Slot{i}=- ");
+        }
+
+        System.Text.StringBuilder back = new System.Text.StringBuilder("후열: ");
+        for (int i = 5; i <= 7; i++)
+        {
+            BattleSlot s = (BattleSlot)i;
+            if (map.TryGetValue(s, out var pair))
+                back.Append($"Slot{i}={pair.stats.enemyName}(#{pair.number}, HP {pair.stats.currentHP}/{pair.stats.maxHP}) ");
+            else
+                back.Append($"Slot{i}=- ");
+        }
+
+        int frontCount = 0, backCount = 0;
+        foreach (var kv in map)
+        {
+            if (SlotHelper.IsFrontRow(kv.Key)) frontCount++;
+            else if (SlotHelper.IsBackRow(kv.Key)) backCount++;
+        }
+
+        Debug.Log($"[FORMATION] 총 {ordered.Count}마리 / 전열 {frontCount} : 후열 {backCount}\n  {front}\n  {back}");
+
+        // ── 진단용 Raw Dump ──
+        // activeEnemies 전체를 무가공 상태로 출력. F12 출력과 실제 스폰 로그/게임 뷰를
+        // 교차 대조하기 위한 정보. currentSlot 내부값 vs 월드 좌표를 동시에 보여준다.
+        System.Text.StringBuilder raw = new System.Text.StringBuilder("[FORMATION_RAW]\n");
+        raw.Append($"  activeEnemies.Count = {activeEnemies.Count}\n");
+        for (int i = 0; i < activeEnemies.Count; i++)
+        {
+            EnemyStats es = activeEnemies[i];
+            if (es == null)
+            {
+                raw.Append($"  [{i}] NULL 엔트리\n");
+                continue;
+            }
+            Vector3 pos = es.transform != null ? es.transform.position : Vector3.zero;
+            string row = SlotHelper.IsFrontRow(es.currentSlot) ? "FRONT" :
+                         SlotHelper.IsBackRow(es.currentSlot) ? "BACK" :
+                         es.currentSlot == BattleSlot.Center ? "CENTER" : "NONE";
+            bool dead = es.IsDead();
+            raw.Append($"  [{i}] {es.enemyName} | currentSlot={es.currentSlot}({(int)es.currentSlot}) [{row}] | world=({pos.x:F2},{pos.y:F2}) | HP={es.currentHP}/{es.maxHP} | Dead={dead}\n");
+        }
+
+        // ── 슬롯 배열 상태 진단 ──
+        // slotPointsFront/Back/Center가 실제로 어떤 GameObject를 가리키는지 확인.
+        // 두 배열이 같은 오브젝트를 가리키면 GetBattleSlotFromTransform이 오작동한다.
+        raw.Append("\n  [Slot Arrays]\n");
+        raw.Append($"  slotPointCenter = {(slotPointCenter == null ? "null" : slotPointCenter.name)}\n");
+        raw.Append("  slotPointsFront = [");
+        if (slotPointsFront != null)
+        {
+            for (int k = 0; k < slotPointsFront.Length; k++)
+            {
+                string nm = slotPointsFront[k] == null ? "null" : slotPointsFront[k].name;
+                int iid = slotPointsFront[k] == null ? 0 : slotPointsFront[k].GetInstanceID();
+                raw.Append($"{k}:{nm}(id={iid})");
+                if (k < slotPointsFront.Length - 1) raw.Append(", ");
+            }
+        }
+        raw.Append("]\n  slotPointsBack  = [");
+        if (slotPointsBack != null)
+        {
+            for (int k = 0; k < slotPointsBack.Length; k++)
+            {
+                string nm = slotPointsBack[k] == null ? "null" : slotPointsBack[k].name;
+                int iid = slotPointsBack[k] == null ? 0 : slotPointsBack[k].GetInstanceID();
+                raw.Append($"{k}:{nm}(id={iid})");
+                if (k < slotPointsBack.Length - 1) raw.Append(", ");
+            }
+        }
+        raw.Append("]\n");
+
+        // 교차 매핑 검증: 각 몬스터 Transform이 어느 slot 배열과 매칭되는지
+        raw.Append("\n  [Transform 매칭 검증]\n");
+        for (int i = 0; i < activeEnemies.Count; i++)
+        {
+            EnemyStats es = activeEnemies[i];
+            if (es == null || es.transform == null) continue;
+            Vector3 p = es.transform.position;
+            // 각 몬스터의 현재 월드 위치가 실제로 어느 SlotPoint 좌표에 가까운지
+            string closest = "?";
+            float bestDist = float.MaxValue;
+            void Check(Transform t, string label)
+            {
+                if (t == null) return;
+                float d = (t.position - p).sqrMagnitude;
+                if (d < bestDist) { bestDist = d; closest = label; }
+            }
+            if (slotPointsFront != null)
+                for (int k = 0; k < slotPointsFront.Length; k++) Check(slotPointsFront[k], $"Front[{k}]({slotPointsFront[k]?.name})");
+            if (slotPointsBack != null)
+                for (int k = 0; k < slotPointsBack.Length; k++) Check(slotPointsBack[k], $"Back[{k}]({slotPointsBack[k]?.name})");
+            Check(slotPointCenter, $"Center({slotPointCenter?.name})");
+            raw.Append($"  [{i}] {es.enemyName} world=({p.x:F2},{p.y:F2}) → 가장 가까운 SlotPoint: {closest} (dist²={bestDist:F3})\n");
+        }
+
+        Debug.Log(raw.ToString());
     }
 
     /// <summary>
@@ -1099,6 +1290,13 @@ public class BattleManager : MonoBehaviour
     {
         if (Input.GetKeyDown(soloPartyHotkey)) SetPartyMode(PartyMode.Solo);
         if (Input.GetKeyDown(fullPartyHotkey)) SetPartyMode(PartyMode.Full);
+
+        // ── 이동 시스템 디버그 (Phase 1) ──
+        // F12: 현재 포메이션을 콘솔에 출력 (읽기 전용, 상태 변경 없음)
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            DebugPrintFormation();
+        }
 
         // 타겟 전환(좌우 방향키)
         if (!battleEnded && activeEnemies.Count > 1 && !waitingForTargetSelection)
@@ -1935,62 +2133,21 @@ public class BattleManager : MonoBehaviour
 
         enemyLine.Clear();
 
-        // 중앙 우선 슬롯 배정 순서 (1명=2번, 2명=2,3번, 3명=1,2,3번, 4명=1,2,3,4번)
-        int[][] centerPriorityOrders = new int[][]
-        {
-            new int[] { 2 },
-            new int[] { 2, 3 },
-            new int[] { 1, 2, 3 },
-            new int[] { 1, 2, 3, 4 }
-        };
-
-        int enemyCount = Mathf.Min(activeEnemies.Count, 4);
-        int[] slotOrder = centerPriorityOrders[enemyCount - 1];
-
-        int orderIndex = 0;
+        // 적의 currentSlot은 이미 스폰 단계(AssignSlotsByAllowedSlots + GetBattleSlotFromTransform)에서
+        // 7슬롯 체계로 정확히 세팅되어 있으므로 절대 덮어쓰지 않는다.
+        // BattleLine은 레거시 4슬롯 컨테이너라 후열(Slot5~7)을 표현하지 못하므로,
+        // 전열(Slot1~4)에 있는 적만 동기화해 기존 GetAt/GetCharactersInMask 호출을 유지한다.
         foreach (var e in activeEnemies)
         {
-            if (e == null || orderIndex >= slotOrder.Length) continue;
-
-            // allowedSlots 범위 안에서 슬롯 찾기
-            int assignedSlot = -1;
-            for (int s = orderIndex; s < slotOrder.Length; s++)
+            if (e == null) continue;
+            int slotIdx = (int)e.currentSlot;
+            if (slotIdx >= 1 && slotIdx <= 4)
             {
-                int candidate = slotOrder[s];
-                SlotMask candidateMask = (SlotMask)(1 << (candidate - 1));
-                if ((e.allowedSlots & candidateMask) != 0)
-                {
-                    assignedSlot = candidate;
-                    orderIndex = s + 1;
-                    break;
-                }
+                enemyLine.AssignToSlot(e, slotIdx);
             }
-
-            // allowedSlots에 맞는 슬롯이 없으면 전체 슬롯에서 allowedSlots 범위로 강제 배정
-            if (assignedSlot == -1)
-            {
-                for (int s = 0; s < 4; s++)
-                {
-                    SlotMask candidateMask = (SlotMask)(1 << s);
-                    if ((e.allowedSlots & candidateMask) != 0 && enemyLine.IsEmpty(s + 1))
-                    {
-                        assignedSlot = s + 1;
-                        break;
-                    }
-                }
-                // 그래도 없으면 빈 슬롯 아무데나
-                if (assignedSlot == -1)
-                {
-                    assignedSlot = enemyLine.FindEmptySlot();
-                }
-                orderIndex++;
-            }
-
-            e.currentSlot = (BattleSlot)assignedSlot;
-            enemyLine.AssignToSlot(e, assignedSlot);
         }
 
-        Debug.Log($"[BattleManager] BattleLine 초기화 완료. 플레이어: {playerLine}, 적: {enemyLine}");
+        Debug.Log($"[BattleManager] BattleLine 초기화 완료. 플레이어: {playerLine}, 적(전열 전용): {enemyLine}");
     }
 
     private void RebuildEnemyStatusPanel()

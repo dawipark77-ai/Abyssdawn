@@ -32,7 +32,7 @@ MonoBehaviour:
   aiPattern: 0
   allowedSlots: 15
   formation: 1
-  minFloor: 1
+  minFloor: 5
   maxFloor: 6
   spawnWeight: 5
   expReward: 0
