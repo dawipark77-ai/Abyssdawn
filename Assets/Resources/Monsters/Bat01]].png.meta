@@ -106,12 +106,12 @@ TextureImporter:
       name: Bat01]]_0
       rect:
         serializedVersion: 2
-        x: 110
-        y: 1
-        width: 639
-        height: 1856
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 0
+        y: 0
+        width: 637
+        height: 1551
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -128,7 +128,7 @@ TextureImporter:
       name: Bat01]]_1
       rect:
         serializedVersion: 2
-        x: 208
+        x: 97
         y: 0
         width: 443
         height: 202
@@ -150,7 +150,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 9e15c8c85c448174b85610b3c2cf5f1b
+    spriteID: 5be9533370a48374793d69dfd1c31b1c
     internalID: 0
     vertices: []
     indices: 

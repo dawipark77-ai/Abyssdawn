@@ -950,6 +950,372 @@ public class BattleManager : MonoBehaviour
         Debug.Log(raw.ToString());
     }
 
+    // ══════════════════════════════════════════════════════════════
+    // ● 이동 시스템 — Phase 2: 데이터 레이어 (No Animation)
+    //   currentSlot과 월드 위치를 즉시 갱신한다. 애니메이션/UI 추종은
+    //   Phase 3에서 추가. 이동은 항상 AllowedSlots를 기본 검증하며,
+    //   강제 이동(푸시/풀/셔플 등 스킬 유래)은 forced=true로 우회한다.
+    //   이동 후 AssignDisplayNumbers + UpdateDivider + enemyLine 동기화.
+    // ══════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// 이동 테스트용 선택 몬스터. 숫자키 1~7로 지정된 순간의 EnemyStats를 참조로 보관한다.
+    /// 이후 이동으로 번호(#N)가 바뀌어도 같은 적을 계속 조작할 수 있다.
+    /// null이거나 죽은 상태면 fallback으로 #1을 쓴다.
+    /// </summary>
+    private EnemyStats moveTestSelectedEnemy;
+
+    /// <summary>
+    /// 숫자키 1~7을 검사해 현재 디스플레이 번호 기준으로 moveTestSelectedEnemy를 갱신한다.
+    /// </summary>
+    private void HandleMoveSelectionKeys()
+    {
+        for (int n = 1; n <= 7; n++)
+        {
+            KeyCode key = KeyCode.Alpha0 + n;
+            if (Input.GetKeyDown(key))
+            {
+                EnemyStats picked = GetMonsterByNumber(n);
+                if (picked == null)
+                {
+                    Debug.Log($"[MOVE_SELECT] #{n} 몬스터 없음");
+                }
+                else
+                {
+                    moveTestSelectedEnemy = picked;
+                    Debug.Log($"[MOVE_SELECT] #{n} {picked.enemyName} ({picked.currentSlot}) 선택됨");
+                }
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 현재 선택된 이동 테스트 대상. 없거나 죽었으면 #1로 fallback.
+    /// </summary>
+    private EnemyStats GetMoveTestTarget()
+    {
+        if (moveTestSelectedEnemy != null && !moveTestSelectedEnemy.IsDead())
+            return moveTestSelectedEnemy;
+        return GetMonsterByNumber(1);
+    }
+
+    /// <summary>
+    /// F8/F9/F10/F11 이동 액션 핫키 처리.
+    /// </summary>
+    private void HandleMoveActionKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.F8))
+        {
+            EnemyStats e = GetMoveTestTarget();
+            if (e == null) { Debug.Log("[MOVE_TEST/F8] 대상 몬스터 없음"); }
+            else if (SlotHelper.IsFrontRow(e.currentSlot))
+            {
+                Debug.Log($"[MOVE_TEST/F8] {e.enemyName}은 이미 전열 ({e.currentSlot}) — 더 앞으로 갈 수 없음 (버팀)");
+            }
+            else
+            {
+                BattleSlot front = GetNearestSlotInOppositeRow(e.currentSlot);
+                if (front == BattleSlot.None) Debug.Log("[MOVE_TEST/F8] 전열 슬롯 매핑 실패");
+                else
+                {
+                    EnemyStats occupant = GetMonsterAtSlot(front);
+                    if (occupant != null)
+                        Debug.Log($"[MOVE_TEST/F8] {e.enemyName} 앞 {front} 점유({occupant.enemyName}) — 버팀");
+                    else
+                        MoveToSlot(e, front, forced: true);
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.F9))
+        {
+            EnemyStats e = GetMoveTestTarget();
+            if (e == null) { Debug.Log("[MOVE_TEST/F9] 대상 몬스터 없음"); }
+            else
+            {
+                BattleSlot right = GetHorizontalNeighbor(e.currentSlot, 1);
+                if (right == BattleSlot.None)
+                    Debug.Log($"[MOVE_TEST/F9] {e.enemyName} {e.currentSlot}의 오른쪽 이웃 없음 (끝/행 경계)");
+                else
+                    MoveToSlot(e, right, forced: false);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.F10))
+        {
+            EnemyStats e = GetMoveTestTarget();
+            if (e == null) { Debug.Log("[MOVE_TEST/F10] 대상 몬스터 없음"); }
+            else if (SlotHelper.IsBackRow(e.currentSlot))
+            {
+                Debug.Log($"[MOVE_TEST/F10] {e.enemyName}은 이미 후열 ({e.currentSlot}) — 더 뒤로 갈 수 없음 (버팀)");
+            }
+            else
+            {
+                BattleSlot back = GetNearestSlotInOppositeRow(e.currentSlot);
+                if (back == BattleSlot.None) Debug.Log("[MOVE_TEST/F10] 후열 슬롯 매핑 실패");
+                else
+                {
+                    EnemyStats occupant = GetMonsterAtSlot(back);
+                    if (occupant != null)
+                        Debug.Log($"[MOVE_TEST/F10] {e.enemyName} 뒤 {back} 점유({occupant.enemyName}) — 버팀");
+                    else
+                        MoveToSlot(e, back, forced: true);
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.F11))
+        {
+            ShuffleAllEnemies();
+        }
+    }
+
+    /// <summary>
+    /// 슬롯별 결정적 sortingOrder.
+    /// 후열(Slot5~7) = 10..12, 전열(Slot1~4) = 20..23.
+    /// 같은 행 내에서도 슬롯 번호가 클수록(오른쪽일수록) 상위에 그려져 스프라이트 겹침이 결정적이 된다.
+    /// 이동·셔플 이후에도 이 규칙만 적용하면 시각적 정렬이 흐트러지지 않는다.
+    /// </summary>
+    private int GetSortingOrderForSlot(BattleSlot slot)
+    {
+        int idx = (int)slot;
+        if (idx >= 5 && idx <= 7) return 10 + (idx - 5); // 10, 11, 12
+        if (idx >= 1 && idx <= 4) return 20 + (idx - 1); // 20, 21, 22, 23
+        return 20;
+    }
+
+    /// <summary>
+    /// 이동 API 결과 코드. 실패 사유를 명확히 구분한다.
+    /// </summary>
+    public enum MoveResult
+    {
+        Success_Moved,      // 빈 슬롯으로 이동
+        Success_Swapped,    // 점유 슬롯과 스왑
+        Fail_InvalidArgs,   // mover null / 죽음 / target None
+        Fail_SameSlot,      // 이미 해당 슬롯
+        Fail_AllowedSlots,  // AllowedSlots 위반 (forced=false일 때)
+        Fail_NoTransform,   // 목표 슬롯 Transform이 씬에 없음
+    }
+
+    /// <summary>
+    /// 수평 이웃 슬롯을 반환한다. 행을 넘지 않는다.
+    /// direction: -1 = 왼쪽, +1 = 오른쪽. 끝이거나 행 경계면 None.
+    /// 전열: 1-2-3-4, 후열: 5-6-7 로 이웃 관계가 정의된다.
+    /// </summary>
+    private BattleSlot GetHorizontalNeighbor(BattleSlot slot, int direction)
+    {
+        int idx = (int)slot;
+        if (direction != -1 && direction != 1) return BattleSlot.None;
+
+        // 전열 (1~4)
+        if (idx >= 1 && idx <= 4)
+        {
+            int next = idx + direction;
+            if (next >= 1 && next <= 4) return (BattleSlot)next;
+            return BattleSlot.None;
+        }
+
+        // 후열 (5~7)
+        if (idx >= 5 && idx <= 7)
+        {
+            int next = idx + direction;
+            if (next >= 5 && next <= 7) return (BattleSlot)next;
+            return BattleSlot.None;
+        }
+
+        return BattleSlot.None;
+    }
+
+    /// <summary>
+    /// 주어진 슬롯에서 반대 행(전→후 / 후→전)으로 X좌표가 가장 가까운 슬롯을 반환한다.
+    /// "뒤로 밀치기" / "앞으로 당기기" 매핑의 기본 규칙. 슬롯 Transform이 씬에 세팅되어 있어야 함.
+    /// </summary>
+    private BattleSlot GetNearestSlotInOppositeRow(BattleSlot from)
+    {
+        Transform src = SlotTransformByIndex((int)from);
+        if (src == null) return BattleSlot.None;
+
+        int start, end;
+        if (SlotHelper.IsFrontRow(from)) { start = 5; end = 7; }
+        else if (SlotHelper.IsBackRow(from)) { start = 1; end = 4; }
+        else return BattleSlot.None;
+
+        float sx = src.position.x;
+        float bestDist = float.MaxValue;
+        int bestIdx = 0;
+        for (int i = start; i <= end; i++)
+        {
+            Transform t = SlotTransformByIndex(i);
+            if (t == null) continue;
+            float d = Mathf.Abs(t.position.x - sx);
+            if (d < bestDist) { bestDist = d; bestIdx = i; }
+        }
+        return bestIdx == 0 ? BattleSlot.None : (BattleSlot)bestIdx;
+    }
+
+    /// <summary>
+    /// 핵심 이동 API. 빈 슬롯이면 Move, 점유 슬롯이면 Swap.
+    /// forced=false(기본): AllowedSlots 엄격 검증. 실패 시 상태 변경 없이 Fail_AllowedSlots.
+    /// forced=true: 푸시/셔플 등 스킬 강제 이동. AllowedSlots 무시.
+    /// 성공 시 currentSlot + 월드 위치 갱신, 전/후열 sortingOrder 재설정,
+    /// AssignDisplayNumbers + UpdateDivider + enemyLine 동기화.
+    /// 애니메이션 없음 (Phase 3에서 추가).
+    /// </summary>
+    public MoveResult MoveToSlot(EnemyStats mover, BattleSlot target, bool forced = false)
+    {
+        if (mover == null || mover.IsDead()) return MoveResult.Fail_InvalidArgs;
+        if (target == BattleSlot.None) return MoveResult.Fail_InvalidArgs;
+        if (mover.currentSlot == target) return MoveResult.Fail_SameSlot;
+
+        int targetIdx = (int)target;
+        if (targetIdx < 1 || targetIdx > 7) return MoveResult.Fail_InvalidArgs;
+
+        Transform targetTransform = SlotTransformByIndex(targetIdx);
+        if (targetTransform == null) return MoveResult.Fail_NoTransform;
+
+        // 이동자의 AllowedSlots 검증 (엄격 모드)
+        if (!forced && !SlotIsAllowed(targetIdx, mover.allowedSlots))
+        {
+            Debug.LogWarning($"[MOVE_FAIL] {mover.enemyName} {mover.currentSlot} → {target} 차단됨 (AllowedSlots 위반)");
+            return MoveResult.Fail_AllowedSlots;
+        }
+
+        EnemyStats occupant = GetMonsterAtSlot(target);
+
+        // 빈 슬롯 → 단순 이동
+        if (occupant == null)
+        {
+            BattleSlot from = mover.currentSlot;
+            ApplySlotAssignment(mover, target, targetTransform);
+            PostMoveRefresh();
+            Debug.Log($"[MOVE] {mover.enemyName} {from} → {target} (이동)" + (forced ? " [forced]" : ""));
+            return MoveResult.Success_Moved;
+        }
+
+        // 점유 슬롯 → 스왑. 스왑은 상대의 AllowedSlots도 검증.
+        if (!forced && !SlotIsAllowed((int)mover.currentSlot, occupant.allowedSlots))
+        {
+            Debug.LogWarning($"[MOVE_FAIL] {mover.enemyName} ↔ {occupant.enemyName} 스왑 차단됨 (상대 AllowedSlots 위반)");
+            return MoveResult.Fail_AllowedSlots;
+        }
+
+        BattleSlot moverFrom = mover.currentSlot;
+        Transform moverOriginTransform = SlotTransformByIndex((int)moverFrom);
+        ApplySlotAssignment(mover, target, targetTransform);
+        ApplySlotAssignment(occupant, moverFrom, moverOriginTransform);
+        PostMoveRefresh();
+        Debug.Log($"[MOVE] {mover.enemyName} {moverFrom} → {target} (swap with {occupant.enemyName})" + (forced ? " [forced]" : ""));
+        return MoveResult.Success_Swapped;
+    }
+
+    /// <summary>
+    /// currentSlot + 월드 위치 + 렌더링 순서를 한 번에 갱신한다.
+    /// HoverOffsetY는 (현재 월드 Y - 이전 슬롯 Y)로 역산해 새 슬롯에서도 유지된다.
+    /// 이전 슬롯 Transform이 없으면 HoverY=0으로 처리.
+    /// </summary>
+    private void ApplySlotAssignment(EnemyStats es, BattleSlot newSlot, Transform newSlotTransform)
+    {
+        if (es == null || newSlotTransform == null) return;
+
+        float hoverY = 0f;
+        Transform prevSlot = SlotTransformByIndex((int)es.currentSlot);
+        if (prevSlot != null && es.transform != null)
+        {
+            hoverY = es.transform.position.y - prevSlot.position.y;
+        }
+
+        es.currentSlot = newSlot;
+        if (es.transform != null)
+        {
+            Vector3 pos = newSlotTransform.position;
+            pos.y += hoverY;
+            es.transform.position = pos;
+        }
+
+        // 슬롯별 결정적 sortingOrder (겹침 순서 고정)
+        SpriteRenderer sr = es.GetComponent<SpriteRenderer>() ?? es.GetComponentInChildren<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.sortingOrder = GetSortingOrderForSlot(newSlot);
+        }
+    }
+
+    /// <summary>
+    /// 이동 연산 후 부수 갱신: 번호 재배정 + 분단선 갱신 + enemyLine(전열 4슬롯) 재동기화.
+    /// Phase 2에서는 즉시 스냅 방식이라 애니 중 추종 처리는 없다.
+    /// </summary>
+    private void PostMoveRefresh()
+    {
+        AssignDisplayNumbers();
+        UpdateDividerFromActualLayout();
+
+        // 레거시 enemyLine은 전열(Slot1~4)만 보관. 후열은 activeEnemies에서만 조회.
+        enemyLine.Clear();
+        foreach (var e in activeEnemies)
+        {
+            if (e == null) continue;
+            int idx = (int)e.currentSlot;
+            if (idx >= 1 && idx <= 4) enemyLine.AssignToSlot(e, idx);
+        }
+    }
+
+    /// <summary>
+    /// 적 전체를 현재 점유 중인 슬롯 집합 안에서 무작위로 재배치한다.
+    /// 슬롯 집합은 보존되고 몬스터만 섞이므로 전/후열 비율(분단선 위치)은 유지된다.
+    /// AllowedSlots는 강제로 무시(셔플은 본질적으로 forced 이동).
+    /// Phase 3에서 페이드/슬라이드 연출 추가 예정.
+    /// </summary>
+    public void ShuffleAllEnemies()
+    {
+        List<EnemyStats> alive = new List<EnemyStats>();
+        List<BattleSlot> slots = new List<BattleSlot>();
+        foreach (var e in activeEnemies)
+        {
+            if (e == null || e.IsDead()) continue;
+            BattleSlot s = e.currentSlot;
+            if (s == BattleSlot.None || s == BattleSlot.Center) continue;
+            alive.Add(e);
+            slots.Add(s);
+        }
+
+        if (alive.Count < 2)
+        {
+            Debug.Log("[SHUFFLE] 대상이 2마리 미만이라 섞을 필요 없음");
+            return;
+        }
+
+        // Fisher–Yates 셔플 (alive 리스트 순서만)
+        for (int i = alive.Count - 1; i > 0; i--)
+        {
+            int r = UnityEngine.Random.Range(0, i + 1);
+            (alive[i], alive[r]) = (alive[r], alive[i]);
+        }
+
+        // alive[i] → slots[i] 매핑으로 재배치. currentSlot을 먼저 전원 None으로 초기화해
+        // GetMonsterAtSlot 충돌을 방지한다.
+        // HoverY 역산은 이 시점에서 손실되므로(prevSlot이 None) HoverY=0으로 snap.
+        // 셔플은 연출용이라 Phase 3 애니에서 hoverY 별도 복원 예정.
+        foreach (var e in alive) e.currentSlot = BattleSlot.None;
+
+        for (int i = 0; i < alive.Count; i++)
+        {
+            EnemyStats e = alive[i];
+            BattleSlot target = slots[i];
+            Transform t = SlotTransformByIndex((int)target);
+            if (t != null && e.transform != null)
+            {
+                e.transform.position = t.position;
+            }
+            e.currentSlot = target;
+            SpriteRenderer sr = e.GetComponent<SpriteRenderer>() ?? e.GetComponentInChildren<SpriteRenderer>();
+            if (sr != null) sr.sortingOrder = GetSortingOrderForSlot(target);
+        }
+
+        PostMoveRefresh();
+        Debug.Log($"[SHUFFLE] 적 {alive.Count}마리 재배치 완료");
+    }
+
     /// <summary>
     /// 전열(1~4) 좌→우, 후열(5~7) 좌→우 순서로 활성 몬스터에게 순번(1부터)을 부여하고
     /// EnemyUIDisplay.SetNumber를 통해 UI Number 텍스트를 갱신한다.
@@ -1297,6 +1663,15 @@ public class BattleManager : MonoBehaviour
         {
             DebugPrintFormation();
         }
+
+        // ── 이동 시스템 테스트 핫키 (Phase 2) ──
+        // 숫자키 1~7: 현재 #N 몬스터를 "이동 선택" 상태로 고정 (이후 이동해도 같은 EnemyStats 유지)
+        // F8 : 선택 몬스터를 앞으로 당기기 (후열 → 전열, 점유됐으면 버팀. forced=true)
+        // F9 : 선택 몬스터를 오른쪽 이웃 슬롯으로 이동/스왑 (AllowedSlots 엄격)
+        // F10: 선택 몬스터를 뒤로 밀치기 (전열 → 후열, 점유됐으면 버팀. forced=true)
+        // F11: 적 전체 랜덤 셔플 (현재 점유 슬롯 집합 유지, forced)
+        HandleMoveSelectionKeys();
+        HandleMoveActionKeys();
 
         // 타겟 전환(좌우 방향키)
         if (!battleEnded && activeEnemies.Count > 1 && !waitingForTargetSelection)
@@ -2006,8 +2381,8 @@ public class BattleManager : MonoBehaviour
             {
                 sr.sprite = monsters[i].Sprite;
                 sr.sortingLayerName = "Default";
-                // 전열(Slot1~4)은 후열(Slot5~7)보다 앞에 렌더링되도록 sortingOrder 차등 부여
-                sr.sortingOrder = IsSlotInBackRow(slot) ? 10 : 20;
+                // 슬롯별 결정적 sortingOrder (전열 20~23, 후열 10~12)
+                sr.sortingOrder = GetSortingOrderForSlot(GetBattleSlotFromTransform(slot));
 
                 if (sr.sprite == null)
                     Debug.LogWarning($"[SPRITE_DEBUG] 스프라이트 NULL: {monsters[i].MonsterName} — MonsterSO의 Sprite 필드를 확인하세요.");

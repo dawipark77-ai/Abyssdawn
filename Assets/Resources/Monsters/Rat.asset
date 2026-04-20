@@ -15,7 +15,7 @@ MonoBehaviour:
   monsterName: Rat
   sprite: {fileID: -3882002067681905023, guid: df0c6636c362af94281ba8d050c43cb8, type: 3}
   scaleMultiplier: 0.4
-  hoverOffsetY: -0.5
+  hoverOffsetY: 0
   type: 3
   hp: 35
   mp: 0
