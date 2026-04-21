@@ -233,14 +233,22 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private float backRowScaleMultiplier = 0.75f;
 
     [Header("전/후열 분단선 (실제 배치 기준 자동 토글)")]
-    [Tooltip("전열 몬스터 1마리 + 후열 1마리 이상일 때 활성화")]
+    [Tooltip("Slot1 뒤에 배치. 포메이션 1/X (예: 1/3) 일 때 활성화")]
     public GameObject divider_1;
-    [Tooltip("전열 몬스터 2마리 + 후열 1마리 이상일 때 활성화 (2/1, 2/2 등)")]
+    [Tooltip("Slot2 뒤에 배치. 포메이션 2/X (예: 2/2, 2/1) 일 때 활성화")]
     public GameObject divider_2;
-    [Tooltip("전열 몬스터 3마리 + 후열 1마리 이상일 때 활성화")]
+    [Tooltip("Slot3 뒤에 배치. 포메이션 3/X (예: 3/1) 일 때 활성화")]
     public GameObject divider_3;
-    [Tooltip("전열 몬스터 4마리 + 후열 1마리 이상일 때 활성화 (선택 — 5마리 이상 전투에서 사용)")]
+    [Tooltip("(4슬롯에서는 사용 안 함) 포메이션 4/X는 전원 전열이라 분단선 없음")]
     public GameObject divider_4;
+
+    /// <summary>
+    /// 현재 전투의 분단선 위치 (1-based 슬롯 인덱스).
+    /// 값이 K이면 Slot_K 뒤에 divider_K가 활성화 (Slot 1..K = 전열, Slot K+1..4 = 후열).
+    /// 0 = 분단선 없음(전원 전열 또는 전원 후열 또는 단독).
+    /// 스폰 시 SpawnPattern의 frontCount에서 파생됨.
+    /// </summary>
+    private int currentDividerSlotIdx = 0;
 
     [Tooltip("씬에 수동 배치하는 적 UI 앵커. 순번(1,2,3,...) 순서대로 몬스터 UI가 해당 앵커 위치로 고정됩니다.\n" +
              "비워두면 아래 자동 배치 설정이 사용됩니다.")]
@@ -557,97 +565,92 @@ public class BattleManager : MonoBehaviour
     // ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 몬스터 수(n)별 슬롯 템플릿 풀. 각 n에 여러 후보가 있어 전투마다 다양한 포메이션이 나온다.
-    /// 1-based 슬롯 인덱스. Front = 1~4, Back = 5~7. 0 = Center 특수값.
-    /// 런타임에 뽑힌 MonsterSO들의 AllowedSlots와 호환되는 템플릿 중 하나를 랜덤 선택한다.
+    /// 4슬롯 시스템의 스폰 패턴.
+    /// slots = 몬스터가 들어갈 슬롯 인덱스(1~4, 정렬된 오름차순). 0은 Center 특수값(n=1 전용).
+    /// frontCount = slots[0..frontCount-1]이 전열, slots[frontCount..]가 후열.
+    ///   · frontCount == 0 : 전원 후열 (분단선 없음)
+    ///   · frontCount == slots.Length : 전원 전열 (분단선 없음)
+    ///   · 그 외 : divider_{slots[frontCount-1]} 활성
+    /// label = 디버그 출력용 포메이션 이름 (예: "2/2", "3/1").
     /// </summary>
-    private static readonly int[][][] SLOT_TEMPLATE_POOLS = new int[][][]
+    private readonly struct SpawnPattern
     {
-        null,                                     // index 0 (미사용)
+        public readonly int[] slots;
+        public readonly int frontCount;
+        public readonly string label;
 
-        // n=1 : 단독 (Center 고정)
-        new int[][]
+        public SpawnPattern(int[] s, int fc, string l) { slots = s; frontCount = fc; label = l; }
+    }
+
+    /// <summary>
+    /// 몬스터 수(n)별 스폰 패턴 풀. 각 n에 여러 포메이션 후보가 있어 전투마다 다양하게 나온다.
+    /// 런타임에 뽑힌 MonsterSO들의 AllowedSlots와 호환되는 패턴 중 하나를 랜덤 선택한다.
+    /// 모든 슬롯은 1~4 범위. 후열 개념은 frontCount로 추상화 (더 이상 물리 슬롯 5~7 없음).
+    /// </summary>
+    private static readonly SpawnPattern[][] SPAWN_PATTERNS = new SpawnPattern[][]
+    {
+        null,                                               // index 0 (미사용)
+
+        // n=1 : 단독 (Center 고정, 분단선 없음)
+        new SpawnPattern[]
         {
-            new[] { 0 },                          // Center
+            new SpawnPattern(new[] { 0 }, 0, "Solo"),
         },
 
         // n=2 : 2명
-        // ※ 규칙: 전열 2명은 항상 Slot2+Slot3 (중앙 2칸). 양끝(1,4) 배치는 사용하지 않음.
-        new int[][]
+        new SpawnPattern[]
         {
-            new[] { 2, 3 },                       // 2/0 전열 중앙
-            new[] { 2, 6 },                       // 1/1 전열 좌중앙 + 후열 중앙
-            new[] { 3, 6 },                       // 1/1 전열 우중앙 + 후열 중앙
-            new[] { 5, 7 },                       // 0/2 후열 양끝
+            new SpawnPattern(new[] { 2, 3 }, 2, "2/0"),     // 전원 전열 중앙
+            new SpawnPattern(new[] { 1, 2 }, 1, "1/1_L"),   // 1front(Slot1) + 1back(Slot2)
+            new SpawnPattern(new[] { 2, 3 }, 1, "1/1_M"),   // 1front(Slot2) + 1back(Slot3)
+            new SpawnPattern(new[] { 3, 4 }, 1, "1/1_R"),   // 1front(Slot3) + 1back(Slot4)
+            new SpawnPattern(new[] { 1, 4 }, 1, "1/1_X"),   // 좌우 양끝 분리
+            new SpawnPattern(new[] { 3, 4 }, 0, "0/2"),     // 전원 후열 (우측)
         },
 
         // n=3 : 3명
-        // ※ 규칙: 전열 2명 구성은 항상 Slot2+Slot3 (양끝 1,4 금지).
-        new int[][]
+        new SpawnPattern[]
         {
-            new[] { 2, 3, 6 },                    // 2/1 중앙 뒤
-            new[] { 1, 2, 3 },                    // 3/0 좌측 전열
-            new[] { 2, 3, 4 },                    // 3/0 중앙 전열
-            new[] { 3, 5, 7 },                    // 1/2 한 명 전열
-            new[] { 2, 5, 7 },                    // 1/2 한 명 전열 (좌)
-            new[] { 5, 6, 7 },                    // 0/3 후열 전체
+            new SpawnPattern(new[] { 1, 2, 3 }, 3, "3/0_L"),// 전원 전열 좌측
+            new SpawnPattern(new[] { 2, 3, 4 }, 3, "3/0_R"),// 전원 전열 우측
+            new SpawnPattern(new[] { 1, 2, 3 }, 2, "2/1"),  // 2front(1,2) + 1back(3)
+            new SpawnPattern(new[] { 2, 3, 4 }, 2, "2/1_R"),// 2front(2,3) + 1back(4)
+            new SpawnPattern(new[] { 1, 2, 3 }, 1, "1/2"),  // 1front(1) + 2back(2,3)
+            new SpawnPattern(new[] { 2, 3, 4 }, 1, "1/2_R"),// 1front(2) + 2back(3,4)
+            new SpawnPattern(new[] { 2, 3, 4 }, 0, "0/3"),  // 전원 후열
         },
 
-        // n=4 : 4명 (다양성의 핵심 — 기존 2/2 고정 탈피)
-        // ※ 규칙: 전열 2명 구성은 항상 Slot2+Slot3 (양끝 1,4 금지).
-        new int[][]
+        // n=4 : 4명 (전 슬롯 사용)
+        new SpawnPattern[]
         {
-            new[] { 2, 3, 5, 7 },                 // 2/2 표준
-            new[] { 1, 2, 3, 4 },                 // 4/0 전열 꽉
-            new[] { 2, 3, 4, 6 },                 // 3/1 전열 우측 3 + 중앙 뒤
-            new[] { 1, 2, 3, 6 },                 // 3/1 전열 좌측 3 + 중앙 뒤
-            new[] { 1, 3, 4, 6 },                 // 3/1 변형
-            new[] { 3, 5, 6, 7 },                 // 1/3 전열 한 명
-            new[] { 2, 5, 6, 7 },                 // 1/3 변형
-        },
-
-        // n=5 : 5명
-        new int[][]
-        {
-            new[] { 1, 2, 3, 4, 6 },              // 4/1
-            new[] { 2, 3, 4, 5, 7 },              // 3/2
-            new[] { 1, 2, 3, 5, 7 },              // 3/2 변형
-            new[] { 2, 3, 5, 6, 7 },              // 2/3
-        },
-
-        // n=6 : 6명
-        new int[][]
-        {
-            new[] { 1, 2, 3, 4, 5, 7 },           // 4/2
-            new[] { 1, 2, 3, 4, 5, 6 },           // 4/2 변형
-            new[] { 2, 3, 4, 5, 6, 7 },           // 3/3
-        },
-
-        // n=7 : 7명 (모든 슬롯)
-        new int[][]
-        {
-            new[] { 1, 2, 3, 4, 5, 6, 7 },        // 4/3 풀
+            new SpawnPattern(new[] { 1, 2, 3, 4 }, 4, "4/0"),   // 전원 전열
+            new SpawnPattern(new[] { 1, 2, 3, 4 }, 3, "3/1"),   // 3front + 1back
+            new SpawnPattern(new[] { 1, 2, 3, 4 }, 2, "2/2"),   // 2front + 2back (표준)
+            new SpawnPattern(new[] { 1, 2, 3, 4 }, 1, "1/3"),   // 1front + 3back
+            new SpawnPattern(new[] { 1, 2, 3, 4 }, 0, "0/4"),   // 전원 후열
         },
     };
 
     /// <summary>
     /// monsters 배열 순서대로 대응하는 Transform 슬롯을 반환한다.
-    /// 몬스터 수별 템플릿 슬롯을 정하고, 그 안에서 각 몬스터의 AllowedSlots로 배치한다.
+    /// 몬스터 수별 패턴에서 슬롯 조합 + frontCount를 결정하고, 각 몬스터의 AllowedSlots로 배치한다.
     /// 반환 배열 i번째 = monsters[i]에 할당된 슬롯. 배치 실패면 null.
+    /// 부수 효과: 선택된 패턴의 frontCount로부터 currentDividerSlotIdx를 설정한다.
     /// </summary>
     private Transform[] AssignSlotsByAllowedSlots(MonsterSO[] monsters)
     {
         int n = monsters.Length;
         Transform[] result = new Transform[n];
+        currentDividerSlotIdx = 0; // 기본: 분단선 없음
 
         if (n <= 0) return result;
-        if (n >= SLOT_TEMPLATE_POOLS.Length || SLOT_TEMPLATE_POOLS[n] == null || SLOT_TEMPLATE_POOLS[n].Length == 0)
+        if (n >= SPAWN_PATTERNS.Length || SPAWN_PATTERNS[n] == null || SPAWN_PATTERNS[n].Length == 0)
         {
-            Debug.LogWarning($"[SPAWN_WARN] 몬스터 수 {n}에 대한 템플릿 풀이 비어있거나 정의되지 않음.");
+            Debug.LogWarning($"[SPAWN_WARN] 몬스터 수 {n}에 대한 스폰 패턴 풀이 비어있거나 정의되지 않음.");
             return result;
         }
 
-        // n=1 규칙: AllowedSlots 무관하게 무조건 Center
+        // n=1 규칙: AllowedSlots 무관하게 무조건 Center, 분단선 없음
         if (n == 1)
         {
             result[0] = slotPointCenter;
@@ -656,9 +659,9 @@ public class BattleManager : MonoBehaviour
             return result;
         }
 
-        // 풀에서 호환되는 템플릿을 랜덤 순서로 시도한다.
-        int[][] pool = SLOT_TEMPLATE_POOLS[n];
-        List<int[]> shuffled = new List<int[]>(pool);
+        // 풀에서 호환되는 패턴을 랜덤 순서로 시도한다.
+        SpawnPattern[] pool = SPAWN_PATTERNS[n];
+        List<SpawnPattern> shuffled = new List<SpawnPattern>(pool);
         // Fisher–Yates 셔플
         for (int s = shuffled.Count - 1; s > 0; s--)
         {
@@ -668,37 +671,51 @@ public class BattleManager : MonoBehaviour
 
         Transform[] bestResult = null;
         int bestPlacedCount = -1;
-        int[] bestTemplate = null;
+        SpawnPattern bestPattern = default;
 
-        foreach (int[] template in shuffled)
+        foreach (SpawnPattern pattern in shuffled)
         {
-            Transform[] attempt = TryPlaceWithTemplate(monsters, template, out int placedCount);
+            Transform[] attempt = TryPlaceWithTemplate(monsters, pattern.slots, out int placedCount);
             if (placedCount == n)
             {
-                // 완전 배치 성공 → 즉시 사용
-                Debug.Log($"[SPAWN] 포메이션 선택: [{string.Join(",", template)}] (n={n}, 전원 배치)");
+                // 완전 배치 성공 → 즉시 사용하고 분단선 위치 확정
+                currentDividerSlotIdx = ComputeDividerSlotIdx(pattern);
+                Debug.Log($"[SPAWN] 포메이션 선택: {pattern.label} [{string.Join(",", pattern.slots)}] frontCount={pattern.frontCount} → divider_{currentDividerSlotIdx}");
                 return attempt;
             }
 
-            // 완전히 맞는 게 없으면 가장 많이 배치된 템플릿을 예비로 보관
             if (placedCount > bestPlacedCount)
             {
                 bestPlacedCount = placedCount;
                 bestResult = attempt;
-                bestTemplate = template;
+                bestPattern = pattern;
             }
         }
 
-        // 완전 배치 가능한 템플릿이 없으면 차선책 반환 (일부 몬스터 스폰 누락 가능)
         if (bestResult != null)
         {
+            currentDividerSlotIdx = ComputeDividerSlotIdx(bestPattern);
             Debug.LogWarning(
-                $"[SPAWN_WARN] n={n} 중 완전 배치 가능한 템플릿이 없음. " +
-                $"차선책 [{string.Join(",", bestTemplate)}] 사용 ({bestPlacedCount}/{n} 배치)");
+                $"[SPAWN_WARN] n={n} 중 완전 배치 가능한 패턴이 없음. " +
+                $"차선책 {bestPattern.label} [{string.Join(",", bestPattern.slots)}] 사용 ({bestPlacedCount}/{n} 배치)");
             return bestResult;
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// SpawnPattern으로부터 분단선 슬롯 인덱스를 계산.
+    /// 전원 전열(frontCount==slots.Length) 또는 전원 후열(frontCount==0) → 0 (분단선 없음).
+    /// 그 외 → 전열 마지막 몬스터가 자리한 슬롯 인덱스.
+    /// </summary>
+    private static int ComputeDividerSlotIdx(SpawnPattern pattern)
+    {
+        if (pattern.slots == null || pattern.slots.Length == 0) return 0;
+        if (pattern.frontCount <= 0) return 0;
+        if (pattern.frontCount >= pattern.slots.Length) return 0;
+        // slots는 오름차순이라고 가정. frontCount-1번째가 전열 마지막 몬스터.
+        return pattern.slots[pattern.frontCount - 1];
     }
 
     /// <summary>
@@ -812,10 +829,10 @@ public class BattleManager : MonoBehaviour
 
     /// <summary>
     /// 현재 포메이션을 콘솔에 출력한다. 디버그 전용, 상태 변경 없음.
+    /// 4슬롯 시스템: 전/후열 구분은 currentDividerSlotIdx 기반.
     /// 출력 예:
-    ///   [FORMATION] 총 3마리 / 전열 2 : 후열 1
-    ///     전열: Slot1=Skeleton(#1, HP 75/75) Slot2=- Slot3=Bat(#2, HP 30/30) Slot4=-
-    ///     후열: Slot5=- Slot6=Goblin(#3, HP 60/60) Slot7=-
+    ///   [FORMATION] 총 4마리 / divider_2 (전열 2 : 후열 2)
+    ///     Slot1=Rat(#1, HP 35/35) Slot2=Skel(#2) | Slot3=Wizard(#3) Slot4=Bat(#4)
     /// </summary>
     public void DebugPrintFormation()
     {
@@ -844,34 +861,34 @@ public class BattleManager : MonoBehaviour
             map[ordered[i].stats.currentSlot] = (ordered[i].stats, i + 1);
         }
 
-        System.Text.StringBuilder front = new System.Text.StringBuilder("전열: ");
+        // 4슬롯 한 줄 출력. currentDividerSlotIdx 위치에 '|' 표시로 전/후열 구분 시각화.
+        System.Text.StringBuilder rowSb = new System.Text.StringBuilder("슬롯: ");
+        int leftCount = 0, rightCount = 0;
         for (int i = 1; i <= 4; i++)
         {
             BattleSlot s = (BattleSlot)i;
             if (map.TryGetValue(s, out var pair))
-                front.Append($"Slot{i}={pair.stats.enemyName}(#{pair.number}, HP {pair.stats.currentHP}/{pair.stats.maxHP}) ");
+            {
+                rowSb.Append($"Slot{i}={pair.stats.enemyName}(#{pair.number}, HP {pair.stats.currentHP}/{pair.stats.maxHP}) ");
+                if (i <= currentDividerSlotIdx) leftCount++; else rightCount++;
+            }
             else
-                front.Append($"Slot{i}=- ");
+            {
+                rowSb.Append($"Slot{i}=- ");
+            }
+            if (i == currentDividerSlotIdx && currentDividerSlotIdx > 0 && currentDividerSlotIdx < 4)
+                rowSb.Append("| ");
         }
 
-        System.Text.StringBuilder back = new System.Text.StringBuilder("후열: ");
-        for (int i = 5; i <= 7; i++)
-        {
-            BattleSlot s = (BattleSlot)i;
-            if (map.TryGetValue(s, out var pair))
-                back.Append($"Slot{i}={pair.stats.enemyName}(#{pair.number}, HP {pair.stats.currentHP}/{pair.stats.maxHP}) ");
-            else
-                back.Append($"Slot{i}=- ");
-        }
+        // Center 슬롯(Solo)도 별도 표기
+        if (map.TryGetValue(BattleSlot.Center, out var centerPair))
+            rowSb.Append($"Center={centerPair.stats.enemyName}(#{centerPair.number}, HP {centerPair.stats.currentHP}/{centerPair.stats.maxHP})");
 
-        int frontCount = 0, backCount = 0;
-        foreach (var kv in map)
-        {
-            if (SlotHelper.IsFrontRow(kv.Key)) frontCount++;
-            else if (SlotHelper.IsBackRow(kv.Key)) backCount++;
-        }
+        string dividerLabel = (currentDividerSlotIdx >= 1 && currentDividerSlotIdx <= 3)
+            ? $"divider_{currentDividerSlotIdx} (전열 {leftCount} : 후열 {rightCount})"
+            : "분단선 없음";
 
-        Debug.Log($"[FORMATION] 총 {ordered.Count}마리 / 전열 {frontCount} : 후열 {backCount}\n  {front}\n  {back}");
+        Debug.Log($"[FORMATION] 총 {ordered.Count}마리 / {dividerLabel}\n  {rowSb}");
 
         // ── 진단용 Raw Dump ──
         // activeEnemies 전체를 무가공 상태로 출력. F12 출력과 실제 스폰 로그/게임 뷰를
@@ -1001,30 +1018,22 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// F8/F9/F10/F11 이동 액션 핫키 처리.
+    /// F7(좌) / F9(우) / F11(셔플) 이동 액션 핫키 처리.
+    /// 4슬롯 수평 전용 이동. AllowedSlots 엄격(forced=false).
     /// </summary>
     private void HandleMoveActionKeys()
     {
-        if (Input.GetKeyDown(KeyCode.F8))
+        if (Input.GetKeyDown(KeyCode.F7))
         {
             EnemyStats e = GetMoveTestTarget();
-            if (e == null) { Debug.Log("[MOVE_TEST/F8] 대상 몬스터 없음"); }
-            else if (SlotHelper.IsFrontRow(e.currentSlot))
-            {
-                Debug.Log($"[MOVE_TEST/F8] {e.enemyName}은 이미 전열 ({e.currentSlot}) — 더 앞으로 갈 수 없음 (버팀)");
-            }
+            if (e == null) { Debug.Log("[MOVE_TEST/F7] 대상 몬스터 없음"); }
             else
             {
-                BattleSlot front = GetNearestSlotInOppositeRow(e.currentSlot);
-                if (front == BattleSlot.None) Debug.Log("[MOVE_TEST/F8] 전열 슬롯 매핑 실패");
+                BattleSlot left = GetHorizontalNeighbor(e.currentSlot, -1);
+                if (left == BattleSlot.None)
+                    Debug.Log($"[MOVE_TEST/F7] {e.enemyName} {e.currentSlot}의 왼쪽 이웃 없음 (끝)");
                 else
-                {
-                    EnemyStats occupant = GetMonsterAtSlot(front);
-                    if (occupant != null)
-                        Debug.Log($"[MOVE_TEST/F8] {e.enemyName} 앞 {front} 점유({occupant.enemyName}) — 버팀");
-                    else
-                        MoveToSlot(e, front, forced: true);
-                }
+                    MoveToSlot(e, left, forced: false);
             }
         }
 
@@ -1036,32 +1045,9 @@ public class BattleManager : MonoBehaviour
             {
                 BattleSlot right = GetHorizontalNeighbor(e.currentSlot, 1);
                 if (right == BattleSlot.None)
-                    Debug.Log($"[MOVE_TEST/F9] {e.enemyName} {e.currentSlot}의 오른쪽 이웃 없음 (끝/행 경계)");
+                    Debug.Log($"[MOVE_TEST/F9] {e.enemyName} {e.currentSlot}의 오른쪽 이웃 없음 (끝)");
                 else
                     MoveToSlot(e, right, forced: false);
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.F10))
-        {
-            EnemyStats e = GetMoveTestTarget();
-            if (e == null) { Debug.Log("[MOVE_TEST/F10] 대상 몬스터 없음"); }
-            else if (SlotHelper.IsBackRow(e.currentSlot))
-            {
-                Debug.Log($"[MOVE_TEST/F10] {e.enemyName}은 이미 후열 ({e.currentSlot}) — 더 뒤로 갈 수 없음 (버팀)");
-            }
-            else
-            {
-                BattleSlot back = GetNearestSlotInOppositeRow(e.currentSlot);
-                if (back == BattleSlot.None) Debug.Log("[MOVE_TEST/F10] 후열 슬롯 매핑 실패");
-                else
-                {
-                    EnemyStats occupant = GetMonsterAtSlot(back);
-                    if (occupant != null)
-                        Debug.Log($"[MOVE_TEST/F10] {e.enemyName} 뒤 {back} 점유({occupant.enemyName}) — 버팀");
-                    else
-                        MoveToSlot(e, back, forced: true);
-                }
             }
         }
 
@@ -1425,7 +1411,9 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 1-based 슬롯 인덱스(1~7)가 주어진 SlotMask에 허용되는지 확인.
+    /// 1-based 슬롯 인덱스(1~4)가 주어진 SlotMask에 허용되는지 확인.
+    /// 레거시 호환: MonsterSO.AllowedSlots가 Slot5~7 비트만 갖는 경우(구 7슬롯 시대 설정),
+    /// 4슬롯 시스템에선 유효한 슬롯이 없으므로 Any(모든 슬롯 1~4 허용)로 완화한다.
     /// </summary>
     private bool SlotIsAllowed(int slotIdx1Based, SlotMask mask)
     {
@@ -1435,12 +1423,15 @@ public class BattleManager : MonoBehaviour
             2 => SlotMask.Slot2,
             3 => SlotMask.Slot3,
             4 => SlotMask.Slot4,
-            5 => SlotMask.Slot5,
-            6 => SlotMask.Slot6,
-            7 => SlotMask.Slot7,
             _ => SlotMask.None
         };
-        return bit != SlotMask.None && (mask & bit) != 0;
+        if (bit == SlotMask.None) return false;
+
+        // 레거시 폴백: 4슬롯 비트가 하나도 없으면(구 Slot5~7-only 설정) 모든 슬롯 허용.
+        const SlotMask FOUR_SLOT_MASK = SlotMask.Slot1 | SlotMask.Slot2 | SlotMask.Slot3 | SlotMask.Slot4;
+        if ((mask & FOUR_SLOT_MASK) == 0) return true;
+
+        return (mask & bit) != 0;
     }
 
     /// <summary>
@@ -1502,12 +1493,11 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 활성 몬스터들의 실제 배치 상태(currentSlot 기반)를 집계하여
-    /// 전열 몬스터 수에 대응하는 Divider만 활성화한다.
-    /// MonsterSO.Formation 레거시 필드에 의존하지 않는 "진실의 원천은 실제 슬롯" 방식.
-    /// - 후열 0마리(Single, 전열만)인 경우 모든 Divider 비활성
-    /// - 전열 N마리 + 후열 1마리 이상 → divider_N 활성 (N=1~4)
-    /// - 호출 시점은 스폰 완료 후(AssignDisplayNumbers 직후)여야 한다.
+    /// currentDividerSlotIdx(스폰 시 SpawnPattern에서 결정)를 기준으로 해당 Divider를 활성화한다.
+    /// - 0 : 분단선 없음 (Solo / 전원 전열 / 전원 후열)
+    /// - 1~3 : divider_{N}을 Slot_N 뒤에 표시
+    /// - 움직임(좌우 스왑/이동)으로 점유 슬롯이 바뀌어도 분단선 '위치'는 유지된다.
+    ///   단, 전열 또는 후열이 모두 비게 되면(사망/이동) 분단선을 끈다.
     /// </summary>
     private void UpdateDividerFromActualLayout()
     {
@@ -1523,43 +1513,49 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        // 실제 배치된 currentSlot으로 전/후열 수 집계
-        int frontCount = 0;
-        int backCount = 0;
-        foreach (EnemyStats es in activeEnemies)
+        // 스폰 시 결정된 분단선이 없으면 그대로 종료
+        if (currentDividerSlotIdx <= 0 || currentDividerSlotIdx >= 4)
         {
-            if (es == null) continue;
-            if (SlotHelper.IsFrontRow(es.currentSlot)) frontCount++;
-            else if (SlotHelper.IsBackRow(es.currentSlot)) backCount++;
-            // Center / None은 두 카운트 모두 제외 (단독 전투 등)
-        }
-
-        // 후열이 0이면 구분선 자체가 의미 없음 (Single / All_Front / n=2 전열만 등)
-        if (backCount == 0)
-        {
-            Debug.Log($"[DIVIDER] 전열 {frontCount} / 후열 0 → 분단선 없음");
+            Debug.Log($"[DIVIDER] currentDividerSlotIdx={currentDividerSlotIdx} → 분단선 없음");
             return;
         }
 
-        GameObject target = frontCount switch
+        // 분단선 기준 좌/우에 살아있는 몬스터가 각각 있는지 확인
+        int leftCount = 0, rightCount = 0;
+        foreach (EnemyStats es in activeEnemies)
+        {
+            if (es == null) continue;
+            if (es.IsDead()) continue;
+            int idx = (int)es.currentSlot;
+            if (idx <= 0 || idx > 4) continue; // Center/None 제외
+            if (idx <= currentDividerSlotIdx) leftCount++;
+            else rightCount++;
+        }
+
+        if (leftCount == 0 || rightCount == 0)
+        {
+            Debug.Log($"[DIVIDER] 한쪽 비어있음 (좌={leftCount}, 우={rightCount}, divider_{currentDividerSlotIdx}) → 분단선 숨김");
+            return;
+        }
+
+        GameObject target = currentDividerSlotIdx switch
         {
             1 => divider_1,
             2 => divider_2,
             3 => divider_3,
-            4 => divider_4,
             _ => null
         };
 
         if (target != null)
         {
             target.SetActive(true);
-            Debug.Log($"[DIVIDER] 전열 {frontCount} / 후열 {backCount} → {target.name} 활성화");
+            Debug.Log($"[DIVIDER] divider_{currentDividerSlotIdx} 활성화 (전열 {leftCount} / 후열 {rightCount})");
         }
         else
         {
             Debug.LogWarning(
-                $"[DIVIDER] 전열 {frontCount} / 후열 {backCount} 포메이션에 대응하는 Divider가 할당되지 않음. " +
-                $"Inspector에서 divider_{frontCount} 슬롯을 연결하세요.");
+                $"[DIVIDER] currentDividerSlotIdx={currentDividerSlotIdx}에 해당하는 divider GameObject가 " +
+                $"Inspector에 할당되지 않았습니다. divider_{currentDividerSlotIdx} 필드를 연결하세요.");
         }
     }
 
@@ -1664,11 +1660,10 @@ public class BattleManager : MonoBehaviour
             DebugPrintFormation();
         }
 
-        // ── 이동 시스템 테스트 핫키 (Phase 2) ──
-        // 숫자키 1~7: 현재 #N 몬스터를 "이동 선택" 상태로 고정 (이후 이동해도 같은 EnemyStats 유지)
-        // F8 : 선택 몬스터를 앞으로 당기기 (후열 → 전열, 점유됐으면 버팀. forced=true)
+        // ── 이동 시스템 테스트 핫키 (4슬롯 좌우 전용) ──
+        // 숫자키 1~4: 현재 #N 몬스터를 "이동 선택" 상태로 고정
+        // F7 : 선택 몬스터를 왼쪽 이웃 슬롯으로 이동/스왑 (AllowedSlots 엄격)
         // F9 : 선택 몬스터를 오른쪽 이웃 슬롯으로 이동/스왑 (AllowedSlots 엄격)
-        // F10: 선택 몬스터를 뒤로 밀치기 (전열 → 후열, 점유됐으면 버팀. forced=true)
         // F11: 적 전체 랜덤 셔플 (현재 점유 슬롯 집합 유지, forced)
         HandleMoveSelectionKeys();
         HandleMoveActionKeys();
