@@ -56,8 +56,8 @@ public class BattleRecorder : MonoBehaviour
 
     private void HandleInput()
     {
-        // F8: Pause / Resume
-        if (Input.GetKeyDown(KeyCode.F8))
+        // Ctrl+F8: Pause / Resume (F8 단독은 BattleManager 이동 선택에 사용)
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.F8))
         {
             TogglePause();
         }

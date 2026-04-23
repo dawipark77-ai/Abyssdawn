@@ -72,15 +72,15 @@ public class DebugHotkeySystem : MonoBehaviour
         {
             DamagePlayer(10);
         }
-        else if (Input.GetKeyDown(KeyCode.F8))
+        else if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.F8))
         {
             ResetBattle();
         }
-        else if (Input.GetKeyDown(KeyCode.F9))
+        else if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.F9))
         {
             TogglePause();
         }
-        else if (Input.GetKeyDown(KeyCode.F10))
+        else if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.F10))
         {
             LogCurrentStatus();
         }

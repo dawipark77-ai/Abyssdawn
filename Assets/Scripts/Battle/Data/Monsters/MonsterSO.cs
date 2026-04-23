@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using AbyssdawnBattle; // SlotMask, SkillData, ConsumableItemSO 참조
 
 namespace Abyssdawn
@@ -32,8 +33,7 @@ namespace Abyssdawn
     }
 
     /// <summary>
-    /// 적 파티의 전투 진형(Formation).
-    /// 이 몬스터가 대표(Boss > Elite > 첫 번째)일 때 전투 배치가 결정됩니다.
+    /// 적 파티의 전투 진형(Formation). 레거시/툴 호환용 enum — 스폰은 SpawnPattern 기반.
     /// Single = 단독 1마리 / All_Front = 4·0 / Three_Front = 3·1 / Two_Two = 2·2 / One_Front = 1·3
     /// </summary>
     public enum FormationType
@@ -43,6 +43,31 @@ namespace Abyssdawn
         Three_Front,
         Two_Two,
         One_Front
+    }
+
+    /// <summary>
+    /// 몬스터 배치 가능 슬롯(1~4만). 비트는 <see cref="SlotMask"/> Slot1~4와 동일.
+    /// None = 슬롯 비트 없음 → <see cref="MonsterRowPreference"/>만으로 기본 슬롯이 정해짐.
+    /// (별도 All 플래그 없음 — 전체 선택은 Slot1|2|3|4)
+    /// </summary>
+    [System.Flags]
+    public enum MonsterAllowedSlotMask
+    {
+        None = 0,
+        Slot1 = 1 << 0,
+        Slot2 = 1 << 1,
+        Slot3 = 1 << 2,
+        Slot4 = 1 << 3
+    }
+
+    /// <summary>
+    /// 4슬롯 기준 행. 전열=슬롯 1·2, 후열=슬롯 3·4, Either=행 제한 없음(슬롯 마스크만).
+    /// </summary>
+    public enum MonsterRowPreference
+    {
+        Either,
+        Front,
+        Back
     }
 
     // ──────────────────────────────────────────
@@ -161,11 +186,16 @@ namespace Abyssdawn
         // ──────────────────────────────────────────
         [Header("파티 배치")]
 
-        [Tooltip("이 몬스터가 배치될 수 있는 슬롯 (SlotMask 비트 마스크)")]
-        [SerializeField] private SlotMask allowedSlots = SlotMask.Any;
+        [Tooltip("Either = 행 무관. Front = 전열(1·2)만. Back = 후열(3·4)만.")]
+        [SerializeField]
+        [FormerlySerializedAs("rowBand")]
+        private MonsterRowPreference rowPreference = MonsterRowPreference.Either;
 
-        [Tooltip("이 몬스터가 대표(Boss/Elite/첫 번째)일 때 전투 파티에 적용할 진형")]
-        [SerializeField] private FormationType formation = FormationType.Two_Two;
+        [Tooltip("슬롯 1~4 조합. None이면 Row만 적용(전열=1·2, 후열=3·4, Either=1~4 전부).")]
+        [SerializeField]
+        private MonsterAllowedSlotMask allowedSlots =
+            MonsterAllowedSlotMask.Slot1 | MonsterAllowedSlotMask.Slot2 |
+            MonsterAllowedSlotMask.Slot3 | MonsterAllowedSlotMask.Slot4;
 
         // ──────────────────────────────────────────
         // 등장 조건
@@ -272,11 +302,11 @@ namespace Abyssdawn
         public AIPattern AIPattern => aiPattern;
 
         // 배치
-        /// <summary>배치 가능 슬롯 마스크</summary>
-        public SlotMask AllowedSlots => allowedSlots;
+        /// <summary>전열 / 후열 / Either</summary>
+        public MonsterRowPreference RowPreference => rowPreference;
 
-        /// <summary>대표 몬스터일 때 적용될 전투 진형</summary>
-        public FormationType Formation => formation;
+        /// <summary>전투 로직용 <see cref="SlotMask"/>(Slot1~4, 행 반영)</summary>
+        public SlotMask AllowedSlots => BuildEffectiveAllowedSlots();
 
         // 등장 조건
         /// <summary>등장 최소 층</summary>
@@ -323,5 +353,44 @@ namespace Abyssdawn
         /// 동료화 가능 여부 (확률 > 0이고 companionData가 있어야 함)
         /// </summary>
         public bool CanBecomCompanion => companionChance > 0f && companionData != null;
+
+        private static readonly SlotMask FourSlotMask =
+            SlotMask.Slot1 | SlotMask.Slot2 | SlotMask.Slot3 | SlotMask.Slot4;
+        private static readonly SlotMask FrontRowSlotMask = SlotMask.Slot1 | SlotMask.Slot2;
+        private static readonly SlotMask BackRowSlotMask = SlotMask.Slot3 | SlotMask.Slot4;
+
+        private const int MonsterSlotBits = 0x0F;
+
+        private static SlotMask MaskFromMonsterSlots(MonsterAllowedSlotMask m)
+        {
+            return (SlotMask)((int)m & MonsterSlotBits);
+        }
+
+        private SlotMask BuildEffectiveAllowedSlots()
+        {
+            SlotMask m = MaskFromMonsterSlots(allowedSlots);
+            switch (rowPreference)
+            {
+                case MonsterRowPreference.Front:
+                    m &= FrontRowSlotMask;
+                    break;
+                case MonsterRowPreference.Back:
+                    m &= BackRowSlotMask;
+                    break;
+            }
+
+            if (m != 0) return m;
+            return rowPreference switch
+            {
+                MonsterRowPreference.Front => FrontRowSlotMask,
+                MonsterRowPreference.Back => BackRowSlotMask,
+                _ => FourSlotMask
+            };
+        }
+
+        private void OnValidate()
+        {
+            allowedSlots = (MonsterAllowedSlotMask)((int)allowedSlots & MonsterSlotBits);
+        }
     }
 }

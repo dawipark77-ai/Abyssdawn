@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using AbyssdawnBattle;
 using Abyssdawn;
 using SkillData = AbyssdawnBattle.SkillData;
@@ -232,15 +233,10 @@ public class BattleManager : MonoBehaviour
     [Range(0.1f, 1f)]
     [SerializeField] private float backRowScaleMultiplier = 0.75f;
 
-    [Header("전/후열 분단선 (실제 배치 기준 자동 토글)")]
-    [Tooltip("Slot1 뒤에 배치. 포메이션 1/X (예: 1/3) 일 때 활성화")]
-    public GameObject divider_1;
-    [Tooltip("Slot2 뒤에 배치. 포메이션 2/X (예: 2/2, 2/1) 일 때 활성화")]
-    public GameObject divider_2;
-    [Tooltip("Slot3 뒤에 배치. 포메이션 3/X (예: 3/1) 일 때 활성화")]
-    public GameObject divider_3;
-    [Tooltip("(4슬롯에서는 사용 안 함) 포메이션 4/X는 전원 전열이라 분단선 없음")]
-    public GameObject divider_4;
+    [Header("분단선 (고정 12|34)")]
+    [Tooltip("항상 표시되는 단일 분단선 오브젝트")]
+    [FormerlySerializedAs("divider_2")]
+    public GameObject divider;
 
     /// <summary>
     /// 현재 전투의 분단선 위치 (1-based 슬롯 인덱스).
@@ -560,8 +556,8 @@ public class BattleManager : MonoBehaviour
 
     // ─────────────────────────────────────────────────────────────
     // AllowedSlots 기반 배치 알고리즘 (n명별 고정 템플릿)
-    // Formation 필드는 더 이상 참조하지 않음. 몬스터 수에 따라 템플릿 슬롯을
-    // 정하고, 그 안에서 각 MonsterSO의 AllowedSlots로 개별 위치를 결정.
+    // MonsterSO: MonsterRowPreference(Either/Front/Back) + MonsterAllowedSlotMask(1~4). 몬스터 수로 템플릿을
+    // 고르고, 각 MonsterSO.AllowedSlots(유효 마스크)로 슬롯을 채운다.
     // ─────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -633,74 +629,82 @@ public class BattleManager : MonoBehaviour
 
     /// <summary>
     /// monsters 배열 순서대로 대응하는 Transform 슬롯을 반환한다.
-    /// 몬스터 수별 패턴에서 슬롯 조합 + frontCount를 결정하고, 각 몬스터의 AllowedSlots로 배치한다.
-    /// 반환 배열 i번째 = monsters[i]에 할당된 슬롯. 배치 실패면 null.
-    /// 부수 효과: 선택된 패턴의 frontCount로부터 currentDividerSlotIdx를 설정한다.
+    /// 규칙: 1명=Center, 2명=1·2, 3명=1·2·3, 4명=1·2·3·4.
+    /// 배치 우선순위: Front → Back → Either.
+    /// (일반 스폰은 슬롯을 1~4 순서로 채운다. Row는 순서 힌트이며 슬롯 강제는 하지 않는다.)
+    /// 분단선은 시스템 규칙이 아니라 UI 기준선이므로 2/2 중앙(단일 divider)로 고정한다.
     /// </summary>
     private Transform[] AssignSlotsByAllowedSlots(MonsterSO[] monsters)
     {
         int n = monsters.Length;
         Transform[] result = new Transform[n];
-        currentDividerSlotIdx = 0; // 기본: 분단선 없음
 
         if (n <= 0) return result;
-        if (n >= SPAWN_PATTERNS.Length || SPAWN_PATTERNS[n] == null || SPAWN_PATTERNS[n].Length == 0)
-        {
-            Debug.LogWarning($"[SPAWN_WARN] 몬스터 수 {n}에 대한 스폰 패턴 풀이 비어있거나 정의되지 않음.");
-            return result;
-        }
 
-        // n=1 규칙: AllowedSlots 무관하게 무조건 Center, 분단선 없음
         if (n == 1)
         {
+            currentDividerSlotIdx = 0;
             result[0] = slotPointCenter;
             if (result[0] == null)
                 Debug.LogWarning("[SPAWN_WARN] slotPointCenter가 null입니다. EnemySpawnRoot 하위에 SlotPoint_Center를 배치하세요.");
             return result;
         }
 
-        // 풀에서 호환되는 패턴을 랜덤 순서로 시도한다.
-        SpawnPattern[] pool = SPAWN_PATTERNS[n];
-        List<SpawnPattern> shuffled = new List<SpawnPattern>(pool);
-        // Fisher–Yates 셔플
-        for (int s = shuffled.Count - 1; s > 0; s--)
+        int[] slotOrder = n switch
         {
-            int r = UnityEngine.Random.Range(0, s + 1);
-            (shuffled[s], shuffled[r]) = (shuffled[r], shuffled[s]);
+            2 => new[] { 1, 2 },
+            3 => new[] { 1, 2, 3 },
+            4 => new[] { 1, 2, 3, 4 },
+            _ => null
+        };
+        if (slotOrder == null)
+        {
+            Debug.LogWarning($"[SPAWN_WARN] 지원 몬스터 수는 1~4입니다. n={n}");
+            return result;
         }
 
-        Transform[] bestResult = null;
-        int bestPlacedCount = -1;
-        SpawnPattern bestPattern = default;
+        // 분단선은 항상 12|34 중앙 고정
+        currentDividerSlotIdx = 2;
 
-        foreach (SpawnPattern pattern in shuffled)
+        List<int> front = new List<int>();
+        List<int> back = new List<int>();
+        List<int> either = new List<int>();
+
+        for (int i = 0; i < n; i++)
         {
-            Transform[] attempt = TryPlaceWithTemplate(monsters, pattern.slots, out int placedCount);
-            if (placedCount == n)
+            MonsterSO m = monsters[i];
+            if (m == null) { either.Add(i); continue; }
+
+            switch (m.RowPreference)
             {
-                // 완전 배치 성공 → 즉시 사용하고 분단선 위치 확정
-                currentDividerSlotIdx = ComputeDividerSlotIdx(pattern);
-                Debug.Log($"[SPAWN] 포메이션 선택: {pattern.label} [{string.Join(",", pattern.slots)}] frontCount={pattern.frontCount} → divider_{currentDividerSlotIdx}");
-                return attempt;
-            }
-
-            if (placedCount > bestPlacedCount)
-            {
-                bestPlacedCount = placedCount;
-                bestResult = attempt;
-                bestPattern = pattern;
+                case MonsterRowPreference.Front:
+                    front.Add(i);
+                    break;
+                case MonsterRowPreference.Back:
+                    back.Add(i);
+                    break;
+                default:
+                    either.Add(i);
+                    break;
             }
         }
 
-        if (bestResult != null)
+        List<int> placementOrder = new List<int>(n);
+        placementOrder.AddRange(front);
+        placementOrder.AddRange(back);
+        placementOrder.AddRange(either);
+
+        List<int> remainingSlots = new List<int>(slotOrder);
+
+        foreach (int mi in placementOrder)
         {
-            currentDividerSlotIdx = ComputeDividerSlotIdx(bestPattern);
-            Debug.LogWarning(
-                $"[SPAWN_WARN] n={n} 중 완전 배치 가능한 패턴이 없음. " +
-                $"차선책 {bestPattern.label} [{string.Join(",", bestPattern.slots)}] 사용 ({bestPlacedCount}/{n} 배치)");
-            return bestResult;
+            if (remainingSlots.Count == 0) break;
+            int chosenSlot = remainingSlots[0];
+            result[mi] = SlotTransformByIndex(chosenSlot);
+            remainingSlots.Remove(chosenSlot);
         }
 
+        Debug.Log($"[SPAWN] 고정 배치 n={n}, slots=[{string.Join(",", slotOrder)}], divider(12|34 고정)");
         return result;
     }
 
@@ -987,6 +991,38 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void HandleMoveSelectionKeys()
     {
+        if (Input.GetKeyDown(KeyCode.F8))
+        {
+            List<EnemyStats> ordered = new List<EnemyStats>();
+            if (activeEnemies != null)
+            {
+                foreach (EnemyStats es in activeEnemies)
+                {
+                    if (es == null || es.IsDead()) continue;
+                    int idx = (int)es.currentSlot;
+                    if (idx >= 1 && idx <= 4) ordered.Add(es);
+                }
+            }
+
+            ordered.Sort((a, b) => ((int)a.currentSlot).CompareTo((int)b.currentSlot));
+            if (ordered.Count == 0)
+            {
+                moveTestSelectedEnemy = null;
+                Debug.Log("[MOVE_SELECT/F8] 선택 가능한 몬스터 없음");
+                return;
+            }
+
+            int cur = -1;
+            if (moveTestSelectedEnemy != null)
+                cur = ordered.IndexOf(moveTestSelectedEnemy);
+            int next = (cur + 1 + ordered.Count) % ordered.Count;
+            moveTestSelectedEnemy = ordered[next];
+
+            int displayNum = next + 1;
+            Debug.Log($"[MOVE_SELECT/F8] 선택: #{displayNum} {moveTestSelectedEnemy.enemyName} (Slot{(int)moveTestSelectedEnemy.currentSlot})");
+            return;
+        }
+
         for (int n = 1; n <= 7; n++)
         {
             KeyCode key = KeyCode.Alpha0 + n;
@@ -1018,22 +1054,22 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// F7(좌) / F9(우) / F11(셔플) 이동 액션 핫키 처리.
-    /// 4슬롯 수평 전용 이동. AllowedSlots 엄격(forced=false).
+    /// F10(좌) / F9(우) / F11(셔플) 이동 액션 핫키 처리.
+    /// 4슬롯 1~4 한 줄에서 한 칸씩. 분단선·AllowedSlots 무시(forced + 분단선 인덱스 초기화).
     /// </summary>
     private void HandleMoveActionKeys()
     {
-        if (Input.GetKeyDown(KeyCode.F7))
+        if (Input.GetKeyDown(KeyCode.F10))
         {
             EnemyStats e = GetMoveTestTarget();
-            if (e == null) { Debug.Log("[MOVE_TEST/F7] 대상 몬스터 없음"); }
+            if (e == null) { Debug.Log("[MOVE_TEST/F10] 대상 몬스터 없음"); }
             else
             {
-                BattleSlot left = GetHorizontalNeighbor(e.currentSlot, -1);
+                BattleSlot left = GetHorizontalNeighbor4(e.currentSlot, -1);
                 if (left == BattleSlot.None)
-                    Debug.Log($"[MOVE_TEST/F7] {e.enemyName} {e.currentSlot}의 왼쪽 이웃 없음 (끝)");
+                    Debug.Log($"[MOVE_TEST/F10] {e.enemyName} {e.currentSlot}의 왼쪽 이웃 없음 (끝)");
                 else
-                    MoveToSlot(e, left, forced: false);
+                    MoveToSlot(e, left, forced: true, clearFormationDivider: true);
             }
         }
 
@@ -1043,11 +1079,11 @@ public class BattleManager : MonoBehaviour
             if (e == null) { Debug.Log("[MOVE_TEST/F9] 대상 몬스터 없음"); }
             else
             {
-                BattleSlot right = GetHorizontalNeighbor(e.currentSlot, 1);
+                BattleSlot right = GetHorizontalNeighbor4(e.currentSlot, 1);
                 if (right == BattleSlot.None)
                     Debug.Log($"[MOVE_TEST/F9] {e.enemyName} {e.currentSlot}의 오른쪽 이웃 없음 (끝)");
                 else
-                    MoveToSlot(e, right, forced: false);
+                    MoveToSlot(e, right, forced: true, clearFormationDivider: true);
             }
         }
 
@@ -1114,6 +1150,19 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 4슬롯 전용(1~4) 수평 이웃. 분단선·전후열 UI와 무관하게 한 줄로만 이어진다.
+    /// </summary>
+    private static BattleSlot GetHorizontalNeighbor4(BattleSlot slot, int direction)
+    {
+        int idx = (int)slot;
+        if (direction != -1 && direction != 1) return BattleSlot.None;
+        if (idx < 1 || idx > 4) return BattleSlot.None;
+        int next = idx + direction;
+        if (next >= 1 && next <= 4) return (BattleSlot)next;
+        return BattleSlot.None;
+    }
+
+    /// <summary>
     /// 주어진 슬롯에서 반대 행(전→후 / 후→전)으로 X좌표가 가장 가까운 슬롯을 반환한다.
     /// "뒤로 밀치기" / "앞으로 당기기" 매핑의 기본 규칙. 슬롯 Transform이 씬에 세팅되어 있어야 함.
     /// </summary>
@@ -1144,11 +1193,12 @@ public class BattleManager : MonoBehaviour
     /// 핵심 이동 API. 빈 슬롯이면 Move, 점유 슬롯이면 Swap.
     /// forced=false(기본): AllowedSlots 엄격 검증. 실패 시 상태 변경 없이 Fail_AllowedSlots.
     /// forced=true: 푸시/셔플 등 스킬 강제 이동. AllowedSlots 무시.
+    /// clearFormationDivider=true: 성공 시 스폰 분단선 인덱스를 0으로(한 줄 자유 이동용).
     /// 성공 시 currentSlot + 월드 위치 갱신, 전/후열 sortingOrder 재설정,
     /// AssignDisplayNumbers + UpdateDivider + enemyLine 동기화.
     /// 애니메이션 없음 (Phase 3에서 추가).
     /// </summary>
-    public MoveResult MoveToSlot(EnemyStats mover, BattleSlot target, bool forced = false)
+    public MoveResult MoveToSlot(EnemyStats mover, BattleSlot target, bool forced = false, bool clearFormationDivider = false)
     {
         if (mover == null || mover.IsDead()) return MoveResult.Fail_InvalidArgs;
         if (target == BattleSlot.None) return MoveResult.Fail_InvalidArgs;
@@ -1174,6 +1224,7 @@ public class BattleManager : MonoBehaviour
         {
             BattleSlot from = mover.currentSlot;
             ApplySlotAssignment(mover, target, targetTransform);
+            if (clearFormationDivider) currentDividerSlotIdx = 2;
             PostMoveRefresh();
             Debug.Log($"[MOVE] {mover.enemyName} {from} → {target} (이동)" + (forced ? " [forced]" : ""));
             return MoveResult.Success_Moved;
@@ -1190,6 +1241,7 @@ public class BattleManager : MonoBehaviour
         Transform moverOriginTransform = SlotTransformByIndex((int)moverFrom);
         ApplySlotAssignment(mover, target, targetTransform);
         ApplySlotAssignment(occupant, moverFrom, moverOriginTransform);
+        if (clearFormationDivider) currentDividerSlotIdx = 2;
         PostMoveRefresh();
         Debug.Log($"[MOVE] {mover.enemyName} {moverFrom} → {target} (swap with {occupant.enemyName})" + (forced ? " [forced]" : ""));
         return MoveResult.Success_Swapped;
@@ -1248,7 +1300,7 @@ public class BattleManager : MonoBehaviour
 
     /// <summary>
     /// 적 전체를 현재 점유 중인 슬롯 집합 안에서 무작위로 재배치한다.
-    /// 슬롯 집합은 보존되고 몬스터만 섞이므로 전/후열 비율(분단선 위치)은 유지된다.
+    /// 슬롯 집합은 보존·몬스터만 섞음. 스폰 분단선 인덱스는 0으로 초기화(한 줄 셔플).
     /// AllowedSlots는 강제로 무시(셔플은 본질적으로 forced 이동).
     /// Phase 3에서 페이드/슬라이드 연출 추가 예정.
     /// </summary>
@@ -1298,6 +1350,7 @@ public class BattleManager : MonoBehaviour
             if (sr != null) sr.sortingOrder = GetSortingOrderForSlot(target);
         }
 
+        currentDividerSlotIdx = 2;
         PostMoveRefresh();
         Debug.Log($"[SHUFFLE] 적 {alive.Count}마리 재배치 완료");
     }
@@ -1412,8 +1465,7 @@ public class BattleManager : MonoBehaviour
 
     /// <summary>
     /// 1-based 슬롯 인덱스(1~4)가 주어진 SlotMask에 허용되는지 확인.
-    /// 레거시 호환: MonsterSO.AllowedSlots가 Slot5~7 비트만 갖는 경우(구 7슬롯 시대 설정),
-    /// 4슬롯 시스템에선 유효한 슬롯이 없으므로 Any(모든 슬롯 1~4 허용)로 완화한다.
+    /// 마스크에 Slot1~4 비트가 없으면 1~4 전체 허용(구 데이터·동료 등 방어).
     /// </summary>
     private bool SlotIsAllowed(int slotIdx1Based, SlotMask mask)
     {
@@ -1427,7 +1479,6 @@ public class BattleManager : MonoBehaviour
         };
         if (bit == SlotMask.None) return false;
 
-        // 레거시 폴백: 4슬롯 비트가 하나도 없으면(구 Slot5~7-only 설정) 모든 슬롯 허용.
         const SlotMask FOUR_SLOT_MASK = SlotMask.Slot1 | SlotMask.Slot2 | SlotMask.Slot3 | SlotMask.Slot4;
         if ((mask & FOUR_SLOT_MASK) == 0) return true;
 
@@ -1493,70 +1544,20 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// currentDividerSlotIdx(스폰 시 SpawnPattern에서 결정)를 기준으로 해당 Divider를 활성화한다.
-    /// - 0 : 분단선 없음 (Solo / 전원 전열 / 전원 후열)
-    /// - 1~3 : divider_{N}을 Slot_N 뒤에 표시
-    /// - 움직임(좌우 스왑/이동)으로 점유 슬롯이 바뀌어도 분단선 '위치'는 유지된다.
-    ///   단, 전열 또는 후열이 모두 비게 되면(사망/이동) 분단선을 끈다.
+    /// 분단선은 항상 12|34 중앙 고정.
+    /// 시스템 판정에는 관여하지 않고, 전열/후열 시각 가이드로만 사용한다.
     /// </summary>
     private void UpdateDividerFromActualLayout()
     {
-        // 우선 모든 Divider 비활성화 (null 안전)
-        if (divider_1 != null) divider_1.SetActive(false);
-        if (divider_2 != null) divider_2.SetActive(false);
-        if (divider_3 != null) divider_3.SetActive(false);
-        if (divider_4 != null) divider_4.SetActive(false);
+        currentDividerSlotIdx = 2;
 
-        if (activeEnemies == null || activeEnemies.Count == 0)
+        if (divider != null)
         {
-            Debug.Log("[DIVIDER] 활성 몬스터 없음 → 모든 Divider off");
+            divider.SetActive(true);
             return;
         }
 
-        // 스폰 시 결정된 분단선이 없으면 그대로 종료
-        if (currentDividerSlotIdx <= 0 || currentDividerSlotIdx >= 4)
-        {
-            Debug.Log($"[DIVIDER] currentDividerSlotIdx={currentDividerSlotIdx} → 분단선 없음");
-            return;
-        }
-
-        // 분단선 기준 좌/우에 살아있는 몬스터가 각각 있는지 확인
-        int leftCount = 0, rightCount = 0;
-        foreach (EnemyStats es in activeEnemies)
-        {
-            if (es == null) continue;
-            if (es.IsDead()) continue;
-            int idx = (int)es.currentSlot;
-            if (idx <= 0 || idx > 4) continue; // Center/None 제외
-            if (idx <= currentDividerSlotIdx) leftCount++;
-            else rightCount++;
-        }
-
-        if (leftCount == 0 || rightCount == 0)
-        {
-            Debug.Log($"[DIVIDER] 한쪽 비어있음 (좌={leftCount}, 우={rightCount}, divider_{currentDividerSlotIdx}) → 분단선 숨김");
-            return;
-        }
-
-        GameObject target = currentDividerSlotIdx switch
-        {
-            1 => divider_1,
-            2 => divider_2,
-            3 => divider_3,
-            _ => null
-        };
-
-        if (target != null)
-        {
-            target.SetActive(true);
-            Debug.Log($"[DIVIDER] divider_{currentDividerSlotIdx} 활성화 (전열 {leftCount} / 후열 {rightCount})");
-        }
-        else
-        {
-            Debug.LogWarning(
-                $"[DIVIDER] currentDividerSlotIdx={currentDividerSlotIdx}에 해당하는 divider GameObject가 " +
-                $"Inspector에 할당되지 않았습니다. divider_{currentDividerSlotIdx} 필드를 연결하세요.");
-        }
+        Debug.LogWarning("[DIVIDER] divider(단일 분단선)가 Inspector에 연결되지 않았습니다.");
     }
 
     /// <summary>
@@ -1662,9 +1663,9 @@ public class BattleManager : MonoBehaviour
 
         // ── 이동 시스템 테스트 핫키 (4슬롯 좌우 전용) ──
         // 숫자키 1~4: 현재 #N 몬스터를 "이동 선택" 상태로 고정
-        // F7 : 선택 몬스터를 왼쪽 이웃 슬롯으로 이동/스왑 (AllowedSlots 엄격)
-        // F9 : 선택 몬스터를 오른쪽 이웃 슬롯으로 이동/스왑 (AllowedSlots 엄격)
-        // F11: 적 전체 랜덤 셔플 (현재 점유 슬롯 집합 유지, forced)
+        // F10: 선택 몬스터를 왼쪽으로 한 칸 (분단선·AllowedSlots 무시)
+        // F9 : 선택 몬스터를 오른쪽으로 한 칸 (동일)
+        // F11: 적 전체 랜덤 셔플 (forced)
         HandleMoveSelectionKeys();
         HandleMoveActionKeys();
 
@@ -2238,9 +2239,8 @@ public class BattleManager : MonoBehaviour
         ForceDisableUIPanels();
         if (battleUIManager != null)
         {
+            // 초기화가 끝난 뒤 StartCommandPhase()에서 FightSubPanel을 연다
             battleUIManager.ForceCloseMenus();
-            // 전투 시작 시 메인 메뉴 표시
-            battleUIManager.ShowMainMenu();
         }
 
         ClearSpawnedEnemies();
@@ -2852,15 +2852,11 @@ public class BattleManager : MonoBehaviour
             return;
         }
         
-        // UI는 Fight 버튼을 눌러야만 나타남 (자동으로 활성화하지 않음)
+        // 커맨드 페이즈: Main 대신 PrepareNextCommand()에서 FightSubPanel 연다
         if (actionPanel != null) actionPanel.SetActive(false);
         if (skillPanel != null) skillPanel.SetActive(false);
         if (battleUIManager != null)
-        {
             battleUIManager.ForceCloseMenus();
-            // Command Phase 시작 시 메인 메뉴 표시
-            battleUIManager.ShowMainMenu();
-        }
         PrepareNextCommand();
     }
 
@@ -2920,11 +2916,9 @@ public class BattleManager : MonoBehaviour
         // if (actionPanel != null) actionPanel.SetActive(true);
         if (skillPanel != null) skillPanel.SetActive(false);
 
-        // 첫 번째 캐릭터가 아니면(이미 Fight를 선택한 상태라면) 자동으로 FightSubPanel 표시
-        if (commandIndex > 0 && battleUIManager != null)
-        {
+        // 매 커맨드 턴마다 FightSubPanel을 동일하게 연다 (첫 파티원 포함)
+        if (battleUIManager != null)
             battleUIManager.ShowFightSubPanel();
-        }
 
         AddMessage($"{currentControlledMember.playerName} is preparing an action.");
         UpdateStatusUI();
