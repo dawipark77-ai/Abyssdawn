@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c4f891a2b3e5d6c9f0a1b2e3d4c5b6a, type: 3}
+  m_Name: BattleSimEnemy_S3_Back
+  m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimEnemyUnitSO
+  displayName: Sim Trash Back1 (Slot3)
+  maxHP: 38
+  maxMP: 0
+  attack: 24
+  defense: 5
+  magic: 0
+  agility: 9
+  luck: 4
+  aiPattern: 0

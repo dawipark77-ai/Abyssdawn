@@ -24,23 +24,9 @@ MonoBehaviour:
   mpMultiplier: 1
   hpPerLevel: 0
   mpPerLevel: 0
-  attackPerLevel: 0
-  defensePerLevel: 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0
 

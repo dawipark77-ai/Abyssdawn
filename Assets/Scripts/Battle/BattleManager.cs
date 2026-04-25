@@ -3504,7 +3504,7 @@ public class BattleManager : MonoBehaviour
         PlayerStats target = GetRandomAlivePartyMember();
         if (target != null && target.currentHP > 0)
         {
-            if (CheckEvasion(target.Agility, enemy.Agility))
+            if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, null))
             {
                 AddMessage($"{target.playerName} evaded {enemy.enemyName}'s attack!");
             }
@@ -3521,6 +3521,7 @@ public class BattleManager : MonoBehaviour
                 Debug.Log($"[BattleLog] Enemy Attack: {effectiveAttack}, Player Defense: {target.Defense} (base: {target.baseDefense} + bonus: {target.GetDefenseBonus()}), Critical: {critical}");
 
                 int damage = CalculateDQDamage(effectiveAttack, target.Defense, critical);
+                damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.playerName);
 
                 if (target.isDefending)
                 {
@@ -4629,7 +4630,7 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || target == null) return;
 
-        if (CheckEvasion(target.Agility, attacker.Agility))
+        if (!RollPhysicalHit_PlayerVsEnemy(attacker, target, null))
         {
             AddMessage($"{target.enemyName} evaded {attacker.playerName}!");
         }
@@ -4694,11 +4695,13 @@ public class BattleManager : MonoBehaviour
 
                 Debug.Log($"[BattleLog] Dual basic attack - base1:{baseHit1}, base2:{baseHit2}, armor1:{armorHit1}, armor2:{armorHit2}, f1:{f1:F2}, f2:{f2:F2}");
 
-                int applied1 = target.TakeDamage(hit1, critical);
+                int hit1Slot = ApplySlotDamageToTarget(hit1, target.currentSlot, target.enemyName);
+                int hit2Slot = ApplySlotDamageToTarget(hit2, target.currentSlot, target.enemyName);
+                int applied1 = target.TakeDamage(hit1Slot, critical);
                 int applied2 = 0;
                 if (!target.IsDead())
                 {
-                    applied2 = target.TakeDamage(hit2, critical);
+                    applied2 = target.TakeDamage(hit2Slot, critical);
                 }
 
                 shownTotal = applied1 + applied2;
@@ -4733,11 +4736,13 @@ public class BattleManager : MonoBehaviour
                 int singleTotal = singleBase + singleArmor;
                 Debug.Log($"[BattleLog] Single-wield attack - base:{singleBase}, armorBreak:{singleArmor}, defReduced:{defenseReduced}, total:{singleTotal}");
 
-                int applied1 = target.TakeDamage(singleBase, critical);
+                int singleBaseSlot = ApplySlotDamageToTarget(singleBase, target.currentSlot, target.enemyName);
+                int singleArmorSlot = ApplySlotDamageToTarget(singleArmor, target.currentSlot, target.enemyName);
+                int applied1 = target.TakeDamage(singleBaseSlot, critical);
                 int applied2 = 0;
                 if (singleArmor > 0 && !target.IsDead())
                 {
-                    applied2 = target.TakeDamage(singleArmor, false);
+                    applied2 = target.TakeDamage(singleArmorSlot, false);
                 }
 
                 shownTotal = applied1 + applied2;
@@ -5221,11 +5226,12 @@ public class BattleManager : MonoBehaviour
         // 각 타격마다 독립적으로 명중률/크리티컬 계산 + 딜레이
         for (int i = 0; i < hits; i++)
         {
-            // 타격마다 명중률 체크
-            float hitChance = CalculateHitChance(skill, attacker, target);
+            // 타격마다 명중률 체크 (스킬 accuracy × 슬롯 보정 × AGI 등)
+            var (hitChance, logSkillAcc, logSlotAcc) = EvaluateHitChance(skill, attacker, target);
             float roll = UnityEngine.Random.Range(0f, 1f);
-            
-            if (roll >= hitChance)
+            bool missed = roll >= hitChance;
+            Debug.Log($"[HIT] {attacker.playerName} → {target.enemyName}(슬롯{(int)target.currentSlot}): 스킬accuracy={logSkillAcc}, 슬롯보정={logSlotAcc}, 최종={hitChance}, 결과={(missed ? "miss" : "hit")}");
+            if (missed)
             {
                 // 회피됨
                 evadedHits++;
@@ -5292,6 +5298,7 @@ public class BattleManager : MonoBehaviour
 
             Debug.Log($"[BattleLog] Skill Final Damage (with armor break): base={baseDamage}, armorBreak={armorBreakDamage}, total={damage}");
 
+            damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.enemyName);
             // 데미지 적용 (적이 흔들림) - 크리티컬 여부 전달
             target.TakeDamage(damage, critical);
             totalDamage += damage;
@@ -5380,10 +5387,11 @@ public class BattleManager : MonoBehaviour
         {
             if (target == null || target.currentHP <= 0) continue;
 
-            float hitChance = CalculateHitChance(skill, attacker, target);
+            var (hitChance, logSkillAcc2, logSlotAcc2) = EvaluateHitChance(skill, attacker, target);
             float roll = UnityEngine.Random.Range(0f, 1f);
-
-            if (roll >= hitChance)
+            bool missed2 = roll >= hitChance;
+            Debug.Log($"[HIT] {attacker.playerName} → {target.enemyName}(슬롯{(int)target.currentSlot}): 스킬accuracy={logSkillAcc2}, 슬롯보정={logSlotAcc2}, 최종={hitChance}, 결과={(missed2 ? "miss" : "hit")}");
+            if (missed2)
             {
                 AddMessage($"{target.enemyName} evaded {attacker.playerName}'s {skill.skillName}!");
                 continue;
@@ -5415,6 +5423,7 @@ public class BattleManager : MonoBehaviour
             // Sharp Edge 등 공격 패시브 보정
             damage = ApplyOffensivePassiveBonuses(attacker, skill, target, damage);
 
+            damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.enemyName);
             target.TakeDamage(damage, critical);
             totalDamage += damage;
 
@@ -5495,12 +5504,6 @@ public class BattleManager : MonoBehaviour
         return roll < criticalChance + luck;
     }
 
-    private bool CheckEvasion(int targetAgility, int attackerAgility)
-    {
-        float roll = UnityEngine.Random.Range(0f, 100f);
-        return roll < evasionChance + (targetAgility - attackerAgility) * 0.5f;
-    }
-
     /// <summary>
     /// 스킬 사용 시 발동하는 패시브 처리 (Combat Breathing 등)
     /// </summary>
@@ -5533,55 +5536,100 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // -------------------- Hit Chance Calculation --------------------
+    // -------------------- Slot damage / Hit chance (슬롯 보정) --------------------
     /// <summary>
-    /// 명중률을 계산합니다.
+    /// 대상 슬롯에 따른 피해량 배율을 적용합니다. (최소 1)
     /// </summary>
-    /// <param name="usedSkill">사용된 스킬 데이터</param>
-    /// <param name="attacker">공격자 (PlayerStats)</param>
-    /// <param name="defender">방어자 (PlayerStats 또는 EnemyStats)</param>
-    /// <returns>명중 확률 (0.0 ~ 1.0)</returns>
-    private float CalculateHitChance(SkillData usedSkill, PlayerStats attacker, PlayerStats defender)
+    private int ApplySlotDamageToTarget(int baseDamage, BattleSlot slot, string targetDisplayName)
     {
-        // Step 1: 기본 명중률 가져오기
-        float baseHit = usedSkill != null ? usedSkill.accuracy : 0.95f;
-
-        // Step 2: AGI 보정 (장비 보정이 포함된 최종 AGI 사용)
-        float attackerAGI = attacker.Agility; // 이미 GetEquipmentAgilityBonus()가 포함됨
-        float defenderAGI = defender.Agility;
-        float agiModifier = (attackerAGI * 1.5f) / (attackerAGI * 1.5f + defenderAGI);
-
-        // Step 3: 최종 합산 (PassiveAccuracy + 장비 Accuracy 보정치 추가)
-        float Luck = attacker.Luck;
-        float passiveAccuracyBonus = attacker.GetPassiveAccuracyBonus();
-        float itemAccuracyBonus = attacker.GetEquipmentAccuracyBonus(); // 장비 명중률 보정치
-        float finalHitChance = baseHit * agiModifier + (Luck * 0.002f) + passiveAccuracyBonus + itemAccuracyBonus;
-
-        // 최종값 제한
-        return Mathf.Clamp(finalHitChance, 0.2f, 0.98f);
+        if (baseDamage <= 0)
+            return 0;
+        float mult = SlotBalanceTable.GetDamageMultiplier(slot);
+        int final = Mathf.Max(1, Mathf.FloorToInt(baseDamage * mult));
+        Debug.Log($"[DMG] {targetDisplayName}(슬롯{(int)slot}): 기본={baseDamage}, 배율={mult}, 최종={final}");
+        return final;
     }
 
     /// <summary>
-    /// 명중률을 계산합니다 (EnemyStats 방어자용 오버로드).
+    /// 최종 명중률 = (스킬 accuracy × 슬롯 명중 보정) × AGI 보정 + Luck/패시브/장비 보정, 이후 클램프.
     /// </summary>
-    private float CalculateHitChance(SkillData usedSkill, PlayerStats attacker, EnemyStats defender)
+    private static (float finalChance, float skillAcc, float slotAcc) ComputeHitChanceCore(
+        SkillData usedSkill,
+        float attackerAgility,
+        float defenderAgility,
+        float attackerLuck,
+        float passiveAccuracyBonus,
+        float itemAccuracyBonus,
+        BattleSlot defenderSlot)
     {
-        // Step 1: 기본 명중률 가져오기
-        float baseHit = usedSkill != null ? usedSkill.accuracy : 0.95f;
+        float skillAcc = usedSkill != null ? usedSkill.accuracy : 1f;
+        float slotAcc = SlotBalanceTable.GetHitChanceMultiplier(defenderSlot);
+        float combinedAcc = skillAcc * slotAcc;
 
-        // Step 2: AGI 보정 (장비 보정이 포함된 최종 AGI 사용)
-        float attackerAGI = attacker.Agility; // 이미 GetEquipmentAgilityBonus()가 포함됨
-        float defenderAGI = defender.Agility;
-        float agiModifier = (attackerAGI * 1.5f) / (attackerAGI * 1.5f + defenderAGI);
+        float agiModifier = (attackerAgility * 1.5f) / (attackerAgility * 1.5f + defenderAgility);
+        float finalHitChance = combinedAcc * agiModifier + (attackerLuck * 0.002f) + passiveAccuracyBonus + itemAccuracyBonus;
+        float clamped = Mathf.Clamp(finalHitChance, 0.2f, 0.98f);
+        return (clamped, skillAcc, slotAcc);
+    }
 
-        // Step 3: 최종 합산 (PassiveAccuracy + 장비 Accuracy 보정치 추가)
-        float Luck = attacker.Luck;
-        float passiveAccuracyBonus = attacker.GetPassiveAccuracyBonus();
-        float itemAccuracyBonus = attacker.GetEquipmentAccuracyBonus(); // 장비 명중률 보정치
-        float finalHitChance = baseHit * agiModifier + (Luck * 0.002f) + passiveAccuracyBonus + itemAccuracyBonus;
+    private (float finalChance, float skillAcc, float slotAcc) EvaluateHitChance(SkillData usedSkill, PlayerStats attacker, EnemyStats defender)
+    {
+        if (attacker == null || defender == null)
+            return (0.2f, 1f, SlotBalanceTable.GetHitChanceMultiplier(BattleSlot.Slot1));
+        return ComputeHitChanceCore(
+            usedSkill,
+            attacker.Agility,
+            defender.Agility,
+            attacker.Luck,
+            attacker.GetPassiveAccuracyBonus(),
+            attacker.GetEquipmentAccuracyBonus(),
+            defender.currentSlot);
+    }
 
-        // 최종값 제한
-        return Mathf.Clamp(finalHitChance, 0.2f, 0.98f);
+    private (float finalChance, float skillAcc, float slotAcc) EvaluateHitChance(SkillData usedSkill, PlayerStats attacker, PlayerStats defender)
+    {
+        if (attacker == null || defender == null)
+            return (0.2f, 1f, SlotBalanceTable.GetHitChanceMultiplier(BattleSlot.Slot1));
+        return ComputeHitChanceCore(
+            usedSkill,
+            attacker.Agility,
+            defender.Agility,
+            attacker.Luck,
+            attacker.GetPassiveAccuracyBonus(),
+            attacker.GetEquipmentAccuracyBonus(),
+            defender.currentSlot);
+    }
+
+    private (float finalChance, float skillAcc, float slotAcc) EvaluateHitChance(SkillData usedSkill, EnemyStats attacker, PlayerStats defender)
+    {
+        if (attacker == null || defender == null)
+            return (0.2f, 1f, SlotBalanceTable.GetHitChanceMultiplier(BattleSlot.Slot1));
+        return ComputeHitChanceCore(
+            usedSkill,
+            attacker.Agility,
+            defender.Agility,
+            attacker.luck,
+            0f,
+            0f,
+            defender.currentSlot);
+    }
+
+    private bool RollPhysicalHit_PlayerVsEnemy(PlayerStats attacker, EnemyStats target, SkillData skillOrNull)
+    {
+        var (final, sa, sl) = EvaluateHitChance(skillOrNull, attacker, target);
+        float roll = UnityEngine.Random.Range(0f, 1f);
+        bool hit = roll < final;
+        Debug.Log($"[HIT] {attacker.playerName} → {target.enemyName}(슬롯{(int)target.currentSlot}): 스킬accuracy={sa}, 슬롯보정={sl}, 최종={final}, 결과={(hit ? "hit" : "miss")}");
+        return hit;
+    }
+
+    private bool RollPhysicalHit_EnemyVsPlayer(EnemyStats attacker, PlayerStats target, SkillData skillOrNull)
+    {
+        var (final, sa, sl) = EvaluateHitChance(skillOrNull, attacker, target);
+        float roll = UnityEngine.Random.Range(0f, 1f);
+        bool hit = roll < final;
+        Debug.Log($"[HIT] {attacker.enemyName} → {target.playerName}(슬롯{(int)target.currentSlot}): 스킬accuracy={sa}, 슬롯보정={sl}, 최종={final}, 결과={(hit ? "hit" : "miss")}");
+        return hit;
     }
 
     // -------------------- 메시지 --------------------
