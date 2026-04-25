@@ -12044,7 +12044,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimulator
   allyRoster: {fileID: 11400000, guid: f0e1d2c3b4a5968778695a4b3c2d1e0f, type: 2}
   enemyRoster: {fileID: 11400000, guid: e0d1c2b3a4f5e6d7c8b9a0f1e2d3c4b5, type: 2}
-  iterations: 100
+  iterations: 1000
   baseSeed: 12345
   maxTurnsPerBattle: 500
   criticalChanceBase: 25
