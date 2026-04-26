@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c4f891a2b3e5d6c9f0a1b2e3d4c5b6a, type: 3}
   m_Name: BattleSimEnemy_S4_Back
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimEnemyUnitSO
-  displayName: Sim Trash Back2 (Slot4)
-  maxHP: 38
+  displayName: "\uC801 \uC2B4\uB86F4 \uD6C4\uC5F4"
+  maxHP: 13
   maxMP: 0
-  attack: 23
-  defense: 5
-  magic: 0
-  agility: 7
+  attack: 5
+  defense: 2
+  magic: 2
+  agility: 6
   luck: 4
   aiPattern: 0

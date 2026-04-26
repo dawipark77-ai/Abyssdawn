@@ -22,14 +22,14 @@ namespace AbyssdawnBattle
             0.65f
         };
 
-        /// <summary>피격자 슬롯별 받는 피해 배율 — 전열 단단(0.85), 후열 약함(1.20).</summary>
+        /// <summary>피격자 슬롯별 받는 피해 배율 — 전열(1~2)×0.90, 후열(3~4)×1.10.</summary>
         private static readonly float[] SlotDmgByIndex =
         {
             0f,
-            0.85f,
-            0.85f,
-            1.20f,
-            1.20f
+            0.90f,
+            0.90f,
+            1.10f,
+            1.10f
         };
 
         private static int ResolveSlotIndex(BattleSlot slot)
@@ -125,7 +125,10 @@ namespace AbyssdawnBattle
             return roll < criticalChanceBase + luck;
         }
 
-        /// <summary>Damage = max(1, floor(ATK×1.2 − DEF×0.7)) × 피격슬롯배율(전열0.85·후열1.2) × Crit × EquipDmg (장비 없으면 1).</summary>
+        /// <summary>
+        /// Damage = max(ATK×0.3, floor(ATK×1.6 − DEF×0.6)) × 피격슬롯(전열×0.90·후열×1.10) × Crit × EquipDmg.
+        /// 최종값은 최소 1.
+        /// </summary>
         public static int CalculateSimMeleeDamage(
             int atk,
             int def,
@@ -133,12 +136,12 @@ namespace AbyssdawnBattle
             BattleSlot defenderSlot,
             float equipDamageMultiplier = 1f)
         {
-            float rawCore = atk * 1.2f - def * 0.7f;
-            int core = Mathf.Max(1, Mathf.FloorToInt(rawCore));
+            int flooredLinear = Mathf.FloorToInt(atk * 1.6f - def * 0.6f);
+            float coreBase = Mathf.Max(atk * 0.3f, flooredLinear);
             float slotDmg = GetSimSlotDamageMultiplier(defenderSlot);
             float crit = isCritical ? CriticalDamageMultiplier : 1f;
             float equip = equipDamageMultiplier <= 0f ? 1f : equipDamageMultiplier;
-            float v = core * slotDmg * crit * equip;
+            float v = coreBase * slotDmg * crit * equip;
             return Mathf.Max(1, Mathf.FloorToInt(v));
         }
     }

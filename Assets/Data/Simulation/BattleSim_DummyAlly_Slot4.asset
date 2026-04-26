@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2c3d4e5f6a708192a3b4c5d6e7f8091, type: 3}
   m_Name: BattleSim_DummyAlly_Slot4
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimDummyAllySO
-  allyDisplayName: Sim Dummy Ally (Slot 4)
-  maxHP: 45
-  maxMP: 30
-  attack: 15
-  defense: 8
-  magic: 0
-  agility: 10
-  luck: 5
+  allyDisplayName: "\uC2B4\uB86F4 \uD6C4\uC5F4 \uAD81\uC218/\uB9C8\uBC95\uC0AC"
+  maxHP: 14
+  maxMP: 0
+  attack: 4
+  defense: 3
+  magic: 4
+  agility: 8
+  luck: 4
   battleSlotIndex: 4
+  simAiPattern: 0

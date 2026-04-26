@@ -77,7 +77,7 @@ namespace Abyssdawn
             sb.AppendLine();
             sb.AppendLine("--- 구현 검증 (시뮬 전용 공식) ---");
             sb.AppendLine("명중: Base(스킬 accuracy 또는 1) × AGI보정(clamp(0.8+(Att-Def)*0.02,0.6,1.2)) × SlotHit × Equip(1) → clamp 0.45~0.95.");
-            sb.AppendLine("딜: max(1, floor(ATK×1.2 − DEF×0.7)) × 피격슬롯(전열1~2:×0.85, 후열3~4:×1.20) × Crit(1.5 또는 1) × Equip(1).");
+            sb.AppendLine("딜: max(ATK×0.3, floor(ATK×1.6 − DEF×0.6)) × 피격슬롯(전열1~2:×0.90, 후열3~4:×1.10) × Crit(1.5 또는 1) × Equip(1).");
             sb.AppendLine();
             acc.AppendSlotReport(sb, iterations);
             sb.AppendLine();

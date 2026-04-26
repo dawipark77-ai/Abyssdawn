@@ -17,6 +17,7 @@ namespace Abyssdawn
         public int maxMP;
         public int attack = 17;
         public int defense = 13;
+        [Tooltip("MAG — 마법 스탯")]
         public int magic;
         public int agility = 9;
         public int luck = 4;

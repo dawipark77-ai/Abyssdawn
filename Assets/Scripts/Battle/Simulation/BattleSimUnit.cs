@@ -24,6 +24,7 @@ namespace Abyssdawn
         public int CurrentMP;
         public int Attack;
         public int Defense;
+        /// <summary>MAG(마법) — 시뮬 전용.</summary>
         public int Magic;
         public int Agility;
         public int Luck;

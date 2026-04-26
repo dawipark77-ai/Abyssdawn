@@ -19,6 +19,7 @@ namespace Abyssdawn
         [Tooltip("물리 공격력(힘)")]
         public int attack = 10;
         public int defense = 10;
+        [Tooltip("MAG — 마법 스탯")]
         public int magic = 10;
         public int agility = 10;
         public int luck = 5;

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c4f891a2b3e5d6c9f0a1b2e3d4c5b6a, type: 3}
   m_Name: BattleSimEnemy_S2_Bruiser
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimEnemyUnitSO
-  displayName: Sim Trash DPS (Slot2)
-  maxHP: 32
+  displayName: "\uC801 \uC2B4\uB86F2 \uC804\uC0AC"
+  maxHP: 21
   maxMP: 0
-  attack: 29
-  defense: 6
-  magic: 0
-  agility: 8
-  luck: 5
+  attack: 11
+  defense: 4
+  magic: 2
+  agility: 5
+  luck: 4
   aiPattern: 0
