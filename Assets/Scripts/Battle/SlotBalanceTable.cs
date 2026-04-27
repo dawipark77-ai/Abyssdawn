@@ -19,10 +19,10 @@ namespace AbyssdawnBattle
         private static readonly float[] DamageMultiplierByBalanceIndex =
         {
             0f,
-            1.00f,
-            1.00f,
+            1.10f,
+            1.10f,
             0.90f,
-            0.85f
+            0.90f
         };
 
         /// <summary>

@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimEnemyUnitSO
   displayName: "\uC801 \uC2B4\uB86F3 \uD6C4\uC5F4"
   maxHP: 14
-  maxMP: 0
-  attack: 8
+  maxMP: 50
+  attack: 10
   defense: 2
-  magic: 2
+  magic: 5
   agility: 7
   luck: 5
   aiPattern: 0
+  simSkills: []

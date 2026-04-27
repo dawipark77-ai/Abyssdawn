@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using AbyssdawnBattle;
 using UnityEngine;
 
 namespace Abyssdawn
@@ -24,5 +26,9 @@ namespace Abyssdawn
 
         [Header("시뮬 AI")]
         public AIPattern aiPattern = AIPattern.Aggressive;
+
+        [Header("시뮬 스킬 조합 (슬롯당 1행 — SkillData 에셋 드래그)")]
+        [Tooltip("리스트 크기는 +로 늘리고, 각 칸에 Resources 등의 SkillData를 드래그합니다. (런타임 시뮬 연동은 추후)")]
+        public List<SkillData> simSkills = new List<SkillData>();
     }
 }

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: BattleSim_DefaultEnemyRoster
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimEnemyRoster
   enemySlot1: {fileID: 11400000, guid: d1e2f3a4b5c60718293a4b5c6d7e8f01, type: 2}
-  enemySlot2: {fileID: 11400000, guid: d1e2f3a4b5c60718293a4b5c6d7e8f02, type: 2}
-  enemySlot3: {fileID: 11400000, guid: d1e2f3a4b5c60718293a4b5c6d7e8f03, type: 2}
-  enemySlot4: {fileID: 11400000, guid: d1e2f3a4b5c60718293a4b5c6d7e8f04, type: 2}
+  enemySlot2: {fileID: 0}
+  enemySlot3: {fileID: 0}
+  enemySlot4: {fileID: 0}

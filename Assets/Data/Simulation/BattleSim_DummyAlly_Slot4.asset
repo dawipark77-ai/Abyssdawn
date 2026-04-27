@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimDummyAllySO
   allyDisplayName: "\uC2B4\uB86F4 \uD6C4\uC5F4 \uAD81\uC218/\uB9C8\uBC95\uC0AC"
   maxHP: 14
-  maxMP: 0
+  maxMP: 50
   attack: 4
   defense: 3
   magic: 4
@@ -22,3 +22,4 @@ MonoBehaviour:
   luck: 4
   battleSlotIndex: 4
   simAiPattern: 0
+  simSkills: []

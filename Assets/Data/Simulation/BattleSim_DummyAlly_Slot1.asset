@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: BattleSim_DummyAlly_Slot1
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimDummyAllySO
   allyDisplayName: "\uC2B4\uB86F1 \uC804\uC5F4 \uC804\uC0AC"
-  maxHP: 21
+  maxHP: 26
   maxMP: 0
-  attack: 9
-  defense: 5
+  attack: 12
+  defense: 9
   magic: 2
-  agility: 5
-  luck: 3
+  agility: 1
+  luck: 4
   battleSlotIndex: 1
   simAiPattern: 0
+  simSkills: []

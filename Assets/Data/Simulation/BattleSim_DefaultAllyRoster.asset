@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: BattleSim_DefaultAllyRoster
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimAllyRoster
   allySlot1: {fileID: 11400000, guid: c1d2e3f4a5b60718293a4b5c6d7e8f91, type: 2}
-  allySlot2: {fileID: 11400000, guid: c1d2e3f4a5b60718293a4b5c6d7e8f92, type: 2}
-  allySlot3: {fileID: 11400000, guid: c1d2e3f4a5b60718293a4b5c6d7e8f93, type: 2}
-  allySlot4: {fileID: 11400000, guid: c1d2e3f4a5b60718293a4b5c6d7e8f94, type: 2}
+  allySlot2: {fileID: 0}
+  allySlot3: {fileID: 0}
+  allySlot4: {fileID: 0}

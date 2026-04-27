@@ -4,6 +4,11 @@
 /[Build]/
 /[Builds]/
 /[Logs]/
+# 시뮬 리포트 텍스트만 무시 (폴더·README는 저장소에 둠)
+/BattleSimLogs/*.txt
+!/BattleSimLogs/README.txt
+# 구버전 경로(Assets 아래) — Unity Import 충돌 방지
+/Assets/Data/Simulation/_LastBattleSimReport.txt
 /[MemoryCaptures]/
 
 # 에셋 메타데이터와 설정 파일은 AI가 읽어야 하므로 제외하지 않음

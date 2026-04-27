@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AbyssdawnBattle;
 using UnityEngine;
 
@@ -37,6 +38,9 @@ namespace Abyssdawn
 
         /// <summary>적이 방어 선택 → <b>다음 라운드 아군 페이즈</b>에서 받는 모든 피해 × 0.6. 중첩 없음.</summary>
         public bool SimGuardNextAllyPhase;
+
+        /// <summary>시뮬 전용 스킬 목록 (로스터 SO에서 복사).</summary>
+        public List<SkillData> SimSkills = new List<SkillData>();
 
         public bool IsAlive => CurrentHP > 0;
 

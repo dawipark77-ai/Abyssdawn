@@ -1,3 +1,4 @@
+using Abyssdawn;
 using UnityEngine;
 
 namespace AbyssdawnBattle
@@ -22,14 +23,14 @@ namespace AbyssdawnBattle
             0.65f
         };
 
-        /// <summary>피격자 슬롯별 받는 피해 배율 — 전열(1~2)×0.90, 후열(3~4)×1.10.</summary>
+        /// <summary>피격자 슬롯별 받는 피해 배율 — 전열(1~2)×1.10, 후열(3~4)×0.90 (본편 SlotBalanceTable과 동일 방향).</summary>
         private static readonly float[] SlotDmgByIndex =
         {
             0f,
-            0.90f,
-            0.90f,
             1.10f,
-            1.10f
+            1.10f,
+            0.90f,
+            0.90f
         };
 
         private static int ResolveSlotIndex(BattleSlot slot)
@@ -119,14 +120,15 @@ namespace AbyssdawnBattle
             return rng.NextDouble() < chance;
         }
 
-        public static bool RollCritical(int luck, float criticalChanceBase, System.Random rng)
+        /// <param name="skillCritBonusPercent">스킬의 critBonusPercent 등 추가 크리율.</param>
+        public static bool RollCritical(int luck, float criticalChanceBase, System.Random rng, float skillCritBonusPercent = 0f)
         {
             double roll = rng.NextDouble() * 100.0;
-            return roll < criticalChanceBase + luck;
+            return roll < criticalChanceBase + luck + skillCritBonusPercent;
         }
 
         /// <summary>
-        /// Damage = max(ATK×0.3, floor(ATK×1.6 − DEF×0.6)) × 피격슬롯(전열×0.90·후열×1.10) × Crit × EquipDmg.
+        /// Damage = max(ATK×0.3, floor(ATK×1.6 − DEF×0.6)) × 피격슬롯(전열×1.10·후열×0.90) × Crit × EquipDmg.
         /// 최종값은 최소 1.
         /// </summary>
         public static int CalculateSimMeleeDamage(
@@ -143,6 +145,53 @@ namespace AbyssdawnBattle
             float equip = equipDamageMultiplier <= 0f ? 1f : equipDamageMultiplier;
             float v = coreBase * slotDmg * crit * equip;
             return Mathf.Max(1, Mathf.FloorToInt(v));
+        }
+
+        /// <summary>스킬 배율(min~max 랜덤) × 시뮬 코어(스케일 스탯 vs 방어) × 슬롯 × 크리.</summary>
+        public static int CalculateSimSkillDamage(
+            SkillData skill,
+            int scaledStat,
+            int defenderDefense,
+            bool isCritical,
+            BattleSlot defenderSlot,
+            System.Random rng)
+        {
+            float mult = skill.minMult >= skill.maxMult
+                ? skill.minMult
+                : skill.minMult + (float)rng.NextDouble() * (skill.maxMult - skill.minMult);
+            int flooredLinear = Mathf.FloorToInt(scaledStat * 1.6f - defenderDefense * 0.6f);
+            float coreBase = Mathf.Max(scaledStat * 0.3f, flooredLinear) * mult;
+            float slotDmg = GetSimSlotDamageMultiplier(defenderSlot);
+            float crit = isCritical ? CriticalDamageMultiplier : 1f;
+            float v = coreBase * slotDmg * crit;
+            return Mathf.Max(1, Mathf.FloorToInt(v));
+        }
+
+        public static int GetSimSkillScaledStat(BattleSimUnit caster, SkillData skill)
+        {
+            DamageType dt = skill.damageType;
+            ScaleStat ss = skill.scalingStat;
+            if (ss == ScaleStat.None)
+            {
+                if (dt == DamageType.Magic) return caster.Magic;
+                if (dt == DamageType.Physical) return caster.Attack;
+                return caster.Attack;
+            }
+
+            switch (ss)
+            {
+                case ScaleStat.Attack: return caster.Attack;
+                case ScaleStat.Defense: return caster.Defense;
+                case ScaleStat.Magic: return caster.Magic;
+                case ScaleStat.Agility: return caster.Agility;
+                case ScaleStat.Luck: return caster.Luck;
+                case ScaleStat.CurrentHPPercent:
+                    return caster.MaxHP > 0 ? Mathf.RoundToInt(caster.CurrentHP * 100f / caster.MaxHP) : 0;
+                case ScaleStat.CurrentMPPercent:
+                    return caster.MaxMP > 0 ? Mathf.RoundToInt(caster.CurrentMP * 100f / caster.MaxMP) : 0;
+                default:
+                    return dt == DamageType.Magic ? caster.Magic : caster.Attack;
+            }
         }
     }
 }
