@@ -60,7 +60,7 @@ public class PlayerStats : MonoBehaviour
     public int AllocatedLuck     => (statData != null) ? statData.allocatedLuck     : _fallbackAllocatedLuck;
 
     // --- [실시간 조립 계산식 - 직업 + 패시브 보너스] ---
-    // MaxHP/MP = (기본값 × 직업 배율) + 패시브 보너스
+    // MaxHP = baseHP + 직업 hpBonus + 패시브/장비/특성 (직업은 배율 없이 정수 가산만)
     public int maxHP
     {
         get
@@ -744,7 +744,7 @@ public class PlayerStats : MonoBehaviour
             characterClass = statData.currentJob;
             Debug.Log($"[PlayerStats] ✓ HeroData에서 직업 로드: {characterClass.className}");
             Debug.Log($"[PlayerStats]   - Attack: {characterClass.attackBonus:+#;-#;0}, Defense: {characterClass.defenseBonus:+#;-#;0}, Magic: {characterClass.magicBonus:+#;-#;0}");
-            Debug.Log($"[PlayerStats]   - HP Multiplier: {characterClass.hpMultiplier:P0}, MP Multiplier: {characterClass.mpMultiplier:P0}");
+            Debug.Log($"[PlayerStats]   - HP/MP 직업 가산: HP +{characterClass.hpBonus}, MP +{characterClass.mpBonus}");
         }
         else
         {
@@ -763,8 +763,8 @@ public class PlayerStats : MonoBehaviour
 
         // [DEBUG] 스탯 계산 확인
         Debug.Log($"[PlayerStats] 최종 스탯 계산:");
-        Debug.Log($"[PlayerStats]   - MaxHP: {maxHP} = BaseHP({baseHP}) × Multiplier({characterClass?.hpMultiplier ?? 1.0f}) + Passive({GetPassiveHPBonus()})");
-        Debug.Log($"[PlayerStats]   - MaxMP: {maxMP} = BaseMP({baseMP}) × Multiplier({characterClass?.mpMultiplier ?? 1.0f}) + Passive({GetPassiveMPBonus()})");
+        Debug.Log($"[PlayerStats]   - MaxHP: {maxHP} = BaseHP {baseHP} + JobHP {characterClass?.hpBonus ?? 0} + Passive/Equip/Trait");
+        Debug.Log($"[PlayerStats]   - MaxMP: {maxMP} = BaseMP {baseMP} + JobMP {characterClass?.mpBonus ?? 0} + Passive/Equip");
         Debug.Log($"[PlayerStats]   - Attack: {Attack} = Base({baseAttack}) + Job({characterClass?.attackBonus ?? 0}) + Passive({GetPassiveAttackBonus()})");
 
         // [FIX] 조건부 초기화: 에셋에 저장된 HP가 0이거나 비정상일 때만 maxHP로 초기화

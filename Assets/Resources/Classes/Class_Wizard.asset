@@ -20,8 +20,8 @@ MonoBehaviour:
   magicBonus: 6
   agilityBonus: -1
   luckBonus: 0
-  hpMultiplier: 0.75
-  mpMultiplier: 1.4
+  hpBonus: -25
+  mpBonus: 4
   hpPerLevel: 2
   mpPerLevel: 10
   attackGrowthPerLevel: 0.1

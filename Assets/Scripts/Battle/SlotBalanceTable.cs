@@ -10,10 +10,10 @@ namespace AbyssdawnBattle
         private static readonly float[] HitChanceByBalanceIndex =
         {
             0f,
+            0.95f,
             0.90f,
-            0.85f,
-            0.40f,
-            0.30f
+            0.75f,
+            0.65f
         };
 
         private static readonly float[] DamageMultiplierByBalanceIndex =

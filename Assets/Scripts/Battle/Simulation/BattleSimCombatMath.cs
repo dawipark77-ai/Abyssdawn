@@ -4,7 +4,7 @@ using UnityEngine;
 namespace AbyssdawnBattle
 {
     /// <summary>
-    /// 헤드리스 시뮬 전용. 본편 <c>BattleSystem</c>/<c>SlotBalanceTable</c>와 별도의 밸런스 공식.
+    /// 헤드리스 시뮬 전용. <see cref="SlotBalanceTable"/> 명중·피해량 슬롯 배율 및 AGI 명중 보정과 동기화됨.
     /// </summary>
     public static class BattleSimCombatMath
     {

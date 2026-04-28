@@ -158,9 +158,9 @@ public class CharacterClassSetupTool : EditorWindow
         warrior.agilityBonus = -2;
         warrior.luckBonus = -1;
         
-        // HP/MP 배율: HP +30%, MP -10%
-        warrior.hpMultiplier = 1.3f;    // 기본 100 → 130
-        warrior.mpMultiplier = 0.9f;    // 기본 10 → 9
+        // HP/MP: 기본 수치(예: baseHP 100)에 더하는 정수. 구 배율 1.3/0.9 ≈ +30 / -1 @100/10
+        warrior.hpBonus = 30;
+        warrior.mpBonus = -1;
 
         EditorUtility.SetDirty(warrior);
         AssetDatabase.SaveAssets();
@@ -207,9 +207,9 @@ public class CharacterClassSetupTool : EditorWindow
         thief.agilityBonus = 5;
         thief.luckBonus = 3;
         
-        // HP/MP 배율: HP -15%, MP +3%
-        thief.hpMultiplier = 0.85f;   // 기본 100 → 85
-        thief.mpMultiplier = 1.03f;   // 기본 10 → 10 (반올림)
+        // HP/MP 가산 (구 배율 0.85 / 1.03 근사 @ base 100/10)
+        thief.hpBonus = -15;
+        thief.mpBonus = 0;
 
         EditorUtility.SetDirty(thief);
         AssetDatabase.SaveAssets();
@@ -256,9 +256,9 @@ public class CharacterClassSetupTool : EditorWindow
         wizard.agilityBonus = -1;
         wizard.luckBonus = 0;
         
-        // HP/MP 배율: HP -25%, MP +40%
-        wizard.hpMultiplier = 0.75f;   // 기본 100 → 75
-        wizard.mpMultiplier = 1.4f;    // 기본 10 → 14
+        // HP/MP 가산 (구 배율 0.75 / 1.4 근사 @ base 100/10)
+        wizard.hpBonus = -25;
+        wizard.mpBonus = 4;
 
         EditorUtility.SetDirty(wizard);
         AssetDatabase.SaveAssets();

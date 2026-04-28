@@ -10,6 +10,28 @@ using AbyssdawnBattle;
 [CreateAssetMenu(fileName = "NewPlayerStatData", menuName = "MyRPG/PlayerData Asset", order = 1)]
 public class PlayerStatData : ScriptableObject
 {
+    [Header("=== 기본 스탯 (Base Stats) ===")]
+    [Tooltip("레벨 1 기준 기본 HP")]
+    public int baseHP = 20;
+
+    [Tooltip("레벨 1 기준 기본 MP")]
+    public int baseMP = 0;
+
+    [Tooltip("레벨 1 기준 기본 공격력")]
+    public int baseAttack = 5;
+
+    [Tooltip("레벨 1 기준 기본 방어력")]
+    public int baseDefense = 5;
+
+    [Tooltip("레벨 1 기준 기본 마력")]
+    public int baseMagic = 5;
+
+    [Tooltip("레벨 1 기준 기본 민첩")]
+    public int baseAgility = 5;
+
+    [Tooltip("레벨 1 기준 기본 행운")]
+    public int baseLuck = 3;
+
     [Header("런타임 데이터 (실시간 저장)")]
     [Tooltip("현재 HP - 실시간으로 저장됨")]
     public int currentHP;

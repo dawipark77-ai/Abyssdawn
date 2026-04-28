@@ -32,9 +32,9 @@ MonoBehaviour:
   aiPattern: 0
   rowPreference: 1
   allowedSlots: 0
-  minFloor: 1
-  maxFloor: 6
-  spawnWeight: 5
+  minFloor: 0
+  maxFloor: 0
+  spawnWeight: 0
   expReward: 0
   goldReward: 0
   dropTable: []

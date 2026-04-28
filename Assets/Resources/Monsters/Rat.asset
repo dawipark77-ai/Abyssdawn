@@ -17,12 +17,12 @@ MonoBehaviour:
   scaleMultiplier: 0.4
   hoverOffsetY: 0
   type: 3
-  hp: 35
+  hp: 28
   mp: 0
-  atk: 8
-  def: 2
-  mag: 0
-  agi: 16
+  atk: 11
+  def: 8
+  mag: 1
+  agi: 8
   luk: 4
   physResist: 0
   magResist: 0
@@ -32,9 +32,9 @@ MonoBehaviour:
   aiPattern: 0
   rowPreference: 0
   allowedSlots: 15
-  minFloor: 1
-  maxFloor: 3
-  spawnWeight: 5
+  minFloor: 0
+  maxFloor: 0
+  spawnWeight: 0
   expReward: 0
   goldReward: 0
   dropTable: []

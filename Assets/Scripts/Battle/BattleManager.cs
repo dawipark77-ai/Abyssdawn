@@ -2699,8 +2699,8 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 지정 층에 등장 가능한 MonsterSO 목록에서 SpawnWeight 가중치로 1~4마리를 선택합니다.
-    /// Resources/Monsters 폴더의 모든 MonsterSO를 로드하며, CanSpawnOnFloor 필터를 적용합니다.
+    /// 지정 층에 등장 가능한 MonsterSO에서 Rat만 스폰합니다(임시). 스폰 수 1마리.
+    /// Resources/Monsters, CanSpawnOnFloor, Rat 강제 폴백.
     /// </summary>
     private MonsterSO[] LoadMonsterSOsForFloor(int floor)
     {
@@ -2725,13 +2725,30 @@ public class BattleManager : MonoBehaviour
         if (candidates.Count == 0)
             return new MonsterSO[0];
 
+        // (임시) 스폰 풀: Rat만 — 다른 MonsterSO는 제외
+        candidates = candidates
+            .Where(so => string.Equals(so.MonsterName, "Rat", System.StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (candidates.Count == 0)
+        {
+            MonsterSO ratSo = all.FirstOrDefault(so =>
+                so != null && string.Equals(so.MonsterName, "Rat", System.StringComparison.OrdinalIgnoreCase));
+            if (ratSo == null)
+            {
+                Debug.LogError("[BattleManager] Rat MonsterSO가 없습니다. Resources/Monsters/Rat 확인.");
+                return new MonsterSO[0];
+            }
+            candidates = new List<MonsterSO> { ratSo };
+            Debug.LogWarning("[BattleManager] 층 조건에 맞는 Rat가 없어 Rat SO를 강제 사용합니다(테스트).");
+        }
+
         // SpawnWeight 합산
         float totalWeight = candidates.Sum(so => Mathf.Max(0f, so.SpawnWeight));
         if (totalWeight <= 0f)
             totalWeight = candidates.Count; // 가중치가 모두 0이면 균등 분배
 
-        // 스폰 수: 1~4마리 랜덤, 최대 4마리 제한
-        int count = Mathf.Clamp(UnityEngine.Random.Range(1, 5), 1, 4);
+        // 스폰 수: (임시) 플레이 테스트용 — 항상 1마리. 복원 시: Mathf.Clamp(Random.Range(1,5),1,4)
+        int count = 1;
         Debug.Log($"[BattleManager] LoadMonsterSOsForFloor({floor}) → candidates: {candidates.Count}, count: {count}");
 
         // 중복 허용: 같은 몬스터가 여러 번 뽑힐 수 있도록 pool에서 제거하지 않는다.
@@ -5566,7 +5583,7 @@ public class BattleManager : MonoBehaviour
         float slotAcc = SlotBalanceTable.GetHitChanceMultiplier(defenderSlot);
         float combinedAcc = skillAcc * slotAcc;
 
-        float agiModifier = (attackerAgility * 1.5f) / (attackerAgility * 1.5f + defenderAgility);
+        float agiModifier = BattleSimCombatMath.ComputeAgilityHitModifier(attackerAgility, defenderAgility);
         float finalHitChance = combinedAcc * agiModifier + (attackerLuck * 0.002f) + passiveAccuracyBonus + itemAccuracyBonus;
         float clamped = Mathf.Clamp(finalHitChance, 0.2f, 0.98f);
         return (clamped, skillAcc, slotAcc);
