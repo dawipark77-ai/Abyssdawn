@@ -12,7 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a344a122eb8754989d26c422398af5, type: 3}
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatData
-  currentHP: 25
+  baseHP: 20
+  baseMP: 0
+  baseAttack: 5
+  baseDefense: 5
+  baseMagic: 5
+  baseAgility: 5
+  baseLuck: 3
+  currentHP: 26
   currentMP: 0
   level: 1
   exp: 30
@@ -24,7 +31,7 @@ MonoBehaviour:
   allocatedLuck: 0
   currentJob: {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
   equippedSkills:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: db0cc0a74e55b8647bf22681e22977a7, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

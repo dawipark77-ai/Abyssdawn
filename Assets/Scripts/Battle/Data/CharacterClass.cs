@@ -13,6 +13,35 @@ public class CharacterClass : ScriptableObject
     public string description = "";
     public Sprite classIcon;
 
+    [Header("=== 스탯 배율 (Multiplier, 1.0 = 100%) ===")]
+    [Tooltip("HP 배율 - 예: 1.30 = 130% (30% 증가)")]
+    [Range(0.1f, 3.0f)]
+    public float hpMultiplier = 1.0f;
+
+    [Tooltip("MP 배율")]
+    [Range(0.1f, 3.0f)]
+    public float mpMultiplier = 1.0f;
+
+    [Tooltip("공격력 배율")]
+    [Range(0.1f, 3.0f)]
+    public float attackMultiplier = 1.0f;
+
+    [Tooltip("방어력 배율")]
+    [Range(0.1f, 3.0f)]
+    public float defenseMultiplier = 1.0f;
+
+    [Tooltip("마력 배율")]
+    [Range(0.1f, 3.0f)]
+    public float magicMultiplier = 1.0f;
+
+    [Tooltip("민첩 배율")]
+    [Range(0.1f, 3.0f)]
+    public float agilityMultiplier = 1.0f;
+
+    [Tooltip("행운 배율")]
+    [Range(0.1f, 3.0f)]
+    public float luckMultiplier = 1.0f;
+
     [Header("스탯 보정 (Hero·PlayerStats 기본 수치에 더함)")]
     public int attackBonus = 0;
     public int defenseBonus = 0;

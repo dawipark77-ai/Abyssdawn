@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08d37bf1de4add4da31ec10430834a5, type: 3}
+  m_Name: Class_Thief
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
+  className: Thief
+  description: "A thief specialized in Agility and Luck. Possesses fast attack and evasion capabilities but has low defense."
+  classIcon: {fileID: 0}
+  attackBonus: 3
+  defenseBonus: -2
+  magicBonus: -1
+  agilityBonus: 5
+  luckBonus: 3
+  hpMultiplier: 0.85
+  mpMultiplier: 1.03
+  hpPerLevel: 4
+  mpPerLevel: 3
+  attackGrowthPerLevel: 0.4
+  defenseGrowthPerLevel: 0.2
+  magicGrowthPerLevel: 0.1
+  agilityGrowthPerLevel: 0.8
+  luckGrowthPerLevel: 0.6

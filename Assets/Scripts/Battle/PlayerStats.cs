@@ -40,13 +40,41 @@ public class PlayerStats : MonoBehaviour
     public string jobClass => (characterClass != null) ? characterClass.className : "None";
 
     [Header("3. 태초의 기본 수치 (고정값)")]
-    public int baseHP = 100;
-    public int baseMP = 10;      // 기본 MP 10
-    public int baseAttack = 5;   // 기본 스탯 5, 5, 5, 5, 3
-    public int baseDefense = 5;
-    public int baseMagic = 5;
-    public int baseAgility = 5;
-    public int baseLuck = 3;
+    public int baseHP
+    {
+        get => statData.baseHP;
+        set => statData.baseHP = value;
+    }
+    public int baseMP
+    {
+        get => statData.baseMP;
+        set => statData.baseMP = value;
+    }
+    public int baseAttack
+    {
+        get => statData.baseAttack;
+        set => statData.baseAttack = value;
+    }
+    public int baseDefense
+    {
+        get => statData.baseDefense;
+        set => statData.baseDefense = value;
+    }
+    public int baseMagic
+    {
+        get => statData.baseMagic;
+        set => statData.baseMagic = value;
+    }
+    public int baseAgility
+    {
+        get => statData.baseAgility;
+        set => statData.baseAgility = value;
+    }
+    public int baseLuck
+    {
+        get => statData.baseLuck;
+        set => statData.baseLuck = value;
+    }
 
     [Header("4. 장착된 직업 데이터 (런타임 - 읽기 전용)")]
     [Tooltip("이 필드는 Awake()에서 statData.currentJob을 읽어 자동 설정됩니다. 에디터에서 직접 수정하지 마세요!")]
@@ -59,17 +87,25 @@ public class PlayerStats : MonoBehaviour
     public int AllocatedAgility  => (statData != null) ? statData.allocatedAgility  : _fallbackAllocatedAgility;
     public int AllocatedLuck     => (statData != null) ? statData.allocatedLuck     : _fallbackAllocatedLuck;
 
-    // --- [실시간 조립 계산식 - 직업 + 패시브 보너스] ---
-    // MaxHP = baseHP + 직업 hpBonus + 패시브/장비/특성 (직업은 배율 없이 정수 가산만)
+    // --- [실시간 조립 계산식 - 직업 배율 → 직업 가산 → 패시브/장비/특성] ---
+    // MaxHP = (baseHP × hpMultiplier) + hpBonus + 패시브/장비/특성
     public int maxHP
     {
         get
         {
-            int baseValue = (characterClass != null) ? characterClass.GetFinalMaxHP(baseHP) : baseHP;
+            // 1. Base × Multiplier
+            float multiplier = characterClass != null ? characterClass.hpMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(baseHP * multiplier);
+
+            // 2. + Class Bonus
+            int classBonus = characterClass != null ? characterClass.hpBonus : 0;
+
+            // 3. + 기타
             int passiveBonus = GetPassiveHPBonus();
             int equipmentBonus = GetEquipmentHPBonus();
             int traitBonus = GetTraitBonus(PassiveBonusStat.HP);
-            return baseValue + passiveBonus + equipmentBonus + traitBonus;
+
+            return baseValue + classBonus + passiveBonus + equipmentBonus + traitBonus;
         }
     }
 
@@ -77,10 +113,19 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
-            int baseValue = (characterClass != null) ? characterClass.GetFinalMaxMP(baseMP) : baseMP;
+            // 1. Base × Multiplier
+            float multiplier = characterClass != null ? characterClass.mpMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(baseMP * multiplier);
+
+            // 2. + Class Bonus
+            int classBonus = characterClass != null ? characterClass.mpBonus : 0;
+
+            // 3. + 기타
             int passiveBonus = GetPassiveMPBonus();
-            int equipmentBonus = GetEquipmentMPBonus(baseValue + passiveBonus);
-            return baseValue + passiveBonus + equipmentBonus;
+            int equipmentBonus = GetEquipmentMPBonus(baseValue + classBonus + passiveBonus);
+            int traitBonus = GetTraitBonus(PassiveBonusStat.MP);
+
+            return baseValue + classBonus + passiveBonus + equipmentBonus + traitBonus;
         }
     }
 
@@ -89,9 +134,16 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
+            // 1. (Base + Allocated) × Multiplier
             int pureBase = baseAttack + AllocatedAttack;
-            int baseValue = (characterClass != null) ? characterClass.GetFinalAttack(pureBase) : pureBase;
-            return baseValue + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetTraitBonus(PassiveBonusStat.Attack);
+            float multiplier = characterClass != null ? characterClass.attackMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(pureBase * multiplier);
+
+            // 2. + Class Bonus
+            int classBonus = characterClass != null ? characterClass.attackBonus : 0;
+
+            // 3. + 기타
+            return baseValue + classBonus + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetTraitBonus(PassiveBonusStat.Attack);
         }
     }
 
@@ -99,9 +151,16 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
+            // 1. (Base + Allocated) × Multiplier
             int pureBase = baseDefense + AllocatedDefense;
-            int baseValue = (characterClass != null) ? characterClass.GetFinalDefense(pureBase) : pureBase;
-            return baseValue + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus() + GetTraitBonus(PassiveBonusStat.Defense);
+            float multiplier = characterClass != null ? characterClass.defenseMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(pureBase * multiplier);
+
+            // 2. + Class Bonus
+            int classBonus = characterClass != null ? characterClass.defenseBonus : 0;
+
+            // 3. + 기타
+            return baseValue + classBonus + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus() + GetTraitBonus(PassiveBonusStat.Defense);
         }
     }
 
@@ -109,9 +168,16 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
+            // 1. (Base + Allocated) × Multiplier
             int pureBase = baseMagic + AllocatedMagic;
-            int baseValue = (characterClass != null) ? characterClass.GetFinalMagic(pureBase) : pureBase;
-            return baseValue + GetPassiveMagicBonus() + GetEquipmentMagicBonus() + GetTraitBonus(PassiveBonusStat.Magic);
+            float multiplier = characterClass != null ? characterClass.magicMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(pureBase * multiplier);
+
+            // 2. + Class Bonus
+            int classBonus = characterClass != null ? characterClass.magicBonus : 0;
+
+            // 3. + 기타
+            return baseValue + classBonus + GetPassiveMagicBonus() + GetEquipmentMagicBonus() + GetTraitBonus(PassiveBonusStat.Magic);
         }
     }
 
@@ -119,9 +185,16 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
+            // 1. (Base + Allocated) × Multiplier
             int pureBase = baseAgility + AllocatedAgility;
-            int baseValue = (characterClass != null) ? characterClass.GetFinalAgility(pureBase) : pureBase;
-            return baseValue + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility);
+            float multiplier = characterClass != null ? characterClass.agilityMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(pureBase * multiplier);
+
+            // 2. + Class Bonus
+            int classBonus = characterClass != null ? characterClass.agilityBonus : 0;
+
+            // 3. + 기타
+            return baseValue + classBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility);
         }
     }
 
@@ -129,9 +202,16 @@ public class PlayerStats : MonoBehaviour
     {
         get
         {
+            // 1. (Base + Allocated) × Multiplier
             int pureBase = baseLuck + AllocatedLuck;
-            int baseValue = (characterClass != null) ? characterClass.GetFinalLuck(pureBase) : pureBase;
-            return baseValue + GetPassiveLuckBonus() + GetEquipmentLuckBonus() + GetTraitBonus(PassiveBonusStat.Luck);
+            float multiplier = characterClass != null ? characterClass.luckMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(pureBase * multiplier);
+
+            // 2. + Class Bonus
+            int classBonus = characterClass != null ? characterClass.luckBonus : 0;
+
+            // 3. + 기타
+            return baseValue + classBonus + GetPassiveLuckBonus() + GetEquipmentLuckBonus() + GetTraitBonus(PassiveBonusStat.Luck);
         }
     }
 

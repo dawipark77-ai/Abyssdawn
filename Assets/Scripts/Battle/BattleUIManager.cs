@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
@@ -16,6 +16,8 @@ public class BattleUIManager : MonoBehaviour
 
     [Header("Fight 하위 메뉴")]
     public GameObject fightSubPanel;    // Attack / Skill / Item / Defend 패널
+    [Tooltip("비어 있으면 이름으로 ItemPanel 검색. 할당 시 Item 버튼은 패널만 연 후 소비하지 않음.")]
+    public GameObject battleItemPanel; // SubPanels/ItemPanel 등
     public Button attackSubButton;      // Fight > Attack
     public Button skillSubButton;       // Fight > Skill (나중에 스킬 구현 시)
     public Button itemSubButton;        // Fight > Item
@@ -50,10 +52,13 @@ public class BattleUIManager : MonoBehaviour
         
         // 메인 메뉴 패널 찾기
         FindMainMenuPanel();
-        
-        // FightSubPanel 찾기
+
+        // Item 패널 참조는 Fight 버튼 리스너보다 먼저 (Item 버튼 동작 분기)
+        FindBattleItemPanelIfNeeded();
+
+        // FightSubPanel 찾기 (내부에서 서브 버튼 연결)
         FindFightSubPanel();
-        
+
         // 메인 메뉴 버튼 찾기 및 연결
         FindAndConnectMainMenuButtons();
     }
@@ -143,6 +148,21 @@ public class BattleUIManager : MonoBehaviour
         else
         {
             Debug.LogWarning("[BattleUIManager] FightSubPanel not found! Please assign it in the Inspector.");
+        }
+    }
+
+    /// <summary>
+    /// 전투 아이템 패널 (이름 ItemPanel). 인스펙터에 없으면 자동 검색.
+    /// </summary>
+    void FindBattleItemPanelIfNeeded()
+    {
+        if (battleItemPanel != null) return;
+
+        GameObject found = GameObject.Find("ItemPanel");
+        if (found != null)
+        {
+            battleItemPanel = found;
+            Debug.Log("[BattleUIManager] battleItemPanel 자동 할당: ItemPanel");
         }
     }
 
@@ -236,12 +256,18 @@ public class BattleUIManager : MonoBehaviour
             itemSubButton.onClick.AddListener(() =>
             {
                 Debug.Log("[BattleUIManager] ItemSubButton clicked!");
-                if (battleManager != null)
+                // FightPanel/fightSubPanel 은 끄지 않음 — ItemPanel만 위에 겹쳐 띄움
+
+                if (battleItemPanel != null)
                 {
-                    // FightSubPanel 닫기
-                    if (fightSubPanel != null) fightSubPanel.SetActive(false);
-                    battleManager.OnItemButton();
+                    BattleItemPanel bip = battleItemPanel.GetComponent<BattleItemPanel>();
+                    if (bip != null) bip.Open();
+                    else battleItemPanel.SetActive(true);
+                    return;
                 }
+
+                if (battleManager != null)
+                    battleManager.OnItemButton();
             });
             Debug.Log("[BattleUIManager] ItemSubButton listener added");
         }
