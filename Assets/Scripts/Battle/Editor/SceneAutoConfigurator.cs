@@ -388,7 +388,7 @@ public class SceneAutoConfigurator : MonoBehaviour
         }
         if (runBtn != null)
         {
-            var prop = so.FindProperty("runButton");
+            var prop = so.FindProperty("fleeButton");
             if (prop != null) prop.objectReferenceValue = runBtn;
         }
         if (defendBtn != null)
@@ -437,7 +437,13 @@ public class SceneAutoConfigurator : MonoBehaviour
         }
 
         // 기존 UI 요소만 찾아서 연결
-        Button fightBtn = GameObject.Find("FightButton")?.GetComponent<Button>();
+        Transform fightPanelTf = GameObject.Find("FightPanel")?.transform;
+        Button atkMain = fightPanelTf != null ? fightPanelTf.Find("Attack")?.GetComponent<Button>() : null;
+        Button skMain = fightPanelTf != null ? fightPanelTf.Find("Skill")?.GetComponent<Button>() : null;
+        Button itemMain = fightPanelTf != null ? fightPanelTf.Find("Item")?.GetComponent<Button>() : null;
+        Button defMain = fightPanelTf != null ? fightPanelTf.Find("Defend")?.GetComponent<Button>() : null;
+        Button fleeMain = fightPanelTf != null ? fightPanelTf.Find("Flee")?.GetComponent<Button>() : null;
+
         GameObject fightSubPanel = GameObject.Find("FightSubPanel");
         Button attackSubBtn = GameObject.Find("AttackSubButton")?.GetComponent<Button>();
         Button skillSubBtn = GameObject.Find("SkillSubButton")?.GetComponent<Button>();
@@ -446,11 +452,17 @@ public class SceneAutoConfigurator : MonoBehaviour
 
         // BattleUIManager 참조 연결
         SerializedObject uiSo = new SerializedObject(uiManager);
-        if (fightBtn != null)
+        void AssignBtn(string propName, Button btn)
         {
-            var prop = uiSo.FindProperty("fightButton");
-            if (prop != null) prop.objectReferenceValue = fightBtn;
+            if (btn == null) return;
+            var prop = uiSo.FindProperty(propName);
+            if (prop != null) prop.objectReferenceValue = btn;
         }
+        AssignBtn("attackButton", atkMain);
+        AssignBtn("skillButton", skMain);
+        AssignBtn("itemButton", itemMain);
+        AssignBtn("defendButton", defMain);
+        AssignBtn("fleeButton", fleeMain);
         if (fightSubPanel != null)
         {
             var prop = uiSo.FindProperty("fightSubPanel");

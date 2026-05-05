@@ -39,7 +39,8 @@ public class BattleManager : MonoBehaviour
     public Button attackButton;
     public Button skillButton;
     public Button itemButton;
-    public Button runButton;
+    [FormerlySerializedAs("runButton")]
+    public Button fleeButton;
     public Button defendButton;
     public Button skillBackButton;
 
@@ -1602,12 +1603,15 @@ public class BattleManager : MonoBehaviour
         ForceDisableUIPanels();
         StartCoroutine(EnsureUIPanelsClosedAfterFrames(3));
 
-        // 버튼 리스너 초기화
+        // 버튼 리스너 초기화 — BattleUIManager가 있으면 Item·Skill 메인 버튼은 UI 매니저가 전담 (토글·패널 연동)
+        BattleUIManager battleUIMgr =
+            battleUIManager != null ? battleUIManager : FindFirstObjectByType<BattleUIManager>();
+
         if (attackButton != null) attackButton.onClick.RemoveAllListeners();
-        if (skillButton != null) skillButton.onClick.RemoveAllListeners();
+        if (skillButton != null && battleUIMgr == null) skillButton.onClick.RemoveAllListeners();
         if (skillBackButton != null) skillBackButton.onClick.RemoveAllListeners();
-        if (itemButton != null) itemButton.onClick.RemoveAllListeners();
-        if (runButton != null) runButton.onClick.RemoveAllListeners();
+        if (itemButton != null && battleUIMgr == null) itemButton.onClick.RemoveAllListeners();
+        if (fleeButton != null) fleeButton.onClick.RemoveAllListeners();
         if (defendButton != null) defendButton.onClick.RemoveAllListeners();
 
         // Back 버튼 찾기 (Start에서도 찾기)
@@ -1618,10 +1622,10 @@ public class BattleManager : MonoBehaviour
 
         // 버튼 연결
         if (attackButton != null) attackButton.onClick.AddListener(OnAttackButton);
-        if (skillButton != null) skillButton.onClick.AddListener(OnSkillButton);
+        if (skillButton != null && battleUIMgr == null) skillButton.onClick.AddListener(OnSkillButton);
         if (skillBackButton != null) skillBackButton.onClick.AddListener(OnSkillBack);
-        if (itemButton != null) itemButton.onClick.AddListener(OnItemButton);
-        if (runButton != null) runButton.onClick.AddListener(OnRunButton);
+        if (itemButton != null && battleUIMgr == null) itemButton.onClick.AddListener(OnItemButton);
+        if (fleeButton != null) fleeButton.onClick.AddListener(OnRunButton);
         if (defendButton != null) defendButton.onClick.AddListener(OnDefendButton);
 
         // 파티 초기화
@@ -3006,15 +3010,15 @@ public class BattleManager : MonoBehaviour
             Debug.LogWarning("[BattleManager] defendButton is null!");
         }
         
-        if (runButton != null)
+        if (fleeButton != null)
         {
-            runButton.gameObject.SetActive(true);
-            runButton.interactable = isHero;
+            fleeButton.gameObject.SetActive(true);
+            fleeButton.interactable = isHero;
             Debug.Log($"[BattleManager] Run button activated (interactable: {isHero})");
         }
         else
         {
-            Debug.LogWarning("[BattleManager] runButton is null!");
+            Debug.LogWarning("[BattleManager] fleeButton is null!");
         }
     }
 
@@ -3263,7 +3267,7 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[BattleManager] SkillButton: {(skillButton != null ? $"Active={skillButton.gameObject.activeSelf}, Interactable={skillButton.interactable}, Visible={skillButton.gameObject.activeInHierarchy}" : "NULL")}");
         Debug.Log($"[BattleManager] ItemButton: {(itemButton != null ? $"Active={itemButton.gameObject.activeSelf}, Interactable={itemButton.interactable}, Visible={itemButton.gameObject.activeInHierarchy}" : "NULL")}");
         Debug.Log($"[BattleManager] DefendButton: {(defendButton != null ? $"Active={defendButton.gameObject.activeSelf}, Interactable={defendButton.interactable}, Visible={defendButton.gameObject.activeInHierarchy}" : "NULL")}");
-        Debug.Log($"[BattleManager] RunButton: {(runButton != null ? $"Active={runButton.gameObject.activeSelf}, Interactable={runButton.interactable}, Visible={runButton.gameObject.activeInHierarchy}" : "NULL")}");
+        Debug.Log($"[BattleManager] RunButton: {(fleeButton != null ? $"Active={fleeButton.gameObject.activeSelf}, Interactable={fleeButton.interactable}, Visible={fleeButton.gameObject.activeInHierarchy}" : "NULL")}");
         
         // Canvas 상태 최종 확인 (이미 선언된 변수 재사용)
         if (canvas != null)

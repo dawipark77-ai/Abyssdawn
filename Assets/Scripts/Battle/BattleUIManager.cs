@@ -5,23 +5,24 @@ using TMPro;
 
 public class BattleUIManager : MonoBehaviour
 {
-    [Header("메인 메뉴 버튼")]
-    public Button fightButton;
+    [Header("메인 메뉴 버튼 (FightPanel 안의 Attack / Skill / Item / Defend / Flee)")]
+    public Button attackButton;
+    public Button skillButton;
     public Button itemButton;
-    public Button runButton;
+    public Button defendButton;
     public Button fleeButton;
 
     [Header("메인 패널")]
     public GameObject mainMenuPanel;
 
-    [Header("Fight 하위 메뉴")]
-    public GameObject fightSubPanel;    // Attack / Skill / Item / Defend 패널
-    [Tooltip("비어 있으면 이름으로 ItemPanel 검색. 할당 시 Item 버튼은 패널만 연 후 소비하지 않음.")]
+    [Header("서브 패널 (Skill/Item용 — 인스펙터에서 SubPanels 등 지정, 없으면 비워 둠)")]
+    public GameObject fightSubPanel;
+    [Tooltip("SubPanels/ItemPanel 오브젝트를 넣으세요. 비우면 SubPanels/ItemPanel 자동 검색. (FightPanel의 Item 버튼을 넣으면 안 됩니다)")]
     public GameObject battleItemPanel; // SubPanels/ItemPanel 등
-    public Button attackSubButton;      // Fight > Attack
-    public Button skillSubButton;       // Fight > Skill (나중에 스킬 구현 시)
-    public Button itemSubButton;        // Fight > Item
-    public Button defendSubButton;      // Fight > Defend
+    public Button attackSubButton;      // 레거시: 별도 서브 바에 둔 Attack (없으면 null)
+    public Button skillSubButton;       // 레거시
+    public Button itemSubButton;        // 레거시
+    public Button defendSubButton;      // 레거시
 
     [Header("BattleManager Reference")]
     public BattleManager battleManager;
@@ -53,60 +54,47 @@ public class BattleUIManager : MonoBehaviour
         // 메인 메뉴 패널 찾기
         FindMainMenuPanel();
 
-        // Item 패널 참조는 Fight 버튼 리스너보다 먼저 (Item 버튼 동작 분기)
+        // Item 패널 참조
         FindBattleItemPanelIfNeeded();
 
-        // FightSubPanel 찾기 (내부에서 서브 버튼 연결)
+        // (선택) 별도 FightSubPanel 오브젝트가 있을 때만 하위 서브버튼 연결
         FindFightSubPanel();
 
-        // 메인 메뉴 버튼 찾기 및 연결
+        // 메인 메뉴 Attack / Skill / Item / Defend / Flee 연결
         FindAndConnectMainMenuButtons();
+
+        // ItemPanel / Back
+        SetupItemPanelBackButton();
     }
 
-    // 메인 메뉴 패널 찾기
+    // 메인 메뉴 패널 찾기 — FightPanel을 우선 사용, 없으면 레거시 Main 계열 fallback
     void FindMainMenuPanel()
     {
-        if (mainMenuPanel == null)
+        if (mainMenuPanel != null) return;
+
+        // 새 디자인: FightPanel을 메인 메뉴로 사용 (transform.Find는 비활성 자식도 검색)
+        Transform fightPanel = transform.Find("FightPanel");
+        if (fightPanel != null)
         {
-            // 여러 가능한 이름으로 찾기
-            string[] possibleNames = { "MainMenuPanel", "MainMenu", "MainPanel", "MenuPanel", "BattleMenu" };
-            foreach (string name in possibleNames)
+            mainMenuPanel = fightPanel.gameObject;
+            Debug.Log("[BattleUIManager] mainMenuPanel 자동 할당: FightPanel");
+            return;
+        }
+
+        // 하위 호환: 기존 Main/MainMenuPanel 등 찾기 (없어도 됨)
+        string[] possibleNames = { "MainMenuPanel", "MainMenu", "MainPanel", "MenuPanel", "BattleMenu", "Main" };
+        foreach (string name in possibleNames)
+        {
+            GameObject panel = GameObject.Find(name);
+            if (panel != null)
             {
-                GameObject panel = GameObject.Find(name);
-                if (panel != null)
-                {
-                    mainMenuPanel = panel;
-                    Debug.Log($"[BattleUIManager] Found main menu panel: {name}");
-                    break;
-                }
-            }
-            
-            // 이름으로 못 찾으면 모든 GameObject에서 검색
-            if (mainMenuPanel == null)
-            {
-                GameObject[] allObjects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
-                foreach (GameObject obj in allObjects)
-                {
-                    string objName = obj.name.ToLower();
-                    if ((objName.Contains("main") && objName.Contains("menu")) || 
-                        (objName.Contains("main") && objName.Contains("panel")))
-                    {
-                        mainMenuPanel = obj;
-                        Debug.Log("[BattleUIManager] Found main menu panel by name search: " + obj.name);
-                        break;
-                    }
-                }
+                mainMenuPanel = panel;
+                Debug.LogWarning($"[BattleUIManager] mainMenuPanel을 '{name}'(으)로 할당 (FightPanel 권장)");
+                return;
             }
         }
-        
-        if (mainMenuPanel != null)
-        {
-            Debug.Log("[BattleUIManager] Main menu panel found: " + mainMenuPanel.name + ", Active: " + mainMenuPanel.activeSelf);
-        }
-        else
-        {
-            Debug.LogWarning("[BattleUIManager] Main menu panel not found! Please assign it in the Inspector.");
-        }
+
+        Debug.LogWarning("[BattleUIManager] mainMenuPanel을 찾지 못했습니다. Inspector에서 수동 할당이 필요합니다.");
     }
 
     // FightSubPanel 찾기
@@ -118,7 +106,7 @@ public class BattleUIManager : MonoBehaviour
             if (fightSubPanel == null)
             {
                 // 여러 가능한 이름으로 찾기
-                string[] possibleNames = { "FightSubPanel", "FightSubMenu", "FightMenu", "FightPanel" };
+                string[] possibleNames = { "FightSubPanel", "FightSubMenu", "FightMenu" };
                 foreach (string name in possibleNames)
                 {
                     GameObject panel = GameObject.Find(name);
@@ -152,18 +140,166 @@ public class BattleUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 전투 아이템 패널 (이름 ItemPanel). 인스펙터에 없으면 자동 검색.
+    /// 인스펙터에 비우거나 잘못 넣었을 때 SubPanels/ItemPanel을 찾고,
+    /// 실수로 FightPanel의 Item 버튼이 들어간 경우 무시 후 다시 검색합니다.
     /// </summary>
     void FindBattleItemPanelIfNeeded()
     {
-        if (battleItemPanel != null) return;
+        ClearBattleItemPanelIfWrongButtonAssign();
 
-        GameObject found = GameObject.Find("ItemPanel");
+        if (battleItemPanel != null)
+            return;
+
+        Transform subItem = transform.Find("SubPanels/ItemPanel");
+        if (subItem != null)
+        {
+            battleItemPanel = subItem.gameObject;
+            Debug.Log("[BattleUIManager] battleItemPanel 자동 할당: SubPanels/ItemPanel");
+            return;
+        }
+
+        GameObject found = BattleItemPanel.FindItemPanelGameObjectInScene();
         if (found != null)
         {
             battleItemPanel = found;
-            Debug.Log("[BattleUIManager] battleItemPanel 자동 할당: ItemPanel");
+            Debug.Log("[BattleUIManager] battleItemPanel 자동 할당: FindItemPanelGameObjectInScene");
         }
+    }
+
+    /// <summary>FightPanel의 Item 버튼이 Battle Item Panel 슬롯에 들어간 흔한 실수 제거.</summary>
+    void ClearBattleItemPanelIfWrongButtonAssign()
+    {
+        if (battleItemPanel == null) return;
+
+        bool looksLikeMainItemButton =
+            battleItemPanel.GetComponent<Button>() != null
+            && battleItemPanel.GetComponent<BattleItemPanel>() == null
+            && battleItemPanel.name == "Item";
+
+        if (!looksLikeMainItemButton)
+            return;
+
+        Transform parent = battleItemPanel.transform.parent;
+        if (parent != null && parent.name == "FightPanel")
+        {
+            Debug.LogWarning("[BattleUIManager] Battle Item Panel에 Item 버튼이 연결되어 있었습니다. ItemPanel을 자동 검색합니다.");
+            battleItemPanel = null;
+        }
+    }
+
+    /// <summary>Item 버튼 → ItemPanel 표시. 외부에서도 호출 가능.</summary>
+    public void OpenBattleItemPanel()
+    {
+        FindBattleItemPanelIfNeeded();
+        if (battleItemPanel == null)
+            battleItemPanel = BattleItemPanel.FindItemPanelGameObjectInScene();
+
+        if (battleItemPanel == null)
+        {
+            Debug.LogWarning("[BattleUIManager] ItemPanel을 찾지 못했습니다. Hierarchy에 SubPanels/ItemPanel을 두거나 Inspector의 Battle Item Panel에 할당하세요.");
+            return;
+        }
+
+        BattleItemPanel bip = battleItemPanel.GetComponent<BattleItemPanel>();
+        if (bip != null)
+            bip.Open();
+        else
+            BattleItemPanel.ActivateWithParents(battleItemPanel);
+    }
+
+    /// <summary>아이템 패널만 끕니다 (Back 버튼·토글 닫기 공용).</summary>
+    public void CloseBattleItemPanel()
+    {
+        FindBattleItemPanelIfNeeded();
+        if (battleItemPanel == null)
+            battleItemPanel = BattleItemPanel.FindItemPanelGameObjectInScene();
+        if (battleItemPanel == null) return;
+
+        BattleItemPanel bip = battleItemPanel.GetComponent<BattleItemPanel>();
+        if (bip != null)
+            bip.Close();
+        else
+            battleItemPanel.SetActive(false);
+    }
+
+    /// <summary>스킬·아이템 서브 패널을 모두 끕니다 (Attack 등).</summary>
+    public void CloseSkillAndItemSubPanels()
+    {
+        CloseBattleItemPanel();
+        if (battleManager != null && battleManager.skillPanel != null)
+            battleManager.skillPanel.SetActive(false);
+    }
+
+    /// <summary>Item 메인/서브: 열려 있으면 끄고, 꺼져 있으면 엽니다.</summary>
+    public void ToggleBattleItemPanel()
+    {
+        FindBattleItemPanelIfNeeded();
+        if (battleItemPanel == null)
+            battleItemPanel = BattleItemPanel.FindItemPanelGameObjectInScene();
+
+        if (battleItemPanel != null && battleItemPanel.activeInHierarchy)
+        {
+            CloseBattleItemPanel();
+            return;
+        }
+
+        if (battleManager != null && battleManager.skillPanel != null && battleManager.skillPanel.activeInHierarchy)
+            battleManager.OnSkillBack();
+
+        OpenBattleItemPanel();
+    }
+
+    /// <summary>Skill 메인/서브: 열려 있으면 끄고, 꺼져 있으면 스킬 목록을 엽니다.</summary>
+    void ToggleSkillPanel()
+    {
+        if (battleManager == null) return;
+        GameObject sp = battleManager.skillPanel;
+        if (sp != null && sp.activeInHierarchy)
+        {
+            battleManager.OnSkillBack();
+            return;
+        }
+
+        // 아이템 패널이 열려 있으면 먼저 닫고 스킬만 표시
+        CloseBattleItemPanel();
+
+        battleManager.OnSkillButton();
+    }
+
+    /// <summary>ItemPanel 자식 Back 버튼 → 패널 닫기 (Hierarchy 이름 Back).</summary>
+    void SetupItemPanelBackButton()
+    {
+        FindBattleItemPanelIfNeeded();
+        if (battleItemPanel == null)
+            battleItemPanel = BattleItemPanel.FindItemPanelGameObjectInScene();
+        if (battleItemPanel == null) return;
+
+        Transform back = battleItemPanel.transform.Find("Back");
+        if (back == null)
+        {
+            foreach (Transform t in battleItemPanel.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name == "Back")
+                {
+                    back = t;
+                    break;
+                }
+            }
+        }
+
+        Button btn = back != null ? back.GetComponent<Button>() : null;
+        if (btn == null)
+        {
+            Debug.LogWarning("[BattleUIManager] ItemPanel에서 이름이 Back인 Button을 찾지 못했습니다.");
+            return;
+        }
+
+        btn.onClick.RemoveAllListeners();
+        btn.onClick.AddListener(() =>
+        {
+            Debug.Log("[BattleUIManager] ItemPanel Back clicked");
+            CloseBattleItemPanel();
+        });
     }
 
     // FightSubPanel 내 버튼 찾기
@@ -220,6 +356,8 @@ public class BattleUIManager : MonoBehaviour
                 {
                     // FightSubPanel 닫기
                     if (fightSubPanel != null) fightSubPanel.SetActive(false);
+
+                    CloseSkillAndItemSubPanels();
                     
                     // Attack 패널(기존 UI)이 있다면 숨기기
                     if (battleManager.actionPanel != null) battleManager.actionPanel.SetActive(false);
@@ -241,9 +379,8 @@ public class BattleUIManager : MonoBehaviour
                 {
                     // FightSubPanel 닫기
                     if (fightSubPanel != null) fightSubPanel.SetActive(false);
-                    
-                    // Skill 패널 활성화 (ShowActionPanel 호출하지 않음 - OnSkillButton에서 처리)
-                    battleManager.OnSkillButton();
+
+                    ToggleSkillPanel();
                 }
             });
             Debug.Log("[BattleUIManager] SkillSubButton listener added");
@@ -256,18 +393,7 @@ public class BattleUIManager : MonoBehaviour
             itemSubButton.onClick.AddListener(() =>
             {
                 Debug.Log("[BattleUIManager] ItemSubButton clicked!");
-                // FightPanel/fightSubPanel 은 끄지 않음 — ItemPanel만 위에 겹쳐 띄움
-
-                if (battleItemPanel != null)
-                {
-                    BattleItemPanel bip = battleItemPanel.GetComponent<BattleItemPanel>();
-                    if (bip != null) bip.Open();
-                    else battleItemPanel.SetActive(true);
-                    return;
-                }
-
-                if (battleManager != null)
-                    battleManager.OnItemButton();
+                ToggleBattleItemPanel();
             });
             Debug.Log("[BattleUIManager] ItemSubButton listener added");
         }
@@ -290,22 +416,31 @@ public class BattleUIManager : MonoBehaviour
         }
     }
 
-    // 메인 메뉴 버튼 찾기 및 연결
+    // 메인 메뉴 버튼 찾기 및 연결 — FightPanel 자식 Attack / Skill / Item / Defend / Flee
     void FindAndConnectMainMenuButtons()
     {
-        // Fight 버튼 찾기
-        if (fightButton == null)
+        if (mainMenuPanel == null)
         {
-            fightButton = FindButtonInPanel("Fight", "FightButton", "BtnFight");
+            Debug.LogWarning("[BattleUIManager] mainMenuPanel이 없습니다! 버튼 연결을 건너뜁니다.");
+            return;
         }
-        
-        // Flee 버튼 찾기
-        if (fleeButton == null)
-        {
-            fleeButton = FindButtonInPanel("Flee", "FleeButton", "BtnFlee", "RunButton", "Run");
-        }
-        
-        // 버튼 연결
+
+        Transform mainTransform = mainMenuPanel.transform;
+
+        if (attackButton == null) attackButton = mainTransform.Find("Attack")?.GetComponent<Button>();
+        if (skillButton == null) skillButton = mainTransform.Find("Skill")?.GetComponent<Button>();
+        if (itemButton == null) itemButton = mainTransform.Find("Item")?.GetComponent<Button>();
+        if (defendButton == null) defendButton = mainTransform.Find("Defend")?.GetComponent<Button>();
+        if (fleeButton == null) fleeButton = mainTransform.Find("Flee")?.GetComponent<Button>();
+
+        if (attackButton == null) attackButton = FindButtonInPanel("Attack", "Atk", "AttackButton");
+        if (skillButton == null) skillButton = FindButtonInPanel("Skill", "SkillButton");
+        if (itemButton == null) itemButton = FindButtonInPanel("Item", "ItemButton");
+        if (defendButton == null) defendButton = FindButtonInPanel("Defend", "DefendButton");
+        if (fleeButton == null) fleeButton = FindButtonInPanel("Flee", "FleeButton", "Run", "Escape");
+
+        Debug.Log($"[BattleUIManager] 메인 메뉴 버튼 (Atk:{attackButton != null}, Sk:{skillButton != null}, It:{itemButton != null}, Def:{defendButton != null}, Fl:{fleeButton != null})");
+
         SetupMainMenuButtons();
     }
 
@@ -397,70 +532,69 @@ public class BattleUIManager : MonoBehaviour
     }
 
 
-    // 메인 메뉴 버튼 설정
+    // 메인 메뉴 버튼 설정 — Fight / Run 단계 없이 5버튼 직결 (서브 패널은 추후 Skill·Item 전용)
     void SetupMainMenuButtons()
     {
-        // Fight 버튼 설정
-        if (fightButton != null)
+        if (attackButton != null)
         {
-            fightButton.onClick.RemoveAllListeners();
-            fightButton.onClick.AddListener(() =>
+            attackButton.onClick.RemoveAllListeners();
+            attackButton.onClick.AddListener(() =>
             {
-                Debug.Log("[BattleUIManager] FightButton clicked!");
-                ShowFightSubPanel();
+                Debug.Log("[BattleUIManager] Attack (main) clicked!");
+                if (battleManager == null) return;
+                CloseSkillAndItemSubPanels();
+                if (battleManager.actionPanel != null) battleManager.actionPanel.SetActive(false);
+                battleManager.OnAttackButton();
             });
-            Debug.Log("[BattleUIManager] FightButton listener added");
-        }
-        else
-        {
-            Debug.LogError("[BattleUIManager] fightButton is null! Cannot add listener.");
         }
 
-        // Flee 버튼 설정 (Run 기능)
+        if (skillButton != null)
+        {
+            skillButton.onClick.RemoveAllListeners();
+            skillButton.onClick.AddListener(() =>
+            {
+                Debug.Log("[BattleUIManager] Skill (main) clicked!");
+                ToggleSkillPanel();
+            });
+        }
+
+        if (itemButton != null)
+        {
+            itemButton.onClick.RemoveAllListeners();
+            itemButton.onClick.AddListener(() =>
+            {
+                Debug.Log("[BattleUIManager] Item (main) clicked!");
+                ToggleBattleItemPanel();
+            });
+        }
+
+        if (defendButton != null)
+        {
+            defendButton.onClick.RemoveAllListeners();
+            defendButton.onClick.AddListener(() =>
+            {
+                Debug.Log("[BattleUIManager] Defend (main) clicked!");
+                battleManager?.OnDefendButton();
+            });
+        }
+
         if (fleeButton != null)
         {
             fleeButton.onClick.RemoveAllListeners();
             fleeButton.onClick.AddListener(() =>
             {
-                Debug.Log("[BattleUIManager] FleeButton clicked!");
+                Debug.Log("[BattleUIManager] Flee (main) clicked!");
                 if (battleManager != null)
-                {
                     battleManager.OnRunButton();
-                }
-                else
-                {
-                    Debug.LogError("[BattleUIManager] battleManager is null when FleeButton clicked!");
-                }
             });
-            Debug.Log("[BattleUIManager] FleeButton listener added");
-        }
-        else
-        {
-            Debug.LogError("[BattleUIManager] fleeButton is null! Cannot add listener.");
         }
     }
 
-    // FightSubPanel 표시
+    // 전투 명령 단계 UI 표시 — 예전엔 Fight 클릭 후 서브패널이었으나, 현재는 메인 5버튼이 곧 명령 메뉴
     public void ShowFightSubPanel()
     {
-        Debug.Log("[BattleUIManager] ShowFightSubPanel called");
-        
-        // 메인 메뉴 숨기기
-        if (mainMenuPanel != null)
-        {
-            mainMenuPanel.SetActive(false);
-            Debug.Log("[BattleUIManager] Main menu panel deactivated");
-        }
-
-        if (fightSubPanel != null)
-        {
-            fightSubPanel.SetActive(true);
-            Debug.Log("[BattleUIManager] FightSubPanel activated");
-        }
-        else
-        {
-            Debug.LogError("[BattleUIManager] FightSubPanel is null! Cannot show.");
-        }
+        Debug.Log("[BattleUIManager] ShowFightSubPanel → ShowMainMenu (메인 5버튼 패턴)");
+        ShowMainMenu();
     }
 
     // 메인 메뉴 패널 표시 (전투 시작 시 호출)
@@ -502,6 +636,7 @@ public class BattleUIManager : MonoBehaviour
     {
         if (fightSubPanel != null)
             fightSubPanel.SetActive(false);
+        CloseSkillAndItemSubPanels();
     }
 
     // -------------------- Back 버튼 관리 --------------------

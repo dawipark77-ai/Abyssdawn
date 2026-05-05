@@ -42,38 +42,38 @@ public class PlayerStats : MonoBehaviour
     [Header("3. 태초의 기본 수치 (고정값)")]
     public int baseHP
     {
-        get => statData.baseHP;
-        set => statData.baseHP = value;
+        get => statData != null ? statData.baseHP : 20;
+        set { if (statData != null) statData.baseHP = value; }
     }
     public int baseMP
     {
-        get => statData.baseMP;
-        set => statData.baseMP = value;
+        get => statData != null ? statData.baseMP : 0;
+        set { if (statData != null) statData.baseMP = value; }
     }
     public int baseAttack
     {
-        get => statData.baseAttack;
-        set => statData.baseAttack = value;
+        get => statData != null ? statData.baseAttack : 5;
+        set { if (statData != null) statData.baseAttack = value; }
     }
     public int baseDefense
     {
-        get => statData.baseDefense;
-        set => statData.baseDefense = value;
+        get => statData != null ? statData.baseDefense : 5;
+        set { if (statData != null) statData.baseDefense = value; }
     }
     public int baseMagic
     {
-        get => statData.baseMagic;
-        set => statData.baseMagic = value;
+        get => statData != null ? statData.baseMagic : 5;
+        set { if (statData != null) statData.baseMagic = value; }
     }
     public int baseAgility
     {
-        get => statData.baseAgility;
-        set => statData.baseAgility = value;
+        get => statData != null ? statData.baseAgility : 5;
+        set { if (statData != null) statData.baseAgility = value; }
     }
     public int baseLuck
     {
-        get => statData.baseLuck;
-        set => statData.baseLuck = value;
+        get => statData != null ? statData.baseLuck : 3;
+        set { if (statData != null) statData.baseLuck = value; }
     }
 
     [Header("4. 장착된 직업 데이터 (런타임 - 읽기 전용)")]
@@ -792,6 +792,12 @@ public class PlayerStats : MonoBehaviour
     {
         // [DEBUG] 인스턴스 ID 출력 (어떤 PlayerStats가 초기화되는지 확인)
         Debug.Log($"[PlayerStats] Awake() 호출: GameObject={gameObject.name}, InstanceID={GetInstanceID()}, playerName={playerName}");
+
+        // [SAFETY] statData 즉시 진단 (this 컨텍스트로 Unity Console에서 GameObject 강조)
+        if (statData == null)
+        {
+            Debug.LogError($"[PlayerStats] {gameObject.name}: statData가 할당되지 않았습니다! HeroData.asset을 연결하세요!", this);
+        }
 
         // [FIX] 이미 초기화되었으면 다시 초기화하지 않음 (중복 방지)
         if (_isInitialized)
