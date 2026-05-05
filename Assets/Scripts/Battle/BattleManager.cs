@@ -3954,10 +3954,21 @@ public class BattleManager : MonoBehaviour
         ShowBackButton();
     }
 
+    /// <summary>
+    /// 외부(BattleItemSlot 등)에서 직접 호출하는 아이템 사용 API.
+    /// turnInProgress 락 + QueueAllyCommand("item") + Back 버튼 정리.
+    /// </summary>
+    public void UseItemInBattle(PlayerStats user, ConsumableItemSO item, int healAmount)
+    {
+        turnInProgress = true;
+        QueueAllyCommand(user, "item", null, null, healAmount, true, item);
+        HideBackButton();
+    }
+
     public void OnItemButton()
     {
         if (currentPhase != BattlePhase.Command || !playerTurn || battleEnded || turnInProgress) return;
-        
+
         // FightSubPanel 강제 종료
         if (battleUIManager != null && battleUIManager.fightSubPanel != null)
         {
