@@ -131,6 +131,21 @@ public class InventoryUIManager : MonoBehaviour
         LoadItemDatabases();
     }
 
+    /// <summary>
+    /// 씬 재로드 후 DontDestroyOnLoad 싱글톤과 중복 컴포넌트가 생기면 인스펙터가 파괴된 ConsumableInventory를 가리킬 수 있음.
+    /// 런타임에는 항상 <see cref="ConsumableInventory.Instance"/>를 사용한다.
+    /// </summary>
+    private void ResolveConsumableInventoryReference()
+    {
+        ConsumableInventory resolved = ConsumableInventory.Instance;
+        if (resolved == null) return;
+
+        if (consumableInventory != null && consumableInventory != resolved)
+            consumableInventory.OnInventoryChanged -= RefreshGrid;
+
+        consumableInventory = resolved;
+    }
+
     private void LoadItemDatabases()
     {
         var eqArr = Resources.LoadAll<EquipmentData>("Item_Equipments/Equipments");
@@ -152,6 +167,8 @@ public class InventoryUIManager : MonoBehaviour
 
     private void Start()
     {
+        ResolveConsumableInventoryReference();
+
         tabAll.onClick       .AddListener(() => SwitchTab(InventoryTab.All));
         tabEquipment.onClick .AddListener(() => SwitchTab(InventoryTab.Equipment));
         tabConsumable.onClick.AddListener(() => SwitchTab(InventoryTab.Consumable));
@@ -166,12 +183,19 @@ public class InventoryUIManager : MonoBehaviour
         UpdateTabVisuals();
     }
 
+    private void OnDestroy()
+    {
+        if (consumableInventory != null)
+            consumableInventory.OnInventoryChanged -= RefreshGrid;
+    }
+
     // ═════════════════════════════════════════════════════════
     //  외부 공개 API
     // ═════════════════════════════════════════════════════════
 
     public void OpenInventory()
     {
+        ResolveConsumableInventoryReference();
         inventoryRoot.SetActive(true);
         ForceHideDetail();
         RefreshGrid();
@@ -228,6 +252,11 @@ public class InventoryUIManager : MonoBehaviour
 
     private void RefreshGrid()
     {
+        // ConsumableInventory는 DontDestroyOnLoad일 수 있음 — 씬 언로드 후에도 OnInventoryChanged가 호출되면
+        // 파괴된 인벤 UI에서 그리드를 건드리지 않도록 차단.
+        if (!this || gridContent == null)
+            return;
+
         foreach (Transform child in gridContent)
         {
             if (child.gameObject == itemSlotTemplate) continue;

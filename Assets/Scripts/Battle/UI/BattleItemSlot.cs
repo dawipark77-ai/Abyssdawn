@@ -27,6 +27,8 @@ public class BattleItemSlot : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log($"[BattleItemSlot] Awake 시작 — gameObject={gameObject.name}, item={(item != null ? item.itemName : "NULL")}", this);
+
         // 자동 참조 (인스펙터 미할당 시)
         if (battleManager == null)
             battleManager = Object.FindFirstObjectByType<BattleManager>();
@@ -35,11 +37,14 @@ public class BattleItemSlot : MonoBehaviour
         if (useButton == null)
             useButton = GetComponentInChildren<Button>(true);
 
+        Debug.Log($"[BattleItemSlot] Awake 자동 검색 결과 — battleManager={battleManager != null}, parentPanel={parentPanel != null}, useButton={useButton != null}", this);
+
         // 사용 버튼 listener 연결
         if (useButton != null)
         {
             useButton.onClick.RemoveAllListeners();
             useButton.onClick.AddListener(OnUseButtonClicked);
+            Debug.Log($"[BattleItemSlot] Awake — useButton listener 등록 완료 (button GameObject: {useButton.gameObject.name}, interactable={useButton.interactable})", this);
         }
         else
         {
@@ -49,6 +54,7 @@ public class BattleItemSlot : MonoBehaviour
 
     private void OnEnable()
     {
+        Debug.Log($"[BattleItemSlot] OnEnable 시작 — gameObject={gameObject.name}, ConsumableInventory.Instance={(ConsumableInventory.Instance != null)}", this);
         RefreshUI();
         if (ConsumableInventory.Instance != null)
             ConsumableInventory.Instance.OnInventoryChanged += RefreshUI;
@@ -56,6 +62,7 @@ public class BattleItemSlot : MonoBehaviour
 
     private void OnDisable()
     {
+        Debug.Log($"[BattleItemSlot] OnDisable — gameObject={gameObject.name}", this);
         if (ConsumableInventory.Instance != null)
             ConsumableInventory.Instance.OnInventoryChanged -= RefreshUI;
     }
@@ -65,19 +72,22 @@ public class BattleItemSlot : MonoBehaviour
     /// </summary>
     public void RefreshUI()
     {
+        Debug.Log($"[BattleItemSlot] RefreshUI 시작 — item={(item != null ? item.itemName : "NULL")}, iconImage={iconImage != null}, chargeText={chargeText != null}, useButton={useButton != null}", this);
+
         if (item == null)
         {
+            Debug.LogWarning($"[BattleItemSlot] RefreshUI — item이 null이라 슬롯 비활성화 처리", this);
             if (iconImage != null) iconImage.enabled = false;
             if (chargeText != null) chargeText.text = "";
             if (useButton != null) useButton.interactable = false;
             return;
         }
 
-        // 아이콘
+        // 아이콘 — 전투 슬롯은 플랫 아이콘 우선 (없으면 메인 아이콘)
         if (iconImage != null)
         {
             iconImage.enabled = true;
-            iconImage.sprite = item.itemIcon != null ? item.itemIcon : item.flatIcon;
+            iconImage.sprite = item.flatIcon != null ? item.flatIcon : item.itemIcon;
         }
 
         // 수량/충전 텍스트
@@ -103,6 +113,7 @@ public class BattleItemSlot : MonoBehaviour
         {
             bool hasItem = ConsumableInventory.Instance != null && ConsumableInventory.Instance.HasItem(item);
             useButton.interactable = hasItem && item.usableInBattle;
+            Debug.Log($"[BattleItemSlot] RefreshUI — useButton.interactable={useButton.interactable} (hasItem={hasItem}, usableInBattle={item.usableInBattle})", this);
         }
     }
 
@@ -112,6 +123,8 @@ public class BattleItemSlot : MonoBehaviour
     /// </summary>
     public void OnUseButtonClicked()
     {
+        Debug.Log("[BattleItemSlot] ★★★ OnUseButtonClicked 호출됨! ★★★", this);
+
         if (item == null)
         {
             Debug.LogWarning("[BattleItemSlot] item이 null — 사용 불가", this);
@@ -123,6 +136,18 @@ public class BattleItemSlot : MonoBehaviour
             Debug.LogError("[BattleItemSlot] battleManager 참조 없음 — 사용 불가", this);
             return;
         }
+
+        // [GUARD 1] 이미 턴 진행 중이면 무시 — ResolutionQueue 도중 재진입 차단
+        if (battleManager.IsTurnInProgress)
+        {
+            Debug.Log("[BattleItemSlot] 턴 진행 중 — 아이템 사용 불가 (연타 방지)", this);
+            return;
+        }
+
+        // [GUARD 2] 버튼 즉시 비활성화 — 같은 프레임 내 중복 클릭 차단
+        // (RefreshUI가 다음에 호출되면 interactable이 자동 재계산됨)
+        if (useButton != null)
+            useButton.interactable = false;
 
         // 사용자(주인공) — BattleManager.player 사용
         PlayerStats user = battleManager.player;

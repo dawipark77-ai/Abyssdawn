@@ -7,13 +7,99 @@ using AbyssdawnBattle;
 /// </summary>
 public class ConsumableInventory : MonoBehaviour
 {
-    // ─── 싱글톤 ───────────────────────────────────────────────
-    public static ConsumableInventory Instance { get; private set; }
+    // ─── 싱글톤 (lazy 초기화 + 씬 영속) ────────────────────────
+    private static ConsumableInventory _instance;
+    /// <summary>게임 시작부터 한 번이라도 dawnChaliceCharges가 초기화됐는지. 매 씬마다 충전되는 것을 방지.</summary>
+    private static bool _hasInitializedThisGame = false;
+
+    public static ConsumableInventory Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindFirstObjectByType<ConsumableInventory>(FindObjectsInactive.Include);
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("[Auto-Created] ConsumableInventory");
+                    _instance = go.AddComponent<ConsumableInventory>();
+                    // [ROLLBACK 2026-05-06] DontDestroyOnLoad 제거 — 던전 씬의 InventoryUIManager 인스펙터 참조가 깨지는 문제 해결
+                    Debug.LogWarning("[ConsumableInventory] 씬에서 컴포넌트를 찾지 못해 자동 생성했습니다. 적절한 GameObject에 수동 부착을 권장합니다.");
+                }
+            }
+            return _instance;
+        }
+        private set { _instance = value; }
+    }
+
+    [Header("자동 초기화")]
+    [Tooltip("게임 처음 시작 시에만 새벽의 잔을 최대치(3/3)로 자동 충전. 매 씬마다 충전되지는 않음.")]
+    public bool autoInitializeDawnChaliceOnStart = true;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
+        if (_instance != null && _instance != this)
+        {
+            // 씬에 ConsumableInventory가 또 있으면: DontDestroyOnLoad로 살아 있는 영속 인스턴스가 이미 있음.
+            // Destroy(gameObject)는 같은 오브젝트에 붙은 다른 컴포넌트/UI까지 날려 인벤 참조가 깨지므로 컴포넌트만 제거한다.
+            Destroy(this);
+            return;
+        }
+        _instance = this;
+        DontDestroyOnLoad(gameObject);   // 씬 전환 시에도 dawnChaliceCharges 유지
+
+        // [INIT] 게임 처음 시작 시에만 dawnChaliceCharges 초기값 3 보장.
+        // 두 번째 씬 이후로는 사용한 차지가 그대로 보존됨.
+        if (!_hasInitializedThisGame)
+        {
+            if (dawnChaliceCharges <= 0)
+                dawnChaliceCharges = dawnChaliceMaxCharges;
+            _hasInitializedThisGame = true;
+            Debug.Log($"[ConsumableInventory] Awake (첫 초기화) — Instance 설정, dawnChaliceItem={(dawnChaliceItem != null ? dawnChaliceItem.itemName : "NULL")}, charges={dawnChaliceCharges}/{dawnChaliceMaxCharges}");
+        }
+        else
+        {
+            Debug.Log($"[ConsumableInventory] Awake (영속 유지) — 기존 charges 유지: {dawnChaliceCharges}/{dawnChaliceMaxCharges}");
+        }
+    }
+
+    private void Start()
+    {
+        // DontDestroyOnLoad이라 Start는 게임 전체에서 한 번만 호출됨.
+        // autoInitializeDawnChaliceOnStart 토글이 켜져 있고 첫 호출일 때만 작동.
+        if (autoInitializeDawnChaliceOnStart)
+            AutoInitializeDawnChalice();
+    }
+
+    /// <summary>
+    /// 새벽의 잔을 최대치로 초기화. 게임 첫 시작 시에만 작동 (force=true로 강제 가능).
+    /// </summary>
+    public void AutoInitializeDawnChalice(bool force = false)
+    {
+        if (_hasInitializedThisGame && !force)
+        {
+            Debug.Log("[ConsumableInventory] AutoInitializeDawnChalice — 이미 초기화됨, 건너뜀 (force=true로 강제 가능)");
+            return;
+        }
+
+        if (dawnChaliceItem == null)
+        {
+            Debug.LogWarning("[ConsumableInventory] dawnChaliceItem이 할당되지 않았습니다. Inspector에서 SO를 연결하세요. (charges는 _hasInitializedThisGame 플래그로 보호되어 있어 안전)");
+            _hasInitializedThisGame = true; // dawnChaliceItem이 비어 있어도 첫 시도는 끝났다고 표시
+            return;
+        }
+
+        int before = dawnChaliceCharges;
+        dawnChaliceCharges = dawnChaliceMaxCharges;
+        _hasInitializedThisGame = true;
+        Debug.Log($"[ConsumableInventory] AutoInitializeDawnChalice — 첫 시작: {before} → {dawnChaliceCharges}/{dawnChaliceMaxCharges}");
+        OnInventoryChanged?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        if (_instance == this)
+            _instance = null;
     }
 
     // ─── 런타임 슬롯 ──────────────────────────────────────────

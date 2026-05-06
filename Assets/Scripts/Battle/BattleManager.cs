@@ -185,6 +185,8 @@ public class BattleManager : MonoBehaviour
 
     private List<BattleActor> turnOrder = new List<BattleActor>();
     private bool turnInProgress = false;
+    /// <summary>외부 UI(BattleItemSlot 등)가 행동 중복 방지용으로 읽는 read-only 프로퍼티.</summary>
+    public bool IsTurnInProgress => turnInProgress;
 
     [System.Serializable]
     public class AllyCommand
