@@ -16,6 +16,8 @@ public class BattleItemSlot : MonoBehaviour
 
     [Header("UI 참조")]
     public Image iconImage;
+    [Tooltip("선택. 비우면 이름 줄 생략.")]
+    public TextMeshProUGUI nameText;
     public TextMeshProUGUI chargeText;
     [Tooltip("Use 버튼. Inspector에서 할당하지 않으면 같은 GameObject 또는 자식에서 자동 검색.")]
     public Button useButton;
@@ -78,6 +80,7 @@ public class BattleItemSlot : MonoBehaviour
         {
             Debug.LogWarning($"[BattleItemSlot] RefreshUI — item이 null이라 슬롯 비활성화 처리", this);
             if (iconImage != null) iconImage.enabled = false;
+            if (nameText != null) nameText.text = "";
             if (chargeText != null) chargeText.text = "";
             if (useButton != null) useButton.interactable = false;
             return;
@@ -89,6 +92,9 @@ public class BattleItemSlot : MonoBehaviour
             iconImage.enabled = true;
             iconImage.sprite = item.flatIcon != null ? item.flatIcon : item.itemIcon;
         }
+
+        if (nameText != null)
+            nameText.text = item.itemName ?? "";
 
         // 수량/충전 텍스트
         if (chargeText != null)
@@ -115,6 +121,13 @@ public class BattleItemSlot : MonoBehaviour
             useButton.interactable = hasItem && item.usableInBattle;
             Debug.Log($"[BattleItemSlot] RefreshUI — useButton.interactable={useButton.interactable} (hasItem={hasItem}, usableInBattle={item.usableInBattle})", this);
         }
+    }
+
+    /// <summary>런타임에 SO를 넣고 UI를 갱신합니다. Scroll View Content에 Instantiate한 직후 호출하세요.</summary>
+    public void Bind(ConsumableItemSO data)
+    {
+        item = data;
+        RefreshUI();
     }
 
     /// <summary>

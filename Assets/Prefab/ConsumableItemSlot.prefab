@@ -571,8 +571,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52b494ce770653446ae3c5c69e273a11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleItemSlot
-  item: {fileID: 11400000, guid: 76f190b09f850eb4f85d4d19242904da, type: 2}
+  item: {fileID: 0}
   iconImage: {fileID: 196580455704933238}
+  nameText: {fileID: 3280689863569923472}
   chargeText: {fileID: 175530622178858727}
   useButton: {fileID: 7325106581427303981}
   battleManager: {fileID: 0}
