@@ -937,11 +937,56 @@ public class InventoryUIManager : MonoBehaviour
 
     private void OnUseConsumableClicked(ConsumableItemSO item)
     {
-        if (consumableInventory == null || !consumableInventory.HasItem(item)) return;
-        consumableInventory.RemoveItem(item);
-        // 실제 효과 적용은 BattleManager 또는 PlayerStats에서 처리
-        Debug.Log($"[Inventory] 사용: {item.itemName}");
+        if (consumableInventory == null || item == null) return;
+
+        // 아이템 보유 체크
+        if (!consumableInventory.HasItem(item))
+        {
+            Debug.Log("[Inventory] 아이템 없음");
+            return;
+        }
+
+        // 아이템 사용 (새벽의 잔 분기 처리 포함)
+        if (!consumableInventory.UseItem(item))
+        {
+            Debug.Log($"[Inventory] {item.itemName} 사용 실패");
+            return;
+        }
+
+        // 효과 적용
+        ApplyItemEffect(item);
+
+        Debug.Log($"[Inventory] {item.itemName} 사용 완료");
+
+        // UI 갱신
         PopulateDetailPanelConsumable(item);
+    }
+
+    // 아이템 효과 적용
+    private void ApplyItemEffect(ConsumableItemSO item)
+    {
+        var player = FindObjectOfType<PlayerStats>();
+        if (player == null)
+        {
+            Debug.LogError("[Inventory] PlayerStats를 찾을 수 없습니다!");
+            return;
+        }
+
+        // HP 회복
+        if (item.hpRecoveryPercent > 0)
+        {
+            int healAmount = Mathf.RoundToInt(player.maxHP * item.hpRecoveryPercent);
+            player.currentHP = Mathf.Min(player.currentHP + healAmount, player.maxHP);
+            Debug.Log($"[Inventory] HP {healAmount} 회복");
+        }
+
+        // MP 회복
+        if (item.mpRecoveryPercent > 0)
+        {
+            int mpAmount = Mathf.RoundToInt(player.maxMP * item.mpRecoveryPercent);
+            player.currentMP = Mathf.Min(player.currentMP + mpAmount, player.maxMP);
+            Debug.Log($"[Inventory] MP {mpAmount} 회복");
+        }
     }
 
     private void OnDiscardClicked()

@@ -38,9 +38,12 @@ public class ConsumableInventory : MonoBehaviour
         private set { _instance = value; }
     }
 
-    [Header("자동 초기화")]
-    [Tooltip("게임 처음 시작 시에만 새벽의 잔을 최대치(3/3)로 자동 충전. 매 씬마다 충전되지는 않음.")]
-    public bool autoInitializeDawnChaliceOnStart = true;
+    [Header("디버그 - 테스트용")]
+    [Tooltip("게임 시작 시 모든 아이템 자동 지급")]
+    public bool grantAllItemsOnStart = false;
+
+    [Tooltip("디버그 키로 모든 아이템 지급 (F12)")]
+    public bool enableDebugKey = true;
 
     private void Awake()
     {
@@ -79,8 +82,16 @@ public class ConsumableInventory : MonoBehaviour
 
     private void Start()
     {
-        if (autoInitializeDawnChaliceOnStart)
-            AutoInitializeDawnChalice();
+        AutoInitializeDawnChalice();
+
+        if (grantAllItemsOnStart)
+            GrantAllTestItems();
+    }
+
+    private void Update()
+    {
+        if (enableDebugKey && Input.GetKeyDown(KeyCode.F12))
+            GrantAllTestItems();
     }
 
     /// <summary>
@@ -297,4 +308,26 @@ public class ConsumableInventory : MonoBehaviour
 
     private ConsumableSlot GetSlot(ConsumableItemSO item)
         => slots.Find(s => s.item == item);
+
+    // ═════════════════════════════════════════════════════════
+    //  디버그 — 테스트용 일괄 지급
+    // ═════════════════════════════════════════════════════════
+
+    [ContextMenu("DEBUG: Grant All Test Items")]
+    public void GrantAllTestItems()
+    {
+        var all = Resources.LoadAll<ConsumableItemSO>("Item_Equipments/Items");
+        int totalAdded = 0;
+
+        foreach (var so in all)
+        {
+            if (so.isDawnChalice) continue; // 새벽의 잔은 이미 있음
+
+            int added = AddItem(so, so.maxStack);
+            totalAdded += added;
+            Debug.Log($"[Grant] {so.itemName}: +{added}/{so.maxStack}");
+        }
+
+        Debug.Log($"[Grant] 총 {totalAdded}개 아이템 지급 완료");
+    }
 }
