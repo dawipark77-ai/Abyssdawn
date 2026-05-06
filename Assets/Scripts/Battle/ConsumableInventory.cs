@@ -9,8 +9,14 @@ public class ConsumableInventory : MonoBehaviour
 {
     // ─── 싱글톤 (lazy 초기화 + 씬 영속) ────────────────────────
     private static ConsumableInventory _instance;
-    /// <summary>게임 시작부터 한 번이라도 dawnChaliceCharges가 초기화됐는지. 매 씬마다 충전되는 것을 방지.</summary>
-    private static bool _hasInitializedThisGame = false;
+
+    /// <summary>
+    /// 플레이 세션 동안 새벽의 잔 차지의 단일 저장소.
+    /// 인스펙터 기본값·씬 재로드 시 새 컴포넌트가 생겨도 여기 값이 진실이 된다.
+    /// </summary>
+    private static int s_sessionDawnCharges = int.MinValue;
+
+    private const int SessionDawnUnset = int.MinValue;
 
     public static ConsumableInventory Instance
     {
@@ -48,58 +54,66 @@ public class ConsumableInventory : MonoBehaviour
         _instance = this;
         DontDestroyOnLoad(gameObject);   // 씬 전환 시에도 dawnChaliceCharges 유지
 
-        // [INIT] 게임 처음 시작 시에만 dawnChaliceCharges 초기값 3 보장.
-        // 두 번째 씬 이후로는 사용한 차지가 그대로 보존됨.
-        if (!_hasInitializedThisGame)
-        {
-            if (dawnChaliceCharges <= 0)
-                dawnChaliceCharges = dawnChaliceMaxCharges;
-            _hasInitializedThisGame = true;
-            Debug.Log($"[ConsumableInventory] Awake (첫 초기화) — Instance 설정, dawnChaliceItem={(dawnChaliceItem != null ? dawnChaliceItem.itemName : "NULL")}, charges={dawnChaliceCharges}/{dawnChaliceMaxCharges}");
-        }
+        ApplySessionDawnChargesOnAwake();
+        Debug.Log($"[ConsumableInventory] Awake — Instance 설정, dawnChaliceItem={(dawnChaliceItem != null ? dawnChaliceItem.itemName : "NULL")}, charges={dawnChaliceCharges}/{dawnChaliceMaxCharges} (session={s_sessionDawnCharges})");
+    }
+
+    /// <summary>
+    /// 세션 저장값이 있으면 복원, 없으면 풀충전으로 세션 시작.
+    /// </summary>
+    private void ApplySessionDawnChargesOnAwake()
+    {
+        if (s_sessionDawnCharges != SessionDawnUnset)
+            dawnChaliceCharges = Mathf.Clamp(s_sessionDawnCharges, 0, dawnChaliceMaxCharges);
         else
         {
-            Debug.Log($"[ConsumableInventory] Awake (영속 유지) — 기존 charges 유지: {dawnChaliceCharges}/{dawnChaliceMaxCharges}");
+            dawnChaliceCharges = dawnChaliceMaxCharges;
+            s_sessionDawnCharges = dawnChaliceCharges;
         }
+    }
+
+    private void FlushSessionDawnCharges()
+    {
+        s_sessionDawnCharges = dawnChaliceCharges;
     }
 
     private void Start()
     {
-        // DontDestroyOnLoad이라 Start는 게임 전체에서 한 번만 호출됨.
-        // autoInitializeDawnChaliceOnStart 토글이 켜져 있고 첫 호출일 때만 작동.
         if (autoInitializeDawnChaliceOnStart)
             AutoInitializeDawnChalice();
     }
 
     /// <summary>
-    /// 새벽의 잔을 최대치로 초기화. 게임 첫 시작 시에만 작동 (force=true로 강제 가능).
+    /// 새벽의 잔을 최대치로 초기화. 세션에 저장값이 이미 있으면 무시 (force=true로 강제).
     /// </summary>
     public void AutoInitializeDawnChalice(bool force = false)
     {
-        if (_hasInitializedThisGame && !force)
+        if (!force && s_sessionDawnCharges != SessionDawnUnset)
         {
-            Debug.Log("[ConsumableInventory] AutoInitializeDawnChalice — 이미 초기화됨, 건너뜀 (force=true로 강제 가능)");
+            Debug.Log("[ConsumableInventory] AutoInitializeDawnChalice — 세션 저장값 있음, 건너뜀 (force=true로 강제 가능)");
             return;
         }
 
         if (dawnChaliceItem == null)
         {
-            Debug.LogWarning("[ConsumableInventory] dawnChaliceItem이 할당되지 않았습니다. Inspector에서 SO를 연결하세요. (charges는 _hasInitializedThisGame 플래그로 보호되어 있어 안전)");
-            _hasInitializedThisGame = true; // dawnChaliceItem이 비어 있어도 첫 시도는 끝났다고 표시
+            Debug.LogWarning("[ConsumableInventory] dawnChaliceItem이 할당되지 않았습니다. Inspector에서 SO를 연결하세요.");
             return;
         }
 
         int before = dawnChaliceCharges;
         dawnChaliceCharges = dawnChaliceMaxCharges;
-        _hasInitializedThisGame = true;
-        Debug.Log($"[ConsumableInventory] AutoInitializeDawnChalice — 첫 시작: {before} → {dawnChaliceCharges}/{dawnChaliceMaxCharges}");
+        FlushSessionDawnCharges();
+        Debug.Log($"[ConsumableInventory] AutoInitializeDawnChalice — {before} → {dawnChaliceCharges}/{dawnChaliceMaxCharges}");
         OnInventoryChanged?.Invoke();
     }
 
     private void OnDestroy()
     {
         if (_instance == this)
+        {
+            FlushSessionDawnCharges();
             _instance = null;
+        }
     }
 
     // ─── 런타임 슬롯 ──────────────────────────────────────────
@@ -168,6 +182,7 @@ public class ConsumableInventory : MonoBehaviour
             if (dawnChaliceCharges <= 0) return false;
             dawnChaliceCharges -= count;
             dawnChaliceCharges  = Mathf.Max(0, dawnChaliceCharges);
+            FlushSessionDawnCharges();
             OnInventoryChanged?.Invoke();
             return true;
         }
@@ -233,6 +248,7 @@ public class ConsumableInventory : MonoBehaviour
     {
         if (dawnChaliceItem == null) return;
         dawnChaliceCharges = dawnChaliceMaxCharges;
+        FlushSessionDawnCharges();
         Debug.Log($"[ConsumableInventory] 새벽의 잔 충전 완료: {dawnChaliceCharges}/{dawnChaliceMaxCharges}");
         OnInventoryChanged?.Invoke();
     }
@@ -251,6 +267,7 @@ public class ConsumableInventory : MonoBehaviour
         int canAdd = Mathf.Min(count, dawnChaliceMaxCharges - dawnChaliceCharges);
         if (canAdd <= 0) return 0;
         dawnChaliceCharges += canAdd;
+        FlushSessionDawnCharges();
         OnInventoryChanged?.Invoke();
         return canAdd;
     }

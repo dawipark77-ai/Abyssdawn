@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Dawn_Chalice
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Dawn Chalice
+  icon: {fileID: 0}
   description: Even in the abyss, dawn will come. At least, that is what we must
     believe.
   itemIcon: {fileID: -5063216152701466143, guid: 9193eccd8dc30974a8da62eba23f0727, type: 3}
-  flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
+  flatIcon: {fileID: 7043268739260826568, guid: 72bbb49c45579934b889efe7db9227a1, type: 3}
   hpRecoveryPercent: 0.4
   mpRecoveryPercent: 0.4
   cureTypes: 01000000020000000300000000000000040000000500000006000000
@@ -35,3 +36,4 @@ MonoBehaviour:
   isChargeable: 1
   maxCharges: 3
   currentCharges: 3
+  sellPrice: 0

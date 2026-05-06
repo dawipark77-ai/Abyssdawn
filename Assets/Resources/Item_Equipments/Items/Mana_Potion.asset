@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Mana_Potion
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Mana Potion
+  icon: {fileID: 0}
   description: The power returns. Briefly, but it does.
   itemIcon: {fileID: 6276969351316911035, guid: a1d45d86f88e8f04ebe1ea81ee6b2d6f, type: 3}
-  flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
+  flatIcon: {fileID: 7043268739260826568, guid: 72bbb49c45579934b889efe7db9227a1, type: 3}
   hpRecoveryPercent: 0
   mpRecoveryPercent: 0.3
   cureTypes: 
@@ -31,3 +32,7 @@ MonoBehaviour:
   isPermanent: 0
   isDawnChalice: 0
   stackGroup: HealthPotion
+  isChargeable: 0
+  maxCharges: 0
+  currentCharges: 0
+  sellPrice: 0

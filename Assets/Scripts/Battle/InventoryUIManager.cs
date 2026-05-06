@@ -439,7 +439,16 @@ public class InventoryUIManager : MonoBehaviour
 
         if (qtyText != null)
         {
-            if (item.isChargeable)
+            ResolveConsumableInventoryReference();
+            // 새벽의 잔: 런타임 충전은 ConsumableInventory에만 있음(SO currentCharges는 갱신 안 됨)
+            if (item.isDawnChalice)
+            {
+                ConsumableInventory inv = ConsumableInventory.Instance;
+                int cur = inv != null ? inv.dawnChaliceCharges : 0;
+                int max = inv != null ? inv.dawnChaliceMaxCharges : item.maxCharges;
+                qtyText.text = $"{cur}/{max}";
+            }
+            else if (item.isChargeable)
                 qtyText.text = $"{item.currentCharges}/{item.maxCharges}";
             else
             {
@@ -496,7 +505,14 @@ public class InventoryUIManager : MonoBehaviour
             primaryButtonText.text = "Use";
 
         bool hasItem  = consumableInventory != null && consumableInventory.HasItem(item);
-        bool hasCharge = !item.isChargeable || item.currentCharges > 0;
+        bool hasCharge;
+        if (item.isDawnChalice)
+        {
+            ConsumableInventory inv = ConsumableInventory.Instance;
+            hasCharge = inv != null && inv.dawnChaliceCharges > 0;
+        }
+        else
+            hasCharge = !item.isChargeable || item.currentCharges > 0;
         // usableInBattle = false이면 비활성 (맵 전용) / 충전형은 충전 0이면 비활성
         primaryButton.interactable = hasItem && item.usableInBattle && hasCharge;
         primaryButton.onClick.RemoveAllListeners();
