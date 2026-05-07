@@ -90,7 +90,6 @@ public class InventoryUIManager : MonoBehaviour
 
     // Resources.LoadAll 로 자동 로드 — Inspector 등록 불필요
     private List<EquipmentData>    allEquipmentDatabase  = new List<EquipmentData>();
-    private List<ConsumableItemSO> allConsumableDatabase = new List<ConsumableItemSO>();
 
     // ─── 외부 참조 ───────────────────────────────────────────
     [Header("시스템 참조")]
@@ -151,18 +150,11 @@ public class InventoryUIManager : MonoBehaviour
         var eqArr = Resources.LoadAll<EquipmentData>("Item_Equipments/Equipments");
         allEquipmentDatabase = new List<EquipmentData>(eqArr);
 
-        var conArr = Resources.LoadAll<ConsumableItemSO>("Item_Equipments/Items");
-        allConsumableDatabase = new List<ConsumableItemSO>(conArr);
-
         Debug.Log($"[DB] 장비 로드: {allEquipmentDatabase.Count}개  " +
                   $"(경로: Resources/Item_Equipments/Equipments)");
-        Debug.Log($"[DB] 소비 아이템 로드: {allConsumableDatabase.Count}개  " +
-                  $"(경로: Resources/Item_Equipments/Items)");
 
         if (allEquipmentDatabase.Count == 0)
             Debug.LogWarning("[DB] 장비 SO 로드 실패 — Resources/Item_Equipments/Equipments 경로 및 .asset 파일 확인 필요");
-        if (allConsumableDatabase.Count == 0)
-            Debug.LogWarning("[DB] 소비 아이템 SO 로드 실패 — Resources/Item_Equipments/Items 경로 및 .asset 파일 확인 필요");
     }
 
     private void Start()
@@ -302,72 +294,60 @@ public class InventoryUIManager : MonoBehaviour
 
     private void PopulateConsumableGrid()
     {
-        // allConsumableDatabase 우선 사용, 없으면 ConsumableInventory fallback
-        var source = (allConsumableDatabase != null && allConsumableDatabase.Count > 0)
-            ? allConsumableDatabase
-            : null;
-
-        Debug.Log($"[Grid] PopulateConsumableGrid — source: {(source != null ? source.Count + "개" : "null")}");
-
-        // 새벽의 잔 — 항상 첫 번째 (isDawnChalice 기준)
-        if (source != null)
+        if (consumableInventory == null) ResolveConsumableInventoryReference();
+        if (consumableInventory == null)
         {
-            foreach (var item in source)
-            {
-                if (item == null || !item.isDawnChalice) continue;
-                int qty = consumableInventory != null
-                    ? consumableInventory.GetQuantity(item)
-                    : 0;
-                var slotObj = CreateSlot();
-                var slot    = slotObj.GetComponent<InventorySlot>();
-                if (slot != null)
-                {
-                    var cap = item;
-                    slot.SetupConsumable(cap, qty, () => OnConsumableClicked(cap));
-                }
-            }
+            Debug.LogWarning("[Grid] PopulateConsumableGrid — ConsumableInventory.Instance가 null입니다.");
+            return;
+        }
 
-            // 일반 소비 아이템 — DB에 있으면 수량 0이어도 표시 (미보유 상태로)
-            foreach (var item in source)
+        // (a) 새벽의 잔: 항상 첫 슬롯
+        var chalice = consumableInventory.dawnChaliceItem;
+        if (chalice == null)
+        {
+            // Fallback: Resources에서 로드
+            chalice = Resources.Load<ConsumableItemSO>("Item_Equipments/Items/Dawn_Chalice");
+            if (chalice != null)
             {
-                if (item == null || item.isDawnChalice) continue;
-                int qty = consumableInventory != null
-                    ? consumableInventory.GetQuantity(item)
-                    : 0;
-                var slotObj = CreateSlot();
-                var slot    = slotObj.GetComponent<InventorySlot>();
-                if (slot != null)
-                {
-                    var cap = item;
-                    slot.SetupConsumable(cap, qty, () => OnConsumableClicked(cap));
-                }
+                Debug.LogWarning("[Grid] dawnChaliceItem이 미할당이라 Resources에서 로드함");
             }
         }
-        else if (consumableInventory != null)
+
+        if (chalice != null)
         {
-            // fallback: ConsumableInventory.slots 직접 사용
-            if (consumableInventory.dawnChaliceItem != null)
+            var slotObj = CreateSlot();
+            var slot    = slotObj.GetComponent<InventorySlot>();
+            if (slot != null)
             {
-                var chalice = consumableInventory.dawnChaliceItem;
-                var slotObj = CreateSlot();
-                var slot    = slotObj.GetComponent<InventorySlot>();
-                if (slot != null)
-                    slot.SetupConsumable(chalice, consumableInventory.dawnChaliceCharges,
-                        () => OnConsumableClicked(chalice));
-            }
-            foreach (var s in consumableInventory.slots)
-            {
-                if (s.item == null || s.quantity <= 0) continue;
-                var slotObj = CreateSlot();
-                var slot    = slotObj.GetComponent<InventorySlot>();
-                if (slot != null)
-                {
-                    var captured = s;
-                    slot.SetupConsumable(captured.item, captured.quantity,
-                        () => OnConsumableClicked(captured.item));
-                }
+                var capChalice = chalice;
+                slot.SetupConsumable(capChalice, consumableInventory.dawnChaliceCharges,
+                                     () => OnConsumableClicked(capChalice));
             }
         }
+        else
+        {
+            Debug.LogWarning("[Grid] 새벽의 잔 SO를 찾을 수 없음 — 슬롯 스킵");
+        }
+
+        // (b) 일반 아이템: ConsumableInventory.slots 중 quantity > 0만
+        int spawned = 0;
+        foreach (var s in consumableInventory.slots)
+        {
+            if (s == null || s.item == null) continue;
+            if (s.item.isDawnChalice) continue;       // 위에서 처리
+            if (s.quantity <= 0) continue;            // ★ 핵심 필터
+
+            var slotObj = CreateSlot();
+            var slot    = slotObj.GetComponent<InventorySlot>();
+            if (slot == null) continue;
+
+            var captured = s;
+            slot.SetupConsumable(captured.item, captured.quantity,
+                                 () => OnConsumableClicked(captured.item));
+            spawned++;
+        }
+
+        Debug.Log($"[Grid] PopulateConsumableGrid — 새벽의 잔 {(chalice != null ? 1 : 0)} + 일반 {spawned}개 표시");
     }
 
     private List<EquipmentData> GetFilteredEquipment()
