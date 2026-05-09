@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Smoke_Bomb
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Smoke Bomb
+  icon: {fileID: 0}
   description: What they cannot see, they cannot hit.
+  itemCategory: 3
   itemIcon: {fileID: -1701494332336445342, guid: 19021cc3f742d6144a04ac084e56fcf6, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0
@@ -31,3 +33,7 @@ MonoBehaviour:
   isPermanent: 0
   isDawnChalice: 0
   stackGroup: 
+  isChargeable: 0
+  maxCharges: 0
+  currentCharges: 0
+  sellPrice: 0

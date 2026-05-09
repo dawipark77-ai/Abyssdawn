@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Antidote
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Antidote
+  icon: {fileID: 0}
   description: Poison kills over time. This steals that time away.
+  itemCategory: 2
   itemIcon: {fileID: -2185028427614365439, guid: c14c0502dd717ba409d37cb24a06abc6, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0
@@ -31,3 +33,7 @@ MonoBehaviour:
   isPermanent: 0
   isDawnChalice: 0
   stackGroup: 
+  isChargeable: 0
+  maxCharges: 0
+  currentCharges: 0
+  sellPrice: 0

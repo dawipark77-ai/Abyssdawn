@@ -4,12 +4,29 @@ using UnityEngine.Serialization;
 
 namespace AbyssdawnBattle
 {
+    /// <summary>
+    /// 소비 아이템 정렬 카테고리. enum 정수 값이 정렬 우선순위가 됩니다.
+    /// HpRecovery(0) → MpRecovery(1) → StatusCure(2) → BattleSupport(3) → Special(4)
+    /// </summary>
+    public enum ItemCategory
+    {
+        HpRecovery    = 0,
+        MpRecovery    = 1,
+        StatusCure    = 2,
+        BattleSupport = 3,
+        Special       = 4,
+    }
+
     [CreateAssetMenu(fileName = "ConsumableItem_", menuName = "Abyssdawn/Consumable Item", order = 30)]
     public class ConsumableItemSO : BaseItemSO
     {
         // itemName   → BaseItemSO.itemName  (필드명 동일, 직렬화 보존)
         // description → BaseItemSO.description (필드명 동일, 직렬화 보존)
         // itemIcon / flatIcon 은 BaseItemSO.icon 과 이름이 달라 그대로 유지
+
+        [Header("정렬 카테고리")]
+        [Tooltip("아이템 정렬 순서 결정 (HP회복 → MP회복 → 해독 → 전투보조 → 특수)")]
+        public ItemCategory itemCategory = ItemCategory.BattleSupport;
 
         [Header("Icons")]
         public Sprite itemIcon;   // 인벤토리 화면 아이콘

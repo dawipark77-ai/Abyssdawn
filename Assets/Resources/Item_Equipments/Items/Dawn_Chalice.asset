@@ -16,10 +16,11 @@ MonoBehaviour:
   icon: {fileID: 0}
   description: Even in the abyss, dawn will come. At least, that is what we must
     believe.
+  itemCategory: 3
   itemIcon: {fileID: -5063216152701466143, guid: 9193eccd8dc30974a8da62eba23f0727, type: 3}
   flatIcon: {fileID: 7043268739260826568, guid: 72bbb49c45579934b889efe7db9227a1, type: 3}
-  hpRecoveryPercent: 0.4
-  mpRecoveryPercent: 0.4
+  hpRecoveryPercent: 0.6
+  mpRecoveryPercent: 0.6
   cureTypes: 01000000020000000300000000000000040000000500000006000000
   attackBuffPercent: 0
   agilityBuff: 0

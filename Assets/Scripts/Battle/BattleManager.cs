@@ -3386,9 +3386,19 @@ public class BattleManager : MonoBehaviour
                         : potionCount-- > 0;
                     if (used)
                     {
-                        cmd.actor.Heal(cmd.itemHealAmount);
+                        // 통합 헬퍼: HP/MP 회복 + 상태이상 해제 + MP 페널티 일괄 적용
+                        // (cmd.itemHealAmount는 더 이상 사용하지 않음 — SO 필드에서 직접 계산)
+                        var fx = ConsumableEffectApplier.ApplyEffects(cmd.actor, cmd.usedItem);
+
                         SyncPotionCount();
-                        AddMessage($"{cmd.actor.playerName} used {cmd.usedItem.itemName} and recovered {cmd.itemHealAmount} HP!");
+
+                        string msg = $"{cmd.actor.playerName} used {cmd.usedItem.itemName}";
+                        if (fx.hpHealed > 0) msg += $" — recovered {fx.hpHealed} HP";
+                        if (fx.mpHealed > 0) msg += $" — recovered {fx.mpHealed} MP";
+                        if (fx.mpLost   > 0) msg += $" — lost {fx.mpLost} MP";
+                        if (fx.curesApplied != null && fx.curesApplied.Count > 0)
+                            msg += $" — cured {string.Join(", ", fx.curesApplied)}";
+                        AddMessage(msg + "!");
                     }
                 }
                 break;

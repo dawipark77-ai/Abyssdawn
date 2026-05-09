@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatData
   baseHP: 20
-  baseMP: 0
+  baseMP: 30
   baseAttack: 5
   baseDefense: 5
   baseMagic: 5
   baseAgility: 5
   baseLuck: 3
-  currentHP: 26
-  currentMP: 0
+  currentHP: 1
+  currentMP: 24
   level: 1
   exp: 30
   freeStatPoints: 0
@@ -32,7 +32,7 @@ MonoBehaviour:
   currentJob: {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
   equippedSkills:
   - {fileID: 11400000, guid: db0cc0a74e55b8647bf22681e22977a7, type: 2}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: bb197b762ed42a04b9f049b8c69290df, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

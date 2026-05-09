@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Bandage
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Bandage
+  icon: {fileID: 0}
   description: Tied rough, but the bleeding stops.
+  itemCategory: 2
   itemIcon: {fileID: 6851228247741294694, guid: 19ddce721897761468576bea0364c23d, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0.2
@@ -31,3 +33,7 @@ MonoBehaviour:
   isPermanent: 0
   isDawnChalice: 0
   stackGroup: 
+  isChargeable: 0
+  maxCharges: 0
+  currentCharges: 0
+  sellPrice: 0

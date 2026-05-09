@@ -329,14 +329,12 @@ public class InventoryUIManager : MonoBehaviour
             Debug.LogWarning("[Grid] 새벽의 잔 SO를 찾을 수 없음 — 슬롯 스킵");
         }
 
-        // (b) 일반 아이템: ConsumableInventory.slots 중 quantity > 0만
+        // (b) 일반 아이템: 카테고리 → 이름 순 정렬, quantity > 0만
+        var sortedSlots = GetSortedConsumableSlots();
         int spawned = 0;
-        foreach (var s in consumableInventory.slots)
+        foreach (var s in sortedSlots)
         {
-            if (s == null || s.item == null) continue;
-            if (s.item.isDawnChalice) continue;       // 위에서 처리
-            if (s.quantity <= 0) continue;            // ★ 핵심 필터
-
+            // GetSortedConsumableSlots에서 이미 null/isDawnChalice/quantity<=0 필터링됨
             var slotObj = CreateSlot();
             var slot    = slotObj.GetComponent<InventorySlot>();
             if (slot == null) continue;
@@ -348,6 +346,63 @@ public class InventoryUIManager : MonoBehaviour
         }
 
         Debug.Log($"[Grid] PopulateConsumableGrid — 새벽의 잔 {(chalice != null ? 1 : 0)} + 일반 {spawned}개 표시");
+    }
+
+    /// <summary>
+    /// ConsumableInventory.slots에서 표시 대상만 필터링한 뒤 정렬해 반환합니다.
+    /// 정렬 순서:
+    ///   1차: HP Potion / Mana Potion 강제 우선 (GetItemPriority)
+    ///   2차: itemCategory enum 정수 오름차순
+    ///   3차: itemName 사전순 (대소문자 무시)
+    /// 새벽의 잔과 quantity ≤ 0 슬롯은 제외. (BattleItemPanel과 동일 로직)
+    /// </summary>
+    private List<ConsumableInventory.ConsumableSlot> GetSortedConsumableSlots()
+    {
+        var sorted = new List<ConsumableInventory.ConsumableSlot>();
+
+        if (consumableInventory == null) return sorted;
+
+        foreach (var s in consumableInventory.slots)
+        {
+            if (s == null || s.item == null) continue;
+            if (s.item.isDawnChalice) continue;
+            if (s.quantity <= 0) continue;
+            sorted.Add(s);
+        }
+
+        sorted.Sort((a, b) =>
+        {
+            // 1차: HP Potion / Mana Potion 강제 우선순위
+            int aPriority = GetItemPriority(a.item);
+            int bPriority = GetItemPriority(b.item);
+            if (aPriority != bPriority) return aPriority.CompareTo(bPriority);
+
+            // 2차: 카테고리 순
+            int catCompare = ((int)a.item.itemCategory).CompareTo((int)b.item.itemCategory);
+            if (catCompare != 0) return catCompare;
+
+            // 3차: 이름순
+            return string.Compare(a.item.itemName, b.item.itemName, System.StringComparison.OrdinalIgnoreCase);
+        });
+
+        return sorted;
+    }
+
+    /// <summary>
+    /// 아이템명 기반 강제 우선순위.
+    /// 0=HP Potion, 1=Mana Potion, 999=그 외(카테고리/이름순으로 정렬).
+    /// 비교는 공백/언더스코어 제거 후 소문자 매칭. (BattleItemPanel과 동일 로직)
+    /// </summary>
+    private int GetItemPriority(ConsumableItemSO item)
+    {
+        if (item == null) return 999;
+
+        string normalized = item.itemName.Replace(" ", "").Replace("_", "").ToLower();
+
+        if (normalized == "hppotion")   return 0;
+        if (normalized == "manapotion") return 1;
+
+        return 999;
     }
 
     private List<EquipmentData> GetFilteredEquipment()
@@ -942,7 +997,7 @@ public class InventoryUIManager : MonoBehaviour
         PopulateDetailPanelConsumable(item);
     }
 
-    // 아이템 효과 적용
+    // 아이템 효과 적용 — 통합 헬퍼(ConsumableEffectApplier)에 위임
     private void ApplyItemEffect(ConsumableItemSO item)
     {
         var player = FindObjectOfType<PlayerStats>();
@@ -952,21 +1007,12 @@ public class InventoryUIManager : MonoBehaviour
             return;
         }
 
-        // HP 회복
-        if (item.hpRecoveryPercent > 0)
-        {
-            int healAmount = Mathf.RoundToInt(player.maxHP * item.hpRecoveryPercent);
-            player.currentHP = Mathf.Min(player.currentHP + healAmount, player.maxHP);
-            Debug.Log($"[Inventory] HP {healAmount} 회복");
-        }
-
-        // MP 회복
-        if (item.mpRecoveryPercent > 0)
-        {
-            int mpAmount = Mathf.RoundToInt(player.maxMP * item.mpRecoveryPercent);
-            player.currentMP = Mathf.Min(player.currentMP + mpAmount, player.maxMP);
-            Debug.Log($"[Inventory] MP {mpAmount} 회복");
-        }
+        var fx = ConsumableEffectApplier.ApplyEffects(player, item);
+        if (fx.hpHealed > 0) Debug.Log($"[Inventory] HP {fx.hpHealed} 회복");
+        if (fx.mpHealed > 0) Debug.Log($"[Inventory] MP {fx.mpHealed} 회복");
+        if (fx.mpLost   > 0) Debug.Log($"[Inventory] MP {fx.mpLost} 손실");
+        if (fx.curesApplied != null && fx.curesApplied.Count > 0)
+            Debug.Log($"[Inventory] 상태이상 해제: {string.Join(", ", fx.curesApplied)}");
     }
 
     private void OnDiscardClicked()

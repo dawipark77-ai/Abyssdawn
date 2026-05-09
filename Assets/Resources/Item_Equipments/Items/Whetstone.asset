@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Whetstone
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Whetstone
+  icon: {fileID: 0}
   description: A sharper edge means less effort.
+  itemCategory: 3
   itemIcon: {fileID: -8563153612813847178, guid: 33868d5d6a6205f4f941fcc8831bd0d1, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0
@@ -31,3 +33,7 @@ MonoBehaviour:
   isPermanent: 0
   isDawnChalice: 0
   stackGroup: 
+  isChargeable: 0
+  maxCharges: 0
+  currentCharges: 0
+  sellPrice: 0
