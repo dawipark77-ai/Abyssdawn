@@ -21165,7 +21165,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   statData: {fileID: 11400000, guid: a176c788f5d164441af8bae214804085, type: 2}
-  playerName: None
+  _fallbackAllocatedAttack: 0
+  _fallbackAllocatedDefense: 0
+  _fallbackAllocatedMagic: 0
+  _fallbackAllocatedAgility: 0
+  _fallbackAllocatedLuck: 0
+  _fallbackCurrentHP: 0
+  _fallbackCurrentMP: 0
+  _fallbackLevel: 1
+  _fallbackExp: 0
+  _fallbackFreeStatPoints: 0
+  _fallbackSkillPoints: 0
+  playerName: hero
   characterClass: {fileID: 0}
   currentSlot: 1
   isFrontRow: 1
@@ -71783,7 +71794,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 104}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1532703016
 MonoBehaviour:
@@ -80713,10 +80724,10 @@ RectTransform:
   - {fileID: 2026409121}
   m_Father: {fileID: 1532703015}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 52, y: -52}
+  m_SizeDelta: {x: 80, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1732906213
 MonoBehaviour:
@@ -97613,7 +97624,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2087497230
 RectTransform:
   m_ObjectHideFlags: 0
@@ -97635,7 +97646,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.00048828125, y: 61.945984}
+  m_AnchoredPosition: {x: 0.00048828125, y: 61.946045}
   m_SizeDelta: {x: 0, y: -299.9481}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2087497231

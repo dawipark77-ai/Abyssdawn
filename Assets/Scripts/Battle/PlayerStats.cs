@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System;
 #if UNITY_EDITOR
@@ -12,18 +13,21 @@ public class PlayerStats : MonoBehaviour
     [Tooltip("PlayerStatData 에셋을 연결하세요. HP/MP가 실시간으로 이 에셋에 저장됩니다.")]
     public PlayerStatData statData;
 
-    // --- [레벨업/자유 분배용 내부 캐시] ---
-    private int _fallbackAllocatedAttack;
-    private int _fallbackAllocatedDefense;
-    private int _fallbackAllocatedMagic;
-    private int _fallbackAllocatedAgility;
-    private int _fallbackAllocatedLuck;
+    // --- [런타임 상태 데이터] ---
+    // [2026-05-07] PlayerStatData(SO)에서 분리되어 컴포넌트에서 직접 보유.
+    // 인스펙터 노출은 디버깅 편의용 — Play 모드 종료 시 자동 리셋(SerializedField 직렬화는 GameObject 인스턴스에 한정).
+    [SerializeField] private int _fallbackAllocatedAttack;
+    [SerializeField] private int _fallbackAllocatedDefense;
+    [SerializeField] private int _fallbackAllocatedMagic;
+    [SerializeField] private int _fallbackAllocatedAgility;
+    [SerializeField] private int _fallbackAllocatedLuck;
 
-    // [FIX] 런타임 fallback 변수 (statData가 없을 때만 사용)
-    private int _fallbackCurrentHP;
-    private int _fallbackCurrentMP;
-    private int _fallbackLevel = 1;
-    private int _fallbackExp = 0;
+    [SerializeField] private int _fallbackCurrentHP;
+    [SerializeField] private int _fallbackCurrentMP;
+    [SerializeField] private int _fallbackLevel = 1;
+    [SerializeField] private int _fallbackExp = 0;
+    [SerializeField] private int _fallbackFreeStatPoints = 0;
+    [SerializeField] private int _fallbackSkillPoints = 0;
     private bool _isInitialized = false; // 초기화 완료 플래그
     private static bool _isFirstLaunch = true; // 앱 첫 실행 여부
 
@@ -81,11 +85,27 @@ public class PlayerStats : MonoBehaviour
     public CharacterClass characterClass;
 
     // 자유 분배로 증가한 기본 스탯(직업/장비/패시브 적용 전 순수 플레이어 투자치)
-    public int AllocatedAttack   => (statData != null) ? statData.allocatedAttack   : _fallbackAllocatedAttack;
-    public int AllocatedDefense  => (statData != null) ? statData.allocatedDefense  : _fallbackAllocatedDefense;
-    public int AllocatedMagic    => (statData != null) ? statData.allocatedMagic    : _fallbackAllocatedMagic;
-    public int AllocatedAgility  => (statData != null) ? statData.allocatedAgility  : _fallbackAllocatedAgility;
-    public int AllocatedLuck     => (statData != null) ? statData.allocatedLuck     : _fallbackAllocatedLuck;
+    // [2026-05-07] PlayerStatData(SO)에서 분리됨 — 컴포넌트의 _fallback* 필드가 primary
+    public int AllocatedAttack   => _fallbackAllocatedAttack;
+    public int AllocatedDefense  => _fallbackAllocatedDefense;
+    public int AllocatedMagic    => _fallbackAllocatedMagic;
+    public int AllocatedAgility  => _fallbackAllocatedAgility;
+    public int AllocatedLuck     => _fallbackAllocatedLuck;
+
+    // 자유 분배에 사용할 남은 스탯 포인트
+    public int FreeStatPoints
+    {
+        get => _fallbackFreeStatPoints;
+        set { _fallbackFreeStatPoints = Mathf.Max(0, value); OnStatusChanged?.Invoke(); }
+    }
+
+    // 스킬 트리에 사용할 스킬 포인트(LP) — Lore Points
+    // [2026-05-07] PlayerStatData(SO)에서 분리됨 — SwordSkillTreeManager/NewSkillTreeUI에서 사용
+    public int skillPoints
+    {
+        get => _fallbackSkillPoints;
+        set { _fallbackSkillPoints = Mathf.Max(0, value); OnStatusChanged?.Invoke(); }
+    }
 
     // --- [실시간 조립 계산식 - 직업 배율 → 직업 가산 → 패시브/장비/특성] ---
     // MaxHP = (baseHP × hpMultiplier) + hpBonus + 패시브/장비/특성
@@ -256,24 +276,16 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // --- [런타임 데이터 프로퍼티 - SO 실시간 저장] ---
-    // HP/MP가 변경될 때마다 SO 에셋에 즉시 저장됩니다
+    // --- [런타임 데이터 프로퍼티] ---
+    // [2026-05-07] PlayerStatData(SO)에서 분리됨 — 컴포넌트 인스턴스가 진실의 단일 소스.
+    // Play 모드 종료 시 자동 리셋되어 .asset 누적 문제 해결.
     public int currentHP
     {
-        get => (statData != null) ? statData.currentHP : _fallbackCurrentHP;
+        get => _fallbackCurrentHP;
         set
         {
-            int oldValue = (statData != null) ? statData.currentHP : _fallbackCurrentHP;
+            int oldValue = _fallbackCurrentHP;
             int newValue = Mathf.Clamp(value, 0, maxHP);
-
-            // [FIX] 실시간 저장: SO 에셋에 즉시 기록
-            if (statData != null)
-            {
-                statData.currentHP = newValue;
-#if UNITY_EDITOR
-                EditorUtility.SetDirty(statData);
-#endif
-            }
 
             _fallbackCurrentHP = newValue;
 
@@ -300,20 +312,12 @@ public class PlayerStats : MonoBehaviour
     }
     public int currentMP
     {
-        get => (statData != null) ? statData.currentMP : _fallbackCurrentMP;
+        get => _fallbackCurrentMP;
         set
         {
-            int oldValue = (statData != null) ? statData.currentMP : _fallbackCurrentMP;
+            int oldValue = _fallbackCurrentMP;
             int newValue = Mathf.Clamp(value, 0, maxMP);
             Debug.Log($"[MP_TRACE] MP set to {newValue} by {gameObject.name}");
-
-            if (statData != null)
-            {
-                statData.currentMP = newValue;
-#if UNITY_EDITOR
-                EditorUtility.SetDirty(statData);
-#endif
-            }
 
             _fallbackCurrentMP = newValue;
 
@@ -329,13 +333,10 @@ public class PlayerStats : MonoBehaviour
     }
     public int level
     {
-        get => (statData != null) ? statData.level : _fallbackLevel;
+        get => _fallbackLevel;
         set
         {
-            if (statData != null)
-                statData.level = value;
-            else
-                _fallbackLevel = value;
+            _fallbackLevel = value;
 
             // [NEW] 레벨 변경 시 이벤트 발동
             OnStatusChanged?.Invoke();
@@ -343,13 +344,10 @@ public class PlayerStats : MonoBehaviour
     }
     public int exp
     {
-        get => (statData != null) ? statData.exp : _fallbackExp;
+        get => _fallbackExp;
         set
         {
-            if (statData != null)
-                statData.exp = value;
-            else
-                _fallbackExp = value;
+            _fallbackExp = value;
 
             // [NEW] 경험치 변경 시 이벤트 발동
             OnStatusChanged?.Invoke();
@@ -792,6 +790,7 @@ public class PlayerStats : MonoBehaviour
     {
         // [DEBUG] 인스턴스 ID 출력 (어떤 PlayerStats가 초기화되는지 확인)
         Debug.Log($"[PlayerStats] Awake() 호출: GameObject={gameObject.name}, InstanceID={GetInstanceID()}, playerName={playerName}");
+        Debug.Log($"[PlayerStats:DIAG] Awake | InstanceID={GetInstanceID()} | Scene='{gameObject.scene.name}' | GO='{gameObject.name}' | playerName='{playerName}' | _isInitialized={_isInitialized}");
 
         // [SAFETY] statData 즉시 진단 (this 컨텍스트로 Unity Console에서 GameObject 강조)
         if (statData == null)
@@ -853,37 +852,74 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"[PlayerStats]   - MaxMP: {maxMP} = BaseMP {baseMP} + JobMP {characterClass?.mpBonus ?? 0} + Passive/Equip");
         Debug.Log($"[PlayerStats]   - Attack: {Attack} = Base({baseAttack}) + Job({characterClass?.attackBonus ?? 0}) + Passive({GetPassiveAttackBonus()})");
 
-        // [FIX] 조건부 초기화: 에셋에 저장된 HP가 0이거나 비정상일 때만 maxHP로 초기화
-        int currentHPFromAsset = statData.currentHP;
-        int currentMPFromAsset = statData.currentMP;
+        // [FIX] 조건부 초기화: 컴포넌트 보유 HP가 0이거나 비정상일 때만 maxHP로 초기화
+        // [2026-05-07] PlayerStatData 분리 — 컴포넌트의 _fallbackCurrentHP가 진실
+        // [2026-05-11 옵션 B] GameManager.staticPartyData 우선 복원 — 씬 전환 영속화 인프라 연결
+        int currentHPFromAsset = _fallbackCurrentHP;
+        int currentMPFromAsset = _fallbackCurrentMP;
 
-        if (_isFirstLaunch)
+        bool restoredFromGameManager = false;
+        var gmInst = GameManager.Instance;
+        Debug.Log($"[PlayerStats:DIAG] Awake GM check | GM={(gmInst != null ? "exists" : "NULL")} | playerName='{playerName}'");
+
+        if (gmInst != null && !string.IsNullOrEmpty(playerName))
         {
-            Debug.Log("[PlayerStats] 첫 실행 감지 → HP/MP 풀 초기화");
-            currentHP = maxHP;
-            currentMP = maxMP;
-            _isFirstLaunch = false;
-        }
-        // HP 조건: 유효 범위면 유지, 그렇지 않으면 새 게임으로 초기화
-        else if (currentHPFromAsset > 0 && currentHPFromAsset <= maxHP)
-        {
-            Debug.Log($"[PlayerStats] SO에서 로드한 HP 유지: {currentHPFromAsset}/{maxHP}");
-        }
-        else
-        {
-            Debug.Log($"[PlayerStats] SO의 HP가 비정상({currentHPFromAsset}) → 새 게임으로 간주, maxHP({maxHP})로 초기화");
-            currentHP = maxHP;
+            bool _diagHasKey = gmInst.partyData.ContainsKey(playerName);
+            string _diagKeysStr = gmInst.partyData.Count > 0
+                ? string.Join(",", gmInst.partyData.Keys)
+                : "(empty)";
+            Debug.Log($"[PlayerStats:DIAG] Awake GM dict | HasKey('{playerName}')={_diagHasKey} | Dict count={gmInst.partyData.Count} | Keys=[{_diagKeysStr}]");
         }
 
-        // MP 조건: 유효 범위면 유지, 그렇지 않으면 새 게임으로 초기화
-        if (currentMPFromAsset >= 0 && currentMPFromAsset <= maxMP)
+        if (gmInst != null && !string.IsNullOrEmpty(playerName) && gmInst.partyData.ContainsKey(playerName))
         {
-            Debug.Log($"[PlayerStats] SO에서 로드한 MP 유지: {currentMPFromAsset}/{maxMP}");
+            Debug.Log($"[PlayerStats:DIAG] Awake Before restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
+            gmInst.ApplyToPlayer(this);
+            restoredFromGameManager = true;
+            Debug.Log($"[PlayerStats:DIAG] Awake After restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
+            Debug.Log($"[PlayerStats] GameManager에서 상태 복원: HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}, EXP {exp}, Lv {level}");
         }
-        else
+
+        if (!restoredFromGameManager)
         {
-            Debug.Log($"[PlayerStats] SO의 MP가 비정상({currentMPFromAsset}) → 새 게임으로 간주, maxMP({maxMP})로 초기화");
-            currentMP = maxMP;
+            if (_isFirstLaunch)
+            {
+                Debug.Log("[PlayerStats] 첫 실행 감지 → HP/MP 풀 초기화");
+                currentHP = maxHP;
+                currentMP = maxMP;
+                _isFirstLaunch = false;
+            }
+            else
+            {
+                // HP 조건: 유효 범위면 유지, 그렇지 않으면 새 게임으로 초기화
+                if (currentHPFromAsset > 0 && currentHPFromAsset <= maxHP)
+                {
+                    Debug.Log($"[PlayerStats] 컴포넌트 HP 유지: {currentHPFromAsset}/{maxHP}");
+                }
+                else
+                {
+                    Debug.Log($"[PlayerStats] 컴포넌트 HP 비정상({currentHPFromAsset}) → maxHP({maxHP})로 초기화");
+                    currentHP = maxHP;
+                }
+
+                // MP 조건: HP와 동일 기준(> 0)으로 통일 — SerializeField 기본값 0 → maxMP 복원
+                if (currentMPFromAsset > 0 && currentMPFromAsset <= maxMP)
+                {
+                    Debug.Log($"[PlayerStats] 컴포넌트 MP 유지: {currentMPFromAsset}/{maxMP}");
+                }
+                else
+                {
+                    Debug.Log($"[PlayerStats] 컴포넌트 MP 비정상({currentMPFromAsset}) → maxMP({maxMP})로 초기화");
+                    currentMP = maxMP;
+                }
+            }
+
+            // GameManager에 첫 등록 — 다음 씬 전환부터 영속화 인프라 동작
+            if (gmInst != null && !string.IsNullOrEmpty(playerName))
+            {
+                gmInst.SaveFromPlayer(this);
+                Debug.Log($"[PlayerStats] GameManager에 초기 스냅샷 저장: HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}");
+            }
         }
 
         _isInitialized = true; // 초기화 완료 플래그
@@ -904,6 +940,53 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"[PlayerStats] Start() - HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}");
 
         // [FIX] 이벤트 발동 (UI 갱신)
+        OnStatusChanged?.Invoke();
+    }
+
+    // [2026-05-11 옵션 B 마무리] 씬 전환 후에도 GameManager.staticPartyData에서 복원
+    // — Awake가 _isInitialized 가드로 스킵되거나 DontDestroyOnLoad라서 재진입 안 되는 경우 대비
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoadedRestore;
+        TryRestoreFromGameManager("OnEnable");
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoadedRestore;
+    }
+
+    private void OnSceneLoadedRestore(Scene scene, LoadSceneMode mode)
+    {
+        TryRestoreFromGameManager($"OnSceneLoaded({scene.name})");
+    }
+
+    private void TryRestoreFromGameManager(string context)
+    {
+        Debug.Log($"[PlayerStats:DIAG] TryRestore({context}) | playerName='{playerName}' | InstanceID={GetInstanceID()}");
+
+        if (string.IsNullOrEmpty(playerName))
+        {
+            Debug.LogWarning($"[PlayerStats:DIAG] {context} ABORT: playerName empty");
+            return;
+        }
+        var gm = GameManager.Instance;
+        if (gm == null)
+        {
+            Debug.LogWarning($"[PlayerStats:DIAG] {context} ABORT: GameManager null");
+            return;
+        }
+        if (!gm.partyData.ContainsKey(playerName))
+        {
+            string _diagKeysStr = gm.partyData.Count > 0 ? string.Join(",", gm.partyData.Keys) : "(empty)";
+            Debug.LogWarning($"[PlayerStats:DIAG] {context} ABORT: key '{playerName}' not in dict. Count={gm.partyData.Count}, Keys=[{_diagKeysStr}]");
+            return;
+        }
+
+        Debug.Log($"[PlayerStats:DIAG] {context} Before restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
+        gm.ApplyToPlayer(this);
+        Debug.Log($"[PlayerStats:DIAG] {context} After restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
+        Debug.Log($"[PlayerStats] {context}: GameManager 복원 — {playerName} HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}, EXP {exp}, Lv {level}");
         OnStatusChanged?.Invoke();
     }
 
@@ -1211,8 +1294,10 @@ public class PlayerStats : MonoBehaviour
 
     public void AddExp(int amount)
     {
+        Debug.Log($"[PlayerStats:DIAG] AddExp called | amount={amount} | Before: EXP={exp}, Lv={level}, maxExp={maxExp} | playerName='{playerName}' | InstanceID={GetInstanceID()}");
         exp += amount;
         while (exp >= maxExp) LevelUp();
+        Debug.Log($"[PlayerStats:DIAG] AddExp result | After: EXP={exp}, Lv={level}, maxExp={maxExp} | playerName='{playerName}' | InstanceID={GetInstanceID()}");
     }
 
     private void LevelUp()
@@ -1389,10 +1474,7 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     private void GrantFreeStatPoint()
     {
-        if (statData != null)
-        {
-            statData.freeStatPoints++;
-        }
+        _fallbackFreeStatPoints++;
     }
 
     /// <summary>
@@ -1400,11 +1482,8 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     public void AllocateFreePoint(StatType statType)
     {
-        if (statData != null)
-        {
-            if (statData.freeStatPoints <= 0) return;
-            statData.freeStatPoints--;
-        }
+        if (_fallbackFreeStatPoints <= 0) return;
+        _fallbackFreeStatPoints--;
 
         AddAllocatedStat(statType, 1);
         OnStatusChanged?.Invoke();
@@ -1416,26 +1495,11 @@ public class PlayerStats : MonoBehaviour
 
         switch (statType)
         {
-            case StatType.Attack:
-                if (statData != null) statData.allocatedAttack += amount;
-                else _fallbackAllocatedAttack += amount;
-                break;
-            case StatType.Defense:
-                if (statData != null) statData.allocatedDefense += amount;
-                else _fallbackAllocatedDefense += amount;
-                break;
-            case StatType.Magic:
-                if (statData != null) statData.allocatedMagic += amount;
-                else _fallbackAllocatedMagic += amount;
-                break;
-            case StatType.Agility:
-                if (statData != null) statData.allocatedAgility += amount;
-                else _fallbackAllocatedAgility += amount;
-                break;
-            case StatType.Luck:
-                if (statData != null) statData.allocatedLuck += amount;
-                else _fallbackAllocatedLuck += amount;
-                break;
+            case StatType.Attack:  _fallbackAllocatedAttack  += amount; break;
+            case StatType.Defense: _fallbackAllocatedDefense += amount; break;
+            case StatType.Magic:   _fallbackAllocatedMagic   += amount; break;
+            case StatType.Agility: _fallbackAllocatedAgility += amount; break;
+            case StatType.Luck:    _fallbackAllocatedLuck    += amount; break;
         }
     }
 }

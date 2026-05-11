@@ -1,68 +1,46 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using System.Collections.Generic;
 using AbyssdawnBattle;
 
 /// <summary>
-/// 플레이어의 런타임 상태 데이터를 저장하는 ScriptableObject
-/// 중요: 이 에셋은 게임 실행 중 실시간으로 업데이트됩니다!
-/// HP/MP가 변경될 때마다 PlayerStats의 setter에서 이 에셋에 자동 저장됩니다.
+/// 플레이어의 정적 기본 스탯/장비/스킬 데이터를 저장하는 ScriptableObject.
+///
+/// [2026-05-07 리팩터] 런타임 데이터(currentHP/MP, level, exp, freeStatPoints,
+/// allocated*, skillPoints)는 이 SO에서 분리되어 PlayerStats(MonoBehaviour)에서
+/// 직접 보유합니다. Play 모드 종료 후에도 .asset에 데이터가 누적되던 문제 해결.
 /// </summary>
 [CreateAssetMenu(fileName = "NewPlayerStatData", menuName = "MyRPG/PlayerData Asset", order = 1)]
 public class PlayerStatData : ScriptableObject
 {
     [Header("=== 기본 스탯 (Base Stats) ===")]
     [Tooltip("레벨 1 기준 기본 HP")]
+    [FormerlySerializedAs("baseHP")]
     public int baseHP = 20;
 
     [Tooltip("레벨 1 기준 기본 MP")]
+    [FormerlySerializedAs("baseMP")]
     public int baseMP = 0;
 
     [Tooltip("레벨 1 기준 기본 공격력")]
+    [FormerlySerializedAs("baseAttack")]
     public int baseAttack = 5;
 
     [Tooltip("레벨 1 기준 기본 방어력")]
+    [FormerlySerializedAs("baseDefense")]
     public int baseDefense = 5;
 
     [Tooltip("레벨 1 기준 기본 마력")]
+    [FormerlySerializedAs("baseMagic")]
     public int baseMagic = 5;
 
     [Tooltip("레벨 1 기준 기본 민첩")]
+    [FormerlySerializedAs("baseAgility")]
     public int baseAgility = 5;
 
     [Tooltip("레벨 1 기준 기본 행운")]
+    [FormerlySerializedAs("baseLuck")]
     public int baseLuck = 3;
-
-    [Header("런타임 데이터 (실시간 저장)")]
-    [Tooltip("현재 HP - 실시간으로 저장됨")]
-    public int currentHP;
-
-    [Tooltip("현재 MP - 실시간으로 저장됨")]
-    public int currentMP;
-
-    [Tooltip("레벨 - 실시간으로 저장됨")]
-    public int level = 1;
-
-    [Tooltip("경험치 - 실시간으로 저장됨")]
-    public int exp = 0;
-
-    [Header("레벨업/능력치 분배 시스템")]
-    [Tooltip("자유 분배에 사용할 남은 스탯 포인트")]
-    public int freeStatPoints = 0;
-
-    [Tooltip("플레이어가 자유 분배로 투자한 힘/공격 추가 수치")]
-    public int allocatedAttack = 0;
-
-    [Tooltip("플레이어가 자유 분배로 투자한 방어 추가 수치")]
-    public int allocatedDefense = 0;
-
-    [Tooltip("플레이어가 자유 분배로 투자한 마력 추가 수치")]
-    public int allocatedMagic = 0;
-
-    [Tooltip("플레이어가 자유 분배로 투자한 민첩 추가 수치")]
-    public int allocatedAgility = 0;
-
-    [Tooltip("플레이어가 자유 분배로 투자한 행운 추가 수치")]
-    public int allocatedLuck = 0;
 
     [Header("탈부착형 캐릭터 시스템")]
     [Tooltip("현재 장착된 직업 - 에디터에서 변경하면 배틀/맵 씬 모두 자동 반영됨")]
@@ -77,9 +55,6 @@ public class PlayerStatData : ScriptableObject
     [Header("스킬 트리 시스템")]
     [Tooltip("배운 스킬 목록 (스킬 트리에서 배운 모든 스킬)")]
     public List<AbyssdawnBattle.SkillData> learnedSkills = new List<AbyssdawnBattle.SkillData>();
-
-    [Tooltip("사용 가능한 스킬 포인트")]
-    public int skillPoints = 0;
 
     [Header("장비 시스템")]
     [Tooltip("오른손 장비 (한손 무기 또는 양손 무기)")]

@@ -96,8 +96,8 @@ public class PlayModeRestoreSkills
             backupEquippedPassives.AddRange(playerStatData.equippedPassives);
         }
 
-        // 스킬 포인트 백업
-        backupSkillPoints = playerStatData.skillPoints;
+        // 스킬 포인트 백업 — PlayerStats(컴포넌트)에서 가져옴 (2026-05-07 분리)
+        backupSkillPoints = GetSkillPointsFromScene();
         hasBackup = true;
 
         Debug.Log($"[PlayModeRestoreSkills] 💾 백업 완료 - 배운 스킬: {backupLearnedSkills.Count}, LP: {backupSkillPoints}");
@@ -128,8 +128,8 @@ public class PlayModeRestoreSkills
         playerStatData.learnedSkills.Clear();
         playerStatData.learnedSkills.AddRange(backupLearnedSkills);
 
-        // 스킬 포인트 복원
-        playerStatData.skillPoints = backupSkillPoints;
+        // 스킬 포인트 복원 — PlayerStats(컴포넌트)에 적용 (2026-05-07 분리)
+        SetSkillPointsInScene(backupSkillPoints);
 
         // 배틀 셋(장착 스킬/패시브) 복원
         if (playerStatData.equippedSkills == null)
@@ -150,10 +150,33 @@ public class PlayModeRestoreSkills
         EditorUtility.SetDirty(playerStatData);
         AssetDatabase.SaveAssets();
 
-        Debug.Log($"[PlayModeRestoreSkills] 🔄 복원 완료 - 배운 스킬: {playerStatData.learnedSkills.Count}, LP: {playerStatData.skillPoints}, " +
+        Debug.Log($"[PlayModeRestoreSkills] 🔄 복원 완료 - 배운 스킬: {playerStatData.learnedSkills.Count}, LP: {GetSkillPointsFromScene()}, " +
                   $"EquippedSkills: {playerStatData.equippedSkills.Count}, EquippedPassives: {playerStatData.equippedPassives.Count}");
 
         hasBackup = false;
+    }
+
+    // ────────────────────────────────────────────────────────
+    // skillPoints 헬퍼 — PlayerStats(컴포넌트) 위임 (2026-05-07 분리 후)
+    // ────────────────────────────────────────────────────────
+
+    private static PlayerStats FindPlayerStatsInScene()
+        => Object.FindFirstObjectByType<PlayerStats>(FindObjectsInactive.Include);
+
+    private static int GetSkillPointsFromScene()
+    {
+        var ps = FindPlayerStatsInScene();
+        return ps != null ? ps.skillPoints : 0;
+    }
+
+    private static void SetSkillPointsInScene(int value)
+    {
+        var ps = FindPlayerStatsInScene();
+        if (ps != null)
+        {
+            ps.skillPoints = value;
+            EditorUtility.SetDirty(ps);
+        }
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
@@ -80,7 +81,9 @@ public class GameManager : MonoBehaviour
     }
 
     // CRITICAL: Using STATIC dictionary to ensure data persists even if component is re-created or missing GUID
-    public static Dictionary<string, PartyMemberData> staticPartyData = new Dictionary<string, PartyMemberData>();
+    // [2026-05-11] OrdinalIgnoreCase — 'hero' / 'Hero' 같은 케이스 차이로 키 분리되는 버그 방지
+    public static Dictionary<string, PartyMemberData> staticPartyData
+        = new Dictionary<string, PartyMemberData>(StringComparer.OrdinalIgnoreCase);
 
     // Backward-compatible alias for older code paths.
     public Dictionary<string, PartyMemberData> partyData => staticPartyData;
@@ -150,18 +153,23 @@ public class GameManager : MonoBehaviour
 
     public void SaveFromPlayer(PlayerStats player)
     {
-        if (player == null) return;
-        if (player.statData != null)
+        Debug.Log($"[GM:DIAG] SaveFromPlayer called | player={(player != null ? player.gameObject.name : "NULL")} | InstanceID={(player != null ? player.GetInstanceID() : 0)} | name='{player?.playerName}'");
+
+        if (player == null)
         {
-            // SO가 단일 소스이므로 GameManager는 더 이상 저장하지 않음
+            Debug.LogWarning("[GM:DIAG] Save ABORT: player null");
             return;
         }
+        // (구) statData 단일 소스 가드 제거 — 런타임은 PlayerStats, 씬 전환 시 staticPartyData로 영속화
 
         if (string.IsNullOrEmpty(player.playerName))
         {
+            Debug.LogWarning($"[GM:DIAG] Save ABORT: playerName empty (GO='{player.gameObject.name}')");
             Debug.LogWarning("[GameManager] Cannot save player with empty name!");
             return;
         }
+
+        bool _diagIsNew = !staticPartyData.ContainsKey(player.playerName);
 
         if (staticPartyData.ContainsKey(player.playerName))
         {
@@ -174,20 +182,26 @@ public class GameManager : MonoBehaviour
             Debug.Log("[SERIALIZATION_FIX] Saved ADDED: " + player.playerName + " HP: " + player.currentHP + "/" + player.maxHP);
         }
 
+        Debug.Log($"[GM:DIAG] {(_diagIsNew ? "ADDED" : "UPDATED")} '{player.playerName}' | HP={player.currentHP}, MP={player.currentMP}, EXP={player.exp}, Lv={player.level} | Dict count={staticPartyData.Count}");
+
         SyncDebugList();
     }
 
     public void ApplyToPlayer(PlayerStats player)
     {
-        if (player == null) return;
-        if (player.statData != null)
+        Debug.Log($"[GM:DIAG] ApplyToPlayer called | name='{player?.playerName}' | InstanceID={(player != null ? player.GetInstanceID() : 0)}");
+
+        if (player == null)
         {
-            // SO가 단일 소스이므로 GameManager는 더 이상 로드하지 않음
+            Debug.LogWarning("[GM:DIAG] Apply ABORT: player null");
             return;
         }
+        // (구) statData 단일 소스 가드 제거 — staticPartyData에서 씬 전환 후 복원
 
         if (staticPartyData.TryGetValue(player.playerName, out PartyMemberData data))
         {
+            Debug.Log($"[GM:DIAG] Loaded from dict | HP={data.currentHP}, MP={data.currentMP}, EXP={data.exp}, Lv={data.level}");
+
             player.level = data.level;
             // jobClass, maxHP, maxMP, attack, defense, magic, agility, luck are now read-only properties
             // They are calculated from CharacterClass SO, so we don't restore them
@@ -203,9 +217,12 @@ public class GameManager : MonoBehaviour
             }
 
             Debug.Log("[SERIALIZATION_FIX] Loaded: " + player.playerName + " HP: " + player.currentHP + "/" + player.maxHP);
+            Debug.Log($"[GM:DIAG] Applied to player | name='{player.playerName}' | final HP={player.currentHP}/{player.maxHP}, MP={player.currentMP}/{player.maxMP}, EXP={player.exp}, Lv={player.level}");
         }
         else
         {
+            string _diagKeysStr = staticPartyData.Count > 0 ? string.Join(",", staticPartyData.Keys) : "(empty)";
+            Debug.LogWarning($"[GM:DIAG] Apply ABORT: key '{player.playerName}' not found. Count={staticPartyData.Count}, Keys=[{_diagKeysStr}]");
             Debug.Log("[SERIALIZATION_FIX] No data for: " + player.playerName + ". Initializing...");
             SaveFromPlayer(player);
         }

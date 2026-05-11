@@ -1858,27 +1858,46 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ReturnToDungeonRoutine(float delay)
     {
         var gm = GameManager.EnsureInstance();
+        Debug.Log($"[BM:DIAG] ReturnToDungeonRoutine START | activePartyMembers.Count={activePartyMembers.Count} | GM={(gm != null ? "exists" : "NULL")}");
         foreach (var member in activePartyMembers)
         {
-            if (member != null) 
+            if (member != null)
             {
+                Debug.Log($"[BM:DIAG] SaveFromPlayer ABOUT TO CALL (initial) | location=ReturnToDungeonRoutine, line=1866 | member='{member.playerName}', InstanceID={member.GetInstanceID()}, EXP={member.exp}, HP={member.currentHP}, Lv={member.level}");
                 Debug.Log("[PERSISTENCE_DEBUG] ReturnToDungeonRoutine: Saving " + member.playerName + " - HP: " + member.currentHP + "/" + member.maxHP);
                 gm.SaveFromPlayer(member);
+            }
+            else
+            {
+                Debug.LogWarning("[BM:DIAG] ReturnToDungeonRoutine: skipped NULL member");
             }
         }
 
         yield return new WaitForSeconds(delay);
-        
+
+        // [SAFETY NET 2026-05-11] 씬 전환 직전 강제 저장 — delay 사이 EXP/HP가 외부 코드로 변경됐을 가능성 보완
+        Debug.Log($"[BM:DIAG] FORCE SAVE before scene transition (after delay={delay}s)");
+        foreach (var member in activePartyMembers)
+        {
+            if (member != null)
+            {
+                Debug.Log($"[BM:DIAG] FORCE SAVE | member='{member.playerName}', InstanceID={member.GetInstanceID()}, EXP={member.exp}, HP={member.currentHP}, Lv={member.level}");
+                gm.SaveFromPlayer(member);
+            }
+        }
+
         string sceneToLoad = DungeonEncounter.lastDungeonScene;
         DungeonEncounter.justReturnedFromBattle = true;
         if (string.IsNullOrEmpty(sceneToLoad))
         {
             Debug.LogWarning("[BattleManager] No last dungeon scene saved. Returning to 0.");
+            Debug.Log("[BM:DIAG] LoadScene(0) — sceneToLoad empty");
             SceneManager.LoadScene(0);
         }
         else
         {
             Debug.Log("[BattleManager] Returning to dungeon: " + sceneToLoad);
+            Debug.Log($"[BM:DIAG] LoadScene('{sceneToLoad}') — dict count BEFORE LoadScene={GameManager.staticPartyData.Count}");
             SceneManager.LoadScene(sceneToLoad);
         }
     }
@@ -2086,10 +2105,11 @@ public class BattleManager : MonoBehaviour
         PlayerStats allyStats = allyObj.AddComponent<PlayerStats>();
         allyStats.playerName = preset.name;
 
-        // Create a runtime PlayerStatData SO for this ally
+        // Create a runtime PlayerStatData SO for this ally (정적 스탯만 보관)
         allyStats.statData = ScriptableObject.CreateInstance<PlayerStatData>();
-        allyStats.statData.level = 1;
-        allyStats.statData.exp = 0;
+        // [2026-05-07] level/exp는 PlayerStats 컴포넌트가 직접 보유 (PlayerStatData에서 분리됨)
+        allyStats.level = 1;
+        allyStats.exp = 0;
 
         // Set base stats (instead of final calculated stats, which are now read-only)
         allyStats.baseHP = preset.maxHP;
@@ -6968,13 +6988,24 @@ private void CacheHeroSkills()
             if (totalExp > 0)
             {
                 AddMessage($"Victory! Party gained {totalExp} EXP!");
+                Debug.Log($"[BM:DIAG] Victory EXP distribution | totalExp={totalExp} | activePartyMembers.Count={activePartyMembers.Count}");
                 foreach (var member in activePartyMembers)
                 {
                     if (member != null && member.currentHP > 0)
                     {
+                        Debug.Log($"[BM:DIAG] AddExp ABOUT TO CALL | member='{member.playerName}', InstanceID={member.GetInstanceID()}, Before EXP={member.exp}");
                         member.AddExp(totalExp);
+                        Debug.Log($"[BM:DIAG] AddExp returned | member='{member.playerName}', After EXP={member.exp}, Lv={member.level}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[BM:DIAG] AddExp SKIPPED | member={(member == null ? "NULL" : member.playerName)}, currentHP={(member != null ? member.currentHP.ToString() : "?")} (dead or null)");
                     }
                 }
+            }
+            else
+            {
+                Debug.LogWarning($"[BM:DIAG] Victory but totalExp=0 — AddExp not called");
             }
 
             if (actionPanel != null) actionPanel.SetActive(false);

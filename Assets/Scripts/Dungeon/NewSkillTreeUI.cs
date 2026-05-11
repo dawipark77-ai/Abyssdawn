@@ -488,7 +488,7 @@ public class NewSkillTreeUI : MonoBehaviour
     {
         if (IsLearned(skill)) return false;
         if (!PrerequisitesMet(skill)) return false;
-        int lp = playerStatData != null ? playerStatData.skillPoints : 0;
+        int lp = GetSkillPoints();
         return lp >= skill.requiredLorePoints;
     }
 
@@ -509,8 +509,8 @@ public class NewSkillTreeUI : MonoBehaviour
     {
         if (playerStatData == null) return;
 
-        // Deduct LP
-        playerStatData.skillPoints -= skill.requiredLorePoints;
+        // Deduct LP — skillPoints는 PlayerStats(컴포넌트)에 보유
+        SetSkillPoints(GetSkillPoints() - skill.requiredLorePoints);
 
         // Add to learned list
         if (playerStatData.learnedSkills == null)
@@ -526,7 +526,7 @@ public class NewSkillTreeUI : MonoBehaviour
         RefreshNodeStates();
         UpdateLPText();
 
-        Debug.Log($"[NewSkillTreeUI] ✅ {skill.skillName} 습득! 잔여 LP: {playerStatData.skillPoints}");
+        Debug.Log($"[NewSkillTreeUI] ✅ {skill.skillName} 습득! 잔여 LP: {GetSkillPoints()}");
     }
 
     private void RefreshNodeStates()
@@ -539,8 +539,33 @@ public class NewSkillTreeUI : MonoBehaviour
     private void UpdateLPText()
     {
         if (lpText == null) return;
-        int lp = playerStatData != null ? playerStatData.skillPoints : 0;
+        int lp = GetSkillPoints();
         lpText.text = $"LP  {lp}";
+    }
+
+    // ────────────────────────────────────────────────────────
+    // skillPoints 헬퍼 — PlayerStats(컴포넌트) 우선, 없으면 0
+    // [2026-05-07] PlayerStatData(SO)에서 분리됨
+    // ────────────────────────────────────────────────────────
+
+    private PlayerStats _cachedPlayerStats;
+    private PlayerStats GetPlayerStats()
+    {
+        if (_cachedPlayerStats == null)
+            _cachedPlayerStats = FindFirstObjectByType<PlayerStats>();
+        return _cachedPlayerStats;
+    }
+
+    private int GetSkillPoints()
+    {
+        var ps = GetPlayerStats();
+        return ps != null ? ps.skillPoints : 0;
+    }
+
+    private void SetSkillPoints(int value)
+    {
+        var ps = GetPlayerStats();
+        if (ps != null) ps.skillPoints = value;
     }
 
     // ─────────────────────────────────────────────────────────────────

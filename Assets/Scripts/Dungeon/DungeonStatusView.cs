@@ -41,12 +41,14 @@ public class DungeonStatusView : MonoBehaviour
         // [NEW] 이벤트 구독
         PlayerStats.OnStatusChanged += UpdateUI;
 
-        // [FIX] 맵 씬 활성화 시 SO 에셋 값을 가장 먼저 확인
+        // [FIX] 맵 씬 활성화 시 컴포넌트 상태 확인
+        // [2026-05-07] currentHP/MP는 PlayerStatData에서 분리되어 PlayerStats가 직접 보유
         Debug.Log("[DungeonStatusView] 강제 데이터 갱신 시작...");
         PlayerStats playerInScene = FindFirstObjectByType<PlayerStats>();
-        if (playerInScene != null && playerInScene.statData != null)
+        if (playerInScene != null)
         {
-            Debug.Log($"[DungeonStatusView] OnEnable statData 확인: {playerInScene.statData.name} (HP={playerInScene.statData.currentHP}, MP={playerInScene.statData.currentMP})");
+            string assetName = playerInScene.statData != null ? playerInScene.statData.name : "(no statData)";
+            Debug.Log($"[DungeonStatusView] OnEnable 확인: statAsset={assetName}, HP={playerInScene.currentHP}, MP={playerInScene.currentMP}");
         }
         UpdateUI();
         Invoke(nameof(UpdateUI), 0.1f);  // 0.1초 후 다시 갱신 (초기화 완료 대기)

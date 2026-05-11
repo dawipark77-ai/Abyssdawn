@@ -58,7 +58,7 @@ public class SwordSkillTreeManager : MonoBehaviour
             }
             else
             {
-                Debug.Log($"[SwordSkillTreeManager] ✅ PlayerStatData 발견! 현재 LP: {playerStatData.skillPoints}");
+                Debug.Log($"[SwordSkillTreeManager] ✅ PlayerStatData 발견! 현재 LP: {GetSkillPoints()}");
             }
         }
         
@@ -104,7 +104,7 @@ public class SwordSkillTreeManager : MonoBehaviour
         }
         
         // 스킬 포인트 백업
-        backupSkillPoints = playerStatData.skillPoints;
+        backupSkillPoints = GetSkillPoints();
         
         Debug.Log($"[SwordSkillTreeManager] 💾 Play 모드 시작 - 백업 완료 (배운 스킬: {backupLearnedSkills.Count}, LP: {backupSkillPoints})");
     }
@@ -125,13 +125,13 @@ public class SwordSkillTreeManager : MonoBehaviour
         playerStatData.learnedSkills.AddRange(backupLearnedSkills);
         
         // 스킬 포인트 복원
-        playerStatData.skillPoints = backupSkillPoints;
+        SetSkillPoints(backupSkillPoints);
         
         // 변경사항 저장
         UnityEditor.EditorUtility.SetDirty(playerStatData);
         UnityEditor.AssetDatabase.SaveAssets();
         
-        Debug.Log($"[SwordSkillTreeManager] 🔄 Play 모드 종료 - 복원 완료 (배운 스킬: {playerStatData.learnedSkills.Count}, LP: {playerStatData.skillPoints})");
+        Debug.Log($"[SwordSkillTreeManager] 🔄 Play 모드 종료 - 복원 완료 (배운 스킬: {playerStatData.learnedSkills.Count}, LP: {GetSkillPoints()})");
     }
     #endif
     
@@ -288,7 +288,7 @@ public class SwordSkillTreeManager : MonoBehaviour
             }
             
             // 스킬 포인트 차감
-            playerStatData.skillPoints -= requiredPoints;
+            SetSkillPoints(GetSkillPoints() - requiredPoints);
             
             // 변경사항 저장 (에디터에서만)
             #if UNITY_EDITOR
@@ -380,16 +380,33 @@ public class SwordSkillTreeManager : MonoBehaviour
     /// </summary>
     public int GetAvailableSkillPoints()
     {
-        if (playerStatData != null)
-        {
-            // PlayerStatData의 skillPoints 필드 사용
-            return playerStatData.skillPoints;
-        }
-        else
-        {
-            // 테스트 모드
-            return testSkillPoints;
-        }
+        // [2026-05-07] skillPoints는 PlayerStats(컴포넌트)가 보유 — PlayerStatData(SO)에서 분리됨
+        return GetSkillPoints();
+    }
+
+    // ────────────────────────────────────────────────────────
+    // skillPoints 헬퍼 — PlayerStats(컴포넌트) 우선, 없으면 testSkillPoints 폴백
+    // ────────────────────────────────────────────────────────
+
+    private PlayerStats _cachedPlayerStats;
+    private PlayerStats GetPlayerStats()
+    {
+        if (_cachedPlayerStats == null)
+            _cachedPlayerStats = FindFirstObjectByType<PlayerStats>();
+        return _cachedPlayerStats;
+    }
+
+    private int GetSkillPoints()
+    {
+        var ps = GetPlayerStats();
+        return ps != null ? ps.skillPoints : testSkillPoints;
+    }
+
+    private void SetSkillPoints(int value)
+    {
+        var ps = GetPlayerStats();
+        if (ps != null) ps.skillPoints = value;
+        else testSkillPoints = Mathf.Max(0, value);
     }
     
     /// <summary>
