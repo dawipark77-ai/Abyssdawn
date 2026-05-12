@@ -1858,46 +1858,27 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ReturnToDungeonRoutine(float delay)
     {
         var gm = GameManager.EnsureInstance();
-        Debug.Log($"[BM:DIAG] ReturnToDungeonRoutine START | activePartyMembers.Count={activePartyMembers.Count} | GM={(gm != null ? "exists" : "NULL")}");
         foreach (var member in activePartyMembers)
         {
-            if (member != null)
+            if (member != null) 
             {
-                Debug.Log($"[BM:DIAG] SaveFromPlayer ABOUT TO CALL (initial) | location=ReturnToDungeonRoutine, line=1866 | member='{member.playerName}', InstanceID={member.GetInstanceID()}, EXP={member.exp}, HP={member.currentHP}, Lv={member.level}");
                 Debug.Log("[PERSISTENCE_DEBUG] ReturnToDungeonRoutine: Saving " + member.playerName + " - HP: " + member.currentHP + "/" + member.maxHP);
                 gm.SaveFromPlayer(member);
-            }
-            else
-            {
-                Debug.LogWarning("[BM:DIAG] ReturnToDungeonRoutine: skipped NULL member");
             }
         }
 
         yield return new WaitForSeconds(delay);
-
-        // [SAFETY NET 2026-05-11] 씬 전환 직전 강제 저장 — delay 사이 EXP/HP가 외부 코드로 변경됐을 가능성 보완
-        Debug.Log($"[BM:DIAG] FORCE SAVE before scene transition (after delay={delay}s)");
-        foreach (var member in activePartyMembers)
-        {
-            if (member != null)
-            {
-                Debug.Log($"[BM:DIAG] FORCE SAVE | member='{member.playerName}', InstanceID={member.GetInstanceID()}, EXP={member.exp}, HP={member.currentHP}, Lv={member.level}");
-                gm.SaveFromPlayer(member);
-            }
-        }
-
+        
         string sceneToLoad = DungeonEncounter.lastDungeonScene;
         DungeonEncounter.justReturnedFromBattle = true;
         if (string.IsNullOrEmpty(sceneToLoad))
         {
             Debug.LogWarning("[BattleManager] No last dungeon scene saved. Returning to 0.");
-            Debug.Log("[BM:DIAG] LoadScene(0) — sceneToLoad empty");
             SceneManager.LoadScene(0);
         }
         else
         {
             Debug.Log("[BattleManager] Returning to dungeon: " + sceneToLoad);
-            Debug.Log($"[BM:DIAG] LoadScene('{sceneToLoad}') — dict count BEFORE LoadScene={GameManager.staticPartyData.Count}");
             SceneManager.LoadScene(sceneToLoad);
         }
     }
@@ -2105,11 +2086,10 @@ public class BattleManager : MonoBehaviour
         PlayerStats allyStats = allyObj.AddComponent<PlayerStats>();
         allyStats.playerName = preset.name;
 
-        // Create a runtime PlayerStatData SO for this ally (정적 스탯만 보관)
+        // Create a runtime PlayerStatData SO for this ally
         allyStats.statData = ScriptableObject.CreateInstance<PlayerStatData>();
-        // [2026-05-07] level/exp는 PlayerStats 컴포넌트가 직접 보유 (PlayerStatData에서 분리됨)
-        allyStats.level = 1;
-        allyStats.exp = 0;
+        allyStats.statData.level = 1;
+        allyStats.statData.exp = 0;
 
         // Set base stats (instead of final calculated stats, which are now read-only)
         allyStats.baseHP = preset.maxHP;
@@ -5697,16 +5677,14 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- 메시지 --------------------
-    // [PUBLIC 2026-05-13] PlayerStats.LevelUp 등 외부에서 호출 가능하도록 public 승격.
-    public void AddMessage(string newMessage)
+    private void AddMessage(string newMessage)
     {
-        if (messageText == null) return; // 전투씬 외 호출 안전 가드
         messageQueue.Enqueue(newMessage);
         if (messageQueue.Count > maxMessages) messageQueue.Dequeue();
 
         messageText.text = string.Join("\n", messageQueue.ToArray());
         Canvas.ForceUpdateCanvases();
-        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+        scrollRect.verticalNormalizedPosition = 0f;
     }
 
     /// <summary>
@@ -6964,39 +6942,19 @@ private void CacheHeroSkills()
     // -------------------- 전투 종료 체크 --------------------
     private void CheckBattleEnd()
     {
-        // [DUPLICATE GUARD 2026-05-11] 이미 종료된 전투는 다시 처리하지 않음
-        // CheckBattleEnd가 같은 프레임/턴에 여러 곳에서 호출되어 Victory 보상 중복 지급 방지
-        string _diagCaller = "?";
-#if UNITY_EDITOR
-        try { _diagCaller = new System.Diagnostics.StackTrace(1).GetFrame(0)?.GetMethod()?.Name ?? "?"; }
-        catch { _diagCaller = "?"; }
-#endif
-        Debug.Log($"[BM:DIAG] CheckBattleEnd ENTRY | battleEnded={battleEnded} | caller={_diagCaller}");
-
-        if (battleEnded)
-        {
-            Debug.Log($"[BM:DIAG] CheckBattleEnd SKIPPED (already ended) | caller={_diagCaller}");
-            return;
-        }
-
         if (!AnyPartyAlive())
         {
-            // ★ battleEnded를 분기 시작 즉시 설정 — 분기 끝에서 설정하면 그 사이 재진입 가능
-            battleEnded = true;
-
             if (player != null && player.currentHP < 0) player.currentHP = 0;
             UpdateStatusUI();
             AddMessage("Party was defeated...");
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
+            battleEnded = true;
             StartCoroutine(GameOverRoutine(3.0f));
             return;
         }
         else if (AllEnemiesDefeated())
         {
-            // ★ battleEnded를 분기 시작 즉시 설정 — AddExp/Save 전에 가드 활성화
-            battleEnded = true;
-
             UpdateStatusUI();
             AddMessage("All enemies defeated!");
 
@@ -7006,32 +6964,22 @@ private void CacheHeroSkills()
             {
                 if (e != null) totalExp += e.expReward;
             }
-
+            
             if (totalExp > 0)
             {
                 AddMessage($"Victory! Party gained {totalExp} EXP!");
-                Debug.Log($"[BM:DIAG] Victory EXP distribution | totalExp={totalExp} | activePartyMembers.Count={activePartyMembers.Count}");
                 foreach (var member in activePartyMembers)
                 {
                     if (member != null && member.currentHP > 0)
                     {
-                        Debug.Log($"[BM:DIAG] AddExp ABOUT TO CALL | member='{member.playerName}', InstanceID={member.GetInstanceID()}, Before EXP={member.exp}");
                         member.AddExp(totalExp);
-                        Debug.Log($"[BM:DIAG] AddExp returned | member='{member.playerName}', After EXP={member.exp}, Lv={member.level}");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[BM:DIAG] AddExp SKIPPED | member={(member == null ? "NULL" : member.playerName)}, currentHP={(member != null ? member.currentHP.ToString() : "?")} (dead or null)");
                     }
                 }
-            }
-            else
-            {
-                Debug.LogWarning($"[BM:DIAG] Victory but totalExp=0 — AddExp not called");
             }
 
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
+            battleEnded = true;
             ReturnToDungeon(3.0f);
         }
     }

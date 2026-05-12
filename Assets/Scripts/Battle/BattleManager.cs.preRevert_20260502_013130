@@ -39,8 +39,7 @@ public class BattleManager : MonoBehaviour
     public Button attackButton;
     public Button skillButton;
     public Button itemButton;
-    [FormerlySerializedAs("runButton")]
-    public Button fleeButton;
+    public Button runButton;
     public Button defendButton;
     public Button skillBackButton;
 
@@ -185,8 +184,6 @@ public class BattleManager : MonoBehaviour
 
     private List<BattleActor> turnOrder = new List<BattleActor>();
     private bool turnInProgress = false;
-    /// <summary>외부 UI(BattleItemSlot 등)가 행동 중복 방지용으로 읽는 read-only 프로퍼티.</summary>
-    public bool IsTurnInProgress => turnInProgress;
 
     [System.Serializable]
     public class AllyCommand
@@ -1605,15 +1602,12 @@ public class BattleManager : MonoBehaviour
         ForceDisableUIPanels();
         StartCoroutine(EnsureUIPanelsClosedAfterFrames(3));
 
-        // 버튼 리스너 초기화 — BattleUIManager가 있으면 Item·Skill 메인 버튼은 UI 매니저가 전담 (토글·패널 연동)
-        BattleUIManager battleUIMgr =
-            battleUIManager != null ? battleUIManager : FindFirstObjectByType<BattleUIManager>();
-
+        // 버튼 리스너 초기화
         if (attackButton != null) attackButton.onClick.RemoveAllListeners();
-        if (skillButton != null && battleUIMgr == null) skillButton.onClick.RemoveAllListeners();
+        if (skillButton != null) skillButton.onClick.RemoveAllListeners();
         if (skillBackButton != null) skillBackButton.onClick.RemoveAllListeners();
-        if (itemButton != null && battleUIMgr == null) itemButton.onClick.RemoveAllListeners();
-        if (fleeButton != null) fleeButton.onClick.RemoveAllListeners();
+        if (itemButton != null) itemButton.onClick.RemoveAllListeners();
+        if (runButton != null) runButton.onClick.RemoveAllListeners();
         if (defendButton != null) defendButton.onClick.RemoveAllListeners();
 
         // Back 버튼 찾기 (Start에서도 찾기)
@@ -1624,10 +1618,10 @@ public class BattleManager : MonoBehaviour
 
         // 버튼 연결
         if (attackButton != null) attackButton.onClick.AddListener(OnAttackButton);
-        if (skillButton != null && battleUIMgr == null) skillButton.onClick.AddListener(OnSkillButton);
+        if (skillButton != null) skillButton.onClick.AddListener(OnSkillButton);
         if (skillBackButton != null) skillBackButton.onClick.AddListener(OnSkillBack);
-        if (itemButton != null && battleUIMgr == null) itemButton.onClick.AddListener(OnItemButton);
-        if (fleeButton != null) fleeButton.onClick.AddListener(OnRunButton);
+        if (itemButton != null) itemButton.onClick.AddListener(OnItemButton);
+        if (runButton != null) runButton.onClick.AddListener(OnRunButton);
         if (defendButton != null) defendButton.onClick.AddListener(OnDefendButton);
 
         // 파티 초기화
@@ -1858,46 +1852,27 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ReturnToDungeonRoutine(float delay)
     {
         var gm = GameManager.EnsureInstance();
-        Debug.Log($"[BM:DIAG] ReturnToDungeonRoutine START | activePartyMembers.Count={activePartyMembers.Count} | GM={(gm != null ? "exists" : "NULL")}");
         foreach (var member in activePartyMembers)
         {
-            if (member != null)
+            if (member != null) 
             {
-                Debug.Log($"[BM:DIAG] SaveFromPlayer ABOUT TO CALL (initial) | location=ReturnToDungeonRoutine, line=1866 | member='{member.playerName}', InstanceID={member.GetInstanceID()}, EXP={member.exp}, HP={member.currentHP}, Lv={member.level}");
                 Debug.Log("[PERSISTENCE_DEBUG] ReturnToDungeonRoutine: Saving " + member.playerName + " - HP: " + member.currentHP + "/" + member.maxHP);
                 gm.SaveFromPlayer(member);
-            }
-            else
-            {
-                Debug.LogWarning("[BM:DIAG] ReturnToDungeonRoutine: skipped NULL member");
             }
         }
 
         yield return new WaitForSeconds(delay);
-
-        // [SAFETY NET 2026-05-11] 씬 전환 직전 강제 저장 — delay 사이 EXP/HP가 외부 코드로 변경됐을 가능성 보완
-        Debug.Log($"[BM:DIAG] FORCE SAVE before scene transition (after delay={delay}s)");
-        foreach (var member in activePartyMembers)
-        {
-            if (member != null)
-            {
-                Debug.Log($"[BM:DIAG] FORCE SAVE | member='{member.playerName}', InstanceID={member.GetInstanceID()}, EXP={member.exp}, HP={member.currentHP}, Lv={member.level}");
-                gm.SaveFromPlayer(member);
-            }
-        }
-
+        
         string sceneToLoad = DungeonEncounter.lastDungeonScene;
         DungeonEncounter.justReturnedFromBattle = true;
         if (string.IsNullOrEmpty(sceneToLoad))
         {
             Debug.LogWarning("[BattleManager] No last dungeon scene saved. Returning to 0.");
-            Debug.Log("[BM:DIAG] LoadScene(0) — sceneToLoad empty");
             SceneManager.LoadScene(0);
         }
         else
         {
             Debug.Log("[BattleManager] Returning to dungeon: " + sceneToLoad);
-            Debug.Log($"[BM:DIAG] LoadScene('{sceneToLoad}') — dict count BEFORE LoadScene={GameManager.staticPartyData.Count}");
             SceneManager.LoadScene(sceneToLoad);
         }
     }
@@ -2105,11 +2080,10 @@ public class BattleManager : MonoBehaviour
         PlayerStats allyStats = allyObj.AddComponent<PlayerStats>();
         allyStats.playerName = preset.name;
 
-        // Create a runtime PlayerStatData SO for this ally (정적 스탯만 보관)
+        // Create a runtime PlayerStatData SO for this ally
         allyStats.statData = ScriptableObject.CreateInstance<PlayerStatData>();
-        // [2026-05-07] level/exp는 PlayerStats 컴포넌트가 직접 보유 (PlayerStatData에서 분리됨)
-        allyStats.level = 1;
-        allyStats.exp = 0;
+        allyStats.statData.level = 1;
+        allyStats.statData.exp = 0;
 
         // Set base stats (instead of final calculated stats, which are now read-only)
         allyStats.baseHP = preset.maxHP;
@@ -3032,15 +3006,15 @@ public class BattleManager : MonoBehaviour
             Debug.LogWarning("[BattleManager] defendButton is null!");
         }
         
-        if (fleeButton != null)
+        if (runButton != null)
         {
-            fleeButton.gameObject.SetActive(true);
-            fleeButton.interactable = isHero;
+            runButton.gameObject.SetActive(true);
+            runButton.interactable = isHero;
             Debug.Log($"[BattleManager] Run button activated (interactable: {isHero})");
         }
         else
         {
-            Debug.LogWarning("[BattleManager] fleeButton is null!");
+            Debug.LogWarning("[BattleManager] runButton is null!");
         }
     }
 
@@ -3289,7 +3263,7 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[BattleManager] SkillButton: {(skillButton != null ? $"Active={skillButton.gameObject.activeSelf}, Interactable={skillButton.interactable}, Visible={skillButton.gameObject.activeInHierarchy}" : "NULL")}");
         Debug.Log($"[BattleManager] ItemButton: {(itemButton != null ? $"Active={itemButton.gameObject.activeSelf}, Interactable={itemButton.interactable}, Visible={itemButton.gameObject.activeInHierarchy}" : "NULL")}");
         Debug.Log($"[BattleManager] DefendButton: {(defendButton != null ? $"Active={defendButton.gameObject.activeSelf}, Interactable={defendButton.interactable}, Visible={defendButton.gameObject.activeInHierarchy}" : "NULL")}");
-        Debug.Log($"[BattleManager] RunButton: {(fleeButton != null ? $"Active={fleeButton.gameObject.activeSelf}, Interactable={fleeButton.interactable}, Visible={fleeButton.gameObject.activeInHierarchy}" : "NULL")}");
+        Debug.Log($"[BattleManager] RunButton: {(runButton != null ? $"Active={runButton.gameObject.activeSelf}, Interactable={runButton.interactable}, Visible={runButton.gameObject.activeInHierarchy}" : "NULL")}");
         
         // Canvas 상태 최종 확인 (이미 선언된 변수 재사용)
         if (canvas != null)
@@ -3406,19 +3380,9 @@ public class BattleManager : MonoBehaviour
                         : potionCount-- > 0;
                     if (used)
                     {
-                        // 통합 헬퍼: HP/MP 회복 + 상태이상 해제 + MP 페널티 일괄 적용
-                        // (cmd.itemHealAmount는 더 이상 사용하지 않음 — SO 필드에서 직접 계산)
-                        var fx = ConsumableEffectApplier.ApplyEffects(cmd.actor, cmd.usedItem);
-
+                        cmd.actor.Heal(cmd.itemHealAmount);
                         SyncPotionCount();
-
-                        string msg = $"{cmd.actor.playerName} used {cmd.usedItem.itemName}";
-                        if (fx.hpHealed > 0) msg += $" — recovered {fx.hpHealed} HP";
-                        if (fx.mpHealed > 0) msg += $" — recovered {fx.mpHealed} MP";
-                        if (fx.mpLost   > 0) msg += $" — lost {fx.mpLost} MP";
-                        if (fx.curesApplied != null && fx.curesApplied.Count > 0)
-                            msg += $" — cured {string.Join(", ", fx.curesApplied)}";
-                        AddMessage(msg + "!");
+                        AddMessage($"{cmd.actor.playerName} used {cmd.usedItem.itemName} and recovered {cmd.itemHealAmount} HP!");
                     }
                 }
                 break;
@@ -3986,26 +3950,25 @@ public class BattleManager : MonoBehaviour
         ShowBackButton();
     }
 
-    /// <summary>
-    /// 외부(BattleItemSlot 등)에서 직접 호출하는 아이템 사용 API.
-    /// turnInProgress 락 + QueueAllyCommand("item") + Back 버튼 정리.
-    /// </summary>
-    public void UseItemInBattle(PlayerStats user, ConsumableItemSO item, int healAmount)
-    {
-        turnInProgress = true;
-        QueueAllyCommand(user, "item", null, null, healAmount, true, item);
-        HideBackButton();
-    }
-
     public void OnItemButton()
     {
         if (currentPhase != BattlePhase.Command || !playerTurn || battleEnded || turnInProgress) return;
 
-        // FightSubPanel 강제 종료
-        if (battleUIManager != null && battleUIManager.fightSubPanel != null)
+        if (battleUIManager != null && battleUIManager.battleItemPanel == null)
+            battleUIManager.battleItemPanel = BattleItemPanel.FindItemPanelGameObjectInScene();
+
+        if (battleUIManager != null && battleUIManager.battleItemPanel != null)
         {
-            battleUIManager.fightSubPanel.SetActive(false);
+            BattleItemPanel bip = battleUIManager.battleItemPanel.GetComponent<BattleItemPanel>();
+            if (bip != null)
+                bip.Open();
+            else
+                BattleItemPanel.ActivateWithParents(battleUIManager.battleItemPanel);
+            return;
         }
+
+        if (battleUIManager != null && battleUIManager.fightSubPanel != null)
+            battleUIManager.fightSubPanel.SetActive(false);
 
         if (currentControlledMember == null || currentControlledMember != player)
         {
@@ -4098,13 +4061,9 @@ public class BattleManager : MonoBehaviour
         // 현재 캐릭터의 스킬 목록 가져오기
         List<SkillData> currentSkills = GetCurrentActorSkills();
         Debug.Log($"[BattleManager] Current actor skills count: {currentSkills.Count}");
-        
+
         if (currentSkills.Count == 0)
-        {
             AddMessage("No skills available!");
-            Debug.LogWarning("[BattleManager] No skills available for current actor!");
-            return;
-        }
         
         // fightSubPanel 닫기 (BattleUIManager에서 처리하지만 여기서도 확인)
         if (battleUIManager != null && battleUIManager.fightSubPanel != null)
@@ -5697,16 +5656,14 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- 메시지 --------------------
-    // [PUBLIC 2026-05-13] PlayerStats.LevelUp 등 외부에서 호출 가능하도록 public 승격.
-    public void AddMessage(string newMessage)
+    private void AddMessage(string newMessage)
     {
-        if (messageText == null) return; // 전투씬 외 호출 안전 가드
         messageQueue.Enqueue(newMessage);
         if (messageQueue.Count > maxMessages) messageQueue.Dequeue();
 
         messageText.text = string.Join("\n", messageQueue.ToArray());
         Canvas.ForceUpdateCanvases();
-        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+        scrollRect.verticalNormalizedPosition = 0f;
     }
 
     /// <summary>
@@ -6964,39 +6921,19 @@ private void CacheHeroSkills()
     // -------------------- 전투 종료 체크 --------------------
     private void CheckBattleEnd()
     {
-        // [DUPLICATE GUARD 2026-05-11] 이미 종료된 전투는 다시 처리하지 않음
-        // CheckBattleEnd가 같은 프레임/턴에 여러 곳에서 호출되어 Victory 보상 중복 지급 방지
-        string _diagCaller = "?";
-#if UNITY_EDITOR
-        try { _diagCaller = new System.Diagnostics.StackTrace(1).GetFrame(0)?.GetMethod()?.Name ?? "?"; }
-        catch { _diagCaller = "?"; }
-#endif
-        Debug.Log($"[BM:DIAG] CheckBattleEnd ENTRY | battleEnded={battleEnded} | caller={_diagCaller}");
-
-        if (battleEnded)
-        {
-            Debug.Log($"[BM:DIAG] CheckBattleEnd SKIPPED (already ended) | caller={_diagCaller}");
-            return;
-        }
-
         if (!AnyPartyAlive())
         {
-            // ★ battleEnded를 분기 시작 즉시 설정 — 분기 끝에서 설정하면 그 사이 재진입 가능
-            battleEnded = true;
-
             if (player != null && player.currentHP < 0) player.currentHP = 0;
             UpdateStatusUI();
             AddMessage("Party was defeated...");
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
+            battleEnded = true;
             StartCoroutine(GameOverRoutine(3.0f));
             return;
         }
         else if (AllEnemiesDefeated())
         {
-            // ★ battleEnded를 분기 시작 즉시 설정 — AddExp/Save 전에 가드 활성화
-            battleEnded = true;
-
             UpdateStatusUI();
             AddMessage("All enemies defeated!");
 
@@ -7006,32 +6943,22 @@ private void CacheHeroSkills()
             {
                 if (e != null) totalExp += e.expReward;
             }
-
+            
             if (totalExp > 0)
             {
                 AddMessage($"Victory! Party gained {totalExp} EXP!");
-                Debug.Log($"[BM:DIAG] Victory EXP distribution | totalExp={totalExp} | activePartyMembers.Count={activePartyMembers.Count}");
                 foreach (var member in activePartyMembers)
                 {
                     if (member != null && member.currentHP > 0)
                     {
-                        Debug.Log($"[BM:DIAG] AddExp ABOUT TO CALL | member='{member.playerName}', InstanceID={member.GetInstanceID()}, Before EXP={member.exp}");
                         member.AddExp(totalExp);
-                        Debug.Log($"[BM:DIAG] AddExp returned | member='{member.playerName}', After EXP={member.exp}, Lv={member.level}");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[BM:DIAG] AddExp SKIPPED | member={(member == null ? "NULL" : member.playerName)}, currentHP={(member != null ? member.currentHP.ToString() : "?")} (dead or null)");
                     }
                 }
-            }
-            else
-            {
-                Debug.LogWarning($"[BM:DIAG] Victory but totalExp=0 — AddExp not called");
             }
 
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
+            battleEnded = true;
             ReturnToDungeon(3.0f);
         }
     }

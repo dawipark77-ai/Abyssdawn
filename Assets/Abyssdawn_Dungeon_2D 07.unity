@@ -1102,7 +1102,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &24126016
 RectTransform:
   m_ObjectHideFlags: 0
@@ -21180,7 +21180,7 @@ MonoBehaviour:
   _fallbackCurrentHP: 0
   _fallbackCurrentMP: 0
   _fallbackLevel: 1
-  _fallbackExp: 0
+  _fallbackExp: 95
   _fallbackFreeStatPoints: 0
   _fallbackSkillPoints: 0
   playerName: hero

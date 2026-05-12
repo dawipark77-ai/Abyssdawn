@@ -5697,16 +5697,14 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- 메시지 --------------------
-    // [PUBLIC 2026-05-13] PlayerStats.LevelUp 등 외부에서 호출 가능하도록 public 승격.
-    public void AddMessage(string newMessage)
+    private void AddMessage(string newMessage)
     {
-        if (messageText == null) return; // 전투씬 외 호출 안전 가드
         messageQueue.Enqueue(newMessage);
         if (messageQueue.Count > maxMessages) messageQueue.Dequeue();
 
         messageText.text = string.Join("\n", messageQueue.ToArray());
         Canvas.ForceUpdateCanvases();
-        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+        scrollRect.verticalNormalizedPosition = 0f;
     }
 
     /// <summary>

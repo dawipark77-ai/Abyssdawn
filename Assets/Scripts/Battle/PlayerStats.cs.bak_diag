@@ -790,7 +790,6 @@ public class PlayerStats : MonoBehaviour
     {
         // [DEBUG] 인스턴스 ID 출력 (어떤 PlayerStats가 초기화되는지 확인)
         Debug.Log($"[PlayerStats] Awake() 호출: GameObject={gameObject.name}, InstanceID={GetInstanceID()}, playerName={playerName}");
-        Debug.Log($"[PlayerStats:DIAG] Awake | InstanceID={GetInstanceID()} | Scene='{gameObject.scene.name}' | GO='{gameObject.name}' | playerName='{playerName}' | _isInitialized={_isInitialized}");
 
         // [SAFETY] statData 즉시 진단 (this 컨텍스트로 Unity Console에서 GameObject 강조)
         if (statData == null)
@@ -860,23 +859,10 @@ public class PlayerStats : MonoBehaviour
 
         bool restoredFromGameManager = false;
         var gmInst = GameManager.Instance;
-        Debug.Log($"[PlayerStats:DIAG] Awake GM check | GM={(gmInst != null ? "exists" : "NULL")} | playerName='{playerName}'");
-
-        if (gmInst != null && !string.IsNullOrEmpty(playerName))
-        {
-            bool _diagHasKey = gmInst.partyData.ContainsKey(playerName);
-            string _diagKeysStr = gmInst.partyData.Count > 0
-                ? string.Join(",", gmInst.partyData.Keys)
-                : "(empty)";
-            Debug.Log($"[PlayerStats:DIAG] Awake GM dict | HasKey('{playerName}')={_diagHasKey} | Dict count={gmInst.partyData.Count} | Keys=[{_diagKeysStr}]");
-        }
-
         if (gmInst != null && !string.IsNullOrEmpty(playerName) && gmInst.partyData.ContainsKey(playerName))
         {
-            Debug.Log($"[PlayerStats:DIAG] Awake Before restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
             gmInst.ApplyToPlayer(this);
             restoredFromGameManager = true;
-            Debug.Log($"[PlayerStats:DIAG] Awake After restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
             Debug.Log($"[PlayerStats] GameManager에서 상태 복원: HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}, EXP {exp}, Lv {level}");
         }
 
@@ -963,29 +949,12 @@ public class PlayerStats : MonoBehaviour
 
     private void TryRestoreFromGameManager(string context)
     {
-        Debug.Log($"[PlayerStats:DIAG] TryRestore({context}) | playerName='{playerName}' | InstanceID={GetInstanceID()}");
-
-        if (string.IsNullOrEmpty(playerName))
-        {
-            Debug.LogWarning($"[PlayerStats:DIAG] {context} ABORT: playerName empty");
-            return;
-        }
+        if (string.IsNullOrEmpty(playerName)) return;
         var gm = GameManager.Instance;
-        if (gm == null)
-        {
-            Debug.LogWarning($"[PlayerStats:DIAG] {context} ABORT: GameManager null");
-            return;
-        }
-        if (!gm.partyData.ContainsKey(playerName))
-        {
-            string _diagKeysStr = gm.partyData.Count > 0 ? string.Join(",", gm.partyData.Keys) : "(empty)";
-            Debug.LogWarning($"[PlayerStats:DIAG] {context} ABORT: key '{playerName}' not in dict. Count={gm.partyData.Count}, Keys=[{_diagKeysStr}]");
-            return;
-        }
+        if (gm == null) return;
+        if (!gm.partyData.ContainsKey(playerName)) return;
 
-        Debug.Log($"[PlayerStats:DIAG] {context} Before restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
         gm.ApplyToPlayer(this);
-        Debug.Log($"[PlayerStats:DIAG] {context} After restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
         Debug.Log($"[PlayerStats] {context}: GameManager 복원 — {playerName} HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}, EXP {exp}, Lv {level}");
         OnStatusChanged?.Invoke();
     }
@@ -1294,35 +1263,15 @@ public class PlayerStats : MonoBehaviour
 
     public void AddExp(int amount)
     {
-        Debug.Log($"[PlayerStats:DIAG] AddExp called | amount={amount} | Before: EXP={exp}, Lv={level}, maxExp={maxExp} | playerName='{playerName}' | InstanceID={GetInstanceID()}");
         exp += amount;
         while (exp >= maxExp) LevelUp();
-        Debug.Log($"[PlayerStats:DIAG] AddExp result | After: EXP={exp}, Lv={level}, maxExp={maxExp} | playerName='{playerName}' | InstanceID={GetInstanceID()}");
     }
-
-    // [LevelUp 2026-05-13] 변화량 추적 필드 — Apply*() 내부에서 누적, LevelUp 끝에 메시지 생성에 사용.
-    private int _lvUpHpGain;
-    private int _lvUpMpGain;
-    private int _lvUpAtkGain;
-    private int _lvUpDefGain;
-    private int _lvUpMagGain;
-    private int _lvUpAgiGain;
-    private int _lvUpLukGain;
 
     private void LevelUp()
     {
         level++;
         exp -= maxExp;
         maxExp = level * 100;
-
-        _lvUpHpGain = 0;
-        _lvUpMpGain = 0;
-        _lvUpAtkGain = 0;
-        _lvUpDefGain = 0;
-        _lvUpMagGain = 0;
-        _lvUpAgiGain = 0;
-        _lvUpLukGain = 0;
-
         ApplyClassRandomGrowth();
         ApplyMemoryRandomGrowth();
         ApplyHpMpGrowth();
@@ -1330,59 +1279,6 @@ public class PlayerStats : MonoBehaviour
         currentHP = maxHP;
         currentMP = maxMP;
         OnStatusChanged?.Invoke();
-
-        EmitLevelUpBattleLog();
-    }
-
-    /// <summary>
-    /// 레벨업 결과를 드퀘식 컬러 태그 배틀 로그로 BattleManager에 전송.
-    /// BattleManager가 없을 경우(던전 씬 등)에는 Debug.Log로만 출력.
-    /// </summary>
-    private void EmitLevelUpBattleLog()
-    {
-        const string colorName   = "#FFD700";
-        const string colorHp     = "#FF6B6B";
-        const string colorMp     = "#6B9EFF";
-        const string colorAtk    = "#FFA500";
-        const string colorDef    = "#90EE90";
-        const string colorMag    = "#C77DFF";
-        const string colorAgi    = "#00CED1";
-        const string colorLuk    = "#F9F871";
-        const string colorPoint  = "#FFD700";
-
-        var nameStr = string.IsNullOrEmpty(playerName) ? "Hero" : playerName;
-
-        // 1줄: 레벨업 알림
-        string line1 = $"<color={colorName}>{nameStr}</color> leveled up to <b>Lv {level}</b>!";
-
-        // 2줄: 스탯 상승 내역 (오른 것만 표시)
-        var gains = new System.Collections.Generic.List<string>();
-        if (_lvUpHpGain  > 0) gains.Add($"HP <color={colorHp}>+{_lvUpHpGain}</color>");
-        if (_lvUpMpGain  > 0) gains.Add($"MP <color={colorMp}>+{_lvUpMpGain}</color>");
-        if (_lvUpAtkGain > 0) gains.Add($"ATK <color={colorAtk}>+{_lvUpAtkGain}</color>");
-        if (_lvUpDefGain > 0) gains.Add($"DEF <color={colorDef}>+{_lvUpDefGain}</color>");
-        if (_lvUpMagGain > 0) gains.Add($"MAG <color={colorMag}>+{_lvUpMagGain}</color>");
-        if (_lvUpAgiGain > 0) gains.Add($"AGI <color={colorAgi}>+{_lvUpAgiGain}</color>");
-        if (_lvUpLukGain > 0) gains.Add($"LUK <color={colorLuk}>+{_lvUpLukGain}</color>");
-        string line2 = gains.Count > 0 ? string.Join(", ", gains) : "";
-
-        // 3줄: 자유 분배 포인트 알림
-        int totalFreePts = _fallbackFreeStatPoints;
-        string line3 = $"<color={colorPoint}>+1 Free Stat Point!</color> (Total: {totalFreePts})";
-
-        var bm = FindFirstObjectByType<BattleManager>();
-        if (bm != null)
-        {
-            bm.AddMessage(line1);
-            if (!string.IsNullOrEmpty(line2)) bm.AddMessage(line2);
-            bm.AddMessage(line3);
-        }
-        else
-        {
-            Debug.Log($"[LevelUp] {line1}");
-            if (!string.IsNullOrEmpty(line2)) Debug.Log($"[LevelUp] {line2}");
-            Debug.Log($"[LevelUp] {line3}");
-        }
     }
 
     /// <summary>
@@ -1409,15 +1305,26 @@ public class PlayerStats : MonoBehaviour
 
         float pick = UnityEngine.Random.Range(0f, total);
 
-        StatType picked;
-        if (pick < atkW)                              picked = StatType.Attack;
-        else if (pick < atkW + defW)                  picked = StatType.Defense;
-        else if (pick < atkW + defW + magW)           picked = StatType.Magic;
-        else if (pick < atkW + defW + magW + agiW)    picked = StatType.Agility;
-        else                                          picked = StatType.Luck;
-
-        AddAllocatedStat(picked, 1);
-        TrackStatGain(picked, 1);
+        if (pick < atkW)
+        {
+            AddAllocatedStat(StatType.Attack, 1);
+        }
+        else if (pick < atkW + defW)
+        {
+            AddAllocatedStat(StatType.Defense, 1);
+        }
+        else if (pick < atkW + defW + magW)
+        {
+            AddAllocatedStat(StatType.Magic, 1);
+        }
+        else if (pick < atkW + defW + magW + agiW)
+        {
+            AddAllocatedStat(StatType.Agility, 1);
+        }
+        else
+        {
+            AddAllocatedStat(StatType.Luck, 1);
+        }
     }
 
     /// <summary>
@@ -1461,15 +1368,26 @@ public class PlayerStats : MonoBehaviour
 
         float pick = UnityEngine.Random.Range(0f, total);
 
-        StatType picked;
-        if (pick < atkW)                              picked = StatType.Attack;
-        else if (pick < atkW + defW)                  picked = StatType.Defense;
-        else if (pick < atkW + defW + magW)           picked = StatType.Magic;
-        else if (pick < atkW + defW + magW + agiW)    picked = StatType.Agility;
-        else                                          picked = StatType.Luck;
-
-        AddAllocatedStat(picked, 1);
-        TrackStatGain(picked, 1);
+        if (pick < atkW)
+        {
+            AddAllocatedStat(StatType.Attack, 1);
+        }
+        else if (pick < atkW + defW)
+        {
+            AddAllocatedStat(StatType.Defense, 1);
+        }
+        else if (pick < atkW + defW + magW)
+        {
+            AddAllocatedStat(StatType.Magic, 1);
+        }
+        else if (pick < atkW + defW + magW + agiW)
+        {
+            AddAllocatedStat(StatType.Agility, 1);
+        }
+        else
+        {
+            AddAllocatedStat(StatType.Luck, 1);
+        }
     }
 
     /// <summary>
@@ -1516,24 +1434,6 @@ public class PlayerStats : MonoBehaviour
 
         baseHP += finalHpGain;
         baseMP += finalMpGain;
-
-        _lvUpHpGain += finalHpGain;
-        _lvUpMpGain += finalMpGain;
-    }
-
-    /// <summary>
-    /// 레벨업 변화량 누적 — 능력치별로 가산.
-    /// </summary>
-    private void TrackStatGain(StatType statType, int amount)
-    {
-        switch (statType)
-        {
-            case StatType.Attack:  _lvUpAtkGain += amount; break;
-            case StatType.Defense: _lvUpDefGain += amount; break;
-            case StatType.Magic:   _lvUpMagGain += amount; break;
-            case StatType.Agility: _lvUpAgiGain += amount; break;
-            case StatType.Luck:    _lvUpLukGain += amount; break;
-        }
     }
 
     /// <summary>
