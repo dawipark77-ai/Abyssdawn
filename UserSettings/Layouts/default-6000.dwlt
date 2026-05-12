@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.ContainerWindow
   m_PixelRect:
     serializedVersion: 2
-    x: 736
+    x: 734
     y: 51
     width: 1178
     height: 988
@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 48
+  controlID: 78
   draggingID: 0
 --- !u!114 &6
 MonoBehaviour:
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 50
+  controlID: 41
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -303,8 +303,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1027
-    y: 87
+    x: 292
+    y: 24
     width: 597
     height: 856
   m_SerializedDataModeController:
@@ -956,8 +956,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Hierarchy\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 736
-    y: 87
+    x: 0
+    y: 24
     width: 290
     height: 856
   m_SerializedDataModeController:
@@ -1257,7 +1257,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 95}
     m_SelectedIDs: 4adc0000
     m_LastClickedID: 56394
-    m_ExpandedIDs: 000000004adc00004cdc00004edc000050dc000052dc000054dc000056dc000058dc00005adc00005cdc000000ca9a3b
+    m_ExpandedIDs: 000000004adc00004cdc00004edc000050dc000052dc000054dc000056dc000058dc00005adc00005cdc0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1365,8 +1365,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Console\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 736
-    y: 969
+    x: 0
+    y: 906
     width: 889
     height: 24
   m_SerializedDataModeController:
@@ -1438,8 +1438,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1626
-    y: 87
+    x: 891
+    y: 24
     width: 287
     height: 906
   m_SerializedDataModeController:

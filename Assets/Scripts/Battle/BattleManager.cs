@@ -6962,19 +6962,39 @@ private void CacheHeroSkills()
     // -------------------- 전투 종료 체크 --------------------
     private void CheckBattleEnd()
     {
+        // [DUPLICATE GUARD 2026-05-11] 이미 종료된 전투는 다시 처리하지 않음
+        // CheckBattleEnd가 같은 프레임/턴에 여러 곳에서 호출되어 Victory 보상 중복 지급 방지
+        string _diagCaller = "?";
+#if UNITY_EDITOR
+        try { _diagCaller = new System.Diagnostics.StackTrace(1).GetFrame(0)?.GetMethod()?.Name ?? "?"; }
+        catch { _diagCaller = "?"; }
+#endif
+        Debug.Log($"[BM:DIAG] CheckBattleEnd ENTRY | battleEnded={battleEnded} | caller={_diagCaller}");
+
+        if (battleEnded)
+        {
+            Debug.Log($"[BM:DIAG] CheckBattleEnd SKIPPED (already ended) | caller={_diagCaller}");
+            return;
+        }
+
         if (!AnyPartyAlive())
         {
+            // ★ battleEnded를 분기 시작 즉시 설정 — 분기 끝에서 설정하면 그 사이 재진입 가능
+            battleEnded = true;
+
             if (player != null && player.currentHP < 0) player.currentHP = 0;
             UpdateStatusUI();
             AddMessage("Party was defeated...");
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
-            battleEnded = true;
             StartCoroutine(GameOverRoutine(3.0f));
             return;
         }
         else if (AllEnemiesDefeated())
         {
+            // ★ battleEnded를 분기 시작 즉시 설정 — AddExp/Save 전에 가드 활성화
+            battleEnded = true;
+
             UpdateStatusUI();
             AddMessage("All enemies defeated!");
 
@@ -6984,7 +7004,7 @@ private void CacheHeroSkills()
             {
                 if (e != null) totalExp += e.expReward;
             }
-            
+
             if (totalExp > 0)
             {
                 AddMessage($"Victory! Party gained {totalExp} EXP!");
@@ -7010,7 +7030,6 @@ private void CacheHeroSkills()
 
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
-            battleEnded = true;
             ReturnToDungeon(3.0f);
         }
     }
