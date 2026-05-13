@@ -1,0 +1,91 @@
+using System.Text;
+
+namespace Abyssdawn
+{
+    /// <summary>
+    /// CSV 한 행 — 한 회차의 한 층 진행 요약 (첨부 회화 명세 기반, Phase 1 핵심 16지표 + 메타).
+    /// 컬럼 추가 시 <see cref="CsvHeader"/>와 <see cref="ToCsvLine"/>를 동시에 수정하세요.
+    /// </summary>
+    public struct DungeonSimRecord
+    {
+        public int RunId;
+        public int Seed;
+        public int Floor;
+        public string FloorType;     // Normal / Elite / Boss / NoPool
+
+        public int StepsMoved;
+        public int Encounters;
+        public int Battles;
+
+        public int HpBefore;
+        public int HpAfter;
+        public int MpBefore;
+        public int MpAfter;
+
+        public int XpGained;
+        public int GoldGained;
+        public int LevelBefore;
+        public int LevelAfter;
+
+        public int PotionUseCount;
+        public int SkillUseCount;
+        public int RecoverySkillUseCount;
+        public int TotalDamageDealt;
+        public int TotalDamageTaken;
+        public int TotalBattleTurns;
+
+        public bool DeathFlag;
+        public bool ClearFlag;
+        public bool NextFloorFlag;
+
+        public string Notes;
+
+        public static string CsvHeader =>
+            "run_id,seed,floor,floor_type," +
+            "steps_moved,encounters,battles," +
+            "hp_before,hp_after,mp_before,mp_after," +
+            "xp_gained,gold_gained,level_before,level_after," +
+            "potion_use_count,skill_use_count,recovery_skill_use_count," +
+            "total_damage_dealt,total_damage_taken,total_battle_turns," +
+            "death_flag,clear_flag,next_floor_flag,notes";
+
+        public string ToCsvLine()
+        {
+            var sb = new StringBuilder(256);
+            sb.Append(RunId).Append(',');
+            sb.Append(Seed).Append(',');
+            sb.Append(Floor).Append(',');
+            sb.Append(EscapeCsv(FloorType)).Append(',');
+            sb.Append(StepsMoved).Append(',');
+            sb.Append(Encounters).Append(',');
+            sb.Append(Battles).Append(',');
+            sb.Append(HpBefore).Append(',');
+            sb.Append(HpAfter).Append(',');
+            sb.Append(MpBefore).Append(',');
+            sb.Append(MpAfter).Append(',');
+            sb.Append(XpGained).Append(',');
+            sb.Append(GoldGained).Append(',');
+            sb.Append(LevelBefore).Append(',');
+            sb.Append(LevelAfter).Append(',');
+            sb.Append(PotionUseCount).Append(',');
+            sb.Append(SkillUseCount).Append(',');
+            sb.Append(RecoverySkillUseCount).Append(',');
+            sb.Append(TotalDamageDealt).Append(',');
+            sb.Append(TotalDamageTaken).Append(',');
+            sb.Append(TotalBattleTurns).Append(',');
+            sb.Append(DeathFlag ? 1 : 0).Append(',');
+            sb.Append(ClearFlag ? 1 : 0).Append(',');
+            sb.Append(NextFloorFlag ? 1 : 0).Append(',');
+            sb.Append(EscapeCsv(Notes));
+            return sb.ToString();
+        }
+
+        private static string EscapeCsv(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            bool needsQuote = s.IndexOf(',') >= 0 || s.IndexOf('"') >= 0 || s.IndexOf('\n') >= 0;
+            if (!needsQuote) return s;
+            return "\"" + s.Replace("\"", "\"\"") + "\"";
+        }
+    }
+}
