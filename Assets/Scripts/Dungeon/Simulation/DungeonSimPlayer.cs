@@ -18,6 +18,11 @@ namespace Abyssdawn
 
         public int HpPotionCount;
         public int HpPotionsUsedTotal;
+
+        // 새벽의 잔 — HP/MP %회복 + (Phase 2에서 상태이상 회복) 충전식 아이템
+        public int DawnChaliceCharges;
+        public int DawnChaliceUsedTotal;
+
         public int LevelUpsTotal;
 
         /// <summary>BattleSimulator에 그대로 전달되는 전투 유닛(슬롯 1~4).</summary>

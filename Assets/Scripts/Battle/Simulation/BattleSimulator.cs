@@ -39,6 +39,13 @@ namespace Abyssdawn
         [SerializeField] private float simItemPickChance = 0.02f;
         [SerializeField] private float simFleePickChance = 0.03f;
 
+        [Tooltip("살아 있는 유닛 기준 HP 풀(현재HP 합 / MaxHP 합)이 적보다 낮으면, 아군 페이즈 시작 전에 전투를 즉시 종료합니다(도망 성공 100%, 보상 없음).")]
+        [SerializeField] private bool fleeWhenHpDisadvantaged = true;
+
+        [Tooltip("도망 발동 격차 — (적 HP 비율 - 아군 HP 비율)이 이 값 이상이어야 도망. 0.70 = 적이 70%p 이상 더 건강할 때만.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float fleeHpGapThreshold = 0.70f;
+
         [Header("스킬 (시뮬)")]
         [Tooltip("사용 가능한 액티브 스킬이 있을 때, 방어가 아닌 행동에서 스킬을 고를 확률 (0~1). 나머지는 일반 공격.")]
         [Range(0f, 1f)]
@@ -61,6 +68,8 @@ namespace Abyssdawn
         public sealed class DungeonBattleResult
         {
             public bool AllyWin;
+            /// <summary>HP 불리 판정으로 전투를 이탈했을 때 true. 승리도 패배(전멸)도 아님 — 보상 없음, 아군 생존 유지.</summary>
+            public bool AllyEscaped;
             public int Turns;
             public int TotalDamageDealtToEnemies;
             public int TotalDamageTakenByAllies;
@@ -68,6 +77,10 @@ namespace Abyssdawn
             public int RecoverySkillUseCount;
             public int DeadAllies;
             public int DeadEnemies;
+            /// <summary>이번 전투 도중(피해 직후) 소모된 일반 HP 포션 개수.</summary>
+            public int BattleHpPotionUses;
+            /// <summary>이번 전투 도중 소모된 새벽의 잔 충전 횟수(0 또는 1 이상 누적).</summary>
+            public int BattleDawnChaliceUses;
         }
 
         /// <summary>
@@ -78,22 +91,32 @@ namespace Abyssdawn
         public DungeonBattleResult RunOneBattleForDungeon(
             List<BattleSimUnit> allies,
             List<BattleSimUnit> enemies,
-            System.Random rng)
+            System.Random rng,
+            bool allowFleeForThisBattle = true,
+            DungeonSimPlayer dungeonConsumablePlayer = null,
+            DungeonSimSettings dungeonConsumableSettings = null)
         {
             if (allies == null || enemies == null || rng == null)
-                return new DungeonBattleResult { AllyWin = false, Turns = 0 };
+                return new DungeonBattleResult { AllyWin = false, AllyEscaped = false, Turns = 0 };
 
             ClearAllSimGuardFlags(allies, enemies);
 
             var acc = new SlotBattleAccumulator();
             var skillStats = new SimGlobalSkillStats();
             bool alliesVictory;
+            bool allyEscaped;
+
+            DungeonMidBattleConsumableContext dungeonCx = null;
+            if (dungeonConsumablePlayer != null && dungeonConsumableSettings != null)
+                dungeonCx = new DungeonMidBattleConsumableContext(dungeonConsumablePlayer, dungeonConsumableSettings);
 
             int turns = RunSingleBattleWithUnits(
                 allies, enemies, rng, criticalChanceBase, acc, skillStats,
                 allowItemActions, allowFleeActions,
                 simItemPickChance, simFleePickChance,
-                out alliesVictory);
+                allowFleeForThisBattle,
+                dungeonCx,
+                out alliesVictory, out allyEscaped);
 
             int totalDamageEnemies = 0;
             int totalDamageAllies = 0;
@@ -113,14 +136,43 @@ namespace Abyssdawn
             return new DungeonBattleResult
             {
                 AllyWin = alliesVictory,
+                AllyEscaped = allyEscaped,
                 Turns = turns,
                 TotalDamageDealtToEnemies = totalDamageEnemies,
                 TotalDamageTakenByAllies = totalDamageAllies,
                 SkillUseCount = (int)skillStats.TotalSkillActivations,
                 RecoverySkillUseCount = (int)skillStats.RecoveryActivations,
                 DeadAllies = deadAllies,
-                DeadEnemies = deadEnemies
+                DeadEnemies = deadEnemies,
+                BattleHpPotionUses = dungeonCx != null ? dungeonCx.PotionUses : 0,
+                BattleDawnChaliceUses = dungeonCx != null ? dungeonCx.ChaliceUses : 0
             };
+        }
+
+        /// <summary>던전 시뮬 1전투 중 — 아군 HP가 깎인 뒤 포션(50%)·잔(40%) 순으로 시도.</summary>
+        private sealed class DungeonMidBattleConsumableContext
+        {
+            public readonly DungeonSimPlayer Player;
+            public readonly DungeonSimSettings Settings;
+            public int PotionUses;
+            public int ChaliceUses;
+
+            public DungeonMidBattleConsumableContext(DungeonSimPlayer player, DungeonSimSettings settings)
+            {
+                Player = player;
+                Settings = settings;
+            }
+        }
+
+        private static void DungeonSimTryConsumablesAfterAllyHpReduced(
+            BattleSimUnit damagedAlly,
+            DungeonMidBattleConsumableContext cx)
+        {
+            if (cx == null || damagedAlly == null) return;
+            if (damagedAlly.Team != BattleSimTeam.Ally) return;
+            // HP 50% 미만 → 포션, 그다음 40% 미만 → 새벽의 잔 (DungeonSimulator 공용 규칙)
+            cx.PotionUses += DungeonSimulator.TryConsumeHpPotionForDungeonSim(cx.Player, cx.Settings);
+            cx.ChaliceUses += DungeonSimulator.TryConsumeDawnChaliceForDungeonSim(cx.Player, cx.Settings);
         }
 
         /// <summary>외부에서 빌드된 유닛 리스트로 1라운드 루프를 돌리는 내부 헬퍼.</summary>
@@ -135,8 +187,12 @@ namespace Abyssdawn
             bool allowFlee,
             float itemChance,
             float fleeChance,
-            out bool alliesVictory)
+            bool allowHpGapFlee,
+            DungeonMidBattleConsumableContext dungeonCx,
+            out bool alliesVictory,
+            out bool allyEscaped)
         {
+            allyEscaped = false;
             var run = new SingleRunSlotTracker();
 
             for (int round = 0; round < maxTurnsPerBattle; round++)
@@ -144,7 +200,16 @@ namespace Abyssdawn
                 if (!HasAlive(allies)) { alliesVictory = false; ClearAllSimGuardFlags(allies, enemies); run.CommitTo(acc, allies, enemies); return round; }
                 if (!HasAlive(enemies)) { alliesVictory = true; ClearAllSimGuardFlags(allies, enemies); run.CommitTo(acc, allies, enemies); return round; }
 
-                ExecuteSideTurn(allies, enemies, rng, critChanceBase, acc, skillStats, targetIsAlly: false, allowItem, allowFlee, itemChance, fleeChance, simSkillPickChance);
+                if (fleeWhenHpDisadvantaged && allowHpGapFlee && IsAllyHpPoolDisadvantagedVsEnemy(allies, enemies, fleeHpGapThreshold))
+                {
+                    alliesVictory = false;
+                    allyEscaped = true;
+                    ClearAllSimGuardFlags(allies, enemies);
+                    run.CommitTo(acc, allies, enemies);
+                    return round;
+                }
+
+                ExecuteSideTurn(allies, enemies, rng, critChanceBase, acc, skillStats, targetIsAlly: false, allowItem, allowFlee, itemChance, fleeChance, simSkillPickChance, dungeonCx);
                 ClearEnemyNextAllyPhaseGuards(enemies);
                 if (!HasAlive(enemies))
                 {
@@ -155,7 +220,7 @@ namespace Abyssdawn
                     return round + 1;
                 }
 
-                ExecuteSideTurn(enemies, allies, rng, critChanceBase, acc, skillStats, targetIsAlly: true, allowItem, allowFlee, itemChance, fleeChance, simSkillPickChance);
+                ExecuteSideTurn(enemies, allies, rng, critChanceBase, acc, skillStats, targetIsAlly: true, allowItem, allowFlee, itemChance, fleeChance, simSkillPickChance, dungeonCx);
                 ClearAllyEnemyPhaseGuards(allies);
                 run.BumpEndOfFullRound(allies, enemies);
             }
@@ -194,7 +259,7 @@ namespace Abyssdawn
             for (int i = 0; i < iterations; i++)
             {
                 var rng = new System.Random(baseSeed + i);
-                int turns = RunSingleBattle(rng, criticalChanceBase, acc, skillStats, allowItemActions, allowFleeActions, simItemPickChance, simFleePickChance, out bool alliesVictory);
+                int turns = RunSingleBattle(rng, criticalChanceBase, acc, skillStats, allowItemActions, allowFleeActions, simItemPickChance, simFleePickChance, out bool alliesVictory, out _);
                 turnSum += turns;
                 skillStats.TotalRoundsSummed += turns;
                 if (alliesVictory) allyWins++;
@@ -221,7 +286,7 @@ namespace Abyssdawn
             sb.AppendLine();
             sb.AppendLine($"규칙: 양측 슬롯 순 행동. 방어=해당 가드 구간 동안 받는 피해×{BattleSimCombatMath.SimGuardIncomingDamageMultiplier:F2}({(1f - BattleSimCombatMath.SimGuardIncomingDamageMultiplier) * 100f:F0}% 경감), 아군가드=같은 라운드 적 페이즈, 적가드=다음 라운드 아군 페이즈, 중첩 없음.");
             sb.AppendLine("타겟: AIPattern별 — Aggressive=전열 가중 랜덤, Defensive=균등 랜덤, Support=후열 우선.");
-            sb.AppendLine($"아이템 행동: {(allowItemActions ? "허용" : "비활성")}, 도망: {(allowFleeActions ? "허용" : "비활성")}.");
+            sb.AppendLine($"아이템 행동: {(allowItemActions ? "허용" : "비활성")}, 도망(행동 랜덤): {(allowFleeActions ? "허용" : "비활성")}, HP불리 시 즉시 도망: {(fleeWhenHpDisadvantaged ? "켜짐(100%)" : "끔")}.");
 
             string report = sb.ToString();
             Debug.Log(report);
@@ -254,51 +319,17 @@ namespace Abyssdawn
             bool allowFlee,
             float itemChance,
             float fleeChance,
-            out bool alliesVictory)
+            out bool alliesVictory,
+            out bool allyEscaped)
         {
             var allies = BuildAlliesFromRoster(allyRoster);
             var enemies = BuildEnemiesFromRoster(enemyRoster);
-            var run = new SingleRunSlotTracker();
-
-            for (int round = 0; round < maxTurnsPerBattle; round++)
-            {
-                if (!HasAlive(allies))
-                {
-                    alliesVictory = false;
-                    ClearAllSimGuardFlags(allies, enemies);
-                    run.CommitTo(acc, allies, enemies);
-                    return round;
-                }
-                if (!HasAlive(enemies))
-                {
-                    alliesVictory = true;
-                    ClearAllSimGuardFlags(allies, enemies);
-                    run.CommitTo(acc, allies, enemies);
-                    return round;
-                }
-
-                ExecuteSideTurn(allies, enemies, rng, critChanceBase, acc, skillStats, targetIsAlly: false, allowItem, allowFlee, itemChance, fleeChance, simSkillPickChance);
-                ClearEnemyNextAllyPhaseGuards(enemies);
-                if (!HasAlive(enemies))
-                {
-                    alliesVictory = true;
-                    run.BumpPartialRoundAllyOnly(allies);
-                    ClearAllSimGuardFlags(allies, enemies);
-                    run.CommitTo(acc, allies, enemies);
-                    return round + 1;
-                }
-
-                ExecuteSideTurn(enemies, allies, rng, critChanceBase, acc, skillStats, targetIsAlly: true, allowItem, allowFlee, itemChance, fleeChance, simSkillPickChance);
-                ClearAllyEnemyPhaseGuards(allies);
-                run.BumpEndOfFullRound(allies, enemies);
-            }
-
-            if (!HasAlive(allies)) alliesVictory = false;
-            else if (!HasAlive(enemies)) alliesVictory = true;
-            else alliesVictory = GetTotalHp(allies) > GetTotalHp(enemies);
-            ClearAllSimGuardFlags(allies, enemies);
-            run.CommitTo(acc, allies, enemies);
-            return maxTurnsPerBattle;
+            return RunSingleBattleWithUnits(
+                allies, enemies, rng, critChanceBase, acc, skillStats,
+                allowItem, allowFlee, itemChance, fleeChance,
+                allowHpGapFlee: true,
+                dungeonCx: null,
+                out alliesVictory, out allyEscaped);
         }
 
         private static void ExecuteSideTurn(
@@ -313,7 +344,8 @@ namespace Abyssdawn
             bool allowFlee,
             float itemChance,
             float fleeChance,
-            float simSkillPickChance)
+            float simSkillPickChance,
+            DungeonMidBattleConsumableContext dungeonCx)
         {
             foreach (var unit in attackers.OrderBy(u => (int)u.Slot))
             {
@@ -334,7 +366,7 @@ namespace Abyssdawn
 
                 bool usedSkill = simSkillPickChance > 0f &&
                                  rng.NextDouble() < simSkillPickChance &&
-                                 TryExecuteSimSkill(unit, attackers, defenders, rng, critChanceBase, acc, skillStats, targetIsAlly);
+                                 TryExecuteSimSkill(unit, attackers, defenders, rng, critChanceBase, acc, skillStats, targetIsAlly, dungeonCx);
                 if (usedSkill)
                     continue;
 
@@ -369,7 +401,7 @@ namespace Abyssdawn
 
                 bool crit = BattleSimCombatMath.RollCritical(unit.Luck, critChanceBase, rng);
                 int dmg = BattleSimCombatMath.CalculateSimMeleeDamage(unit.Attack, target.Defense, crit, target.Slot);
-                int applied = ApplyPhysicalDamageWithSimGuard(target, dmg, targetIsAlly);
+                int applied = ApplyPhysicalDamageWithSimGuard(target, dmg, targetIsAlly, dungeonCx);
                 if (targetIsAlly)
                     acc.AllyDefenderDamageTaken[si] += applied;
                 else
@@ -378,7 +410,11 @@ namespace Abyssdawn
         }
 
         /// <param name="damageIsEnemyVsAlly"><c>ExecuteSideTurn</c>의 targetIsAlly와 동일(적이 아군을 칠 때 true).</param>
-        private static int ApplyPhysicalDamageWithSimGuard(BattleSimUnit target, int damageAfterFormula, bool damageIsEnemyVsAlly)
+        private static int ApplyPhysicalDamageWithSimGuard(
+            BattleSimUnit target,
+            int damageAfterFormula,
+            bool damageIsEnemyVsAlly,
+            DungeonMidBattleConsumableContext dungeonCx = null)
         {
             int dmg = damageAfterFormula;
             if (damageIsEnemyVsAlly && target.SimGuardEnemyPhase)
@@ -387,6 +423,8 @@ namespace Abyssdawn
                 dmg = Mathf.FloorToInt(dmg * BattleSimCombatMath.SimGuardIncomingDamageMultiplier);
             int before = target.CurrentHP;
             target.ApplyDamage(dmg);
+            if (damageIsEnemyVsAlly && dungeonCx != null && before > target.CurrentHP)
+                DungeonSimTryConsumablesAfterAllyHpReduced(target, dungeonCx);
             return before - target.CurrentHP;
         }
 
@@ -634,6 +672,27 @@ namespace Abyssdawn
 
         private static int GetTotalHp(List<BattleSimUnit> side) => side.Where(u => u.IsAlive).Sum(u => u.CurrentHP);
 
+        /// <summary>살아 있는 유닛만 대상으로 ΣCurrentHP / ΣMaxHP (0~1).</summary>
+        private static float GetAliveHpPoolRatio(List<BattleSimUnit> side)
+        {
+            int cur = 0, maxSum = 0;
+            foreach (var u in side)
+            {
+                if (!u.IsAlive) continue;
+                cur += u.CurrentHP;
+                maxSum += Mathf.Max(1, u.MaxHP);
+            }
+            return maxSum > 0 ? (float)cur / maxSum : 1f;
+        }
+
+        /// <summary>(적 HP 풀 비율 - 아군 HP 풀 비율) &gt;= <paramref name="gapThreshold"/> 일 때만 “불리(도망 판정)”.</summary>
+        private static bool IsAllyHpPoolDisadvantagedVsEnemy(List<BattleSimUnit> allies, List<BattleSimUnit> enemies, float gapThreshold)
+        {
+            float ra = GetAliveHpPoolRatio(allies);
+            float re = GetAliveHpPoolRatio(enemies);
+            return (re - ra) >= gapThreshold - 1e-4f;
+        }
+
         private static List<BattleSimUnit> BuildAlliesFromRoster(BattleSimAllyRoster roster)
         {
             var list = new List<BattleSimUnit>();
@@ -659,7 +718,11 @@ namespace Abyssdawn
                     Agility = so.agility,
                     Luck = so.luck,
                     SimAiPattern = so.simAiPattern,
-                    SimSkills = CopySkillList(so.simSkills)
+                    SimSkills = CopySkillList(so.simSkills),
+                    MemorySlot1 = so.memorySlot1,
+                    MemorySlot2 = so.memorySlot2,
+                    MemorySlot3 = so.memorySlot3,
+                    SimCharacterClass = so.characterClass
                 });
             }
             return list;
@@ -725,7 +788,7 @@ namespace Abyssdawn
             return true;
         }
 
-        private static void ApplySimSkillCost(BattleSimUnit unit, SkillData skill)
+        private static void ApplySimSkillCost(BattleSimUnit unit, SkillData skill, DungeonMidBattleConsumableContext dungeonCx = null)
         {
             if (unit == null || skill == null) return;
             int mp = Mathf.Max(0, skill.mpCost);
@@ -733,7 +796,12 @@ namespace Abyssdawn
                 unit.CurrentMP = Mathf.Max(0, unit.CurrentMP - mp);
             int hpCost = GetSimSkillHpCost(unit, skill);
             if (hpCost > 0)
+            {
+                int before = unit.CurrentHP;
                 unit.CurrentHP = Mathf.Max(0, unit.CurrentHP - hpCost);
+                if (dungeonCx != null && unit.Team == BattleSimTeam.Ally && before > unit.CurrentHP)
+                    DungeonSimTryConsumablesAfterAllyHpReduced(unit, dungeonCx);
+            }
         }
 
         private static bool DoesSkillHaveSimEffect(SkillData s)
@@ -773,7 +841,8 @@ namespace Abyssdawn
             float critChanceBase,
             SlotBattleAccumulator acc,
             SimGlobalSkillStats skillStats,
-            bool targetIsAlly)
+            bool targetIsAlly,
+            DungeonMidBattleConsumableContext dungeonCx)
         {
             var skill = PickRandomUsableSkill(unit, attackers, defenders, rng);
             if (skill == null) return false;
@@ -807,7 +876,7 @@ namespace Abyssdawn
                 }
             }
 
-            ApplySimSkillCost(unit, skill);
+            ApplySimSkillCost(unit, skill, dungeonCx);
 
             if (SkillHasRecoveryForSim(skill))
             {
@@ -852,7 +921,7 @@ namespace Abyssdawn
 
                     bool crit = BattleSimCombatMath.RollCritical(unit.Luck, critChanceBase, rng, skill.critBonusPercent);
                     int dmg = BattleSimCombatMath.CalculateSimSkillDamage(skill, scaled, target.Defense, crit, target.Slot, rng);
-                    int applied = ApplyPhysicalDamageWithSimGuard(target, dmg, targetIsAlly);
+                    int applied = ApplyPhysicalDamageWithSimGuard(target, dmg, targetIsAlly, dungeonCx);
                     if (targetIsAlly)
                         acc.AllyDefenderDamageTaken[si] += applied;
                     else

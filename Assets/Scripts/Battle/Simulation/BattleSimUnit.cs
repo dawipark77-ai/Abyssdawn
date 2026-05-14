@@ -42,6 +42,14 @@ namespace Abyssdawn
         /// <summary>시뮬 전용 스킬 목록 (로스터 SO에서 복사).</summary>
         public List<SkillData> SimSkills = new List<SkillData>();
 
+        /// <summary>던전/배틀 시뮬 — 더미 아군 SO의 종의 기억 3칸 (레벨업 룰렛·성장치 합산에 사용).</summary>
+        public MemoryOfSpeciesData MemorySlot1;
+        public MemoryOfSpeciesData MemorySlot2;
+        public MemoryOfSpeciesData MemorySlot3;
+
+        /// <summary>던전 시뮬 레벨업 시 HP/MP — <see cref="CharacterClass.hpPerLevel"/> / <see cref="CharacterClass.mpPerLevel"/>.</summary>
+        public CharacterClass SimCharacterClass;
+
         public bool IsAlive => CurrentHP > 0;
 
         public void ApplyDamage(int amount)

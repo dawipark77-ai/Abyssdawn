@@ -1,0 +1,16 @@
+﻿=== Dungeon Simulation (Phase 1) ===
+리포트 생성: 2026-05-14 01:52:51
+Iterations: 200, Floors: 10, BaseSeed: 12345
+Steps/Floor: 25~40, EncounterChance: 15 %, Cooldown: 3
+
+전체 클리어(모든 층): 200/200 (100.0%)
+사망 회차: 0/200 (0.0%)
+평균 전투 수/회차: 0.00
+평균 포션 사용/회차: 0.00
+
+--- 도달 층 분포 (해당 회차가 마지막으로 클리어한 층 수) ---
+  10층 도달: 200 (100.0%)
+
+CSV 컬럼: run_id,seed,floor,floor_type,steps_moved,encounters,battles,hp_before,hp_after,mp_before,mp_after,xp_gained,gold_gained,level_before,level_after,potion_use_count,skill_use_count,recovery_skill_use_count,total_damage_dealt,total_damage_taken,total_battle_turns,death_flag,clear_flag,next_floor_flag,notes
+
+[Phase 1 한계] 레벨업 적용 로직은 본 컴포넌트에 아직 들어있지 않습니다 — DungeonSimPlayer.Exp만 누적되고 Level은 startingLevel을 유지합니다. Phase 2에서 PlayerStats.LevelUp 모듈을 시뮬에 이식하여 baseHP/MP/스탯 성장을 반영할 예정입니다.

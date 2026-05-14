@@ -1,0 +1,2001 @@
+﻿run_id,seed,floor,floor_type,steps_moved,encounters,battles,hp_before,hp_after,mp_before,mp_after,xp_gained,gold_gained,level_before,level_after,potion_use_count,skill_use_count,recovery_skill_use_count,total_damage_dealt,total_damage_taken,total_battle_turns,death_flag,clear_flag,next_floor_flag,notes
+1,12345,1,Normal,26,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+1,12345,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+1,12345,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,1,Normal,34,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+2,12346,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+2,12346,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,1,Normal,26,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+3,12347,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+3,12347,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,1,Normal,35,1,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+4,12348,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+4,12348,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,1,Normal,27,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+5,12349,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+5,12349,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,1,Normal,35,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+6,12350,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+6,12350,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,1,Normal,28,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+7,12351,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+7,12351,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,1,Normal,36,14,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+8,12352,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+8,12352,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,1,Normal,28,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+9,12353,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+9,12353,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,1,Normal,37,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+10,12354,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+10,12354,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,1,Normal,29,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+11,12355,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+11,12355,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,1,Normal,38,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+12,12356,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+12,12356,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,1,Normal,30,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+13,12357,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+13,12357,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,1,Normal,38,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+14,12358,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+14,12358,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,1,Normal,31,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+15,12359,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+15,12359,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,1,Normal,39,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+16,12360,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+16,12360,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,1,Normal,31,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+17,12361,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+17,12361,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,1,Normal,40,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+18,12362,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+18,12362,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,1,Normal,32,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+19,12363,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+19,12363,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,1,Normal,40,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+20,12364,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+20,12364,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,1,Normal,33,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+21,12365,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+21,12365,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,1,Normal,25,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+22,12366,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+22,12366,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,1,Normal,33,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+23,12367,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+23,12367,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,1,Normal,26,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+24,12368,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+24,12368,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,1,Normal,34,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+25,12369,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+25,12369,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,1,Normal,27,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+26,12370,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+26,12370,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,1,Normal,35,9,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+27,12371,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+27,12371,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,1,Normal,27,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+28,12372,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+28,12372,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,1,Normal,36,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+29,12373,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+29,12373,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,1,Normal,28,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+30,12374,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+30,12374,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,1,Normal,36,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+31,12375,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+31,12375,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,1,Normal,29,11,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+32,12376,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+32,12376,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,1,Normal,37,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+33,12377,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+33,12377,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,1,Normal,29,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+34,12378,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+34,12378,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,1,Normal,38,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+35,12379,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+35,12379,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,1,Normal,30,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+36,12380,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+36,12380,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,1,Normal,38,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+37,12381,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+37,12381,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,1,Normal,31,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+38,12382,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+38,12382,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,1,Normal,39,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+39,12383,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+39,12383,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,1,Normal,32,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+40,12384,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+40,12384,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,1,Normal,40,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+41,12385,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+41,12385,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,1,Normal,32,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+42,12386,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+42,12386,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,1,Normal,25,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+43,12387,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+43,12387,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,1,Normal,33,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+44,12388,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+44,12388,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,1,Normal,25,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+45,12389,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+45,12389,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,1,Normal,34,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+46,12390,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+46,12390,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,1,Normal,26,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+47,12391,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+47,12391,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,1,Normal,34,9,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+48,12392,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+48,12392,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,1,Normal,27,1,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+49,12393,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+49,12393,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,1,Normal,35,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+50,12394,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+50,12394,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,1,Normal,28,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+51,12395,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+51,12395,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,1,Normal,36,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+52,12396,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+52,12396,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,1,Normal,28,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+53,12397,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+53,12397,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,1,Normal,37,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+54,12398,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+54,12398,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,1,Normal,29,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+55,12399,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+55,12399,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,1,Normal,37,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+56,12400,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+56,12400,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,1,Normal,30,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+57,12401,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+57,12401,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,1,Normal,38,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+58,12402,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+58,12402,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,1,Normal,30,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+59,12403,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+59,12403,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,1,Normal,39,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+60,12404,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+60,12404,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,1,Normal,31,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+61,12405,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+61,12405,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,1,Normal,39,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+62,12406,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+62,12406,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,1,Normal,32,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+63,12407,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+63,12407,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,1,Normal,40,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+64,12408,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+64,12408,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,1,Normal,33,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+65,12409,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+65,12409,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,1,Normal,25,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+66,12410,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+66,12410,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,1,Normal,33,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+67,12411,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+67,12411,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,1,Normal,26,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+68,12412,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+68,12412,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,1,Normal,34,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+69,12413,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+69,12413,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,1,Normal,26,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+70,12414,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+70,12414,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,1,Normal,35,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+71,12415,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+71,12415,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,1,Normal,27,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+72,12416,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+72,12416,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,1,Normal,35,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+73,12417,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+73,12417,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,1,Normal,28,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+74,12418,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+74,12418,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,1,Normal,36,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+75,12419,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+75,12419,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,1,Normal,28,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+76,12420,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+76,12420,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,1,Normal,37,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+77,12421,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+77,12421,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,1,Normal,29,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+78,12422,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+78,12422,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,1,Normal,38,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+79,12423,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+79,12423,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,1,Normal,30,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+80,12424,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+80,12424,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,1,Normal,38,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+81,12425,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+81,12425,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,1,Normal,31,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+82,12426,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+82,12426,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,1,Normal,39,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+83,12427,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+83,12427,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,1,Normal,31,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+84,12428,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+84,12428,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,1,Normal,40,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+85,12429,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+85,12429,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,1,Normal,32,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+86,12430,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+86,12430,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,1,Normal,40,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+87,12431,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+87,12431,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,1,Normal,33,11,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+88,12432,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+88,12432,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,1,Normal,25,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+89,12433,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+89,12433,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,1,Normal,34,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+90,12434,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+90,12434,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,1,Normal,26,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+91,12435,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+91,12435,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,1,Normal,34,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+92,12436,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+92,12436,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,1,Normal,27,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+93,12437,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+93,12437,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,1,Normal,35,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+94,12438,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+94,12438,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,1,Normal,27,1,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+95,12439,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+95,12439,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,1,Normal,36,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+96,12440,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+96,12440,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,1,Normal,28,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+97,12441,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+97,12441,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,1,Normal,36,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+98,12442,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+98,12442,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,1,Normal,29,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+99,12443,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+99,12443,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,1,Normal,37,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+100,12444,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+100,12444,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,1,Normal,29,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+101,12445,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+101,12445,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,1,Normal,38,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+102,12446,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+102,12446,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,1,Normal,30,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+103,12447,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+103,12447,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,1,Normal,39,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+104,12448,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+104,12448,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,1,Normal,31,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+105,12449,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+105,12449,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,1,Normal,39,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+106,12450,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+106,12450,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,1,Normal,32,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+107,12451,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+107,12451,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,1,Normal,40,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+108,12452,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+108,12452,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,1,Normal,32,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+109,12453,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+109,12453,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,1,Normal,25,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+110,12454,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+110,12454,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,1,Normal,33,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+111,12455,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+111,12455,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,1,Normal,25,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+112,12456,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+112,12456,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,1,Normal,34,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+113,12457,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+113,12457,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,1,Normal,26,1,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+114,12458,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+114,12458,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,1,Normal,34,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+115,12459,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+115,12459,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,1,Normal,27,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+116,12460,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+116,12460,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,1,Normal,35,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+117,12461,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+117,12461,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,1,Normal,28,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+118,12462,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+118,12462,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,1,Normal,36,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+119,12463,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+119,12463,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,1,Normal,28,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+120,12464,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+120,12464,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,1,Normal,37,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+121,12465,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+121,12465,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,1,Normal,29,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+122,12466,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+122,12466,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,1,Normal,37,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+123,12467,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+123,12467,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,1,Normal,30,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+124,12468,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+124,12468,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,1,Normal,38,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+125,12469,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+125,12469,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,1,Normal,30,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+126,12470,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+126,12470,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,1,Normal,39,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+127,12471,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+127,12471,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,1,Normal,31,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+128,12472,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+128,12472,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,1,Normal,39,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+129,12473,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+129,12473,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,1,Normal,32,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+130,12474,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+130,12474,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,1,Normal,40,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+131,12475,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+131,12475,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,1,Normal,33,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+132,12476,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+132,12476,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,1,Normal,25,1,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+133,12477,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+133,12477,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,1,Normal,33,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+134,12478,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+134,12478,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,1,Normal,26,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+135,12479,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+135,12479,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,1,Normal,34,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+136,12480,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+136,12480,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,1,Normal,26,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+137,12481,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+137,12481,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,1,Normal,35,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+138,12482,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+138,12482,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,1,Normal,27,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+139,12483,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+139,12483,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,1,Normal,35,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+140,12484,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+140,12484,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,1,Normal,28,10,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+141,12485,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+141,12485,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,1,Normal,36,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+142,12486,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+142,12486,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,1,Normal,29,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+143,12487,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+143,12487,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,1,Normal,37,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+144,12488,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+144,12488,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,1,Normal,29,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+145,12489,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+145,12489,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,1,Normal,38,12,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+146,12490,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+146,12490,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,1,Normal,30,1,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+147,12491,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+147,12491,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,1,Normal,38,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+148,12492,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+148,12492,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,1,Normal,31,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+149,12493,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+149,12493,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,1,Normal,39,9,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+150,12494,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+150,12494,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,1,Normal,31,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+151,12495,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+151,12495,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,1,Normal,40,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+152,12496,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+152,12496,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,1,Normal,32,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+153,12497,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+153,12497,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,1,Normal,40,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+154,12498,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+154,12498,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,1,Normal,33,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+155,12499,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+155,12499,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,1,Normal,25,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+156,12500,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+156,12500,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,1,Normal,34,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+157,12501,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+157,12501,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,1,Normal,26,9,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+158,12502,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+158,12502,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,1,Normal,34,10,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+159,12503,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+159,12503,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,1,Normal,27,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+160,12504,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+160,12504,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,1,Normal,35,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+161,12505,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+161,12505,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,1,Normal,27,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+162,12506,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+162,12506,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,1,Normal,36,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+163,12507,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+163,12507,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,1,Normal,28,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+164,12508,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+164,12508,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,1,Normal,36,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+165,12509,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+165,12509,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,1,Normal,29,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+166,12510,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+166,12510,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,1,Normal,37,1,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+167,12511,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+167,12511,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,1,Normal,29,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+168,12512,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+168,12512,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,1,Normal,38,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+169,12513,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+169,12513,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,1,Normal,30,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+170,12514,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+170,12514,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,1,Normal,39,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+171,12515,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+171,12515,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,1,Normal,31,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+172,12516,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+172,12516,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,1,Normal,39,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+173,12517,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+173,12517,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,1,Normal,32,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+174,12518,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+174,12518,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,1,Normal,40,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+175,12519,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+175,12519,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,1,Normal,32,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+176,12520,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+176,12520,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,1,Normal,25,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+177,12521,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+177,12521,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,1,Normal,33,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+178,12522,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+178,12522,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,1,Normal,25,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+179,12523,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+179,12523,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,1,Normal,34,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+180,12524,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+180,12524,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,1,Normal,26,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+181,12525,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+181,12525,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,1,Normal,35,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+182,12526,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+182,12526,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,1,Normal,27,2,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+183,12527,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+183,12527,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,1,Normal,35,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+184,12528,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+184,12528,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,1,Normal,28,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+185,12529,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+185,12529,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,1,Normal,36,5,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+186,12530,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+186,12530,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,1,Normal,28,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+187,12531,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+187,12531,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,1,Normal,37,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+188,12532,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+188,12532,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,1,Normal,29,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+189,12533,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+189,12533,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,1,Normal,37,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+190,12534,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+190,12534,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,1,Normal,30,9,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+191,12535,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+191,12535,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,1,Normal,38,7,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+192,12536,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+192,12536,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,1,Normal,30,3,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+193,12537,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+193,12537,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,1,Normal,39,13,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+194,12538,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+194,12538,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,1,Normal,31,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+195,12539,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+195,12539,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,1,Normal,40,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+196,12540,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+196,12540,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,1,Normal,32,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+197,12541,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+197,12541,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,1,Normal,40,6,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+198,12542,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+198,12542,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,1,Normal,33,8,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+199,12543,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+199,12543,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,1,Normal,25,4,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,
+200,12544,2,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,3,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,4,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,5,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,6,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,7,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,8,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,9,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor
+200,12544,10,NoPool,0,0,0,26,26,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,no monster pool entry for this floor

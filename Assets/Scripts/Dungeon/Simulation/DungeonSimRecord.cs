@@ -16,6 +16,10 @@ namespace Abyssdawn
         public int StepsMoved;
         public int Encounters;
         public int Battles;
+        /// <summary>해당 층에서 아군 승리로 끝난 전투 수 (패배 시 마지막 판은 미포함).</summary>
+        public int BattlesWon;
+        /// <summary>해당 층에서 HP 격차로 도망(보상 없음, 생존 유지)친 전투 수.</summary>
+        public int BattlesFled;
 
         public int HpBefore;
         public int HpAfter;
@@ -28,6 +32,11 @@ namespace Abyssdawn
         public int LevelAfter;
 
         public int PotionUseCount;
+        public int DawnChaliceUseCount;
+        /// <summary>이 층을 마친 직후의 일반 HP 포션 잔량.</summary>
+        public int PotionRemainAfter;
+        /// <summary>이 층을 마친 직후의 새벽의 잔 충전 잔량.</summary>
+        public int DawnChaliceRemainAfter;
         public int SkillUseCount;
         public int RecoverySkillUseCount;
         public int TotalDamageDealt;
@@ -42,10 +51,10 @@ namespace Abyssdawn
 
         public static string CsvHeader =>
             "run_id,seed,floor,floor_type," +
-            "steps_moved,encounters,battles," +
+            "steps_moved,encounters,battles,battles_won,battles_fled," +
             "hp_before,hp_after,mp_before,mp_after," +
             "xp_gained,gold_gained,level_before,level_after," +
-            "potion_use_count,skill_use_count,recovery_skill_use_count," +
+            "potion_use_count,dawn_chalice_use_count,potion_remain_after,chalice_remain_after,skill_use_count,recovery_skill_use_count," +
             "total_damage_dealt,total_damage_taken,total_battle_turns," +
             "death_flag,clear_flag,next_floor_flag,notes";
 
@@ -59,6 +68,8 @@ namespace Abyssdawn
             sb.Append(StepsMoved).Append(',');
             sb.Append(Encounters).Append(',');
             sb.Append(Battles).Append(',');
+            sb.Append(BattlesWon).Append(',');
+            sb.Append(BattlesFled).Append(',');
             sb.Append(HpBefore).Append(',');
             sb.Append(HpAfter).Append(',');
             sb.Append(MpBefore).Append(',');
@@ -68,6 +79,9 @@ namespace Abyssdawn
             sb.Append(LevelBefore).Append(',');
             sb.Append(LevelAfter).Append(',');
             sb.Append(PotionUseCount).Append(',');
+            sb.Append(DawnChaliceUseCount).Append(',');
+            sb.Append(PotionRemainAfter).Append(',');
+            sb.Append(DawnChaliceRemainAfter).Append(',');
             sb.Append(SkillUseCount).Append(',');
             sb.Append(RecoverySkillUseCount).Append(',');
             sb.Append(TotalDamageDealt).Append(',');

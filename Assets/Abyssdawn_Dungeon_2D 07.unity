@@ -86470,6 +86470,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1849071809}
   m_CullTransparentMesh: 1
+--- !u!1 &1849738748
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1849738750}
+  - component: {fileID: 1849738749}
+  - component: {fileID: 1849738751}
+  m_Layer: 0
+  m_Name: DungeonSimulator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1849738749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849738748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deb3d7cc7b372be4c8e4e8a88311954a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.BattleSimulator
+  allyRoster: {fileID: 11400000, guid: f0e1d2c3b4a5968778695a4b3c2d1e0f, type: 2}
+  enemyRoster: {fileID: 11400000, guid: e0d1c2b3a4f5e6d7c8b9a0f1e2d3c4b5, type: 2}
+  iterations: 100
+  baseSeed: 12345
+  maxTurnsPerBattle: 500
+  criticalChanceBase: 25
+  writeReportFile: 1
+  reportRelativePath: BattleSimLogs/_LastBattleSimReport.txt
+  allowItemActions: 0
+  allowFleeActions: 0
+  simItemPickChance: 0.02
+  simFleePickChance: 0.03
+  simSkillPickChance: 0.45
+  simRecoveryReportFallbackWhenNone: 2
+--- !u!4 &1849738750
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849738748}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 586.7595, y: 857.9568, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1849738751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849738748}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83bbe2f43f9b82e4b990030bf665643f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.DungeonSimulator
+  settings: {fileID: 11400000, guid: ef49b5cdcafe7ce42a54ad7dd3fded9e, type: 2}
+  allyRoster: {fileID: 11400000, guid: f0e1d2c3b4a5968778695a4b3c2d1e0f, type: 2}
+  monsterPool: {fileID: 11400000, guid: 7401fe2e8bdfeb84aaac65e5b0fde26b, type: 2}
+  battleSimulator: {fileID: 1849738749}
 --- !u!1 &1850482132
 GameObject:
   m_ObjectHideFlags: 0
@@ -100935,3 +101010,4 @@ SceneRoots:
   - {fileID: 114855729}
   - {fileID: 639714628}
   - {fileID: 1389415301}
+  - {fileID: 1849738750}

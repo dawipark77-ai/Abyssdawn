@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84be4711df84a024cba807feaeb74869, type: 3}
+  m_Name: DungeonSimSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.DungeonSimSettings
+  floorCount: 10
+  iterations: 200
+  baseSeed: 12345
+  stepsPerFloorMin: 25
+  stepsPerFloorMax: 40
+  encounterChance: 0.15
+  postBattleCooldownSteps: 3
+  expPerLevelMultiplier: 100
+  startingLevel: 1
+  startingExp: 0
+  levelUpHpGain: 8
+  levelUpMpGain: 3
+  levelUpAtkGain: 1
+  levelUpDefGain: 1
+  levelUpMagGain: 0
+  levelUpAgiGain: 0
+  levelUpLukGain: 0
+  startingHpPotionCount: 5
+  hpPotionHealAmount: 30
+  potionUseHpThreshold: 0.5
+  dawnChaliceHpThreshold: 0.4
+  useDawnChaliceOnlyWhenPotionEmpty: 0
+  csvRelativePath: DungeonSimLogs/DungeonSim_{TIMESTAMP}.csv
+  summaryRelativePath: Assets/Data/Simulation/_LastDungeonSimSummary.txt
+  maxBattlesPerFloor: 50
