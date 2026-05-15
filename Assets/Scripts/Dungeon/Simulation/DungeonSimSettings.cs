@@ -44,6 +44,9 @@ namespace Abyssdawn
         [Tooltip("시작 EXP")]
         [Min(0)] public int startingExp = 0;
 
+        [Tooltip("던전 시뮬 전용 — 승리 시 획득 EXP(몬스터 ExpReward 합)에 곱합니다. 1이면 실제 몹 보상과 동일.")]
+        [Min(0f)] public float simExpRewardMultiplier = 4f;
+
         [Header("레벨업 (던전 시뮬) — 고정치 + 종의 기억")]
         [Tooltip("CharacterClass 미지정 시에만 사용 — 레벨당 maxHP 기본 증가. 지정 시에는 직업 hpPerLevel이 대신 쓰입니다.")]
         [Min(0)] public int levelUpHpGain = 8;
@@ -73,8 +76,37 @@ namespace Abyssdawn
         [Tooltip("일반 HP 포션 1회 회복량 (절대값)")]
         [Min(0)] public int hpPotionHealAmount = 30;
 
-        [Tooltip("HP 비율이 이 값 이하로 떨어지면 전투 직전에 일반 HP 포션 사용 (기본 0.5 = 50% 미만).")]
+        [Tooltip("HP 비율이 이 값 미만일 때 약초→포션→잔 우선 회복(시뮬). 기본 0.5 = 최대 HP의 50% 미만.")]
         [Range(0f, 1f)] public float potionUseHpThreshold = 0.5f;
+
+        [Header("Medicinal Herb (약초) — 시뮬 전용")]
+        [Tooltip("비우면 아래 Fallback 범위로 회복량을 계산합니다.")]
+        public MedicinalHerbSimData medicinalHerbData;
+
+        [Tooltip("medicinalHerbData가 없을 때 최소 HP 회복")]
+        [Min(0)] public int medicinalHerbHealMinFallback = 32;
+
+        [Tooltip("medicinalHerbData가 없을 때 최대 HP 회복(포함)")]
+        [Min(0)] public int medicinalHerbHealMaxFallback = 35;
+
+        [Tooltip("약초를 이 층(포함)부터")]
+        [Min(1)] public int medicinalHerbGrantFloorsMin = 1;
+
+        [Tooltip("약초를 이 층(포함)까지 진입 시 지급")]
+        [Min(1)] public int medicinalHerbGrantFloorsMax = 5;
+
+        [Tooltip("지급 층 범위에 들어올 때마다 추가되는 약초 개수")]
+        [Min(0)] public int medicinalHerbGrantCountPerFloor = 3;
+
+        [Header("1층 마을 (시뮬 전용) — 경제 없음")]
+        [Tooltip("켜면 매 회차 1층 진입 시 아군 HP·MP 최대로, HP포션·새벽의 잔·약초를 아래 스택으로 맞춥니다(드퀘식 숙소 상정).")]
+        public bool floor1TownFullRestoreEnabled = true;
+
+        [Tooltip("1층 마을에서 세팅할 약초 개수(절대값). 마을 적용 시에는 이 층에 대한 ‘층 진입 약초 +N’은 생략합니다.")]
+        [Min(0)] public int floor1TownMedicinalHerbStack = 15;
+
+        [Tooltip("1층 + 1층 마을 켜짐일 때만 — 전투 승리 직후 마을과 동일 풀 HP/MP·소모품 재충전(귀환 노가다 시뮬).")]
+        public bool floor1TownAfterVictoryEnabled = true;
 
         [Header("도망 (Flee) 정책 — BattleSimulator의 fleeWhenHpDisadvantaged와 함께 작동")]
         [Tooltip("한 층에서 허용되는 최대 도망 횟수. 이 횟수에 도달하면 이후 전투에서는 HP 격차 도망이 차단됩니다.")]

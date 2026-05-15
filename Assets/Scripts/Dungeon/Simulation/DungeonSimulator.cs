@@ -65,6 +65,7 @@ namespace Abyssdawn
             long totalBattleFlees = 0;
             long totalPotions = 0;
             long totalDawnChalice = 0;
+            long totalMedicinalHerbs = 0;
             int[] floorReachedCount = new int[settings.floorCount + 1];
 
             for (int i = 0; i < iterations; i++)
@@ -90,6 +91,7 @@ namespace Abyssdawn
                     totalBattleFlees += rec.BattlesFled;
                     totalPotions += rec.PotionUseCount;
                     totalDawnChalice += rec.DawnChaliceUseCount;
+                    totalMedicinalHerbs += rec.MedicinalHerbUseCount;
 
                     if (rec.DeathFlag)
                     {
@@ -116,7 +118,7 @@ namespace Abyssdawn
             }
             catch (Exception e) { Debug.LogWarning($"[DungeonSim] CSV write failed: {e.Message}"); }
 
-            string summary = BuildSummary(iterations, totalDeaths, totalClearedAllFloors, totalBattles, totalBattleWins, totalBattleFlees, totalPotions, totalDawnChalice, floorReachedCount, allRecords);
+            string summary = BuildSummary(iterations, totalDeaths, totalClearedAllFloors, totalBattles, totalBattleWins, totalBattleFlees, totalMedicinalHerbs, totalPotions, totalDawnChalice, floorReachedCount, allRecords);
             Debug.Log(summary);
             try
             {
@@ -172,6 +174,18 @@ namespace Abyssdawn
 
             rec.FloorType = entry.kind.ToString();
 
+            int fMin = Mathf.Min(settings.medicinalHerbGrantFloorsMin, settings.medicinalHerbGrantFloorsMax);
+            int fMax = Mathf.Max(settings.medicinalHerbGrantFloorsMin, settings.medicinalHerbGrantFloorsMax);
+            if (floor == 1 && settings.floor1TownFullRestoreEnabled)
+            {
+                ApplyFloor1TownFullRestore(player, settings);
+                rec.HpBefore = player.GetTotalCurrentHP();
+                rec.MpBefore = player.GetTotalCurrentMP();
+                rec.Notes = string.IsNullOrEmpty(rec.Notes) ? "floor1_town" : rec.Notes + "; floor1_town";
+            }
+            else if (floor >= fMin && floor <= fMax)
+                player.MedicinalHerbCount += Mathf.Max(0, settings.medicinalHerbGrantCountPerFloor);
+
             int steps = rng.Next(settings.stepsPerFloorMin, settings.stepsPerFloorMax + 1);
             int cooldown = 0;
             int battles = 0;
@@ -181,6 +195,7 @@ namespace Abyssdawn
             int goldGained = 0;
             int potionUseCount = 0;
             int dawnChaliceUseCount = 0;
+            int medicinalHerbUseCount = 0;
             int skillUseCount = 0;
             int recoverySkillUseCount = 0;
             int dmgDealt = 0;
@@ -211,9 +226,11 @@ namespace Abyssdawn
                 }
 
                 encounters++;
-                // 새벽의 잔 → 그다음 포션: 포션(+절대량)이 먼저면 Max가 작을 때 만피가 되어 잔(40%)이 영원히 안 쓰이는 경우가 많음.
-                dawnChaliceUseCount += MaybeAutoUseDawnChalice(player);
-                potionUseCount += MaybeAutoUseHpPotion(player);
+                int hPre, pPre, cPre;
+                TryHealPartyPriorityHerbPotionChalice(player, settings, rng, out hPre, out pPre, out cPre);
+                medicinalHerbUseCount += hPre;
+                potionUseCount += pPre;
+                dawnChaliceUseCount += cPre;
 
                 var enemyParty = monsterPool.BuildEnemyParty(entry, rng);
                 if (enemyParty.Count == 0) continue;
@@ -230,6 +247,7 @@ namespace Abyssdawn
                 recoverySkillUseCount += outcome.RecoverySkillUseCount;
                 potionUseCount += outcome.BattleHpPotionUses;
                 dawnChaliceUseCount += outcome.BattleDawnChaliceUses;
+                medicinalHerbUseCount += outcome.BattleMedicinalHerbUses;
 
                 if (outcome.AllyWin)
                 {
@@ -242,9 +260,13 @@ namespace Abyssdawn
                         xpThisBattle += m.ExpReward;
                         goldThisBattle += m.GoldReward;
                     }
-                    xpGained += xpThisBattle;
+                    float xpMult = settings.simExpRewardMultiplier <= 0f ? 1f : settings.simExpRewardMultiplier;
+                    int xpAward = Mathf.Max(0, Mathf.RoundToInt(xpThisBattle * xpMult));
+                    if (xpThisBattle > 0 && xpAward < 1)
+                        xpAward = 1;
+                    xpGained += xpAward;
                     goldGained += goldThisBattle;
-                    player.Exp += xpThisBattle;
+                    player.Exp += xpAward;
                     player.Gold += goldThisBattle;
 
                     while (player.Exp >= settings.GetExpToNextLevel(player.Level))
@@ -253,6 +275,9 @@ namespace Abyssdawn
                         ApplyLevelUp(player, rng);
                         levelUpsThisFloor++;
                     }
+
+                    if (floor == 1 && settings.floor1TownFullRestoreEnabled && settings.floor1TownAfterVictoryEnabled)
+                        ApplyFloor1TownFullRestore(player, settings);
 
                     cooldown = settings.postBattleCooldownSteps;
                 }
@@ -267,9 +292,12 @@ namespace Abyssdawn
                     break;
                 }
 
-                // 전투 직전에는 대개 만피라 임계(포션/잔)에 안 걸림. 승리·도망 후 HP가 깎인 상태에서 회복 판정.
-                dawnChaliceUseCount += MaybeAutoUseDawnChalice(player);
-                potionUseCount += MaybeAutoUseHpPotion(player);
+                // 전투 직전에는 대개 만피라 임계에 안 걸림. 승리·도망 후 HP가 깎인 상태에서 회복(약초→포션→잔).
+                int hPost, pPost, cPost;
+                TryHealPartyPriorityHerbPotionChalice(player, settings, rng, out hPost, out pPost, out cPost);
+                medicinalHerbUseCount += hPost;
+                potionUseCount += pPost;
+                dawnChaliceUseCount += cPost;
             }
 
             rec.StepsMoved = stepsTakenActual;
@@ -279,8 +307,10 @@ namespace Abyssdawn
             rec.BattlesFled = fleesThisFloor;
             rec.PotionUseCount = potionUseCount;
             rec.DawnChaliceUseCount = dawnChaliceUseCount;
+            rec.MedicinalHerbUseCount = medicinalHerbUseCount;
             rec.PotionRemainAfter = player.HpPotionCount;
             rec.DawnChaliceRemainAfter = player.DawnChaliceCharges;
+            rec.MedicinalHerbRemainAfter = player.MedicinalHerbCount;
             rec.SkillUseCount = skillUseCount;
             rec.RecoverySkillUseCount = recoverySkillUseCount;
             rec.TotalDamageDealt = dmgDealt;
@@ -460,8 +490,106 @@ namespace Abyssdawn
         }
 
         // ---------------------------------------------------------------
-        // 포션 / 새벽의 잔 — 던전 시뮬 전투 중·외부 공용 (BattleSimulator에서도 호출)
+        // 1층 마을 — 시뮬 전용 (경제 없음: 풀 HP/MP + 소모품 스택 고정)
         // ---------------------------------------------------------------
+        public static void ApplyFloor1TownFullRestore(DungeonSimPlayer player, DungeonSimSettings settings)
+        {
+            if (player?.Units == null || settings == null) return;
+            foreach (var u in player.Units)
+            {
+                if (u == null || !u.IsAlive) continue;
+                if (u.MaxHP > 0) u.CurrentHP = u.MaxHP;
+                if (u.MaxMP > 0) u.CurrentMP = u.MaxMP;
+            }
+            player.HpPotionCount = Mathf.Max(0, settings.startingHpPotionCount);
+            player.DawnChaliceCharges = Mathf.Max(0, settings.startingDawnChaliceCharges);
+            player.MedicinalHerbCount = Mathf.Max(0, settings.floor1TownMedicinalHerbStack);
+        }
+
+        // ---------------------------------------------------------------
+        // 약초 / 포션 / 새벽의 잔 — 시뮬 전용 (BattleSimulator에서도 호출)
+        // HP < potionUseHpThreshold(기본 50% 미만)일 때: 약초 → 포션 →(포션 0이면) 새벽의 잔
+        // ---------------------------------------------------------------
+        public static void GetMedicinalHerbHealRange(DungeonSimSettings settings, out int minHp, out int maxHp)
+        {
+            minHp = 32;
+            maxHp = 35;
+            if (settings == null) return;
+            if (settings.medicinalHerbData != null)
+            {
+                minHp = Mathf.Max(0, settings.medicinalHerbData.healHpMin);
+                maxHp = Mathf.Max(minHp, settings.medicinalHerbData.healHpMax);
+            }
+            else
+            {
+                minHp = Mathf.Max(0, settings.medicinalHerbHealMinFallback);
+                maxHp = Mathf.Max(minHp, settings.medicinalHerbHealMaxFallback);
+            }
+        }
+
+        public static bool AnyAllyHpRatioAtOrBelow(DungeonSimPlayer player, float ratioThreshold)
+        {
+            if (player?.Units == null) return false;
+            foreach (var u in player.Units)
+            {
+                if (u == null || !u.IsAlive || u.MaxHP <= 0) continue;
+                if ((float)u.CurrentHP / u.MaxHP < ratioThreshold) return true;
+            }
+            return false;
+        }
+
+        /// <summary>HP 임계 이하인 살아있는 유닛에 약초를 반복 사용(한 스윕에 유닛당 최대 1개, 필요 시 다시 스윕).</summary>
+        public static int TryConsumeMedicinalHerbsResolve(DungeonSimPlayer player, DungeonSimSettings settings, System.Random rng, float hpRatioThreshold)
+        {
+            int used = 0;
+            if (player == null || settings == null || rng == null) return 0;
+            GetMedicinalHerbHealRange(settings, out int hMin, out int hMax);
+            bool progressed = true;
+            while (progressed && player.MedicinalHerbCount > 0)
+            {
+                progressed = false;
+                foreach (var u in player.Units)
+                {
+                    if (player.MedicinalHerbCount <= 0) break;
+                    if (u == null || !u.IsAlive || u.MaxHP <= 0) continue;
+                    if ((float)u.CurrentHP / u.MaxHP >= hpRatioThreshold) continue;
+                    int amt = rng.Next(hMin, hMax + 1);
+                    u.CurrentHP = Mathf.Min(u.MaxHP, u.CurrentHP + amt);
+                    player.MedicinalHerbCount--;
+                    player.MedicinalHerbsUsedTotal++;
+                    used++;
+                    progressed = true;
+                }
+            }
+            return used;
+        }
+
+        public static void TryHealPartyPriorityHerbPotionChalice(
+            DungeonSimPlayer player,
+            DungeonSimSettings settings,
+            System.Random rng,
+            out int herbsUsed,
+            out int potionsUsed,
+            out int chalicesUsed)
+        {
+            herbsUsed = potionsUsed = chalicesUsed = 0;
+            if (player == null || settings == null || rng == null) return;
+            float t = settings.potionUseHpThreshold;
+            if (!AnyAllyHpRatioAtOrBelow(player, t)) return;
+
+            herbsUsed = TryConsumeMedicinalHerbsResolve(player, settings, rng, t);
+
+            while (AnyAllyHpRatioAtOrBelow(player, t) && player.HpPotionCount > 0)
+            {
+                int p = TryConsumeHpPotionForDungeonSim(player, settings);
+                if (p <= 0) break;
+                potionsUsed += p;
+            }
+
+            if (AnyAllyHpRatioAtOrBelow(player, t) && player.HpPotionCount <= 0 && player.DawnChaliceCharges > 0)
+                chalicesUsed += TryConsumeDawnChaliceForDungeonSim(player, settings, hpThresholdOverride: t, bypassPotionEmptyGate: true);
+        }
+
         public static int TryConsumeHpPotionForDungeonSim(DungeonSimPlayer player, DungeonSimSettings settings)
         {
             if (player == null || settings == null) return 0;
@@ -473,7 +601,7 @@ namespace Abyssdawn
                 if (!u.IsAlive) continue;
                 if (u.MaxHP <= 0) continue;
                 float ratio = (float)u.CurrentHP / Mathf.Max(1, u.MaxHP);
-                if (ratio <= settings.potionUseHpThreshold && player.HpPotionCount > 0)
+                if (ratio < settings.potionUseHpThreshold && player.HpPotionCount > 0)
                 {
                     u.CurrentHP = Mathf.Min(u.MaxHP, u.CurrentHP + settings.hpPotionHealAmount);
                     player.HpPotionCount--;
@@ -484,11 +612,17 @@ namespace Abyssdawn
             return used;
         }
 
-        public static int TryConsumeDawnChaliceForDungeonSim(DungeonSimPlayer player, DungeonSimSettings settings)
+        public static int TryConsumeDawnChaliceForDungeonSim(
+            DungeonSimPlayer player,
+            DungeonSimSettings settings,
+            float? hpThresholdOverride = null,
+            bool bypassPotionEmptyGate = false)
         {
             if (player == null || settings == null) return 0;
             if (player.DawnChaliceCharges <= 0) return 0;
-            if (settings.useDawnChaliceOnlyWhenPotionEmpty && player.HpPotionCount > 0) return 0;
+            if (!bypassPotionEmptyGate && settings.useDawnChaliceOnlyWhenPotionEmpty && player.HpPotionCount > 0) return 0;
+
+            float th = hpThresholdOverride ?? settings.dawnChaliceHpThreshold;
 
             bool needsHeal = false;
             foreach (var u in player.Units)
@@ -496,7 +630,7 @@ namespace Abyssdawn
                 if (!u.IsAlive) continue;
                 if (u.MaxHP <= 0) continue;
                 float ratio = (float)u.CurrentHP / Mathf.Max(1, u.MaxHP);
-                if (ratio <= settings.dawnChaliceHpThreshold)
+                if (ratio < th)
                 {
                     needsHeal = true;
                     break;
@@ -526,23 +660,6 @@ namespace Abyssdawn
             player.DawnChaliceUsedTotal++;
             return 1;
         }
-
-        // ---------------------------------------------------------------
-        // 포션 자동 사용 (HP 임계 미달 시 살아있는 유닛 1명에게 사용)
-        // ---------------------------------------------------------------
-        private int MaybeAutoUseHpPotion(DungeonSimPlayer player) =>
-            TryConsumeHpPotionForDungeonSim(player, settings);
-
-        // ---------------------------------------------------------------
-        // 새벽의 잔 자동 사용
-        //   - HP 비율이 dawnChaliceHpThreshold 이하인 유닛이 있으면 발동
-        //   - useDawnChaliceOnlyWhenPotionEmpty=true일 때는 일반 포션이 0일 때만 사용
-        //   - 호출 순서: RunSingleFloor에서 포션보다 먼저 호출(작은 MaxHP + 큰 포션량이면 포션만 쓰고 잔이 영원히 안 나가는 것 방지)
-        //   - 충전 1회 = 살아있는 모든 유닛 대상 HP/MP %회복 (전체 회복형 아이템)
-        //   - Phase 1에서는 상태이상 추적이 없으므로 "상태이상 회복"은 효과 없음
-        // ---------------------------------------------------------------
-        private int MaybeAutoUseDawnChalice(DungeonSimPlayer player) =>
-            TryConsumeDawnChaliceForDungeonSim(player, settings);
 
         // ---------------------------------------------------------------
         // 플레이어 빌드
@@ -648,7 +765,7 @@ namespace Abyssdawn
             File.WriteAllText(absPath, sb.ToString(), Encoding.UTF8);
         }
 
-        private string BuildSummary(int iterations, int deaths, int allFloorsCleared, long battles, long battleWins, long battleFlees, long potions, long dawnChalice, int[] reached, List<DungeonSimRecord> records)
+        private string BuildSummary(int iterations, int deaths, int allFloorsCleared, long battles, long battleWins, long battleFlees, long medicinalHerbs, long potions, long dawnChalice, int[] reached, List<DungeonSimRecord> records)
         {
             var sb = new StringBuilder();
             sb.AppendLine("=== Dungeon Simulation (Phase 1) ===");
@@ -656,6 +773,11 @@ namespace Abyssdawn
             sb.AppendLine($"Iterations: {iterations}, Floors: {settings.floorCount}, BaseSeed: {settings.baseSeed}");
             sb.AppendLine($"Steps/Floor: {settings.stepsPerFloorMin}~{settings.stepsPerFloorMax}, EncounterChance: {settings.encounterChance:P0}, Cooldown: {settings.postBattleCooldownSteps}");
             sb.AppendLine($"시작 자원 — HP포션: {settings.startingHpPotionCount}개, 새벽의 잔: {settings.startingDawnChaliceCharges}회 (HP {settings.dawnChaliceHpHealPercent:P0} / MP {settings.dawnChaliceMpHealPercent:P0} 회복)");
+            sb.AppendLine($"시뮬 EXP 배율: ×{settings.simExpRewardMultiplier:0.##} (승리 시 몬스터 ExpReward 합에 적용)");
+            sb.AppendLine($"약초 — {settings.medicinalHerbGrantFloorsMin}~{settings.medicinalHerbGrantFloorsMax}층 진입 시마다 +{settings.medicinalHerbGrantCountPerFloor}개 (시뮬 전용), HP<{settings.potionUseHpThreshold:P0} 시 약초→포션→잔");
+            if (settings.floor1TownFullRestoreEnabled)
+                sb.AppendLine($"1층 마을(시뮬) — 1층 진입 시 HP·MP 풀, 포션 {settings.startingHpPotionCount}·잔 {settings.startingDawnChaliceCharges}·약초 {settings.floor1TownMedicinalHerbStack}으로 맞춤(경제 없음). 이 층의 약초 +{settings.medicinalHerbGrantCountPerFloor} 지급은 생략." +
+                              (settings.floor1TownAfterVictoryEnabled ? " 승리마다 동일 충전." : ""));
             sb.AppendLine();
             sb.AppendLine($"전체 클리어(모든 층): {allFloorsCleared}/{iterations} ({100f * allFloorsCleared / iterations:F1}%)");
             sb.AppendLine($"사망 회차: {deaths}/{iterations} ({100f * deaths / iterations:F1}%)");
@@ -665,6 +787,7 @@ namespace Abyssdawn
                 sb.AppendLine("전투 승률(전체): N/A (전투 0회)");
             sb.AppendLine($"평균 전투 수/회차: {(iterations > 0 ? (double)battles / iterations : 0):F2}");
             sb.AppendLine($"평균 도망 수/회차: {(iterations > 0 ? (double)battleFlees / iterations : 0):F2}  (HP 격차 ≥ {(int)(0.7f * 100)}%p, 층당 최대 {settings.maxFleesPerFloor}회)");
+            sb.AppendLine($"평균 약초 사용/회차: {(iterations > 0 ? (double)medicinalHerbs / iterations : 0):F2}");
             sb.AppendLine($"평균 포션 사용/회차: {(iterations > 0 ? (double)potions / iterations : 0):F2}");
             sb.AppendLine($"평균 새벽의 잔 사용/회차: {(iterations > 0 ? (double)dawnChalice / iterations : 0):F2}");
             sb.AppendLine();
@@ -719,8 +842,10 @@ namespace Abyssdawn
             long[] hpBeforeSum = new long[floors + 2];
             long[] hpAfterSum = new long[floors + 2];
             long[] potionUseSum = new long[floors + 2];
+            long[] herbUseSum = new long[floors + 2];
             long[] chaliceUseSum = new long[floors + 2];
             long[] potionAfterSum = new long[floors + 2];
+            long[] herbAfterSum = new long[floors + 2];
             long[] chaliceAfterSum = new long[floors + 2];
             long[] xpSum = new long[floors + 2];
             long[] levelBeforeSum = new long[floors + 2];
@@ -740,8 +865,10 @@ namespace Abyssdawn
                 hpBeforeSum[f] += r.HpBefore;
                 hpAfterSum[f] += r.HpAfter;
                 potionUseSum[f] += r.PotionUseCount;
+                herbUseSum[f] += r.MedicinalHerbUseCount;
                 chaliceUseSum[f] += r.DawnChaliceUseCount;
                 potionAfterSum[f] += r.PotionRemainAfter;
+                herbAfterSum[f] += r.MedicinalHerbRemainAfter;
                 chaliceAfterSum[f] += r.DawnChaliceRemainAfter;
                 xpSum[f] += r.XpGained;
                 levelBeforeSum[f] += r.LevelBefore;
@@ -790,7 +917,7 @@ namespace Abyssdawn
             // ② 층별 진단표
             sb.AppendLine();
             sb.AppendLine("② 층별 진단표 (도달 회차 기준 평균)");
-            sb.AppendLine("  층 |  도달 | 클리어%  | 사망% | 전투 | 승률 | 도망 | HP진입 → HP종료(손실) | 포션사용/남음 | 잔사용/남음 | 레벨진입 → 종료 | XP");
+            sb.AppendLine("  층 |  도달 | 클리어%  | 사망% | 전투 | 승률 | 도망 | HP진입 → HP종료(손실) | 약초사용/남음 | 포션사용/남음 | 잔사용/남음 | 레벨진입 → 종료 | XP");
             for (int f = 1; f <= floors; f++)
             {
                 int reachedF = reachedCnt[f];
@@ -802,6 +929,8 @@ namespace Abyssdawn
                 double avgFlee = (double)fledSum[f] / reachedF;
                 double avgHpBefore = (double)hpBeforeSum[f] / reachedF;
                 double avgHpAfter = (double)hpAfterSum[f] / reachedF;
+                double avgHerbUse = (double)herbUseSum[f] / reachedF;
+                double avgHerbAfter = (double)herbAfterSum[f] / reachedF;
                 double avgPotionUse = (double)potionUseSum[f] / reachedF;
                 double avgPotionAfter = (double)potionAfterSum[f] / reachedF;
                 double avgChaliceUse = (double)chaliceUseSum[f] / reachedF;
@@ -812,7 +941,7 @@ namespace Abyssdawn
                 sb.AppendLine(
                     $"  {f,2} | {reachedF,5} | {clearPct,6:F1}% | {diePct,5:F1}% | {avgBattles,4:F2} | {avgWinRate,4:F1}% | {avgFlee,4:F2} | " +
                     $"{avgHpBefore,5:F1} → {avgHpAfter,5:F1} ({avgHpBefore - avgHpAfter,5:F1}) | " +
-                    $"{avgPotionUse,4:F2}/{avgPotionAfter,4:F2} | {avgChaliceUse,4:F2}/{avgChaliceAfter,4:F2} | " +
+                    $"{avgHerbUse,4:F2}/{avgHerbAfter,4:F2} | {avgPotionUse,4:F2}/{avgPotionAfter,4:F2} | {avgChaliceUse,4:F2}/{avgChaliceAfter,4:F2} | " +
                     $"{avgLvBefore,4:F2} → {avgLvAfter,4:F2} | {avgXp,5:F1}");
             }
 
@@ -853,7 +982,7 @@ namespace Abyssdawn
                 double avgFloor = runsPotionExhausted > 0 ? (double)sumPotionExhaustionFloor / runsPotionExhausted : 0;
                 sb.AppendLine($"  포션이 0이 된 회차: {runsPotionExhausted}/{totalRuns} ({100.0 * runsPotionExhausted / totalRuns:F1}%), 평균 {avgFloor:F1}층에서 소진.");
                 if (runsPotionExhausted == 0)
-                    sb.AppendLine($"  ▶ 포션을 다 쓰지 못한 채 끝났습니다 — 인카 직전·전투 후 트리거(HP {settings.potionUseHpThreshold:P0} 임계)에 걸리기 전에 죽거나, 승/도망 없이 끝남.");
+                    sb.AppendLine($"  ▶ 포션을 다 쓰지 못한 채 끝났습니다 — 인카 직전·전투 후 트리거(HP<{settings.potionUseHpThreshold:P0})에 걸리기 전에 죽거나, 승/도망 없이 끝남.");
             }
             if (settings.startingDawnChaliceCharges > 0)
             {

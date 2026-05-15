@@ -31,8 +31,11 @@ namespace Abyssdawn
         public int LevelBefore;
         public int LevelAfter;
 
+        public int MedicinalHerbUseCount;
         public int PotionUseCount;
         public int DawnChaliceUseCount;
+        /// <summary>이 층을 마친 직후의 약초 잔량.</summary>
+        public int MedicinalHerbRemainAfter;
         /// <summary>이 층을 마친 직후의 일반 HP 포션 잔량.</summary>
         public int PotionRemainAfter;
         /// <summary>이 층을 마친 직후의 새벽의 잔 충전 잔량.</summary>
@@ -54,7 +57,7 @@ namespace Abyssdawn
             "steps_moved,encounters,battles,battles_won,battles_fled," +
             "hp_before,hp_after,mp_before,mp_after," +
             "xp_gained,gold_gained,level_before,level_after," +
-            "potion_use_count,dawn_chalice_use_count,potion_remain_after,chalice_remain_after,skill_use_count,recovery_skill_use_count," +
+            "medicinal_herb_use_count,potion_use_count,dawn_chalice_use_count,medicinal_herb_remain_after,potion_remain_after,chalice_remain_after,skill_use_count,recovery_skill_use_count," +
             "total_damage_dealt,total_damage_taken,total_battle_turns," +
             "death_flag,clear_flag,next_floor_flag,notes";
 
@@ -78,8 +81,10 @@ namespace Abyssdawn
             sb.Append(GoldGained).Append(',');
             sb.Append(LevelBefore).Append(',');
             sb.Append(LevelAfter).Append(',');
+            sb.Append(MedicinalHerbUseCount).Append(',');
             sb.Append(PotionUseCount).Append(',');
             sb.Append(DawnChaliceUseCount).Append(',');
+            sb.Append(MedicinalHerbRemainAfter).Append(',');
             sb.Append(PotionRemainAfter).Append(',');
             sb.Append(DawnChaliceRemainAfter).Append(',');
             sb.Append(SkillUseCount).Append(',');

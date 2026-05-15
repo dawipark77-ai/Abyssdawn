@@ -19,6 +19,10 @@ namespace Abyssdawn
         public int HpPotionCount;
         public int HpPotionsUsedTotal;
 
+        /// <summary>던전 시뮬 전용 — Medicinal Herb(약초). 층 진입 시 지급·전투 전후 소모.</summary>
+        public int MedicinalHerbCount;
+        public int MedicinalHerbsUsedTotal;
+
         // 새벽의 잔 — HP/MP %회복 + (Phase 2에서 상태이상 회복) 충전식 아이템
         public int DawnChaliceCharges;
         public int DawnChaliceUsedTotal;

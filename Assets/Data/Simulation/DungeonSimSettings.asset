@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DungeonSimSettings
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.DungeonSimSettings
   floorCount: 10
-  iterations: 200
+  iterations: 1000
   baseSeed: 12345
   stepsPerFloorMin: 25
   stepsPerFloorMax: 40
@@ -22,6 +22,7 @@ MonoBehaviour:
   expPerLevelMultiplier: 100
   startingLevel: 1
   startingExp: 0
+  simExpRewardMultiplier: 4
   levelUpHpGain: 8
   levelUpMpGain: 3
   levelUpAtkGain: 1
@@ -29,9 +30,22 @@ MonoBehaviour:
   levelUpMagGain: 0
   levelUpAgiGain: 0
   levelUpLukGain: 0
-  startingHpPotionCount: 5
+  startingHpPotionCount: 3
   hpPotionHealAmount: 30
   potionUseHpThreshold: 0.5
+  medicinalHerbData: {fileID: 11400000, guid: c4d5e6f7a8b90123456789abcdef0120, type: 2}
+  medicinalHerbHealMinFallback: 32
+  medicinalHerbHealMaxFallback: 35
+  medicinalHerbGrantFloorsMin: 1
+  medicinalHerbGrantFloorsMax: 5
+  medicinalHerbGrantCountPerFloor: 3
+  floor1TownFullRestoreEnabled: 1
+  floor1TownMedicinalHerbStack: 15
+  floor1TownAfterVictoryEnabled: 1
+  maxFleesPerFloor: 2
+  startingDawnChaliceCharges: 3
+  dawnChaliceHpHealPercent: 0.6
+  dawnChaliceMpHealPercent: 0.6
   dawnChaliceHpThreshold: 0.4
   useDawnChaliceOnlyWhenPotionEmpty: 0
   csvRelativePath: DungeonSimLogs/DungeonSim_{TIMESTAMP}.csv

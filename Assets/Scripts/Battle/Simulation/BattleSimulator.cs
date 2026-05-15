@@ -77,6 +77,8 @@ namespace Abyssdawn
             public int RecoverySkillUseCount;
             public int DeadAllies;
             public int DeadEnemies;
+            /// <summary>이번 전투 도중(피해 직후) 소모된 약초 개수.</summary>
+            public int BattleMedicinalHerbUses;
             /// <summary>이번 전투 도중(피해 직후) 소모된 일반 HP 포션 개수.</summary>
             public int BattleHpPotionUses;
             /// <summary>이번 전투 도중 소모된 새벽의 잔 충전 횟수(0 또는 1 이상 누적).</summary>
@@ -108,7 +110,7 @@ namespace Abyssdawn
 
             DungeonMidBattleConsumableContext dungeonCx = null;
             if (dungeonConsumablePlayer != null && dungeonConsumableSettings != null)
-                dungeonCx = new DungeonMidBattleConsumableContext(dungeonConsumablePlayer, dungeonConsumableSettings);
+                dungeonCx = new DungeonMidBattleConsumableContext(dungeonConsumablePlayer, dungeonConsumableSettings, rng);
 
             int turns = RunSingleBattleWithUnits(
                 allies, enemies, rng, criticalChanceBase, acc, skillStats,
@@ -144,23 +146,27 @@ namespace Abyssdawn
                 RecoverySkillUseCount = (int)skillStats.RecoveryActivations,
                 DeadAllies = deadAllies,
                 DeadEnemies = deadEnemies,
+                BattleMedicinalHerbUses = dungeonCx != null ? dungeonCx.HerbUses : 0,
                 BattleHpPotionUses = dungeonCx != null ? dungeonCx.PotionUses : 0,
                 BattleDawnChaliceUses = dungeonCx != null ? dungeonCx.ChaliceUses : 0
             };
         }
 
-        /// <summary>던전 시뮬 1전투 중 — 아군 HP가 깎인 뒤 포션(50%)·잔(40%) 순으로 시도.</summary>
+        /// <summary>던전 시뮬 1전투 중 — 아군 HP가 깎인 뒤 약초→포션→(포션 소진 시) 새벽의 잔 (<see cref="DungeonSimSettings.potionUseHpThreshold"/> 미만).</summary>
         private sealed class DungeonMidBattleConsumableContext
         {
             public readonly DungeonSimPlayer Player;
             public readonly DungeonSimSettings Settings;
+            public readonly System.Random Rng;
+            public int HerbUses;
             public int PotionUses;
             public int ChaliceUses;
 
-            public DungeonMidBattleConsumableContext(DungeonSimPlayer player, DungeonSimSettings settings)
+            public DungeonMidBattleConsumableContext(DungeonSimPlayer player, DungeonSimSettings settings, System.Random rng)
             {
                 Player = player;
                 Settings = settings;
+                Rng = rng;
             }
         }
 
@@ -170,9 +176,10 @@ namespace Abyssdawn
         {
             if (cx == null || damagedAlly == null) return;
             if (damagedAlly.Team != BattleSimTeam.Ally) return;
-            // HP 50% 미만 → 포션, 그다음 40% 미만 → 새벽의 잔 (DungeonSimulator 공용 규칙)
-            cx.PotionUses += DungeonSimulator.TryConsumeHpPotionForDungeonSim(cx.Player, cx.Settings);
-            cx.ChaliceUses += DungeonSimulator.TryConsumeDawnChaliceForDungeonSim(cx.Player, cx.Settings);
+            DungeonSimulator.TryHealPartyPriorityHerbPotionChalice(cx.Player, cx.Settings, cx.Rng, out int h, out int p, out int c);
+            cx.HerbUses += h;
+            cx.PotionUses += p;
+            cx.ChaliceUses += c;
         }
 
         /// <summary>외부에서 빌드된 유닛 리스트로 1라운드 루프를 돌리는 내부 헬퍼.</summary>
