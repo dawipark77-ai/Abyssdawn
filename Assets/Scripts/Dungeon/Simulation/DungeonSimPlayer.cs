@@ -29,6 +29,9 @@ namespace Abyssdawn
 
         public int LevelUpsTotal;
 
+        /// <summary>1층 마을(풀 HP/MP·소모품 충전) 호출 누적 — 회차 전체.</summary>
+        public int Floor1TownUsesTotal;
+
         /// <summary>BattleSimulator에 그대로 전달되는 전투 유닛(슬롯 1~4).</summary>
         public readonly List<BattleSimUnit> Units = new List<BattleSimUnit>();
 

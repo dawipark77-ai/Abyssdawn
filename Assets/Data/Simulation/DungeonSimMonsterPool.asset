@@ -32,12 +32,16 @@ MonoBehaviour:
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
+      weight: 1
     partySizeMin: 0
     partySizeMax: 0
   - floor: 4
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+      weight: 1
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
       weight: 1
     partySizeMin: 0
     partySizeMax: 0
@@ -46,12 +50,16 @@ MonoBehaviour:
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
+      weight: 1
     partySizeMin: 0
     partySizeMax: 0
   - floor: 6
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+      weight: 1
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
       weight: 1
     partySizeMin: 0
     partySizeMax: 0
@@ -60,12 +68,25 @@ MonoBehaviour:
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
+      weight: 1
     partySizeMin: 0
     partySizeMax: 0
   - floor: 8
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+      weight: 1
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
+      weight: 1
+    partySizeMin: 0
+    partySizeMax: 0
+  - floor: 9
+    kind: 0
+    monsters:
+    - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+      weight: 1
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
       weight: 1
     partySizeMin: 0
     partySizeMax: 0
@@ -74,12 +95,7 @@ MonoBehaviour:
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
-  - floor: 1
-    kind: 0
-    monsters:
-    - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
       weight: 1
     partySizeMin: 0
     partySizeMax: 0

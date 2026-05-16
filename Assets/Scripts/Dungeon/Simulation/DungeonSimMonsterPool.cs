@@ -92,13 +92,24 @@ namespace Abyssdawn
         }
 
         /// <summary>지정 층 entry로부터 적 파티(여러 마리) 빌드.</summary>
-        public List<MonsterSO> BuildEnemyParty(FloorEntry entry, System.Random rng)
+        /// <param name="dungeonFloor">시뮬 던전 층(1-base). <paramref name="randomOneOrTwoEnemyPartyFromFloor"/>와 함께 쓰입니다.</param>
+        /// <param name="randomOneOrTwoEnemyPartyFromFloor">이 값 이상 층이면서 <see cref="FloorKind.Boss"/>가 아니면 적 1~2마리 균등 랜덤(0이면 비활성).</param>
+        public List<MonsterSO> BuildEnemyParty(FloorEntry entry, System.Random rng, int dungeonFloor = 0, int randomOneOrTwoEnemyPartyFromFloor = 0)
         {
             var list = new List<MonsterSO>();
             if (entry == null) return list;
 
             int sizeMin = Mathf.Clamp(entry.partySizeMin, 1, 4);
             int sizeMax = Mathf.Clamp(entry.partySizeMax, sizeMin, 4);
+
+            if (randomOneOrTwoEnemyPartyFromFloor > 0
+                && dungeonFloor >= randomOneOrTwoEnemyPartyFromFloor
+                && entry.kind != FloorKind.Boss)
+            {
+                sizeMin = 1;
+                sizeMax = 2;
+            }
+
             int size = rng.Next(sizeMin, sizeMax + 1);
 
             for (int i = 0; i < size; i++)

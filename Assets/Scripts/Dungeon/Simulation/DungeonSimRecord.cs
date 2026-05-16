@@ -50,6 +50,12 @@ namespace Abyssdawn
         public bool ClearFlag;
         public bool NextFloorFlag;
 
+        /// <summary>이 층을 마친 직후까지의 1층 마을(풀 회복·충전) 누적 호출 횟수.</summary>
+        public int Floor1TownUsesCumulative;
+
+        /// <summary>이 층에서 마지막으로 치른 전투의 적 수(해당 층 전투 없음 0). 사망 행이면 패배한 그 전투 기준.</summary>
+        public int LastBattleEnemyCount;
+
         public string Notes;
 
         public static string CsvHeader =>
@@ -59,7 +65,7 @@ namespace Abyssdawn
             "xp_gained,gold_gained,level_before,level_after," +
             "medicinal_herb_use_count,potion_use_count,dawn_chalice_use_count,medicinal_herb_remain_after,potion_remain_after,chalice_remain_after,skill_use_count,recovery_skill_use_count," +
             "total_damage_dealt,total_damage_taken,total_battle_turns," +
-            "death_flag,clear_flag,next_floor_flag,notes";
+            "death_flag,clear_flag,next_floor_flag,floor1_town_uses_cumulative,last_battle_enemy_count,notes";
 
         public string ToCsvLine()
         {
@@ -95,6 +101,8 @@ namespace Abyssdawn
             sb.Append(DeathFlag ? 1 : 0).Append(',');
             sb.Append(ClearFlag ? 1 : 0).Append(',');
             sb.Append(NextFloorFlag ? 1 : 0).Append(',');
+            sb.Append(Floor1TownUsesCumulative).Append(',');
+            sb.Append(LastBattleEnemyCount).Append(',');
             sb.Append(EscapeCsv(Notes));
             return sb.ToString();
         }

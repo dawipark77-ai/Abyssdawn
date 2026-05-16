@@ -19,10 +19,13 @@ MonoBehaviour:
   stepsPerFloorMax: 40
   encounterChance: 0.15
   postBattleCooldownSteps: 3
+  dungeonStepHealEnabled: 1
+  stepHealRollChance: 0.08
+  stepHealPeriodicN: 6
   expPerLevelMultiplier: 100
   startingLevel: 1
   startingExp: 0
-  simExpRewardMultiplier: 4
+  simExpRewardMultiplier: 1
   levelUpHpGain: 8
   levelUpMpGain: 3
   levelUpAtkGain: 1
@@ -30,23 +33,38 @@ MonoBehaviour:
   levelUpMagGain: 0
   levelUpAgiGain: 0
   levelUpLukGain: 0
+  healTargetHpRatio: 0.7
+  potionHealHpRatio: 0.7
+  herbUseHpRatio: 0.4
+  emergencyHealHpRatio: 0.25
   startingHpPotionCount: 3
   hpPotionHealAmount: 30
-  potionUseHpThreshold: 0.5
+  potionUseHpThreshold: 0.7
   medicinalHerbData: {fileID: 11400000, guid: c4d5e6f7a8b90123456789abcdef0120, type: 2}
   medicinalHerbHealMinFallback: 32
   medicinalHerbHealMaxFallback: 35
   medicinalHerbGrantFloorsMin: 1
   medicinalHerbGrantFloorsMax: 5
-  medicinalHerbGrantCountPerFloor: 3
+  medicinalHerbGrantCountMin: 0
+  medicinalHerbGrantCountMax: 2
+  randomOneOrTwoEnemyPartyFromFloor: 3
   floor1TownFullRestoreEnabled: 1
   floor1TownMedicinalHerbStack: 15
   floor1TownAfterVictoryEnabled: 1
   maxFleesPerFloor: 2
+  aiProgressionEnabled: 1
+  aiSurvivalEnemyTurnCount: 3
+  aiMaxTownRetreatsPerEncounter: 6
+  aiMaxFarmingPassesBeforeNextFloor: 50
+  aiTownRetreatBeforeUnsafeBattle: 1
+  floorLevelGates:
+  - floor: 3
+    minLevelToEnter: 3
+    maxRecommendedLevel: 5
   startingDawnChaliceCharges: 3
   dawnChaliceHpHealPercent: 0.6
   dawnChaliceMpHealPercent: 0.6
-  dawnChaliceHpThreshold: 0.4
+  dawnChaliceHpThreshold: 0.6
   useDawnChaliceOnlyWhenPotionEmpty: 0
   csvRelativePath: DungeonSimLogs/DungeonSim_{TIMESTAMP}.csv
   summaryRelativePath: Assets/Data/Simulation/_LastDungeonSimSummary.txt

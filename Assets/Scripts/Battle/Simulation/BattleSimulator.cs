@@ -152,7 +152,7 @@ namespace Abyssdawn
             };
         }
 
-        /// <summary>던전 시뮬 1전투 중 — 아군 HP가 깎인 뒤 약초→포션→(포션 소진 시) 새벽의 잔 (<see cref="DungeonSimSettings.potionUseHpThreshold"/> 미만).</summary>
+        /// <summary>던전 시뮬 1전투 중 — 아군 HP가 깎인 뒤 <see cref="DungeonSimulator.TryHealPartyPriorityHerbPotionChalice"/> (유지·긴급·적극 반복).</summary>
         private sealed class DungeonMidBattleConsumableContext
         {
             public readonly DungeonSimPlayer Player;
