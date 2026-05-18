@@ -32,6 +32,12 @@ namespace Abyssdawn
         /// <summary>1층 마을(풀 HP/MP·소모품 충전) 호출 누적 — 회차 전체.</summary>
         public int Floor1TownUsesTotal;
 
+        /// <summary>마지막 마을 방문 시 AI가 고른 장비 시그니처(보고용).</summary>
+        public string LastAiEquipSignature = "";
+
+        /// <summary>이 회차에서 AI 장비 재선택 횟수(마을 방문마다 +1).</summary>
+        public int AiEquipPickCount;
+
         /// <summary>BattleSimulator에 그대로 전달되는 전투 유닛(슬롯 1~4).</summary>
         public readonly List<BattleSimUnit> Units = new List<BattleSimUnit>();
 

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System;
+using Abyssdawn;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -771,6 +772,7 @@ public class PlayerStats : MonoBehaviour
     }
 
     [Header("5. 레벨 시스템")]
+    [Tooltip("현재 레벨에서 다음 레벨까지 필요한 EXP — PlayerExpProgression 표와 동기화됩니다.")]
     public int maxExp = 100;
 
     [Header("6. 배틀 상태 (휘발성)")]
@@ -922,6 +924,8 @@ public class PlayerStats : MonoBehaviour
             }
         }
 
+        SyncMaxExpToProgressionCurve();
+
         _isInitialized = true; // 초기화 완료 플래그
 
         Debug.Log($"[PlayerStats] ===== {playerName} 초기화 완료! =====");
@@ -985,7 +989,8 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"[PlayerStats:DIAG] {context} Before restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
         gm.ApplyToPlayer(this);
-        Debug.Log($"[PlayerStats:DIAG] {context} After restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
+        SyncMaxExpToProgressionCurve();
+        Debug.Log($"[PlayerStats:DIAG] {context} After restore | HP={currentHP}, MP={currentMP}, EXP={exp}/{maxExp}, Lv={level}");
         Debug.Log($"[PlayerStats] {context}: GameManager 복원 — {playerName} HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}, EXP {exp}, Lv {level}");
         OnStatusChanged?.Invoke();
     }
@@ -1300,6 +1305,11 @@ public class PlayerStats : MonoBehaviour
         Debug.Log($"[PlayerStats:DIAG] AddExp result | After: EXP={exp}, Lv={level}, maxExp={maxExp} | playerName='{playerName}' | InstanceID={GetInstanceID()}");
     }
 
+    private void SyncMaxExpToProgressionCurve()
+    {
+        maxExp = Mathf.Max(1, PlayerExpProgression.GetExpToNextLevel(level));
+    }
+
     // [LevelUp 2026-05-13] 변화량 추적 필드 — Apply*() 내부에서 누적, LevelUp 끝에 메시지 생성에 사용.
     private int _lvUpHpGain;
     private int _lvUpMpGain;
@@ -1313,7 +1323,7 @@ public class PlayerStats : MonoBehaviour
     {
         level++;
         exp -= maxExp;
-        maxExp = level * 100;
+        maxExp = Mathf.Max(1, PlayerExpProgression.GetExpToNextLevel(level));
 
         _lvUpHpGain = 0;
         _lvUpMpGain = 0;
@@ -1332,6 +1342,18 @@ public class PlayerStats : MonoBehaviour
         OnStatusChanged?.Invoke();
 
         EmitLevelUpBattleLog();
+        LogLevelUpStatsSnapshot();
+    }
+
+    /// <summary>
+    /// 레벨업 직후 전투 스탯 스냅샷(장비·패시브·직업 반영 후). 콘솔 필터: <c>LevelUpStats</c>.
+    /// </summary>
+    private void LogLevelUpStatsSnapshot()
+    {
+        string n = string.IsNullOrEmpty(playerName) ? "Hero" : playerName;
+        Debug.Log(
+            $"[LevelUpStats] {n} | Lv{level} | HP {currentHP}/{maxHP} | MP {currentMP}/{maxMP} | " +
+            $"ATK {Attack} | DEF {Defense} | MAG {Magic} | AGI {Agility} | LUK {Luck} | FreePts {FreeStatPoints}");
     }
 
     /// <summary>

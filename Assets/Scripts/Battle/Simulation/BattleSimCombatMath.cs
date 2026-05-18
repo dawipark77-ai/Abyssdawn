@@ -77,7 +77,7 @@ namespace AbyssdawnBattle
         }
 
         /// <summary>
-        /// HitChance = Base × AGI보정 × SlotHit × Equip, clamp 0.45~0.95. Base = 스킬 accuracy 또는 1.
+        /// 본편 <c>BattleManager.ComputeHitChanceCore</c>와 동일: (스킬accuracy×슬롯)×AGI보정 + Luck×0.002 + 패시브·장비 가산, clamp 0.2~0.98.
         /// </summary>
         public static float ComputeHitChance(
             SkillData usedSkill,
@@ -89,12 +89,16 @@ namespace AbyssdawnBattle
             BattleSlot defenderSlot,
             float equipAccuracyMultiplier = 1f)
         {
-            float baseAcc = usedSkill != null ? usedSkill.accuracy : 1f;
-            float agiMod = ComputeAgilityHitModifier(attackerAgility, defenderAgility);
-            float slotHit = GetSimSlotHitMultiplier(defenderSlot);
+            float skillAcc = usedSkill != null ? usedSkill.accuracy : 1f;
+            float slotAcc = GetSimSlotHitMultiplier(defenderSlot);
+            float combinedAcc = skillAcc * slotAcc;
+            float agiModifier = ComputeAgilityHitModifier(attackerAgility, defenderAgility);
             float equip = equipAccuracyMultiplier <= 0f ? 1f : equipAccuracyMultiplier;
-            float p = baseAcc * agiMod * slotHit * equip;
-            return Mathf.Clamp(p, 0.45f, 0.95f);
+            float finalHitChance = combinedAcc * agiModifier * equip
+                                   + (attackerLuck * 0.002f)
+                                   + passiveAccuracyBonus
+                                   + itemAccuracyBonus;
+            return Mathf.Clamp(finalHitChance, 0.2f, 0.98f);
         }
 
         public static bool RollHit(

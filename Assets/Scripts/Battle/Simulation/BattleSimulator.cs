@@ -389,12 +389,13 @@ namespace Abyssdawn
                 else
                     acc.EnemyDefenderAttackAttempts[si]++;
 
+                float accBonus = BattleSimLearnedSkillCombatMods.GetPassiveAccuracyBonusFromSimSkills(unit);
                 bool hit = BattleSimCombatMath.RollHit(
                     null,
                     unit.Agility,
                     target.Agility,
                     unit.Luck,
-                    0f,
+                    accBonus,
                     0f,
                     target.Slot,
                     rng);
@@ -408,6 +409,8 @@ namespace Abyssdawn
 
                 bool crit = BattleSimCombatMath.RollCritical(unit.Luck, critChanceBase, rng);
                 int dmg = BattleSimCombatMath.CalculateSimMeleeDamage(unit.Attack, target.Defense, crit, target.Slot);
+                bool defIsEnemy = !targetIsAlly;
+                dmg = BattleSimLearnedSkillCombatMods.ApplySharpEdgeDamageMultiplier(unit, target, dmg, defIsEnemy);
                 int applied = ApplyPhysicalDamageWithSimGuard(target, dmg, targetIsAlly, dungeonCx);
                 if (targetIsAlly)
                     acc.AllyDefenderDamageTaken[si] += applied;
@@ -424,6 +427,8 @@ namespace Abyssdawn
             DungeonMidBattleConsumableContext dungeonCx = null)
         {
             int dmg = damageAfterFormula;
+            float r = BattleSimLearnedSkillCombatMods.GetBasicSwordsmanshipDamageTakenReduction(target);
+            dmg = Mathf.Max(1, Mathf.FloorToInt(dmg * (1f - Mathf.Clamp(r, 0f, 0.9f))));
             if (damageIsEnemyVsAlly && target.SimGuardEnemyPhase)
                 dmg = Mathf.FloorToInt(dmg * BattleSimCombatMath.SimGuardIncomingDamageMultiplier);
             else if (!damageIsEnemyVsAlly && target.SimGuardNextAllyPhase)
@@ -909,12 +914,13 @@ namespace Abyssdawn
                     else
                         acc.EnemyDefenderAttackAttempts[si]++;
 
+                    float accBonus = BattleSimLearnedSkillCombatMods.GetPassiveAccuracyBonusFromSimSkills(unit);
                     bool hit = BattleSimCombatMath.RollHit(
                         skill,
                         unit.Agility,
                         target.Agility,
                         unit.Luck,
-                        0f,
+                        accBonus,
                         0f,
                         target.Slot,
                         rng);
@@ -928,6 +934,8 @@ namespace Abyssdawn
 
                     bool crit = BattleSimCombatMath.RollCritical(unit.Luck, critChanceBase, rng, skill.critBonusPercent);
                     int dmg = BattleSimCombatMath.CalculateSimSkillDamage(skill, scaled, target.Defense, crit, target.Slot, rng);
+                    bool defIsEnemy = !targetIsAlly;
+                    dmg = BattleSimLearnedSkillCombatMods.ApplySharpEdgeDamageMultiplier(unit, target, dmg, defIsEnemy);
                     int applied = ApplyPhysicalDamageWithSimGuard(target, dmg, targetIsAlly, dungeonCx);
                     if (targetIsAlly)
                         acc.AllyDefenderDamageTaken[si] += applied;

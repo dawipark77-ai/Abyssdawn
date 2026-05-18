@@ -18,84 +18,68 @@ MonoBehaviour:
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 2
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 3
     kind: 0
     monsters:
-    - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+    - monster: {fileID: 11400000, guid: 27eec78f5835712448fd1c257cb94489, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 4
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 5
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 6
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 7
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 8
     kind: 0
     monsters:
-    - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+    - monster: {fileID: 11400000, guid: 8c48f9a85dea7b344b45220f0b416896, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 9
     kind: 0
     monsters:
     - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1
   - floor: 10
     kind: 0
     monsters:
-    - monster: {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+    - monster: {fileID: 11400000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9, type: 2}
       weight: 1
-    - monster: {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
-      weight: 1
-    partySizeMin: 0
-    partySizeMax: 0
+    partySizeMin: 1
+    partySizeMax: 1

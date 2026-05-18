@@ -50,12 +50,103 @@ namespace Abyssdawn
         /// <summary>던전 시뮬 레벨업 시 HP/MP — <see cref="CharacterClass.hpPerLevel"/> / <see cref="CharacterClass.mpPerLevel"/>.</summary>
         public CharacterClass SimCharacterClass;
 
+        /// <summary>던전 시뮬 전용 — 레벨업·SO 기반 수치는 여기에만 쌓고, <see cref="RecomputeSimDerivedStatsFromIntrinsicsAndEquipment"/>로 전투 스탯을 갱신합니다.</summary>
+        public bool SimStatLayerEquipmentEnabled;
+
+        /// <summary>던전 시뮬 파티 레벨 — 기본 검술 등 레벨 의존 패시브에 사용.</summary>
+        public int SimDungeonPartyLevel = 1;
+
+        public int IntrinsicMaxHP;
+        public int IntrinsicMaxMP;
+        public int IntrinsicAttack;
+        public int IntrinsicDefense;
+        public int IntrinsicMagic;
+        public int IntrinsicAgility;
+        public int IntrinsicLuck;
+
+        /// <summary>던전 시뮬 AI 장비(우/좌 손, 몸, 악세×2). 적 유닛은 비웁니다.</summary>
+        public EquipmentData SimEquipRightHand;
+        public EquipmentData SimEquipLeftHand;
+        public EquipmentData SimEquipBody;
+        public EquipmentData SimEquipAccessory1;
+        public EquipmentData SimEquipAccessory2;
+
         public bool IsAlive => CurrentHP > 0;
 
         public void ApplyDamage(int amount)
         {
             if (amount <= 0) return;
             CurrentHP = Mathf.Max(0, CurrentHP - amount);
+        }
+
+        /// <summary>Intrinsic + 장비 보너스로 MaxHP/MP·오박 스탯을 다시 계산합니다. 비활성 유닛은 변경하지 않습니다.</summary>
+        public void RecomputeSimDerivedStatsFromIntrinsicsAndEquipment()
+        {
+            if (!SimStatLayerEquipmentEnabled) return;
+
+            // MaxHP가 아직 없던 최초 재계산(빌드 직후)에서는 CurrentHP 기본값 0을 ‘사망’으로 보지 않는다.
+            bool wasDead = CurrentHP <= 0 && MaxHP > 0;
+
+            int hpRatioNum = MaxHP > 0 ? CurrentHP : IntrinsicMaxHP;
+            int hpRatioDen = Mathf.Max(1, MaxHP > 0 ? MaxHP : IntrinsicMaxHP);
+            int mpRatioNum = MaxMP > 0 ? CurrentMP : IntrinsicMaxMP;
+            int mpRatioDen = Mathf.Max(1, MaxMP > 0 ? MaxMP : IntrinsicMaxMP);
+
+            int atk = IntrinsicAttack;
+            int def = IntrinsicDefense;
+            int mag = IntrinsicMagic;
+            int agi = IntrinsicAgility;
+            int luk = IntrinsicLuck;
+            int hpFlat = IntrinsicMaxHP;
+            int mpFlat = IntrinsicMaxMP;
+            float mpPctSum = 0f;
+
+            void AddEq(EquipmentData e)
+            {
+                if (e == null) return;
+                atk += e.attackBonus;
+                def += e.defenseBonus;
+                mag += e.magicBonus;
+                agi += e.agiBonus;
+                luk += e.luckBonus;
+                hpFlat += e.hpBonus;
+                mpFlat += e.mpBonus;
+                mpPctSum += e.mpBonusPercent;
+            }
+
+            AddEq(SimEquipRightHand);
+            AddEq(SimEquipLeftHand);
+            AddEq(SimEquipBody);
+            AddEq(SimEquipAccessory1);
+            AddEq(SimEquipAccessory2);
+
+            atk += BattleSimLearnedSkillCombatMods.GetBasicSwordsmanshipAttackBonus(this);
+
+            Attack = Mathf.Max(0, atk);
+            Defense = Mathf.Max(0, def);
+            Magic = Mathf.Max(0, mag);
+            Agility = Mathf.Max(0, agi);
+            Luck = Mathf.Max(0, luk);
+
+            MaxHP = Mathf.Max(1, hpFlat);
+            MaxMP = Mathf.Max(0, mpFlat + Mathf.RoundToInt(IntrinsicMaxMP * mpPctSum));
+
+            if (wasDead)
+            {
+                CurrentHP = 0;
+                CurrentMP = 0;
+                return;
+            }
+
+            if (MaxHP > 0)
+                CurrentHP = Mathf.Clamp(Mathf.RoundToInt((float)hpRatioNum * MaxHP / hpRatioDen), 1, MaxHP);
+            else
+                CurrentHP = 0;
+
+            if (MaxMP > 0)
+                CurrentMP = Mathf.Clamp(Mathf.RoundToInt((float)mpRatioNum * MaxMP / mpRatioDen), 0, MaxMP);
+            else
+                CurrentMP = 0;
         }
     }
 }

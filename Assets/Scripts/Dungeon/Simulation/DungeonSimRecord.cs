@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace Abyssdawn
@@ -45,6 +46,8 @@ namespace Abyssdawn
         public int TotalDamageDealt;
         public int TotalDamageTaken;
         public int TotalBattleTurns;
+        /// <summary>승리한 전투만 — 소모된 턴 수 합(평균은 BattlesWon으로 나눔).</summary>
+        public int WinBattleTurnsSum;
 
         public bool DeathFlag;
         public bool ClearFlag;
@@ -58,14 +61,17 @@ namespace Abyssdawn
 
         public string Notes;
 
+        /// <summary>사망 행(death_flag=1)일 때 마지막 AI 장비 시그니처.</summary>
+        public string DeathAiEquipSignature;
+
         public static string CsvHeader =>
             "run_id,seed,floor,floor_type," +
             "steps_moved,encounters,battles,battles_won,battles_fled," +
             "hp_before,hp_after,mp_before,mp_after," +
             "xp_gained,gold_gained,level_before,level_after," +
             "medicinal_herb_use_count,potion_use_count,dawn_chalice_use_count,medicinal_herb_remain_after,potion_remain_after,chalice_remain_after,skill_use_count,recovery_skill_use_count," +
-            "total_damage_dealt,total_damage_taken,total_battle_turns," +
-            "death_flag,clear_flag,next_floor_flag,floor1_town_uses_cumulative,last_battle_enemy_count,notes";
+            "total_damage_dealt,total_damage_taken,total_battle_turns,win_turns_sum,avg_turns_per_win," +
+            "death_flag,clear_flag,next_floor_flag,floor1_town_uses_cumulative,last_battle_enemy_count,death_ai_equip,notes";
 
         public string ToCsvLine()
         {
@@ -98,11 +104,15 @@ namespace Abyssdawn
             sb.Append(TotalDamageDealt).Append(',');
             sb.Append(TotalDamageTaken).Append(',');
             sb.Append(TotalBattleTurns).Append(',');
+            sb.Append(WinBattleTurnsSum).Append(',');
+            float avgWin = BattlesWon > 0 ? WinBattleTurnsSum / (float)BattlesWon : 0f;
+            sb.Append(avgWin.ToString("0.###", CultureInfo.InvariantCulture)).Append(',');
             sb.Append(DeathFlag ? 1 : 0).Append(',');
             sb.Append(ClearFlag ? 1 : 0).Append(',');
             sb.Append(NextFloorFlag ? 1 : 0).Append(',');
             sb.Append(Floor1TownUsesCumulative).Append(',');
             sb.Append(LastBattleEnemyCount).Append(',');
+            sb.Append(EscapeCsv(DeathAiEquipSignature)).Append(',');
             sb.Append(EscapeCsv(Notes));
             return sb.ToString();
         }

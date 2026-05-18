@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Abyssdawn
 {
@@ -59,8 +58,9 @@ namespace Abyssdawn
         [Tooltip("N칸마다 1회 회복 시도. 0이면 주기만 끔.")]
         [Min(0)] public int stepHealPeriodicN = 6;
 
-        [Header("EXP 곡선 (실제 PlayerStats.LevelUp 공식과 동일)")]
-        [Tooltip("레벨 N → N+1에 필요한 EXP = N × expPerLevelMultiplier")]
+        [Header("EXP 곡선 (PlayerExpProgression과 동일)")]
+        [Tooltip("구버전 에셋 직렬화 호환용 — 무시됩니다. 레벨업 EXP는 PlayerExpProgression 표를 사용합니다.")]
+        [HideInInspector]
         [Min(1)] public int expPerLevelMultiplier = 100;
 
         [Tooltip("시작 레벨")]
@@ -79,19 +79,19 @@ namespace Abyssdawn
         [Tooltip("CharacterClass 미지정 시에만 사용 — 레벨당 maxMP 기본 증가.")]
         [Min(0)] public int levelUpMpGain = 3;
 
-        [Tooltip("레벨업 시 ATK 기본 증가(고정). 이후 종의 기억 가중 랜덤으로 스탯 +1이 한 번 더 들어갈 수 있음.")]
+        [Tooltip("던전 시뮬 ApplyLevelUp에서 스탯 고정 증가에는 사용하지 않음(스탯은 랜덤 +2만).")]
         [Min(0)] public int levelUpAtkGain = 1;
 
-        [Tooltip("레벨업 시 DEF 증가량 (평균)")]
+        [Tooltip("던전 시뮬 ApplyLevelUp에서 스탯 고정 증가에는 사용하지 않음(스탯은 랜덤 +2만).")]
         [Min(0)] public int levelUpDefGain = 1;
 
-        [Tooltip("레벨업 시 MAG 증가량 (평균)")]
+        [Tooltip("던전 시뮬 ApplyLevelUp에서 스탯 고정 증가에는 사용하지 않음(스탯은 랜덤 +2만).")]
         [Min(0)] public int levelUpMagGain = 0;
 
-        [Tooltip("레벨업 시 AGI 증가량 (평균)")]
+        [Tooltip("던전 시뮬 ApplyLevelUp에서 스탯 고정 증가에는 사용하지 않음(스탯은 랜덤 +2만).")]
         [Min(0)] public int levelUpAgiGain = 0;
 
-        [Tooltip("레벨업 시 LUK 증가량 (평균)")]
+        [Tooltip("던전 시뮬 ApplyLevelUp에서 스탯 고정 증가에는 사용하지 않음(스탯은 랜덤 +2만).")]
         [Min(0)] public int levelUpLukGain = 0;
 
         [Header("HP 회복 임계 (던전 시뮬)")]
@@ -138,17 +138,12 @@ namespace Abyssdawn
         [Tooltip("지급 층 범위 진입 시 추가 약초 — 최대(포함). Min~Max 균등 랜덤.")]
         [Min(0)] public int medicinalHerbGrantCountMax = 2;
 
-        [Header("적 파티 (던전 시뮬)")]
-        [Tooltip("이 층 번호 이상의 인카운터에서, 풀 항목이 Boss가 아니면 적 1~2마리 균등 랜덤. 0이면 비활성(풀의 partySizeMin/Max만 사용).")]
-        [FormerlySerializedAs("forceTwoEnemyPartyFromFloor")]
-        [Min(0)] public int randomOneOrTwoEnemyPartyFromFloor = 3;
-
         [Header("1층 마을 (시뮬 전용) — 경제 없음")]
-        [Tooltip("켜면 매 회차 1층 진입 시 아군 HP·MP 최대로, HP포션·새벽의 잔·약초를 아래 스택으로 맞춥니다(드퀘식 숙소 상정).")]
+        [Tooltip("켜면 매 회차 1층 진입 시 아군 HP·MP 최대로, HP포션·새벽의 잔을 시작 스택으로 맞춥니다. 약초는 아래 스택이 1 이상일 때만 덮어쓰며, 기본은 층 진입 지급(약초 범위)만 사용합니다.")]
         public bool floor1TownFullRestoreEnabled = true;
 
-        [Tooltip("1층 마을에서 세팅할 약초 개수(절대값). 마을 적용 시에는 이 층에 대한 ‘층 진입 약초 +N’은 생략합니다.")]
-        [Min(0)] public int floor1TownMedicinalHerbStack = 15;
+        [Tooltip("0이면 마을이 약초 개수를 건드리지 않습니다(층 진입 0~N 지급만). 1 이상이면 마을 적용 시마다 이 개수로 덮어씁니다.")]
+        [Min(0)] public int floor1TownMedicinalHerbStack = 0;
 
         [Tooltip("1층 + 1층 마을 켜짐일 때만 — 전투 승리 직후 마을과 동일 풀 HP/MP·소모품 재충전(귀환 노가다 시뮬).")]
         public bool floor1TownAfterVictoryEnabled = true;
@@ -170,8 +165,33 @@ namespace Abyssdawn
         [Tooltip("다음 층 진입 최소 레벨 미달 시, 같은 층을 다시 도는 최대 횟수(한 횟수 = RunSingleFloor 1회, 층 진입 지급 생략).")]
         [Min(0)] public int aiMaxFarmingPassesBeforeNextFloor = 50;
 
+        [Tooltip("다음 층 요구 레벨(수동·풀 병합)을 만족한 뒤에도, 그보다 이 레벨만큼 더 올릴 때까지 같은 층 파밍을 시도합니다. 0 = 요구치만 맞추면 즉시 다음 층(기본). EXP가 적으면 aiMaxFarmingPasses에 걸려 중간에 올라가지 못할 수 있습니다.")]
+        [Min(0)] public int aiExtraLevelsBeyondNextFloorGate = 0;
+
         [Tooltip("false면 전투 전 HP·마을 판정을 끕니다(권장 레벨 파밍만 유지).")]
         public bool aiTownRetreatBeforeUnsafeBattle = true;
+
+        [Tooltip("켜면 다음 층 진입에 필요한 레벨 = max(floorLevelGates, 몬스터 풀 스탯으로 추정한 권장 레벨). 끄면 게이트 리스트만 사용(비어 있으면 1).")]
+        public bool aiMergeMonsterPoolRecommendedLevel = true;
+
+        [Header("AI — 다음 층 레벨 (턴 승리 기준)")]
+        [Tooltip("켜면: 다음 층 몬스터 풀 대상으로 ‘N턴 이내 승리’ 프로브로 최소 플레이어 레벨을 산출해, 수동 게이트와 병합합니다(아래 ‘풀 추정 대체’ 참고).")]
+        public bool aiTurnWinGateEnabled = true;
+
+        [Tooltip("true면 몬스터 풀 스탯 추정(aiMergeMonsterPoolRecommendedLevel)으로 나온 권장 레벨은 무시하고, 수동 게이트와 턴 승리 기준만 사용합니다.")]
+        public bool aiTurnWinGateReplacesPoolRecommendation = true;
+
+        [Tooltip("이 턴 수 이하로 전투가 끝난 승리만 ‘통과’로 카운트합니다(프로브 판정).")]
+        [Min(1)] public int aiTurnWinGateMaxTurns = 3;
+
+        [Tooltip("후보 레벨 L마다 같은 층 적을 몇 번 샘플링할지(가중 랜덤 1마리 전투).")]
+        [Min(1)] public int aiTurnWinGateProbesPerLevel = 8;
+
+        [Tooltip("프로브 중 이 비율 이상이 (승리 ∧ 턴≤제한)이면 해당 L을 충분하다고 봅니다.")]
+        [Range(0.5f, 1f)] public float aiTurnWinGateRequiredSuccessRatio = 0.875f;
+
+        [Tooltip("턴 게이트 탐색 시 최대 플레이어 레벨(상한에 걸리면 이 값을 그대로 반환).")]
+        [Min(1)] public int aiTurnWinGateMaxSearchLevel = 60;
 
         [Tooltip("층별 ‘이 층에 들어가려면’ 최소 레벨. 비어 있거나 해당 층 행이 없으면 1(제한 없음)으로 간주합니다.")]
         public List<DungeonSimFloorLevelGate> floorLevelGates = new List<DungeonSimFloorLevelGate>();
@@ -231,10 +251,8 @@ namespace Abyssdawn
             return 0.25f;
         }
 
-        public int GetExpToNextLevel(int currentLevel)
-        {
-            return Mathf.Max(1, currentLevel) * expPerLevelMultiplier;
-        }
+        public int GetExpToNextLevel(int currentLevel) =>
+            PlayerExpProgression.GetExpToNextLevel(currentLevel);
 
         /// <summary>해당 층에 처음 진입하기 위한 최소 레벨. 정의 없으면 1.</summary>
         public int GetMinLevelToEnterFloor(int floor)
@@ -253,6 +271,30 @@ namespace Abyssdawn
             return found ? best : 1;
         }
 
+        /// <summary>
+        /// AI 층 진입 판정용 — <see cref="GetMinLevelToEnterFloor"/>와
+        /// (옵션) <see cref="DungeonSimMonsterPool.GetRecommendedMinLevelToEnterFloor"/> 중 큰 값.
+        /// </summary>
+        public int GetEffectiveMinLevelToEnterFloor(int floor, DungeonSimMonsterPool pool)
+        {
+            int fromGates = GetMinLevelToEnterFloor(floor);
+            if (!aiMergeMonsterPoolRecommendedLevel || pool == null) return fromGates;
+            int fromPool = pool.GetRecommendedMinLevelToEnterFloor(floor);
+            return Mathf.Max(fromGates, fromPool);
+        }
+
+        /// <summary>해당 층에 대한 수동 최소 레벨 행이 <see cref="floorLevelGates"/>에 정의돼 있는지.</summary>
+        public bool HasMinLevelGateRowForFloor(int floor)
+        {
+            if (floorLevelGates == null || floorLevelGates.Count == 0) return false;
+            for (int i = 0; i < floorLevelGates.Count; i++)
+            {
+                var g = floorLevelGates[i];
+                if (g != null && g.floor == floor) return true;
+            }
+            return false;
+        }
+
         /// <summary>층 진입 약초 지급량 — Min~Max(포함) 균등 랜덤. System.Random용.</summary>
         public int RollMedicinalHerbGrantCount(System.Random rng)
         {
@@ -264,6 +306,7 @@ namespace Abyssdawn
 
         private void OnValidate()
         {
+            aiTurnWinGateRequiredSuccessRatio = Mathf.Clamp(aiTurnWinGateRequiredSuccessRatio, 0.5f, 1f);
             if (medicinalHerbGrantCountMax < medicinalHerbGrantCountMin)
                 medicinalHerbGrantCountMax = medicinalHerbGrantCountMin;
             if (floorLevelGates == null) return;

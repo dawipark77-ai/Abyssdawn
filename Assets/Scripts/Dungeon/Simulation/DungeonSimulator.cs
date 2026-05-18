@@ -32,6 +32,15 @@ namespace Abyssdawn
         [Tooltip("BattleSimulator 컴포넌트 — 1전투 실행 엔진. 비우면 같은 GameObject에서 찾습니다.")]
         [SerializeField] private BattleSimulator battleSimulator;
 
+        /// <summary>한 번의 RunDungeonSimulation 안에서 층별 턴-승리 기준 최소 레벨을 재계산하지 않도록 캐시합니다.</summary>
+        private readonly Dictionary<int, int> _aiTurnWinMinLevelCache = new Dictionary<int, int>();
+
+        private sealed class SimEquipHistograms
+        {
+            public readonly Dictionary<string, int> AiPick = new Dictionary<string, int>();
+            public readonly Dictionary<string, int> Death = new Dictionary<string, int>();
+        }
+
         public bool IsReadyToRun()
         {
             return settings != null && allyRoster != null && monsterPool != null && ResolveBattleSimulator() != null;
@@ -54,6 +63,8 @@ namespace Abyssdawn
             var bm = ResolveBattleSimulator();
             if (bm == null) { Debug.LogError("[DungeonSim] BattleSimulator 미할당 — 같은 GameObject에 BattleSimulator를 추가하거나 필드를 채우세요."); return; }
 
+            _aiTurnWinMinLevelCache.Clear();
+
             int iterations = Mathf.Max(1, settings.iterations);
             int baseSeed = settings.baseSeed;
             var allRecords = new List<DungeonSimRecord>(iterations * settings.floorCount);
@@ -67,6 +78,7 @@ namespace Abyssdawn
             long totalDawnChalice = 0;
             long totalMedicinalHerbs = 0;
             int[] floorReachedCount = new int[settings.floorCount + 1];
+            var equipHist = new SimEquipHistograms();
 
             for (int i = 0; i < iterations; i++)
             {
@@ -84,7 +96,7 @@ namespace Abyssdawn
                         break;
                     }
 
-                    var rec = RunSingleFloor(i + 1, seed, floor, player, rng, bm, skipFloorEntryEffects: false);
+                    var rec = RunSingleFloor(i + 1, seed, floor, player, rng, bm, equipHist, skipFloorEntryEffects: false);
                     allRecords.Add(rec);
                     totalBattles += rec.Battles;
                     totalBattleWins += rec.BattlesWon;
@@ -101,13 +113,14 @@ namespace Abyssdawn
 
                     if (settings.aiProgressionEnabled && floor < settings.floorCount)
                     {
-                        int needLv = settings.GetMinLevelToEnterFloor(floor + 1);
+                        int needLv = GetAiNextFloorRequiredLevel(floor + 1);
+                        int targetLv = needLv + Mathf.Max(0, settings.aiExtraLevelsBeyondNextFloorGate);
                         int farmPasses = 0;
                         while (player.AnyAlive()
-                               && player.Level < needLv
+                               && player.Level < targetLv
                                && farmPasses < settings.aiMaxFarmingPassesBeforeNextFloor)
                         {
-                            var farmRec = RunSingleFloor(i + 1, seed, floor, player, rng, bm, skipFloorEntryEffects: true);
+                            var farmRec = RunSingleFloor(i + 1, seed, floor, player, rng, bm, equipHist, skipFloorEntryEffects: true);
                             allRecords.Add(farmRec);
                             totalBattles += farmRec.Battles;
                             totalBattleWins += farmRec.BattlesWon;
@@ -129,7 +142,17 @@ namespace Abyssdawn
                 }
 
                 floorReachedCount[Mathf.Clamp(floorsCleared, 0, settings.floorCount)]++;
-                if (died) totalDeaths++;
+                if (died)
+                {
+                    totalDeaths++;
+                    string sig = DungeonSimAiEquipment.GetPartyEquipSignature(player);
+                    if (!string.IsNullOrEmpty(sig))
+                    {
+                        if (!equipHist.Death.TryGetValue(sig, out int dc))
+                            dc = 0;
+                        equipHist.Death[sig] = dc + 1;
+                    }
+                }
                 if (floorsCleared >= settings.floorCount && !died) totalClearedAllFloors++;
             }
 
@@ -145,7 +168,7 @@ namespace Abyssdawn
             }
             catch (Exception e) { Debug.LogWarning($"[DungeonSim] CSV write failed: {e.Message}"); }
 
-            string summary = BuildSummary(iterations, totalDeaths, totalClearedAllFloors, totalBattles, totalBattleWins, totalBattleFlees, totalMedicinalHerbs, totalPotions, totalDawnChalice, floorReachedCount, allRecords);
+            string summary = BuildSummary(iterations, totalDeaths, totalClearedAllFloors, totalBattles, totalBattleWins, totalBattleFlees, totalMedicinalHerbs, totalPotions, totalDawnChalice, floorReachedCount, allRecords, equipHist);
             Debug.Log(summary);
             try
             {
@@ -174,7 +197,7 @@ namespace Abyssdawn
         // ---------------------------------------------------------------
         // 한 층 실행
         // ---------------------------------------------------------------
-        private DungeonSimRecord RunSingleFloor(int runId, int seed, int floor, DungeonSimPlayer player, System.Random rng, BattleSimulator bm, bool skipFloorEntryEffects)
+        private DungeonSimRecord RunSingleFloor(int runId, int seed, int floor, DungeonSimPlayer player, System.Random rng, BattleSimulator bm, SimEquipHistograms equipHist, bool skipFloorEntryEffects)
         {
             var rec = new DungeonSimRecord
             {
@@ -212,12 +235,12 @@ namespace Abyssdawn
             {
                 if (floor == 1 && settings.floor1TownFullRestoreEnabled)
                 {
-                    ApplyFloor1TownFullRestore(player, settings);
+                    ApplyFloor1TownFullRestore(player, settings, rng, monsterPool, floor, equipHist?.AiPick);
                     rec.HpBefore = player.GetTotalCurrentHP();
                     rec.MpBefore = player.GetTotalCurrentMP();
                     rec.Notes = string.IsNullOrEmpty(rec.Notes) ? "floor1_town" : rec.Notes + "; floor1_town";
                 }
-                else if (floor >= fMin && floor <= fMax)
+                if (floor >= fMin && floor <= fMax)
                     player.MedicinalHerbCount += Mathf.Max(0, settings.RollMedicinalHerbGrantCount(rng));
             }
 
@@ -236,6 +259,7 @@ namespace Abyssdawn
             int dmgDealt = 0;
             int dmgTaken = 0;
             int turnsSum = 0;
+            int winTurnsSum = 0;
             int levelUpsThisFloor = 0;
             int fleesThisFloor = 0;
             int lastBattleEnemyCount = 0;
@@ -274,32 +298,32 @@ namespace Abyssdawn
                     break;
                 }
 
-                encounters++;
                 int hPre, pPre, cPre;
                 TryHealPartyPriorityHerbPotionChalice(player, settings, rng, out hPre, out pPre, out cPre);
                 medicinalHerbUseCount += hPre;
                 potionUseCount += pPre;
                 dawnChaliceUseCount += cPre;
 
-                var enemyParty = monsterPool.BuildEnemyParty(entry, rng, floor, settings.randomOneOrTwoEnemyPartyFromFloor);
+                var enemyParty = monsterPool.BuildEnemyParty(entry, rng);
                 if (enemyParty.Count == 0) continue;
                 var enemyUnits = BuildEnemyUnitsFromMonsterSOs(enemyParty);
                 if (enemyUnits.Count == 0) continue;
 
                 if (settings.aiProgressionEnabled && settings.aiTownRetreatBeforeUnsafeBattle && settings.floor1TownFullRestoreEnabled)
                 {
-                    int maxAtk = GetMaxMonsterAtkFromParty(enemyParty);
+                    int maxStrike = GetMaxMonsterStrikeFromParty(enemyParty);
                     int turns = Mathf.Max(1, settings.aiSurvivalEnemyTurnCount);
                     for (int tr = 0; tr < settings.aiMaxTownRetreatsPerEncounter; tr++)
                     {
-                        if (maxAtk <= 0) break;
-                        long needHp = (long)maxAtk * turns;
+                        if (maxStrike <= 0) break;
+                        long needHp = (long)maxStrike * turns;
                         if (player.GetTotalCurrentHP() >= needHp) break;
-                        ApplyFloor1TownFullRestore(player, settings);
+                        ApplyFloor1TownFullRestore(player, settings, rng, monsterPool, floor, equipHist?.AiPick);
                         if (player.GetTotalCurrentHP() >= needHp) break;
                     }
                 }
 
+                encounters++;
                 lastBattleEnemyCount = enemyUnits.Count;
 
                 battles++;
@@ -317,6 +341,7 @@ namespace Abyssdawn
                 if (outcome.AllyWin)
                 {
                     battleWins++;
+                    winTurnsSum += outcome.Turns;
                     int xpThisBattle = 0;
                     int goldThisBattle = 0;
                     foreach (var m in enemyParty)
@@ -337,12 +362,12 @@ namespace Abyssdawn
                     while (player.Exp >= settings.GetExpToNextLevel(player.Level))
                     {
                         player.Exp -= settings.GetExpToNextLevel(player.Level);
-                        ApplyLevelUp(player, rng);
+                        ApplyLevelUp(player, settings, rng);
                         levelUpsThisFloor++;
                     }
 
                     if (floor == 1 && settings.floor1TownFullRestoreEnabled && settings.floor1TownAfterVictoryEnabled)
-                        ApplyFloor1TownFullRestore(player, settings);
+                        ApplyFloor1TownFullRestore(player, settings, rng, monsterPool, floor, equipHist?.AiPick);
 
                     cooldown = settings.postBattleCooldownSteps;
                 }
@@ -381,6 +406,7 @@ namespace Abyssdawn
             rec.TotalDamageDealt = dmgDealt;
             rec.TotalDamageTaken = dmgTaken;
             rec.TotalBattleTurns = turnsSum;
+            rec.WinBattleTurnsSum = winTurnsSum;
             rec.XpGained = xpGained;
             rec.GoldGained = goldGained;
             rec.LevelAfter = player.Level;
@@ -391,6 +417,8 @@ namespace Abyssdawn
             rec.NextFloorFlag = rec.ClearFlag;
             rec.Floor1TownUsesCumulative = player.Floor1TownUsesTotal;
             rec.LastBattleEnemyCount = lastBattleEnemyCount;
+            if (rec.DeathFlag)
+                rec.DeathAiEquipSignature = DungeonSimAiEquipment.GetPartyEquipSignature(player);
             if (levelUpsThisFloor > 0)
                 rec.Notes = string.IsNullOrEmpty(rec.Notes) ? $"+{levelUpsThisFloor} levelup" : rec.Notes + $"; +{levelUpsThisFloor} levelup";
             if (fleesThisFloor > 0)
@@ -400,16 +428,175 @@ namespace Abyssdawn
         }
 
         /// <summary>
+        /// AI 파밍 목표 레벨 — 수동 게이트, (옵션) 풀 스탯 추정, (옵션) ‘N턴 이내 승리’ 프로브 중 설정에 따라 병합.
+        /// </summary>
+        private int GetAiNextFloorRequiredLevel(int nextFloor)
+        {
+            int manual = settings.GetMinLevelToEnterFloor(nextFloor);
+            if (!settings.aiTurnWinGateEnabled)
+                return settings.GetEffectiveMinLevelToEnterFloor(nextFloor, monsterPool);
+
+            if (!_aiTurnWinMinLevelCache.TryGetValue(nextFloor, out int turnRec))
+            {
+                turnRec = ComputeMinPlayerLevelForNextFloorTurnWin(nextFloor);
+                _aiTurnWinMinLevelCache[nextFloor] = turnRec;
+            }
+
+            if (settings.aiTurnWinGateReplacesPoolRecommendation)
+                return Mathf.Max(manual, turnRec);
+
+            int poolRec = (!settings.aiMergeMonsterPoolRecommendedLevel || monsterPool == null)
+                ? 1
+                : monsterPool.GetRecommendedMinLevelToEnterFloor(nextFloor);
+            return Mathf.Max(manual, poolRec, turnRec);
+        }
+
+        /// <summary>
+        /// <see cref="DungeonSimSettings.aiTurnWinGateMaxTurns"/>턴 이내 승리하는 프로브 비율이 기준을 넘는 최소 플레이어 레벨(탐색 상한까지).
+        /// </summary>
+        private int ComputeMinPlayerLevelForNextFloorTurnWin(int nextFloor)
+        {
+            if (monsterPool == null || allyRoster == null || settings == null) return 1;
+            var bm = ResolveBattleSimulator();
+            if (bm == null) return 1;
+
+            var entry = monsterPool.GetEntryForFloor(nextFloor);
+            if (entry == null) return 1;
+
+            int turnCap = Mathf.Max(1, settings.aiTurnWinGateMaxTurns);
+            int probes = Mathf.Max(1, settings.aiTurnWinGateProbesPerLevel);
+            float ratio = Mathf.Clamp(settings.aiTurnWinGateRequiredSuccessRatio, 0.5f, 1f);
+            int needOk = Mathf.CeilToInt(probes * ratio);
+            int maxL = Mathf.Max(1, settings.aiTurnWinGateMaxSearchLevel);
+            int growthSeedBase = settings.baseSeed ^ (nextFloor * unchecked((int)0x9E3779B9));
+
+            for (int L = 1; L <= maxL; L++)
+            {
+                int growthSeed = unchecked(growthSeedBase + L * 7919);
+                var template = CreateSimPlayerAtLevel(allyRoster, settings, L, growthSeed);
+                if (template == null || !template.AnyAlive()) continue;
+
+                int ok = 0;
+                for (int b = 0; b < probes; b++)
+                {
+                    int brng = unchecked(growthSeed + b * 130027 + nextFloor * 17);
+                    var battleRng = new System.Random(brng);
+                    var enemyParty = monsterPool.BuildEnemyParty(entry, battleRng);
+                    if (enemyParty == null || enemyParty.Count == 0) continue;
+
+                    var allies = CloneBattleSimUnits(template.Units);
+                    var enemies = BuildEnemyUnitsFromMonsterSOs(enemyParty);
+                    if (enemies == null || enemies.Count == 0) continue;
+
+                    var outcome = bm.RunOneBattleForDungeon(allies, enemies, battleRng, false, null, null);
+                    if (outcome.AllyWin && outcome.Turns <= turnCap) ok++;
+                }
+
+                if (ok >= needOk) return L;
+            }
+
+            return maxL;
+        }
+
+        private static List<BattleSimUnit> CloneBattleSimUnits(List<BattleSimUnit> src)
+        {
+            var list = new List<BattleSimUnit>(src != null ? src.Count : 0);
+            if (src == null) return list;
+            for (int i = 0; i < src.Count; i++)
+            {
+                var u = src[i];
+                if (u == null) continue;
+                var c = new BattleSimUnit
+                {
+                    Team = u.Team,
+                    DisplayName = u.DisplayName,
+                    Slot = u.Slot,
+                    MaxHP = u.MaxHP,
+                    CurrentHP = u.CurrentHP,
+                    MaxMP = u.MaxMP,
+                    CurrentMP = u.CurrentMP,
+                    Attack = u.Attack,
+                    Defense = u.Defense,
+                    Magic = u.Magic,
+                    Agility = u.Agility,
+                    Luck = u.Luck,
+                    SimAiPattern = u.SimAiPattern,
+                    MemorySlot1 = u.MemorySlot1,
+                    MemorySlot2 = u.MemorySlot2,
+                    MemorySlot3 = u.MemorySlot3,
+                    SimCharacterClass = u.SimCharacterClass,
+                    SimStatLayerEquipmentEnabled = u.SimStatLayerEquipmentEnabled,
+                    SimDungeonPartyLevel = u.SimDungeonPartyLevel,
+                    IntrinsicMaxHP = u.IntrinsicMaxHP,
+                    IntrinsicMaxMP = u.IntrinsicMaxMP,
+                    IntrinsicAttack = u.IntrinsicAttack,
+                    IntrinsicDefense = u.IntrinsicDefense,
+                    IntrinsicMagic = u.IntrinsicMagic,
+                    IntrinsicAgility = u.IntrinsicAgility,
+                    IntrinsicLuck = u.IntrinsicLuck,
+                    SimEquipRightHand = u.SimEquipRightHand,
+                    SimEquipLeftHand = u.SimEquipLeftHand,
+                    SimEquipBody = u.SimEquipBody,
+                    SimEquipAccessory1 = u.SimEquipAccessory1,
+                    SimEquipAccessory2 = u.SimEquipAccessory2
+                };
+                if (u.SimSkills != null)
+                {
+                    for (int si = 0; si < u.SimSkills.Count; si++)
+                    {
+                        var sk = u.SimSkills[si];
+                        if (sk != null) c.SimSkills.Add(sk);
+                    }
+                }
+                list.Add(c);
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 파티 레벨 L일 때 Sword Lore T1 5종을 순환하며 누적 습득(L=1이면 1번째, L=3이면 1~3번째).
+        /// </summary>
+        private static void SyncDungeonSwordLoreT1SkillsToPartyLevel(DungeonSimPlayer player)
+        {
+            if (player?.Units == null) return;
+            var chain = DungeonSimSwordLoreT1SkillRegistry.GetOrderedT1Skills();
+            int L = Mathf.Max(1, player.Level);
+            if (chain == null || chain.Length == 0)
+            {
+                foreach (var u in player.Units)
+                {
+                    if (u != null && u.SimStatLayerEquipmentEnabled)
+                        u.SimDungeonPartyLevel = L;
+                }
+
+                return;
+            }
+
+            foreach (var u in player.Units)
+            {
+                if (u == null || !u.SimStatLayerEquipmentEnabled) continue;
+                u.SimDungeonPartyLevel = L;
+                if (u.SimSkills == null) u.SimSkills = new List<SkillData>();
+                for (int li = 1; li <= L; li++)
+                {
+                    int idx = (li - 1) % chain.Length;
+                    var sk = chain[idx];
+                    if (sk == null) continue;
+                    if (!u.SimSkills.Contains(sk))
+                        u.SimSkills.Add(sk);
+                }
+            }
+        }
+
+        /// <summary>
         /// 던전 시뮬 레벨업.
         /// <para>HP/MP — <see cref="CharacterClass.hpPerLevel"/>·<see cref="CharacterClass.mpPerLevel"/>
         /// (없으면 Settings 대체) + 종의 기억 성장치 합 + ±1 노이즈(<see cref="PlayerStats.ApplyHpMpGrowth"/> 동일).</para>
-        /// <para>스탯 — 시뮬 전용으로 <b>레벨업당 2 포인트 랜덤</b>:
-        ///   ① 직업 가중 랜덤 +1 (가중치 0/직업 없음이면 5스탯 균등),
-        ///   ② 종의 기억 가중 랜덤 +1 (가중치 0/슬롯 없음이면 5스탯 균등 — 실전의 “선택 1포인트”를 시뮬에서 랜덤 대체).</para>
-        /// <para>Settings.levelUp*Gain는 위 랜덤과 별개로 추가되는 고정 보너스(기본값 0 권장).</para>
+        /// <para>스탯 — 레벨업당 <b>랜덤 +2</b>만: 직업·종의 기억 성장 가중치를 합친 뒤 같은 비중으로 주사위 2회(직업만 0이면 균등, 합계 0이면 5스탯 균등).</para>
         /// </summary>
-        private void ApplyLevelUp(DungeonSimPlayer player, System.Random rng)
+        private static void ApplyLevelUp(DungeonSimPlayer player, DungeonSimSettings settings, System.Random rng)
         {
+            if (player == null || settings == null || rng == null) return;
             player.Level++;
             player.LevelUpsTotal++;
             foreach (var u in player.Units)
@@ -431,28 +618,47 @@ namespace Abyssdawn
                 int finalHpGain = Mathf.Max(1, Mathf.RoundToInt(classHpGain + hpGrowthSum + hpNoise));
                 int finalMpGain = Mathf.Max(1, Mathf.RoundToInt(classMpGain + mpGrowthSum + mpNoise));
 
-                u.MaxHP += finalHpGain;
-                u.MaxMP += finalMpGain;
-                u.Attack += settings.levelUpAtkGain;
-                u.Defense += settings.levelUpDefGain;
-                u.Magic += settings.levelUpMagGain;
-                u.Agility += settings.levelUpAgiGain;
-                u.Luck += settings.levelUpLukGain;
+                u.IntrinsicMaxHP += finalHpGain;
+                u.IntrinsicMaxMP += finalMpGain;
 
-                ApplyClassRandomStatPlusOne(u, rng);
-                ApplyMemoryRandomStatPlusOneOrUniform(u, memAtkW, memDefW, memMagW, memAgiW, memLukW, rng);
+                ApplySimTwoRandomStatPoints(u, memAtkW, memDefW, memMagW, memAgiW, memLukW, rng);
+            }
 
+            SyncDungeonSwordLoreT1SkillsToPartyLevel(player);
+            foreach (var u in player.Units)
+            {
+                if (u == null || !u.IsAlive) continue;
+                u.RecomputeSimDerivedStatsFromIntrinsicsAndEquipment();
                 u.CurrentHP = u.MaxHP;
                 u.CurrentMP = u.MaxMP;
             }
         }
 
         /// <summary>
-        /// 시뮬 “2포인트 랜덤” 중 ①: 직업 가중 랜덤 +1.
-        /// <see cref="CharacterClass.attackGrowthPerLevel"/> ~ <see cref="CharacterClass.luckGrowthPerLevel"/> 합을
-        /// 가중치로 사용. 모두 0이거나 직업이 없으면 5스탯 균등 랜덤.
+        /// 로스터 베이스(Lv1)에서 던전 시뮬과 동일한 <see cref="ApplyLevelUp"/> 규칙을 반복 적용해 <paramref name="targetLevel"/>에 맞춥니다.
+        /// <paramref name="levelGrowthSeed"/>가 같으면 레벨업 랜덤 시퀀스도 동일합니다.
         /// </summary>
-        private static void ApplyClassRandomStatPlusOne(BattleSimUnit u, System.Random rng)
+        public static DungeonSimPlayer CreateSimPlayerAtLevel(
+            BattleSimAllyRoster roster,
+            DungeonSimSettings st,
+            int targetLevel,
+            int levelGrowthSeed)
+        {
+            if (roster == null || st == null) return null;
+            int L = Mathf.Max(1, targetLevel);
+            var rng = new System.Random(levelGrowthSeed == int.MinValue ? 1 : levelGrowthSeed);
+            var p = BuildPlayerFromRoster(roster, st, forceBaselineLevel1: true);
+            while (p.Level < L)
+                ApplyLevelUp(p, st, rng);
+            p.Exp = 0;
+            return p;
+        }
+
+        /// <summary>직업 + 종의 기억 성장 가중치 합으로 스탯 +1을 두 번(레벨당 총 +2 랜덤).</summary>
+        private static void ApplySimTwoRandomStatPoints(
+            BattleSimUnit u,
+            float memAtkW, float memDefW, float memMagW, float memAgiW, float memLukW,
+            System.Random rng)
         {
             float a, d, m, ag, l;
             var c = u.SimCharacterClass;
@@ -465,30 +671,22 @@ namespace Abyssdawn
                 l = Mathf.Max(0f, c.luckGrowthPerLevel);
             }
             else
-            {
                 a = d = m = ag = l = 0f;
-            }
-            if (a + d + m + ag + l <= 0f)
-            {
-                a = d = m = ag = l = 1f; // 균등 폴백
-            }
-            PickAndBumpStat(u, a, d, m, ag, l, rng);
-        }
 
-        /// <summary>
-        /// 시뮬 “2포인트 랜덤” 중 ②: 종의 기억 가중 랜덤 +1.
-        /// 가중치가 0이거나 슬롯이 비어 있으면 5스탯 균등 랜덤(실전의 “선택 1포인트”를 시뮬에서 랜덤 대체).
-        /// </summary>
-        private static void ApplyMemoryRandomStatPlusOneOrUniform(
-            BattleSimUnit u,
-            float atkW, float defW, float magW, float agiW, float lukW,
-            System.Random rng)
-        {
-            if (atkW + defW + magW + agiW + lukW <= 0f)
-            {
-                atkW = defW = magW = agiW = lukW = 1f; // 균등 폴백
-            }
-            PickAndBumpStat(u, atkW, defW, magW, agiW, lukW, rng);
+            if (a + d + m + ag + l <= 0f)
+                a = d = m = ag = l = 1f;
+
+            a += memAtkW;
+            d += memDefW;
+            m += memMagW;
+            ag += memAgiW;
+            l += memLukW;
+
+            if (a + d + m + ag + l <= 0f)
+                a = d = m = ag = l = 1f;
+
+            PickAndBumpStat(u, a, d, m, ag, l, rng);
+            PickAndBumpStat(u, a, d, m, ag, l, rng);
         }
 
         private static void PickAndBumpStat(BattleSimUnit u, float a, float d, float m, float ag, float l, System.Random rng)
@@ -496,11 +694,11 @@ namespace Abyssdawn
             float total = a + d + m + ag + l;
             if (total <= 0f) return;
             float pick = (float)(rng.NextDouble() * total);
-            if (pick < a) u.Attack++;
-            else if (pick < a + d) u.Defense++;
-            else if (pick < a + d + m) u.Magic++;
-            else if (pick < a + d + m + ag) u.Agility++;
-            else u.Luck++;
+            if (pick < a) u.IntrinsicAttack++;
+            else if (pick < a + d) u.IntrinsicDefense++;
+            else if (pick < a + d + m) u.IntrinsicMagic++;
+            else if (pick < a + d + m + ag) u.IntrinsicAgility++;
+            else u.IntrinsicLuck++;
         }
 
         private static void AccumulateMemoryGrowthWeights(
@@ -559,18 +757,31 @@ namespace Abyssdawn
         // ---------------------------------------------------------------
         // 1층 마을 — 시뮬 전용 (경제 없음: 풀 HP/MP + 소모품 스택 고정)
         // ---------------------------------------------------------------
-        public static void ApplyFloor1TownFullRestore(DungeonSimPlayer player, DungeonSimSettings settings)
+        public static void ApplyFloor1TownFullRestore(
+            DungeonSimPlayer player,
+            DungeonSimSettings settings,
+            System.Random rng,
+            DungeonSimMonsterPool monsterPool,
+            int currentFloorForEquipAi,
+            Dictionary<string, int> aiEquipPickHistogram)
         {
             if (player?.Units == null || settings == null) return;
+
+            player.HpPotionCount = Mathf.Max(0, settings.startingHpPotionCount);
+            player.DawnChaliceCharges = Mathf.Max(0, settings.startingDawnChaliceCharges);
+            if (settings.floor1TownMedicinalHerbStack > 0)
+                player.MedicinalHerbCount = Mathf.Max(0, settings.floor1TownMedicinalHerbStack);
+
+            if (rng != null && monsterPool != null)
+                DungeonSimAiEquipment.TryPickAndApply(player, monsterPool, currentFloorForEquipAi, settings.floorCount, rng, aiEquipPickHistogram);
+
             foreach (var u in player.Units)
             {
                 if (u == null || !u.IsAlive) continue;
                 if (u.MaxHP > 0) u.CurrentHP = u.MaxHP;
                 if (u.MaxMP > 0) u.CurrentMP = u.MaxMP;
             }
-            player.HpPotionCount = Mathf.Max(0, settings.startingHpPotionCount);
-            player.DawnChaliceCharges = Mathf.Max(0, settings.startingDawnChaliceCharges);
-            player.MedicinalHerbCount = Mathf.Max(0, settings.floor1TownMedicinalHerbStack);
+
             player.Floor1TownUsesTotal++;
         }
 
@@ -799,13 +1010,15 @@ namespace Abyssdawn
         // ---------------------------------------------------------------
         // 플레이어 빌드
         // ---------------------------------------------------------------
-        private static DungeonSimPlayer BuildPlayerFromRoster(BattleSimAllyRoster roster, DungeonSimSettings st)
+        /// <param name="forceBaselineLevel1">true면 Lv1·EXP0으로만 빌드(보스 레벨 탐침 등). false면 Settings의 startingLevel/startingExp 사용.</param>
+        private static DungeonSimPlayer BuildPlayerFromRoster(BattleSimAllyRoster roster, DungeonSimSettings st, bool forceBaselineLevel1 = false)
         {
+            int startLv = forceBaselineLevel1 ? 1 : Mathf.Max(1, st.startingLevel);
             var p = new DungeonSimPlayer
             {
                 Name = "Party",
-                Level = Mathf.Max(1, st.startingLevel),
-                Exp = Mathf.Max(0, st.startingExp),
+                Level = startLv,
+                Exp = forceBaselineLevel1 ? 0 : Mathf.Max(0, st.startingExp),
                 Gold = 0,
                 HpPotionCount = Mathf.Max(0, st.startingHpPotionCount),
                 DawnChaliceCharges = Mathf.Max(0, st.startingDawnChaliceCharges)
@@ -819,49 +1032,55 @@ namespace Abyssdawn
                 int slotNum = i + 1;
                 var slot = (BattleSlot)slotNum;
                 ComputeInitialStatsWithMemoryFlat(so, out int hp, out int mp, out int atk, out int def, out int mag, out int agi, out int luk);
-                p.Units.Add(new BattleSimUnit
+                var u = new BattleSimUnit
                 {
                     Team = BattleSimTeam.Ally,
                     DisplayName = so.allyDisplayName,
                     Slot = slot,
-                    MaxHP = hp,
-                    CurrentHP = hp,
-                    MaxMP = mp,
-                    CurrentMP = mp,
-                    Attack = atk,
-                    Defense = def,
-                    Magic = mag,
-                    Agility = agi,
-                    Luck = luk,
+                    SimStatLayerEquipmentEnabled = true,
+                    IntrinsicMaxHP = hp,
+                    IntrinsicMaxMP = mp,
+                    IntrinsicAttack = atk,
+                    IntrinsicDefense = def,
+                    IntrinsicMagic = mag,
+                    IntrinsicAgility = agi,
+                    IntrinsicLuck = luk,
                     SimAiPattern = so.simAiPattern,
                     SimSkills = new List<SkillData>(so.simSkills ?? new List<SkillData>()),
                     MemorySlot1 = so.memorySlot1,
                     MemorySlot2 = so.memorySlot2,
                     MemorySlot3 = so.memorySlot3,
                     SimCharacterClass = so.characterClass
-                });
+                };
+                p.Units.Add(u);
             }
+
+            SyncDungeonSwordLoreT1SkillsToPartyLevel(p);
+            foreach (var u in p.Units)
+            {
+                if (u != null && u.SimStatLayerEquipmentEnabled)
+                    u.RecomputeSimDerivedStatsFromIntrinsicsAndEquipment();
+            }
+
             return p;
         }
 
-        /// <summary>인카운터 직전 생존 판정용 — 적 파티 중 최대 ATK.</summary>
-        private static int GetMaxMonsterAtkFromParty(List<MonsterSO> party)
+        /// <summary>인카운터 직전 생존 판정용 — 적 파티 중 max(ATK, MAG) 최댓값.</summary>
+        private static int GetMaxMonsterStrikeFromParty(List<MonsterSO> party)
         {
-            int maxAtk = 0;
+            int maxStrike = 0;
             if (party == null) return 0;
             for (int i = 0; i < party.Count; i++)
             {
                 var m = party[i];
                 if (m == null) continue;
-                maxAtk = Mathf.Max(maxAtk, m.ATK);
+                maxStrike = Mathf.Max(maxStrike, Mathf.Max(m.ATK, m.MAG));
             }
-            return maxAtk;
+            return maxStrike;
         }
 
-        // ---------------------------------------------------------------
-        // 적 유닛 빌드 (MonsterSO → BattleSimUnit). 슬롯은 1번부터 순서대로 배정.
-        // ---------------------------------------------------------------
-        private static List<BattleSimUnit> BuildEnemyUnitsFromMonsterSOs(List<MonsterSO> party)
+        /// <summary>MonsterSO 리스트 → 전투 시뮬 적 유닛(슬롯 1부터).</summary>
+        public static List<BattleSimUnit> BuildEnemyUnitsFromMonsterSOs(List<MonsterSO> party)
         {
             var list = new List<BattleSimUnit>();
             for (int i = 0; i < party.Count && i < 4; i++)
@@ -914,7 +1133,7 @@ namespace Abyssdawn
             File.WriteAllText(absPath, sb.ToString(), Encoding.UTF8);
         }
 
-        private string BuildSummary(int iterations, int deaths, int allFloorsCleared, long battles, long battleWins, long battleFlees, long medicinalHerbs, long potions, long dawnChalice, int[] reached, List<DungeonSimRecord> records)
+        private string BuildSummary(int iterations, int deaths, int allFloorsCleared, long battles, long battleWins, long battleFlees, long medicinalHerbs, long potions, long dawnChalice, int[] reached, List<DungeonSimRecord> records, SimEquipHistograms equipHist)
         {
             var sb = new StringBuilder();
             sb.AppendLine("=== Dungeon Simulation (Phase 1) ===");
@@ -927,21 +1146,33 @@ namespace Abyssdawn
             {
                 int hLo = Mathf.Min(settings.medicinalHerbGrantCountMin, settings.medicinalHerbGrantCountMax);
                 int hHi = Mathf.Max(settings.medicinalHerbGrantCountMin, settings.medicinalHerbGrantCountMax);
-                sb.AppendLine($"층 진입 약초: {settings.medicinalHerbGrantFloorsMin}~{settings.medicinalHerbGrantFloorsMax}층마다 {hLo}~{hHi}개(균등 랜덤). 1층 마을 적용 시 1층 진입 지급은 생략.");
+                sb.AppendLine($"층 진입 약초: {settings.medicinalHerbGrantFloorsMin}~{settings.medicinalHerbGrantFloorsMax}층마다 진입 시 {hLo}~{hHi}개(균등 랜덤) 추가. 1층도 동일 범위에 포함되면 1층 진입 시에도 지급.");
             }
             if (settings.floor1TownFullRestoreEnabled)
             {
-                int gLo = Mathf.Min(settings.medicinalHerbGrantCountMin, settings.medicinalHerbGrantCountMax);
-                int gHi = Mathf.Max(settings.medicinalHerbGrantCountMin, settings.medicinalHerbGrantCountMax);
-                sb.AppendLine($"1층 마을(시뮬) — 1층 진입 시 HP·MP 풀, 포션 {settings.startingHpPotionCount}·잔 {settings.startingDawnChaliceCharges}·약초 {settings.floor1TownMedicinalHerbStack}으로 맞춤(경제 없음). 이 층의 약초 진입 지급({gLo}~{gHi} 랜덤)은 생략." +
+                string herbTown = settings.floor1TownMedicinalHerbStack > 0
+                    ? $"약초는 마을 시마다 {settings.floor1TownMedicinalHerbStack}개로 덮어씀."
+                    : "약초는 마을로 리필하지 않음(층 진입 지급만).";
+                sb.AppendLine($"1층 마을(시뮬) — 1층 진입 시 HP·MP 풀, 포션 {settings.startingHpPotionCount}·잔 {settings.startingDawnChaliceCharges}으로 맞춤(경제 없음). {herbTown}" +
                               (settings.floor1TownAfterVictoryEnabled ? " 승리마다 동일 충전." : ""));
             }
-            if (settings.randomOneOrTwoEnemyPartyFromFloor > 0)
-                sb.AppendLine($"적 파티(시뮬): {settings.randomOneOrTwoEnemyPartyFromFloor}층 이상·비보스 인카운터는 적 1~2마리 균등 랜덤.");
+            sb.AppendLine("적 파티(시뮬): 인카운터마다 적 1마리(1대1) 고정.");
             if (settings.aiProgressionEnabled)
             {
-                sb.AppendLine("AI 진행(시뮬): ON — 전투 전 HP < 적최대ATK×" + settings.aiSurvivalEnemyTurnCount + "이면 마을 풀충전(최대 " + settings.aiMaxTownRetreatsPerEncounter + "회/인카운터) 후 재판정, 불가면 전투.");
-                sb.AppendLine("  다음 층 진입 최소 레벨 미달 시 같은 층 추가 패스(최대 " + settings.aiMaxFarmingPassesBeforeNextFloor + "회, CSV notes: ai_farm).");
+                sb.AppendLine("AI 진행(시뮬): ON — 전투 전 아군 현재 HP 합 < 적 max(ATK,MAG)×" + settings.aiSurvivalEnemyTurnCount + "이면 마을 풀충전(최대 " + settings.aiMaxTownRetreatsPerEncounter + "회/인카운터) 후 재판정, 불가면 전투.");
+                sb.AppendLine("  다음 층 진입 최소 레벨 미달 시 같은 층 추가 패스(최대 " + settings.aiMaxFarmingPassesBeforeNextFloor + "회, CSV notes: ai_farm). 요구+추가: +" + settings.aiExtraLevelsBeyondNextFloorGate + "Lv.");
+                if (settings.aiTurnWinGateEnabled)
+                {
+                    sb.AppendLine($"  다음 층 요구 레벨 — 턴 승리 기준: LvL 파티(CreateSimPlayerAtLevel)로 해당 층 풀 적 1마리 전투를 {settings.aiTurnWinGateProbesPerLevel}회 샘플링, (승리 ∧ 턴≤{settings.aiTurnWinGateMaxTurns}) 비율 ≥ {settings.aiTurnWinGateRequiredSuccessRatio:P0}인 가장 낮은 L.");
+                    if (settings.aiTurnWinGateReplacesPoolRecommendation)
+                        sb.AppendLine("  병합: max(수동 게이트, 턴 기준) — 몬스터 풀 스탯 추정은 요구치에 쓰이지 않음(아래 표는 참고용으로 풀추정도 병기).");
+                    else
+                        sb.AppendLine("  병합: max(수동, 풀 스탯 추정, 턴 기준).");
+                }
+                else if (settings.aiMergeMonsterPoolRecommendedLevel)
+                    sb.AppendLine("  다음 층 요구 레벨 = max(수동 게이트, 몬스터 풀 스탯 추정).");
+                else
+                    sb.AppendLine("  다음 층 요구 레벨 = 수동 게이트만(비어 있으면 1).");
                 if (settings.floorLevelGates != null && settings.floorLevelGates.Count > 0)
                 {
                     var gs = new System.Text.StringBuilder();
@@ -953,9 +1184,40 @@ namespace Abyssdawn
                         gs.Append($"{g.floor}층≥Lv{g.minLevelToEnter}");
                     }
                     if (gs.Length > 0)
-                        sb.AppendLine("  층별 최소 진입 레벨: " + gs);
+                        sb.AppendLine("  수동 층별 최소 진입 레벨: " + gs);
+                }
+                if (monsterPool != null)
+                {
+                    var es = new System.Text.StringBuilder();
+                    int shown = 0;
+                    for (int f = 2; f <= settings.floorCount && shown < 12; f++)
+                    {
+                        int eff = GetAiNextFloorRequiredLevel(f);
+                        int gateOnly = settings.GetMinLevelToEnterFloor(f);
+                        int poolOnly = monsterPool.GetRecommendedMinLevelToEnterFloor(f);
+                        int turnOnly = settings.aiTurnWinGateEnabled
+                            ? (_aiTurnWinMinLevelCache.TryGetValue(f, out int t) ? t : ComputeMinPlayerLevelForNextFloorTurnWin(f))
+                            : -1;
+                        if (es.Length > 0) es.Append(", ");
+                        es.Append($"{f}층→Lv{eff}");
+                        if (turnOnly >= 0)
+                        {
+                            es.Append($"(수동{gateOnly}/풀추정{poolOnly}/턴기준{turnOnly})");
+                        }
+                        else if (eff != gateOnly || eff != poolOnly)
+                        {
+                            string manual = settings.HasMinLevelGateRowForFloor(f)
+                                ? $"수동Lv{gateOnly}"
+                                : "수동없음";
+                            es.Append($"({manual}/풀추정{poolOnly})");
+                        }
+                        shown++;
+                    }
+                    if (es.Length > 0)
+                        sb.AppendLine("  층별 유효 진입 레벨(샘플): " + es);
                 }
             }
+            AppendDungeonSimLevelStatTable(sb);
             sb.AppendLine();
             sb.AppendLine($"전체 클리어(모든 층): {allFloorsCleared}/{iterations} ({100f * allFloorsCleared / iterations:F1}%)");
             sb.AppendLine($"사망 회차: {deaths}/{iterations} ({100f * deaths / iterations:F1}%)");
@@ -963,6 +1225,24 @@ namespace Abyssdawn
                 sb.AppendLine($"전투 승률(전체): {battleWins}/{battles} ({100.0 * battleWins / battles:F1}%)");
             else
                 sb.AppendLine("전투 승률(전체): N/A (전투 0회)");
+            {
+                long winTurnSum = 0;
+                long winBattleCount = 0;
+                if (records != null)
+                {
+                    for (int ri = 0; ri < records.Count; ri++)
+                    {
+                        var r = records[ri];
+                        if (r.BattlesWon <= 0) continue;
+                        winTurnSum += r.WinBattleTurnsSum;
+                        winBattleCount += r.BattlesWon;
+                    }
+                }
+                if (winBattleCount > 0)
+                    sb.AppendLine($"승리 전투당 평균 소모 턴(층행·전투 가중): {winTurnSum / (double)winBattleCount:F2} (승리 {winBattleCount}회, 턴 합 {winTurnSum})");
+                else
+                    sb.AppendLine("승리 전투당 평균 소모 턴: N/A (승리 전투 없음)");
+            }
             sb.AppendLine($"평균 전투 수/회차: {(iterations > 0 ? (double)battles / iterations : 0):F2}");
             sb.AppendLine($"평균 도망 수/회차: {(iterations > 0 ? (double)battleFlees / iterations : 0):F2}  (HP 격차 ≥ {(int)(0.7f * 100)}%p, 층당 최대 {settings.maxFleesPerFloor}회)");
             sb.AppendLine($"평균 약초 사용/회차: {(iterations > 0 ? (double)medicinalHerbs / iterations : 0):F2}");
@@ -979,13 +1259,99 @@ namespace Abyssdawn
                 sb.AppendLine($"  {label}: {reached[i]} ({100f * reached[i] / iterations:F1}%)");
             }
             sb.AppendLine();
+            AppendEquipHistogramSections(sb, equipHist);
             AppendDiagnostics(sb, records);
             sb.AppendLine();
             sb.AppendLine("CSV 컬럼: " + DungeonSimRecord.CsvHeader);
             sb.AppendLine();
-            sb.AppendLine("[Phase 1] 레벨업: HP/MP = CharacterClass hpPerLevel/mpPerLevel(없으면 Settings) + 종의 기억 성장치 합 + ±1. 스탯 = 직업 가중 랜덤 +1 (없으면 균등) + 종의 기억 가중 랜덤 +1 (없으면 균등). Settings.levelUp*Gain은 추가 고정.");
+            sb.AppendLine("[Phase 1] 레벨업: HP/MP = CharacterClass hpPerLevel/mpPerLevel(없으면 Settings) + 종의 기억 성장치 합 + ±1. 스탯 = 직업+종의 기억 가중 합으로 랜덤 +1×2(레벨당 +2). 다음 레벨까지 필요 EXP는 PlayerExpProgression 표(인게임 PlayerStats와 동일).");
 
             return sb.ToString();
+        }
+
+        private static void AppendEquipHistogramSections(StringBuilder sb, SimEquipHistograms equipHist)
+        {
+            if (equipHist == null) return;
+            DungeonSimAiEquipment.EnsureCrudePoolLoaded();
+            sb.AppendLine("─────────────────────────────────────────");
+            sb.AppendLine("=== 던전 시뮬 — Crude 장비(AI) ===");
+            sb.AppendLine($"Resources.LoadAll 경로: \"{DungeonSimAiEquipment.CrudeResourcesPath}\" (장비 타입·방패=Hand+blockData 기준 분류)");
+            sb.AppendLine("규칙: 양손 1칸만 / 한손×2 또는 한손+방패(총 2칸) / 방어구 0~1 / 악세 0~2. 마을(1층 입장·승리 후·AI 풀충전)마다 현재 층·다음 층 위협치로 점수 최대 조합 선택.");
+            sb.AppendLine();
+
+            void AppendSortedDict(string title, Dictionary<string, int> dict)
+            {
+                sb.AppendLine(title);
+                if (dict == null || dict.Count == 0)
+                {
+                    sb.AppendLine("  (없음)");
+                    sb.AppendLine();
+                    return;
+                }
+                var list = new List<KeyValuePair<string, int>>(dict);
+                list.Sort((a, b) => b.Value.CompareTo(a.Value));
+                for (int i = 0; i < list.Count; i++)
+                    sb.AppendLine($"  {list[i].Value,5}회 | {list[i].Key}");
+                sb.AppendLine();
+            }
+
+            AppendSortedDict("① 사망 시 착용했던 장비(회차 종료 시 사망 1회당 집계)", equipHist.Death);
+            AppendSortedDict("② 마을 방문 시 AI가 선택한 장비(선택 1회당 집계)", equipHist.AiPick);
+        }
+
+        /// <summary>
+        /// 요약 텍스트에 던전 시뮬 <see cref="ApplyLevelUp"/> 규칙으로 올린 레벨별 파티 스탯 표를 붙입니다.
+        /// 성장 RNG는 <see cref="DungeonSimSettings.baseSeed"/> 한 가지로 고정해, Lv1→LvN이 한 경로로 쌓인 스냅샷입니다.
+        /// </summary>
+        private void AppendDungeonSimLevelStatTable(StringBuilder sb)
+        {
+            if (allyRoster == null || settings == null) return;
+
+            int growthSeed = settings.baseSeed == int.MinValue ? 1 : settings.baseSeed;
+            int maxLv = Mathf.Clamp(
+                Mathf.Max(12, Mathf.Max(settings.floorCount + 8, settings.aiTurnWinGateMaxSearchLevel)),
+                12, 50);
+
+            sb.AppendLine("=== 던전 시뮬 — 레벨별 파티 스탯 (ApplyLevelUp, 성장 시드=baseSeed 고정) ===");
+            sb.AppendLine("※ 장비(Crude AI 마을 착용)는 미반영. 파티 레벨에 따라 Sword Lore T1 자동 습득 스킬이 쌓이며, 기본 검술 등 재계산 보너스는 ATK 등에 포함됨. 레벨마다 CreateSimPlayerAtLevel로 재빌드한 스냅샷.");
+            sb.AppendLine();
+            sb.AppendLine("Lv | ΣMaxHP ΣMaxMP | ΣATK ΣDEF ΣMAG ΣAGI ΣLUK | 슬롯별(이름:ATK/DEF/MAG/AGI/LUK MaxHP)");
+            for (int L = 1; L <= maxLv; L++)
+            {
+                var p = CreateSimPlayerAtLevel(allyRoster, settings, L, growthSeed);
+                if (p == null || !p.AnyAlive())
+                {
+                    sb.AppendLine($"  {L,2} | (파티 생성 실패)");
+                    continue;
+                }
+
+                int sHp = 0, sMp = 0, sAtk = 0, sDef = 0, sMag = 0, sAgi = 0, sLuk = 0;
+                foreach (var u in p.Units)
+                {
+                    if (u == null || !u.IsAlive) continue;
+                    sHp += u.MaxHP;
+                    sMp += u.MaxMP;
+                    sAtk += u.Attack;
+                    sDef += u.Defense;
+                    sMag += u.Magic;
+                    sAgi += u.Agility;
+                    sLuk += u.Luck;
+                }
+
+                var slotSb = new StringBuilder();
+                for (int i = 0; i < p.Units.Count; i++)
+                {
+                    var u = p.Units[i];
+                    if (u == null || !u.IsAlive) continue;
+                    string nm = string.IsNullOrEmpty(u.DisplayName) ? $"S{i + 1}" : u.DisplayName;
+                    if (nm.Length > 10) nm = nm.Substring(0, 10);
+                    if (slotSb.Length > 0) slotSb.Append(" | ");
+                    slotSb.Append($"{nm}:{u.Attack}/{u.Defense}/{u.Magic}/{u.Agility}/{u.Luck} HP{u.MaxHP}");
+                }
+
+                sb.AppendLine(
+                    $"  {L,2} | {sHp,5} {sMp,5} | {sAtk,4} {sDef,4} {sMag,4} {sAgi,4} {sLuk,4} | {slotSb}");
+            }
         }
 
         // ---------------------------------------------------------------
@@ -1002,13 +1368,11 @@ namespace Abyssdawn
 
             int floors = Mathf.Max(1, settings.floorCount);
 
-            // 한 회차의 마지막 행만 모음(사망/완주 모두 포함, 사망행이라면 그게 마지막)
+            // 한 회차의 마지막 행만 모음 — CSV에 기록된 순서대로, 같은 run_id는 항상 덮어써서 마지막 행이 남게 함
+            // (AI 파밍으로 같은 층 번호가 연속될 때 r.Floor > prev.Floor 비교만 하면 이전 클리어 행이 남는 버그가 있음)
             var lastRowByRun = new Dictionary<int, DungeonSimRecord>();
             foreach (var r in records)
-            {
-                if (!lastRowByRun.TryGetValue(r.RunId, out var prev) || r.Floor > prev.Floor)
-                    lastRowByRun[r.RunId] = r;
-            }
+                lastRowByRun[r.RunId] = r;
 
             // 층별 누적기
             int[] reachedCnt = new int[floors + 2];
@@ -1030,6 +1394,7 @@ namespace Abyssdawn
             long[] levelAfterSum = new long[floors + 2];
             long[] stepsSum = new long[floors + 2];
             long[] damageTakenSum = new long[floors + 2];
+            long[] winTurnsSumByFloor = new long[floors + 2];
 
             foreach (var r in records)
             {
@@ -1053,6 +1418,7 @@ namespace Abyssdawn
                 levelAfterSum[f] += r.LevelAfter;
                 stepsSum[f] += r.StepsMoved;
                 damageTakenSum[f] += r.TotalDamageTaken;
+                winTurnsSumByFloor[f] += r.WinBattleTurnsSum;
             }
 
             int totalRuns = lastRowByRun.Count;
@@ -1158,7 +1524,7 @@ namespace Abyssdawn
             // ② 층별 진단표
             sb.AppendLine();
             sb.AppendLine("② 층별 진단표 (도달 회차 기준 평균)");
-            sb.AppendLine("  층 |  도달 | 클리어%  | 사망% | 전투 | 승률 | 도망 | HP진입 → HP종료(손실) | 약초사용/남음 | 포션사용/남음 | 잔사용/남음 | 레벨진입 → 종료 | XP");
+            sb.AppendLine("  층 |  도달 | 클리어%  | 사망% | 전투 | 승률 | 도망 | 승리평균턴 | HP진입 → HP종료(손실) | 약초사용/남음 | 포션사용/남음 | 잔사용/남음 | 레벨진입 → 종료 | XP");
             for (int f = 1; f <= floors; f++)
             {
                 int reachedF = reachedCnt[f];
@@ -1168,6 +1534,7 @@ namespace Abyssdawn
                 double avgBattles = (double)battlesSum[f] / reachedF;
                 double avgWinRate = battlesSum[f] > 0 ? 100.0 * winsSum[f] / battlesSum[f] : 0;
                 double avgFlee = (double)fledSum[f] / reachedF;
+                double avgWinTurns = winsSum[f] > 0 ? (double)winTurnsSumByFloor[f] / winsSum[f] : 0;
                 double avgHpBefore = (double)hpBeforeSum[f] / reachedF;
                 double avgHpAfter = (double)hpAfterSum[f] / reachedF;
                 double avgHerbUse = (double)herbUseSum[f] / reachedF;
@@ -1180,7 +1547,7 @@ namespace Abyssdawn
                 double avgLvAfter = (double)levelAfterSum[f] / reachedF;
                 double avgXp = (double)xpSum[f] / reachedF;
                 sb.AppendLine(
-                    $"  {f,2} | {reachedF,5} | {clearPct,6:F1}% | {diePct,5:F1}% | {avgBattles,4:F2} | {avgWinRate,4:F1}% | {avgFlee,4:F2} | " +
+                    $"  {f,2} | {reachedF,5} | {clearPct,6:F1}% | {diePct,5:F1}% | {avgBattles,4:F2} | {avgWinRate,4:F1}% | {avgFlee,4:F2} | {avgWinTurns,5:F2} | " +
                     $"{avgHpBefore,5:F1} → {avgHpAfter,5:F1} ({avgHpBefore - avgHpAfter,5:F1}) | " +
                     $"{avgHerbUse,4:F2}/{avgHerbAfter,4:F2} | {avgPotionUse,4:F2}/{avgPotionAfter,4:F2} | {avgChaliceUse,4:F2}/{avgChaliceAfter,4:F2} | " +
                     $"{avgLvBefore,4:F2} → {avgLvAfter,4:F2} | {avgXp,5:F1}");

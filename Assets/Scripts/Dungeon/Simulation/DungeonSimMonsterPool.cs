@@ -32,11 +32,11 @@ namespace Abyssdawn
             [Tooltip("등장 몬스터 목록 (가중치 랜덤)")]
             public List<MonsterPick> monsters = new List<MonsterPick>();
 
-            [Tooltip("적 파티 최소 마릿수 (1~4)")]
+            [Tooltip("미사용 — 던전 시뮬 Phase1은 인카운터마다 항상 적 1마리(1대1)만 스폰합니다.")]
             [Range(1, 4)] public int partySizeMin = 1;
 
-            [Tooltip("적 파티 최대 마릿수 (1~4). Boss 층은 1로 두는 것을 권장합니다.")]
-            [Range(1, 4)] public int partySizeMax = 2;
+            [Tooltip("미사용 — 던전 시뮬 Phase1은 인카운터마다 항상 적 1마리(1대1)만 스폰합니다.")]
+            [Range(1, 4)] public int partySizeMax = 1;
         }
 
         [System.Serializable]
@@ -91,33 +91,48 @@ namespace Abyssdawn
             return null;
         }
 
-        /// <summary>지정 층 entry로부터 적 파티(여러 마리) 빌드.</summary>
-        /// <param name="dungeonFloor">시뮬 던전 층(1-base). <paramref name="randomOneOrTwoEnemyPartyFromFloor"/>와 함께 쓰입니다.</param>
-        /// <param name="randomOneOrTwoEnemyPartyFromFloor">이 값 이상 층이면서 <see cref="FloorKind.Boss"/>가 아니면 적 1~2마리 균등 랜덤(0이면 비활성).</param>
-        public List<MonsterSO> BuildEnemyParty(FloorEntry entry, System.Random rng, int dungeonFloor = 0, int randomOneOrTwoEnemyPartyFromFloor = 0)
+        /// <summary>인카운터당 적 1마리(1대1 시뮬) — <see cref="PickWeighted"/>.</summary>
+        public List<MonsterSO> BuildEnemyParty(FloorEntry entry, System.Random rng)
         {
             var list = new List<MonsterSO>();
             if (entry == null) return list;
-
-            int sizeMin = Mathf.Clamp(entry.partySizeMin, 1, 4);
-            int sizeMax = Mathf.Clamp(entry.partySizeMax, sizeMin, 4);
-
-            if (randomOneOrTwoEnemyPartyFromFloor > 0
-                && dungeonFloor >= randomOneOrTwoEnemyPartyFromFloor
-                && entry.kind != FloorKind.Boss)
-            {
-                sizeMin = 1;
-                sizeMax = 2;
-            }
-
-            int size = rng.Next(sizeMin, sizeMax + 1);
-
-            for (int i = 0; i < size; i++)
-            {
-                var picked = PickWeighted(entry, rng);
-                if (picked != null) list.Add(picked);
-            }
+            var picked = PickWeighted(entry, rng);
+            if (picked != null) list.Add(picked);
             return list;
+        }
+
+        /// <summary>
+        /// 해당 층 풀에 등록된 몬스터 스탯으로 ‘이 층에 들어가기 전’ 권장 최소 레벨을 추정합니다.
+        /// <see cref="DungeonSimSettings.GetEffectiveMinLevelToEnterFloor"/>에서 수동 게이트와 병합합니다.
+        /// </summary>
+        public int GetRecommendedMinLevelToEnterFloor(int floor)
+        {
+            var entry = GetEntryForFloor(floor);
+            if (entry == null || entry.monsters == null || entry.monsters.Count == 0) return 1;
+
+            int best = 1;
+            for (int i = 0; i < entry.monsters.Count; i++)
+            {
+                var pick = entry.monsters[i];
+                if (pick == null || pick.monster == null || pick.weight <= 0f) continue;
+                best = Mathf.Max(best, EstimateRecommendedLevelForMonster(pick.monster));
+            }
+
+            float kindMul = entry.kind == FloorKind.Boss ? 1.35f
+                : entry.kind == FloorKind.Elite ? 1.15f
+                : 1f;
+            return Mathf.Max(1, Mathf.CeilToInt(best * kindMul));
+        }
+
+        /// <summary>단일 몬스터 기준 권장 플레이어 레벨(>=1).</summary>
+        public static int EstimateRecommendedLevelForMonster(MonsterSO m)
+        {
+            if (m == null) return 1;
+            float strike = Mathf.Max(m.ATK, m.MAG);
+            float bulk = (m.HP + m.DEF) / 12f;
+            float threat = strike + bulk * 0.35f;
+            int fromStats = Mathf.Max(1, Mathf.CeilToInt(threat / 9f));
+            return Mathf.Max(fromStats, m.MonsterLevel);
         }
     }
 }

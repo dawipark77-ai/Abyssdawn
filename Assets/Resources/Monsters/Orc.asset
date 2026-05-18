@@ -17,13 +17,14 @@ MonoBehaviour:
   scaleMultiplier: 1.4
   hoverOffsetY: 0
   type: 0
+  level: 9
   hp: 150
   mp: 0
   atk: 25
-  def: 8
-  mag: 2
-  agi: 6
-  luk: 2
+  def: 14
+  mag: 5
+  agi: 12
+  luk: 7
   physResist: 1
   magResist: 1
   statusResist: 1
@@ -35,7 +36,7 @@ MonoBehaviour:
   minFloor: 0
   maxFloor: 0
   spawnWeight: 0
-  expReward: 10
+  expReward: 60
   goldReward: 0
   dropTable: []
   companionChance: 0

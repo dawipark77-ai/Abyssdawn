@@ -17,6 +17,7 @@ MonoBehaviour:
   scaleMultiplier: 0.4
   hoverOffsetY: 0
   type: 3
+  level: 2
   hp: 28
   mp: 0
   atk: 11

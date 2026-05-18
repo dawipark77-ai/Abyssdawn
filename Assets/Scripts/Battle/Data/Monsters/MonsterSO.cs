@@ -119,6 +119,12 @@ namespace Abyssdawn
         [Tooltip("몬스터 등급 (Normal / Elite / Boss)")]
         [SerializeField] private MonsterType type = MonsterType.Normal;
 
+        [Header("기획 · 밸런스")]
+        [Tooltip("몬스터 레벨 (1~). 종류마다 인스펙터에서 직접 설정.")]
+        [Min(1)]
+        [FormerlySerializedAs("monsterLevel")]
+        public int level = 1;
+
         // ──────────────────────────────────────────
         // 전투 스탯
         // ──────────────────────────────────────────
@@ -258,6 +264,8 @@ namespace Abyssdawn
         /// <summary>몬스터 등급</summary>
         public MonsterType Type => type;
 
+        public int MonsterLevel => level;
+
         // 스탯
         /// <summary>최대 HP</summary>
         public int HP => hp;
@@ -391,6 +399,7 @@ namespace Abyssdawn
         private void OnValidate()
         {
             allowedSlots = (MonsterAllowedSlotMask)((int)allowedSlots & MonsterSlotBits);
+            level = Mathf.Max(1, level);
         }
     }
 }

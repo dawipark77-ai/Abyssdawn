@@ -44,23 +44,27 @@ MonoBehaviour:
   medicinalHerbHealMinFallback: 32
   medicinalHerbHealMaxFallback: 35
   medicinalHerbGrantFloorsMin: 1
-  medicinalHerbGrantFloorsMax: 5
+  medicinalHerbGrantFloorsMax: 3
   medicinalHerbGrantCountMin: 0
   medicinalHerbGrantCountMax: 2
-  randomOneOrTwoEnemyPartyFromFloor: 3
   floor1TownFullRestoreEnabled: 1
-  floor1TownMedicinalHerbStack: 15
+  floor1TownMedicinalHerbStack: 0
   floor1TownAfterVictoryEnabled: 1
   maxFleesPerFloor: 2
   aiProgressionEnabled: 1
   aiSurvivalEnemyTurnCount: 3
   aiMaxTownRetreatsPerEncounter: 6
   aiMaxFarmingPassesBeforeNextFloor: 50
+  aiExtraLevelsBeyondNextFloorGate: 0
   aiTownRetreatBeforeUnsafeBattle: 1
-  floorLevelGates:
-  - floor: 3
-    minLevelToEnter: 3
-    maxRecommendedLevel: 5
+  aiMergeMonsterPoolRecommendedLevel: 1
+  aiTurnWinGateEnabled: 1
+  aiTurnWinGateReplacesPoolRecommendation: 1
+  aiTurnWinGateMaxTurns: 3
+  aiTurnWinGateProbesPerLevel: 8
+  aiTurnWinGateRequiredSuccessRatio: 0.875
+  aiTurnWinGateMaxSearchLevel: 60
+  floorLevelGates: []
   startingDawnChaliceCharges: 3
   dawnChaliceHpHealPercent: 0.6
   dawnChaliceMpHealPercent: 0.6
