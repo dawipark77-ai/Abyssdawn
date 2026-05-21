@@ -17,7 +17,8 @@ MonoBehaviour:
   subtitle: Fast Sugar Burn
   species: 3
   memoryIcon: {fileID: 0}
-  hpBonusPercent: -10
+  hpBonusPercent: -5
+  mpBonusPercent: 5
   hpBonus: 0
   attackBonus: 0
   defenseBonus: 0
@@ -25,12 +26,17 @@ MonoBehaviour:
   magicBonus: 0
   luckBonus: 1
   hpGrowthPerLevel: 0
-  mpGrowthPerLevel: 0
+  mpGrowthPerLevel: 0.15
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
-  luckGrowthPerLevel: 0.2
+  luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 0
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 10
+  luckLevelUpChanceBonus: 10
   description: "Luck +1, Max HP -10%. Level up: Luck +0.2 per level."
   flavorText: "Energy burns bright and fast in them, leaving little in reserve."
   requiredMemoriesForTrait: 3

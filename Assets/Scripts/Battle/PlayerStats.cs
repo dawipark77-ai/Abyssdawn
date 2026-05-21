@@ -121,12 +121,15 @@ public class PlayerStats : MonoBehaviour
             // 2. + Class Bonus
             int classBonus = characterClass != null ? characterClass.hpBonus : 0;
 
+            int memoryFlatHp = GetMemorySpeciesHpFlatBonus();
+            int memoryHpFromPercent = Mathf.RoundToInt(baseHP * GetMemorySpeciesHpBonusPercentSum() / 100f);
+
             // 3. + 기타
             int passiveBonus = GetPassiveHPBonus();
             int equipmentBonus = GetEquipmentHPBonus();
             int traitBonus = GetTraitBonus(PassiveBonusStat.HP);
 
-            return baseValue + classBonus + passiveBonus + equipmentBonus + traitBonus;
+            return baseValue + classBonus + memoryFlatHp + memoryHpFromPercent + passiveBonus + equipmentBonus + traitBonus;
         }
     }
 
@@ -141,12 +144,14 @@ public class PlayerStats : MonoBehaviour
             // 2. + Class Bonus
             int classBonus = characterClass != null ? characterClass.mpBonus : 0;
 
+            int memoryMpFromPercent = Mathf.RoundToInt(baseMP * GetMemorySpeciesMpBonusPercentSum() / 100f);
+
             // 3. + 기타
             int passiveBonus = GetPassiveMPBonus();
             int equipmentBonus = GetEquipmentMPBonus(baseValue + classBonus + passiveBonus);
             int traitBonus = GetTraitBonus(PassiveBonusStat.MP);
 
-            return baseValue + classBonus + passiveBonus + equipmentBonus + traitBonus;
+            return baseValue + classBonus + memoryMpFromPercent + passiveBonus + equipmentBonus + traitBonus;
         }
     }
 
@@ -661,6 +666,47 @@ public class PlayerStats : MonoBehaviour
         return total;
     }
 
+    private void AppendMemoriesToList(System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData> list)
+    {
+        if (statData == null || list == null) return;
+        if (statData.memorySlot1 != null) list.Add(statData.memorySlot1);
+        if (statData.memorySlot2 != null) list.Add(statData.memorySlot2);
+        if (statData.memorySlot3 != null) list.Add(statData.memorySlot3);
+    }
+
+    private int GetMemorySpeciesHpFlatBonus()
+    {
+        if (statData == null) return 0;
+        var list = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>(3);
+        AppendMemoriesToList(list);
+        int sum = 0;
+        for (int i = 0; i < list.Count; i++)
+            if (list[i] != null) sum += list[i].hpBonus;
+        return sum;
+    }
+
+    private float GetMemorySpeciesHpBonusPercentSum()
+    {
+        if (statData == null) return 0f;
+        var list = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>(3);
+        AppendMemoriesToList(list);
+        float sum = 0f;
+        for (int i = 0; i < list.Count; i++)
+            if (list[i] != null) sum += list[i].hpBonusPercent;
+        return sum;
+    }
+
+    private float GetMemorySpeciesMpBonusPercentSum()
+    {
+        if (statData == null) return 0f;
+        var list = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>(3);
+        AppendMemoriesToList(list);
+        float sum = 0f;
+        for (int i = 0; i < list.Count; i++)
+            if (list[i] != null) sum += list[i].mpBonusPercent;
+        return sum;
+    }
+
     /// <summary>
     /// 장비로부터 명중률 보정치를 가져옵니다 (0.0 ~ 1.0 범위).
     /// </summary>
@@ -822,7 +868,15 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"[PlayerStats] ✓ statData 에셋 연결됨: {statData.name}");
 
-        // 종의 기억 세트 효과 런타임 체크 (OnValidate는 에디터 전용이므로 여기서도 실행)
+        // [2026-05-20] 빈 playerName이면 GameManager.SaveFromPlayer/ApplyToPlayer가 전부 스킵되어
+        // 던전에서 쌓은 EXP·레벨이 전투 씬(별도 PlayerStats 인스턴스)으로 넘어가지 않음 → 전투는 항상 "새 캐릭터"처럼 동작.
+        if (string.IsNullOrWhiteSpace(playerName))
+        {
+            playerName = "Hero";
+            Debug.LogWarning("[PlayerStats] playerName이 비어 있어 'Hero'로 설정했습니다. (GameManager 파티 키·씬 간 동기화에 필요)", this);
+        }
+
+        // 종의 기억 세트 효과 런타임 체크 (OnValidate는 에디터 전용이므로 여기도 실행)
         statData.CheckAndActivateTrait();
 
         // [NEW] 씬 간 자동 동기화: HeroData의 currentJob을 읽어 characterClass에 할당
@@ -1333,9 +1387,9 @@ public class PlayerStats : MonoBehaviour
         _lvUpAgiGain = 0;
         _lvUpLukGain = 0;
 
-        ApplyClassRandomGrowth();
-        ApplyMemoryRandomGrowth();
         ApplyHpMpGrowth();
+        ApplyCombinedClassMemoryRandomStatGrowth();
+        ApplyHpMpBonusFromDefenseMagicGainedThisLevel();
         GrantFreeStatPoint();
         currentHP = maxHP;
         currentMP = maxMP;
@@ -1408,97 +1462,87 @@ public class PlayerStats : MonoBehaviour
     }
 
     /// <summary>
-    /// 레벨업 시 직업 성장치에 따라 기본 스탯이 랜덤 상승하는 로직
+    /// 레벨업 시 직업 + 장착 종의 기억을 <b>한 번의 가중치 추첨</b>으로 합쳐 스탯 +1.
+    /// 신규 직업(독립 확률 %)은 (직업 기본 + 기억 %p)를 5~70% 클램프한 뒤 비중으로 추첨, 레거시는 attackGrowth 등 합산 가중치.
     /// </summary>
-    private void ApplyClassRandomGrowth()
+    private void ApplyCombinedClassMemoryRandomStatGrowth()
     {
         if (characterClass == null) return;
 
-        // 성장 가중치 설정 (0 이하인 값은 자동으로 무시)
-        float atkW = Mathf.Max(0f, characterClass.attackGrowthPerLevel);
-        float defW = Mathf.Max(0f, characterClass.defenseGrowthPerLevel);
-        float magW = Mathf.Max(0f, characterClass.magicGrowthPerLevel);
-        float agiW = Mathf.Max(0f, characterClass.agilityGrowthPerLevel);
-        float lukW = Mathf.Max(0f, characterClass.luckGrowthPerLevel);
+        float wAtk, wDef, wMag, wAgi, wLuk;
 
-        float total = atkW + defW + magW + agiW + lukW;
-        if (total <= 0f)
+        if (characterClass.UsesIndependentStatLevelUpChances)
         {
-            // 성장치가 모두 0이면 균등 분배
-            atkW = defW = magW = agiW = lukW = 1f;
-            total = 5f;
+            GetMemoryLevelUpChanceBonusSums(out float aM, out float dM, out float mM, out float agM, out float lM);
+            wAtk = CharacterClass.ClampStatLevelUpChancePercent(characterClass.levelUpAttackChancePercent + aM);
+            wDef = CharacterClass.ClampStatLevelUpChancePercent(characterClass.levelUpDefenseChancePercent + dM);
+            wMag = CharacterClass.ClampStatLevelUpChancePercent(characterClass.levelUpMagicChancePercent + mM);
+            wAgi = CharacterClass.ClampStatLevelUpChancePercent(characterClass.levelUpAgilityChancePercent + agM);
+            wLuk = CharacterClass.ClampStatLevelUpChancePercent(characterClass.levelUpLuckChancePercent + lM);
+        }
+        else
+        {
+            wAtk = Mathf.Max(0f, characterClass.attackGrowthPerLevel);
+            wDef = Mathf.Max(0f, characterClass.defenseGrowthPerLevel);
+            wMag = Mathf.Max(0f, characterClass.magicGrowthPerLevel);
+            wAgi = Mathf.Max(0f, characterClass.agilityGrowthPerLevel);
+            wLuk = Mathf.Max(0f, characterClass.luckGrowthPerLevel);
+
+            if (statData != null)
+            {
+                var memories = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>();
+                AppendMemoriesToList(memories);
+                foreach (var mem in memories)
+                {
+                    if (mem == null) continue;
+                    wAtk += Mathf.Max(0f, mem.attackGrowthPerLevel);
+                    wDef += Mathf.Max(0f, mem.defenseGrowthPerLevel);
+                    wMag += Mathf.Max(0f, mem.magicGrowthPerLevel);
+                    wAgi += Mathf.Max(0f, mem.agilityGrowthPerLevel);
+                    wLuk += Mathf.Max(0f, mem.luckGrowthPerLevel);
+                }
+            }
+
+            float sumLegacy = wAtk + wDef + wMag + wAgi + wLuk;
+            if (sumLegacy <= 0f)
+                wAtk = wDef = wMag = wAgi = wLuk = 1f;
         }
 
+        float total = wAtk + wDef + wMag + wAgi + wLuk;
+        if (total <= 0f)
+            return;
+
         float pick = UnityEngine.Random.Range(0f, total);
+        StatType chosen;
+        if (pick < wAtk) chosen = StatType.Attack;
+        else if (pick < wAtk + wDef) chosen = StatType.Defense;
+        else if (pick < wAtk + wDef + wMag) chosen = StatType.Magic;
+        else if (pick < wAtk + wDef + wMag + wAgi) chosen = StatType.Agility;
+        else chosen = StatType.Luck;
 
-        StatType picked;
-        if (pick < atkW)                              picked = StatType.Attack;
-        else if (pick < atkW + defW)                  picked = StatType.Defense;
-        else if (pick < atkW + defW + magW)           picked = StatType.Magic;
-        else if (pick < atkW + defW + magW + agiW)    picked = StatType.Agility;
-        else                                          picked = StatType.Luck;
-
-        AddAllocatedStat(picked, 1);
-        TrackStatGain(picked, 1);
+        AddAllocatedStat(chosen, 1);
+        TrackStatGain(chosen, 1);
     }
 
-    /// <summary>
-    /// 레벨업 시 장착된 종의 기억(MemoryOfSpecies) 성장치에 따라
-    /// 추가로 기본 스탯이 랜덤 상승하는 로직
-    /// - 직업 성장과는 완전히 별도로 한 번 더 돌립니다.
-    /// </summary>
-    private void ApplyMemoryRandomGrowth()
+    private void GetMemoryLevelUpChanceBonusSums(out float atk, out float def, out float mag, out float agi, out float luk)
     {
+        atk = def = mag = agi = luk = 0f;
         if (statData == null) return;
-
         var memories = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>();
-        if (statData.memorySlot1 != null) memories.Add(statData.memorySlot1);
-        if (statData.memorySlot2 != null) memories.Add(statData.memorySlot2);
-        if (statData.memorySlot3 != null) memories.Add(statData.memorySlot3);
-
-        if (memories.Count == 0) return;
-
-        float atkW = 0f;
-        float defW = 0f;
-        float magW = 0f;
-        float agiW = 0f;
-        float lukW = 0f;
-
+        AppendMemoriesToList(memories);
         foreach (var mem in memories)
         {
             if (mem == null) continue;
-            atkW += Mathf.Max(0f, mem.attackGrowthPerLevel);
-            defW += Mathf.Max(0f, mem.defenseGrowthPerLevel);
-            magW += Mathf.Max(0f, mem.magicGrowthPerLevel);
-            agiW += Mathf.Max(0f, mem.agilityGrowthPerLevel);
-            lukW += Mathf.Max(0f, mem.luckGrowthPerLevel);
+            atk += mem.attackLevelUpChanceBonus;
+            def += mem.defenseLevelUpChanceBonus;
+            mag += mem.magicLevelUpChanceBonus;
+            agi += mem.agilityLevelUpChanceBonus;
+            luk += mem.luckLevelUpChanceBonus;
         }
-
-        float total = atkW + defW + magW + agiW + lukW;
-        if (total <= 0f)
-        {
-            // 성장치가 전부 0이면 종의 기억에서는 레벨업 보정 없음
-            return;
-        }
-
-        float pick = UnityEngine.Random.Range(0f, total);
-
-        StatType picked;
-        if (pick < atkW)                              picked = StatType.Attack;
-        else if (pick < atkW + defW)                  picked = StatType.Defense;
-        else if (pick < atkW + defW + magW)           picked = StatType.Magic;
-        else if (pick < atkW + defW + magW + agiW)    picked = StatType.Agility;
-        else                                          picked = StatType.Luck;
-
-        AddAllocatedStat(picked, 1);
-        TrackStatGain(picked, 1);
     }
 
     /// <summary>
-    /// 레벨업 시 HP/MP는 항상 상승하도록 처리.
-    /// - 직업의 hpPerLevel/mpPerLevel을 기본으로 사용하고
-    /// - 장착된 종의 기억의 hpGrowthPerLevel/mpGrowthPerLevel을 추가로 더해
-    ///   약간의 랜덤 오차를 준 뒤 baseHP/baseMP를 증가시킵니다.
+    /// 레벨업 시 HP/MP — 직업 hpPerLevel/mpPerLevel + 종의 기억 hpGrowthPerLevel/mpGrowthPerLevel 합을 반올림(확정, 노이즈 없음).
     /// </summary>
     private void ApplyHpMpGrowth()
     {
@@ -1517,30 +1561,36 @@ public class PlayerStats : MonoBehaviour
         if (statData != null)
         {
             var memories = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>();
-            if (statData.memorySlot1 != null) memories.Add(statData.memorySlot1);
-            if (statData.memorySlot2 != null) memories.Add(statData.memorySlot2);
-            if (statData.memorySlot3 != null) memories.Add(statData.memorySlot3);
+            AppendMemoriesToList(memories);
 
             foreach (var mem in memories)
             {
                 if (mem == null) continue;
-                memoryHpGrowth += Mathf.Max(0f, mem.hpGrowthPerLevel);
-                memoryMpGrowth += Mathf.Max(0f, mem.mpGrowthPerLevel);
+                memoryHpGrowth += mem.hpGrowthPerLevel;
+                memoryMpGrowth += mem.mpGrowthPerLevel;
             }
         }
 
-        float expectedHpGain = classHpGain + memoryHpGrowth;
-        float expectedMpGain = classMpGain + memoryMpGrowth;
-
-        // 약간의 오차(-1 ~ +1)를 더하되, 최소 1 이상은 항상 오른다.
-        int finalHpGain = Mathf.Max(1, Mathf.RoundToInt(expectedHpGain + UnityEngine.Random.Range(-1f, 1f)));
-        int finalMpGain = Mathf.Max(1, Mathf.RoundToInt(expectedMpGain + UnityEngine.Random.Range(-1f, 1f)));
+        int finalHpGain = Mathf.Max(0, Mathf.RoundToInt(classHpGain + memoryHpGrowth));
+        int finalMpGain = Mathf.Max(0, Mathf.RoundToInt(classMpGain + memoryMpGrowth));
 
         baseHP += finalHpGain;
         baseMP += finalMpGain;
 
         _lvUpHpGain += finalHpGain;
         _lvUpMpGain += finalMpGain;
+    }
+
+    /// <summary>이번 레벨업에서 자동으로 오른 DEF/MAG 1당 MaxHP·MaxMP +3.</summary>
+    private void ApplyHpMpBonusFromDefenseMagicGainedThisLevel()
+    {
+        int bonusHp = _lvUpDefGain * CharacterClass.HpBonusPerDefensePointGained;
+        int bonusMp = _lvUpMagGain * CharacterClass.MpBonusPerMagicPointGained;
+        if (bonusHp == 0 && bonusMp == 0) return;
+        baseHP += bonusHp;
+        baseMP += bonusMp;
+        _lvUpHpGain += bonusHp;
+        _lvUpMpGain += bonusMp;
     }
 
     /// <summary>
@@ -1575,6 +1625,16 @@ public class PlayerStats : MonoBehaviour
         _fallbackFreeStatPoints--;
 
         AddAllocatedStat(statType, 1);
+        if (statType == StatType.Defense)
+        {
+            baseHP += CharacterClass.HpBonusPerDefensePointGained;
+            _fallbackCurrentHP = Mathf.Min(_fallbackCurrentHP + CharacterClass.HpBonusPerDefensePointGained, maxHP);
+        }
+        else if (statType == StatType.Magic)
+        {
+            baseMP += CharacterClass.MpBonusPerMagicPointGained;
+            _fallbackCurrentMP = Mathf.Min(_fallbackCurrentMP + CharacterClass.MpBonusPerMagicPointGained, maxMP);
+        }
         OnStatusChanged?.Invoke();
     }
 

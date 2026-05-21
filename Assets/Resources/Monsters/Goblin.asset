@@ -39,5 +39,5 @@ MonoBehaviour:
   expReward: 12
   goldReward: 0
   dropTable: []
-  companionChance: 0
-  companionData: {fileID: 0}
+  companionChance: 0.2
+  companionData: {fileID: 11400000, guid: 26730e91edd748479c99b8fbec06cc39, type: 2}

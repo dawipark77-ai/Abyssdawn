@@ -35,8 +35,27 @@ namespace Abyssdawn
         /// <summary>마지막 마을 방문 시 AI가 고른 장비 시그니처(보고용).</summary>
         public string LastAiEquipSignature = "";
 
+        /// <summary>마지막 마을 방문 시 장비 점수 1줄(옵션 로그·요약용).</summary>
+        public string LastAiEquipScoreExplain = "";
+
         /// <summary>이 회차에서 AI 장비 재선택 횟수(마을 방문마다 +1).</summary>
         public int AiEquipPickCount;
+
+        /// <summary>이 회차에서 시뮬 동료 합류에 성공한 횟수(성공 시 <see cref="BattleSimUnit"/> 파티에 반영).</summary>
+        public int SimCompanionJoinsTotal;
+
+        /// <summary>마지막으로 동료화에 성공한 몬스터 표시명(보고용).</summary>
+        public string LastCompanionJoinedName = "";
+
+        /// <summary>이번 회차에서 동료 합류에 성공한 순서대로의 표시명(중복 허용).</summary>
+        public readonly List<string> SimCompanionJoinHistory = new List<string>();
+
+        /// <summary>CSV·요약용 — 합류 이력을 <c>|</c>로 이은 문자열. 없으면 "-".</summary>
+        public string FormatCompanionJoinHistorySig()
+        {
+            if (SimCompanionJoinHistory == null || SimCompanionJoinHistory.Count == 0) return "-";
+            return string.Join("|", SimCompanionJoinHistory);
+        }
 
         /// <summary>BattleSimulator에 그대로 전달되는 전투 유닛(슬롯 1~4).</summary>
         public readonly List<BattleSimUnit> Units = new List<BattleSimUnit>();

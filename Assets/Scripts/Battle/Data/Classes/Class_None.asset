@@ -13,20 +13,31 @@ MonoBehaviour:
   m_Name: Class_None
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: None
-  description: "No class selected. All stats remain at their base values with no bonuses or penalties."
+  description: "No class selected. Neutral baseline."
   classIcon: {fileID: 0}
+  hpMultiplier: 1
+  mpMultiplier: 1
+  attackMultiplier: 1
+  defenseMultiplier: 1
+  magicMultiplier: 1
+  agilityMultiplier: 1
+  luckMultiplier: 1
   attackBonus: 0
   defenseBonus: 0
   magicBonus: 0
   agilityBonus: 0
   luckBonus: 0
-  hpMultiplier: 1
-  mpMultiplier: 1
-  hpPerLevel: 0
-  mpPerLevel: 0
+  hpBonus: 0
+  mpBonus: 0
+  hpPerLevel: 5
+  mpPerLevel: 2
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
-
+  levelUpAttackChancePercent: 16
+  levelUpDefenseChancePercent: 16
+  levelUpMagicChancePercent: 16
+  levelUpAgilityChancePercent: 16
+  levelUpLuckChancePercent: 16

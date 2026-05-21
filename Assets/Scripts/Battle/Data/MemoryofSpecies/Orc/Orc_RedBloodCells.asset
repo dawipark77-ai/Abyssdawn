@@ -18,19 +18,25 @@ MonoBehaviour:
   species: 2
   memoryIcon: {fileID: 0}
   hpBonusPercent: 10
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: 1
   defenseBonus: 0
   agilityBonus: 0
   magicBonus: 0
   luckBonus: -1
-  hpGrowthPerLevel: 0
+  hpGrowthPerLevel: 0.3
   mpGrowthPerLevel: 0
-  attackGrowthPerLevel: 0.2
+  attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 15
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 0
+  luckLevelUpChanceBonus: 0
   description: "Attack +1, Max HP +10%, Luck -1. Level up: Attack +0.2 per level."
   flavorText: "Blood thick with power keeps them fighting long after others fall."
   requiredMemoriesForTrait: 3

@@ -511,7 +511,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   statData: {fileID: 11400000, guid: a176c788f5d164441af8bae214804085, type: 2}
-  playerName: 
+  _fallbackAllocatedAttack: 0
+  _fallbackAllocatedDefense: 0
+  _fallbackAllocatedMagic: 0
+  _fallbackAllocatedAgility: 0
+  _fallbackAllocatedLuck: 0
+  _fallbackCurrentHP: 0
+  _fallbackCurrentMP: 0
+  _fallbackLevel: 1
+  _fallbackExp: 99
+  _fallbackFreeStatPoints: 0
+  _fallbackSkillPoints: 0
+  playerName: Hero
   characterClass: {fileID: 0}
   currentSlot: 1
   isFrontRow: 1
@@ -10001,6 +10012,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   statData: {fileID: 11400000, guid: a176c788f5d164441af8bae214804085, type: 2}
+  _fallbackAllocatedAttack: 0
+  _fallbackAllocatedDefense: 0
+  _fallbackAllocatedMagic: 0
+  _fallbackAllocatedAgility: 0
+  _fallbackAllocatedLuck: 0
+  _fallbackCurrentHP: 0
+  _fallbackCurrentMP: 0
+  _fallbackLevel: 1
+  _fallbackExp: 0
+  _fallbackFreeStatPoints: 0
+  _fallbackSkillPoints: 0
   playerName: Hero
   characterClass: {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
   currentSlot: 1
@@ -13360,6 +13382,8 @@ MonoBehaviour:
   allowFleeActions: 0
   simItemPickChance: 0.02
   simFleePickChance: 0.03
+  fleeWhenHpDisadvantaged: 1
+  fleeHpGapThreshold: 0.7
   simSkillPickChance: 0.45
   simRecoveryReportFallbackWhenNone: 2
 --- !u!4 &1512681447

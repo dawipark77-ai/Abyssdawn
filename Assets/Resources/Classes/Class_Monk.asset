@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: Class_Monk
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: Monk
-  description: A martial artist who relies on agility and inner power rather than
-    heavy armor.
+  description: "A martial artist who relies on agility and inner power."
   classIcon: {fileID: 0}
+  hpMultiplier: 0.85
+  mpMultiplier: 1.15
+  attackMultiplier: 1
+  defenseMultiplier: 1
+  magicMultiplier: 1
+  agilityMultiplier: 1
+  luckMultiplier: 1
   attackBonus: 2
   defenseBonus: -1
   magicBonus: 0
@@ -23,10 +29,15 @@ MonoBehaviour:
   luckBonus: 1
   hpBonus: 0
   mpBonus: 0
-  hpPerLevel: 6
-  mpPerLevel: 6
-  attackGrowthPerLevel: 0.6
-  defenseGrowthPerLevel: 0.1
-  magicGrowthPerLevel: 0.2
-  agilityGrowthPerLevel: 0.8
-  luckGrowthPerLevel: 0.4
+  hpPerLevel: 3
+  mpPerLevel: 7
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0
+  levelUpAttackChancePercent: 30
+  levelUpDefenseChancePercent: 5
+  levelUpMagicChancePercent: 10
+  levelUpAgilityChancePercent: 30
+  levelUpLuckChancePercent: 5

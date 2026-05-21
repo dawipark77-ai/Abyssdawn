@@ -75,6 +75,8 @@ namespace Abyssdawn
             public int TotalDamageTakenByAllies;
             public int SkillUseCount;
             public int RecoverySkillUseCount;
+            /// <summary>이번 전투에서 액티브로 시전된 스킬 누적. 형식: <c>skillID=count|...</c> (ID 없으면 skillName).</summary>
+            public string SkillActivationBreakdown;
             public int DeadAllies;
             public int DeadEnemies;
             /// <summary>이번 전투 도중(피해 직후) 소모된 약초 개수.</summary>
@@ -83,6 +85,30 @@ namespace Abyssdawn
             public int BattleHpPotionUses;
             /// <summary>이번 전투 도중 소모된 새벽의 잔 충전 횟수(0 또는 1 이상 누적).</summary>
             public int BattleDawnChaliceUses;
+
+            /// <summary>인덱스 1~4 = 슬롯. 0 미사용.</summary>
+            public readonly int[] AllyHpStartBySlot = new int[5];
+            public readonly int[] AllyHpEndBySlot = new int[5];
+            public readonly int[] EnemyHpStartBySlot = new int[5];
+            public readonly int[] EnemyHpEndBySlot = new int[5];
+
+            public readonly long[] AllyAttackerDamageDealt = new long[5];
+            public readonly long[] AllyAttackerOffenseAttempts = new long[5];
+            public readonly long[] AllyAttackerOffenseHits = new long[5];
+            public readonly long[] AllyAttackerCrits = new long[5];
+            public readonly long[] AllyDefenderDamageTaken = new long[5];
+            public readonly long[] AllySlotSurvivalTurns = new long[5];
+            public readonly int[] AllyDefendActions = new int[5];
+            public readonly int[] AllySkillCasts = new int[5];
+
+            public readonly long[] EnemyAttackerDamageDealt = new long[5];
+            public readonly long[] EnemyAttackerOffenseAttempts = new long[5];
+            public readonly long[] EnemyAttackerOffenseHits = new long[5];
+            public readonly long[] EnemyAttackerCrits = new long[5];
+            public readonly long[] EnemyDefenderDamageTaken = new long[5];
+            public readonly long[] EnemySlotSurvivalTurns = new long[5];
+            public readonly int[] EnemyDefendActions = new int[5];
+            public readonly int[] EnemySkillCasts = new int[5];
         }
 
         /// <summary>
@@ -99,7 +125,7 @@ namespace Abyssdawn
             DungeonSimSettings dungeonConsumableSettings = null)
         {
             if (allies == null || enemies == null || rng == null)
-                return new DungeonBattleResult { AllyWin = false, AllyEscaped = false, Turns = 0 };
+                return new DungeonBattleResult { AllyWin = false, AllyEscaped = false, Turns = 0, SkillActivationBreakdown = "" };
 
             ClearAllSimGuardFlags(allies, enemies);
 
@@ -107,6 +133,10 @@ namespace Abyssdawn
             var skillStats = new SimGlobalSkillStats();
             bool alliesVictory;
             bool allyEscaped;
+
+            var battleResult = new DungeonBattleResult();
+            SnapshotHpBySlot(allies, battleResult.AllyHpStartBySlot);
+            SnapshotHpBySlot(enemies, battleResult.EnemyHpStartBySlot);
 
             DungeonMidBattleConsumableContext dungeonCx = null;
             if (dungeonConsumablePlayer != null && dungeonConsumableSettings != null)
@@ -119,6 +149,9 @@ namespace Abyssdawn
                 allowFleeForThisBattle,
                 dungeonCx,
                 out alliesVictory, out allyEscaped);
+
+            SnapshotHpBySlot(allies, battleResult.AllyHpEndBySlot);
+            SnapshotHpBySlot(enemies, battleResult.EnemyHpEndBySlot);
 
             int totalDamageEnemies = 0;
             int totalDamageAllies = 0;
@@ -135,21 +168,59 @@ namespace Abyssdawn
 
             ClearAllSimGuardFlags(allies, enemies);
 
-            return new DungeonBattleResult
+            CopySlotBattleAccumulatorToDungeonResult(acc, battleResult);
+
+            battleResult.AllyWin = alliesVictory;
+            battleResult.AllyEscaped = allyEscaped;
+            battleResult.Turns = turns;
+            battleResult.TotalDamageDealtToEnemies = totalDamageEnemies;
+            battleResult.TotalDamageTakenByAllies = totalDamageAllies;
+            battleResult.SkillUseCount = (int)skillStats.TotalSkillActivations;
+            battleResult.RecoverySkillUseCount = (int)skillStats.RecoveryActivations;
+            battleResult.SkillActivationBreakdown = SimSkillActivationLog.ToEncoded(skillStats.ActivationsBySkillKey);
+            battleResult.DeadAllies = deadAllies;
+            battleResult.DeadEnemies = deadEnemies;
+            battleResult.BattleMedicinalHerbUses = dungeonCx != null ? dungeonCx.HerbUses : 0;
+            battleResult.BattleHpPotionUses = dungeonCx != null ? dungeonCx.PotionUses : 0;
+            battleResult.BattleDawnChaliceUses = dungeonCx != null ? dungeonCx.ChaliceUses : 0;
+
+            return battleResult;
+        }
+
+        private static void SnapshotHpBySlot(List<BattleSimUnit> units, int[] dst)
+        {
+            for (int s = 0; s < dst.Length; s++) dst[s] = 0;
+            if (units == null) return;
+            foreach (var u in units)
             {
-                AllyWin = alliesVictory,
-                AllyEscaped = allyEscaped,
-                Turns = turns,
-                TotalDamageDealtToEnemies = totalDamageEnemies,
-                TotalDamageTakenByAllies = totalDamageAllies,
-                SkillUseCount = (int)skillStats.TotalSkillActivations,
-                RecoverySkillUseCount = (int)skillStats.RecoveryActivations,
-                DeadAllies = deadAllies,
-                DeadEnemies = deadEnemies,
-                BattleMedicinalHerbUses = dungeonCx != null ? dungeonCx.HerbUses : 0,
-                BattleHpPotionUses = dungeonCx != null ? dungeonCx.PotionUses : 0,
-                BattleDawnChaliceUses = dungeonCx != null ? dungeonCx.ChaliceUses : 0
-            };
+                int i = SlotIndex(u.Slot);
+                if (i >= 1 && i <= 4) dst[i] = Mathf.Max(0, u.CurrentHP);
+            }
+        }
+
+        private static void CopySlotBattleAccumulatorToDungeonResult(SlotBattleAccumulator acc, DungeonBattleResult res)
+        {
+            if (acc == null || res == null) return;
+            for (int s = 1; s <= 4; s++)
+            {
+                res.AllyAttackerDamageDealt[s] = acc.AllyAttackerDamageDealt[s];
+                res.AllyAttackerOffenseAttempts[s] = acc.AllyAttackerOffenseAttempts[s];
+                res.AllyAttackerOffenseHits[s] = acc.AllyAttackerOffenseHits[s];
+                res.AllyAttackerCrits[s] = acc.AllyAttackerCrits[s];
+                res.AllyDefenderDamageTaken[s] = acc.AllyDefenderDamageTaken[s];
+                res.AllySlotSurvivalTurns[s] = acc.AllySlotSurvivalTurnsSum[s];
+                res.AllyDefendActions[s] = acc.AllyDefendActions[s];
+                res.AllySkillCasts[s] = acc.AllySkillCasts[s];
+
+                res.EnemyAttackerDamageDealt[s] = acc.EnemyAttackerDamageDealt[s];
+                res.EnemyAttackerOffenseAttempts[s] = acc.EnemyAttackerOffenseAttempts[s];
+                res.EnemyAttackerOffenseHits[s] = acc.EnemyAttackerOffenseHits[s];
+                res.EnemyAttackerCrits[s] = acc.EnemyAttackerCrits[s];
+                res.EnemyDefenderDamageTaken[s] = acc.EnemyDefenderDamageTaken[s];
+                res.EnemySlotSurvivalTurns[s] = acc.EnemySlotSurvivalTurnsSum[s];
+                res.EnemyDefendActions[s] = acc.EnemyDefendActions[s];
+                res.EnemySkillCasts[s] = acc.EnemySkillCasts[s];
+            }
         }
 
         /// <summary>던전 시뮬 1전투 중 — 아군 HP가 깎인 뒤 <see cref="DungeonSimulator.TryHealPartyPriorityHerbPotionChalice"/> (유지·긴급·적극 반복).</summary>
@@ -364,6 +435,15 @@ namespace Abyssdawn
 
                 if (action == BattleSimActionType.Defend)
                 {
+                    int di = SlotIndex(unit.Slot);
+                    if (di >= 1 && di <= 4)
+                    {
+                        if (unit.Team == BattleSimTeam.Ally)
+                            acc.AllyDefendActions[di]++;
+                        else
+                            acc.EnemyDefendActions[di]++;
+                    }
+
                     if (unit.Team == BattleSimTeam.Ally)
                         unit.SimGuardEnemyPhase = true;
                     else
@@ -384,6 +464,12 @@ namespace Abyssdawn
                 int si = SlotIndex(target.Slot);
                 if (si < 1 || si > 4) continue;
 
+                int attackerIdx = SlotIndex(unit.Slot);
+                if (!targetIsAlly && unit.Team == BattleSimTeam.Ally && attackerIdx >= 1 && attackerIdx <= 4)
+                    acc.AllyAttackerOffenseAttempts[attackerIdx]++;
+                else if (targetIsAlly && unit.Team == BattleSimTeam.Enemy && attackerIdx >= 1 && attackerIdx <= 4)
+                    acc.EnemyAttackerOffenseAttempts[attackerIdx]++;
+
                 if (targetIsAlly)
                     acc.AllyDefenderAttackAttempts[si]++;
                 else
@@ -402,6 +488,11 @@ namespace Abyssdawn
 
                 if (!hit) continue;
 
+                if (!targetIsAlly && unit.Team == BattleSimTeam.Ally && attackerIdx >= 1 && attackerIdx <= 4)
+                    acc.AllyAttackerOffenseHits[attackerIdx]++;
+                else if (targetIsAlly && unit.Team == BattleSimTeam.Enemy && attackerIdx >= 1 && attackerIdx <= 4)
+                    acc.EnemyAttackerOffenseHits[attackerIdx]++;
+
                 if (targetIsAlly)
                     acc.AllyDefenderHits[si]++;
                 else
@@ -416,6 +507,17 @@ namespace Abyssdawn
                     acc.AllyDefenderDamageTaken[si] += applied;
                 else
                     acc.EnemyDefenderDamageTaken[si] += applied;
+
+                if (!targetIsAlly && unit.Team == BattleSimTeam.Ally && attackerIdx >= 1 && attackerIdx <= 4)
+                {
+                    acc.AllyAttackerDamageDealt[attackerIdx] += applied;
+                    if (crit) acc.AllyAttackerCrits[attackerIdx]++;
+                }
+                else if (targetIsAlly && unit.Team == BattleSimTeam.Enemy && attackerIdx >= 1 && attackerIdx <= 4)
+                {
+                    acc.EnemyAttackerDamageDealt[attackerIdx] += applied;
+                    if (crit) acc.EnemyAttackerCrits[attackerIdx]++;
+                }
             }
         }
 
@@ -471,6 +573,9 @@ namespace Abyssdawn
         /// <summary>전체 시뮬 반복에 걸친 스킬 시전·회복 HP% 구간 집계.</summary>
         private sealed class SimGlobalSkillStats
         {
+            /// <summary>액티브 스킬 1회 시전당 1 — 키는 <see cref="SimSkillActivationLog.KeyFor"/>.</summary>
+            public readonly Dictionary<string, long> ActivationsBySkillKey = new Dictionary<string, long>();
+
             public long TotalSkillActivations;
             public long TotalRoundsSummed;
             public long RecoveryActivations;
@@ -510,6 +615,12 @@ namespace Abyssdawn
                     sb.AppendLine($"판당 평균 스킬 시전: {(double)TotalSkillActivations / iterations:F3}");
                 else
                     sb.AppendLine("판당 평균 스킬 시전: n/a");
+
+                SimSkillActivationLog.AppendSortedHumanReport(
+                    sb,
+                    ActivationsBySkillKey,
+                    "--- 스킬별 액티브 시전 횟수 (skillID 우선, 동일 판 반복 합산) ---",
+                    maxLines: 50);
 
                 if (TotalRoundsSummed > 0)
                     sb.AppendLine($"라운드당 평균 스킬 시전: {(double)TotalSkillActivations / TotalRoundsSummed:F4} (분모=각 판의 종료 라운드 수 합, RunSingleBattle 반환값 합)");
@@ -637,12 +748,26 @@ namespace Abyssdawn
             public readonly int[] AllySlotDiedInBattle = new int[5];
             public readonly int[] AllySlotSurvivedBattleEnd = new int[5];
 
+            public readonly long[] AllyAttackerDamageDealt = new long[5];
+            public readonly long[] AllyAttackerOffenseAttempts = new long[5];
+            public readonly long[] AllyAttackerOffenseHits = new long[5];
+            public readonly long[] AllyAttackerCrits = new long[5];
+            public readonly int[] AllyDefendActions = new int[5];
+            public readonly int[] AllySkillCasts = new int[5];
+
             public readonly long[] EnemyDefenderAttackAttempts = new long[5];
             public readonly long[] EnemyDefenderHits = new long[5];
             public readonly long[] EnemyDefenderDamageTaken = new long[5];
             public readonly long[] EnemySlotSurvivalTurnsSum = new long[5];
             public readonly int[] EnemySlotDiedInBattle = new int[5];
             public readonly int[] EnemySlotSurvivedBattleEnd = new int[5];
+
+            public readonly long[] EnemyAttackerDamageDealt = new long[5];
+            public readonly long[] EnemyAttackerOffenseAttempts = new long[5];
+            public readonly long[] EnemyAttackerOffenseHits = new long[5];
+            public readonly long[] EnemyAttackerCrits = new long[5];
+            public readonly int[] EnemyDefendActions = new int[5];
+            public readonly int[] EnemySkillCasts = new int[5];
 
             public void AppendSlotReport(StringBuilder sb, int iterations)
             {
@@ -874,6 +999,7 @@ namespace Abyssdawn
             if (skillStats != null)
             {
                 skillStats.TotalSkillActivations++;
+                SimSkillActivationLog.Bump(skillStats.ActivationsBySkillKey, skill);
                 RecordSimSkillTypeHistograms(skillStats, skill, hpBucketBeforeCost, recoveryPath);
 
                 if (recoveryPath)
@@ -890,6 +1016,18 @@ namespace Abyssdawn
 
             ApplySimSkillCost(unit, skill, dungeonCx);
 
+            if (acc != null)
+            {
+                int castSi = SlotIndex(unit.Slot);
+                if (castSi >= 1 && castSi <= 4)
+                {
+                    if (unit.Team == BattleSimTeam.Ally)
+                        acc.AllySkillCasts[castSi]++;
+                    else
+                        acc.EnemySkillCasts[castSi]++;
+                }
+            }
+
             if (SkillHasRecoveryForSim(skill))
             {
                 ApplySimRecoveryFromSkill(skill, targets);
@@ -898,6 +1036,7 @@ namespace Abyssdawn
 
             int scaled = BattleSimCombatMath.GetSimSkillScaledStat(unit, skill);
             int hitCount = Mathf.Max(1, skill.hitCount);
+            int attackerIdxSk = SlotIndex(unit.Slot);
 
             foreach (var target in targets)
             {
@@ -908,6 +1047,11 @@ namespace Abyssdawn
                 for (int h = 0; h < hitCount; h++)
                 {
                     if (!target.IsAlive) break;
+
+                    if (!targetIsAlly && unit.Team == BattleSimTeam.Ally && attackerIdxSk >= 1 && attackerIdxSk <= 4)
+                        acc.AllyAttackerOffenseAttempts[attackerIdxSk]++;
+                    else if (targetIsAlly && unit.Team == BattleSimTeam.Enemy && attackerIdxSk >= 1 && attackerIdxSk <= 4)
+                        acc.EnemyAttackerOffenseAttempts[attackerIdxSk]++;
 
                     if (targetIsAlly)
                         acc.AllyDefenderAttackAttempts[si]++;
@@ -927,6 +1071,11 @@ namespace Abyssdawn
 
                     if (!hit) continue;
 
+                    if (!targetIsAlly && unit.Team == BattleSimTeam.Ally && attackerIdxSk >= 1 && attackerIdxSk <= 4)
+                        acc.AllyAttackerOffenseHits[attackerIdxSk]++;
+                    else if (targetIsAlly && unit.Team == BattleSimTeam.Enemy && attackerIdxSk >= 1 && attackerIdxSk <= 4)
+                        acc.EnemyAttackerOffenseHits[attackerIdxSk]++;
+
                     if (targetIsAlly)
                         acc.AllyDefenderHits[si]++;
                     else
@@ -941,6 +1090,17 @@ namespace Abyssdawn
                         acc.AllyDefenderDamageTaken[si] += applied;
                     else
                         acc.EnemyDefenderDamageTaken[si] += applied;
+
+                    if (!targetIsAlly && unit.Team == BattleSimTeam.Ally && attackerIdxSk >= 1 && attackerIdxSk <= 4)
+                    {
+                        acc.AllyAttackerDamageDealt[attackerIdxSk] += applied;
+                        if (crit) acc.AllyAttackerCrits[attackerIdxSk]++;
+                    }
+                    else if (targetIsAlly && unit.Team == BattleSimTeam.Enemy && attackerIdxSk >= 1 && attackerIdxSk <= 4)
+                    {
+                        acc.EnemyAttackerDamageDealt[attackerIdxSk] += applied;
+                        if (crit) acc.EnemyAttackerCrits[attackerIdxSk]++;
+                    }
                 }
             }
 

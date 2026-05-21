@@ -43,6 +43,10 @@ namespace AbyssdawnBattle
         [Tooltip("최대 HP 보정 (%)")]
         [Range(-50f, 50f)]
         public float hpBonusPercent = 0f;
+
+        [Tooltip("최대 MP 보정 (%) — baseMP 대비")]
+        [Range(-50f, 50f)]
+        public float mpBonusPercent = 0f;
         
         [Tooltip("HP 보정 (절대값)")]
         public int hpBonus = 0;
@@ -95,6 +99,13 @@ namespace AbyssdawnBattle
         [Tooltip("레벨당 행운 성장치 (예: 0.2 = 레벨당 +0.2 행운)")]
         [Range(-5f, 5f)]
         public float luckGrowthPerLevel = 0f;
+
+        [Header("레벨업 — 5스탯 성공 확률 보너스 (퍼센트 포인트, 직업 기본 확률에 가산)")]
+        public float attackLevelUpChanceBonus = 0f;
+        public float defenseLevelUpChanceBonus = 0f;
+        public float magicLevelUpChanceBonus = 0f;
+        public float agilityLevelUpChanceBonus = 0f;
+        public float luckLevelUpChanceBonus = 0f;
         
         [Header("Description")]
         [Tooltip("득실 정보 (효과 상세 설명)")]
@@ -125,6 +136,8 @@ namespace AbyssdawnBattle
             
             if (hpBonusPercent != 0)
                 bonuses.Add($"HP {(hpBonusPercent > 0 ? "+" : "")}{hpBonusPercent}%");
+            if (mpBonusPercent != 0)
+                bonuses.Add($"MP {(mpBonusPercent > 0 ? "+" : "")}{mpBonusPercent}%");
             if (hpBonus != 0)
                 bonuses.Add($"HP {(hpBonus > 0 ? "+" : "")}{hpBonus}");
             if (attackBonus != 0)
@@ -153,6 +166,16 @@ namespace AbyssdawnBattle
                 bonuses.Add($"AGI +{agilityGrowthPerLevel:F1}/레벨");
             if (luckGrowthPerLevel != 0)
                 bonuses.Add($"LUK +{luckGrowthPerLevel:F1}/레벨");
+            if (attackLevelUpChanceBonus != 0)
+                bonuses.Add($"Lv업 ATK확률 {(attackLevelUpChanceBonus > 0 ? "+" : "")}{attackLevelUpChanceBonus:F0}%p");
+            if (defenseLevelUpChanceBonus != 0)
+                bonuses.Add($"Lv업 DEF확률 {(defenseLevelUpChanceBonus > 0 ? "+" : "")}{defenseLevelUpChanceBonus:F0}%p");
+            if (magicLevelUpChanceBonus != 0)
+                bonuses.Add($"Lv업 MAG확률 {(magicLevelUpChanceBonus > 0 ? "+" : "")}{magicLevelUpChanceBonus:F0}%p");
+            if (agilityLevelUpChanceBonus != 0)
+                bonuses.Add($"Lv업 AGI확률 {(agilityLevelUpChanceBonus > 0 ? "+" : "")}{agilityLevelUpChanceBonus:F0}%p");
+            if (luckLevelUpChanceBonus != 0)
+                bonuses.Add($"Lv업 LUK확률 {(luckLevelUpChanceBonus > 0 ? "+" : "")}{luckLevelUpChanceBonus:F0}%p");
             
             return bonuses.Count > 0 ? string.Join(", ", bonuses) : "No bonuses";
         }

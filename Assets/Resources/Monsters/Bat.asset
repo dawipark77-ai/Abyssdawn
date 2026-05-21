@@ -40,4 +40,4 @@ MonoBehaviour:
   goldReward: 0
   dropTable: []
   companionChance: 0.3
-  companionData: {fileID: 0}
+  companionData: {fileID: 11400000, guid: 7fbd356a21c24e759939f555b6ecf15c, type: 2}

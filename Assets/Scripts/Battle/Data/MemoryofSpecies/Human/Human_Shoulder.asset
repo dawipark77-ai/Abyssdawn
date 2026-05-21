@@ -18,6 +18,7 @@ MonoBehaviour:
   species: 0
   memoryIcon: {fileID: 7701394913484588842, guid: 018b1ac7043653248b2125c22186c3f1, type: 3}
   hpBonusPercent: 0
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: 2
   defenseBonus: -1
@@ -26,11 +27,16 @@ MonoBehaviour:
   luckBonus: 0
   hpGrowthPerLevel: 0
   mpGrowthPerLevel: 0
-  attackGrowthPerLevel: 0.3
+  attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 20
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 0
+  luckLevelUpChanceBonus: 0
   description: "\uACF5\uACA9 +2 (\uD22C\uCC99 \uBC0F \uD68C\uC804 \uACF5\uACA9 \uAC00\uB3D9
     \uBC94\uC704)\n\uBC29\uC5B4 -1 (\uAD00\uC808\uC758 \uBD88\uC548\uC815\uC131,
     \uD0C8\uAD6C \uC704\uD5D8)"

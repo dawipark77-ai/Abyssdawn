@@ -32,11 +32,11 @@ namespace Abyssdawn
             [Tooltip("등장 몬스터 목록 (가중치 랜덤)")]
             public List<MonsterPick> monsters = new List<MonsterPick>();
 
-            [Tooltip("미사용 — 던전 시뮬 Phase1은 인카운터마다 항상 적 1마리(1대1)만 스폰합니다.")]
+            [Tooltip("인카운터당 적 수 하한(1~4). 상한과 같으면 고정 마리 수.")]
             [Range(1, 4)] public int partySizeMin = 1;
 
-            [Tooltip("미사용 — 던전 시뮬 Phase1은 인카운터마다 항상 적 1마리(1대1)만 스폰합니다.")]
-            [Range(1, 4)] public int partySizeMax = 1;
+            [Tooltip("인카운터당 적 수 상한(1~4). 각 슬롯은 가중치 랜덤으로 독립 추첨 → 동일 몬스터 중복 가능.")]
+            [Range(1, 4)] public int partySizeMax = 4;
         }
 
         [System.Serializable]
@@ -50,6 +50,20 @@ namespace Abyssdawn
 
         [Header("층별 등장 풀")]
         public List<FloorEntry> entries = new List<FloorEntry>();
+
+        private void OnValidate()
+        {
+            if (entries == null) return;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                var e = entries[i];
+                if (e == null) continue;
+                e.partySizeMin = Mathf.Clamp(e.partySizeMin, 1, 4);
+                e.partySizeMax = Mathf.Clamp(e.partySizeMax, 1, 4);
+                if (e.partySizeMax < e.partySizeMin)
+                    e.partySizeMax = e.partySizeMin;
+            }
+        }
 
         /// <summary>지정 층에 해당하는 항목을 반환합니다(없으면 null).</summary>
         public FloorEntry GetEntryForFloor(int floor)
@@ -66,7 +80,7 @@ namespace Abyssdawn
         /// <summary>가중치 기반으로 1마리 뽑기.</summary>
         public MonsterSO PickWeighted(FloorEntry entry, System.Random rng)
         {
-            if (entry == null || entry.monsters == null || entry.monsters.Count == 0) return null;
+            if (entry == null || rng == null || entry.monsters == null || entry.monsters.Count == 0) return null;
 
             float totalWeight = 0f;
             for (int i = 0; i < entry.monsters.Count; i++)
@@ -91,14 +105,51 @@ namespace Abyssdawn
             return null;
         }
 
-        /// <summary>인카운터당 적 1마리(1대1 시뮬) — <see cref="PickWeighted"/>.</summary>
+        /// <summary>
+        /// 인카운터당 적 파티 — <see cref="FloorEntry.partySizeMin"/>~<see cref="FloorEntry.partySizeMax"/> 마리(1~4),
+        /// 각 마리는 <see cref="PickWeighted"/>로 독립 추첨(동일 개체 중복 가능).
+        /// </summary>
         public List<MonsterSO> BuildEnemyParty(FloorEntry entry, System.Random rng)
         {
             var list = new List<MonsterSO>();
-            if (entry == null) return list;
-            var picked = PickWeighted(entry, rng);
-            if (picked != null) list.Add(picked);
+            if (entry == null || rng == null) return list;
+
+            int lo = Mathf.Clamp(Mathf.Min(entry.partySizeMin, entry.partySizeMax), 1, 4);
+            int hi = Mathf.Clamp(Mathf.Max(entry.partySizeMin, entry.partySizeMax), 1, 4);
+            int count = lo >= hi ? lo : rng.Next(lo, hi + 1);
+
+            for (int i = 0; i < count; i++)
+            {
+                MonsterSO picked = null;
+                for (int tries = 0; tries < 12; tries++)
+                {
+                    picked = PickWeighted(entry, rng);
+                    if (picked != null) break;
+                }
+                if (picked != null)
+                    list.Add(picked);
+            }
+
             return list;
+        }
+
+        /// <summary>
+        /// 적 파티 크기를 <paramref name="targetCount"/>마리(1~4)로 맞춥니다. 부족하면 <see cref="PickWeighted"/>로 보충하고,
+        /// 초과하면 목록 끝에서 제거합니다.
+        /// </summary>
+        public void NormalizeEnemyPartyMonsterCount(List<MonsterSO> party, FloorEntry entry, System.Random rng, int targetCount)
+        {
+            if (party == null || entry == null || rng == null) return;
+            int t = Mathf.Clamp(targetCount, 1, 4);
+            int guard = 0;
+            while (party.Count < t && guard++ < 48)
+            {
+                var pick = PickWeighted(entry, rng);
+                if (pick == null) break;
+                party.Add(pick);
+            }
+            while (party.Count > t)
+                party.RemoveAt(party.Count - 1);
         }
 
         /// <summary>
@@ -118,10 +169,13 @@ namespace Abyssdawn
                 best = Mathf.Max(best, EstimateRecommendedLevelForMonster(pick.monster));
             }
 
+            int partyCap = Mathf.Clamp(Mathf.Max(entry.partySizeMin, entry.partySizeMax), 1, 4);
+            float partyFactor = 1f + 0.22f * (partyCap - 1);
+
             float kindMul = entry.kind == FloorKind.Boss ? 1.35f
                 : entry.kind == FloorKind.Elite ? 1.15f
                 : 1f;
-            return Mathf.Max(1, Mathf.CeilToInt(best * kindMul));
+            return Mathf.Max(1, Mathf.CeilToInt(best * kindMul * partyFactor));
         }
 
         /// <summary>단일 몬스터 기준 권장 플레이어 레벨(>=1).</summary>

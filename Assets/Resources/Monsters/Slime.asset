@@ -18,12 +18,12 @@ MonoBehaviour:
   hoverOffsetY: -0.5
   type: 0
   level: 4
-  hp: 130
+  hp: 180
   mp: 0
-  atk: 15
-  def: 5
+  atk: 11
+  def: 20
   mag: 0
-  agi: 5
+  agi: 3
   luk: 1
   physResist: 1
   magResist: 1
@@ -39,5 +39,5 @@ MonoBehaviour:
   expReward: 10
   goldReward: 0
   dropTable: []
-  companionChance: 0
-  companionData: {fileID: 0}
+  companionChance: 0.3
+  companionData: {fileID: 11400000, guid: 9cfc7ca33c104b0ab3dc9405933867ae, type: 2}

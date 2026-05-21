@@ -18,6 +18,7 @@ MonoBehaviour:
   species: 1
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: 0
   defenseBonus: -1
@@ -28,9 +29,14 @@ MonoBehaviour:
   mpGrowthPerLevel: 0
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
-  magicGrowthPerLevel: 0.2
+  magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 0
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 10
+  agilityLevelUpChanceBonus: 10
+  luckLevelUpChanceBonus: 10
   description: "Magic attack +10%, Luck +1, Agility +1\nDefense -1, Physical attack
     -10%\nLevel up: Magic +0.2 per level"
   flavorText: "Hair that remembers the sun holds traces of ancient blessings, but

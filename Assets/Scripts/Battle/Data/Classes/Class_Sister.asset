@@ -15,20 +15,29 @@ MonoBehaviour:
   className: Sister
   description: "A devoted healer who balances sacred magic with modest physical ability."
   classIcon: {fileID: 0}
+  hpMultiplier: 1
+  mpMultiplier: 1
+  attackMultiplier: 1
+  defenseMultiplier: 1
+  magicMultiplier: 1
+  agilityMultiplier: 1
+  luckMultiplier: 1
   attackBonus: -1
   defenseBonus: 0
   magicBonus: 3
   agilityBonus: 1
   luckBonus: 2
-  hpMultiplier: 1
-  mpMultiplier: 1
+  hpBonus: 0
+  mpBonus: 0
   hpPerLevel: 4
   mpPerLevel: 8
-  attackGrowthPerLevel: 0.1
-  defenseGrowthPerLevel: 0.2
-  magicGrowthPerLevel: 0.6
-  agilityGrowthPerLevel: 0.4
-  luckGrowthPerLevel: 0.6
-
-
-
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0
+  levelUpAttackChancePercent: 5
+  levelUpDefenseChancePercent: 15
+  levelUpMagicChancePercent: 25
+  levelUpAgilityChancePercent: 15
+  levelUpLuckChancePercent: 20

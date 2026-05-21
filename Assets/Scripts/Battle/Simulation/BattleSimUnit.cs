@@ -56,6 +56,12 @@ namespace Abyssdawn
         /// <summary>던전 시뮬 파티 레벨 — 기본 검술 등 레벨 의존 패시브에 사용.</summary>
         public int SimDungeonPartyLevel = 1;
 
+        /// <summary>던전 시뮬 — <see cref="CompanionSO"/>로 합류한 몬스터 동료. 레벨업·장비·Sword Lore T1 순환 대상에서 제외.</summary>
+        public bool SimIsMonsterCompanion;
+
+        /// <summary>던전 시뮬 몬스터 동료 — 합류 시점 <see cref="MonsterSO.MonsterLevel"/>(교체 판정용). 0이면 구버전 유닛으로 간주해 레벨 뒤처짐 제거를 건너뜁니다.</summary>
+        public int SimCompanionMonsterLevel;
+
         public int IntrinsicMaxHP;
         public int IntrinsicMaxMP;
         public int IntrinsicAttack;

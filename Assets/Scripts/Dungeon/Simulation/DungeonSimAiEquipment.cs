@@ -12,6 +12,32 @@ namespace Abyssdawn
     {
         public const string CrudeResourcesPath = "Item_Equipments/Equipments/Crude";
 
+        /// <summary>RunDungeonSimulation 시작 시 초기화 — 요약의 ‘첫/마지막 선택’ 샘플용.</summary>
+        public static void ResetExplainSamples()
+        {
+            _explainSampleFirst = null;
+            _explainSampleLast = null;
+        }
+
+        private static string _explainSampleFirst;
+        private static string _explainSampleLast;
+
+        private static void RegisterExplainSample(string line)
+        {
+            if (string.IsNullOrEmpty(line)) return;
+            if (string.IsNullOrEmpty(_explainSampleFirst))
+                _explainSampleFirst = line;
+            _explainSampleLast = line;
+        }
+
+        /// <summary>이번 시뮬 실행 동안 기록된 첫/마지막 마을 장비 점수 설명(없으면 false).</summary>
+        public static bool TryGetExplainSamples(out string first, out string last)
+        {
+            first = _explainSampleFirst;
+            last = _explainSampleLast;
+            return !string.IsNullOrEmpty(first) || !string.IsNullOrEmpty(last);
+        }
+
         private static List<EquipmentData> _crudeAll;
         private static List<EquipmentData> _oneHandWeapons;
         private static List<EquipmentData> _twoHandWeapons;
@@ -154,7 +180,51 @@ namespace Abyssdawn
             }
         }
 
-        private static float ScoreLoadout(BattleSimUnit u, Loadout L, int enemyThreat)
+        private readonly struct EquipScoreBreakdown
+        {
+            public readonly int EnemyThreat;
+            public readonly int Atk;
+            public readonly int Def;
+            public readonly int Mag;
+            public readonly int Agi;
+            public readonly int Luk;
+            public readonly int MaxHp;
+            public readonly int MaxMp;
+            public readonly float TermAtkMag;
+            public readonly float TermDef;
+            public readonly float TermHp;
+            public readonly float TermMp;
+            public readonly float TermAgi;
+            public readonly float TermLuk;
+            public readonly float PenaltyThreat;
+            public readonly float Total;
+
+            public EquipScoreBreakdown(
+                int enemyThreat,
+                int atk, int def, int mag, int agi, int luk, int maxHp, int maxMp,
+                float termAtkMag, float termDef, float termHp, float termMp, float termAgi, float termLuk,
+                float penaltyThreat, float total)
+            {
+                EnemyThreat = enemyThreat;
+                Atk = atk;
+                Def = def;
+                Mag = mag;
+                Agi = agi;
+                Luk = luk;
+                MaxHp = maxHp;
+                MaxMp = maxMp;
+                TermAtkMag = termAtkMag;
+                TermDef = termDef;
+                TermHp = termHp;
+                TermMp = termMp;
+                TermAgi = termAgi;
+                TermLuk = termLuk;
+                PenaltyThreat = penaltyThreat;
+                Total = total;
+            }
+        }
+
+        private static EquipScoreBreakdown EvaluateLoadoutScore(BattleSimUnit u, Loadout L, int enemyThreat)
         {
             int atk = u.IntrinsicAttack;
             int def = u.IntrinsicDefense;
@@ -187,16 +257,51 @@ namespace Abyssdawn
             int maxHp = Mathf.Max(1, hp);
             int maxMp = Mathf.Max(0, mp + Mathf.RoundToInt(u.IntrinsicMaxMP * mpPct));
 
-            float score =
-                (atk + mag) * 1.15f
-                + def * 1.25f
-                + maxHp * 0.035f
-                + maxMp * 0.02f
-                + agi * 0.12f
-                + luk * 0.18f;
+            float termAtkMag = (atk + mag) * 1.15f;
+            float termDef = def * 1.25f;
+            float termHp = maxHp * 0.035f;
+            float termMp = maxMp * 0.02f;
+            float termAgi = agi * 0.12f;
+            float termLuk = luk * 0.18f;
+            float penalty = enemyThreat * 1.35f;
+            float total = termAtkMag + termDef + termHp + termMp + termAgi + termLuk - penalty;
 
-            score -= enemyThreat * 1.35f;
-            return score;
+            return new EquipScoreBreakdown(
+                enemyThreat, atk, def, mag, agi, luk, maxHp, maxMp,
+                termAtkMag, termDef, termHp, termMp, termAgi, termLuk,
+                penalty, total);
+        }
+
+        private static float ScoreLoadout(BattleSimUnit u, Loadout L, int enemyThreat) =>
+            EvaluateLoadoutScore(u, L, enemyThreat).Total;
+
+        /// <summary>요약 텍스트에 붙이는 점수 모델 설명(계수는 <see cref="EvaluateLoadoutScore"/>와 동일해야 함).</summary>
+        public static string DescribeScoringModelForSummary()
+        {
+            return "enemyThreat = max(현재층·다음층 몬스터 풀의 max(ATK, MAG)).\n" +
+                   "장착 후 스탯으로:\n" +
+                   "  score = (ATK+MAG)×1.15 + DEF×1.25 + MaxHP×0.035 + MaxMP×0.02 + AGI×0.12 + LUK×0.18 - enemyThreat×1.35\n" +
+                   "MaxMP = 장비 평탄 MP합 + IntrinsicMaxMP×(장비 mpBonusPercent 합). 동점 시 RNG로 타이브레이크.\n" +
+                   "※ Block·ArmorBreak·명중률(accuracyBonus) 등은 이 점수에 넣지 않음 — 방패의 생존 기여가 전투와 달리 반영되지 않을 수 있음.";
+        }
+
+        /// <summary>한 번의 선택에 대한 1줄 설명(동일 클래스 내부 전용).</summary>
+        private static string FormatPickScoreLine(
+            BattleSimUnit template,
+            Loadout best,
+            int currentFloor,
+            int maxFloors,
+            DungeonSimMonsterPool pool)
+        {
+            if (template == null) return "";
+            int fThreat = Mathf.Max(
+                GetMaxStrikeThreatForFloor(pool, Mathf.Clamp(currentFloor, 1, maxFloors)),
+                GetMaxStrikeThreatForFloor(pool, Mathf.Clamp(currentFloor + 1, 1, maxFloors)));
+            var d = EvaluateLoadoutScore(template, best, fThreat);
+            var sig = new Loadout(best.Rh, best.Lh, best.Body, best.Acc1, best.Acc2).ToSignature();
+            return $"층{currentFloor} threat={d.EnemyThreat} | 장착스탯 ATK{d.Atk} DEF{d.Def} MAG{d.Mag} AGI{d.Agi} LUK{d.Luk} MaxHP{d.MaxHp} MaxMP{d.MaxMp} | " +
+                   $"(A+M)×1.15={d.TermAtkMag:F2} DEF×1.25={d.TermDef:F2} HP×0.035={d.TermHp:F2} MP×0.02={d.TermMp:F2} AGI×0.12={d.TermAgi:F2} LUK×0.18={d.TermLuk:F2} " +
+                   $"- threat×1.35=-{d.PenaltyThreat:F2} => total={d.Total:F2} | {sig}";
         }
 
         private static BattleSimUnit PickTemplateUnit(DungeonSimPlayer player)
@@ -269,6 +374,9 @@ namespace Abyssdawn
 
             string sig = new Loadout(best.Rh, best.Lh, best.Body, best.Acc1, best.Acc2).ToSignature();
             player.LastAiEquipSignature = sig;
+            string explain = FormatPickScoreLine(template, best, currentFloor, maxFloors, pool);
+            player.LastAiEquipScoreExplain = explain;
+            RegisterExplainSample(explain);
             player.AiEquipPickCount++;
 
             if (aiPickHistogram != null)

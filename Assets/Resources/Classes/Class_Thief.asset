@@ -13,19 +13,31 @@ MonoBehaviour:
   m_Name: Class_Thief
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: Thief
-  description: "A thief specialized in Agility and Luck. Possesses fast attack and evasion capabilities but has low defense."
+  description: "A thief specialized in Agility and Luck."
   classIcon: {fileID: 0}
+  hpMultiplier: 0.85
+  mpMultiplier: 1.03
+  attackMultiplier: 1
+  defenseMultiplier: 1
+  magicMultiplier: 1
+  agilityMultiplier: 1
+  luckMultiplier: 1
   attackBonus: 3
   defenseBonus: -2
   magicBonus: -1
   agilityBonus: 5
   luckBonus: 3
-  hpBonus: -15
+  hpBonus: 0
   mpBonus: 0
   hpPerLevel: 4
   mpPerLevel: 3
-  attackGrowthPerLevel: 0.4
-  defenseGrowthPerLevel: 0.2
-  magicGrowthPerLevel: 0.1
-  agilityGrowthPerLevel: 0.8
-  luckGrowthPerLevel: 0.6
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0
+  levelUpAttackChancePercent: 15
+  levelUpDefenseChancePercent: 5
+  levelUpMagicChancePercent: 5
+  levelUpAgilityChancePercent: 30
+  levelUpLuckChancePercent: 25

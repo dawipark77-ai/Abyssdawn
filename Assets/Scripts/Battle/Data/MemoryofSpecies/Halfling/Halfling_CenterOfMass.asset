@@ -18,6 +18,7 @@ MonoBehaviour:
   species: 3
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: -1
   defenseBonus: 1
@@ -29,8 +30,13 @@ MonoBehaviour:
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
-  agilityGrowthPerLevel: 0.2
+  agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 0
+  defenseLevelUpChanceBonus: 10
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 15
+  luckLevelUpChanceBonus: 0
   description: "Agility +1, Defense +1, Attack -1. Level up: Agility +0.2 per level."
   flavorText: "Short legs and a low stance make it hard to knock them off balance."
   requiredMemoriesForTrait: 3

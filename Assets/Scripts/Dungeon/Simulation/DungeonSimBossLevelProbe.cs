@@ -7,7 +7,7 @@ namespace Abyssdawn
 {
     /// <summary>
     /// 최종 층 보스(예: 3층 고블린) 대비 — 시뮬 <see cref="DungeonSimulator.ApplyLevelUp"/> 규칙으로 올린 레벨별
-    /// 1vs1 반복 전투 승률을 측정합니다. 던전 전체가 아니라 “이 레벨이면 몇 % 이기나”만 봅니다.
+    /// 전투 승률을 측정합니다(MonsterPool의 partySize·DungeonSimSettings.simAlwaysFourEnemyUnits·동료화와 동일하게 적 파티가 구성됨). 던전 전체가 아니라 “이 레벨이면 몇 % 이기나”만 봅니다.
     /// </summary>
     [AddComponentMenu("Abyssdawn/Dungeon Sim Boss Level Probe")]
     public class DungeonSimBossLevelProbe : MonoBehaviour
@@ -95,6 +95,7 @@ namespace Abyssdawn
                     if (player == null || !player.AnyAlive()) continue;
 
                     var enemyParty = monsterPool.BuildEnemyParty(entry, rng);
+                    DungeonSimulator.ApplyDungeonSimEnemyPartySize(enemyParty, entry, monsterPool, rng, settings);
                     if (enemyParty == null || enemyParty.Count == 0) continue;
                     var enemies = DungeonSimulator.BuildEnemyUnitsFromMonsterSOs(enemyParty);
                     if (enemies == null || enemies.Count == 0) continue;

@@ -18,6 +18,7 @@ MonoBehaviour:
   species: 4
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: 2
   defenseBonus: 0
@@ -26,11 +27,16 @@ MonoBehaviour:
   luckBonus: 0
   hpGrowthPerLevel: 0
   mpGrowthPerLevel: 0
-  attackGrowthPerLevel: 0.3
+  attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 20
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 0
+  luckLevelUpChanceBonus: 0
   description: "Attack +2, Magic -1. Level up: Attack +0.3 per level."
   flavorText: "Arms forged by a lifetime of hammer blows swing weapons with brutal force."
   requiredMemoriesForTrait: 3

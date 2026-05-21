@@ -64,12 +64,40 @@ public class CharacterClass : ScriptableObject
     [Tooltip("레벨당 baseMP에 더해지는 증가량(직업).")]
     public int mpPerLevel = 0;
 
-    [Header("레벨업 스탯 성장치 (직업별)")]
+    [Header("레벨업 스탯 성장치 (레거시 가중치 — 미사용 시 0)")]
+    [Tooltip("구버전: 가중치 랜덤 1스탯. 신규: levelUp*ChancePercent 사용 시 무시됩니다.")]
     public float attackGrowthPerLevel = 0f;
     public float defenseGrowthPerLevel = 0f;
     public float magicGrowthPerLevel = 0f;
     public float agilityGrowthPerLevel = 0f;
     public float luckGrowthPerLevel = 0f;
+
+    /// <summary>5스탯 레벨업 독립 판정 — 최종 확률 상한/하한(종의 기억 보정 합산 후 클램프).</summary>
+    public const float StatLevelUpChanceMinPercent = 5f;
+    public const float StatLevelUpChanceMaxPercent = 70f;
+
+    [Header("레벨업 — 5스탯 독립 성공 확률 기본 (%)")]
+    [Tooltip("각 스탯마다 별도 주사위. 최종 = 이 값 + 종의 기억 보정 합 → 5~70% 클램프. 전부 0이면 레거시 attackGrowthPerLevel 가중치로 1회 추첨.")]
+    [Range(0f, 100f)] public float levelUpAttackChancePercent = 0f;
+    [Range(0f, 100f)] public float levelUpDefenseChancePercent = 0f;
+    [Range(0f, 100f)] public float levelUpMagicChancePercent = 0f;
+    [Range(0f, 100f)] public float levelUpAgilityChancePercent = 0f;
+    [Range(0f, 100f)] public float levelUpLuckChancePercent = 0f;
+
+    /// <summary>DEF·MAG 1포인트 상승 시 추가 MaxHP / MaxMP (레벨업 랜덤·자유분배 공통).</summary>
+    public const int HpBonusPerDefensePointGained = 3;
+    public const int MpBonusPerMagicPointGained = 3;
+
+    public static float ClampStatLevelUpChancePercent(float rawPercent) =>
+        Mathf.Clamp(rawPercent, StatLevelUpChanceMinPercent, StatLevelUpChanceMaxPercent);
+
+    /// <summary>신규 독립 확률 테이블을 쓰는지(하나라도 0 초과면 사용).</summary>
+    public bool UsesIndependentStatLevelUpChances =>
+        levelUpAttackChancePercent > 0.001f ||
+        levelUpDefenseChancePercent > 0.001f ||
+        levelUpMagicChancePercent > 0.001f ||
+        levelUpAgilityChancePercent > 0.001f ||
+        levelUpLuckChancePercent > 0.001f;
 
     public int GetFinalAttack(int baseAttack) => baseAttack + attackBonus;
     public int GetFinalDefense(int baseDefense) => baseDefense + defenseBonus;

@@ -18,10 +18,11 @@ MonoBehaviour:
   species: 1
   memoryIcon: {fileID: 0}
   hpBonusPercent: -10
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: 0
   defenseBonus: 0
-  agilityBonus: 1
+  agilityBonus: 2
   magicBonus: 0
   luckBonus: 0
   hpGrowthPerLevel: 0
@@ -29,8 +30,13 @@ MonoBehaviour:
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
-  agilityGrowthPerLevel: 0.2
+  agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 0
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 20
+  luckLevelUpChanceBonus: 0
   description: "Agility +1\nMax HP -10%\nLevel up: Agility +0.2 per level"
   flavorText: "Their hollow, light bones let them dance between blows, but a single
     hit can be fatal."

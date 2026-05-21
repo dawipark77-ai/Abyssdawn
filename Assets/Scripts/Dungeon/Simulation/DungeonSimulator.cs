@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using AbyssdawnBattle;
 using UnityEngine;
@@ -35,10 +37,29 @@ namespace Abyssdawn
         /// <summary>한 번의 RunDungeonSimulation 안에서 층별 턴-승리 기준 최소 레벨을 재계산하지 않도록 캐시합니다.</summary>
         private readonly Dictionary<int, int> _aiTurnWinMinLevelCache = new Dictionary<int, int>();
 
+        /// <summary>전체 10층 클리어 최소 레벨 프로브 중 — 수동·풀 게이트만 사용(10층 게이트·턴 게이트 제외).</summary>
+        private bool _aiGateProbeSimpleOnly;
+
+        private const int SimDungeonMaxAllySlots = 4;
+        private const int SimDungeonMaxMonsterCompanions = 3;
+
+        private bool _floor10ClearMinCached;
+        private int _floor10ClearMinLevel;
+
+        private bool _sessionLoggingActive;
+        private int _sessionBattleSeq;
+        private List<DungeonSimBattleLogRow> _logBattles;
+        private List<DungeonSimPartySlotLogRow> _logPartySlots;
+        private List<DungeonSimRecruitLogRow> _logRecruits;
+
         private sealed class SimEquipHistograms
         {
             public readonly Dictionary<string, int> AiPick = new Dictionary<string, int>();
             public readonly Dictionary<string, int> Death = new Dictionary<string, int>();
+            /// <summary>동료 합류 성공 시 몬스터 표시명별 누적(전투당 최대 1회).</summary>
+            public readonly Dictionary<string, int> CompanionJoinByName = new Dictionary<string, int>();
+            /// <summary>전체 층 클리어(사망 없음) 회차 종료 시점의 동료 파이프 시그니처별 누적.</summary>
+            public readonly Dictionary<string, int> FullClearCompanionSig = new Dictionary<string, int>();
         }
 
         public bool IsReadyToRun()
@@ -64,10 +85,20 @@ namespace Abyssdawn
             if (bm == null) { Debug.LogError("[DungeonSim] BattleSimulator 미할당 — 같은 GameObject에 BattleSimulator를 추가하거나 필드를 채우세요."); return; }
 
             _aiTurnWinMinLevelCache.Clear();
+            _floor10ClearMinCached = false;
+            _floor10ClearMinLevel = 0;
+            DungeonSimAiEquipment.ResetExplainSamples();
 
             int iterations = Mathf.Max(1, settings.iterations);
             int baseSeed = settings.baseSeed;
-            var allRecords = new List<DungeonSimRecord>(iterations * settings.floorCount);
+            var allFloors = new List<DungeonSimFloorLogRow>(iterations * settings.floorCount * 2);
+            var allRuns = new List<DungeonSimRunLogRow>(iterations);
+
+            _sessionLoggingActive = true;
+            _sessionBattleSeq = 0;
+            _logBattles = new List<DungeonSimBattleLogRow>(iterations * settings.floorCount * 6);
+            _logPartySlots = new List<DungeonSimPartySlotLogRow>(iterations * settings.floorCount * 16);
+            _logRecruits = new List<DungeonSimRecruitLogRow>(512);
 
             int totalDeaths = 0;
             int totalClearedAllFloors = 0;
@@ -87,6 +118,7 @@ namespace Abyssdawn
                 var player = BuildPlayerFromRoster(allyRoster, settings);
                 bool died = false;
                 int floorsCleared = 0;
+                var runFloors = new List<DungeonSimFloorLogRow>(settings.floorCount * 2);
 
                 for (int floor = 1; floor <= settings.floorCount; floor++)
                 {
@@ -96,16 +128,17 @@ namespace Abyssdawn
                         break;
                     }
 
-                    var rec = RunSingleFloor(i + 1, seed, floor, player, rng, bm, equipHist, skipFloorEntryEffects: false);
-                    allRecords.Add(rec);
-                    totalBattles += rec.Battles;
-                    totalBattleWins += rec.BattlesWon;
-                    totalBattleFlees += rec.BattlesFled;
-                    totalPotions += rec.PotionUseCount;
-                    totalDawnChalice += rec.DawnChaliceUseCount;
-                    totalMedicinalHerbs += rec.MedicinalHerbUseCount;
+                    var fr = RunSingleFloor(i + 1, seed, floor, player, rng, bm, equipHist, skipFloorEntryEffects: false);
+                    allFloors.Add(fr);
+                    runFloors.Add(fr);
+                    totalBattles += fr.Battles;
+                    totalBattleWins += fr.BattlesWon;
+                    totalBattleFlees += fr.BattlesFled;
+                    totalPotions += fr.PotionUseDelta;
+                    totalDawnChalice += fr.ChaliceUseDelta;
+                    totalMedicinalHerbs += fr.HerbUseDelta;
 
-                    if (rec.DeathFlag)
+                    if (fr.DeathFlag != 0)
                     {
                         died = true;
                         break;
@@ -120,16 +153,17 @@ namespace Abyssdawn
                                && player.Level < targetLv
                                && farmPasses < settings.aiMaxFarmingPassesBeforeNextFloor)
                         {
-                            var farmRec = RunSingleFloor(i + 1, seed, floor, player, rng, bm, equipHist, skipFloorEntryEffects: true);
-                            allRecords.Add(farmRec);
-                            totalBattles += farmRec.Battles;
-                            totalBattleWins += farmRec.BattlesWon;
-                            totalBattleFlees += farmRec.BattlesFled;
-                            totalPotions += farmRec.PotionUseCount;
-                            totalDawnChalice += farmRec.DawnChaliceUseCount;
-                            totalMedicinalHerbs += farmRec.MedicinalHerbUseCount;
+                            var farmFr = RunSingleFloor(i + 1, seed, floor, player, rng, bm, equipHist, skipFloorEntryEffects: true);
+                            allFloors.Add(farmFr);
+                            runFloors.Add(farmFr);
+                            totalBattles += farmFr.Battles;
+                            totalBattleWins += farmFr.BattlesWon;
+                            totalBattleFlees += farmFr.BattlesFled;
+                            totalPotions += farmFr.PotionUseDelta;
+                            totalDawnChalice += farmFr.ChaliceUseDelta;
+                            totalMedicinalHerbs += farmFr.HerbUseDelta;
                             farmPasses++;
-                            if (farmRec.DeathFlag)
+                            if (farmFr.DeathFlag != 0)
                             {
                                 died = true;
                                 break;
@@ -153,8 +187,19 @@ namespace Abyssdawn
                         equipHist.Death[sig] = dc + 1;
                     }
                 }
-                if (floorsCleared >= settings.floorCount && !died) totalClearedAllFloors++;
+                if (floorsCleared >= settings.floorCount && !died)
+                {
+                    totalClearedAllFloors++;
+                    string cSig = player.FormatCompanionJoinHistorySig();
+                    if (!equipHist.FullClearCompanionSig.TryGetValue(cSig, out int fc))
+                        fc = 0;
+                    equipHist.FullClearCompanionSig[cSig] = fc + 1;
+                }
+
+                allRuns.Add(BuildRunLogRow(i + 1, seed, runFloors, player, died, floorsCleared, equipHist));
             }
+
+            _sessionLoggingActive = false;
 
             string csvPath = ResolveAbs(settings.csvRelativePath, true);
             string summaryPath = ResolveAbs(settings.summaryRelativePath, false);
@@ -162,13 +207,13 @@ namespace Abyssdawn
             bool wroteToAssets = false;
             try
             {
-                WriteCsv(csvPath, allRecords);
-                Debug.Log($"[DungeonSim] CSV written: {csvPath}");
+                WriteStructuredCsvs(csvPath, allRuns, allFloors, _logBattles, _logPartySlots, _logRecruits);
+                Debug.Log($"[DungeonSim] CSV written (runs/floors/battles/party/recruits): {csvPath}");
                 if (IsInsideAssets(settings.csvRelativePath)) wroteToAssets = true;
             }
             catch (Exception e) { Debug.LogWarning($"[DungeonSim] CSV write failed: {e.Message}"); }
 
-            string summary = BuildSummary(iterations, totalDeaths, totalClearedAllFloors, totalBattles, totalBattleWins, totalBattleFlees, totalMedicinalHerbs, totalPotions, totalDawnChalice, floorReachedCount, allRecords, equipHist);
+            string summary = BuildSummary(iterations, totalDeaths, totalClearedAllFloors, totalBattles, totalBattleWins, totalBattleFlees, totalMedicinalHerbs, totalPotions, totalDawnChalice, floorReachedCount, allFloors, allRuns, equipHist);
             Debug.Log(summary);
             try
             {
@@ -194,40 +239,338 @@ namespace Abyssdawn
             return norm.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase);
         }
 
+        private static float GetPartyHpPct(DungeonSimPlayer p)
+        {
+            if (p == null) return 1f;
+            int mx = p.GetTotalMaxHP();
+            if (mx <= 0) return 1f;
+            return Mathf.Clamp01(p.GetTotalCurrentHP() / (float)mx);
+        }
+
+        private static float GetPartyMpPct(DungeonSimPlayer p)
+        {
+            if (p == null) return 1f;
+            int mx = p.GetTotalMaxMP();
+            if (mx <= 0) return 1f;
+            return Mathf.Clamp01(p.GetTotalCurrentMP() / (float)mx);
+        }
+
+        private static int CountMonsterCompanions(DungeonSimPlayer p)
+        {
+            if (p?.Units == null) return 0;
+            int c = 0;
+            foreach (var u in p.Units)
+                if (u != null && u.SimIsMonsterCompanion) c++;
+            return c;
+        }
+
+        private static int CountRosterAllies(DungeonSimPlayer p)
+        {
+            if (p?.Units == null) return 0;
+            int c = 0;
+            foreach (var u in p.Units)
+                if (u != null && !u.SimIsMonsterCompanion) c++;
+            return c;
+        }
+
+        private static string BuildEnemyPartySig(List<MonsterSO> party)
+        {
+            if (party == null || party.Count == 0) return "";
+            var parts = new List<string>(party.Count);
+            foreach (var m in party)
+            {
+                if (m == null) parts.Add("?");
+                else parts.Add($"{m.MonsterName}L{m.MonsterLevel}");
+            }
+            return string.Join("|", parts);
+        }
+
+        private static string SlotRowTag(int slotNum) => slotNum <= 2 ? "front" : "back";
+
+        private void LogPartySlotRowsForBattle(int battleSeq, int runId, int seed, int floor, DungeonSimPlayer player)
+        {
+            if (!_sessionLoggingActive || _logPartySlots == null || player?.Units == null) return;
+            foreach (var u in player.Units)
+            {
+                if (u == null) continue;
+                int sn = (int)u.Slot;
+                if (sn < 1 || sn > 4) continue;
+                _logPartySlots.Add(new DungeonSimPartySlotLogRow
+                {
+                    BattleSeq = battleSeq,
+                    RunId = runId,
+                    Seed = seed,
+                    Floor = floor,
+                    Slot = sn,
+                    RowTag = SlotRowTag(sn),
+                    UnitKind = u.SimIsMonsterCompanion ? "monster_companion" : "roster",
+                    DisplayName = u.DisplayName ?? "",
+                    ClassName = u.SimCharacterClass != null ? u.SimCharacterClass.name : "",
+                    PartyLevelField = player.Level,
+                    MonsterLevelField = u.SimIsMonsterCompanion ? u.SimCompanionMonsterLevel : 0,
+                    Atk = u.Attack,
+                    Def = u.Defense,
+                    Mag = u.Magic,
+                    Agi = u.Agility,
+                    Luk = u.Luck,
+                    Hp = u.CurrentHP,
+                    MaxHp = u.MaxHP,
+                    Mp = u.CurrentMP,
+                    MaxMp = u.MaxMP
+                });
+            }
+        }
+
+        private void AppendBattleLogRow(
+            int battleSeq,
+            int runId,
+            int seed,
+            int floor,
+            int encounterIdx,
+            List<MonsterSO> enemyParty,
+            BattleSimulator.DungeonBattleResult o)
+        {
+            if (!_sessionLoggingActive || _logBattles == null || o == null) return;
+
+            _logBattles.Add(new DungeonSimBattleLogRow
+            {
+                BattleSeq = battleSeq,
+                RunId = runId,
+                Seed = seed,
+                Floor = floor,
+                EncounterIndexInFloor = encounterIdx,
+                EnemyPartySig = BuildEnemyPartySig(enemyParty),
+                ResultWin = o.AllyWin ? 1 : 0,
+                ResultFlee = o.AllyEscaped ? 1 : 0,
+                ResultLoss = (!o.AllyWin && !o.AllyEscaped) ? 1 : 0,
+                Turns = o.Turns,
+                DamageDealtToEnemies = o.TotalDamageDealtToEnemies,
+                DamageTakenByAllies = o.TotalDamageTakenByAllies,
+                SkillActivationBreakdown = o.SkillActivationBreakdown ?? "",
+                BattleHerbUses = o.BattleMedicinalHerbUses,
+                BattlePotionUses = o.BattleHpPotionUses,
+                BattleChaliceUses = o.BattleDawnChaliceUses,
+                AllySlot1HpStart = o.AllyHpStartBySlot[1],
+                AllySlot1HpEnd = o.AllyHpEndBySlot[1],
+                AllySlot2HpStart = o.AllyHpStartBySlot[2],
+                AllySlot2HpEnd = o.AllyHpEndBySlot[2],
+                AllySlot3HpStart = o.AllyHpStartBySlot[3],
+                AllySlot3HpEnd = o.AllyHpEndBySlot[3],
+                AllySlot4HpStart = o.AllyHpStartBySlot[4],
+                AllySlot4HpEnd = o.AllyHpEndBySlot[4],
+                EnemySlot1HpStart = o.EnemyHpStartBySlot[1],
+                EnemySlot1HpEnd = o.EnemyHpEndBySlot[1],
+                EnemySlot2HpStart = o.EnemyHpStartBySlot[2],
+                EnemySlot2HpEnd = o.EnemyHpEndBySlot[2],
+                EnemySlot3HpStart = o.EnemyHpStartBySlot[3],
+                EnemySlot3HpEnd = o.EnemyHpEndBySlot[3],
+                EnemySlot4HpStart = o.EnemyHpStartBySlot[4],
+                EnemySlot4HpEnd = o.EnemyHpEndBySlot[4],
+                A1Dealt = o.AllyAttackerDamageDealt[1],
+                A2Dealt = o.AllyAttackerDamageDealt[2],
+                A3Dealt = o.AllyAttackerDamageDealt[3],
+                A4Dealt = o.AllyAttackerDamageDealt[4],
+                A1Taken = o.AllyDefenderDamageTaken[1],
+                A2Taken = o.AllyDefenderDamageTaken[2],
+                A3Taken = o.AllyDefenderDamageTaken[3],
+                A4Taken = o.AllyDefenderDamageTaken[4],
+                A1OffAtt = o.AllyAttackerOffenseAttempts[1],
+                A2OffAtt = o.AllyAttackerOffenseAttempts[2],
+                A3OffAtt = o.AllyAttackerOffenseAttempts[3],
+                A4OffAtt = o.AllyAttackerOffenseAttempts[4],
+                A1OffHit = o.AllyAttackerOffenseHits[1],
+                A2OffHit = o.AllyAttackerOffenseHits[2],
+                A3OffHit = o.AllyAttackerOffenseHits[3],
+                A4OffHit = o.AllyAttackerOffenseHits[4],
+                A1Crit = o.AllyAttackerCrits[1],
+                A2Crit = o.AllyAttackerCrits[2],
+                A3Crit = o.AllyAttackerCrits[3],
+                A4Crit = o.AllyAttackerCrits[4],
+                A1SurvTurns = o.AllySlotSurvivalTurns[1],
+                A2SurvTurns = o.AllySlotSurvivalTurns[2],
+                A3SurvTurns = o.AllySlotSurvivalTurns[3],
+                A4SurvTurns = o.AllySlotSurvivalTurns[4],
+                A1Defend = o.AllyDefendActions[1],
+                A2Defend = o.AllyDefendActions[2],
+                A3Defend = o.AllyDefendActions[3],
+                A4Defend = o.AllyDefendActions[4],
+                A1Skill = o.AllySkillCasts[1],
+                A2Skill = o.AllySkillCasts[2],
+                A3Skill = o.AllySkillCasts[3],
+                A4Skill = o.AllySkillCasts[4]
+            });
+        }
+
+        private static void WriteStructuredCsvs(
+            string userCsvPath,
+            List<DungeonSimRunLogRow> runs,
+            List<DungeonSimFloorLogRow> floors,
+            List<DungeonSimBattleLogRow> battles,
+            List<DungeonSimPartySlotLogRow> party,
+            List<DungeonSimRecruitLogRow> recruits)
+        {
+            string dir = Path.GetDirectoryName(userCsvPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            string fileName = Path.GetFileNameWithoutExtension(userCsvPath);
+            if (string.IsNullOrEmpty(fileName))
+                fileName = "DungeonSim";
+            string stem = string.IsNullOrEmpty(dir) ? fileName : Path.Combine(dir, fileName);
+
+            void WriteFile<T>(string suffix, IEnumerable<T> rows, string header, Func<T, string> line)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine(header);
+                if (rows != null)
+                {
+                    foreach (var r in rows)
+                        sb.AppendLine(line(r));
+                }
+                File.WriteAllText(stem + suffix, sb.ToString(), Encoding.UTF8);
+            }
+
+            WriteFile("_runs.csv", runs ?? new List<DungeonSimRunLogRow>(), DungeonSimRunLogRow.Header, r => r.ToLine());
+            WriteFile("_floors.csv", floors ?? new List<DungeonSimFloorLogRow>(), DungeonSimFloorLogRow.Header, r => r.ToLine());
+            WriteFile("_battles.csv", battles ?? new List<DungeonSimBattleLogRow>(), DungeonSimBattleLogRow.Header, r => r.ToLine());
+            WriteFile("_party.csv", party ?? new List<DungeonSimPartySlotLogRow>(), DungeonSimPartySlotLogRow.Header, r => r.ToLine());
+            WriteFile("_recruits.csv", recruits ?? new List<DungeonSimRecruitLogRow>(), DungeonSimRecruitLogRow.Header, r => r.ToLine());
+        }
+
+        private DungeonSimRunLogRow BuildRunLogRow(
+            int runId,
+            int seed,
+            List<DungeonSimFloorLogRow> runFloors,
+            DungeonSimPlayer player,
+            bool died,
+            int floorsCleared,
+            SimEquipHistograms equipHist)
+        {
+            int targetFloors = settings != null ? settings.floorCount : 0;
+            int finalFloor = 0;
+            if (runFloors != null && runFloors.Count > 0)
+                finalFloor = runFloors[runFloors.Count - 1].Floor;
+            else
+                finalFloor = Mathf.Clamp(floorsCleared, 0, targetFloors);
+
+            int battlesTotal = 0, wins = 0, losses = 0, flees = 0;
+            long xp = 0, dmgD = 0, dmgT = 0;
+            int herb = 0, pot = 0, chal = 0;
+            if (runFloors != null)
+            {
+                for (int i = 0; i < runFloors.Count; i++)
+                {
+                    var f = runFloors[i];
+                    battlesTotal += f.Battles;
+                    wins += f.BattlesWon;
+                    losses += f.BattlesLost;
+                    flees += f.BattlesFled;
+                    xp += f.XpGained;
+                    dmgD += f.DamageDealtFloor;
+                    dmgT += f.DamageTakenFloor;
+                    herb += f.HerbUseDelta;
+                    pot += f.PotionUseDelta;
+                    chal += f.ChaliceUseDelta;
+                }
+            }
+
+            string deathCause = "none";
+            string deathEquip = "";
+            if (died && runFloors != null && runFloors.Count > 0)
+            {
+                var last = runFloors[runFloors.Count - 1];
+                deathEquip = last.DeathAiEquipSignature ?? "";
+                if (!string.IsNullOrEmpty(last.Notes) && last.Notes.IndexOf("party wiped", StringComparison.OrdinalIgnoreCase) >= 0)
+                    deathCause = "battle";
+                else
+                    deathCause = "other";
+            }
+
+            return new DungeonSimRunLogRow
+            {
+                RunId = runId,
+                Seed = seed,
+                TargetFloors = targetFloors,
+                FinalFloorReached = finalFloor,
+                DeathFlag = died ? 1 : 0,
+                DeathCause = deathCause,
+                FinalPartyLevel = player != null ? player.Level : 0,
+                FinalCompanionCumulative = player != null ? player.FormatCompanionJoinHistorySig() : "-",
+                BattlesTotal = battlesTotal,
+                BattlesWon = wins,
+                BattlesLost = losses,
+                BattlesFled = flees,
+                HerbUses = herb,
+                PotionUses = pot,
+                ChaliceUses = chal,
+                XpGainedRun = xp,
+                DamageDealtRun = dmgD,
+                DamageTakenRun = dmgT,
+                CompanionCountEnd = CountMonsterCompanions(player),
+                RosterAllyCountEnd = CountRosterAllies(player),
+                DeathAiEquipSignature = deathEquip
+            };
+        }
+
         // ---------------------------------------------------------------
         // 한 층 실행
         // ---------------------------------------------------------------
-        private DungeonSimRecord RunSingleFloor(int runId, int seed, int floor, DungeonSimPlayer player, System.Random rng, BattleSimulator bm, SimEquipHistograms equipHist, bool skipFloorEntryEffects)
+        private DungeonSimFloorLogRow RunSingleFloor(int runId, int seed, int floor, DungeonSimPlayer player, System.Random rng, BattleSimulator bm, SimEquipHistograms equipHist, bool skipFloorEntryEffects)
         {
-            var rec = new DungeonSimRecord
+            string notes = "";
+
+            var fr = new DungeonSimFloorLogRow
             {
                 RunId = runId,
                 Seed = seed,
                 Floor = floor,
                 FloorType = "NoPool",
-                LevelBefore = player.Level,
-                HpBefore = player.GetTotalCurrentHP(),
-                MpBefore = player.GetTotalCurrentMP()
+                LevelOnEnter = player.Level,
+                PartyHpPctEnter = GetPartyHpPct(player),
+                PartyMpPctEnter = GetPartyMpPct(player),
+                HerbOnEnter = player.MedicinalHerbCount,
+                PotionOnEnter = player.HpPotionCount,
+                ChaliceOnEnter = player.DawnChaliceCharges,
+                CompanionCountEnter = CountMonsterCompanions(player),
+                RosterAllyCountEnter = CountRosterAllies(player),
+                TotalHpEnter = player.GetTotalCurrentHP(),
+                TotalMpEnter = player.GetTotalCurrentMP()
             };
 
             var entry = monsterPool.GetEntryForFloor(floor);
             if (entry == null)
             {
-                rec.Notes = "no monster pool entry for this floor";
-                rec.LevelAfter = player.Level;
-                rec.HpAfter = player.GetTotalCurrentHP();
-                rec.MpAfter = player.GetTotalCurrentMP();
-                rec.ClearFlag = true;
-                rec.NextFloorFlag = true;
-                rec.Floor1TownUsesCumulative = player.Floor1TownUsesTotal;
-                rec.LastBattleEnemyCount = 0;
-                return rec;
+                notes = "no monster pool entry for this floor";
+                fr.Notes = notes;
+                fr.LevelOnExit = player.Level;
+                fr.PartyHpPctExit = GetPartyHpPct(player);
+                fr.PartyMpPctExit = GetPartyMpPct(player);
+                fr.HerbOnExit = player.MedicinalHerbCount;
+                fr.PotionOnExit = player.HpPotionCount;
+                fr.ChaliceOnExit = player.DawnChaliceCharges;
+                fr.CompanionCountExit = CountMonsterCompanions(player);
+                fr.RosterAllyCountExit = CountRosterAllies(player);
+                fr.TotalHpExit = player.GetTotalCurrentHP();
+                fr.TotalMpExit = player.GetTotalCurrentMP();
+                fr.HerbUseDelta = 0;
+                fr.PotionUseDelta = 0;
+                fr.ChaliceUseDelta = 0;
+                fr.ClearFlag = 1;
+                fr.DeathFlag = 0;
+                fr.Floor1TownUsesCumulative = player.Floor1TownUsesTotal;
+                fr.SkillActivationBreakdown = "";
+                fr.CompanionsJoinedCumulative = player.FormatCompanionJoinHistorySig();
+                fr.LastBattleEnemyCount = 0;
+                fr.CompanionJoinsThisFloor = 0;
+                fr.SumEnemyMonstersInBattlesThisFloor = 0;
+                fr.MaxEnemyMonstersSingleBattleThisFloor = 0;
+                return fr;
             }
 
-            rec.FloorType = entry.kind.ToString();
+            fr.FloorType = entry.kind.ToString();
 
             if (skipFloorEntryEffects)
-                rec.Notes = string.IsNullOrEmpty(rec.Notes) ? "ai_farm" : rec.Notes + "; ai_farm";
+                notes = string.IsNullOrEmpty(notes) ? "ai_farm" : notes + "; ai_farm";
 
             int fMin = Mathf.Min(settings.medicinalHerbGrantFloorsMin, settings.medicinalHerbGrantFloorsMax);
             int fMax = Mathf.Max(settings.medicinalHerbGrantFloorsMin, settings.medicinalHerbGrantFloorsMax);
@@ -236,9 +579,11 @@ namespace Abyssdawn
                 if (floor == 1 && settings.floor1TownFullRestoreEnabled)
                 {
                     ApplyFloor1TownFullRestore(player, settings, rng, monsterPool, floor, equipHist?.AiPick);
-                    rec.HpBefore = player.GetTotalCurrentHP();
-                    rec.MpBefore = player.GetTotalCurrentMP();
-                    rec.Notes = string.IsNullOrEmpty(rec.Notes) ? "floor1_town" : rec.Notes + "; floor1_town";
+                    fr.PartyHpPctEnter = GetPartyHpPct(player);
+                    fr.PartyMpPctEnter = GetPartyMpPct(player);
+                    fr.TotalHpEnter = player.GetTotalCurrentHP();
+                    fr.TotalMpEnter = player.GetTotalCurrentMP();
+                    notes = string.IsNullOrEmpty(notes) ? "floor1_town" : notes + "; floor1_town";
                 }
                 if (floor >= fMin && floor <= fMax)
                     player.MedicinalHerbCount += Mathf.Max(0, settings.RollMedicinalHerbGrantCount(rng));
@@ -248,6 +593,7 @@ namespace Abyssdawn
             int cooldown = 0;
             int battles = 0;
             int battleWins = 0;
+            int battlesLostThisFloor = 0;
             int encounters = 0;
             int xpGained = 0;
             int goldGained = 0;
@@ -256,6 +602,7 @@ namespace Abyssdawn
             int medicinalHerbUseCount = 0;
             int skillUseCount = 0;
             int recoverySkillUseCount = 0;
+            var floorSkillActivation = new Dictionary<string, long>();
             int dmgDealt = 0;
             int dmgTaken = 0;
             int turnsSum = 0;
@@ -263,6 +610,9 @@ namespace Abyssdawn
             int levelUpsThisFloor = 0;
             int fleesThisFloor = 0;
             int lastBattleEnemyCount = 0;
+            int sumEnemyMonstersInBattlesThisFloor = 0;
+            int maxEnemyMonstersSingleBattleThisFloor = 0;
+            int companionJoinsThisFloor = 0;
 
             int stepsTakenActual = 0;
             for (int s = 0; s < steps; s++)
@@ -294,7 +644,7 @@ namespace Abyssdawn
 
                 if (battles >= settings.maxBattlesPerFloor)
                 {
-                    rec.Notes = "maxBattlesPerFloor reached";
+                    notes = string.IsNullOrEmpty(notes) ? "maxBattlesPerFloor reached" : notes + "; maxBattlesPerFloor reached";
                     break;
                 }
 
@@ -305,6 +655,7 @@ namespace Abyssdawn
                 dawnChaliceUseCount += cPre;
 
                 var enemyParty = monsterPool.BuildEnemyParty(entry, rng);
+                ApplyDungeonSimEnemyPartySize(enemyParty, entry, monsterPool, rng, settings);
                 if (enemyParty.Count == 0) continue;
                 var enemyUnits = BuildEnemyUnitsFromMonsterSOs(enemyParty);
                 if (enemyUnits.Count == 0) continue;
@@ -312,11 +663,11 @@ namespace Abyssdawn
                 if (settings.aiProgressionEnabled && settings.aiTownRetreatBeforeUnsafeBattle && settings.floor1TownFullRestoreEnabled)
                 {
                     int maxStrike = GetMaxMonsterStrikeFromParty(enemyParty);
-                    int turns = Mathf.Max(1, settings.aiSurvivalEnemyTurnCount);
+                    int turnsProbe = Mathf.Max(1, settings.aiSurvivalEnemyTurnCount);
                     for (int tr = 0; tr < settings.aiMaxTownRetreatsPerEncounter; tr++)
                     {
                         if (maxStrike <= 0) break;
-                        long needHp = (long)maxStrike * turns;
+                        long needHp = (long)maxStrike * turnsProbe;
                         if (player.GetTotalCurrentHP() >= needHp) break;
                         ApplyFloor1TownFullRestore(player, settings, rng, monsterPool, floor, equipHist?.AiPick);
                         if (player.GetTotalCurrentHP() >= needHp) break;
@@ -325,15 +676,32 @@ namespace Abyssdawn
 
                 encounters++;
                 lastBattleEnemyCount = enemyUnits.Count;
+                sumEnemyMonstersInBattlesThisFloor += enemyUnits.Count;
+                if (enemyUnits.Count > maxEnemyMonstersSingleBattleThisFloor)
+                    maxEnemyMonstersSingleBattleThisFloor = enemyUnits.Count;
 
                 battles++;
                 bool allowFleeForThisBattle = fleesThisFloor < Mathf.Max(0, settings.maxFleesPerFloor);
+
+                int thisBattleSeq = 0;
+                if (_sessionLoggingActive)
+                {
+                    _sessionBattleSeq++;
+                    thisBattleSeq = _sessionBattleSeq;
+                    LogPartySlotRowsForBattle(thisBattleSeq, runId, seed, floor, player);
+                }
+
                 var outcome = bm.RunOneBattleForDungeon(player.Units, enemyUnits, rng, allowFleeForThisBattle, player, settings);
+
+                if (_sessionLoggingActive && thisBattleSeq > 0)
+                    AppendBattleLogRow(thisBattleSeq, runId, seed, floor, encounters, enemyParty, outcome);
+
                 turnsSum += outcome.Turns;
                 dmgDealt += outcome.TotalDamageDealtToEnemies;
                 dmgTaken += outcome.TotalDamageTakenByAllies;
                 skillUseCount += outcome.SkillUseCount;
                 recoverySkillUseCount += outcome.RecoverySkillUseCount;
+                SimSkillActivationLog.MergeEncoded(floorSkillActivation, outcome.SkillActivationBreakdown);
                 potionUseCount += outcome.BattleHpPotionUses;
                 dawnChaliceUseCount += outcome.BattleDawnChaliceUses;
                 medicinalHerbUseCount += outcome.BattleMedicinalHerbUses;
@@ -366,6 +734,14 @@ namespace Abyssdawn
                         levelUpsThisFloor++;
                     }
 
+                    ReplaceUnderleveledMonsterCompanionsAfterVictory(player, enemyParty, rng, settings, ref notes);
+
+                    TryRollCompanionAfterVictory(
+                        player, enemyParty, rng, settings, equipHist,
+                        ref companionJoinsThisFloor, ref notes,
+                        _sessionLoggingActive ? _logRecruits : null,
+                        thisBattleSeq, runId, seed, floor);
+
                     if (floor == 1 && settings.floor1TownFullRestoreEnabled && settings.floor1TownAfterVictoryEnabled)
                         ApplyFloor1TownFullRestore(player, settings, rng, monsterPool, floor, equipHist?.AiPick);
 
@@ -378,11 +754,11 @@ namespace Abyssdawn
                 }
                 else
                 {
-                    rec.Notes = string.IsNullOrEmpty(rec.Notes) ? "party wiped" : rec.Notes + "; party wiped";
+                    battlesLostThisFloor++;
+                    notes = string.IsNullOrEmpty(notes) ? "party wiped" : notes + "; party wiped";
                     break;
                 }
 
-                // 전투 직전에는 대개 만피라 임계에 안 걸림. 승리·도망 후 HP가 깎인 상태에서 회복(약초→포션→잔).
                 int hPost, pPost, cPost;
                 TryHealPartyPriorityHerbPotionChalice(player, settings, rng, out hPost, out pPost, out cPost);
                 medicinalHerbUseCount += hPost;
@@ -390,51 +766,75 @@ namespace Abyssdawn
                 dawnChaliceUseCount += cPost;
             }
 
-            rec.StepsMoved = stepsTakenActual;
-            rec.Encounters = encounters;
-            rec.Battles = battles;
-            rec.BattlesWon = battleWins;
-            rec.BattlesFled = fleesThisFloor;
-            rec.PotionUseCount = potionUseCount;
-            rec.DawnChaliceUseCount = dawnChaliceUseCount;
-            rec.MedicinalHerbUseCount = medicinalHerbUseCount;
-            rec.PotionRemainAfter = player.HpPotionCount;
-            rec.DawnChaliceRemainAfter = player.DawnChaliceCharges;
-            rec.MedicinalHerbRemainAfter = player.MedicinalHerbCount;
-            rec.SkillUseCount = skillUseCount;
-            rec.RecoverySkillUseCount = recoverySkillUseCount;
-            rec.TotalDamageDealt = dmgDealt;
-            rec.TotalDamageTaken = dmgTaken;
-            rec.TotalBattleTurns = turnsSum;
-            rec.WinBattleTurnsSum = winTurnsSum;
-            rec.XpGained = xpGained;
-            rec.GoldGained = goldGained;
-            rec.LevelAfter = player.Level;
-            rec.HpAfter = player.GetTotalCurrentHP();
-            rec.MpAfter = player.GetTotalCurrentMP();
-            rec.DeathFlag = !player.AnyAlive();
-            rec.ClearFlag = !rec.DeathFlag;
-            rec.NextFloorFlag = rec.ClearFlag;
-            rec.Floor1TownUsesCumulative = player.Floor1TownUsesTotal;
-            rec.LastBattleEnemyCount = lastBattleEnemyCount;
-            if (rec.DeathFlag)
-                rec.DeathAiEquipSignature = DungeonSimAiEquipment.GetPartyEquipSignature(player);
+            fr.StepsMoved = stepsTakenActual;
+            fr.Encounters = encounters;
+            fr.Battles = battles;
+            fr.BattlesWon = battleWins;
+            fr.BattlesFled = fleesThisFloor;
+            fr.BattlesLost = battlesLostThisFloor;
+            fr.HerbUseDelta = medicinalHerbUseCount;
+            fr.PotionUseDelta = potionUseCount;
+            fr.ChaliceUseDelta = dawnChaliceUseCount;
+            fr.HerbOnExit = player.MedicinalHerbCount;
+            fr.PotionOnExit = player.HpPotionCount;
+            fr.ChaliceOnExit = player.DawnChaliceCharges;
+            fr.SkillActivationBreakdown = SimSkillActivationLog.ToEncoded(floorSkillActivation);
+            fr.DamageDealtFloor = dmgDealt;
+            fr.DamageTakenFloor = dmgTaken;
+            fr.TotalBattleTurns = turnsSum;
+            fr.WinBattleTurnsSum = winTurnsSum;
+            fr.XpGained = xpGained;
+            fr.GoldGained = goldGained;
+            fr.LevelOnExit = player.Level;
+            fr.PartyHpPctExit = GetPartyHpPct(player);
+            fr.PartyMpPctExit = GetPartyMpPct(player);
+            fr.TotalHpExit = player.GetTotalCurrentHP();
+            fr.TotalMpExit = player.GetTotalCurrentMP();
+            fr.DeathFlag = !player.AnyAlive() ? 1 : 0;
+            fr.ClearFlag = player.AnyAlive() ? 1 : 0;
+            fr.Floor1TownUsesCumulative = player.Floor1TownUsesTotal;
+            fr.LastBattleEnemyCount = lastBattleEnemyCount;
+            fr.SumEnemyMonstersInBattlesThisFloor = sumEnemyMonstersInBattlesThisFloor;
+            fr.MaxEnemyMonstersSingleBattleThisFloor = maxEnemyMonstersSingleBattleThisFloor;
+            fr.CompanionJoinsThisFloor = companionJoinsThisFloor;
+            fr.CompanionsJoinedCumulative = player.FormatCompanionJoinHistorySig();
+            if (fr.DeathFlag != 0)
+                fr.DeathAiEquipSignature = DungeonSimAiEquipment.GetPartyEquipSignature(player);
             if (levelUpsThisFloor > 0)
-                rec.Notes = string.IsNullOrEmpty(rec.Notes) ? $"+{levelUpsThisFloor} levelup" : rec.Notes + $"; +{levelUpsThisFloor} levelup";
+                notes = string.IsNullOrEmpty(notes) ? $"+{levelUpsThisFloor} levelup" : notes + $"; +{levelUpsThisFloor} levelup";
             if (fleesThisFloor > 0)
-                rec.Notes = string.IsNullOrEmpty(rec.Notes) ? $"flee×{fleesThisFloor}" : rec.Notes + $"; flee×{fleesThisFloor}";
+                notes = string.IsNullOrEmpty(notes) ? $"flee×{fleesThisFloor}" : notes + $"; flee×{fleesThisFloor}";
+            fr.CompanionCountExit = CountMonsterCompanions(player);
+            fr.RosterAllyCountExit = CountRosterAllies(player);
+            fr.Notes = notes;
 
-            return rec;
+            return fr;
         }
 
         /// <summary>
-        /// AI 파밍 목표 레벨 — 수동 게이트, (옵션) 풀 스탯 추정, (옵션) ‘N턴 이내 승리’ 프로브 중 설정에 따라 병합.
+        /// AI 파밍 목표 레벨 — 수동 게이트, (옵션) 풀 스탯 추정, (옵션) 턴 승리 프로브, (옵션) 10층 전체 클리어 최소 레벨 프로브.
         /// </summary>
         private int GetAiNextFloorRequiredLevel(int nextFloor)
         {
-            int manual = settings.GetMinLevelToEnterFloor(nextFloor);
-            if (!settings.aiTurnWinGateEnabled)
+            if (_aiGateProbeSimpleOnly)
                 return settings.GetEffectiveMinLevelToEnterFloor(nextFloor, monsterPool);
+
+            int manual = settings.GetMinLevelToEnterFloor(nextFloor);
+            int poolRec = (!settings.aiMergeMonsterPoolRecommendedLevel || monsterPool == null)
+                ? 1
+                : monsterPool.GetRecommendedMinLevelToEnterFloor(nextFloor);
+
+            int effectiveNoTurn = settings.aiMergeMonsterPoolRecommendedLevel && monsterPool != null
+                ? Mathf.Max(manual, poolRec)
+                : manual;
+
+            if (!settings.aiTurnWinGateEnabled)
+            {
+                int lv = effectiveNoTurn;
+                if (settings.aiFloor10ClearMinLevelGateEnabled && nextFloor == settings.floorCount)
+                    lv = Mathf.Max(lv, GetCachedFloor10ClearMinLevel());
+                return lv;
+            }
 
             if (!_aiTurnWinMinLevelCache.TryGetValue(nextFloor, out int turnRec))
             {
@@ -442,13 +842,94 @@ namespace Abyssdawn
                 _aiTurnWinMinLevelCache[nextFloor] = turnRec;
             }
 
-            if (settings.aiTurnWinGateReplacesPoolRecommendation)
-                return Mathf.Max(manual, turnRec);
+            int lv2 = settings.aiTurnWinGateReplacesPoolRecommendation
+                ? Mathf.Max(manual, turnRec)
+                : Mathf.Max(manual, poolRec, turnRec);
 
-            int poolRec = (!settings.aiMergeMonsterPoolRecommendedLevel || monsterPool == null)
-                ? 1
-                : monsterPool.GetRecommendedMinLevelToEnterFloor(nextFloor);
-            return Mathf.Max(manual, poolRec, turnRec);
+            if (settings.aiFloor10ClearMinLevelGateEnabled && nextFloor == settings.floorCount)
+                lv2 = Mathf.Max(lv2, GetCachedFloor10ClearMinLevel());
+            return lv2;
+        }
+
+        private int GetCachedFloor10ClearMinLevel()
+        {
+            if (_floor10ClearMinCached)
+                return _floor10ClearMinLevel;
+            _floor10ClearMinLevel = ComputeMinPlayerLevelForFullDungeonClear();
+            _floor10ClearMinCached = true;
+            return _floor10ClearMinLevel;
+        }
+
+        /// <summary>
+        /// 최소 L — L레벨 파티로 1~floorCount층을 연속 클리어(사망 없음)할 확률이 기준 이상인 가장 낮은 L.
+        /// 프로브 구간에는 <see cref="_aiGateProbeSimpleOnly"/>로 10층 게이트·턴 게이트를 끕니다.
+        /// </summary>
+        private int ComputeMinPlayerLevelForFullDungeonClear()
+        {
+            if (monsterPool == null || allyRoster == null || settings == null) return 1;
+            var bm = ResolveBattleSimulator();
+            if (bm == null) return 1;
+
+            int probes = Mathf.Max(1, settings.aiFloor10ClearProbesPerLevel);
+            float ratio = Mathf.Clamp(settings.aiFloor10ClearRequiredSuccessRatio, 0.5f, 1f);
+            int needOk = Mathf.CeilToInt(probes * ratio);
+            int maxL = Mathf.Max(1, settings.aiFloor10ClearMaxSearchLevel);
+
+            bool prev = _aiGateProbeSimpleOnly;
+            _aiGateProbeSimpleOnly = true;
+            try
+            {
+                for (int L = 1; L <= maxL; L++)
+                {
+                    int ok = 0;
+                    for (int p = 0; p < probes; p++)
+                    {
+                        int growthSeed = unchecked(settings.baseSeed ^ (L * unchecked((int)0x85EBCA6B)) ^ (p * unchecked((int)0xC2B2AE35)));
+                        int runSeed = unchecked(growthSeed + 1747632519 + p * 49999);
+                        if (SimulateFullDungeonRunClearAllFloors(L, growthSeed, runSeed, bm))
+                            ok++;
+                        if (ok >= needOk)
+                            return L;
+                    }
+                }
+
+                return maxL;
+            }
+            finally
+            {
+                _aiGateProbeSimpleOnly = prev;
+            }
+        }
+
+        /// <summary>한 회차 분량 — 전 층 무사 통과 시 true.</summary>
+        private bool SimulateFullDungeonRunClearAllFloors(int playerLevel, int levelGrowthSeed, int runSeed, BattleSimulator bm)
+        {
+            var player = CreateSimPlayerAtLevel(allyRoster, settings, playerLevel, levelGrowthSeed);
+            if (player == null || !player.AnyAlive()) return false;
+            var rng = new System.Random(runSeed);
+            for (int floor = 1; floor <= settings.floorCount; floor++)
+            {
+                if (!player.AnyAlive()) return false;
+                var fr = RunSingleFloor(-1, runSeed, floor, player, rng, bm, null, skipFloorEntryEffects: false);
+                if (fr.DeathFlag != 0) return false;
+
+                if (settings.aiProgressionEnabled && floor < settings.floorCount)
+                {
+                    int needLv = GetAiNextFloorRequiredLevel(floor + 1);
+                    int targetLv = needLv + Mathf.Max(0, settings.aiExtraLevelsBeyondNextFloorGate);
+                    int farmPasses = 0;
+                    while (player.AnyAlive()
+                           && player.Level < targetLv
+                           && farmPasses < settings.aiMaxFarmingPassesBeforeNextFloor)
+                    {
+                        var farmFr = RunSingleFloor(-1, runSeed, floor, player, rng, bm, null, skipFloorEntryEffects: true);
+                        farmPasses++;
+                        if (farmFr.DeathFlag != 0) return false;
+                    }
+                }
+            }
+
+            return player.AnyAlive();
         }
 
         /// <summary>
@@ -482,6 +963,7 @@ namespace Abyssdawn
                     int brng = unchecked(growthSeed + b * 130027 + nextFloor * 17);
                     var battleRng = new System.Random(brng);
                     var enemyParty = monsterPool.BuildEnemyParty(entry, battleRng);
+                    ApplyDungeonSimEnemyPartySize(enemyParty, entry, monsterPool, battleRng, settings);
                     if (enemyParty == null || enemyParty.Count == 0) continue;
 
                     var allies = CloneBattleSimUnits(template.Units);
@@ -527,6 +1009,8 @@ namespace Abyssdawn
                     SimCharacterClass = u.SimCharacterClass,
                     SimStatLayerEquipmentEnabled = u.SimStatLayerEquipmentEnabled,
                     SimDungeonPartyLevel = u.SimDungeonPartyLevel,
+                    SimIsMonsterCompanion = u.SimIsMonsterCompanion,
+                    SimCompanionMonsterLevel = u.SimCompanionMonsterLevel,
                     IntrinsicMaxHP = u.IntrinsicMaxHP,
                     IntrinsicMaxMP = u.IntrinsicMaxMP,
                     IntrinsicAttack = u.IntrinsicAttack,
@@ -565,7 +1049,13 @@ namespace Abyssdawn
             {
                 foreach (var u in player.Units)
                 {
-                    if (u != null && u.SimStatLayerEquipmentEnabled)
+                    if (u == null) continue;
+                    if (u.SimIsMonsterCompanion)
+                    {
+                        u.SimDungeonPartyLevel = L;
+                        continue;
+                    }
+                    if (u.SimStatLayerEquipmentEnabled)
                         u.SimDungeonPartyLevel = L;
                 }
 
@@ -574,7 +1064,7 @@ namespace Abyssdawn
 
             foreach (var u in player.Units)
             {
-                if (u == null || !u.SimStatLayerEquipmentEnabled) continue;
+                if (u == null || u.SimIsMonsterCompanion || !u.SimStatLayerEquipmentEnabled) continue;
                 u.SimDungeonPartyLevel = L;
                 if (u.SimSkills == null) u.SimSkills = new List<SkillData>();
                 for (int li = 1; li <= L; li++)
@@ -590,9 +1080,8 @@ namespace Abyssdawn
 
         /// <summary>
         /// 던전 시뮬 레벨업.
-        /// <para>HP/MP — <see cref="CharacterClass.hpPerLevel"/>·<see cref="CharacterClass.mpPerLevel"/>
-        /// (없으면 Settings 대체) + 종의 기억 성장치 합 + ±1 노이즈(<see cref="PlayerStats.ApplyHpMpGrowth"/> 동일).</para>
-        /// <para>스탯 — 레벨업당 <b>랜덤 +2</b>만: 직업·종의 기억 성장 가중치를 합친 뒤 같은 비중으로 주사위 2회(직업만 0이면 균등, 합계 0이면 5스탯 균등).</para>
+        /// <para>HP/MP — 직업 hpPerLevel/mpPerLevel(없으면 Settings) + 종의 기억 HP/Lv·MP/Lv 합, 반올림(노이즈 없음).</para>
+        /// <para>스탯 — 직업+종의 기억 가중치로 <b>1회</b> 추첨해 인트린식 +1, DEF/MAG면 MaxHP/MaxMP +3, 이어서 시뮬 자유 1스탯(균등 랜덤, DEF/MAG 시 HP/MP 보너스 동일).</para>
         /// </summary>
         private static void ApplyLevelUp(DungeonSimPlayer player, DungeonSimSettings settings, System.Random rng)
         {
@@ -601,33 +1090,77 @@ namespace Abyssdawn
             player.LevelUpsTotal++;
             foreach (var u in player.Units)
             {
-                if (u == null || !u.IsAlive) continue;
+                if (u == null || !u.IsAlive || u.SimIsMonsterCompanion) continue;
 
                 AccumulateMemoryGrowthWeights(u,
                     out float memAtkW, out float memDefW, out float memMagW, out float memAgiW, out float memLukW,
                     out float hpGrowthSum, out float mpGrowthSum);
 
-                float hpNoise = (float)(rng.NextDouble() * 2.0 - 1.0);
-                float mpNoise = (float)(rng.NextDouble() * 2.0 - 1.0);
                 int classHpGain = u.SimCharacterClass != null
                     ? Mathf.Max(0, u.SimCharacterClass.hpPerLevel)
                     : settings.levelUpHpGain;
                 int classMpGain = u.SimCharacterClass != null
                     ? Mathf.Max(0, u.SimCharacterClass.mpPerLevel)
                     : settings.levelUpMpGain;
-                int finalHpGain = Mathf.Max(1, Mathf.RoundToInt(classHpGain + hpGrowthSum + hpNoise));
-                int finalMpGain = Mathf.Max(1, Mathf.RoundToInt(classMpGain + mpGrowthSum + mpNoise));
+                int finalHpGain = Mathf.Max(0, Mathf.RoundToInt(classHpGain + hpGrowthSum));
+                int finalMpGain = Mathf.Max(0, Mathf.RoundToInt(classMpGain + mpGrowthSum));
 
                 u.IntrinsicMaxHP += finalHpGain;
                 u.IntrinsicMaxMP += finalMpGain;
 
-                ApplySimTwoRandomStatPoints(u, memAtkW, memDefW, memMagW, memAgiW, memLukW, rng);
+                AccumulateMemoryChanceBonuses(u,
+                    out float bAtk, out float bDef, out float bMag, out float bAgi, out float bLuk);
+
+                var c = u.SimCharacterClass;
+                float wa, wd, wm, wag, wl;
+                if (c != null && c.UsesIndependentStatLevelUpChances)
+                {
+                    wa = CharacterClass.ClampStatLevelUpChancePercent(c.levelUpAttackChancePercent + bAtk);
+                    wd = CharacterClass.ClampStatLevelUpChancePercent(c.levelUpDefenseChancePercent + bDef);
+                    wm = CharacterClass.ClampStatLevelUpChancePercent(c.levelUpMagicChancePercent + bMag);
+                    wag = CharacterClass.ClampStatLevelUpChancePercent(c.levelUpAgilityChancePercent + bAgi);
+                    wl = CharacterClass.ClampStatLevelUpChancePercent(c.levelUpLuckChancePercent + bLuk);
+                }
+                else
+                {
+                    if (c != null)
+                    {
+                        wa = Mathf.Max(0f, c.attackGrowthPerLevel);
+                        wd = Mathf.Max(0f, c.defenseGrowthPerLevel);
+                        wm = Mathf.Max(0f, c.magicGrowthPerLevel);
+                        wag = Mathf.Max(0f, c.agilityGrowthPerLevel);
+                        wl = Mathf.Max(0f, c.luckGrowthPerLevel);
+                    }
+                    else
+                    {
+                        wa = wd = wm = wag = wl = 0f;
+                    }
+
+                    wa += memAtkW;
+                    wd += memDefW;
+                    wm += memMagW;
+                    wag += memAgiW;
+                    wl += memLukW;
+                    if (wa + wd + wm + wag + wl <= 0f)
+                        wa = wd = wm = wag = wl = 1f;
+                }
+
+                SimWeightedPickOneIntrinsicStat(u, wa, wd, wm, wag, wl, rng, out int defGained, out int magGained);
+                u.IntrinsicMaxHP += defGained * CharacterClass.HpBonusPerDefensePointGained;
+                u.IntrinsicMaxMP += magGained * CharacterClass.MpBonusPerMagicPointGained;
+                SimGrantRandomFreeStatPoint(u, rng);
             }
 
             SyncDungeonSwordLoreT1SkillsToPartyLevel(player);
             foreach (var u in player.Units)
             {
-                if (u == null || !u.IsAlive) continue;
+                if (u == null) continue;
+                if (u.SimIsMonsterCompanion)
+                {
+                    u.SimDungeonPartyLevel = Mathf.Max(1, player.Level);
+                    continue;
+                }
+                if (!u.IsAlive) continue;
                 u.RecomputeSimDerivedStatsFromIntrinsicsAndEquipment();
                 u.CurrentHP = u.MaxHP;
                 u.CurrentMP = u.MaxMP;
@@ -654,51 +1187,72 @@ namespace Abyssdawn
             return p;
         }
 
-        /// <summary>직업 + 종의 기억 성장 가중치 합으로 스탯 +1을 두 번(레벨당 총 +2 랜덤).</summary>
-        private static void ApplySimTwoRandomStatPoints(
+        private static void SimWeightedPickOneIntrinsicStat(
             BattleSimUnit u,
-            float memAtkW, float memDefW, float memMagW, float memAgiW, float memLukW,
-            System.Random rng)
+            float wa, float wd, float wm, float wag, float wl,
+            System.Random rng,
+            out int defenseGained,
+            out int magicGained)
         {
-            float a, d, m, ag, l;
-            var c = u.SimCharacterClass;
-            if (c != null)
+            defenseGained = 0;
+            magicGained = 0;
+            if (u == null || rng == null) return;
+
+            float t = wa + wd + wm + wag + wl;
+            if (t <= 0f)
             {
-                a = Mathf.Max(0f, c.attackGrowthPerLevel);
-                d = Mathf.Max(0f, c.defenseGrowthPerLevel);
-                m = Mathf.Max(0f, c.magicGrowthPerLevel);
-                ag = Mathf.Max(0f, c.agilityGrowthPerLevel);
-                l = Mathf.Max(0f, c.luckGrowthPerLevel);
+                wa = wd = wm = wag = wl = 1f;
+                t = 5f;
             }
-            else
-                a = d = m = ag = l = 0f;
 
-            if (a + d + m + ag + l <= 0f)
-                a = d = m = ag = l = 1f;
-
-            a += memAtkW;
-            d += memDefW;
-            m += memMagW;
-            ag += memAgiW;
-            l += memLukW;
-
-            if (a + d + m + ag + l <= 0f)
-                a = d = m = ag = l = 1f;
-
-            PickAndBumpStat(u, a, d, m, ag, l, rng);
-            PickAndBumpStat(u, a, d, m, ag, l, rng);
+            float pick = (float)(rng.NextDouble() * t);
+            if (pick < wa) u.IntrinsicAttack++;
+            else if (pick < wa + wd) { u.IntrinsicDefense++; defenseGained = 1; }
+            else if (pick < wa + wd + wm) { u.IntrinsicMagic++; magicGained = 1; }
+            else if (pick < wa + wd + wm + wag) u.IntrinsicAgility++;
+            else u.IntrinsicLuck++;
         }
 
-        private static void PickAndBumpStat(BattleSimUnit u, float a, float d, float m, float ag, float l, System.Random rng)
+        private static void SimGrantRandomFreeStatPoint(BattleSimUnit u, System.Random rng)
         {
-            float total = a + d + m + ag + l;
-            if (total <= 0f) return;
-            float pick = (float)(rng.NextDouble() * total);
-            if (pick < a) u.IntrinsicAttack++;
-            else if (pick < a + d) u.IntrinsicDefense++;
-            else if (pick < a + d + m) u.IntrinsicMagic++;
-            else if (pick < a + d + m + ag) u.IntrinsicAgility++;
-            else u.IntrinsicLuck++;
+            if (u == null || rng == null) return;
+            switch (rng.Next(0, 5))
+            {
+                case 0: u.IntrinsicAttack++; break;
+                case 1:
+                    u.IntrinsicDefense++;
+                    u.IntrinsicMaxHP += CharacterClass.HpBonusPerDefensePointGained;
+                    break;
+                case 2:
+                    u.IntrinsicMagic++;
+                    u.IntrinsicMaxMP += CharacterClass.MpBonusPerMagicPointGained;
+                    break;
+                case 3: u.IntrinsicAgility++; break;
+                default: u.IntrinsicLuck++; break;
+            }
+        }
+
+        private static void AccumulateMemoryChanceBonuses(
+            BattleSimUnit u,
+            out float atkB, out float defB, out float magB, out float agiB, out float lukB)
+        {
+            float a = 0f, d = 0f, m1 = 0f, ag = 0f, l = 0f;
+            AddMemChanceBonus(u.MemorySlot1, ref a, ref d, ref m1, ref ag, ref l);
+            AddMemChanceBonus(u.MemorySlot2, ref a, ref d, ref m1, ref ag, ref l);
+            AddMemChanceBonus(u.MemorySlot3, ref a, ref d, ref m1, ref ag, ref l);
+            atkB = a; defB = d; magB = m1; agiB = ag; lukB = l;
+        }
+
+        private static void AddMemChanceBonus(
+            MemoryOfSpeciesData m,
+            ref float atkB, ref float defB, ref float magB, ref float agiB, ref float lukB)
+        {
+            if (m == null) return;
+            atkB += m.attackLevelUpChanceBonus;
+            defB += m.defenseLevelUpChanceBonus;
+            magB += m.magicLevelUpChanceBonus;
+            agiB += m.agilityLevelUpChanceBonus;
+            lukB += m.luckLevelUpChanceBonus;
         }
 
         private static void AccumulateMemoryGrowthWeights(
@@ -734,19 +1288,22 @@ namespace Abyssdawn
         {
             int h = so.maxHP, mP = so.maxMP, a = so.attack, d = so.defense, mg = so.magic, ag = so.agility, lk = so.luck;
             int baseHpRef = Mathf.Max(1, so.maxHP);
-            ApplyMemFlat(so.memorySlot1, baseHpRef, ref h, ref a, ref d, ref mg, ref ag, ref lk);
-            ApplyMemFlat(so.memorySlot2, baseHpRef, ref h, ref a, ref d, ref mg, ref ag, ref lk);
-            ApplyMemFlat(so.memorySlot3, baseHpRef, ref h, ref a, ref d, ref mg, ref ag, ref lk);
+            int baseMpRef = Mathf.Max(1, so.maxMP);
+            ApplyMemFlat(so.memorySlot1, baseHpRef, baseMpRef, ref h, ref mP, ref a, ref d, ref mg, ref ag, ref lk);
+            ApplyMemFlat(so.memorySlot2, baseHpRef, baseMpRef, ref h, ref mP, ref a, ref d, ref mg, ref ag, ref lk);
+            ApplyMemFlat(so.memorySlot3, baseHpRef, baseMpRef, ref h, ref mP, ref a, ref d, ref mg, ref ag, ref lk);
             hp = h; mp = mP; atk = a; def = d; mag = mg; agi = ag; luk = lk;
         }
 
         private static void ApplyMemFlat(
             MemoryOfSpeciesData m,
             int baseHpRef,
-            ref int hp, ref int atk, ref int def, ref int mag, ref int agi, ref int luk)
+            int baseMpRef,
+            ref int hp, ref int mp, ref int atk, ref int def, ref int mag, ref int agi, ref int luk)
         {
             if (m == null) return;
             hp += Mathf.RoundToInt(baseHpRef * m.hpBonusPercent / 100f) + m.hpBonus;
+            mp += Mathf.RoundToInt(baseMpRef * m.mpBonusPercent / 100f);
             atk += m.attackBonus;
             def += m.defenseBonus;
             mag += m.magicBonus;
@@ -1079,6 +1636,221 @@ namespace Abyssdawn
             return maxStrike;
         }
 
+        /// <summary>
+        /// 승리·레벨업 처리 후 — 몬스터 동료의 <see cref="BattleSimUnit.SimCompanionMonsterLevel"/>이 플레이어보다
+        /// <see cref="DungeonSimSettings.simCompanionReplaceMinLevelGap"/> 이상 낮으면 제거하고, 같은 전투 적 목록에서 교체 영입(CompanionChance 없음).
+        /// 아군 4인·몬스터 동료 3인 상한은 <see cref="TryAddMonsterCompanionToParty"/>로 유지.
+        /// </summary>
+        private static void ReplaceUnderleveledMonsterCompanionsAfterVictory(
+            DungeonSimPlayer player,
+            List<MonsterSO> enemyParty,
+            System.Random rng,
+            DungeonSimSettings settings,
+            ref string floorNotes)
+        {
+            if (settings == null || !settings.simCompanionAutoReplaceWhenLevelLagEnabled) return;
+            if (player?.Units == null || enemyParty == null || rng == null) return;
+
+            int pLv = Mathf.Max(1, player.Level);
+            int gap = Mathf.Max(2, settings.simCompanionReplaceMinLevelGap);
+
+            var toRemove = new List<BattleSimUnit>();
+            for (int i = 0; i < player.Units.Count; i++)
+            {
+                var u = player.Units[i];
+                if (u == null || !u.SimIsMonsterCompanion) continue;
+                if (u.SimCompanionMonsterLevel <= 0) continue;
+                if (pLv - u.SimCompanionMonsterLevel >= gap)
+                    toRemove.Add(u);
+            }
+            if (toRemove.Count == 0) return;
+
+            foreach (var u in toRemove)
+            {
+                player.Units.Remove(u);
+                string tag = string.IsNullOrEmpty(u.DisplayName) ? "?" : u.DisplayName.Replace(';', ',');
+                floorNotes = AppendSemiColonNote(floorNotes, "companion_cull_level:" + tag);
+            }
+
+            for (int k = 0; k < toRemove.Count; k++)
+            {
+                if (!CanPartyAcceptAnotherMonsterCompanion(player)) break;
+                if (!TryRecruitReplacementCompanionFromEnemyParty(player, enemyParty, pLv, rng, ref floorNotes))
+                    floorNotes = AppendSemiColonNote(floorNotes, "companion_replace_fail:no_eligible");
+            }
+        }
+
+        private static bool CanPartyAcceptAnotherMonsterCompanion(DungeonSimPlayer player)
+        {
+            if (player?.Units == null) return false;
+            if (player.Units.Count >= SimDungeonMaxAllySlots) return false;
+            int n = 0;
+            for (int i = 0; i < player.Units.Count; i++)
+            {
+                var u = player.Units[i];
+                if (u != null && u.SimIsMonsterCompanion) n++;
+            }
+            return n < SimDungeonMaxMonsterCompanions;
+        }
+
+        /// <summary>동료화 가능 몬스터만. 우선 플레이어−1 이상, 다음 −2 이상, 마지막으로 아무 동료화 가능체.</summary>
+        private static MonsterSO PickReplacementMonsterFromEnemyParty(List<MonsterSO> enemyParty, int playerLevel, System.Random rng)
+        {
+            if (enemyParty == null || rng == null) return null;
+            int p = Mathf.Max(1, playerLevel);
+            var tier1 = new List<MonsterSO>();
+            var tier2 = new List<MonsterSO>();
+            var tier3 = new List<MonsterSO>();
+            for (int i = 0; i < enemyParty.Count; i++)
+            {
+                var m = enemyParty[i];
+                if (m == null || !m.CanBecomCompanion) continue;
+                int ml = m.MonsterLevel;
+                if (ml >= p - 1) tier1.Add(m);
+                else if (ml >= p - 2) tier2.Add(m);
+                else tier3.Add(m);
+            }
+            MonsterSO Pick(List<MonsterSO> pool) =>
+                pool != null && pool.Count > 0 ? pool[rng.Next(pool.Count)] : null;
+            return Pick(tier1) ?? Pick(tier2) ?? Pick(tier3);
+        }
+
+        private static bool TryRecruitReplacementCompanionFromEnemyParty(
+            DungeonSimPlayer player,
+            List<MonsterSO> enemyParty,
+            int playerLevel,
+            System.Random rng,
+            ref string floorNotes)
+        {
+            if (!CanPartyAcceptAnotherMonsterCompanion(player)) return false;
+            var m = PickReplacementMonsterFromEnemyParty(enemyParty, playerLevel, rng);
+            if (m == null) return false;
+            var cd = m.CompanionData;
+            if (cd == null) return false;
+            if (!TryAddMonsterCompanionToParty(player, m, cd, ref floorNotes))
+                return false;
+            string nm = string.IsNullOrWhiteSpace(cd.CompanionName)
+                ? (string.IsNullOrWhiteSpace(m.MonsterName) ? m.name : m.MonsterName)
+                : cd.CompanionName;
+            floorNotes = AppendSemiColonNote(floorNotes, "companion_replace_join:" + (string.IsNullOrEmpty(nm) ? "?" : nm.Replace(';', ',')));
+            return true;
+        }
+
+        /// <summary>전투 승리 직후 — 해당 전투 적 목록에서 균등 1체를 골라 <see cref="MonsterSO.CompanionChance"/> 1회만 굴립니다. 성공 시 <see cref="CompanionSO"/> 기반 유닛을 파티에 추가합니다(몬스터 동료 최대 3, 아군 슬롯 최대 4).</summary>
+        private static void TryRollCompanionAfterVictory(
+            DungeonSimPlayer player,
+            List<MonsterSO> enemyParty,
+            System.Random rng,
+            DungeonSimSettings settings,
+            SimEquipHistograms equipHist,
+            ref int companionJoinsThisFloor,
+            ref string floorNotes,
+            List<DungeonSimRecruitLogRow> recruitLog,
+            int battleSeq,
+            int runId,
+            int seed,
+            int floor)
+        {
+            void LogRow(string mName, int mLv, string chanceStr, string rollStr, int success, string failReason, string joinedName, int joinedSlot)
+            {
+                if (recruitLog == null) return;
+                recruitLog.Add(new DungeonSimRecruitLogRow
+                {
+                    BattleSeq = battleSeq,
+                    RunId = runId,
+                    Seed = seed,
+                    Floor = floor,
+                    MonsterName = mName ?? "",
+                    MonsterLevel = mLv,
+                    CompanionChanceStr = chanceStr ?? "",
+                    RollU01Str = rollStr ?? "",
+                    Success = success,
+                    FailReason = failReason ?? "",
+                    JoinedDisplayName = joinedName ?? "",
+                    JoinedSlot = joinedSlot
+                });
+            }
+
+            if (settings == null || !settings.simCompanionRollAfterVictoryEnabled) return;
+            if (player?.Units == null || enemyParty == null || enemyParty.Count == 0 || rng == null) return;
+
+            int idx = rng.Next(enemyParty.Count);
+            var m = enemyParty[idx];
+            if (m == null)
+            {
+                LogRow("?", 0, "", "", 0, "null_monster_pick", "", 0);
+                return;
+            }
+
+            string mName = string.IsNullOrEmpty(m.MonsterName) ? m.name : m.MonsterName;
+            int mLv = m.MonsterLevel;
+
+            if (!m.CanBecomCompanion)
+            {
+                LogRow(mName, mLv, "", "", 0, "not_companion_eligible", "", 0);
+                return;
+            }
+
+            double roll = rng.NextDouble();
+            float ch = m.CompanionChance;
+            string rollStr = roll.ToString("0.######", CultureInfo.InvariantCulture);
+            string chStr = ch.ToString("0.######", CultureInfo.InvariantCulture);
+            if (roll >= ch)
+            {
+                LogRow(mName, mLv, chStr, rollStr, 0, "probability", "", 0);
+                return;
+            }
+
+            if (!CanPartyAcceptAnotherMonsterCompanion(player))
+            {
+                LogRow(mName, mLv, chStr, rollStr, 0,
+                    player.Units.Count >= SimDungeonMaxAllySlots ? "party_full" : "max_monster_companions", "", 0);
+                floorNotes = AppendSemiColonNote(floorNotes,
+                    player.Units.Count >= SimDungeonMaxAllySlots
+                        ? "companion_join_skip:party_full"
+                        : "companion_join_skip:max_monster_companions");
+                return;
+            }
+
+            var cd = m.CompanionData;
+            if (cd == null)
+            {
+                LogRow(mName, mLv, chStr, rollStr, 0, "no_companion_so", "", 0);
+                return;
+            }
+
+            if (!TryAddMonsterCompanionToParty(player, m, cd, ref floorNotes))
+            {
+                LogRow(mName, mLv, chStr, rollStr, 0, "add_failed", "", 0);
+                return;
+            }
+
+            int joinedSlot = (int)player.Units[player.Units.Count - 1].Slot;
+
+            string historyName = string.IsNullOrWhiteSpace(cd.CompanionName)
+                ? (string.IsNullOrWhiteSpace(m.MonsterName) ? m.name : m.MonsterName)
+                : cd.CompanionName;
+            player.SimCompanionJoinsTotal++;
+            player.LastCompanionJoinedName = historyName;
+            player.SimCompanionJoinHistory.Add(historyName);
+            companionJoinsThisFloor++;
+            floorNotes = AppendSemiColonNote(floorNotes, "companion_join:" + historyName);
+            LogRow(mName, mLv, chStr, rollStr, 1, "", historyName, joinedSlot);
+            if (equipHist != null)
+            {
+                if (!equipHist.CompanionJoinByName.TryGetValue(historyName, out int c))
+                    c = 0;
+                equipHist.CompanionJoinByName[historyName] = c + 1;
+            }
+        }
+
+        private static string AppendSemiColonNote(string existing, string add)
+        {
+            if (string.IsNullOrEmpty(add)) return existing ?? "";
+            if (string.IsNullOrEmpty(existing)) return add;
+            return existing + ";" + add;
+        }
+
         /// <summary>MonsterSO 리스트 → 전투 시뮬 적 유닛(슬롯 1부터).</summary>
         public static List<BattleSimUnit> BuildEnemyUnitsFromMonsterSOs(List<MonsterSO> party)
         {
@@ -1116,24 +1888,96 @@ namespace Abyssdawn
             return list;
         }
 
+        /// <summary>
+        /// <see cref="DungeonSimSettings.simAlwaysFourEnemyUnits"/>가 켜져 있으면 적 파티를 4마리로 맞춥니다(던전 루프·보스 프로브 등 공통).
+        /// </summary>
+        public static void ApplyDungeonSimEnemyPartySize(
+            List<MonsterSO> party,
+            DungeonSimMonsterPool.FloorEntry entry,
+            DungeonSimMonsterPool pool,
+            System.Random rng,
+            DungeonSimSettings settings)
+        {
+            if (party == null || entry == null || pool == null || rng == null || settings == null) return;
+            if (!settings.simAlwaysFourEnemyUnits) return;
+            pool.NormalizeEnemyPartyMonsterCount(party, entry, rng, SimDungeonMaxAllySlots);
+        }
+
+        private static bool TryPickEmptyAllySlotForCompanion(BattleSimUnit[] occupiedSlots1To4, SlotMask allowed, out BattleSlot slot)
+        {
+            slot = BattleSlot.None;
+            for (int n = 1; n <= SimDungeonMaxAllySlots; n++)
+            {
+                SlotMask bit = (SlotMask)(1 << (n - 1));
+                if ((allowed & bit) == 0) continue;
+                if (occupiedSlots1To4[n] != null) continue;
+                slot = (BattleSlot)n;
+                return true;
+            }
+            for (int n = 1; n <= SimDungeonMaxAllySlots; n++)
+            {
+                if (occupiedSlots1To4[n] != null) continue;
+                slot = (BattleSlot)n;
+                return true;
+            }
+            return false;
+        }
+
+        private static bool TryAddMonsterCompanionToParty(
+            DungeonSimPlayer player,
+            MonsterSO sourceMonster,
+            CompanionSO comp,
+            ref string floorNotes)
+        {
+            var occ = new BattleSimUnit[SimDungeonMaxAllySlots + 1];
+            foreach (var u in player.Units)
+            {
+                if (u == null) continue;
+                int sn = (int)u.Slot;
+                if (sn >= 1 && sn <= SimDungeonMaxAllySlots) occ[sn] = u;
+            }
+            if (!TryPickEmptyAllySlotForCompanion(occ, comp.AllowedSlots, out BattleSlot slot))
+            {
+                floorNotes = AppendSemiColonNote(floorNotes, "companion_join_fail:no_slot");
+                return false;
+            }
+
+            var unit = new BattleSimUnit
+            {
+                Team = BattleSimTeam.Ally,
+                DisplayName = string.IsNullOrWhiteSpace(comp.CompanionName)
+                    ? (string.IsNullOrWhiteSpace(sourceMonster.MonsterName) ? sourceMonster.name : sourceMonster.MonsterName)
+                    : comp.CompanionName,
+                Slot = slot,
+                SimIsMonsterCompanion = true,
+                SimStatLayerEquipmentEnabled = false,
+                SimAiPattern = sourceMonster.AIPattern,
+                MaxHP = Mathf.Max(1, comp.HP),
+                CurrentHP = Mathf.Max(1, comp.HP),
+                MaxMP = Mathf.Max(0, comp.MP),
+                CurrentMP = Mathf.Max(0, comp.MP),
+                Attack = Mathf.Max(0, comp.ATK),
+                Defense = Mathf.Max(0, comp.DEF),
+                Magic = Mathf.Max(0, comp.MAG),
+                Agility = Mathf.Max(0, comp.AGI),
+                Luck = Mathf.Max(0, comp.LUK),
+                SimDungeonPartyLevel = Mathf.Max(1, player.Level),
+                SimCompanionMonsterLevel = Mathf.Max(0, sourceMonster.MonsterLevel),
+                SimSkills = new List<SkillData>()
+            };
+            if (comp.ActiveSkills != null)
+            {
+                foreach (var sk in comp.ActiveSkills)
+                    if (sk != null) unit.SimSkills.Add(sk);
+            }
+            player.Units.Add(unit);
+            return true;
+        }
+
         // ---------------------------------------------------------------
         // CSV / Summary 출력
         // ---------------------------------------------------------------
-        private static void WriteCsv(string absPath, List<DungeonSimRecord> records)
-        {
-            var dir = Path.GetDirectoryName(absPath);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            var sb = new StringBuilder();
-            sb.AppendLine(DungeonSimRecord.CsvHeader);
-            foreach (var r in records)
-                sb.AppendLine(r.ToCsvLine());
-
-            File.WriteAllText(absPath, sb.ToString(), Encoding.UTF8);
-        }
-
-        private string BuildSummary(int iterations, int deaths, int allFloorsCleared, long battles, long battleWins, long battleFlees, long medicinalHerbs, long potions, long dawnChalice, int[] reached, List<DungeonSimRecord> records, SimEquipHistograms equipHist)
+        private string BuildSummary(int iterations, int deaths, int allFloorsCleared, long battles, long battleWins, long battleFlees, long medicinalHerbs, long potions, long dawnChalice, int[] reached, List<DungeonSimFloorLogRow> floorRows, List<DungeonSimRunLogRow> runRows, SimEquipHistograms equipHist)
         {
             var sb = new StringBuilder();
             sb.AppendLine("=== Dungeon Simulation (Phase 1) ===");
@@ -1156,23 +2000,68 @@ namespace Abyssdawn
                 sb.AppendLine($"1층 마을(시뮬) — 1층 진입 시 HP·MP 풀, 포션 {settings.startingHpPotionCount}·잔 {settings.startingDawnChaliceCharges}으로 맞춤(경제 없음). {herbTown}" +
                               (settings.floor1TownAfterVictoryEnabled ? " 승리마다 동일 충전." : ""));
             }
-            sb.AppendLine("적 파티(시뮬): 인카운터마다 적 1마리(1대1) 고정.");
+            string enemyPartyLine = settings.simAlwaysFourEnemyUnits
+                ? "적 파티(시뮬): 인카운터당 적 4명 고정(simAlwaysFourEnemyUnits). 부족 시 해당 층 풀 가중 추첨으로 보충. 각 슬롯은 가중치로 몬스터를 독립 추첨(동일 개체 중복 가능)."
+                : "적 파티(시뮬): 인카운터당 적 수 = DungeonSimMonsterPool 해당 층의 partySizeMin~partySizeMax(1~4, 균등). 각 슬롯은 가중치로 몬스터를 독립 추첨(동일 개체 중복 가능).";
+            sb.AppendLine(enemyPartyLine + " 아군은 로스터 + 몬스터 동료(CompanionSO)로 슬롯 최대 4, 몬스터 동료 최대 3.");
+            if (floorRows != null)
+            {
+                long cj = 0;
+                for (int ri = 0; ri < floorRows.Count; ri++)
+                    cj += floorRows[ri].CompanionJoinsThisFloor;
+                int rowN = floorRows.Count;
+                double perFloorRow = rowN > 0 ? cj / (double)rowN : 0d;
+                sb.AppendLine(
+                    $"동료화(시뮬): CSV 층 행 {rowN}건에 기록된 합류 성공 합계 {cj}회(행당 평균 {perFloorRow:F3}회). " +
+                    "※ 이 수치는 ‘회차당’이 아니라 모든 층·모든 회차의 층 행을 더한 값입니다. 회차당 분포는 아래 ‘동료 합류 성공 횟수’ 블록을 보세요. " +
+                    $"승리 후 전투당 1회 무작위 적 1체에 MonsterSO.CompanionChance·CompanionSO. 성공 시 파티에 유닛 추가. simCompanionRollAfterVictoryEnabled={settings.simCompanionRollAfterVictoryEnabled}.");
+                if (equipHist != null && equipHist.CompanionJoinByName != null && equipHist.CompanionJoinByName.Count > 0)
+                {
+                    var pairs = new List<KeyValuePair<string, int>>(equipHist.CompanionJoinByName);
+                    pairs.Sort((a, b) =>
+                    {
+                        int cmp = b.Value.CompareTo(a.Value);
+                        return cmp != 0 ? cmp : string.CompareOrdinal(a.Key, b.Key);
+                    });
+                    sb.Append("  동료 몬스터 합류 누적(이름별, CompanionChance 성공만): ");
+                    for (int hi = 0; hi < pairs.Count; hi++)
+                    {
+                        if (hi > 0) sb.Append(" / ");
+                        sb.Append(pairs[hi].Key).Append('=').Append(pairs[hi].Value);
+                    }
+                    sb.AppendLine();
+                }
+                AppendMostCommonEndOfRunCompanionCombos(sb, runRows, topN: 30);
+                AppendCompanionJoinPerRunDepthStats(sb, runRows, iterations);
+            }
             if (settings.aiProgressionEnabled)
             {
                 sb.AppendLine("AI 진행(시뮬): ON — 전투 전 아군 현재 HP 합 < 적 max(ATK,MAG)×" + settings.aiSurvivalEnemyTurnCount + "이면 마을 풀충전(최대 " + settings.aiMaxTownRetreatsPerEncounter + "회/인카운터) 후 재판정, 불가면 전투.");
                 sb.AppendLine("  다음 층 진입 최소 레벨 미달 시 같은 층 추가 패스(최대 " + settings.aiMaxFarmingPassesBeforeNextFloor + "회, CSV notes: ai_farm). 요구+추가: +" + settings.aiExtraLevelsBeyondNextFloorGate + "Lv.");
                 if (settings.aiTurnWinGateEnabled)
                 {
-                    sb.AppendLine($"  다음 층 요구 레벨 — 턴 승리 기준: LvL 파티(CreateSimPlayerAtLevel)로 해당 층 풀 적 1마리 전투를 {settings.aiTurnWinGateProbesPerLevel}회 샘플링, (승리 ∧ 턴≤{settings.aiTurnWinGateMaxTurns}) 비율 ≥ {settings.aiTurnWinGateRequiredSuccessRatio:P0}인 가장 낮은 L.");
+                    sb.AppendLine($"  다음 층 요구 레벨 — 턴 승리 기준(옵션): LvL 파티(CreateSimPlayerAtLevel)로 해당 층 풀 적 1마리 전투를 {settings.aiTurnWinGateProbesPerLevel}회 샘플링, (승리 ∧ 턴≤{settings.aiTurnWinGateMaxTurns}) 비율 ≥ {settings.aiTurnWinGateRequiredSuccessRatio:P0}인 가장 낮은 L.");
                     if (settings.aiTurnWinGateReplacesPoolRecommendation)
-                        sb.AppendLine("  병합: max(수동 게이트, 턴 기준) — 몬스터 풀 스탯 추정은 요구치에 쓰이지 않음(아래 표는 참고용으로 풀추정도 병기).");
+                        sb.AppendLine("  병합(턴 ON): max(수동 게이트, 턴 기준) — 풀 스탯 추정은 이 모드에서 생략.");
                     else
-                        sb.AppendLine("  병합: max(수동, 풀 스탯 추정, 턴 기준).");
+                        sb.AppendLine("  병합(턴 ON): max(수동, 풀 스탯 추정, 턴 기준).");
                 }
-                else if (settings.aiMergeMonsterPoolRecommendedLevel)
-                    sb.AppendLine("  다음 층 요구 레벨 = max(수동 게이트, 몬스터 풀 스탯 추정).");
+                else if (settings.aiFloor10ClearMinLevelGateEnabled)
+                {
+                    sb.AppendLine($"  다음 층 요구 레벨 — **{settings.floorCount}층 진입** 시 추가: 전체 {settings.floorCount}층을 사망 없이 통과할 확률이 ≥{settings.aiFloor10ClearRequiredSuccessRatio:P0}인 최소 L(프로브 {settings.aiFloor10ClearProbesPerLevel}회/레벨, 상한 L{settings.aiFloor10ClearMaxSearchLevel}). 턴 승리 게이트는 OFF.");
+                    if (settings.aiMergeMonsterPoolRecommendedLevel && monsterPool != null)
+                        sb.AppendLine("  병합: max(수동, 풀 추정, 10층전체클리어프로브) — 턴 기준 미사용.");
+                    else
+                        sb.AppendLine("  병합: max(수동, 10층전체클리어프로브) — 풀 병합·턴 기준 미사용.");
+                }
                 else
-                    sb.AppendLine("  다음 층 요구 레벨 = 수동 게이트만(비어 있으면 1).");
+                {
+                    sb.AppendLine("  다음 층 요구 레벨 — 턴 승리·10층 전체 프로브 모두 OFF: 수동 게이트 + (옵션)풀 추정만.");
+                    if (settings.aiMergeMonsterPoolRecommendedLevel && monsterPool != null)
+                        sb.AppendLine("  병합: max(수동, 풀 스탯 추정).");
+                    else
+                        sb.AppendLine("  병합: 수동 게이트만(풀 병합 OFF).");
+                }
                 if (settings.floorLevelGates != null && settings.floorLevelGates.Count > 0)
                 {
                     var gs = new System.Text.StringBuilder();
@@ -1198,11 +2087,18 @@ namespace Abyssdawn
                         int turnOnly = settings.aiTurnWinGateEnabled
                             ? (_aiTurnWinMinLevelCache.TryGetValue(f, out int t) ? t : ComputeMinPlayerLevelForNextFloorTurnWin(f))
                             : -1;
+                        int floor10Only = settings.aiFloor10ClearMinLevelGateEnabled && f == settings.floorCount
+                            ? (_floor10ClearMinCached ? _floor10ClearMinLevel : GetCachedFloor10ClearMinLevel())
+                            : -1;
                         if (es.Length > 0) es.Append(", ");
                         es.Append($"{f}층→Lv{eff}");
                         if (turnOnly >= 0)
                         {
                             es.Append($"(수동{gateOnly}/풀추정{poolOnly}/턴기준{turnOnly})");
+                        }
+                        else if (floor10Only >= 0)
+                        {
+                            es.Append($"(수동{gateOnly}/풀추정{poolOnly}/10층전체{floor10Only})");
                         }
                         else if (eff != gateOnly || eff != poolOnly)
                         {
@@ -1220,19 +2116,36 @@ namespace Abyssdawn
             AppendDungeonSimLevelStatTable(sb);
             sb.AppendLine();
             sb.AppendLine($"전체 클리어(모든 층): {allFloorsCleared}/{iterations} ({100f * allFloorsCleared / iterations:F1}%)");
+            AppendFullClearCompanionSummary(sb, allFloorsCleared, equipHist, floorRows, settings.floorCount);
             sb.AppendLine($"사망 회차: {deaths}/{iterations} ({100f * deaths / iterations:F1}%)");
             if (battles > 0)
                 sb.AppendLine($"전투 승률(전체): {battleWins}/{battles} ({100.0 * battleWins / battles:F1}%)");
             else
                 sb.AppendLine("전투 승률(전체): N/A (전투 0회)");
+            if (floorRows != null && battles > 0)
+            {
+                long sumEnemySlots = 0;
+                int globalMaxSingle = 0;
+                for (int ri = 0; ri < floorRows.Count; ri++)
+                {
+                    sumEnemySlots += floorRows[ri].SumEnemyMonstersInBattlesThisFloor;
+                    int mx = floorRows[ri].MaxEnemyMonstersSingleBattleThisFloor;
+                    if (mx > globalMaxSingle) globalMaxSingle = mx;
+                }
+
+                sb.AppendLine(
+                    $"적 몬스터 등장 합계(실제 전투에 들어간 적 유닛 수, 전 판·전 회차 합산): {sumEnemySlots}마리 — " +
+                    $"DungeonSimMonsterPool 층별 partySizeMin~Max(각 1~4)로 한 판의 마리수를 정한 뒤, 그만큼 가중치 추첨으로 채웁니다. " +
+                    $"전체 {battles}판 기준 평균 {sumEnemySlots / (double)battles:F2}마리/판, 이번 실행에서 한 판 최대 {globalMaxSingle}마리.");
+            }
             {
                 long winTurnSum = 0;
                 long winBattleCount = 0;
-                if (records != null)
+                if (floorRows != null)
                 {
-                    for (int ri = 0; ri < records.Count; ri++)
+                    for (int ri = 0; ri < floorRows.Count; ri++)
                     {
-                        var r = records[ri];
+                        var r = floorRows[ri];
                         if (r.BattlesWon <= 0) continue;
                         winTurnSum += r.WinBattleTurnsSum;
                         winBattleCount += r.BattlesWon;
@@ -1259,17 +2172,19 @@ namespace Abyssdawn
                 sb.AppendLine($"  {label}: {reached[i]} ({100f * reached[i] / iterations:F1}%)");
             }
             sb.AppendLine();
-            AppendEquipHistogramSections(sb, equipHist);
-            AppendDiagnostics(sb, records);
+            AppendEquipHistogramSections(sb, equipHist, settings);
+            AppendCompanionHistogramSections(sb, equipHist, floorRows, settings.floorCount);
+            AppendGlobalSkillActivationSummary(sb, floorRows);
+            AppendDiagnostics(sb, floorRows);
             sb.AppendLine();
-            sb.AppendLine("CSV 컬럼: " + DungeonSimRecord.CsvHeader);
+            sb.AppendLine("CSV: 동일 경로 stem에 _runs.csv, _floors.csv, _battles.csv, _party.csv, _recruits.csv 가 생성됩니다.");
             sb.AppendLine();
-            sb.AppendLine("[Phase 1] 레벨업: HP/MP = CharacterClass hpPerLevel/mpPerLevel(없으면 Settings) + 종의 기억 성장치 합 + ±1. 스탯 = 직업+종의 기억 가중 합으로 랜덤 +1×2(레벨당 +2). 다음 레벨까지 필요 EXP는 PlayerExpProgression 표(인게임 PlayerStats와 동일).");
+            sb.AppendLine("[Phase 1] 레벨업: HP/MP = 직업 hpPerLevel/mpPerLevel(없으면 Settings) + 종의 기억 HP/Lv·MP/Lv 합(반올림). 스탯 = 직업+기억 가중 1회 추첨(+1) + DEF/MAG면 MaxHP/MaxMP +3 + 시뮬 자유 1스탯(균등). 다음 레벨 EXP는 PlayerExpProgression 표(인게임과 동일).");
 
             return sb.ToString();
         }
 
-        private static void AppendEquipHistogramSections(StringBuilder sb, SimEquipHistograms equipHist)
+        private static void AppendEquipHistogramSections(StringBuilder sb, SimEquipHistograms equipHist, DungeonSimSettings simSettings)
         {
             if (equipHist == null) return;
             DungeonSimAiEquipment.EnsureCrudePoolLoaded();
@@ -1277,6 +2192,22 @@ namespace Abyssdawn
             sb.AppendLine("=== 던전 시뮬 — Crude 장비(AI) ===");
             sb.AppendLine($"Resources.LoadAll 경로: \"{DungeonSimAiEquipment.CrudeResourcesPath}\" (장비 타입·방패=Hand+blockData 기준 분류)");
             sb.AppendLine("규칙: 양손 1칸만 / 한손×2 또는 한손+방패(총 2칸) / 방어구 0~1 / 악세 0~2. 마을(1층 입장·승리 후·AI 풀충전)마다 현재 층·다음 층 위협치로 점수 최대 조합 선택.");
+            if (simSettings != null && simSettings.aiEquipAppendExplainSampleToSummary)
+            {
+                sb.AppendLine();
+                sb.AppendLine("── 장비 점수(설명) — 규칙 기반, ‘인터뷰’ 대신 아래 수식·샘플로 검증 ──");
+                sb.AppendLine(DungeonSimAiEquipment.DescribeScoringModelForSummary());
+                if (DungeonSimAiEquipment.TryGetExplainSamples(out string first, out string last))
+                {
+                    sb.AppendLine("이번 실행 샘플(전 회차·전 마을 방문 합산 중 첫 1회 / 마지막 1회):");
+                    sb.AppendLine("  첫 선택: " + (string.IsNullOrEmpty(first) ? "(마을 장비 선택 없음)" : first));
+                    sb.AppendLine("  마지막 선택: " + (string.IsNullOrEmpty(last) ? "(마을 장비 선택 없음)" : last));
+                }
+                else
+                {
+                    sb.AppendLine("이번 실행 샘플: (마을 장비 선택 호출 없음)");
+                }
+            }
             sb.AppendLine();
 
             void AppendSortedDict(string title, Dictionary<string, int> dict)
@@ -1299,6 +2230,229 @@ namespace Abyssdawn
             AppendSortedDict("② 마을 방문 시 AI가 선택한 장비(선택 1회당 집계)", equipHist.AiPick);
         }
 
+        /// <summary>전체 클리어 직후 요약에 붙입니다. 클리어 0회일 때는 CSV에서 조합을 찾는 법을 안내합니다.</summary>
+        private static void AppendFullClearCompanionSummary(StringBuilder sb, int totalFullClears, SimEquipHistograms equipHist, List<DungeonSimFloorLogRow> floorRows, int floorCount)
+        {
+            sb.AppendLine("--- 전체 클리어 시 동료 조합(누적, 몬스터 표시명을 | 로 연결) ---");
+            if (totalFullClears <= 0)
+            {
+                sb.AppendLine($"  이번 실행에서는 전체 클리어가 없어 조합 목록이 비어 있습니다.");
+                sb.AppendLine($"  CSV에서 확인: 같은 run_id 안에서 floor={floorCount} 이고 death_flag=0 인 행의 companions_joined_cumulative 가 그 회차의 최종 동료 누적입니다.");
+                sb.AppendLine();
+                return;
+            }
+
+            if (equipHist != null && equipHist.FullClearCompanionSig != null && equipHist.FullClearCompanionSig.Count > 0)
+            {
+                var agg = new List<KeyValuePair<string, int>>(equipHist.FullClearCompanionSig);
+                agg.Sort((a, b) => b.Value.CompareTo(a.Value));
+                sb.AppendLine($"  조합별 클리어 횟수(동일 시그니처 합산, 총 {totalFullClears}회):");
+                for (int i = 0; i < agg.Count; i++)
+                {
+                    string label = string.IsNullOrEmpty(agg[i].Key) || agg[i].Key == "-"
+                        ? "(동료 합류 없음)"
+                        : agg[i].Key;
+                    sb.AppendLine($"    {agg[i].Value,5}회 | {label}");
+                }
+            }
+
+            if (floorRows != null && floorRows.Count > 0 && floorCount > 0)
+            {
+                var lastClearRowByRun = new Dictionary<int, DungeonSimFloorLogRow>();
+                for (int ri = 0; ri < floorRows.Count; ri++)
+                {
+                    var r = floorRows[ri];
+                    if (r.Floor != floorCount || r.DeathFlag != 0) continue;
+                    lastClearRowByRun[r.RunId] = r;
+                }
+
+                const int maxPerRunLines = 100;
+                sb.AppendLine($"  회차별 상세(run_id, seed, 최종 조합) — 총 {lastClearRowByRun.Count}회차(최대 {maxPerRunLines}행만 출력):");
+                var runIds = new List<int>(lastClearRowByRun.Keys);
+                runIds.Sort();
+                int cap = Mathf.Min(runIds.Count, maxPerRunLines);
+                for (int k = 0; k < cap; k++)
+                {
+                    var r = lastClearRowByRun[runIds[k]];
+                    string combo = string.IsNullOrEmpty(r.CompanionsJoinedCumulative) || r.CompanionsJoinedCumulative == "-"
+                        ? "(동료 합류 없음)"
+                        : r.CompanionsJoinedCumulative;
+                    sb.AppendLine($"    run {r.RunId,4} | seed {r.Seed} | {combo}");
+                }
+
+                if (runIds.Count > maxPerRunLines)
+                    sb.AppendLine($"    … 외 {runIds.Count - maxPerRunLines}회차 생략 — 전체는 CSV에서 floor={floorCount}, death_flag=0 으로 필터하세요.");
+            }
+
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// 각 run_id의 runs CSV 행에 기록된 <see cref="DungeonSimRunLogRow.FinalCompanionCumulative"/>를 집계합니다.
+        /// 전체 클리어 여부와 무관하게, 회차 종료 시점까지 누적된 동료 표시명 조합의 빈도를 봅니다.
+        /// </summary>
+        private static void AppendMostCommonEndOfRunCompanionCombos(StringBuilder sb, List<DungeonSimRunLogRow> runs, int topN)
+        {
+            if (runs == null || runs.Count == 0) return;
+            topN = Mathf.Max(5, topN);
+
+            var counts = new Dictionary<string, int>();
+            for (int i = 0; i < runs.Count; i++)
+            {
+                string sig = runs[i].FinalCompanionCumulative;
+                if (string.IsNullOrWhiteSpace(sig) || sig == "-")
+                    sig = "(동료 합류 없음)";
+                if (!counts.TryGetValue(sig, out int c))
+                    c = 0;
+                counts[sig] = c + 1;
+            }
+
+            var list = new List<KeyValuePair<string, int>>(counts);
+            list.Sort((a, b) => b.Value.CompareTo(a.Value));
+
+            sb.AppendLine("--- 회차 종료 시점 동료 누적 조합(빈도순, *_runs.csv 의 final_companion_cumulative) ---");
+            int show = Mathf.Min(topN, list.Count);
+            for (int i = 0; i < show; i++)
+                sb.AppendLine($"  {list[i].Value,5}회 / {list.Count}종 중 | {list[i].Key}");
+            if (list.Count > topN)
+                sb.AppendLine($"  … 고유 조합 {list.Count}종 중 상위 {topN}개만 표시");
+            sb.AppendLine();
+        }
+
+        /// <summary><see cref="DungeonSimRecord.CompanionsJoinedCumulative"/> 문자열의 합류 성공 횟수(| 구분, 빈 토큰 무시).</summary>
+        private static int CountPipeSeparatedCompanionNames(string cumulative)
+        {
+            if (string.IsNullOrWhiteSpace(cumulative) || cumulative == "-") return 0;
+            var parts = cumulative.Split('|');
+            int n = 0;
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(parts[i])) n++;
+            }
+
+            return n;
+        }
+
+        /// <summary>
+        /// 회차마다 runs 행의 누적 동료 합류 횟수로, 이번 시뮬에서의 최댓값·평균을 요약합니다.
+        /// </summary>
+        private static void AppendCompanionJoinPerRunDepthStats(StringBuilder sb, List<DungeonSimRunLogRow> runs, int iterations)
+        {
+            if (runs == null || runs.Count == 0) return;
+
+            int maxJoins = 0;
+            long sumJoins = 0;
+            DungeonSimRunLogRow maxRun = null;
+            foreach (var run in runs)
+            {
+                int c = CountPipeSeparatedCompanionNames(run.FinalCompanionCumulative);
+                sumJoins += c;
+                if (c > maxJoins)
+                {
+                    maxJoins = c;
+                    maxRun = run;
+                }
+            }
+
+            int nRuns = runs.Count;
+            double avg = nRuns > 0 ? sumJoins / (double)nRuns : 0d;
+
+            sb.AppendLine("--- 동료 합류 성공 횟수(회차 누적, 전투 파티 반영) ---");
+            sb.AppendLine($"  이번 실행 회차 수: {nRuns} (설정 iterations={iterations}).");
+            sb.AppendLine($"  한 회차가 끝날 때까지 누적된 합류 성공 최대: {maxJoins}회(몬스터 동료 상한 3).");
+            if (maxJoins > 0 && nRuns > 0 && maxRun != null)
+            {
+                string tail = string.IsNullOrEmpty(maxRun.FinalCompanionCumulative) || maxRun.FinalCompanionCumulative == "-"
+                    ? "-"
+                    : maxRun.FinalCompanionCumulative;
+                if (tail.Length > 100)
+                    tail = tail.Substring(0, 97) + "...";
+                sb.AppendLine($"    (해당 예시) run {maxRun.RunId} | seed {maxRun.Seed} | …{tail}");
+            }
+
+            sb.AppendLine($"  회차당 평균 합류 성공 횟수: {avg:F2}회.");
+            sb.AppendLine();
+        }
+
+        private static void AppendCompanionHistogramSections(StringBuilder sb, SimEquipHistograms equipHist, List<DungeonSimFloorLogRow> floorRows, int floorCount)
+        {
+            if (equipHist == null) return;
+            sb.AppendLine("─────────────────────────────────────────");
+            sb.AppendLine("=== 던전 시뮬 — 동료화 로그(합류 이력) ===");
+            sb.AppendLine("CSV(*_floors.csv): companions_joined_cumulative = 해당 층 종료 시점까지 합류 성공한 몬스터 표시명(순서, | 구분). notes에 companion_join:이름(해당 층) 병기.");
+
+            void AppendSortedDict(string title, Dictionary<string, int> dict)
+            {
+                sb.AppendLine(title);
+                if (dict == null || dict.Count == 0)
+                {
+                    sb.AppendLine("  (없음)");
+                    sb.AppendLine();
+                    return;
+                }
+
+                var list = new List<KeyValuePair<string, int>>(dict);
+                list.Sort((a, b) => b.Value.CompareTo(a.Value));
+                for (int i = 0; i < list.Count; i++)
+                    sb.AppendLine($"  {list[i].Value,5}회 | {list[i].Key}");
+                sb.AppendLine();
+            }
+
+            AppendSortedDict("① 동료 합류 성공(몬스터 표시명별, 승리 후 시도 1회 중 성공)", equipHist.CompanionJoinByName);
+            AppendSortedDict("② 전체 클리어(사망 없음) 회차 종료 시 동료 조합(누적 파이프 시그니처)", equipHist.FullClearCompanionSig);
+
+            if (floorRows != null && floorRows.Count > 0 && floorCount > 0)
+            {
+                var lastClearRowByRun = new Dictionary<int, DungeonSimFloorLogRow>();
+                for (int ri = 0; ri < floorRows.Count; ri++)
+                {
+                    var r = floorRows[ri];
+                    if (r.Floor != floorCount || r.DeathFlag != 0) continue;
+                    lastClearRowByRun[r.RunId] = r;
+                }
+
+                sb.AppendLine("③ 전체 클리어 회차 목록(run_id → seed → 최종 조합) — 요약 상단 블록과 동일 규칙(최대 50행)");
+                if (lastClearRowByRun.Count == 0)
+                {
+                    sb.AppendLine("  (해당 없음)");
+                }
+                else
+                {
+                    var runIds = new List<int>(lastClearRowByRun.Keys);
+                    runIds.Sort();
+                    int cap = Mathf.Min(runIds.Count, 50);
+                    for (int k = 0; k < cap; k++)
+                    {
+                        var r = lastClearRowByRun[runIds[k]];
+                        string combo = string.IsNullOrEmpty(r.CompanionsJoinedCumulative) || r.CompanionsJoinedCumulative == "-"
+                            ? "(동료 합류 없음)"
+                            : r.CompanionsJoinedCumulative;
+                        sb.AppendLine($"  run {r.RunId,4} | seed {r.Seed} | {combo}");
+                    }
+
+                    if (runIds.Count > 50)
+                        sb.AppendLine($"  … 외 {runIds.Count - 50}행 생략(요약 상단 또는 CSV)");
+                }
+
+                sb.AppendLine();
+            }
+        }
+
+        /// <summary>모든 층 CSV 행의 <see cref="DungeonSimFloorLogRow.SkillActivationBreakdown"/>을 합산해 요약에 붙입니다.</summary>
+        private static void AppendGlobalSkillActivationSummary(StringBuilder sb, List<DungeonSimFloorLogRow> floorRows)
+        {
+            if (floorRows == null || floorRows.Count == 0) return;
+            var g = new Dictionary<string, long>();
+            for (int i = 0; i < floorRows.Count; i++)
+                SimSkillActivationLog.MergeEncoded(g, floorRows[i].SkillActivationBreakdown);
+            sb.AppendLine("─────────────────────────────────────────");
+            SimSkillActivationLog.AppendSortedHumanReport(
+                sb,
+                g,
+                "=== 전체 시뮬 — 스킬 액티브 시전 누적(모든 층 CSV 행 합산, skillID 우선) ===",
+                maxLines: 50);
+        }
+
         /// <summary>
         /// 요약 텍스트에 던전 시뮬 <see cref="ApplyLevelUp"/> 규칙으로 올린 레벨별 파티 스탯 표를 붙입니다.
         /// 성장 RNG는 <see cref="DungeonSimSettings.baseSeed"/> 한 가지로 고정해, Lv1→LvN이 한 경로로 쌓인 스냅샷입니다.
@@ -1308,12 +2462,14 @@ namespace Abyssdawn
             if (allyRoster == null || settings == null) return;
 
             int growthSeed = settings.baseSeed == int.MinValue ? 1 : settings.baseSeed;
+            int capSearch = Mathf.Max(settings.aiTurnWinGateMaxSearchLevel, settings.aiFloor10ClearMaxSearchLevel);
+            int upper = Mathf.Max(50, capSearch);
             int maxLv = Mathf.Clamp(
-                Mathf.Max(12, Mathf.Max(settings.floorCount + 8, settings.aiTurnWinGateMaxSearchLevel)),
-                12, 50);
+                Mathf.Max(12, Mathf.Max(settings.floorCount + 8, capSearch)),
+                12, upper);
 
             sb.AppendLine("=== 던전 시뮬 — 레벨별 파티 스탯 (ApplyLevelUp, 성장 시드=baseSeed 고정) ===");
-            sb.AppendLine("※ 장비(Crude AI 마을 착용)는 미반영. 파티 레벨에 따라 Sword Lore T1 자동 습득 스킬이 쌓이며, 기본 검술 등 재계산 보너스는 ATK 등에 포함됨. 레벨마다 CreateSimPlayerAtLevel로 재빌드한 스냅샷.");
+            sb.AppendLine("※ 로스터(아군 SO)만 — 던전 중 합류한 몬스터 동료(CompanionSO)는 이 표에 포함하지 않습니다. 장비(Crude AI 마을 착용)도 미반영. Sword Lore T1·기본 검술 보너스는 포함. 레벨마다 CreateSimPlayerAtLevel 스냅샷.");
             sb.AppendLine();
             sb.AppendLine("Lv | ΣMaxHP ΣMaxMP | ΣATK ΣDEF ΣMAG ΣAGI ΣLUK | 슬롯별(이름:ATK/DEF/MAG/AGI/LUK MaxHP)");
             for (int L = 1; L <= maxLv; L++)
@@ -1362,62 +2518,62 @@ namespace Abyssdawn
         //   ④ 레벨업 진단 (사망 시 평균 레벨, 첫 레벨업 평균 층)
         //   ⑤ 사망 원인 분류 (1전투 즉사 / 회복 자원 보유한 채 죽음 / 자원 고갈 사망)
         // ---------------------------------------------------------------
-        private void AppendDiagnostics(StringBuilder sb, List<DungeonSimRecord> records)
+        private void AppendDiagnostics(StringBuilder sb, List<DungeonSimFloorLogRow> floorRows)
         {
-            if (records == null || records.Count == 0) return;
+            if (floorRows == null || floorRows.Count == 0) return;
 
-            int floors = Mathf.Max(1, settings.floorCount);
+            int floorCap = Mathf.Max(1, settings.floorCount);
 
             // 한 회차의 마지막 행만 모음 — CSV에 기록된 순서대로, 같은 run_id는 항상 덮어써서 마지막 행이 남게 함
             // (AI 파밍으로 같은 층 번호가 연속될 때 r.Floor > prev.Floor 비교만 하면 이전 클리어 행이 남는 버그가 있음)
-            var lastRowByRun = new Dictionary<int, DungeonSimRecord>();
-            foreach (var r in records)
+            var lastRowByRun = new Dictionary<int, DungeonSimFloorLogRow>();
+            foreach (var r in floorRows)
                 lastRowByRun[r.RunId] = r;
 
             // 층별 누적기
-            int[] reachedCnt = new int[floors + 2];
-            int[] clearedCnt = new int[floors + 2];
-            int[] wipedCnt = new int[floors + 2];
-            long[] battlesSum = new long[floors + 2];
-            long[] winsSum = new long[floors + 2];
-            long[] fledSum = new long[floors + 2];
-            long[] hpBeforeSum = new long[floors + 2];
-            long[] hpAfterSum = new long[floors + 2];
-            long[] potionUseSum = new long[floors + 2];
-            long[] herbUseSum = new long[floors + 2];
-            long[] chaliceUseSum = new long[floors + 2];
-            long[] potionAfterSum = new long[floors + 2];
-            long[] herbAfterSum = new long[floors + 2];
-            long[] chaliceAfterSum = new long[floors + 2];
-            long[] xpSum = new long[floors + 2];
-            long[] levelBeforeSum = new long[floors + 2];
-            long[] levelAfterSum = new long[floors + 2];
-            long[] stepsSum = new long[floors + 2];
-            long[] damageTakenSum = new long[floors + 2];
-            long[] winTurnsSumByFloor = new long[floors + 2];
+            int[] reachedCnt = new int[floorCap + 2];
+            int[] clearedCnt = new int[floorCap + 2];
+            int[] wipedCnt = new int[floorCap + 2];
+            long[] battlesSum = new long[floorCap + 2];
+            long[] winsSum = new long[floorCap + 2];
+            long[] fledSum = new long[floorCap + 2];
+            long[] hpBeforeSum = new long[floorCap + 2];
+            long[] hpAfterSum = new long[floorCap + 2];
+            long[] potionUseSum = new long[floorCap + 2];
+            long[] herbUseSum = new long[floorCap + 2];
+            long[] chaliceUseSum = new long[floorCap + 2];
+            long[] potionAfterSum = new long[floorCap + 2];
+            long[] herbAfterSum = new long[floorCap + 2];
+            long[] chaliceAfterSum = new long[floorCap + 2];
+            long[] xpSum = new long[floorCap + 2];
+            long[] levelBeforeSum = new long[floorCap + 2];
+            long[] levelAfterSum = new long[floorCap + 2];
+            long[] stepsSum = new long[floorCap + 2];
+            long[] damageTakenSum = new long[floorCap + 2];
+            long[] winTurnsSumByFloor = new long[floorCap + 2];
 
-            foreach (var r in records)
+            foreach (var r in floorRows)
             {
-                int f = Mathf.Clamp(r.Floor, 1, floors);
+                int f = Mathf.Clamp(r.Floor, 1, floorCap);
                 reachedCnt[f]++;
-                if (r.ClearFlag) clearedCnt[f]++;
-                if (r.DeathFlag) wipedCnt[f]++;
+                if (r.ClearFlag != 0) clearedCnt[f]++;
+                if (r.DeathFlag != 0) wipedCnt[f]++;
                 battlesSum[f] += r.Battles;
                 winsSum[f] += r.BattlesWon;
                 fledSum[f] += r.BattlesFled;
-                hpBeforeSum[f] += r.HpBefore;
-                hpAfterSum[f] += r.HpAfter;
-                potionUseSum[f] += r.PotionUseCount;
-                herbUseSum[f] += r.MedicinalHerbUseCount;
-                chaliceUseSum[f] += r.DawnChaliceUseCount;
-                potionAfterSum[f] += r.PotionRemainAfter;
-                herbAfterSum[f] += r.MedicinalHerbRemainAfter;
-                chaliceAfterSum[f] += r.DawnChaliceRemainAfter;
+                hpBeforeSum[f] += r.TotalHpEnter;
+                hpAfterSum[f] += r.TotalHpExit;
+                potionUseSum[f] += r.PotionUseDelta;
+                herbUseSum[f] += r.HerbUseDelta;
+                chaliceUseSum[f] += r.ChaliceUseDelta;
+                potionAfterSum[f] += r.PotionOnExit;
+                herbAfterSum[f] += r.HerbOnExit;
+                chaliceAfterSum[f] += r.ChaliceOnExit;
                 xpSum[f] += r.XpGained;
-                levelBeforeSum[f] += r.LevelBefore;
-                levelAfterSum[f] += r.LevelAfter;
+                levelBeforeSum[f] += r.LevelOnEnter;
+                levelAfterSum[f] += r.LevelOnExit;
                 stepsSum[f] += r.StepsMoved;
-                damageTakenSum[f] += r.TotalDamageTaken;
+                damageTakenSum[f] += r.DamageTakenFloor;
                 winTurnsSumByFloor[f] += r.WinBattleTurnsSum;
             }
 
@@ -1429,23 +2585,23 @@ namespace Abyssdawn
             foreach (var kv in lastRowByRun)
             {
                 var r = kv.Value;
-                bool fullClear = !r.DeathFlag && r.Floor >= floors;
+                bool fullClear = r.DeathFlag == 0 && r.Floor >= floorCap;
                 if (fullClear)
                 {
                     nFullClear++;
-                    sumLvClear += r.LevelAfter;
-                    sumHerbClear += r.MedicinalHerbRemainAfter;
-                    sumPotClear += r.PotionRemainAfter;
-                    sumChalClear += r.DawnChaliceRemainAfter;
+                    sumLvClear += r.LevelOnExit;
+                    sumHerbClear += r.HerbOnExit;
+                    sumPotClear += r.PotionOnExit;
+                    sumChalClear += r.ChaliceOnExit;
                     sumTownClear += r.Floor1TownUsesCumulative;
                 }
-                else if (r.DeathFlag)
+                else if (r.DeathFlag != 0)
                 {
                     nDeathEnd++;
-                    sumLvDeath += r.LevelAfter;
-                    sumHerbDeath += r.MedicinalHerbRemainAfter;
-                    sumPotDeath += r.PotionRemainAfter;
-                    sumChalDeath += r.DawnChaliceRemainAfter;
+                    sumLvDeath += r.LevelOnExit;
+                    sumHerbDeath += r.HerbOnExit;
+                    sumPotDeath += r.PotionOnExit;
+                    sumChalDeath += r.ChaliceOnExit;
                     sumTownDeath += r.Floor1TownUsesCumulative;
                 }
                 else
@@ -1458,7 +2614,7 @@ namespace Abyssdawn
             if (nFullClear > 0)
             {
                 sb.AppendLine(
-                    $"  {floors}층 전체 클리어(사망 없음): {nFullClear}회 — 평균 레벨 {sumLvClear / (double)nFullClear:F2}, " +
+                    $"  {floorCap}층 전체 클리어(사망 없음): {nFullClear}회 — 평균 레벨 {sumLvClear / (double)nFullClear:F2}, " +
                     $"남은 약초 {sumHerbClear / (double)nFullClear:F2}, 포션 {sumPotClear / (double)nFullClear:F2}, 새벽의 잔 {sumChalClear / (double)nFullClear:F2}, " +
                     $"1층 마을 누적 {sumTownClear / (double)nFullClear:F2}회");
             }
@@ -1470,20 +2626,20 @@ namespace Abyssdawn
                     $"1층 마을 누적 {sumTownDeath / (double)nDeathEnd:F2}회");
             }
             if (nOtherEnd > 0)
-                sb.AppendLine($"  기타 종료(사망 아님·{floors}층 미만 등): {nOtherEnd}회 — 시뮬 예외 시 CSV로 확인.");
+                sb.AppendLine($"  기타 종료(사망 아님·{floorCap}층 미만 등): {nOtherEnd}회 — 시뮬 예외 시 CSV로 확인.");
 
             sb.AppendLine("─────────────────────────────────────────");
             sb.AppendLine("=== 진단 — 어디서 막히는가 ===");
 
             // ① 사망 층 분포
-            int[] deathFloor = new int[floors + 2];
+            int[] deathFloor = new int[floorCap + 2];
             int wipedTotal = 0;
             foreach (var kv in lastRowByRun)
             {
                 var r = kv.Value;
-                if (r.DeathFlag)
+                if (r.DeathFlag != 0)
                 {
-                    int f = Mathf.Clamp(r.Floor, 1, floors);
+                    int f = Mathf.Clamp(r.Floor, 1, floorCap);
                     deathFloor[f]++;
                     wipedTotal++;
                 }
@@ -1497,7 +2653,7 @@ namespace Abyssdawn
             else
             {
                 int firstWallFloor = -1;
-                for (int f = 1; f <= floors; f++)
+                for (int f = 1; f <= floorCap; f++)
                 {
                     if (deathFloor[f] == 0) continue;
                     if (firstWallFloor < 0) firstWallFloor = f;
@@ -1508,7 +2664,7 @@ namespace Abyssdawn
                     sb.AppendLine($"  ▶ 번호상 가장 이른 마지막 사망 층: {firstWallFloor}층 (사망이 1회 이상 기록된 층 중 최소 번호 — 통과 병목과는 다를 수 있음).");
                     int peakF = -1;
                     int peakCnt = 0;
-                    for (int f = 1; f <= floors; f++)
+                    for (int f = 1; f <= floorCap; f++)
                     {
                         if (deathFloor[f] > peakCnt)
                         {
@@ -1525,7 +2681,7 @@ namespace Abyssdawn
             sb.AppendLine();
             sb.AppendLine("② 층별 진단표 (도달 회차 기준 평균)");
             sb.AppendLine("  층 |  도달 | 클리어%  | 사망% | 전투 | 승률 | 도망 | 승리평균턴 | HP진입 → HP종료(손실) | 약초사용/남음 | 포션사용/남음 | 잔사용/남음 | 레벨진입 → 종료 | XP");
-            for (int f = 1; f <= floors; f++)
+            for (int f = 1; f <= floorCap; f++)
             {
                 int reachedF = reachedCnt[f];
                 if (reachedF == 0) continue;
@@ -1560,12 +2716,12 @@ namespace Abyssdawn
             int runsChaliceExhausted = 0;
             long sumPotionExhaustionFloor = 0;
             long sumChaliceExhaustionFloor = 0;
-            var perRunRecords = new Dictionary<int, List<DungeonSimRecord>>();
-            foreach (var r in records)
+            var perRunRecords = new Dictionary<int, List<DungeonSimFloorLogRow>>();
+            foreach (var r in floorRows)
             {
                 if (!perRunRecords.TryGetValue(r.RunId, out var list))
                 {
-                    list = new List<DungeonSimRecord>();
+                    list = new List<DungeonSimFloorLogRow>();
                     perRunRecords[r.RunId] = list;
                 }
                 list.Add(r);
@@ -1578,8 +2734,8 @@ namespace Abyssdawn
                 int firstChaliceEmpty = -1;
                 foreach (var r in list)
                 {
-                    if (firstPotionEmpty < 0 && r.PotionRemainAfter == 0) firstPotionEmpty = r.Floor;
-                    if (firstChaliceEmpty < 0 && r.DawnChaliceRemainAfter == 0 && settings.startingDawnChaliceCharges > 0)
+                    if (firstPotionEmpty < 0 && r.PotionOnExit == 0) firstPotionEmpty = r.Floor;
+                    if (firstChaliceEmpty < 0 && r.ChaliceOnExit == 0 && settings.startingDawnChaliceCharges > 0)
                         firstChaliceEmpty = r.Floor;
                 }
                 if (firstPotionEmpty > 0) { runsPotionExhausted++; sumPotionExhaustionFloor += firstPotionEmpty; }
@@ -1615,9 +2771,9 @@ namespace Abyssdawn
                 int firstLevelUpFloor = -1;
                 foreach (var r in list)
                 {
-                    if (r.LevelAfter > r.LevelBefore && firstLevelUpFloor < 0)
+                    if (r.LevelOnExit > r.LevelOnEnter && firstLevelUpFloor < 0)
                         firstLevelUpFloor = r.Floor;
-                    if (r.DeathFlag) { died = true; deathLevel = r.LevelAfter; }
+                    if (r.DeathFlag != 0) { died = true; deathLevel = r.LevelOnExit; }
                 }
                 if (died) { sumLevelAtDeath += deathLevel; countDeathLevel++; }
                 if (firstLevelUpFloor > 0) { firstLevelUpFloorSum += firstLevelUpFloor; countFirstLevelUp++; }
@@ -1643,11 +2799,11 @@ namespace Abyssdawn
             foreach (var kv in lastRowByRun)
             {
                 var r = kv.Value;
-                if (!r.DeathFlag) continue;
+                if (r.DeathFlag == 0) continue;
                 if (r.Battles <= 1) sudden++;
                 else afterMany++;
-                if (r.PotionRemainAfter > 0) withPotion++; else noPotion++;
-                if (r.DawnChaliceRemainAfter > 0) withChalice++; else noChalice++;
+                if (r.PotionOnExit > 0) withPotion++; else noPotion++;
+                if (r.ChaliceOnExit > 0) withChalice++; else noChalice++;
                 int ec = r.LastBattleEnemyCount;
                 if (ec <= 0) deathLastVsUnknown++;
                 else if (ec == 1) deathLastVs1++;
@@ -1689,7 +2845,7 @@ namespace Abyssdawn
             else
             {
                 int firstWallFloor = 1;
-                for (int f = 1; f <= floors; f++) { if (deathFloor[f] > 0) { firstWallFloor = f; break; } }
+                for (int f = 1; f <= floorCap; f++) { if (deathFloor[f] > 0) { firstWallFloor = f; break; } }
                 if (settings.startingHpPotionCount <= 0)
                 {
                     if (noChalice > withChalice)

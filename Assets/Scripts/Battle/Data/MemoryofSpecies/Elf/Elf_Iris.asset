@@ -18,6 +18,7 @@ MonoBehaviour:
   species: 1
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: 0
   defenseBonus: -1
@@ -28,9 +29,14 @@ MonoBehaviour:
   mpGrowthPerLevel: 0
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
-  magicGrowthPerLevel: 0.3
+  magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 0
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 15
+  agilityLevelUpChanceBonus: 10
+  luckLevelUpChanceBonus: 0
   description: "Magic damage +5%, Crit chance +5%, Agility +2\nDefense -10%, Luck -1\nLevel
     up: Magic +0.3 per level"
   flavorText: "Elven eyes see further into both light and shadow, but expose their

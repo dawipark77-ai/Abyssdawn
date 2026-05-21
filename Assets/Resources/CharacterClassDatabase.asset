@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: CharacterClassDatabase
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDatabase
   allClasses:
-  - {fileID: 11400000, guid: 86173007c73427d4c8dff10b39345910, type: 2}
+  - {fileID: 11400000, guid: 0066eb8cc4bf76c44baa77b0df8897cd, type: 2}
   - {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
+  - {fileID: 11400000, guid: 8bfab7e149aa3094786c0831e16c0ad8, type: 2}
+  - {fileID: 11400000, guid: 639d2b9674c516b4ab44c330e7f90124, type: 2}
+  - {fileID: 11400000, guid: 86173007c73427d4c8dff10b39345910, type: 2}
   - {fileID: 11400000, guid: c6d7e46e7a49e9745aed874ab8442efe, type: 2}

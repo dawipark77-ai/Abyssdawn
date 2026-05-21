@@ -48,6 +48,20 @@ namespace Abyssdawn
         [Tooltip("전투 종료 후 인카운터가 발생하지 않는 이동 칸 수")]
         [Min(0)] public int postBattleCooldownSteps = 3;
 
+        [Header("전투 — 동료화(시뮬)")]
+        [Tooltip("승리 시 전투당 1회만, 해당 전투 적 목록에서 무작위 1체를 골라 MonsterSO.CompanionChance·CompanionSO로 동료 합류를 시뮬합니다. 성공 시 CompanionSO 스탯으로 BattleSimUnit이 파티에 추가됩니다(몬스터 동료 최대 3, 아군 슬롯 총 최대 4).")]
+        public bool simCompanionRollAfterVictoryEnabled = true;
+
+        [Tooltip("켜면 승리·레벨업 처리 직후, 몬스터 동료의 MonsterLevel이 플레이어보다 simCompanionReplaceMinLevelGap 이상 낮으면 파티에서 제거하고, 같은 전투 적 목록에서 동료화 가능 몬스터로 교체 영입을 시도합니다(CompanionChance 없음). 아군 4·몬스터 동료 3 상한은 유지.")]
+        public bool simCompanionAutoReplaceWhenLevelLagEnabled = true;
+
+        [Tooltip("플레이어 레벨 − 동료 MonsterLevel ≥ 이 값이면 교체 대상(기본 2 = 플레이어보다 2 이상 낮으면 교체).")]
+        [Min(2)] public int simCompanionReplaceMinLevelGap = 2;
+
+        [Header("전투 — 적 파티 규모(시뮬)")]
+        [Tooltip("켜면 인카운터마다 적을 항상 4명으로 맞춥니다. 부족하면 해당 층 풀에서 가중 추첨으로 보충합니다.")]
+        public bool simAlwaysFourEnemyUnits = true;
+
         [Header("던전 이동 중 회복 (시뮬)")]
         [Tooltip("이동 칸 처리 중에도 확률/주기로 회복 루프를 돌립니다.")]
         public bool dungeonStepHealEnabled = true;
@@ -174,9 +188,9 @@ namespace Abyssdawn
         [Tooltip("켜면 다음 층 진입에 필요한 레벨 = max(floorLevelGates, 몬스터 풀 스탯으로 추정한 권장 레벨). 끄면 게이트 리스트만 사용(비어 있으면 1).")]
         public bool aiMergeMonsterPoolRecommendedLevel = true;
 
-        [Header("AI — 다음 층 레벨 (턴 승리 기준)")]
-        [Tooltip("켜면: 다음 층 몬스터 풀 대상으로 ‘N턴 이내 승리’ 프로브로 최소 플레이어 레벨을 산출해, 수동 게이트와 병합합니다(아래 ‘풀 추정 대체’ 참고).")]
-        public bool aiTurnWinGateEnabled = true;
+        [Header("AI — 다음 층 레벨 (턴 승리 기준, 옵션)")]
+        [Tooltip("켜면: 다음 층 몬스터 풀 대상으로 ‘N턴 이내 승리’ 프로브로 최소 플레이어 레벨을 산출해 병합합니다. 생존·장비 관찰용으로는 끄는 것을 권장합니다.")]
+        public bool aiTurnWinGateEnabled = false;
 
         [Tooltip("true면 몬스터 풀 스탯 추정(aiMergeMonsterPoolRecommendedLevel)으로 나온 권장 레벨은 무시하고, 수동 게이트와 턴 승리 기준만 사용합니다.")]
         public bool aiTurnWinGateReplacesPoolRecommendation = true;
@@ -192,6 +206,19 @@ namespace Abyssdawn
 
         [Tooltip("턴 게이트 탐색 시 최대 플레이어 레벨(상한에 걸리면 이 값을 그대로 반환).")]
         [Min(1)] public int aiTurnWinGateMaxSearchLevel = 60;
+
+        [Header("AI — 10층 전체 클리어 최소 레벨(프로브)")]
+        [Tooltip("켜면: **마지막 층(floorCount) 진입** 직전 파밍 목표에 ‘L레벨 파티로 1~10층 전체를 무사히 클리어할 확률’ 프로브 결과를 합산합니다. 프로브 도중에는 수동·풀 게이트만 사용합니다(순환 참조 방지).")]
+        public bool aiFloor10ClearMinLevelGateEnabled = true;
+
+        [Tooltip("후보 레벨 L마다 전체 던전(층 1~floorCount) 시뮬을 몇 번 돌릴지.")]
+        [Min(1)] public int aiFloor10ClearProbesPerLevel = 6;
+
+        [Tooltip("프로브 중 이 비율 이상이 ‘전 층 클리어·사망 없음’이면 해당 L을 충분하다고 봅니다.")]
+        [Range(0.5f, 1f)] public float aiFloor10ClearRequiredSuccessRatio = 0.67f;
+
+        [Tooltip("10층 클리어 최소 레벨 탐색 상한.")]
+        [Min(1)] public int aiFloor10ClearMaxSearchLevel = 60;
 
         [Tooltip("층별 ‘이 층에 들어가려면’ 최소 레벨. 비어 있거나 해당 층 행이 없으면 1(제한 없음)으로 간주합니다.")]
         public List<DungeonSimFloorLevelGate> floorLevelGates = new List<DungeonSimFloorLevelGate>();
@@ -218,6 +245,9 @@ namespace Abyssdawn
 
         [Tooltip("요약 텍스트 저장 경로 (프로젝트 루트 기준 상대). Assets/ 하위에 두면 Unity Project 창에서 클릭해 바로 볼 수 있습니다.")]
         public string summaryRelativePath = "Assets/Data/Simulation/_LastDungeonSimSummary.txt";
+
+        [Tooltip("요약에 Crude 장비 AI의 점수 공식 설명 + 이번 실행에서 첫/마지막 마을 선택 시 1줄 점수 내역을 붙입니다(인터뷰 대신 숫자 설명).")]
+        public bool aiEquipAppendExplainSampleToSummary = false;
 
         [Header("안전 가드")]
         [Tooltip("한 층에서 발생할 수 있는 전투 수 상한 (무한 루프 방지)")]
@@ -306,7 +336,9 @@ namespace Abyssdawn
 
         private void OnValidate()
         {
+            simCompanionReplaceMinLevelGap = Mathf.Max(2, simCompanionReplaceMinLevelGap);
             aiTurnWinGateRequiredSuccessRatio = Mathf.Clamp(aiTurnWinGateRequiredSuccessRatio, 0.5f, 1f);
+            aiFloor10ClearRequiredSuccessRatio = Mathf.Clamp(aiFloor10ClearRequiredSuccessRatio, 0.5f, 1f);
             if (medicinalHerbGrantCountMax < medicinalHerbGrantCountMin)
                 medicinalHerbGrantCountMax = medicinalHerbGrantCountMin;
             if (floorLevelGates == null) return;

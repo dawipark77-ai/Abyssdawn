@@ -13,19 +13,31 @@ MonoBehaviour:
   m_Name: Class_Wizard
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: Wizard
-  description: "A wizard specialized in powerful magic. Possesses high Magic power and MP but has weak physical attack and defense."
+  description: "A wizard specialized in powerful magic."
   classIcon: {fileID: 0}
+  hpMultiplier: 0.75
+  mpMultiplier: 1.4
+  attackMultiplier: 1
+  defenseMultiplier: 1
+  magicMultiplier: 1
+  agilityMultiplier: 1
+  luckMultiplier: 1
   attackBonus: -3
   defenseBonus: -3
   magicBonus: 6
   agilityBonus: -1
   luckBonus: 0
-  hpBonus: -25
-  mpBonus: 4
+  hpBonus: 0
+  mpBonus: 0
   hpPerLevel: 2
   mpPerLevel: 10
-  attackGrowthPerLevel: 0.1
-  defenseGrowthPerLevel: 0.1
-  magicGrowthPerLevel: 0.8
-  agilityGrowthPerLevel: 0.2
-  luckGrowthPerLevel: 0.4
+  attackGrowthPerLevel: 0
+  defenseGrowthPerLevel: 0
+  magicGrowthPerLevel: 0
+  agilityGrowthPerLevel: 0
+  luckGrowthPerLevel: 0
+  levelUpAttackChancePercent: 5
+  levelUpDefenseChancePercent: 5
+  levelUpMagicChancePercent: 35
+  levelUpAgilityChancePercent: 10
+  levelUpLuckChancePercent: 25

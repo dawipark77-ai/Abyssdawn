@@ -18,6 +18,7 @@ MonoBehaviour:
   species: 3
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
+  mpBonusPercent: 0
   hpBonus: 0
   attackBonus: -1
   defenseBonus: 0
@@ -29,8 +30,13 @@ MonoBehaviour:
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
-  agilityGrowthPerLevel: 0.3
+  agilityGrowthPerLevel: 0
   luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 0
+  defenseLevelUpChanceBonus: 0
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 20
+  luckLevelUpChanceBonus: 0
   description: "Agility +2, Attack -1. Level up: Agility +0.3 per level."
   flavorText: "Bare feet tough as leather let them run quietly over any ground."
   requiredMemoriesForTrait: 3

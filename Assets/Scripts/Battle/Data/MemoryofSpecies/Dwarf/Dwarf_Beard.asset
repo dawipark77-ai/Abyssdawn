@@ -18,19 +18,25 @@ MonoBehaviour:
   species: 4
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
+  mpBonusPercent: 5
   hpBonus: 0
   attackBonus: 0
   defenseBonus: 0
   agilityBonus: -1
-  magicBonus: 1
+  magicBonus: 0
   luckBonus: 1
   hpGrowthPerLevel: 0
-  mpGrowthPerLevel: 0
+  mpGrowthPerLevel: 0.15
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0
   magicGrowthPerLevel: 0
   agilityGrowthPerLevel: 0
-  luckGrowthPerLevel: 0.2
+  luckGrowthPerLevel: 0
+  attackLevelUpChanceBonus: 0
+  defenseLevelUpChanceBonus: 10
+  magicLevelUpChanceBonus: 0
+  agilityLevelUpChanceBonus: 15
+  luckLevelUpChanceBonus: 0
   description: "Luck +1, Magic +1, Agility -1. Level up: Luck +0.2 per level."
   flavorText: "Their beards twitch at the scent of ore and buried treasure."
   requiredMemoriesForTrait: 3

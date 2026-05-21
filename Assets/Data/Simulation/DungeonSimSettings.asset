@@ -19,6 +19,7 @@ MonoBehaviour:
   stepsPerFloorMax: 40
   encounterChance: 0.15
   postBattleCooldownSteps: 3
+  simCompanionRollAfterVictoryEnabled: 1
   dungeonStepHealEnabled: 1
   stepHealRollChance: 0.08
   stepHealPeriodicN: 6
@@ -57,13 +58,17 @@ MonoBehaviour:
   aiMaxFarmingPassesBeforeNextFloor: 50
   aiExtraLevelsBeyondNextFloorGate: 0
   aiTownRetreatBeforeUnsafeBattle: 1
-  aiMergeMonsterPoolRecommendedLevel: 1
-  aiTurnWinGateEnabled: 1
+  aiMergeMonsterPoolRecommendedLevel: 0
+  aiTurnWinGateEnabled: 0
   aiTurnWinGateReplacesPoolRecommendation: 1
   aiTurnWinGateMaxTurns: 3
   aiTurnWinGateProbesPerLevel: 8
   aiTurnWinGateRequiredSuccessRatio: 0.875
   aiTurnWinGateMaxSearchLevel: 60
+  aiFloor10ClearMinLevelGateEnabled: 1
+  aiFloor10ClearProbesPerLevel: 6
+  aiFloor10ClearRequiredSuccessRatio: 0.67
+  aiFloor10ClearMaxSearchLevel: 60
   floorLevelGates: []
   startingDawnChaliceCharges: 3
   dawnChaliceHpHealPercent: 0.6
@@ -72,4 +77,5 @@ MonoBehaviour:
   useDawnChaliceOnlyWhenPotionEmpty: 0
   csvRelativePath: DungeonSimLogs/DungeonSim_{TIMESTAMP}.csv
   summaryRelativePath: Assets/Data/Simulation/_LastDungeonSimSummary.txt
+  aiEquipAppendExplainSampleToSummary: 0
   maxBattlesPerFloor: 50
