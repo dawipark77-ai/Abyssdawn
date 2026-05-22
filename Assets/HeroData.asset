@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a344a122eb8754989d26c422398af5, type: 3}
   m_Name: HeroData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatData
-  baseHP: 157
-  baseMP: 18
+  baseHP: 173
+  baseMP: 25
   baseAttack: 30
   baseDefense: 5
   baseMagic: 5

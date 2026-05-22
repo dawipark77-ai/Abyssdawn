@@ -1651,6 +1651,46 @@ public class PlayerStats : MonoBehaviour
             case StatType.Luck:    _fallbackAllocatedLuck    += amount; break;
         }
     }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // [PlusButton API] StatusPanel의 + 버튼이 호출하는 단축 메서드.
+    // 자유 분배 포인트(_fallbackFreeStatPoints)가 1 이상일 때만 적용된다.
+    // ─────────────────────────────────────────────────────────────────────
+
+    /// <summary>HP +1 (baseHP 직접 증가). 자유 포인트 1 소모.</summary>
+    public void AddHP()
+    {
+        if (_fallbackFreeStatPoints <= 0) return;
+        _fallbackFreeStatPoints--;
+        baseHP += 1;
+        _fallbackCurrentHP = Mathf.Min(_fallbackCurrentHP + 1, maxHP);
+        OnStatusChanged?.Invoke();
+    }
+
+    /// <summary>MP +1 (baseMP 직접 증가). 자유 포인트 1 소모.</summary>
+    public void AddMP()
+    {
+        if (_fallbackFreeStatPoints <= 0) return;
+        _fallbackFreeStatPoints--;
+        baseMP += 1;
+        _fallbackCurrentMP = Mathf.Min(_fallbackCurrentMP + 1, maxMP);
+        OnStatusChanged?.Invoke();
+    }
+
+    /// <summary>STR(공격력) +1.</summary>
+    public void AddSTR() => AllocateFreePoint(StatType.Attack);
+
+    /// <summary>DEF(방어력) +1. CharacterClass 설정에 따라 HP 보너스도 함께 부여될 수 있다.</summary>
+    public void AddDEF() => AllocateFreePoint(StatType.Defense);
+
+    /// <summary>MAG(마법력) +1. CharacterClass 설정에 따라 MP 보너스도 함께 부여될 수 있다.</summary>
+    public void AddMAG() => AllocateFreePoint(StatType.Magic);
+
+    /// <summary>AGI(민첩성) +1.</summary>
+    public void AddAGI() => AllocateFreePoint(StatType.Agility);
+
+    /// <summary>LUK(행운) +1.</summary>
+    public void AddLUK() => AllocateFreePoint(StatType.Luck);
 }
 
 /// <summary>
