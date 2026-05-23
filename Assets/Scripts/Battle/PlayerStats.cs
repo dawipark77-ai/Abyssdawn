@@ -29,6 +29,19 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private int _fallbackExp = 0;
     [SerializeField] private int _fallbackFreeStatPoints = 0;
     [SerializeField] private int _fallbackSkillPoints = 0;
+
+    // [2026-05-24] Base 스탯 7종을 SO에서 분리. SO(PlayerStatData)는 초기 시드값
+    // 템플릿으로만 사용. 런타임 변동은 모두 _fallbackBase*에만 기록되어
+    // Play 모드 종료 후 .asset 누적 오염을 차단.
+    [SerializeField] private int _fallbackBaseHP;
+    [SerializeField] private int _fallbackBaseMP;
+    [SerializeField] private int _fallbackBaseAttack;
+    [SerializeField] private int _fallbackBaseDefense;
+    [SerializeField] private int _fallbackBaseMagic;
+    [SerializeField] private int _fallbackBaseAgility;
+    [SerializeField] private int _fallbackBaseLuck;
+    // SO에서 한 번이라도 시드됐는지 표시 (false면 다음 호출 시 SO에서 로드)
+    private bool _baseStatsSeeded = false;
     private bool _isInitialized = false; // 초기화 완료 플래그
     private static bool _isFirstLaunch = true; // 앱 첫 실행 여부
 
@@ -44,41 +57,73 @@ public class PlayerStats : MonoBehaviour
     // GameManager 호환용: 현재 직업 에셋의 이름을 반환
     public string jobClass => (characterClass != null) ? characterClass.className : "None";
 
-    [Header("3. 태초의 기본 수치 (고정값)")]
+    [Header("3. 태초의 기본 수치 (런타임 보유 — SO는 초기 시드만 제공)")]
+    // [2026-05-24] Base 스탯은 _fallbackBase* 필드에 저장. SO는 read-only 템플릿.
+    // 시드 미완료 시 SeedBaseStatsFromSO()가 lazy load.
     public int baseHP
     {
-        get => statData != null ? statData.baseHP : 20;
-        set { if (statData != null) statData.baseHP = value; }
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseHP; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseHP = value; }
     }
     public int baseMP
     {
-        get => statData != null ? statData.baseMP : 0;
-        set { if (statData != null) statData.baseMP = value; }
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseMP; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseMP = value; }
     }
     public int baseAttack
     {
-        get => statData != null ? statData.baseAttack : 5;
-        set { if (statData != null) statData.baseAttack = value; }
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseAttack; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseAttack = value; }
     }
     public int baseDefense
     {
-        get => statData != null ? statData.baseDefense : 5;
-        set { if (statData != null) statData.baseDefense = value; }
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseDefense; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseDefense = value; }
     }
     public int baseMagic
     {
-        get => statData != null ? statData.baseMagic : 5;
-        set { if (statData != null) statData.baseMagic = value; }
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseMagic; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseMagic = value; }
     }
     public int baseAgility
     {
-        get => statData != null ? statData.baseAgility : 5;
-        set { if (statData != null) statData.baseAgility = value; }
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseAgility; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseAgility = value; }
     }
     public int baseLuck
     {
-        get => statData != null ? statData.baseLuck : 3;
-        set { if (statData != null) statData.baseLuck = value; }
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseLuck; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseLuck = value; }
+    }
+
+    /// <summary>
+    /// SO에서 base 스탯 7개를 _fallback* 필드로 1회 복사. 이후 모든 변동은 _fallback*에만.
+    /// statData == null이면 코드 디폴트(20/0/5/5/5/5/3)로 시드.
+    /// </summary>
+    private void EnsureBaseStatsSeeded()
+    {
+        if (_baseStatsSeeded) return;
+        if (statData != null)
+        {
+            _fallbackBaseHP      = statData.baseHP;
+            _fallbackBaseMP      = statData.baseMP;
+            _fallbackBaseAttack  = statData.baseAttack;
+            _fallbackBaseDefense = statData.baseDefense;
+            _fallbackBaseMagic   = statData.baseMagic;
+            _fallbackBaseAgility = statData.baseAgility;
+            _fallbackBaseLuck    = statData.baseLuck;
+        }
+        else
+        {
+            _fallbackBaseHP      = 20;
+            _fallbackBaseMP      = 0;
+            _fallbackBaseAttack  = 5;
+            _fallbackBaseDefense = 5;
+            _fallbackBaseMagic   = 5;
+            _fallbackBaseAgility = 5;
+            _fallbackBaseLuck    = 3;
+        }
+        _baseStatsSeeded = true;
     }
 
     [Header("4. 장착된 직업 데이터 (런타임 - 읽기 전용)")]
@@ -1428,36 +1473,40 @@ public class PlayerStats : MonoBehaviour
 
         var nameStr = string.IsNullOrEmpty(playerName) ? "Hero" : playerName;
 
-        // 1줄: 레벨업 알림
-        string line1 = $"<color={colorName}>{nameStr}</color> leveled up to <b>Lv {level}</b>!";
+        var lines = new System.Collections.Generic.List<string>();
 
-        // 2줄: 스탯 상승 내역 (오른 것만 표시)
-        var gains = new System.Collections.Generic.List<string>();
-        if (_lvUpHpGain  > 0) gains.Add($"HP <color={colorHp}>+{_lvUpHpGain}</color>");
-        if (_lvUpMpGain  > 0) gains.Add($"MP <color={colorMp}>+{_lvUpMpGain}</color>");
-        if (_lvUpAtkGain > 0) gains.Add($"ATK <color={colorAtk}>+{_lvUpAtkGain}</color>");
-        if (_lvUpDefGain > 0) gains.Add($"DEF <color={colorDef}>+{_lvUpDefGain}</color>");
-        if (_lvUpMagGain > 0) gains.Add($"MAG <color={colorMag}>+{_lvUpMagGain}</color>");
-        if (_lvUpAgiGain > 0) gains.Add($"AGI <color={colorAgi}>+{_lvUpAgiGain}</color>");
-        if (_lvUpLukGain > 0) gains.Add($"LUK <color={colorLuk}>+{_lvUpLukGain}</color>");
-        string line2 = gains.Count > 0 ? string.Join(", ", gains) : "";
+        // ① 레벨업 (Level up)
+        lines.Add($"<color={colorName}>{nameStr}</color> reached <b>Lv {level}</b>!");
 
-        // 3줄: 자유 분배 포인트 알림
+        // ② 자유 스탯 포인트 +1 획득 (Free Stat Point gained)
         int totalFreePts = _fallbackFreeStatPoints;
-        string line3 = $"<color={colorPoint}>+1 Free Stat Point!</color> (Total: {totalFreePts})";
+        lines.Add($"<color={colorPoint}>Free Stat Point +1!</color> (Total: {totalFreePts})");
 
+        // ③ HP/MP 상승분 (변동 있을 때만)
+        var hpMpGains = new System.Collections.Generic.List<string>();
+        if (_lvUpHpGain > 0) hpMpGains.Add($"HP <color={colorHp}>+{_lvUpHpGain}</color>");
+        if (_lvUpMpGain > 0) hpMpGains.Add($"MP <color={colorMp}>+{_lvUpMpGain}</color>");
+        if (hpMpGains.Count > 0) lines.Add(string.Join(", ", hpMpGains));
+
+        // ④ 랜덤으로 오른 스탯 (변동 있을 때만)
+        var randomGains = new System.Collections.Generic.List<string>();
+        if (_lvUpAtkGain > 0) randomGains.Add($"STR <color={colorAtk}>+{_lvUpAtkGain}</color>");
+        if (_lvUpDefGain > 0) randomGains.Add($"DEF <color={colorDef}>+{_lvUpDefGain}</color>");
+        if (_lvUpMagGain > 0) randomGains.Add($"MAG <color={colorMag}>+{_lvUpMagGain}</color>");
+        if (_lvUpAgiGain > 0) randomGains.Add($"AGI <color={colorAgi}>+{_lvUpAgiGain}</color>");
+        if (_lvUpLukGain > 0) randomGains.Add($"LUK <color={colorLuk}>+{_lvUpLukGain}</color>");
+        if (randomGains.Count > 0) lines.Add(string.Join(", ", randomGains));
+
+        // 시퀀스 출력 — 전투 씬이면 BattleManager의 타이핑 코루틴 사용,
+        // 던전 씬 등 BattleManager가 없으면 Debug.Log 한 번에.
         var bm = FindFirstObjectByType<BattleManager>();
-        if (bm != null)
+        if (bm != null && bm.messageText != null)
         {
-            bm.AddMessage(line1);
-            if (!string.IsNullOrEmpty(line2)) bm.AddMessage(line2);
-            bm.AddMessage(line3);
+            bm.PlayMessageSequence(lines);
         }
         else
         {
-            Debug.Log($"[LevelUp] {line1}");
-            if (!string.IsNullOrEmpty(line2)) Debug.Log($"[LevelUp] {line2}");
-            Debug.Log($"[LevelUp] {line3}");
+            foreach (var l in lines) Debug.Log($"[LevelUp] {l}");
         }
     }
 
@@ -1691,6 +1740,56 @@ public class PlayerStats : MonoBehaviour
 
     /// <summary>LUK(행운) +1.</summary>
     public void AddLUK() => AllocateFreePoint(StatType.Luck);
+
+    // ─────────────────────────────────────────────────────────────────────
+    // [영속화 복원 API] GameManager.ApplyToPlayer 전용.
+    // 씬 전환 후 PartyMemberData 스냅샷에서 자유 분배 포인트·분배 누적치·
+    // 스킬 포인트(LP)를 한 번에 복원한다. AllocateFreePoint/GrantFreeStatPoint를
+    // 거치지 않고 _fallback* 필드에 직접 기록(이벤트도 한 번만 발동).
+    // ─────────────────────────────────────────────────────────────────────
+    /// <summary>
+    /// [영속화 복원 API — Base 스탯] GameManager.ApplyToPlayer 전용.
+    /// PartyMemberData 스냅샷에서 base 스탯 7종을 _fallbackBase*에 직접 기록.
+    /// SO는 건드리지 않음. 시드 플래그를 true로 설정하여 lazy 시드 차단.
+    /// </summary>
+    public void RestoreBaseStats(
+        int bHP, int bMP, int bAttack, int bDefense, int bMagic, int bAgility, int bLuck)
+    {
+        _fallbackBaseHP      = bHP;
+        _fallbackBaseMP      = bMP;
+        _fallbackBaseAttack  = bAttack;
+        _fallbackBaseDefense = bDefense;
+        _fallbackBaseMagic   = bMagic;
+        _fallbackBaseAgility = bAgility;
+        _fallbackBaseLuck    = bLuck;
+        _baseStatsSeeded = true; // 복원 후엔 SO 재시드 차단
+        OnStatusChanged?.Invoke();
+        Debug.Log($"[PlayerStats] RestoreBaseStats: HP={bHP}, MP={bMP}, ATK={bAttack}, " +
+                  $"DEF={bDefense}, MAG={bMagic}, AGI={bAgility}, LUK={bLuck}");
+    }
+
+    public void RestoreAllocations(
+        int freeStatPts,
+        int allocAttack,
+        int allocDefense,
+        int allocMagic,
+        int allocAgility,
+        int allocLuck,
+        int skillPts)
+    {
+        _fallbackFreeStatPoints   = Mathf.Max(0, freeStatPts);
+        _fallbackAllocatedAttack  = Mathf.Max(0, allocAttack);
+        _fallbackAllocatedDefense = Mathf.Max(0, allocDefense);
+        _fallbackAllocatedMagic   = Mathf.Max(0, allocMagic);
+        _fallbackAllocatedAgility = Mathf.Max(0, allocAgility);
+        _fallbackAllocatedLuck    = Mathf.Max(0, allocLuck);
+        _fallbackSkillPoints      = Mathf.Max(0, skillPts);
+        OnStatusChanged?.Invoke();
+        Debug.Log($"[PlayerStats] RestoreAllocations: Free={_fallbackFreeStatPoints}, " +
+                  $"AllocATK={_fallbackAllocatedAttack}, AllocDEF={_fallbackAllocatedDefense}, " +
+                  $"AllocMAG={_fallbackAllocatedMagic}, AllocAGI={_fallbackAllocatedAgility}, " +
+                  $"AllocLUK={_fallbackAllocatedLuck}, LP={_fallbackSkillPoints}");
+    }
 }
 
 /// <summary>

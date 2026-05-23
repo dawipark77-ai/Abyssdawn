@@ -61,6 +61,20 @@ public class BattleManager : MonoBehaviour
     [Header("Battle Settings")]
     public int maxMessages = 50;
 
+    [Header("Sequential Message (Dragon Quest 스타일 레벨업 연출)")]
+    [Tooltip("한 글자가 나타나는 간격(초). 작을수록 빠름. 권장 0.02~0.08")]
+    [Range(0.005f, 0.3f)]
+    public float messageTypingSpeed = 0.04f;
+
+    [Tooltip("줄 완료 후 다음 줄로 진행할 키")]
+    public KeyCode messageAdvanceKey = KeyCode.Space;
+
+    [Tooltip("마우스 좌클릭으로도 다음 줄로 진행")]
+    public bool messageAdvanceOnMouseClick = true;
+
+    [Tooltip("타이핑 중 입력 시 해당 줄 전체 즉시 표시(스킵)")]
+    public bool messageSkipOnInput = true;
+
     [Header("Battle System")]
     public PlayerStats player;
     public EnemyStats enemy;
@@ -5701,12 +5715,201 @@ public class BattleManager : MonoBehaviour
     public void AddMessage(string newMessage)
     {
         if (messageText == null) return; // 전투씬 외 호출 안전 가드
+        // [SeqMsg-DIAG] 시퀀스 진행 중 다른 메시지가 AddMessage로 들어오면
+        // messageText.text가 덮어쓰기되어 시퀀스 출력이 깨짐. 경고로 가시화.
+        if (IsPlayingMessageSequence)
+        {
+            Debug.LogWarning($"[SeqMsg-DIAG] ⚠ AddMessage 호출됨 (시퀀스 진행 중!): \"{newMessage}\" — 시퀀스 텍스트 충돌 가능");
+        }
         messageQueue.Enqueue(newMessage);
         if (messageQueue.Count > maxMessages) messageQueue.Dequeue();
 
         messageText.text = string.Join("\n", messageQueue.ToArray());
         Canvas.ForceUpdateCanvases();
         if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+    }
+
+    // -------------------- 순차 메시지 (Dragon Quest 스타일) --------------------
+    // 줄별 타이핑 효과 + 한 줄 끝나면 클릭/키 대기 → 다음 줄.
+    // 모든 줄 완료 시 onComplete 콜백 호출. messageText 컴포넌트 재사용.
+    // 타이핑은 TMP의 maxVisibleCharacters로 처리하여 컬러 태그(<color>, <b>)에 안전.
+
+    private Coroutine _sequenceRoutine;
+
+    /// <summary>현재 순차 메시지 출력 중인지.</summary>
+    public bool IsPlayingMessageSequence => _sequenceRoutine != null;
+
+    /// <summary>
+    /// 여러 줄을 한 줄씩 타이핑 + 클릭 대기로 출력. 호출 즉시 반환(코루틴 시작만).
+    /// onComplete: 모든 줄이 끝난 직후 호출 (전투 결과 닫기, 다음 단계 진행 등).
+    /// </summary>
+    public void PlayMessageSequence(IList<string> lines, System.Action onComplete = null)
+    {
+        Debug.Log($"[SeqMsg-DIAG] === PlayMessageSequence 진입 === lines.Count={(lines == null ? "(null)" : lines.Count.ToString())}, messageText={(messageText != null ? messageText.name : "NULL")}, gameObject.activeInHierarchy={gameObject.activeInHierarchy}");
+        if (lines != null)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                Debug.Log($"[SeqMsg-DIAG]   line[{i}] (len={(lines[i] == null ? 0 : lines[i].Length)}) = \"{lines[i]}\"");
+            }
+        }
+
+        if (messageText == null)
+        {
+            Debug.LogWarning("[BattleManager] PlayMessageSequence: messageText가 null입니다. 콜백만 즉시 호출.");
+            onComplete?.Invoke();
+            return;
+        }
+        if (lines == null || lines.Count == 0)
+        {
+            Debug.LogWarning("[SeqMsg-DIAG] lines 비어있음 → 즉시 onComplete");
+            onComplete?.Invoke();
+            return;
+        }
+
+        if (_sequenceRoutine != null)
+        {
+            // 이전 시퀀스가 진행 중이면 강제 종료 후 새로 시작
+            Debug.LogWarning("[SeqMsg-DIAG] 이전 시퀀스가 진행 중 — StopCoroutine 후 재시작");
+            StopCoroutine(_sequenceRoutine);
+            _sequenceRoutine = null;
+        }
+        _sequenceRoutine = StartCoroutine(SequenceRoutine(lines, onComplete));
+        Debug.Log("[SeqMsg-DIAG] StartCoroutine 완료. 코루틴 핸들 보존됨.");
+    }
+
+    /// <summary>현재 시퀀스를 강제로 끝내고 onComplete를 즉시 호출하지는 않는다.</summary>
+    public void StopMessageSequence()
+    {
+        if (_sequenceRoutine != null)
+        {
+            Debug.LogWarning($"[SeqMsg-DIAG] !! StopMessageSequence 호출됨 (시퀀스 강제 중단). StackTrace:\n{System.Environment.StackTrace}");
+            StopCoroutine(_sequenceRoutine);
+            _sequenceRoutine = null;
+            if (messageText != null) messageText.maxVisibleCharacters = int.MaxValue;
+        }
+    }
+
+    private System.Collections.IEnumerator SequenceRoutine(IList<string> lines, System.Action onComplete)
+    {
+        Debug.Log($"[SeqMsg-DIAG] SequenceRoutine 진입. 처리할 줄 수={lines.Count}");
+
+        // 기존 누적 로그 백업 — 시퀀스 동안 깔끔하게 점유 후 복원
+        string backup = messageText.text;
+        int backupMaxVisible = messageText.maxVisibleCharacters;
+        Debug.Log($"[SeqMsg-DIAG] 백업 저장. backup.Length={backup.Length}, backupMaxVisible={backupMaxVisible}");
+        messageText.text = "";
+        messageText.maxVisibleCharacters = int.MaxValue;
+
+        string accumulated = "";
+
+        for (int li = 0; li < lines.Count; li++)
+        {
+            string line = lines[li];
+            if (string.IsNullOrEmpty(line))
+            {
+                Debug.LogWarning($"[SeqMsg-DIAG] ▶ 줄 #{li + 1} 스킵 (빈 문자열)");
+                continue;
+            }
+            Debug.Log($"[SeqMsg-DIAG] ▶ 줄 #{li + 1}/{lines.Count} 시작: \"{line}\"");
+
+            // 누적 + 새 줄(개행 포함) 전체를 텍스트에 박아두고 maxVisibleCharacters로 가린다.
+            string full = string.IsNullOrEmpty(accumulated) ? line : (accumulated + "\n" + line);
+            messageText.text = full;
+
+            // ForceMeshUpdate로 textInfo.characterCount 동기화 (TMP 필수)
+            messageText.ForceMeshUpdate();
+            int totalVisibleChars = messageText.textInfo.characterCount;
+
+            // 이전 줄까지의 보이는 글자 수 = accumulated 본문 + 개행 1자
+            int startVisible = 0;
+            if (!string.IsNullOrEmpty(accumulated))
+            {
+                messageText.text = accumulated;
+                messageText.ForceMeshUpdate();
+                startVisible = messageText.textInfo.characterCount + 1; // +1 for \n
+                messageText.text = full;
+                messageText.ForceMeshUpdate();
+            }
+            messageText.maxVisibleCharacters = startVisible;
+            Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} 타이핑 준비: startVisible={startVisible}, totalVisible={totalVisibleChars}, 타이핑할 글자수={totalVisibleChars - startVisible}");
+
+            // 스크롤 맨 아래로
+            if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+
+            // 타이핑 효과
+            bool skipped = false;
+            for (int v = startVisible + 1; v <= totalVisibleChars; v++)
+            {
+                if (messageSkipOnInput && IsAdvanceInputPressedThisFrame())
+                {
+                    Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} 타이핑 중 입력 감지 → 스킵 (v={v}/{totalVisibleChars})");
+                    messageText.maxVisibleCharacters = totalVisibleChars;
+                    skipped = true;
+                    // 스킵 입력이 곧바로 다음 줄로 넘어가는 신호로도 작동하지 않도록 한 프레임 흘림
+                    yield return null;
+                    break;
+                }
+                messageText.maxVisibleCharacters = v;
+                yield return new WaitForSecondsRealtime(messageTypingSpeed);
+            }
+
+            messageText.maxVisibleCharacters = totalVisibleChars;
+            if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+            Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} 타이핑 완료. messageText.text(첫 80자)=\"{(messageText.text.Length > 80 ? messageText.text.Substring(0, 80) + "..." : messageText.text)}\"");
+
+            // 줄 완료 — 마지막 줄이면 입력 대기 없이 콜백으로 (호출자가 결과 화면 닫기)
+            // 중간 줄이면 다음 줄로 진행할 입력 대기
+            bool isLastLine = (li == lines.Count - 1);
+            if (!isLastLine)
+            {
+                Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} → 다음 줄 진행 입력 대기 시작 (Key={messageAdvanceKey}, MouseClick={messageAdvanceOnMouseClick})");
+                // 직전 스킵 입력의 잔향을 피해 한 프레임 대기
+                if (skipped) yield return null;
+                int waitFrames = 0;
+                while (!IsAdvanceInputPressedThisFrame())
+                {
+                    waitFrames++;
+                    yield return null;
+                }
+                Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} 입력 감지! {waitFrames} 프레임 대기 후 다음 줄로 진행");
+            }
+            else
+            {
+                Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} 마지막 줄 — for 루프 종료");
+            }
+
+            accumulated = full;
+        }
+
+        // 마지막 줄도 클릭 한 번 더 받아야 닫히도록 (드퀘식 — 마지막 화면 확인 대기)
+        Debug.Log("[SeqMsg-DIAG] 모든 줄 출력 완료. 최종 확인 입력 대기 시작");
+        // 직전 스킵/진행 입력의 잔향을 피해 한 프레임 대기
+        yield return null;
+        int finalWait = 0;
+        while (!IsAdvanceInputPressedThisFrame())
+        {
+            finalWait++;
+            yield return null;
+        }
+        Debug.Log($"[SeqMsg-DIAG] 최종 입력 감지! {finalWait} 프레임 대기 후 백업 복원");
+
+        // 백업 복원 — 전투 로그가 다시 보이게
+        messageText.text = backup;
+        messageText.maxVisibleCharacters = backupMaxVisible == 0 ? int.MaxValue : backupMaxVisible;
+        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+
+        _sequenceRoutine = null;
+        Debug.Log("[SeqMsg-DIAG] 시퀀스 정상 종료. onComplete 호출");
+        onComplete?.Invoke();
+    }
+
+    /// <summary>이번 프레임에 진행 입력(키 또는 마우스 좌클릭)이 들어왔는지.</summary>
+    private bool IsAdvanceInputPressedThisFrame()
+    {
+        if (Input.GetKeyDown(messageAdvanceKey)) return true;
+        if (messageAdvanceOnMouseClick && Input.GetMouseButtonDown(0)) return true;
+        return false;
     }
 
     /// <summary>

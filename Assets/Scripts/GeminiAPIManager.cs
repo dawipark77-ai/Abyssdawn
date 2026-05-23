@@ -11,7 +11,10 @@ namespace Genesis01
         [Header("Gemini API Settings")]
         [Tooltip("Enter your Google AI Studio API Key here")]
         [SerializeField] private string apiKey = "YOUR_API_KEY_HERE";
-        [SerializeField] private string modelName = "gemini-1.5-flash";
+        // [2026-05-24] gemini-1.5-flash가 v1beta에서 deprecated되어 404 발생.
+        // 현행 가능한 모델: gemini-2.5-flash(권장), gemini-2.5-pro, gemini-2.0-flash, gemini-flash-latest
+        [Tooltip("사용할 Gemini 모델. 기본: gemini-2.5-flash. 다른 옵션: gemini-2.5-pro / gemini-2.0-flash / gemini-flash-latest")]
+        [SerializeField] private string modelName = "gemini-2.5-flash";
 
         private const string ApiUrlFormat = "https://generativelanguage.googleapis.com/v1beta/models/{0}:generateContent?key={1}";
 

@@ -51,6 +51,16 @@ public class GameManager : MonoBehaviour
         public int baseAgility;
         public int baseLuck;
 
+        // [2026-05-24] 자유 분배 포인트 + 분배 누적치 + 스킬 포인트(LP) 영속화
+        // 누락 시 씬 전환마다 0으로 리셋되어 PlusButton/SkillTree가 깨짐.
+        public int freeStatPoints;
+        public int allocatedAttack;
+        public int allocatedDefense;
+        public int allocatedMagic;
+        public int allocatedAgility;
+        public int allocatedLuck;
+        public int skillPoints;
+
         public PartyMemberData(PlayerStats stats)
         {
             characterName = stats.playerName;
@@ -69,7 +79,7 @@ public class GameManager : MonoBehaviour
             luck = stats.luck;
             isIgnited = stats.isIgnited;
             igniteTurnsRemaining = stats.igniteTurnsRemaining;
-            
+
             baseHP = stats.baseHP;
             baseMP = stats.baseMP;
             baseAttack = stats.baseAttack;
@@ -77,6 +87,15 @@ public class GameManager : MonoBehaviour
             baseMagic = stats.baseMagic;
             baseAgility = stats.baseAgility;
             baseLuck = stats.baseLuck;
+
+            // [2026-05-24] 분배 상태 캡처
+            freeStatPoints    = stats.FreeStatPoints;
+            allocatedAttack   = stats.AllocatedAttack;
+            allocatedDefense  = stats.AllocatedDefense;
+            allocatedMagic    = stats.AllocatedMagic;
+            allocatedAgility  = stats.AllocatedAgility;
+            allocatedLuck     = stats.AllocatedLuck;
+            skillPoints       = stats.skillPoints;
         }
     }
 
@@ -207,8 +226,33 @@ public class GameManager : MonoBehaviour
             // They are calculated from CharacterClass SO, so we don't restore them
             player.exp = data.exp;
             player.maxExp = data.maxExp;
+
+            // [2026-05-24] Base 스탯 7종 복원 (currentHP/MP 클램프 전에 호출 — maxHP가 base에 의존)
+            // 이 호출 이전: PlayerStats가 SO에서 lazy 시드하던 값이 들어있을 수 있음.
+            // 이 호출 이후: PartyMemberData에 영속화된 값이 진실의 단일 소스.
+            player.RestoreBaseStats(
+                data.baseHP,
+                data.baseMP,
+                data.baseAttack,
+                data.baseDefense,
+                data.baseMagic,
+                data.baseAgility,
+                data.baseLuck);
+
             player.currentHP = Mathf.Clamp(data.currentHP, 0, player.maxHP);
             player.currentMP = Mathf.Clamp(data.currentMP, 0, player.maxMP);
+
+            // [2026-05-24] 자유 분배 포인트 + 분배 누적치 + 스킬 포인트 복원
+            // currentHP/MP 복원 후 호출해야 maxHP/MP가 분배 누적치 반영된 정확한 값으로 클램프됨.
+            player.RestoreAllocations(
+                data.freeStatPoints,
+                data.allocatedAttack,
+                data.allocatedDefense,
+                data.allocatedMagic,
+                data.allocatedAgility,
+                data.allocatedLuck,
+                data.skillPoints);
+
             if (data.isIgnited && data.igniteTurnsRemaining > 0)
             {
                 var ignite = Resources.Load<AbyssdawnBattle.StatusEffectSO>("StatusEffects/Curse_Ignite");
