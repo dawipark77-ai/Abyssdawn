@@ -113,7 +113,7 @@ public static class NewSkillTreeUISetup
         treeNameTxt.alignment = TextAlignmentOptions.Left;
 
         var lpLabelTxt = CreateLabel("LPLabel", treePager.transform,
-                                     140f, TreePagerH, "LP  0", 24f,
+                                     140f, TreePagerH, "SP  0", 24f,
                                      new Color(0.6f, 0.9f, 1.0f, 1f));
         lpLabelTxt.alignment = TextAlignmentOptions.Right;
 
@@ -285,7 +285,7 @@ public static class NewSkillTreeUISetup
 
         popup.damageText   = MakeStatCell("Damage",   popupRoot.transform, pad,             statsY, cellW, "배율 1.0x");
         popup.mpCostText   = MakeStatCell("MPCost",   popupRoot.transform, pad + cellW,     statsY, cellW, "MP 0");
-        popup.lpCostText   = MakeStatCell("LPCost",   popupRoot.transform, pad + cellW * 2, statsY, cellW, "LP 1");
+        popup.lpCostText   = MakeStatCell("LPCost",   popupRoot.transform, pad + cellW * 2, statsY, cellW, "SP 1");
         popup.hitCountText = MakeStatCell("HitCount", popupRoot.transform, pad + cellW * 3, statsY, cellW, "단타");
 
         // ── Prerequisites row ────────────────────────────────────────

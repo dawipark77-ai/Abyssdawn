@@ -1436,6 +1436,7 @@ public class PlayerStats : MonoBehaviour
         ApplyCombinedClassMemoryRandomStatGrowth();
         ApplyHpMpBonusFromDefenseMagicGainedThisLevel();
         GrantFreeStatPoint();
+        GrantSkillPoint();  // [2026-05-24] 매 레벨업마다 LP +1 자동 지급
         currentHP = maxHP;
         currentMP = maxMP;
         OnStatusChanged?.Invoke();
@@ -1476,7 +1477,7 @@ public class PlayerStats : MonoBehaviour
         var lines = new System.Collections.Generic.List<string>();
 
         // ① 레벨업 (Level up)
-        lines.Add($"<color={colorName}>{nameStr}</color> reached <b>Lv {level}</b>!");
+        lines.Add($"<color={colorName}>{nameStr}</color> leveled up to <b>Lv {level}</b>!");
 
         // ② 자유 스탯 포인트 +1 획득 (Free Stat Point gained)
         int totalFreePts = _fallbackFreeStatPoints;
@@ -1496,6 +1497,11 @@ public class PlayerStats : MonoBehaviour
         if (_lvUpAgiGain > 0) randomGains.Add($"AGI <color={colorAgi}>+{_lvUpAgiGain}</color>");
         if (_lvUpLukGain > 0) randomGains.Add($"LUK <color={colorLuk}>+{_lvUpLukGain}</color>");
         if (randomGains.Count > 0) lines.Add(string.Join(", ", randomGains));
+
+        // ⑤ 스킬 포인트(SP) +1 획득 — GrantSkillPoint가 LevelUp마다 호출되므로 항상 표시
+        // 메시지에서는 풀네임 "Skill Point" 사용 (Free Stat Point와 패턴 일치). UI 헤더/팝업의 "SP" 약어와 별개.
+        int totalSP = _fallbackSkillPoints;
+        lines.Add($"<color={colorPoint}>Skill Point +1!</color> (Total: {totalSP})");
 
         // 시퀀스 출력 — 전투 씬이면 BattleManager의 타이핑 코루틴 사용,
         // 던전 씬 등 BattleManager가 없으면 Debug.Log 한 번에.
@@ -1663,6 +1669,17 @@ public class PlayerStats : MonoBehaviour
     private void GrantFreeStatPoint()
     {
         _fallbackFreeStatPoints++;
+    }
+
+    /// <summary>
+    /// 레벨업 시 스킬 트리에 사용할 스킬 포인트(LP) 1점 지급.
+    /// GrantFreeStatPoint와 동일한 패턴 — _fallbackSkillPoints에 직접 +1.
+    /// (skillPoints 프로퍼티 setter는 OnStatusChanged를 발동하지만, LevelUp 끝에서 한 번에 발동되므로 직접 증분으로 충분)
+    /// </summary>
+    private void GrantSkillPoint()
+    {
+        _fallbackSkillPoints++;
+        Debug.Log($"[Learn-DIAG] GrantSkillPoint 호출됨 — '{playerName}' (InstanceID={GetInstanceID()}) skillPoints → {_fallbackSkillPoints}");
     }
 
     /// <summary>

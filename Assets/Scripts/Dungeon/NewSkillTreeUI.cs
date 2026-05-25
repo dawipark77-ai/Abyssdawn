@@ -54,7 +54,7 @@ public class NewSkillTreeUI : MonoBehaviour
     public TextMeshProUGUI treeNameText;
     public Image treeIconImage;
 
-    [Header("LP Display")]
+    [Header("SP Display")]
     public TextMeshProUGUI lpText;
 
     [Header("Scroll View")]
@@ -486,37 +486,88 @@ public class NewSkillTreeUI : MonoBehaviour
 
     private bool CanLearn(SkillData skill)
     {
-        if (IsLearned(skill)) return false;
-        if (!PrerequisitesMet(skill)) return false;
+        bool already = IsLearned(skill);
+        bool prereq = PrerequisitesMet(skill);
         int lp = GetSkillPoints();
-        return lp >= skill.requiredLorePoints;
+        int cost = skill.requiredLorePoints;
+        bool lpOk = lp >= cost;
+        bool result = !already && prereq && lpOk;
+
+        Debug.Log($"[Learn-DIAG] CanLearn({skill.skillName}): IsLearned={already}, PrerequisitesMet={prereq}, LP={lp}, required={cost}, lpOk={lpOk} → {result}");
+        if (!prereq)
+        {
+            // 어느 선행 스킬이 막는지 표시
+            if (skill.prerequisiteSkills != null)
+            {
+                foreach (var pre in skill.prerequisiteSkills)
+                {
+                    if (pre != null && !IsLearned(pre))
+                        Debug.LogWarning($"[Learn-DIAG]   └─ 미충족 선행: {pre.skillName} (skillID={pre.skillID})");
+                }
+            }
+        }
+        return result;
     }
 
     private void OnNodeClicked(NewSkillTreeNode node)
     {
-        if (detailPopup == null) return;
+        Debug.Log($"[Learn-DIAG] === OnNodeClicked === node='{(node != null ? node.name : "NULL")}', skill='{(node != null && node.SkillData != null ? node.SkillData.skillName : "NULL")}', detailPopup={(detailPopup == null ? "NULL" : detailPopup.name)}");
+        if (detailPopup == null)
+        {
+            Debug.LogError("[Learn-DIAG] ✗ detailPopup == NULL → 팝업 안 열림, 학습 진행 불가");
+            return;
+        }
         SkillData data  = node.SkillData;
         NodeState state = GetNodeState(data);
+        Debug.Log($"[Learn-DIAG] 팝업 Show 호출. skill='{data.skillName}', state={state}, requiredLP={data.requiredLorePoints}, prereqCount={(data.prerequisiteSkills != null ? data.prerequisiteSkills.Count : 0)}");
 
         detailPopup.Show(data, state, () =>
         {
-            if (CanLearn(data))
+            Debug.Log($"[Learn-DIAG] *** detailPopup callback 발동 *** (Learn 버튼 클릭됨) — skill='{data.skillName}'");
+            bool canLearn = CanLearn(data);
+            if (canLearn)
+            {
+                Debug.Log($"[Learn-DIAG] CanLearn 통과 → LearnSkill 호출");
                 LearnSkill(data);
+            }
+            else
+            {
+                Debug.LogWarning($"[Learn-DIAG] ✗ CanLearn false → LearnSkill 호출 안 됨. 위의 CanLearn 로그에서 원인 확인");
+            }
         });
     }
 
     private void LearnSkill(SkillData skill)
     {
-        if (playerStatData == null) return;
+        Debug.Log($"[Learn-DIAG] === LearnSkill 진입 === skill='{skill.skillName}', playerStatData={(playerStatData == null ? "NULL" : playerStatData.name)}");
+        if (playerStatData == null)
+        {
+            Debug.LogError("[Learn-DIAG] ✗ playerStatData == NULL → early return. Inspector에 PlayerStatData SO 연결 필요");
+            return;
+        }
+
+        int lpBefore = GetSkillPoints();
+        var ps = GetPlayerStats();
+        Debug.Log($"[Learn-DIAG] LP 차감 직전 — LP={lpBefore}, cost={skill.requiredLorePoints}, PlayerStats InstanceID={(ps != null ? ps.GetInstanceID().ToString() : "NULL")}, name='{(ps != null ? ps.playerName : "?")}'");
 
         // Deduct LP — skillPoints는 PlayerStats(컴포넌트)에 보유
         SetSkillPoints(GetSkillPoints() - skill.requiredLorePoints);
+        int lpAfter = GetSkillPoints();
+        Debug.Log($"[Learn-DIAG] LP 차감 완료 — LP {lpBefore} → {lpAfter}");
 
         // Add to learned list
         if (playerStatData.learnedSkills == null)
             playerStatData.learnedSkills = new List<SkillData>();
-        if (!playerStatData.learnedSkills.Contains(skill))
+        bool alreadyInList = playerStatData.learnedSkills.Contains(skill);
+        if (!alreadyInList)
+        {
             playerStatData.learnedSkills.Add(skill);
+            Debug.Log($"[Learn-DIAG] learnedSkills에 추가됨. 총 학습 스킬 수={playerStatData.learnedSkills.Count}");
+        }
+        else
+        {
+            Debug.LogWarning($"[Learn-DIAG] ⚠ learnedSkills에 이미 존재 ({skill.skillName}) — 중복 추가 안 함. (CanLearn에서 막혔어야 정상)");
+        }
 
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(playerStatData);
@@ -540,7 +591,7 @@ public class NewSkillTreeUI : MonoBehaviour
     {
         if (lpText == null) return;
         int lp = GetSkillPoints();
-        lpText.text = $"LP  {lp}";
+        lpText.text = $"SP  {lp}";
     }
 
     // ────────────────────────────────────────────────────────
@@ -552,20 +603,35 @@ public class NewSkillTreeUI : MonoBehaviour
     private PlayerStats GetPlayerStats()
     {
         if (_cachedPlayerStats == null)
+        {
             _cachedPlayerStats = FindFirstObjectByType<PlayerStats>();
+            Debug.Log($"[Learn-DIAG] GetPlayerStats: 첫 탐색 → {(_cachedPlayerStats == null ? "NULL" : $"'{_cachedPlayerStats.playerName}' (InstanceID={_cachedPlayerStats.GetInstanceID()}, scene='{_cachedPlayerStats.gameObject.scene.name}')")}");
+        }
         return _cachedPlayerStats;
     }
 
     private int GetSkillPoints()
     {
         var ps = GetPlayerStats();
-        return ps != null ? ps.skillPoints : 0;
+        if (ps == null)
+        {
+            Debug.LogWarning("[Learn-DIAG] GetSkillPoints: PlayerStats == NULL → 0 반환");
+            return 0;
+        }
+        return ps.skillPoints;
     }
 
     private void SetSkillPoints(int value)
     {
         var ps = GetPlayerStats();
-        if (ps != null) ps.skillPoints = value;
+        if (ps == null)
+        {
+            Debug.LogError($"[Learn-DIAG] SetSkillPoints({value}): PlayerStats == NULL → 무시. LP 차감 실패!");
+            return;
+        }
+        int before = ps.skillPoints;
+        ps.skillPoints = value;
+        Debug.Log($"[Learn-DIAG] SetSkillPoints: '{ps.playerName}' (InstanceID={ps.GetInstanceID()}) skillPoints {before} → {ps.skillPoints} (요청 값={value})");
     }
 
     // ─────────────────────────────────────────────────────────────────

@@ -11,10 +11,10 @@ using UnityEditor;
 /// </summary>
 public class LorePointManager : EditorWindow
 {
-    [MenuItem("Tools/Skill Tree/Manage Lore Points")]
+    [MenuItem("Tools/Skill Tree/Manage Skill Points")]
     public static void ShowWindow()
     {
-        GetWindow<LorePointManager>("LP 관리");
+        GetWindow<LorePointManager>("SP 관리");
     }
 
     private PlayerStatData playerStatData;
@@ -41,7 +41,7 @@ public class LorePointManager : EditorWindow
 
     private void OnGUI()
     {
-        GUILayout.Label("Lore Point (LP) 관리", EditorStyles.boldLabel);
+        GUILayout.Label("Skill Point (SP) 관리", EditorStyles.boldLabel);
         GUILayout.Space(10);
 
         // PlayerStatData 자동 로드 (learnedSkills 등 SO 데이터 편집용)
@@ -61,22 +61,22 @@ public class LorePointManager : EditorWindow
         if (psInScene == null)
         {
             EditorGUILayout.HelpBox(
-                "씬에 PlayerStats 컴포넌트가 없어 LP를 편집할 수 없습니다.\n" +
+                "씬에 PlayerStats 컴포넌트가 없어 SP를 편집할 수 없습니다.\n" +
                 "[2026-05-07] skillPoints는 PlayerStats(컴포넌트)가 보유합니다.\n" +
                 "씬에 Player GameObject를 추가하거나 Play 모드에서 실행하세요.",
                 MessageType.Warning);
         }
 
-        // 현재 LP 표시 (PlayerStats 우선, 없으면 0)
+        // 현재 SP 표시 (PlayerStats 우선, 없으면 0)
         EditorGUILayout.BeginVertical("box");
-        GUILayout.Label($"현재 LP: {GetSkillPoints()}", EditorStyles.largeLabel);
+        GUILayout.Label($"현재 SP: {GetSkillPoints()}", EditorStyles.largeLabel);
         EditorGUILayout.EndVertical();
 
         GUILayout.Space(10);
 
-        // LP 추가/제거
+        // SP 추가/제거
         EditorGUILayout.BeginHorizontal();
-        GUILayout.Label("추가할 LP:", GUILayout.Width(100));
+        GUILayout.Label("추가할 SP:", GUILayout.Width(100));
         pointsToAdd = EditorGUILayout.IntField(pointsToAdd, GUILayout.Width(50));
         EditorGUILayout.EndHorizontal();
 
@@ -84,20 +84,20 @@ public class LorePointManager : EditorWindow
 
         EditorGUILayout.BeginHorizontal();
 
-        if (GUILayout.Button($"LP +{pointsToAdd} 추가", GUILayout.Height(30)))
+        if (GUILayout.Button($"SP +{pointsToAdd} 추가", GUILayout.Height(30)))
         {
             int newValue = GetSkillPoints() + pointsToAdd;
             if (SetSkillPoints(newValue))
-                Debug.Log($"[LorePointManager] ✅ LP +{pointsToAdd} 추가! 현재 LP: {GetSkillPoints()}");
+                Debug.Log($"[LorePointManager] ✅ SP +{pointsToAdd} 추가! 현재 SP: {GetSkillPoints()}");
             else
                 Debug.LogWarning("[LorePointManager] PlayerStats 컴포넌트가 씬에 없어 적용 실패");
         }
 
-        if (GUILayout.Button($"LP -{pointsToAdd} 제거", GUILayout.Height(30)))
+        if (GUILayout.Button($"SP -{pointsToAdd} 제거", GUILayout.Height(30)))
         {
             int newValue = Mathf.Max(0, GetSkillPoints() - pointsToAdd);
             if (SetSkillPoints(newValue))
-                Debug.Log($"[LorePointManager] ✅ LP -{pointsToAdd} 제거! 현재 LP: {GetSkillPoints()}");
+                Debug.Log($"[LorePointManager] ✅ SP -{pointsToAdd} 제거! 현재 SP: {GetSkillPoints()}");
             else
                 Debug.LogWarning("[LorePointManager] PlayerStats 컴포넌트가 씬에 없어 적용 실패");
         }
@@ -111,28 +111,28 @@ public class LorePointManager : EditorWindow
 
         EditorGUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("LP = 0", GUILayout.Height(25)))
+        if (GUILayout.Button("SP = 0", GUILayout.Height(25)))
         {
             if (SetSkillPoints(0))
-                Debug.Log("[LorePointManager] ✅ LP = 0으로 설정!");
+                Debug.Log("[LorePointManager] ✅ SP = 0으로 설정!");
         }
 
-        if (GUILayout.Button("LP = 1", GUILayout.Height(25)))
+        if (GUILayout.Button("SP = 1", GUILayout.Height(25)))
         {
             if (SetSkillPoints(1))
-                Debug.Log("[LorePointManager] ✅ LP = 1로 설정! (Basic Swordsmanship 배울 수 있음)");
+                Debug.Log("[LorePointManager] ✅ SP = 1로 설정! (Basic Swordsmanship 배울 수 있음)");
         }
 
-        if (GUILayout.Button("LP = 3", GUILayout.Height(25)))
+        if (GUILayout.Button("SP = 3", GUILayout.Height(25)))
         {
             if (SetSkillPoints(3))
-                Debug.Log("[LorePointManager] ✅ LP = 3으로 설정!");
+                Debug.Log("[LorePointManager] ✅ SP = 3으로 설정!");
         }
 
-        if (GUILayout.Button("LP = 6", GUILayout.Height(25)))
+        if (GUILayout.Button("SP = 6", GUILayout.Height(25)))
         {
             if (SetSkillPoints(6))
-                Debug.Log("[LorePointManager] ✅ LP = 6으로 설정! (Tier 1 전부 배울 수 있음)");
+                Debug.Log("[LorePointManager] ✅ SP = 6으로 설정! (Tier 1 전부 배울 수 있음)");
         }
 
         EditorGUILayout.EndHorizontal();
@@ -145,7 +145,7 @@ public class LorePointManager : EditorWindow
 
         if (GUILayout.Button("🔄 스킬 트리 리셋 (배운 스킬 모두 삭제)", GUILayout.Height(30)))
         {
-            if (EditorUtility.DisplayDialog("스킬 트리 리셋", "정말로 배운 스킬을 모두 삭제하시겠습니까?\n\nLP는 유지됩니다.", "리셋", "취소"))
+            if (EditorUtility.DisplayDialog("스킬 트리 리셋", "정말로 배운 스킬을 모두 삭제하시겠습니까?\n\nSP는 유지됩니다.", "리셋", "취소"))
             {
                 if (playerStatData.learnedSkills != null)
                 {
@@ -158,9 +158,9 @@ public class LorePointManager : EditorWindow
             }
         }
 
-        if (GUILayout.Button("🗑️ 완전 리셋 (LP + 배운 스킬 모두 삭제)", GUILayout.Height(30)))
+        if (GUILayout.Button("🗑️ 완전 리셋 (SP + 배운 스킬 모두 삭제)", GUILayout.Height(30)))
         {
-            if (EditorUtility.DisplayDialog("완전 리셋", "정말로 LP와 배운 스킬을 모두 삭제하시겠습니까?", "리셋", "취소"))
+            if (EditorUtility.DisplayDialog("완전 리셋", "정말로 SP와 배운 스킬을 모두 삭제하시겠습니까?", "리셋", "취소"))
             {
                 SetSkillPoints(0);
                 if (playerStatData.learnedSkills != null)

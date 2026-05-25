@@ -519,9 +519,16 @@ MonoBehaviour:
   _fallbackCurrentHP: 0
   _fallbackCurrentMP: 0
   _fallbackLevel: 1
-  _fallbackExp: 99
+  _fallbackExp: 95
   _fallbackFreeStatPoints: 0
   _fallbackSkillPoints: 0
+  _fallbackBaseHP: 0
+  _fallbackBaseMP: 0
+  _fallbackBaseAttack: 0
+  _fallbackBaseDefense: 0
+  _fallbackBaseMagic: 0
+  _fallbackBaseAgility: 0
+  _fallbackBaseLuck: 0
   playerName: Hero
   characterClass: {fileID: 0}
   currentSlot: 1
@@ -4064,6 +4071,10 @@ MonoBehaviour:
   potionCountText: {fileID: 0}
   pageText: {fileID: 0}
   maxMessages: 50
+  messageTypingSpeed: 0.04
+  messageAdvanceKey: 32
+  messageAdvanceOnMouseClick: 1
+  messageSkipOnInput: 1
   player: {fileID: 1121858210}
   enemy: {fileID: 1624584570}
   potionCount: 2
@@ -10023,6 +10034,13 @@ MonoBehaviour:
   _fallbackExp: 0
   _fallbackFreeStatPoints: 0
   _fallbackSkillPoints: 0
+  _fallbackBaseHP: 0
+  _fallbackBaseMP: 0
+  _fallbackBaseAttack: 0
+  _fallbackBaseDefense: 0
+  _fallbackBaseMagic: 0
+  _fallbackBaseAgility: 0
+  _fallbackBaseLuck: 0
   playerName: Hero
   characterClass: {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
   currentSlot: 1

@@ -29,7 +29,7 @@ MonoBehaviour:
   luckBonus: -1
   hpBonus: 0
   mpBonus: 0
-  hpPerLevel: 8
+  hpPerLevel: 5
   mpPerLevel: 2
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0

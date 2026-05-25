@@ -75,6 +75,33 @@ public class BattleManager : MonoBehaviour
     [Tooltip("타이핑 중 입력 시 해당 줄 전체 즉시 표시(스킵)")]
     public bool messageSkipOnInput = true;
 
+    [Header("Advance Indicator (▼ 클릭 유도 — 텍스트 문자 방식)")]
+    [Tooltip("▼ 표시 자체 ON/OFF. 끄면 시퀀스 진행에 영향 없이 ▼만 안 뜸")]
+    public bool indicatorEnabled = true;
+
+    [Tooltip("사용할 문자. 기본 '▼'. ▽ ▶ ▷ 등으로 바꿔도 됨")]
+    public string indicatorChar = "▼";
+
+    [Tooltip("깜빡임 1주기(초). 작을수록 빠르게 깜빡. on/off 토글 간격")]
+    [Range(0.05f, 2f)]
+    public float indicatorBlinkInterval = 0.4f;
+
+    [Tooltip("위아래 움직임 ON/OFF. 끄면 제자리에서 깜빡임만")]
+    public bool indicatorBobEnabled = true;
+
+    [Tooltip("위아래 움직임 진폭(px). indicatorBobEnabled가 켜져 있을 때만 적용")]
+    [Range(0f, 20f)]
+    public float indicatorBobAmplitude = 4f;
+
+    [Tooltip("위아래 움직임 속도. 클수록 빠르게 흔들림(라디안/초)")]
+    [Range(0.5f, 10f)]
+    public float indicatorBobSpeed = 3f;
+
+    [Header("Post-Sequence Delay (시퀀스 종료 후 추가 대기)")]
+    [Tooltip("레벨업 시퀀스 모든 줄 클릭 완료 후, 맵 복귀 전 추가 대기(초). 사용자 요청 '페이드아웃' 시간 역할")]
+    [Range(0f, 5f)]
+    public float postSequenceFadeDelay = 3.0f;
+
     [Header("Battle System")]
     public PlayerStats player;
     public EnemyStats enemy;
@@ -1872,7 +1899,7 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ReturnToDungeonRoutine(float delay)
     {
         var gm = GameManager.EnsureInstance();
-        Debug.Log($"[BM:DIAG] ReturnToDungeonRoutine START | activePartyMembers.Count={activePartyMembers.Count} | GM={(gm != null ? "exists" : "NULL")}");
+        Debug.Log($"[BM:DIAG] ReturnToDungeonRoutine START | activePartyMembers.Count={activePartyMembers.Count} | GM={(gm != null ? "exists" : "NULL")} | delay={delay}, IsPlayingMessageSequence={IsPlayingMessageSequence}");
         foreach (var member in activePartyMembers)
         {
             if (member != null)
@@ -1887,7 +1914,30 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(delay);
+        // [2026-05-24] 복귀 타이머 분기:
+        //   - 레벨업 메시지 시퀀스 진행 중 → 자동 delay 타이머 무시, 시퀀스 끝까지 대기
+        //     → 시퀀스 종료 후 postSequenceFadeDelay 초 추가 대기(페이드아웃 시간 대용) → 씬 전환
+        //   - 시퀀스 없으면 → 기존대로 delay 초 대기 후 씬 전환
+        bool wasPlayingSequence = IsPlayingMessageSequence;
+        if (wasPlayingSequence)
+        {
+            Debug.Log("[BattleManager] 레벨업 시퀀스 진행 중 — 자동 복귀 타이머 무시, 시퀀스 완료까지 대기");
+            while (IsPlayingMessageSequence)
+            {
+                yield return null;
+            }
+            Debug.Log($"[BattleManager] 시퀀스 완료 감지 — postSequenceFadeDelay {postSequenceFadeDelay}s 추가 대기");
+            if (postSequenceFadeDelay > 0f)
+            {
+                yield return new WaitForSeconds(postSequenceFadeDelay);
+            }
+            Debug.Log("[BattleManager] 추가 대기 종료 — 씬 전환 진행");
+        }
+        else
+        {
+            Debug.Log($"[BattleManager] 시퀀스 없음 — 기존대로 {delay}s 자동 대기");
+            yield return new WaitForSeconds(delay);
+        }
 
         // [SAFETY NET 2026-05-11] 씬 전환 직전 강제 저장 — delay 사이 EXP/HP가 외부 코드로 변경됐을 가능성 보완
         Debug.Log($"[BM:DIAG] FORCE SAVE before scene transition (after delay={delay}s)");
@@ -5729,6 +5779,22 @@ public class BattleManager : MonoBehaviour
         if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
     }
 
+    /// <summary>
+    /// 메시지 박스 전체 비움. messageQueue와 messageText를 모두 클리어.
+    /// 레벨업 시퀀스가 빈 화면에서 시작되도록 호출.
+    /// </summary>
+    public void ClearMessages()
+    {
+        messageQueue.Clear();
+        if (messageText != null)
+        {
+            messageText.text = "";
+            messageText.maxVisibleCharacters = int.MaxValue;
+        }
+        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+        Debug.Log("[BattleManager] ClearMessages: 메시지 박스 비움");
+    }
+
     // -------------------- 순차 메시지 (Dragon Quest 스타일) --------------------
     // 줄별 타이핑 효과 + 한 줄 끝나면 클릭/키 대기 → 다음 줄.
     // 모든 줄 완료 시 onComplete 콜백 호출. messageText 컴포넌트 재사용.
@@ -5787,6 +5853,87 @@ public class BattleManager : MonoBehaviour
             StopCoroutine(_sequenceRoutine);
             _sequenceRoutine = null;
             if (messageText != null) messageText.maxVisibleCharacters = int.MaxValue;
+            HideAdvanceIndicator();
+        }
+    }
+
+    // -------------------- Advance Indicator (▼ 텍스트 문자 방식) --------------------
+    // 별도 GameObject 없이 messageText의 끝에 ▼ 글자를 매 프레임 append.
+    // bob 움직임은 TMP의 <voffset> 태그로 처리. 깜빡임은 글자 추가/제거 토글.
+    // 본문은 _indicatorBaseText에 보존되어 매 프레임 복원되므로 시퀀스 텍스트 충돌 없음.
+    private Coroutine _indicatorRoutine;
+    private string _indicatorBaseText = "";       // 인디케이터 표시 전 본문 텍스트(매 프레임 이 위에 ▼ 덧붙임)
+    private int _indicatorBaseMaxVisible = int.MaxValue;
+    private bool _indicatorActive = false;
+
+    /// <summary>인디케이터 표시 + 깜빡임/bob 애니메이션 시작. 현재 messageText 본문을 base로 캐시.</summary>
+    private void ShowAdvanceIndicator()
+    {
+        if (!indicatorEnabled || messageText == null) return;
+        if (_indicatorActive) HideAdvanceIndicator(); // 중복 시작 방지
+
+        _indicatorBaseText = messageText.text;
+        _indicatorBaseMaxVisible = messageText.maxVisibleCharacters;
+        // 인디케이터 표시 중엔 본문 + ▼ 둘 다 보여야 하므로 가시 제한 해제
+        messageText.maxVisibleCharacters = int.MaxValue;
+        _indicatorActive = true;
+        if (_indicatorRoutine != null) StopCoroutine(_indicatorRoutine);
+        _indicatorRoutine = StartCoroutine(IndicatorAnimationRoutine());
+    }
+
+    /// <summary>인디케이터 숨김 + 애니메이션 중단 + 본문 복원.</summary>
+    private void HideAdvanceIndicator()
+    {
+        if (_indicatorRoutine != null)
+        {
+            StopCoroutine(_indicatorRoutine);
+            _indicatorRoutine = null;
+        }
+        if (_indicatorActive && messageText != null)
+        {
+            messageText.text = _indicatorBaseText;
+            messageText.maxVisibleCharacters = _indicatorBaseMaxVisible;
+        }
+        _indicatorActive = false;
+    }
+
+    /// <summary>매 프레임 본문 + ▼(옵션: voffset bob)을 다시 그려 깜빡임+움직임 효과.</summary>
+    private System.Collections.IEnumerator IndicatorAnimationRoutine()
+    {
+        float startTime = Time.unscaledTime;
+        float blinkTimer = 0f;
+        bool visiblePhase = true;
+
+        while (true)
+        {
+            float elapsed = Time.unscaledTime - startTime;
+
+            // visible phase일 때만 ▼ 표시. 비가시 phase는 본문만.
+            string suffix = "";
+            if (visiblePhase)
+            {
+                if (indicatorBobEnabled && indicatorBobAmplitude > 0f)
+                {
+                    float bob = Mathf.Sin(elapsed * indicatorBobSpeed) * indicatorBobAmplitude;
+                    // TMP voffset는 em 단위가 아닌 픽셀(혹은 폰트 크기 단위) — 일반적으로 px 작동
+                    suffix = $"  <voffset={bob:0.00}>{indicatorChar}</voffset>";
+                }
+                else
+                {
+                    suffix = $"  {indicatorChar}";
+                }
+            }
+
+            if (messageText != null) messageText.text = _indicatorBaseText + suffix;
+
+            blinkTimer += Time.unscaledDeltaTime;
+            if (blinkTimer >= indicatorBlinkInterval)
+            {
+                blinkTimer = 0f;
+                visiblePhase = !visiblePhase;
+            }
+
+            yield return null;
         }
     }
 
@@ -5794,13 +5941,43 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Log($"[SeqMsg-DIAG] SequenceRoutine 진입. 처리할 줄 수={lines.Count}");
 
-        // 기존 누적 로그 백업 — 시퀀스 동안 깔끔하게 점유 후 복원
-        string backup = messageText.text;
-        int backupMaxVisible = messageText.maxVisibleCharacters;
-        Debug.Log($"[SeqMsg-DIAG] 백업 저장. backup.Length={backup.Length}, backupMaxVisible={backupMaxVisible}");
-        messageText.text = "";
+        // [2026-05-24] 흐름 재구성:
+        //   1) 기존 누적 메시지(승리/EXP 등)를 그대로 보여준 채 ▼ 표시 + 클릭 대기 1회
+        //   2) 클릭 → ClearMessages → 빈 화면에서 시퀀스 시작
+        //   3) 줄별 타이핑 + 클릭 대기 (기존)
+        // 이전 누적(append) 모드는 폐기 — 사용자 요청: 시퀀스는 항상 빈 화면 첫 줄부터.
+
+        HideAdvanceIndicator();
         messageText.maxVisibleCharacters = int.MaxValue;
 
+        // ──────── 단계 1: 사전 메시지 확인 클릭 대기 ────────
+        // 화면에 이미 표시된 메시지("All enemies defeated!" / "Victory! ...")를
+        // 사용자가 충분히 본 뒤 클릭으로 넘기게 함.
+        bool hasPriorMessages = !string.IsNullOrEmpty(messageText.text);
+        if (hasPriorMessages)
+        {
+            Debug.Log("[SeqMsg-DIAG] 사전 메시지 존재 — ▼ 표시 + 클릭 대기 (clear 직전)");
+            yield return null; // 직전 입력 잔향 회피
+            ShowAdvanceIndicator();
+            int preClearWait = 0;
+            while (!IsAdvanceInputPressedThisFrame())
+            {
+                preClearWait++;
+                yield return null;
+            }
+            HideAdvanceIndicator();
+            Debug.Log($"[SeqMsg-DIAG] 사전 메시지 확인 클릭 감지 ({preClearWait} 프레임 대기)");
+        }
+        else
+        {
+            Debug.Log("[SeqMsg-DIAG] 사전 메시지 없음 — clear 단계 스킵");
+        }
+
+        // ──────── 단계 2: 메시지 박스 비움 ────────
+        ClearMessages();
+        messageText.maxVisibleCharacters = int.MaxValue;
+
+        // accumulated는 빈 문자열에서 시작 → 시퀀스 첫 줄이 화면 맨 위에 옴
         string accumulated = "";
 
         for (int li = 0; li < lines.Count; li++)
@@ -5858,20 +6035,21 @@ public class BattleManager : MonoBehaviour
             if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
             Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} 타이핑 완료. messageText.text(첫 80자)=\"{(messageText.text.Length > 80 ? messageText.text.Substring(0, 80) + "..." : messageText.text)}\"");
 
-            // 줄 완료 — 마지막 줄이면 입력 대기 없이 콜백으로 (호출자가 결과 화면 닫기)
-            // 중간 줄이면 다음 줄로 진행할 입력 대기
+            // 줄 완료 — 마지막 줄이면 마지막 확인 대기, 아니면 다음 줄 진행 대기
             bool isLastLine = (li == lines.Count - 1);
             if (!isLastLine)
             {
                 Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} → 다음 줄 진행 입력 대기 시작 (Key={messageAdvanceKey}, MouseClick={messageAdvanceOnMouseClick})");
                 // 직전 스킵 입력의 잔향을 피해 한 프레임 대기
                 if (skipped) yield return null;
+                ShowAdvanceIndicator(); // ▼ 표시 시작
                 int waitFrames = 0;
                 while (!IsAdvanceInputPressedThisFrame())
                 {
                     waitFrames++;
                     yield return null;
                 }
+                HideAdvanceIndicator(); // 입력 감지 → ▼ 즉시 숨김
                 Debug.Log($"[SeqMsg-DIAG] 줄 #{li + 1} 입력 감지! {waitFrames} 프레임 대기 후 다음 줄로 진행");
             }
             else
@@ -5886,17 +6064,19 @@ public class BattleManager : MonoBehaviour
         Debug.Log("[SeqMsg-DIAG] 모든 줄 출력 완료. 최종 확인 입력 대기 시작");
         // 직전 스킵/진행 입력의 잔향을 피해 한 프레임 대기
         yield return null;
+        ShowAdvanceIndicator(); // 마지막 줄에도 ▼ 표시
         int finalWait = 0;
         while (!IsAdvanceInputPressedThisFrame())
         {
             finalWait++;
             yield return null;
         }
-        Debug.Log($"[SeqMsg-DIAG] 최종 입력 감지! {finalWait} 프레임 대기 후 백업 복원");
+        HideAdvanceIndicator();
+        Debug.Log($"[SeqMsg-DIAG] 최종 입력 감지! {finalWait} 프레임 대기");
 
-        // 백업 복원 — 전투 로그가 다시 보이게
-        messageText.text = backup;
-        messageText.maxVisibleCharacters = backupMaxVisible == 0 ? int.MaxValue : backupMaxVisible;
+        // 시퀀스 출력은 그대로 화면에 남음 (사용자가 마지막 클릭 직후 페이드아웃 대기 동안 메시지 확인).
+        // messageText.text는 모든 시퀀스 줄이 포함된 상태(=accumulated). 가시 제한만 해제.
+        messageText.maxVisibleCharacters = int.MaxValue;
         if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
 
         _sequenceRoutine = null;

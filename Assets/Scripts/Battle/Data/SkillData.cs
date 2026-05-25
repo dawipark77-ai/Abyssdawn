@@ -401,7 +401,7 @@ namespace AbyssdawnBattle
         [Tooltip("이 스킬을 배우기 위해 필요한 선행 스킬들")]
         public List<SkillData> prerequisiteSkills = new List<SkillData>();
 
-        [Tooltip("이 스킬을 배우는 데 필요한 LP(Lore Point)")]
+        [Tooltip("이 스킬을 배우는 데 필요한 SP(Skill Point)")]
         public int requiredLorePoints = 1;
 
         // Legacy compatibility properties (for BattleManager refactoring transition)

@@ -144,7 +144,7 @@ public static class NewSkillTreeSetupTool
         SetAnchored(lpT, ScreenW * 0.5f, 5f, ScreenW * 0.45f, InfoBarH - 10f);
         var lpTmp = lpT.gameObject.GetComponent<TextMeshProUGUI>();
         if (lpTmp == null) lpTmp = lpT.gameObject.AddComponent<TextMeshProUGUI>();
-        lpTmp.text = "LP  0"; lpTmp.fontSize = 26; lpTmp.color = new Color(0.9f, 0.8f, 0.3f, 1f);
+        lpTmp.text = "SP  0"; lpTmp.fontSize = 26; lpTmp.color = new Color(0.9f, 0.8f, 0.3f, 1f);
         lpTmp.alignment = TextAlignmentOptions.MidlineLeft;
 
         var closeBtn = CreateButton("Close_Btn", infoBar,
@@ -395,7 +395,7 @@ public static class NewSkillTreeSetupTool
     {
         var (_, t0) = BuildStatCell(parent, "Damage",    x,               y, cellW, h, "배율\n—");
         var (_, t1) = BuildStatCell(parent, "MP",        x + cellW,       y, cellW, h, "MP\n0");
-        var (_, t2) = BuildStatCell(parent, "LP",        x + cellW * 2f,  y, cellW, h, "LP\n0");
+        var (_, t2) = BuildStatCell(parent, "LP",        x + cellW * 2f,  y, cellW, h, "SP\n0");
         var (_, t3) = BuildStatCell(parent, "Hits",      x + cellW * 3f,  y, cellW, h, "타\n1");
         return (t0, t1, t2, t3);
     }

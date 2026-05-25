@@ -85,12 +85,12 @@ public class SwordSkillTreeSetup : EditorWindow
             psInScene.skillPoints = 1;
             EditorUtility.SetDirty(psInScene);
             currentLp = 1;
-            Debug.Log("[SwordSkillTreeSetup] PlayerStats(씬 컴포넌트)에 초기 LP 1개 설정 완료!");
+            Debug.Log("[SwordSkillTreeSetup] PlayerStats(씬 컴포넌트)에 초기 SP 1개 설정 완료!");
         }
 
         EditorUtility.DisplayDialog(
             "설정 완료!",
-            $"Sword Lore 스킬 트리 설정 완료!\n\n✓ {setupCount}개의 스킬 노드 연결\n✓ 선행 스킬 관계 설정 (SO 기반)\n✓ PlayerStatData 연결\n✓ 현재 LP: {currentLp}개\n\n게임을 실행하여 테스트해보세요!\n\n추가 도구:\n• LP 관리: Tools > Skill Tree > Manage Lore Points\n• SO 선행 스킬 설정: Tools > Skill Tree > Setup Sword Skill Prerequisites (SO)",
+            $"Sword Lore 스킬 트리 설정 완료!\n\n✓ {setupCount}개의 스킬 노드 연결\n✓ 선행 스킬 관계 설정 (SO 기반)\n✓ PlayerStatData 연결\n✓ 현재 SP: {currentLp}개\n\n게임을 실행하여 테스트해보세요!\n\n추가 도구:\n• SP 관리: Tools > Skill Tree > Manage Skill Points\n• SO 선행 스킬 설정: Tools > Skill Tree > Setup Sword Skill Prerequisites (SO)",
             "확인"
         );
     }
