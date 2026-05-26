@@ -76,6 +76,7 @@ public class NewSkillDetailPopup : MonoBehaviour
     /// <param name="onLearn">습득 버튼 클릭 시 호출할 콜백</param>
     public void Show(SkillData data, NewSkillTreeUI.NodeState state, Action onLearn)
     {
+        Debug.Log($"[Learn-DIAG] [Popup] Show 진입 — skill='{(data != null ? data.skillName : "NULL")}', state={state}, onLearn callback={(onLearn == null ? "NULL" : "OK")}");
         _onLearnCallback = onLearn;
         PopulateInfo(data, state);
 
@@ -84,6 +85,7 @@ public class NewSkillDetailPopup : MonoBehaviour
 
         if (_slideCoroutine != null) StopCoroutine(_slideCoroutine);
         _slideCoroutine = StartCoroutine(Slide(true));
+        Debug.Log("[Learn-DIAG] [Popup] Show 완료 — 슬라이드 애니메이션 시작");
     }
 
     public void Hide()
@@ -147,10 +149,16 @@ public class NewSkillDetailPopup : MonoBehaviour
 
     private void SetLearnButton(NewSkillTreeUI.NodeState state)
     {
-        if (learnButton == null) return;
+        Debug.Log($"[Learn-DIAG] [Popup] SetLearnButton 진입 — state={state}, learnButton={(learnButton == null ? "NULL" : learnButton.name)}");
+        if (learnButton == null)
+        {
+            Debug.LogError("[Learn-DIAG] [Popup] ✗ learnButton == NULL → Inspector에 Learn Button 연결 필요. 학습 불가");
+            return;
+        }
 
         bool learned   = state == NewSkillTreeUI.NodeState.Learned;
         bool available = state == NewSkillTreeUI.NodeState.Available;
+        Debug.Log($"[Learn-DIAG] [Popup] state 분석: learned={learned}, available={available} → button interactable={available}");
 
         learnButton.interactable = available;
 
@@ -167,9 +175,16 @@ public class NewSkillDetailPopup : MonoBehaviour
         {
             learnButton.onClick.AddListener(() =>
             {
+                Debug.Log($"[Learn-DIAG] [Popup] *** Learn 버튼 onClick lambda 실행 *** callback={(_onLearnCallback == null ? "NULL" : "OK")}");
                 _onLearnCallback?.Invoke();
+                Debug.Log("[Learn-DIAG] [Popup] callback 호출 완료 → Hide() 호출");
                 Hide();
             });
+            Debug.Log("[Learn-DIAG] [Popup] ✓ Learn 버튼 onClick listener 등록됨 (available=true)");
+        }
+        else
+        {
+            Debug.LogWarning($"[Learn-DIAG] [Popup] ⚠ available=false → Learn 버튼 listener 등록 안 됨. 클릭해도 아무 동작 안 함. state={state}");
         }
     }
 

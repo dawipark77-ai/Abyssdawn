@@ -3,20 +3,36 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Status 버튼에 부착하여 PlayerStats.FreeStatPoints > 0 일 때 황금빛 테두리를 표시.
-/// 별도 황금빛 테두리 이미지 GameObject를 Inspector에서 연결받아 SetActive 토글 + alpha 깜빡임.
+/// 메뉴 버튼에 부착하여 PlayerStats의 특정 포인트(FreeStatPoints 또는 skillPoints)가
+/// 0보다 클 때 황금빛 테두리를 표시. 별도 황금빛 테두리 이미지 GameObject를 Inspector에서
+/// 연결받아 SetActive 토글 + alpha 깜빡임.
+///
+/// 클래스명은 역사적 이유로 StatusButtonGlowEffect 유지(씬/프리팹 참조 보존).
+/// 실제로는 Status, Skills 등 여러 버튼에 재사용 가능 — Watched Stat enum으로 어느 포인트를 볼지 선택.
 ///
 /// 사용 방법:
-///   1) Status 버튼 자식으로 GoldenBorder Image GameObject 생성 (황금색 스프라이트, 버튼 위에 겹치도록 배치).
-///   2) Status 버튼 GameObject에 이 컴포넌트 부착.
-///   3) Inspector의 Golden Border 필드에 자식 GoldenBorder 드래그.
+///   1) 버튼 자식으로 GoldenBorder Image GameObject 생성 (황금색 스프라이트, 버튼 위에 겹치도록 배치).
+///   2) 버튼 GameObject에 이 컴포넌트 부착.
+///   3) Inspector:
+///      - Golden Border 필드에 자식 GoldenBorder 드래그
+///      - Watched Stat을 선택 (Status 버튼=FreeStatPoints, Skills 버튼=SkillPoints)
 ///   4) blink 관련 값은 기본값으로 시작, 취향대로 조정.
 /// </summary>
 public class StatusButtonGlowEffect : MonoBehaviour
 {
+    /// <summary>어느 PlayerStats 포인트를 감시할지 선택. 기본값은 FreeStatPoints(=Status 버튼 기존 동작 호환).</summary>
+    public enum WatchedStat
+    {
+        FreeStatPoints,  // 자유 스탯 포인트 (Status 버튼용)
+        SkillPoints,     // 스킬 포인트(SP) (Skills 버튼용)
+    }
+
     [Header("Glow Target")]
-    [Tooltip("FreeStatPoints > 0일 때 표시할 황금빛 테두리 이미지 GameObject. 비워두면 동작 안 함.")]
+    [Tooltip("해당 포인트 > 0일 때 표시할 황금빛 테두리 이미지 GameObject. 비워두면 동작 안 함.")]
     public GameObject goldenBorder;
+
+    [Tooltip("감시할 포인트 종류. Status 버튼=FreeStatPoints, Skills 버튼=SkillPoints")]
+    public WatchedStat watchedStat = WatchedStat.FreeStatPoints;
 
     [Header("Blink Animation")]
     [Tooltip("깜빡임 ON/OFF. 끄면 maxAlpha로 고정 표시")]
@@ -103,9 +119,17 @@ public class StatusButtonGlowEffect : MonoBehaviour
             Debug.Log($"[Glow-DIAG] PlayerStats 발견: name='{player.playerName}', InstanceID={player.GetInstanceID()}, scene='{player.gameObject.scene.name}'");
         }
 
-        int free = (player != null) ? player.FreeStatPoints : 0;
-        bool shouldGlow = free > 0;
-        Debug.Log($"[Glow-DIAG] FreeStatPoints={free} → shouldGlow={shouldGlow}");
+        int pointValue = 0;
+        if (player != null)
+        {
+            switch (watchedStat)
+            {
+                case WatchedStat.FreeStatPoints: pointValue = player.FreeStatPoints; break;
+                case WatchedStat.SkillPoints:    pointValue = player.skillPoints;    break;
+            }
+        }
+        bool shouldGlow = pointValue > 0;
+        Debug.Log($"[Glow-DIAG] watchedStat={watchedStat}, value={pointValue} → shouldGlow={shouldGlow}");
 
         if (shouldGlow)
         {
