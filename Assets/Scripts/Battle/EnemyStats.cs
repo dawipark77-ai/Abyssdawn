@@ -29,6 +29,11 @@ public class StatusEffectInstance
 
 public class EnemyStats : MonoBehaviour
 {
+    // [2026-05-24] 영입 시스템용 — 이 적의 출처 MonsterSO 참조.
+    // Init(MonsterSO)에서 자동 채워짐. 사망 시 BattleManager가 이 참조로
+    // CompanionChance/CompanionData를 조회하여 영입 판정.
+    [HideInInspector] public MonsterSO sourceMonster;
+
     [Header("Base Stats")]
     public string enemyName = "";
     public int maxHP = 0;
@@ -134,6 +139,7 @@ public class EnemyStats : MonoBehaviour
             return;
         }
 
+        sourceMonster = so; // [2026-05-24] 영입 시스템: 출처 SO 참조 보관
         enemyName    = so.MonsterName;
         maxHP        = so.HP;
         currentHP    = so.HP;
@@ -610,6 +616,12 @@ public class EnemyStats : MonoBehaviour
         {
             statusUI.SetActive(false);
         }
+
+        // [2026-05-24] 영입 시스템: BattleManager에게 "이 적이 마지막에 죽음" 알림.
+        // 전투 종료 시 BattleManager가 _lastDefeatedEnemy로 영입 후보 1마리를 선정.
+        // BattleManager 싱글톤 없으므로 씬 인스턴스 조회 (전투 씬에 1개만 존재 가정).
+        var bm = FindFirstObjectByType<AbyssdawnBattle.BattleManager>();
+        if (bm != null) bm.NotifyEnemyDied(this);
     }
 
     // World Space UI 생성 (public으로 변경하여 외부에서 호출 가능)

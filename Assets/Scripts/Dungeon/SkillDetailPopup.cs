@@ -115,27 +115,32 @@ public class SkillDetailPopup : MonoBehaviour
     /// </summary>
     private void OnLearnButtonClicked()
     {
-        Debug.Log("[SkillDetailPopup] 🔘 Learn 버튼 클릭 감지!");
-        
+        Debug.Log("[Learn-DIAG] [SkillDetailPopup] *** OnLearnButtonClicked 진입 *** (Learn 버튼 onClick 도달)");
+
         if (currentNode == null)
         {
-            Debug.LogError("[SkillDetailPopup] ❌ currentNode가 null입니다!");
+            Debug.LogError("[Learn-DIAG] [SkillDetailPopup] ✗ currentNode == NULL → early return. Show 시점에 node 전달 누락 가능");
             return;
         }
-        
+        Debug.Log($"[Learn-DIAG] [SkillDetailPopup] currentNode OK: '{currentNode.name}', skill='{(currentNode.GetSkillData() != null ? currentNode.GetSkillData().skillName : "NULL")}'");
+
         // SwordSkillTreeManager 찾기
         SwordSkillTreeManager manager = FindObjectOfType<SwordSkillTreeManager>();
         if (manager == null)
         {
-            Debug.LogError("[SkillDetailPopup] ❌ SwordSkillTreeManager를 찾을 수 없습니다!");
+            Debug.LogError("[Learn-DIAG] [SkillDetailPopup] ✗ SwordSkillTreeManager == NULL → 씬에 매니저 없음. 학습 불가");
             return;
         }
-        
+        Debug.Log($"[Learn-DIAG] [SkillDetailPopup] SwordSkillTreeManager 발견: '{manager.gameObject.name}', InstanceID={manager.GetInstanceID()}");
+
         // 스킬 배우기 시도
+        Debug.Log("[Learn-DIAG] [SkillDetailPopup] → TryLearnSkill 호출");
         manager.TryLearnSkill(currentNode);
-        
+        Debug.Log("[Learn-DIAG] [SkillDetailPopup] ← TryLearnSkill 반환");
+
         // 스킬 정보 새로고침 (상태 변경 반영)
         UpdateSkillInfo();
+        Debug.Log("[Learn-DIAG] [SkillDetailPopup] UpdateSkillInfo 호출 완료");
     }
     
     /// <summary>
@@ -176,7 +181,7 @@ public class SkillDetailPopup : MonoBehaviour
         {
             isPanelOpen = popupPanel.activeSelf;
         }
-        
+
         // ESC 키로 닫기
         if (enableEscapeKey && Input.GetKeyDown(KeyCode.Escape))
         {
@@ -185,42 +190,12 @@ public class SkillDetailPopup : MonoBehaviour
                 ClosePopup();
             }
         }
-        
-        // 팝업 외부 클릭 감지
-        if (isPanelOpen && Input.GetMouseButtonDown(0))
-        {
-            // 팝업 외부를 클릭했는지 확인
-            if (!IsPointerOverPopup())
-            {
-                Debug.Log("[SkillDetailPopup] 🔘 팝업 외부 클릭 감지! → 팝업 닫기");
-                ClosePopup();
-            }
-        }
-    }
-    
-    /// <summary>
-    /// 마우스 포인터가 팝업 위에 있는지 확인
-    /// </summary>
-    private bool IsPointerOverPopup()
-    {
-        if (popupPanel == null) return false;
-        
-        RectTransform rectTransform = popupPanel.GetComponent<RectTransform>();
-        if (rectTransform == null) return false;
-        
-        // 마우스 위치가 팝업 RectTransform 안에 있는지 확인
-        bool isOver = RectTransformUtility.RectangleContainsScreenPoint(
-            rectTransform, 
-            Input.mousePosition, 
-            null // Overlay Canvas는 null
-        );
-        
-        if (!isOver)
-        {
-            Debug.Log($"[SkillDetailPopup] 마우스가 팝업 외부에 있음 - 마우스 위치: {Input.mousePosition}");
-        }
-        
-        return isOver;
+
+        // [2026-05-24 D안] 팝업 외부 클릭 감지 제거.
+        // 이유: Canvas Render Mode가 Overlay가 아닐 경우 RectangleContainsScreenPoint(null)이
+        //       잘못된 결과를 반환하여 팝업 내부 클릭(Learn 버튼 등)도 외부로 오인 → ClosePopup 발동.
+        // 대안: 배경 Image의 Button.onClick → OnBackgroundClicked (Awake에서 등록됨).
+        //       Inspector에 backgroundImage 필드만 연결돼 있으면 배경 클릭만으로 닫기가 정상 작동.
     }
     
     /// <summary>

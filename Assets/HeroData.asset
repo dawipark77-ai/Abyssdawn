@@ -21,8 +21,8 @@ MonoBehaviour:
   baseLuck: 3
   currentJob: {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
   equippedSkills:
-  - {fileID: 11400000, guid: db0cc0a74e55b8647bf22681e22977a7, type: 2}
-  - {fileID: 11400000, guid: bb197b762ed42a04b9f049b8c69290df, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

@@ -227,40 +227,45 @@ public class SwordSkillTreeManager : MonoBehaviour
     /// </summary>
     public void TryLearnSkill(SkillTreeNode node)
     {
+        Debug.Log($"[Learn-DIAG] [SwordSkillTreeManager] === TryLearnSkill 진입 === node='{(node != null ? node.name : "NULL")}', skill='{(node != null && node.GetSkillData() != null ? node.GetSkillData().skillName : "NULL")}'");
+
         if (node == null || node.GetSkillData() == null)
         {
-            Debug.LogError("[SwordSkillTreeManager] 유효하지 않은 노드입니다.");
+            Debug.LogError("[Learn-DIAG] [SwordSkillTreeManager] ✗ 유효하지 않은 노드 → early return");
             return;
         }
-        
+
         SkillData skill = node.GetSkillData();
-        
+
         // 이미 배운 스킬인지 확인
         if (learnedSkillIDs.Contains(skill.skillID))
         {
-            Debug.LogWarning($"[SwordSkillTreeManager] {skill.skillName}은(는) 이미 배운 스킬입니다.");
+            Debug.LogWarning($"[Learn-DIAG] [SwordSkillTreeManager] ✗ '{skill.skillName}' 이미 배운 스킬 → early return. learnedSkillIDs.Count={learnedSkillIDs.Count}");
             return;
         }
-        
+
         // 배울 수 있는지 확인
         if (!node.CanLearn())
         {
-            Debug.LogWarning($"[SwordSkillTreeManager] {skill.skillName}을(를) 배울 수 없습니다.");
+            Debug.LogWarning($"[Learn-DIAG] [SwordSkillTreeManager] ✗ '{skill.skillName}' node.CanLearn()=false → early return. 선행 스킬 미충족 가능");
             return;
         }
-        
+
         // 스킬 포인트 확인
         int requiredPoints = node.requiredSkillPoints;
         int availablePoints = GetAvailableSkillPoints();
-        
+        Debug.Log($"[Learn-DIAG] [SwordSkillTreeManager] SP 체크: 필요={requiredPoints}, 보유={availablePoints}");
+
         if (availablePoints < requiredPoints)
         {
-            Debug.LogWarning($"[SwordSkillTreeManager] 스킬 포인트가 부족합니다. (필요: {requiredPoints}, 보유: {availablePoints})");
+            Debug.LogWarning($"[Learn-DIAG] [SwordSkillTreeManager] ✗ SP 부족 (필요: {requiredPoints}, 보유: {availablePoints}) → early return");
             return;
         }
-        
+
         // 스킬 배우기
+        Debug.Log($"[Learn-DIAG] [SwordSkillTreeManager] ✓ 모든 조건 통과 → LearnSkill('{skill.skillName}') 호출");
         LearnSkill(node);
+        Debug.Log($"[Learn-DIAG] [SwordSkillTreeManager] LearnSkill 반환. 잔여 SP={GetAvailableSkillPoints()}");
     }
     
     /// <summary>

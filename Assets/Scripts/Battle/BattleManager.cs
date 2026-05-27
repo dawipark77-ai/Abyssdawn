@@ -61,6 +61,15 @@ public class BattleManager : MonoBehaviour
     [Header("Battle Settings")]
     public int maxMessages = 50;
 
+    [Header("Monster Recruit (1차 구현)")]
+    [Tooltip("최대 활성 동료 수 (Hero 제외, 전투 슬롯 점유)")]
+    [Range(1, 10)]
+    public int maxActiveCompanions = 3;
+
+    [Tooltip("최대 대기열(후보) 동료 수. 활성 슬롯 꽉 차면 여기에 보관")]
+    [Range(0, 10)]
+    public int maxCompanionWaitlist = 3;
+
     [Header("Sequential Message (Dragon Quest 스타일 레벨업 연출)")]
     [Tooltip("한 글자가 나타나는 간격(초). 작을수록 빠름. 권장 0.02~0.08")]
     [Range(0.005f, 0.3f)]
@@ -123,6 +132,11 @@ public class BattleManager : MonoBehaviour
     public PlayerStatData playerStatData;
 
     private Queue<string> messageQueue = new Queue<string>();
+
+    // [2026-05-24] 영입 시스템 (1차) — Warrior/Rogue/Wizard 시스템과 별개
+    private List<PlayerStats> _companionInstances = new List<PlayerStats>();   // 활성 동료 (max maxActiveCompanions)
+    private List<Abyssdawn.CompanionSO> _companionWaitlist = new List<Abyssdawn.CompanionSO>();  // 대기열 (max maxCompanionWaitlist)
+    private EnemyStats _lastDefeatedEnemy;                                     // EnemyStats.HandleDeath가 갱신
     public bool playerTurn = true;
 
     [Header("RPG Percent Settings")]
@@ -5758,6 +5772,143 @@ public class BattleManager : MonoBehaviour
         bool hit = roll < final;
         Debug.Log($"[HIT] {attacker.enemyName} → {target.playerName}(슬롯{(int)target.currentSlot}): 스킬accuracy={sa}, 슬롯보정={sl}, 최종={final}, 결과={(hit ? "hit" : "miss")}");
         return hit;
+    }
+
+    // -------------------- 영입 시스템 (1차) --------------------
+    // 정책: 활성 동료 max maxActiveCompanions(=3), 대기열 max maxCompanionWaitlist(=3).
+    // 후보: 마지막에 죽은 적 1마리. EnemyStats.HandleDeath → NotifyEnemyDied가 갱신.
+    // 동료 레벨업 없음 (CompanionSO 고정 스탯). UI 없음 — 콘솔 로그만.
+    // Warrior/Rogue/Wizard 하드코딩 동료 시스템과 별개 컬렉션.
+
+    /// <summary>EnemyStats.HandleDeath가 호출. 마지막 사망 적 갱신.</summary>
+    public void NotifyEnemyDied(EnemyStats enemy)
+    {
+        _lastDefeatedEnemy = enemy;
+        Debug.Log($"[Recruit] 마지막 사망 적 갱신: '{(enemy != null ? enemy.enemyName : "NULL")}' (sourceMonster={(enemy != null && enemy.sourceMonster != null ? enemy.sourceMonster.MonsterName : "NULL")})");
+    }
+
+    /// <summary>승리 시점에 마지막 죽은 적 1마리로 영입 판정. 콘솔 로그만, UI 없음.</summary>
+    private void TryRecruitLastDefeatedMonster()
+    {
+        Debug.Log("[Recruit] === TryRecruitLastDefeatedMonster 진입 ===");
+        if (_lastDefeatedEnemy == null)
+        {
+            Debug.Log("[Recruit] _lastDefeatedEnemy == NULL → 영입 판정 스킵");
+            return;
+        }
+        var so = _lastDefeatedEnemy.sourceMonster;
+        if (so == null)
+        {
+            Debug.LogWarning($"[Recruit] '{_lastDefeatedEnemy.enemyName}' sourceMonster == NULL → 영입 판정 스킵 (Init이 MonsterSO 없이 호출됐을 수 있음)");
+            return;
+        }
+        if (!so.CanBecomCompanion)
+        {
+            Debug.Log($"[Recruit] '{so.MonsterName}' 영입 불가 — CanBecomCompanion=false (companionChance={so.CompanionChance:F2}, companionData={(so.CompanionData != null ? so.CompanionData.CompanionName : "NULL")})");
+            return;
+        }
+
+        float roll = Random.value;
+        bool success = roll <= so.CompanionChance;
+        if (success)
+        {
+            Debug.Log($"[Recruit] ✅ 영입 성공! '{so.MonsterName}' (확률 {so.CompanionChance:P0}, 굴림 {roll:F3})");
+            AcceptCompanion(so.CompanionData);
+        }
+        else
+        {
+            Debug.Log($"[Recruit] ❌ 영입 실패 — '{so.MonsterName}' (확률 {so.CompanionChance:P0}, 굴림 {roll:F3})");
+        }
+    }
+
+    /// <summary>활성 슬롯 또는 대기열에 동료 배치.</summary>
+    private void AcceptCompanion(Abyssdawn.CompanionSO data)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning("[Recruit] AcceptCompanion: CompanionSO == NULL → 무시");
+            return;
+        }
+
+        if (_companionInstances.Count < maxActiveCompanions)
+        {
+            var ally = CreateAllyFromCompanion(data);
+            if (ally != null)
+            {
+                _companionInstances.Add(ally);
+                if (!activePartyMembers.Contains(ally)) activePartyMembers.Add(ally);
+                Debug.Log($"[Recruit] → 활성 파티에 추가됨: '{data.CompanionName}' (활성 동료 {_companionInstances.Count}/{maxActiveCompanions})");
+            }
+        }
+        else if (_companionWaitlist.Count < maxCompanionWaitlist)
+        {
+            _companionWaitlist.Add(data);
+            Debug.Log($"[Recruit] → 활성 파티 가득 — 대기열에 추가: '{data.CompanionName}' (대기 {_companionWaitlist.Count}/{maxCompanionWaitlist})");
+        }
+        else
+        {
+            Debug.LogWarning($"[Recruit] ⚠ 활성 파티({_companionInstances.Count}/{maxActiveCompanions}) + 대기열({_companionWaitlist.Count}/{maxCompanionWaitlist}) 모두 가득 — '{data.CompanionName}' 거절");
+        }
+    }
+
+    /// <summary>CompanionSO 고정 스탯/스킬로 PlayerStats 인스턴스 동적 생성. CreateAllyFromPreset 패턴 차용.</summary>
+    private PlayerStats CreateAllyFromCompanion(Abyssdawn.CompanionSO data)
+    {
+        if (data == null) return null;
+
+        GameObject allyObj = new GameObject($"Companion_{data.CompanionName}");
+        if (playerPartyRoot != null)
+        {
+            allyObj.transform.SetParent(playerPartyRoot, false);
+        }
+
+        PlayerStats allyStats = allyObj.AddComponent<PlayerStats>();
+        allyStats.playerName = data.CompanionName;
+
+        // 런타임 PlayerStatData SO (CompanionSO는 동료 시스템 전용, PlayerStatData는 PlayerStats 작동에 필요)
+        allyStats.statData = ScriptableObject.CreateInstance<PlayerStatData>();
+
+        // [고정 스탯] 동료는 레벨업 없음 (사용자 정책)
+        allyStats.level = 1;
+        allyStats.exp = 0;
+        allyStats.maxExp = int.MaxValue; // 사실상 레벨업 차단
+
+        // CompanionSO 고정 7스탯 → base*에 복사
+        allyStats.baseHP      = data.HP;
+        allyStats.baseMP      = data.MP;
+        allyStats.baseAttack  = data.ATK;
+        allyStats.baseDefense = data.DEF;
+        allyStats.baseMagic   = data.MAG;
+        allyStats.baseAgility = data.AGI;
+        allyStats.baseLuck    = data.LUK;
+
+        // characterClass = null (CompanionSO는 직업 없음, base 스탯이 그대로 최종)
+
+        // 스킬셋 복사 (PlayerStatData의 equippedSkills/equippedPassives는 List<SkillData>)
+        if (data.ActiveSkills != null)
+        {
+            allyStats.statData.equippedSkills = new List<AbyssdawnBattle.SkillData>(data.ActiveSkills);
+        }
+        if (data.PassiveSkills != null)
+        {
+            // PassiveData는 별도 타입. equippedPassives는 List<SkillData>이므로 직접 호환 안 됨.
+            // 1차에서는 패시브 스킬 효과 미적용 — 로그만 남기고 빈 리스트로.
+            // (PassiveData → SkillData 변환 또는 별도 적용 경로는 2차에서 처리)
+            if (data.PassiveSkills.Count > 0)
+            {
+                Debug.LogWarning($"[Recruit] '{data.CompanionName}' PassiveSkills {data.PassiveSkills.Count}개 — 1차에서는 미적용 (2차 작업 대기)");
+            }
+        }
+
+        // 풀피로 초기화
+        allyStats.currentHP = allyStats.maxHP;
+        allyStats.currentMP = allyStats.maxMP;
+
+        // 시각적 표현 없음 (Warrior/Rogue 패턴 동일)
+        EnsureVisualForPartyMember(allyStats, false);
+
+        Debug.Log($"[Recruit] CreateAllyFromCompanion: '{data.CompanionName}' 생성 완료 — HP {allyStats.currentHP}/{allyStats.maxHP}, MP {allyStats.currentMP}/{allyStats.maxMP}, ATK {allyStats.Attack}, DEF {allyStats.Defense}");
+        return allyStats;
     }
 
     // -------------------- 메시지 --------------------
