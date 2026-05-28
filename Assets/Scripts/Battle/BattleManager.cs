@@ -560,6 +560,13 @@ public class BattleManager : MonoBehaviour
     void Awake()
     {
         Debug.Log("[PERSISTENCE_DEBUG] BattleManager.Awake RUNNING");
+        Debug.Log($"[Recruit-DIAG] BattleManager.Awake — static 초기 상태 점검: ActiveRoster.Count={CompanionPartyPersistence.ActiveRoster.Count}, WaitlistPaths.Count={CompanionPartyPersistence.WaitlistPaths.Count}, MaxActive={CompanionPartyPersistence.MaxActive}, MaxWaitlist={CompanionPartyPersistence.MaxWaitlist}");
+        if (CompanionPartyPersistence.ActiveRoster.Count > 0 || CompanionPartyPersistence.WaitlistPaths.Count > 0)
+        {
+            Debug.LogWarning($"[Recruit-DIAG] ⚠ Awake 시점 ActiveRoster/Waitlist에 이미 항목 있음 — Domain Reload 비활성화 또는 이전 세션 잔존 데이터 의심");
+            for (int i = 0; i < CompanionPartyPersistence.ActiveRoster.Count; i++)
+                Debug.LogWarning($"[Recruit-DIAG]   ActiveRoster[{i}]: resourcePath='{CompanionPartyPersistence.ActiveRoster[i].resourcePath}', HP={CompanionPartyPersistence.ActiveRoster[i].currentHP}, MP={CompanionPartyPersistence.ActiveRoster[i].currentMP}");
+        }
         startWithFullParty = false; // [Anti-Gravity] 강제 Solo 모드 설정 (인스펙터 값 무시)
         ForceDisableUIPanels();
 
@@ -2096,6 +2103,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void BuildBattlePartyForEncounter(bool includePresetAlliesIfNoCompanions = false)
     {
+        Debug.Log($"[Recruit-DIAG] === BuildBattlePartyForEncounter 진입 === includePreset={includePresetAlliesIfNoCompanions} | ActiveRoster.Count(전)={CompanionPartyPersistence.ActiveRoster.Count}, WaitlistPaths.Count(전)={CompanionPartyPersistence.WaitlistPaths.Count}");
         RestoreCompanionInstancesFromPersistence();
 
         activePartyMembers.Clear();
@@ -2137,15 +2145,17 @@ public class BattleManager : MonoBehaviour
 
     private void RestoreCompanionInstancesFromPersistence()
     {
+        Debug.Log($"[Recruit-DIAG] === RestoreCompanionInstancesFromPersistence 진입 === ActiveRoster.Count={CompanionPartyPersistence.ActiveRoster.Count}");
         DestroyAllCompanionInstances();
 
+        int restored = 0;
         foreach (var entry in CompanionPartyPersistence.ActiveRoster)
         {
             if (_companionInstances.Count >= maxActiveCompanions) break;
             var so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
             if (so == null)
             {
-                Debug.LogWarning($"[CompanionParty] 로드 실패: '{entry.resourcePath}'");
+                Debug.LogWarning($"[CompanionParty] 로드 실패: '{entry.resourcePath}' (Resources 경로 확인 필요)");
                 continue;
             }
 
@@ -2155,7 +2165,9 @@ public class BattleManager : MonoBehaviour
             ally.currentHP = Mathf.Clamp(entry.currentHP, 0, ally.maxHP);
             ally.currentMP = Mathf.Clamp(entry.currentMP, 0, ally.maxMP);
             _companionInstances.Add(ally);
+            restored++;
         }
+        Debug.Log($"[Recruit-DIAG] RestoreCompanionInstances 완료 — restored={restored}, _companionInstances.Count={_companionInstances.Count}");
     }
 
     private void RegisterCompanionSkills(PlayerStats member)
@@ -5904,39 +5916,57 @@ public class BattleManager : MonoBehaviour
     /// <summary>활성 슬롯 또는 대기열에 동료 배치.</summary>
     private void AcceptCompanion(Abyssdawn.CompanionSO data)
     {
+        Debug.Log($"[Recruit-DIAG] === AcceptCompanion 진입 === data={(data == null ? "NULL" : data.CompanionName)}");
         if (data == null)
         {
             Debug.LogWarning("[Recruit] AcceptCompanion: CompanionSO == NULL → 무시");
             return;
         }
 
-        if (_companionInstances.Count < maxActiveCompanions &&
-            CompanionPartyPersistence.ActiveRoster.Count < CompanionPartyPersistence.MaxActive)
+        // [DIAG] 4가지 카운트 동시 출력 — 어느 가드가 막는지 즉시 식별
+        int instCount = _companionInstances.Count;
+        int rosterCount = CompanionPartyPersistence.ActiveRoster.Count;
+        int waitInstCount = _companionWaitlist.Count;
+        int waitRosterCount = CompanionPartyPersistence.WaitlistPaths.Count;
+        bool guardActiveInst = instCount < maxActiveCompanions;
+        bool guardActiveRoster = rosterCount < CompanionPartyPersistence.MaxActive;
+        bool guardWaitInst = waitInstCount < maxCompanionWaitlist;
+        bool guardWaitRoster = waitRosterCount < CompanionPartyPersistence.MaxWaitlist;
+        Debug.Log($"[Recruit-DIAG] 가드 상태:");
+        Debug.Log($"[Recruit-DIAG]   ├─ 활성: _companionInstances={instCount}/{maxActiveCompanions} (pass={guardActiveInst}) & ActiveRoster={rosterCount}/{CompanionPartyPersistence.MaxActive} (pass={guardActiveRoster})");
+        Debug.Log($"[Recruit-DIAG]   └─ 대기: _companionWaitlist={waitInstCount}/{maxCompanionWaitlist} (pass={guardWaitInst}) & WaitlistPaths={waitRosterCount}/{CompanionPartyPersistence.MaxWaitlist} (pass={guardWaitRoster})");
+
+        if (guardActiveInst && guardActiveRoster)
         {
+            Debug.Log("[Recruit-DIAG] → 활성 슬롯 분기 진입 (둘 다 pass)");
             var ally = CreateAllyFromCompanion(data);
-            if (ally != null)
+            if (ally == null)
             {
-                _companionInstances.Add(ally);
-                CompanionPartyPersistence.TryAddActive(data, ally.currentHP, ally.currentMP);
-                RegisterCompanionSkills(ally);
-
-                if (!activePartyMembers.Contains(ally))
-                    activePartyMembers.Add(ally);
-
-                RebuildPlayerStatusPanel();
-                UpdateStatusUI();
-                Debug.Log($"[Recruit] → 활성 파티 슬롯 {_companionInstances.Count + 1}/4 (동료 {_companionInstances.Count}/{maxActiveCompanions}): '{data.CompanionName}'");
+                Debug.LogError("[Recruit-DIAG] ✗ CreateAllyFromCompanion이 NULL 반환 → 추가 실패");
+                return;
             }
+            _companionInstances.Add(ally);
+            bool added = CompanionPartyPersistence.TryAddActive(data, ally.currentHP, ally.currentMP);
+            Debug.Log($"[Recruit-DIAG] TryAddActive 반환={added}, ActiveRoster.Count(after)={CompanionPartyPersistence.ActiveRoster.Count}");
+            RegisterCompanionSkills(ally);
+
+            if (!activePartyMembers.Contains(ally))
+                activePartyMembers.Add(ally);
+
+            RebuildPlayerStatusPanel();
+            UpdateStatusUI();
+            Debug.Log($"[Recruit] → 활성 파티 슬롯 {_companionInstances.Count + 1}/4 (동료 {_companionInstances.Count}/{maxActiveCompanions}): '{data.CompanionName}'");
         }
-        else if (_companionWaitlist.Count < maxCompanionWaitlist &&
-                 CompanionPartyPersistence.WaitlistPaths.Count < CompanionPartyPersistence.MaxWaitlist)
+        else if (guardWaitInst && guardWaitRoster)
         {
+            Debug.Log("[Recruit-DIAG] → 대기열 분기 진입 (활성 fail, 대기 pass)");
             _companionWaitlist.Add(data);
             CompanionPartyPersistence.WaitlistPaths.Add(CompanionPartyPersistence.GetResourcePath(data));
             Debug.Log($"[Recruit] → 활성 파티 가득 — 대기열에 추가: '{data.CompanionName}' (대기 {_companionWaitlist.Count}/{maxCompanionWaitlist})");
         }
         else
         {
+            Debug.LogWarning($"[Recruit-DIAG] ✗ 모든 가드 fail — '{data.CompanionName}' 거절 (활성 fail={(!guardActiveInst || !guardActiveRoster)}, 대기 fail={(!guardWaitInst || !guardWaitRoster)})");
             Debug.LogWarning($"[Recruit] ⚠ 활성·대기열 모두 가득 — '{data.CompanionName}' 거절");
         }
     }
