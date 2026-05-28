@@ -41,5 +41,5 @@ MonoBehaviour:
   dropTable:
   - item: {fileID: 0}
     dropChance: 0
-  companionChance: 0.3
+  companionChance: 1
   companionData: {fileID: 11400000, guid: 5ff4cbf795254a27bef1c7cc262bad6a, type: 2}

@@ -620,7 +620,9 @@ public class EnemyStats : MonoBehaviour
         // [2026-05-24] 영입 시스템: BattleManager에게 "이 적이 마지막에 죽음" 알림.
         // 전투 종료 시 BattleManager가 _lastDefeatedEnemy로 영입 후보 1마리를 선정.
         // BattleManager 싱글톤 없으므로 씬 인스턴스 조회 (전투 씬에 1개만 존재 가정).
-        var bm = FindFirstObjectByType<AbyssdawnBattle.BattleManager>();
+        // global:: 한정자 — using AbyssdawnBattle;이 있어 simple 'BattleManager'가
+        // AbyssdawnBattle.BattleManager(존재 안 함)로 잘못 해석되는 것을 방지.
+        var bm = FindFirstObjectByType<global::BattleManager>();
         if (bm != null) bm.NotifyEnemyDied(this);
     }
 

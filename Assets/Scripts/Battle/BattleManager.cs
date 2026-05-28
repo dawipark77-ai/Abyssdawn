@@ -5851,21 +5851,38 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    /// <summary>CompanionSO 고정 스탯/스킬로 PlayerStats 인스턴스 동적 생성. CreateAllyFromPreset 패턴 차용.</summary>
+    /// <summary>CompanionSO 고정 스탯/스킬로 PlayerStats 인스턴스 동적 생성.
+    /// SetActive 패턴 — 비활성 상태에서 statData를 포함한 전체 셋업을 마친 뒤 활성화하여
+    /// PlayerStats.Awake가 statData null인 상태로 실행되는 false positive 에러 차단.
+    /// </summary>
     private PlayerStats CreateAllyFromCompanion(Abyssdawn.CompanionSO data)
     {
         if (data == null) return null;
 
+        // ─────────────────────────────────────────────────────────────
+        // STEP 1: GameObject 생성 + 즉시 비활성화 (Awake 차단)
+        // Unity는 비활성 GameObject에 부착된 컴포넌트의 Awake를 호출하지 않음.
+        // 표준 패턴 — "fully construct, then activate".
+        // ─────────────────────────────────────────────────────────────
         GameObject allyObj = new GameObject($"Companion_{data.CompanionName}");
+        allyObj.SetActive(false);
+        Debug.Log($"[Recruit] CreateAllyFromCompanion: GameObject '{allyObj.name}' 생성 + 비활성화 (Awake 차단 모드)");
+
         if (playerPartyRoot != null)
         {
             allyObj.transform.SetParent(playerPartyRoot, false);
         }
 
+        // ─────────────────────────────────────────────────────────────
+        // STEP 2: PlayerStats 컴포넌트 부착 (비활성이라 Awake 안 됨)
+        // ─────────────────────────────────────────────────────────────
         PlayerStats allyStats = allyObj.AddComponent<PlayerStats>();
         allyStats.playerName = data.CompanionName;
 
-        // 런타임 PlayerStatData SO (CompanionSO는 동료 시스템 전용, PlayerStatData는 PlayerStats 작동에 필요)
+        // ─────────────────────────────────────────────────────────────
+        // STEP 3: statData를 Awake 호출 전에 미리 할당 (핵심 — 에러 근원 제거)
+        // CompanionSO는 동료 시스템 전용 데이터, PlayerStatData는 PlayerStats 작동에 필요
+        // ─────────────────────────────────────────────────────────────
         allyStats.statData = ScriptableObject.CreateInstance<PlayerStatData>();
 
         // [고정 스탯] 동료는 레벨업 없음 (사용자 정책)
@@ -5885,29 +5902,42 @@ public class BattleManager : MonoBehaviour
         // characterClass = null (CompanionSO는 직업 없음, base 스탯이 그대로 최종)
 
         // 스킬셋 복사 (PlayerStatData의 equippedSkills/equippedPassives는 List<SkillData>)
+        int activeSkillCount = 0;
         if (data.ActiveSkills != null)
         {
             allyStats.statData.equippedSkills = new List<AbyssdawnBattle.SkillData>(data.ActiveSkills);
+            activeSkillCount = allyStats.statData.equippedSkills.Count;
         }
-        if (data.PassiveSkills != null)
+        if (data.PassiveSkills != null && data.PassiveSkills.Count > 0)
         {
             // PassiveData는 별도 타입. equippedPassives는 List<SkillData>이므로 직접 호환 안 됨.
             // 1차에서는 패시브 스킬 효과 미적용 — 로그만 남기고 빈 리스트로.
             // (PassiveData → SkillData 변환 또는 별도 적용 경로는 2차에서 처리)
-            if (data.PassiveSkills.Count > 0)
-            {
-                Debug.LogWarning($"[Recruit] '{data.CompanionName}' PassiveSkills {data.PassiveSkills.Count}개 — 1차에서는 미적용 (2차 작업 대기)");
-            }
+            Debug.LogWarning($"[Recruit] '{data.CompanionName}' PassiveSkills {data.PassiveSkills.Count}개 — 1차에서는 미적용 (2차 작업 대기)");
         }
 
         // 풀피로 초기화
         allyStats.currentHP = allyStats.maxHP;
         allyStats.currentMP = allyStats.maxMP;
 
+        // ─────────────────────────────────────────────────────────────
+        // STEP 4: 모든 셋업 완료 — 이제 활성화. Awake가 statData가 있는 상태로 실행됨.
+        // ─────────────────────────────────────────────────────────────
+        allyObj.SetActive(true);
+
         // 시각적 표현 없음 (Warrior/Rogue 패턴 동일)
         EnsureVisualForPartyMember(allyStats, false);
 
-        Debug.Log($"[Recruit] CreateAllyFromCompanion: '{data.CompanionName}' 생성 완료 — HP {allyStats.currentHP}/{allyStats.maxHP}, MP {allyStats.currentMP}/{allyStats.maxMP}, ATK {allyStats.Attack}, DEF {allyStats.Defense}");
+        // ─────────────────────────────────────────────────────────────
+        // STEP 5: 검증 로그 — statData/스킬/스탯이 제대로 들어갔는지 가시화
+        // ─────────────────────────────────────────────────────────────
+        bool statDataOK = allyStats.statData != null;
+        Debug.Log($"[Recruit] CreateAllyFromCompanion: '{data.CompanionName}' 생성 완료");
+        Debug.Log($"[Recruit]   ├─ statData={(statDataOK ? "OK" : "NULL!")} (InstanceID={(statDataOK ? allyStats.statData.GetInstanceID() : 0)})");
+        Debug.Log($"[Recruit]   ├─ HP {allyStats.currentHP}/{allyStats.maxHP}, MP {allyStats.currentMP}/{allyStats.maxMP}");
+        Debug.Log($"[Recruit]   ├─ ATK {allyStats.Attack}, DEF {allyStats.Defense}, MAG {allyStats.Magic}, AGI {allyStats.Agility}, LUK {allyStats.Luck}");
+        Debug.Log($"[Recruit]   └─ equippedSkills.Count={activeSkillCount}{(activeSkillCount > 0 ? $" (첫 스킬: '{allyStats.statData.equippedSkills[0]?.skillName}')" : " (액티브 스킬 없음)")}");
+
         return allyStats;
     }
 
@@ -7533,6 +7563,10 @@ private void CacheHeroSkills()
 
             UpdateStatusUI();
             AddMessage("All enemies defeated!");
+
+            // [2026-05-24] 영입 시스템 (1차): 마지막에 죽은 적 1마리로 영입 판정.
+            // EXP 부여 전에 호출하여 콘솔 로그 순서가 자연스럽게 됨.
+            TryRecruitLastDefeatedMonster();
 
             // [Anti-Gravity] 경험치 정산 로직
             int totalExp = 0;
