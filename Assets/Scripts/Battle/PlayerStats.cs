@@ -54,6 +54,11 @@ public class PlayerStats : MonoBehaviour
     [Header("2. 캐릭터 정보")]
     public string playerName = "Hero";
 
+    /// <summary>영입 동료일 때 원본 CompanionSO. 프리셋 Warrior/Rogue/Wizard는 null.</summary>
+    [HideInInspector] public Abyssdawn.CompanionSO companionSource;
+
+    public bool IsRecruitedCompanion => companionSource != null;
+
     // GameManager 호환용: 현재 직업 에셋의 이름을 반환
     public string jobClass => (characterClass != null) ? characterClass.className : "None";
 

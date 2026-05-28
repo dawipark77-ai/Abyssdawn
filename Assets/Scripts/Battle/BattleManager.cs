@@ -174,6 +174,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] Image[] partyMPBars;
     [SerializeField] TMP_Text[] partyMPTexts;
     [SerializeField] Transform[] partyStatusIconRows;
+    [Tooltip("슬롯 1~4 초상화 (영입 동료 CompanionSO.Portrait). 비어 있으면 이름·HP/MP만 갱신.")]
+    [SerializeField] Image[] partyPortraitImages;
 
     // 파티 관련 구조체 및 열거형
     public enum PartyMode { Solo, Full }
@@ -193,7 +195,7 @@ public class BattleManager : MonoBehaviour
         public Color color;
     }
 
-    public enum PartyRole { Hero, Warrior, Rogue, Wizard }
+    public enum PartyRole { Hero, Warrior, Rogue, Wizard, Companion }
     private PartyRole currentControlledRole = PartyRole.Hero;
 
     private List<PlayerStats> activePartyMembers = new List<PlayerStats>();
@@ -342,6 +344,7 @@ public class BattleManager : MonoBehaviour
     public SkillData fireballSkill;
     private List<SkillData> heroSkillCache = new List<SkillData>(); // 히어로 스킬 목록 (Strong Slash, Fireball)
     private Dictionary<PartyRole, List<SkillData>> roleSkillCache = new Dictionary<PartyRole, List<SkillData>>(); // 역할별 스킬 캐시
+    private readonly Dictionary<PlayerStats, List<SkillData>> companionSkillsByMember = new Dictionary<PlayerStats, List<SkillData>>();
 
     // ========== 액션 딜레이 ==========
     [Header("Action Delays")]
@@ -1964,6 +1967,8 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        SyncCompanionPersistenceBeforeSceneLeave();
+
         string sceneToLoad = DungeonEncounter.lastDungeonScene;
         DungeonEncounter.justReturnedFromBattle = true;
         if (string.IsNullOrEmpty(sceneToLoad))
@@ -1997,8 +2002,9 @@ public class BattleManager : MonoBehaviour
         // 던전 영속 데이터 전체 초기화 (층수, 안개, 위치, 상태이상)
         DungeonPersistentData.ClearState();
 
-        // GameManager 파티 데이터 초기화
         GameManager.EnsureInstance().ClearAllData();
+        CompanionPartyPersistence.Clear();
+        DestroyAllCompanionInstances();
 
         Debug.Log("[BattleManager] Game Over — resetting to floor 1.");
         DungeonEncounter.justReturnedFromBattle = false; // 게임오버는 새 시작이므로 쿨다운 없음
@@ -2085,6 +2091,95 @@ public class BattleManager : MonoBehaviour
         Debug.Log("[BattleManager] InitializeParty complete. UI Updated.");
     }
 
+    /// <summary>
+    /// 슬롯1=Hero, 슬롯2~4=영입 동료(CompanionPartyPersistence, 최대 3).
+    /// </summary>
+    private void BuildBattlePartyForEncounter(bool includePresetAlliesIfNoCompanions = false)
+    {
+        RestoreCompanionInstancesFromPersistence();
+
+        activePartyMembers.Clear();
+        activePartyMembers.Add(player);
+
+        companionSkillsByMember.Clear();
+        foreach (var companion in _companionInstances)
+        {
+            if (companion == null || companion == player) continue;
+            activePartyMembers.Add(companion);
+            RegisterCompanionSkills(companion);
+            EnsureVisualForPartyMember(companion, false);
+        }
+
+        if (includePresetAlliesIfNoCompanions && _companionInstances.Count == 0)
+        {
+            var warrior = GetOrCreateAlly(PartyRole.Warrior);
+            var rogue = GetOrCreateAlly(PartyRole.Rogue);
+            var wizard = GetOrCreateAlly(PartyRole.Wizard);
+            activePartyMembers.Add(warrior);
+            activePartyMembers.Add(rogue);
+            activePartyMembers.Add(wizard);
+        }
+
+        PositionPartyMembers();
+        Debug.Log($"[CompanionParty] BuildBattleParty — members={activePartyMembers.Count} (companions={_companionInstances.Count})");
+    }
+
+    private void DestroyAllCompanionInstances()
+    {
+        foreach (var c in _companionInstances)
+        {
+            if (c != null)
+                Destroy(c.gameObject);
+        }
+        _companionInstances.Clear();
+        companionSkillsByMember.Clear();
+    }
+
+    private void RestoreCompanionInstancesFromPersistence()
+    {
+        DestroyAllCompanionInstances();
+
+        foreach (var entry in CompanionPartyPersistence.ActiveRoster)
+        {
+            if (_companionInstances.Count >= maxActiveCompanions) break;
+            var so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
+            if (so == null)
+            {
+                Debug.LogWarning($"[CompanionParty] 로드 실패: '{entry.resourcePath}'");
+                continue;
+            }
+
+            var ally = CreateAllyFromCompanion(so);
+            if (ally == null) continue;
+
+            ally.currentHP = Mathf.Clamp(entry.currentHP, 0, ally.maxHP);
+            ally.currentMP = Mathf.Clamp(entry.currentMP, 0, ally.maxMP);
+            _companionInstances.Add(ally);
+        }
+    }
+
+    private void RegisterCompanionSkills(PlayerStats member)
+    {
+        if (member == null || member.companionSource == null) return;
+
+        var list = new List<SkillData>();
+        var skills = member.companionSource.ActiveSkills;
+        if (skills != null)
+        {
+            foreach (var sk in skills)
+            {
+                if (sk != null) list.Add(sk);
+            }
+        }
+        companionSkillsByMember[member] = list;
+    }
+
+    private void SyncCompanionPersistenceBeforeSceneLeave()
+    {
+        CompanionPartyPersistence.SyncActiveFromInstances(_companionInstances);
+        Debug.Log($"[CompanionParty] Saved roster count={CompanionPartyPersistence.ActiveRoster.Count}");
+    }
+
     private void SetPartyMode(PartyMode mode)
     {
         if (currentPartyMode == mode) return;
@@ -2100,39 +2195,24 @@ public class BattleManager : MonoBehaviour
 
         if (mode == PartyMode.Solo)
         {
-            // 솔로 모드: Hero만 활성화
             activePartyMembers.Clear();
             activePartyMembers.Add(player);
 
-            // 동료들 비활성화
             foreach (var kvp in allyInstances)
             {
                 if (kvp.Value != null && kvp.Value != player)
-                {
                     EnsureVisualForPartyMember(kvp.Value, false);
-                }
+            }
+            foreach (var c in _companionInstances)
+            {
+                if (c != null && c != player)
+                    EnsureVisualForPartyMember(c, false);
             }
         }
         else
         {
-            // 풀 파티 모드: Hero + 3명 동료
-            activePartyMembers.Clear();
-            activePartyMembers.Add(player);
-
-            // Warrior
-            var warrior = GetOrCreateAlly(PartyRole.Warrior);
-            activePartyMembers.Add(warrior);
-
-            // Rogue
-            var rogue = GetOrCreateAlly(PartyRole.Rogue);
-            activePartyMembers.Add(rogue);
-
-            // Wizard
-            var wizard = GetOrCreateAlly(PartyRole.Wizard);
-            activePartyMembers.Add(wizard);
-
-            // 동료들 위치 설정
-            PositionPartyMembers();
+            // Hero(슬롯1) + 영입 동료(슬롯2~4) 우선, 없으면 프리셋 3인(디버그)
+            BuildBattlePartyForEncounter(includePresetAlliesIfNoCompanions: true);
         }
 
         RebuildPlayerStatusPanel();
@@ -2314,6 +2394,7 @@ public class BattleManager : MonoBehaviour
     private PartyRole GetPartyRole(PlayerStats member)
     {
         if (member == player) return PartyRole.Hero;
+        if (member != null && member.IsRecruitedCompanion) return PartyRole.Companion;
         if (allyInstances.ContainsValue(member))
         {
             foreach (var kvp in allyInstances)
@@ -2355,18 +2436,15 @@ public class BattleManager : MonoBehaviour
         pendingSkill = null;
         hoveredEnemy = null;
 
-        // [중요] 먼저 GameManager에서 HP/MP 로드 (파티 구성 전에 로드하여 덮어쓰지 않도록)
         InitializeParty();
 
-        // [LastStand] InitializeParty 이후 리셋 (파티 확정 후)
         foreach (var member in activePartyMembers)
         {
             if (member != null) member.ResetLastStand();
         }
-        
-        // 파티 구성 보정 (InitializeParty 이후에 호출하여 로드된 HP/MP가 보존되도록)
-        var desiredMode = startWithFullParty ? PartyMode.Full : PartyMode.Solo;
-        ApplyPartyMode(desiredMode, force: true, restartCommands: false);
+
+        // Hero + 영입 동료(슬롯2~4). 프리셋 3인은 영입이 없고 startWithFullParty일 때만.
+        BuildBattlePartyForEncounter(includePresetAlliesIfNoCompanions: startWithFullParty);
         
         // ApplyPartyMode 후 다시 한 번 GameManager에서 로드 (파티 구성이 덮어쓰지 않도록)
         var gm = GameManager.EnsureInstance();
@@ -3054,14 +3132,16 @@ public class BattleManager : MonoBehaviour
         
         Debug.Log($"[BattleManager] isHero: {isHero}, role: {role}, player: {(player != null ? player.playerName : "null")}, actor == player: {(actor != null && player != null ? (actor == player).ToString() : "N/A")}");
 
-        // 스킬 버튼 활성화 조건 (역할별 스킬 확인)
         bool hasSkills = false;
         if (actor != null)
         {
-            PartyRole actorRole = GetPartyRole(actor);
-            if (roleSkillCache.ContainsKey(actorRole))
+            if (companionSkillsByMember.TryGetValue(actor, out var compSkills))
+                hasSkills = compSkills.Count > 0;
+            else
             {
-                hasSkills = roleSkillCache[actorRole].Count > 0;
+                PartyRole actorRole = GetPartyRole(actor);
+                if (roleSkillCache.ContainsKey(actorRole))
+                    hasSkills = roleSkillCache[actorRole].Count > 0;
             }
         }
 
@@ -5830,24 +5910,34 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        if (_companionInstances.Count < maxActiveCompanions)
+        if (_companionInstances.Count < maxActiveCompanions &&
+            CompanionPartyPersistence.ActiveRoster.Count < CompanionPartyPersistence.MaxActive)
         {
             var ally = CreateAllyFromCompanion(data);
             if (ally != null)
             {
                 _companionInstances.Add(ally);
-                if (!activePartyMembers.Contains(ally)) activePartyMembers.Add(ally);
-                Debug.Log($"[Recruit] → 활성 파티에 추가됨: '{data.CompanionName}' (활성 동료 {_companionInstances.Count}/{maxActiveCompanions})");
+                CompanionPartyPersistence.TryAddActive(data, ally.currentHP, ally.currentMP);
+                RegisterCompanionSkills(ally);
+
+                if (!activePartyMembers.Contains(ally))
+                    activePartyMembers.Add(ally);
+
+                RebuildPlayerStatusPanel();
+                UpdateStatusUI();
+                Debug.Log($"[Recruit] → 활성 파티 슬롯 {_companionInstances.Count + 1}/4 (동료 {_companionInstances.Count}/{maxActiveCompanions}): '{data.CompanionName}'");
             }
         }
-        else if (_companionWaitlist.Count < maxCompanionWaitlist)
+        else if (_companionWaitlist.Count < maxCompanionWaitlist &&
+                 CompanionPartyPersistence.WaitlistPaths.Count < CompanionPartyPersistence.MaxWaitlist)
         {
             _companionWaitlist.Add(data);
+            CompanionPartyPersistence.WaitlistPaths.Add(CompanionPartyPersistence.GetResourcePath(data));
             Debug.Log($"[Recruit] → 활성 파티 가득 — 대기열에 추가: '{data.CompanionName}' (대기 {_companionWaitlist.Count}/{maxCompanionWaitlist})");
         }
         else
         {
-            Debug.LogWarning($"[Recruit] ⚠ 활성 파티({_companionInstances.Count}/{maxActiveCompanions}) + 대기열({_companionWaitlist.Count}/{maxCompanionWaitlist}) 모두 가득 — '{data.CompanionName}' 거절");
+            Debug.LogWarning($"[Recruit] ⚠ 활성·대기열 모두 가득 — '{data.CompanionName}' 거절");
         }
     }
 
@@ -5878,6 +5968,7 @@ public class BattleManager : MonoBehaviour
         // ─────────────────────────────────────────────────────────────
         PlayerStats allyStats = allyObj.AddComponent<PlayerStats>();
         allyStats.playerName = data.CompanionName;
+        allyStats.companionSource = data;
 
         // ─────────────────────────────────────────────────────────────
         // STEP 3: statData를 Awake 호출 전에 미리 할당 (핵심 — 에러 근원 제거)
@@ -7110,13 +7201,14 @@ private void CacheHeroSkills()
     public List<SkillData> GetCurrentActorSkills()
     {
         if (currentControlledMember == null) return new List<SkillData>();
-        
+
+        if (companionSkillsByMember.TryGetValue(currentControlledMember, out var compSkills))
+            return compSkills;
+
         PartyRole role = GetPartyRole(currentControlledMember);
         if (roleSkillCache.ContainsKey(role))
-        {
             return roleSkillCache[role];
-        }
-        
+
         return new List<SkillData>();
     }
 
@@ -7413,6 +7505,16 @@ private void CacheHeroSkills()
                 {
                     partyMPTexts[i].text = $"{m.currentMP}/{m.maxMP}";
                     partyMPTexts[i].color = textColor;
+                }
+
+                if (partyPortraitImages != null && i < partyPortraitImages.Length && partyPortraitImages[i] != null)
+                {
+                    Sprite portrait = m.IsRecruitedCompanion && m.companionSource != null
+                        ? m.companionSource.Portrait
+                        : null;
+                    partyPortraitImages[i].sprite = portrait;
+                    partyPortraitImages[i].enabled = portrait != null;
+                    partyPortraitImages[i].color = portrait != null ? Color.white : new Color(1f, 1f, 1f, 0f);
                 }
 
                 // 상태이상 아이콘 행
