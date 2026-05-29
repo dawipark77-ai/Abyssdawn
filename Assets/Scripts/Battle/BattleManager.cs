@@ -5925,22 +5925,30 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        // [DIAG] 4가지 카운트 동시 출력 — 어느 가드가 막는지 즉시 식별
+        // [2026-05-24] 영입 판정은 _companionInstances 단일 가드 — 인스턴스가 진실의 단일 소스.
+        // ActiveRoster/WaitlistPaths(CompanionPartyPersistence)는 영속화 그림자로만 유지.
+        // 영입 직후 TryAddActive로 그림자 동기화는 계속 수행하지만, 가드에는 영향 X.
+        // (별도 작업 예정: LoadCompanion 실패 시 stale entry 청소)
         int instCount = _companionInstances.Count;
         int rosterCount = CompanionPartyPersistence.ActiveRoster.Count;
         int waitInstCount = _companionWaitlist.Count;
         int waitRosterCount = CompanionPartyPersistence.WaitlistPaths.Count;
         bool guardActiveInst = instCount < maxActiveCompanions;
-        bool guardActiveRoster = rosterCount < CompanionPartyPersistence.MaxActive;
         bool guardWaitInst = waitInstCount < maxCompanionWaitlist;
-        bool guardWaitRoster = waitRosterCount < CompanionPartyPersistence.MaxWaitlist;
-        Debug.Log($"[Recruit-DIAG] 가드 상태:");
-        Debug.Log($"[Recruit-DIAG]   ├─ 활성: _companionInstances={instCount}/{maxActiveCompanions} (pass={guardActiveInst}) & ActiveRoster={rosterCount}/{CompanionPartyPersistence.MaxActive} (pass={guardActiveRoster})");
-        Debug.Log($"[Recruit-DIAG]   └─ 대기: _companionWaitlist={waitInstCount}/{maxCompanionWaitlist} (pass={guardWaitInst}) & WaitlistPaths={waitRosterCount}/{CompanionPartyPersistence.MaxWaitlist} (pass={guardWaitRoster})");
-
-        if (guardActiveInst && guardActiveRoster)
+        // 참고용 — 그림자 동기 상태 모니터링. 분기에는 사용 X.
+        bool shadowActiveSync = rosterCount == instCount;
+        bool shadowWaitSync = waitRosterCount == waitInstCount;
+        Debug.Log($"[Recruit-DIAG] 가드 상태 (판정=instances만, roster는 영속화 그림자):");
+        Debug.Log($"[Recruit-DIAG]   ├─ 활성: _companionInstances={instCount}/{maxActiveCompanions} (pass={guardActiveInst}) | shadow ActiveRoster={rosterCount}/{CompanionPartyPersistence.MaxActive} (sync={shadowActiveSync})");
+        Debug.Log($"[Recruit-DIAG]   └─ 대기: _companionWaitlist={waitInstCount}/{maxCompanionWaitlist} (pass={guardWaitInst}) | shadow WaitlistPaths={waitRosterCount}/{CompanionPartyPersistence.MaxWaitlist} (sync={shadowWaitSync})");
+        if (!shadowActiveSync || !shadowWaitSync)
         {
-            Debug.Log("[Recruit-DIAG] → 활성 슬롯 분기 진입 (둘 다 pass)");
+            Debug.LogWarning($"[Recruit-DIAG] ⚠ 그림자 불일치 — instances vs roster 카운트 불일치. 영속화 동기화 점검 필요 (영입 판정엔 영향 없음).");
+        }
+
+        if (guardActiveInst)
+        {
+            Debug.Log("[Recruit-DIAG] → 활성 슬롯 분기 진입 (instances pass)");
             var ally = CreateAllyFromCompanion(data);
             if (ally == null)
             {
@@ -5949,7 +5957,7 @@ public class BattleManager : MonoBehaviour
             }
             _companionInstances.Add(ally);
             bool added = CompanionPartyPersistence.TryAddActive(data, ally.currentHP, ally.currentMP);
-            Debug.Log($"[Recruit-DIAG] TryAddActive 반환={added}, ActiveRoster.Count(after)={CompanionPartyPersistence.ActiveRoster.Count}");
+            Debug.Log($"[Recruit-DIAG] TryAddActive(그림자) 반환={added}, ActiveRoster.Count(after)={CompanionPartyPersistence.ActiveRoster.Count}");
             RegisterCompanionSkills(ally);
 
             if (!activePartyMembers.Contains(ally))
@@ -5959,7 +5967,7 @@ public class BattleManager : MonoBehaviour
             UpdateStatusUI();
             Debug.Log($"[Recruit] → 활성 파티 슬롯 {_companionInstances.Count + 1}/4 (동료 {_companionInstances.Count}/{maxActiveCompanions}): '{data.CompanionName}'");
         }
-        else if (guardWaitInst && guardWaitRoster)
+        else if (guardWaitInst)
         {
             Debug.Log("[Recruit-DIAG] → 대기열 분기 진입 (활성 fail, 대기 pass)");
             _companionWaitlist.Add(data);
@@ -5968,7 +5976,7 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[Recruit-DIAG] ✗ 모든 가드 fail — '{data.CompanionName}' 거절 (활성 fail={(!guardActiveInst || !guardActiveRoster)}, 대기 fail={(!guardWaitInst || !guardWaitRoster)})");
+            Debug.LogWarning($"[Recruit-DIAG] ✗ instances 기준 모두 가득 — 거절 (활성 instances {instCount}/{maxActiveCompanions}, 대기 instances {waitInstCount}/{maxCompanionWaitlist})");
             Debug.LogWarning($"[Recruit] ⚠ 활성·대기열 모두 가득 — '{data.CompanionName}' 거절");
         }
     }
