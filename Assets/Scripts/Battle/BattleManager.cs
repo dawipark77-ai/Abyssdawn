@@ -174,8 +174,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] Image[] partyMPBars;
     [SerializeField] TMP_Text[] partyMPTexts;
     [SerializeField] Transform[] partyStatusIconRows;
+    // [2026-05-24] partyPortraitImages는 신규 필드 — null 시작이 SerializedObjectList NRE를
+    // 유발할 가능성이 있어 명시적으로 빈 배열로 초기화. Inspector에서 비어 있어도 안전.
     [Tooltip("슬롯 1~4 초상화 (영입 동료 CompanionSO.Portrait). 비어 있으면 이름·HP/MP만 갱신.")]
-    [SerializeField] Image[] partyPortraitImages;
+    [SerializeField] Image[] partyPortraitImages = new Image[0];
 
     // 파티 관련 구조체 및 열거형
     public enum PartyMode { Solo, Full }

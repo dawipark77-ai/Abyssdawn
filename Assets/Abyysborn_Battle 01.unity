@@ -519,7 +519,7 @@ MonoBehaviour:
   _fallbackCurrentHP: 0
   _fallbackCurrentMP: 0
   _fallbackLevel: 1
-  _fallbackExp: 95
+  _fallbackExp: 0
   _fallbackFreeStatPoints: 0
   _fallbackSkillPoints: 0
   _fallbackBaseHP: 0
@@ -530,6 +530,7 @@ MonoBehaviour:
   _fallbackBaseAgility: 0
   _fallbackBaseLuck: 0
   playerName: Hero
+  companionSource: {fileID: 0}
   characterClass: {fileID: 0}
   currentSlot: 1
   isFrontRow: 1
@@ -4071,10 +4072,19 @@ MonoBehaviour:
   potionCountText: {fileID: 0}
   pageText: {fileID: 0}
   maxMessages: 50
+  maxActiveCompanions: 3
+  maxCompanionWaitlist: 3
   messageTypingSpeed: 0.04
   messageAdvanceKey: 32
   messageAdvanceOnMouseClick: 1
   messageSkipOnInput: 1
+  indicatorEnabled: 1
+  indicatorChar: "\u25BC"
+  indicatorBlinkInterval: 0.4
+  indicatorBobEnabled: 1
+  indicatorBobAmplitude: 4
+  indicatorBobSpeed: 3
+  postSequenceFadeDelay: 3
   player: {fileID: 1121858210}
   enemy: {fileID: 1624584570}
   potionCount: 2
@@ -4115,6 +4125,7 @@ MonoBehaviour:
   partyMPBars: []
   partyMPTexts: []
   partyStatusIconRows: []
+  partyPortraitImages: []
   spawnCenter: {fileID: 1130131489}
   worldRoot: {fileID: 1687753668}
   canvas: {fileID: 779149225}
@@ -10042,6 +10053,7 @@ MonoBehaviour:
   _fallbackBaseAgility: 0
   _fallbackBaseLuck: 0
   playerName: Hero
+  companionSource: {fileID: 0}
   characterClass: {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
   currentSlot: 1
   isFrontRow: 1
@@ -14164,6 +14176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1def947344765d140b010e136a1d78eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStats
+  sourceMonster: {fileID: 0}
   enemyName: Enemy
   maxHP: 130
   currentHP: 0
