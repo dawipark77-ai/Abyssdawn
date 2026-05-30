@@ -70,6 +70,20 @@ public class BattleManager : MonoBehaviour
     [Range(0, 10)]
     public int maxCompanionWaitlist = 3;
 
+    [Header("Recruit Dialog (영입 YES/NO UI)")]
+    [Tooltip("직접 만든 영입 다이얼로그 패널 GameObject. 비워두면 런타임 자동 생성(회색 박스 + YES/NO).")]
+    public GameObject customRecruitPanel;
+
+    [Tooltip("커스텀 패널의 YES 버튼")]
+    public Button customRecruitYesButton;
+
+    [Tooltip("커스텀 패널의 NO 버튼")]
+    public Button customRecruitNoButton;
+
+    [Tooltip("적 sprite가 다시 등장할 때 페이드인 시간(초). 0이면 즉시 표시.")]
+    [Range(0f, 3f)]
+    public float recruitSpriteFadeInDuration = 0.8f;
+
     [Header("Sequential Message (Dragon Quest 스타일 레벨업 연출)")]
     [Tooltip("한 글자가 나타나는 간격(초). 작을수록 빠름. 권장 0.02~0.08")]
     [Range(0.005f, 0.3f)]
@@ -1945,7 +1959,27 @@ public class BattleManager : MonoBehaviour
         //     → 시퀀스 종료 후 postSequenceFadeDelay 초 추가 대기(페이드아웃 시간 대용) → 씬 전환
         //   - 시퀀스 없으면 → 기존대로 delay 초 대기 후 씬 전환
         bool wasPlayingSequence = IsPlayingMessageSequence;
-        if (wasPlayingSequence)
+
+        // [2026-05-24] 영입 다이얼로그 분기 — WaitForSeconds(delay) 전에 굴림.
+        // 굴림 성공 + 슬롯 여유 → 적 sprite 켜고 메시지 + YES/NO 다이얼로그.
+        // 굴림 실패 또는 슬롯 부족 → 기존 흐름(시퀀스 대기 또는 일반 delay).
+        bool recruitFlow = TryInitiateRecruitDialog(out Abyssdawn.CompanionSO recruitData);
+
+        if (recruitFlow)
+        {
+            Debug.Log($"[Recruit] 영입 다이얼로그 흐름 활성 — '{recruitData.CompanionName}' (기존 {delay}s 자동 딜레이 무시)");
+
+            // 레벨업 시퀀스 진행 중이면 먼저 끝까지 대기 (자연스러운 순서: Victory → 레벨업 → 영입)
+            if (wasPlayingSequence)
+            {
+                Debug.Log("[BattleManager] 영입 다이얼로그 전에 레벨업 시퀀스 먼저 대기");
+                while (IsPlayingMessageSequence) yield return null;
+                if (postSequenceFadeDelay > 0f) yield return new WaitForSeconds(postSequenceFadeDelay);
+            }
+
+            yield return StartCoroutine(RecruitDialogRoutine(recruitData));
+        }
+        else if (wasPlayingSequence)
         {
             Debug.Log("[BattleManager] 레벨업 시퀀스 진행 중 — 자동 복귀 타이머 무시, 시퀀스 완료까지 대기");
             while (IsPlayingMessageSequence)
@@ -5915,6 +5949,238 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    // ──────────────────────────────────────────────────────────────────
+    // [2026-05-24] 영입 다이얼로그 흐름 (ReturnToDungeonRoutine 내부에서 사용)
+    // - TryInitiateRecruitDialog: 굴림 + 슬롯 체크. 가능하면 CompanionSO 반환.
+    // - RecruitDialogRoutine: 적 sprite 켜기 → 메시지 → YES/NO → 분기 처리
+    // - YES 선택 시 CompanionPartyPersistence.TryAddActive만 호출 (활성 파티 슬롯/_companionInstances는 건드리지 않음 — 사용자 명시)
+    // - WaitForMessageSequence: PlayMessageSequence 동기 대기 헬퍼
+    // - BuildRecruitYesNoPanel / MakeRecruitDialogButton: 런타임 UI 생성
+    // ──────────────────────────────────────────────────────────────────
+
+    /// <summary>마지막 적의 영입 굴림 + 슬롯 여유 체크. 가능하면 recruitData를 반환.</summary>
+    private bool TryInitiateRecruitDialog(out Abyssdawn.CompanionSO recruitData)
+    {
+        recruitData = null;
+        if (_lastDefeatedEnemy == null)
+        {
+            Debug.Log("[Recruit] TryInitiateRecruitDialog: _lastDefeatedEnemy == NULL → 다이얼로그 스킵");
+            return false;
+        }
+        var so = _lastDefeatedEnemy.sourceMonster;
+        if (so == null)
+        {
+            Debug.LogWarning($"[Recruit] '{_lastDefeatedEnemy.enemyName}' sourceMonster == NULL → 다이얼로그 스킵");
+            return false;
+        }
+        if (!so.CanBecomCompanion || so.CompanionData == null)
+        {
+            Debug.Log($"[Recruit] '{so.MonsterName}' 영입 불가 (CanBecomCompanion={so.CanBecomCompanion}, CompanionData={(so.CompanionData == null ? "NULL" : so.CompanionData.CompanionName)})");
+            return false;
+        }
+
+        float roll = Random.value;
+        bool rollSuccess = roll <= so.CompanionChance;
+        if (!rollSuccess)
+        {
+            Debug.Log($"[Recruit] ❌ 굴림 실패 — '{so.MonsterName}' (확률 {so.CompanionChance:P0}, 굴림 {roll:F3})");
+            return false;
+        }
+
+        bool hasActiveSlot = CompanionPartyPersistence.ActiveRoster.Count < CompanionPartyPersistence.MaxActive;
+        bool hasWaitSlot = CompanionPartyPersistence.WaitlistPaths.Count < CompanionPartyPersistence.MaxWaitlist;
+        if (!hasActiveSlot && !hasWaitSlot)
+        {
+            Debug.LogWarning($"[Recruit] ⚠ 굴림은 성공했지만 활성+대기 슬롯 모두 가득 — '{so.MonsterName}' 다이얼로그 스킵");
+            return false;
+        }
+
+        Debug.Log($"[Recruit] ✅ 굴림 성공 + 슬롯 여유 — '{so.MonsterName}' 다이얼로그 진입 (확률 {so.CompanionChance:P0}, 굴림 {roll:F3}, active {CompanionPartyPersistence.ActiveRoster.Count}/{CompanionPartyPersistence.MaxActive}, wait {CompanionPartyPersistence.WaitlistPaths.Count}/{CompanionPartyPersistence.MaxWaitlist})");
+        recruitData = so.CompanionData;
+        return true;
+    }
+
+    /// <summary>영입 다이얼로그 — 적 재활성화(페이드인), 메시지, YES/NO 버튼, 분기 처리.</summary>
+    private IEnumerator RecruitDialogRoutine(Abyssdawn.CompanionSO data)
+    {
+        // 1) 마지막에 죽은 적의 sprite 다시 켜고 alpha 0 → 1 페이드인 (자연스러운 재등장)
+        SpriteRenderer recruitSpriteRef = null;
+        Color recruitSpriteOriginalColor = Color.white;
+        if (_lastDefeatedEnemy != null)
+        {
+            recruitSpriteRef = _lastDefeatedEnemy.GetComponent<SpriteRenderer>();
+            if (recruitSpriteRef != null)
+            {
+                recruitSpriteOriginalColor = recruitSpriteRef.color;
+                recruitSpriteRef.color = new Color(recruitSpriteOriginalColor.r, recruitSpriteOriginalColor.g, recruitSpriteOriginalColor.b, 0f);
+                recruitSpriteRef.enabled = true;
+                Debug.Log($"[Recruit] 다이얼로그: '{_lastDefeatedEnemy.enemyName}' 스프라이트 재활성 (alpha=0에서 시작, 페이드인 {recruitSpriteFadeInDuration:F2}s)");
+
+                if (recruitSpriteFadeInDuration > 0f)
+                {
+                    yield return StartCoroutine(FadeInSpriteRoutine(recruitSpriteRef, recruitSpriteOriginalColor, recruitSpriteFadeInDuration));
+                }
+                else
+                {
+                    recruitSpriteRef.color = recruitSpriteOriginalColor; // 즉시 표시
+                }
+            }
+        }
+
+        // 2) "원함" 메시지 시퀀스 (영어 — 폰트 한글 미지원으로 깨짐 회피)
+        yield return StartCoroutine(WaitForMessageSequence(new System.Collections.Generic.List<string>
+        {
+            $"<color=#FFD700>{data.CompanionName}</color> wants to join your party!"
+        }));
+
+        // 3) YES/NO 패널 — 커스텀 우선, 없으면 런타임 생성
+        GameObject panel;
+        Button yesBtn;
+        Button noBtn;
+        bool isCustomPanel = customRecruitPanel != null && customRecruitYesButton != null && customRecruitNoButton != null;
+
+        if (isCustomPanel)
+        {
+            panel = customRecruitPanel;
+            yesBtn = customRecruitYesButton;
+            noBtn = customRecruitNoButton;
+            panel.SetActive(true);
+            Debug.Log($"[Recruit] 커스텀 영입 패널 사용: '{panel.name}'");
+        }
+        else
+        {
+            panel = BuildRecruitYesNoPanel(out yesBtn, out noBtn);
+            Debug.Log("[Recruit] 커스텀 패널 미연결 — 런타임 자동 생성된 회색 패널 사용");
+        }
+
+        // listener를 변수에 캡처해 우리 액션만 add/remove (Inspector에서 설정한 다른 onClick 보존)
+        int? choice = null; // null=대기, 0=NO, 1=YES
+        UnityEngine.Events.UnityAction yesAction = () => { if (choice == null) choice = 1; };
+        UnityEngine.Events.UnityAction noAction  = () => { if (choice == null) choice = 0; };
+        yesBtn.onClick.AddListener(yesAction);
+        noBtn.onClick.AddListener(noAction);
+        Debug.Log("[Recruit] YES/NO listener 등록, 사용자 입력 대기");
+
+        // 4) 사용자 선택 대기
+        while (choice == null) yield return null;
+
+        // 우리 listener만 제거 (다른 listener 보존)
+        yesBtn.onClick.RemoveListener(yesAction);
+        noBtn.onClick.RemoveListener(noAction);
+
+        if (isCustomPanel)
+        {
+            panel.SetActive(false);
+        }
+        else
+        {
+            Destroy(panel);
+        }
+        Debug.Log($"[Recruit] 사용자 선택: {(choice == 1 ? "YES" : "NO")}");
+
+        // 5) 분기
+        if (choice == 1)
+        {
+            // YES — 영속화 등록만. 활성 파티 슬롯/_companionInstances는 건드리지 않음 (사용자 명시)
+            // 다음 씬에서 RestoreCompanionInstancesFromPersistence가 ActiveRoster 기반으로 동료 인스턴스화.
+            bool added = CompanionPartyPersistence.TryAddActive(data, data.HP, data.MP);
+            Debug.Log($"[Recruit] ✅ YES → CompanionPartyPersistence.TryAddActive 호출. 반환={added}, ActiveRoster.Count={CompanionPartyPersistence.ActiveRoster.Count}, WaitlistPaths.Count={CompanionPartyPersistence.WaitlistPaths.Count}");
+
+            // "동료가 되었다" 메시지 (영어)
+            yield return StartCoroutine(WaitForMessageSequence(new System.Collections.Generic.List<string>
+            {
+                $"<color=#90EE90>{data.CompanionName}</color> joined your party!"
+            }));
+
+            yield return new WaitForSeconds(3f);
+        }
+        else
+        {
+            Debug.Log($"[Recruit] NO → '{data.CompanionName}' 영입 거절, 즉시 맵 복귀");
+        }
+    }
+
+    /// <summary>SpriteRenderer alpha를 0에서 originalColor의 alpha까지 duration초 동안 보간.</summary>
+    private IEnumerator FadeInSpriteRoutine(SpriteRenderer sr, Color targetColor, float duration)
+    {
+        if (sr == null) yield break;
+        float elapsed = 0f;
+        float targetAlpha = targetColor.a;
+        while (elapsed < duration)
+        {
+            if (sr == null) yield break;
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float a = Mathf.Lerp(0f, targetAlpha, t);
+            sr.color = new Color(targetColor.r, targetColor.g, targetColor.b, a);
+            yield return null;
+        }
+        if (sr != null) sr.color = targetColor;
+    }
+
+    /// <summary>PlayMessageSequence를 동기적으로 대기 (시퀀스 종료까지 yield).</summary>
+    private IEnumerator WaitForMessageSequence(System.Collections.Generic.IList<string> lines)
+    {
+        PlayMessageSequence(lines);
+        yield return null; // 시퀀스 코루틴이 시작될 한 프레임 확보
+        while (IsPlayingMessageSequence) yield return null;
+    }
+
+    /// <summary>YES/NO 패널을 Canvas 자식으로 런타임 생성. 최소 디자인.</summary>
+    private GameObject BuildRecruitYesNoPanel(out Button yesBtn, out Button noBtn)
+    {
+        Canvas targetCanvas = this.canvas;
+        if (targetCanvas == null) targetCanvas = FindAnyObjectByType<Canvas>();
+
+        GameObject panel = new GameObject("RecruitYesNoPanel", typeof(RectTransform), typeof(Image));
+        panel.transform.SetParent(targetCanvas != null ? targetCanvas.transform : null, false);
+        var rt = panel.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(420, 160);
+        rt.anchoredPosition = Vector2.zero;
+
+        var img = panel.GetComponent<Image>();
+        img.color = new Color(0f, 0f, 0f, 0.85f);
+
+        yesBtn = MakeRecruitDialogButton("YES", panel.transform, new Vector2(-95, 0));
+        noBtn  = MakeRecruitDialogButton("NO",  panel.transform, new Vector2( 95, 0));
+
+        panel.transform.SetAsLastSibling(); // 다른 UI 위로
+        return panel;
+    }
+
+    private Button MakeRecruitDialogButton(string label, Transform parent, Vector2 anchoredPos)
+    {
+        GameObject go = new GameObject($"Btn_{label}", typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(150, 80);
+        rt.anchoredPosition = anchoredPos;
+
+        var img = go.GetComponent<Image>();
+        img.color = new Color(0.22f, 0.22f, 0.22f, 1f);
+
+        GameObject txtGo = new GameObject("Text", typeof(RectTransform));
+        txtGo.transform.SetParent(go.transform, false);
+        var tmp = txtGo.AddComponent<TextMeshProUGUI>();
+        var txtRt = tmp.rectTransform;
+        txtRt.anchorMin = Vector2.zero;
+        txtRt.anchorMax = Vector2.one;
+        txtRt.offsetMin = Vector2.zero;
+        txtRt.offsetMax = Vector2.zero;
+        tmp.text = label;
+        tmp.fontSize = 36;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        return go.GetComponent<Button>();
+    }
+
     /// <summary>활성 슬롯 또는 대기열에 동료 배치.</summary>
     private void AcceptCompanion(Abyssdawn.CompanionSO data)
     {
@@ -7725,9 +7991,8 @@ private void CacheHeroSkills()
             UpdateStatusUI();
             AddMessage("All enemies defeated!");
 
-            // [2026-05-24] 영입 시스템 (1차): 마지막에 죽은 적 1마리로 영입 판정.
-            // EXP 부여 전에 호출하여 콘솔 로그 순서가 자연스럽게 됨.
-            TryRecruitLastDefeatedMonster();
+            // [2026-05-24] 영입 굴림은 ReturnToDungeonRoutine으로 이동.
+            // 사용자 YES/NO 다이얼로그 + 메시지 시퀀스가 맵 복귀 전 단계에 통합됨.
 
             // [Anti-Gravity] 경험치 정산 로직
             int totalExp = 0;
