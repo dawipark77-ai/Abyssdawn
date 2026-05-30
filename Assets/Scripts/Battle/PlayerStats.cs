@@ -937,6 +937,13 @@ public class PlayerStats : MonoBehaviour
             Debug.Log($"[PlayerStats]   - Attack: {characterClass.attackBonus:+#;-#;0}, Defense: {characterClass.defenseBonus:+#;-#;0}, Magic: {characterClass.magicBonus:+#;-#;0}");
             Debug.Log($"[PlayerStats]   - HP/MP 직업 가산: HP +{characterClass.hpBonus}, MP +{characterClass.mpBonus}");
         }
+        else if (companionSource != null)
+        {
+            // [2026-05-24] 영입 동료는 직업 없이 CompanionSO 고정 스탯이 진실의 단일 소스.
+            // 자동 Warrior 할당이 동료 HP/스탯을 오염시키는 것을 차단.
+            // characterClass는 null 유지 → maxHP 계산식에서 hpMultiplier=1.0, classBonus=0 적용 → baseHP가 그대로 최종값.
+            Debug.Log($"[PlayerStats] '{playerName}' 영입 동료 — 자동 직업 할당 스킵 (CompanionSO 고정 스탯 유지)");
+        }
         else
         {
             Debug.LogWarning($"[PlayerStats] HeroData에 직업이 설정되지 않았습니다! 기본 Warrior 직업을 설정합니다.");
