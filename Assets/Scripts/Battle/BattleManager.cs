@@ -6069,6 +6069,25 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[Recruit]   ├─ ATK {allyStats.Attack}, DEF {allyStats.Defense}, MAG {allyStats.Magic}, AGI {allyStats.Agility}, LUK {allyStats.Luck}");
         Debug.Log($"[Recruit]   └─ equippedSkills.Count={activeSkillCount}{(activeSkillCount > 0 ? $" (첫 스킬: '{allyStats.statData.equippedSkills[0]?.skillName}')" : " (액티브 스킬 없음)")}");
 
+        // [Recruit-DIAG] HP 분해 추적 — CompanionSO.HP와 실제 maxHP가 다르면 어디서 +가 생겼는지 식별
+        // 의심 1순위: PlayerStats.Awake가 statData.currentJob == null이면 SetClass("Warrior")로 자동 할당.
+        var cc = allyStats.characterClass;
+        int classHpBonus = cc != null ? cc.hpBonus : 0;
+        float classHpMult = cc != null ? cc.hpMultiplier : 1f;
+        int equipHp = allyStats.GetEquipmentHPBonus();
+        int totalHpBonus = allyStats.GetHPBonus(); // maxHP - baseHP
+        Debug.Log($"[Recruit-DIAG] HP 분해 — '{data.CompanionName}'");
+        Debug.Log($"[Recruit-DIAG]   ├─ CompanionSO.HP={data.HP} → baseHP={allyStats.baseHP} (그대로 복사)");
+        Debug.Log($"[Recruit-DIAG]   ├─ characterClass={(cc == null ? "NULL ✓" : $"'{cc.className}' ⚠ (자동 할당된 듯 — Awake가 SetClass 실행)")}");
+        Debug.Log($"[Recruit-DIAG]   ├─ class hpMultiplier={classHpMult:F2}, hpBonus={classHpBonus}");
+        Debug.Log($"[Recruit-DIAG]   ├─ equipmentHPBonus={equipHp} (장비 미장착이면 0)");
+        Debug.Log($"[Recruit-DIAG]   ├─ totalHpBonus (maxHP - baseHP) = {totalHpBonus}");
+        Debug.Log($"[Recruit-DIAG]   └─ maxHP({allyStats.maxHP}) = baseHP({allyStats.baseHP}) × mult({classHpMult:F2}) + classBonus({classHpBonus}) + 기타({totalHpBonus - classHpBonus})");
+        if (cc != null)
+        {
+            Debug.LogWarning($"[Recruit-DIAG] ⚠ 동료에 직업이 할당됨: '{cc.className}'. CompanionSO는 직업 없이 고정 스탯이어야 함. PlayerStats.Awake의 fallback 자동 Warrior 할당이 원인으로 추정.");
+        }
+
         return allyStats;
     }
 

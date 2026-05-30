@@ -519,7 +519,7 @@ MonoBehaviour:
   _fallbackCurrentHP: 0
   _fallbackCurrentMP: 0
   _fallbackLevel: 1
-  _fallbackExp: 0
+  _fallbackExp: 95
   _fallbackFreeStatPoints: 0
   _fallbackSkillPoints: 0
   _fallbackBaseHP: 0
