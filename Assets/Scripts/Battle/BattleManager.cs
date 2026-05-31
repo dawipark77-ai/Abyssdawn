@@ -1969,13 +1969,14 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log($"[Recruit] 영입 다이얼로그 흐름 활성 — '{recruitData.CompanionName}' (기존 {delay}s 자동 딜레이 무시)");
 
-            // 레벨업 시퀀스 진행 중이면 먼저 끝까지 대기 (자연스러운 순서: Victory → 레벨업 → 영입)
-            if (wasPlayingSequence)
-            {
-                Debug.Log("[BattleManager] 영입 다이얼로그 전에 레벨업 시퀀스 먼저 대기");
-                while (IsPlayingMessageSequence) yield return null;
-                if (postSequenceFadeDelay > 0f) yield return new WaitForSeconds(postSequenceFadeDelay);
-            }
+            // [2026-05-25 BUGFIX] wasPlayingSequence 스냅샷 의존 제거 → 무조건 가드로 일원화.
+            // 이전 결함: 시퀀스 시작이 이 코루틴 첫 프레임보다 늦거나 멀티 레벨업으로
+            //   _sequenceRoutine이 재시작되면 스냅샷이 빗나가 가드가 무력화됨 → 로그 끝나기 전 영입 시작.
+            // 수정: RecruitDialogRoutine 직전에 조건과 무관하게 시퀀스 완전 종료까지 대기.
+            //   멀티 레벨업도 안전 — PlayMessageSequence가 새 시퀀스를 set하면 _sequenceRoutine != null이
+            //   다시 true가 되어 마지막 레벨업 시퀀스까지 끝나야 루프를 빠져나감.
+            yield return StartCoroutine(WaitForActiveMessageSequence("영입 전 시퀀스 대기"));
+            if (postSequenceFadeDelay > 0f) yield return new WaitForSeconds(postSequenceFadeDelay);
 
             yield return StartCoroutine(RecruitDialogRoutine(recruitData));
         }
@@ -2026,6 +2027,34 @@ public class BattleManager : MonoBehaviour
             Debug.Log($"[BM:DIAG] LoadScene('{sceneToLoad}') — dict count BEFORE LoadScene={GameManager.staticPartyData.Count}");
             SceneManager.LoadScene(sceneToLoad);
         }
+    }
+
+    /// <summary>
+    /// [2026-05-25] 진행 중인 메시지 시퀀스(레벨업 등)가 완전히 끝날 때까지 대기.
+    /// 멀티 레벨업으로 시퀀스가 StopCoroutine 후 재시작돼도, _sequenceRoutine != null인 동안 계속 대기.
+    /// 안전장치: maxWaitSeconds 초과 시(시퀀스가 비정상으로 영영 안 끝나는 경우) 강제 탈출 + 경고.
+    /// 정상 시퀀스는 사용자 클릭으로 종료되므로 타임아웃은 비상용. 넉넉하게 잡아 일반 플레이를 방해하지 않음.
+    /// </summary>
+    private IEnumerator WaitForActiveMessageSequence(string reason, float maxWaitSeconds = 120f)
+    {
+        if (!IsPlayingMessageSequence)
+        {
+            Debug.Log($"[BattleManager] WaitForActiveMessageSequence({reason}): 진행 중 시퀀스 없음 — 즉시 통과");
+            yield break;
+        }
+
+        Debug.Log($"[BattleManager] WaitForActiveMessageSequence({reason}): 시퀀스 완료까지 대기 시작");
+        float startUnscaled = Time.unscaledTime;
+        while (IsPlayingMessageSequence)
+        {
+            if (Time.unscaledTime - startUnscaled > maxWaitSeconds)
+            {
+                Debug.LogWarning($"[BattleManager] WaitForActiveMessageSequence({reason}): {maxWaitSeconds}s 타임아웃 — 시퀀스가 비정상으로 종료 안 됨. 강제 진행.");
+                break;
+            }
+            yield return null;
+        }
+        Debug.Log($"[BattleManager] WaitForActiveMessageSequence({reason}): 대기 종료 (시퀀스 {(IsPlayingMessageSequence ? "타임아웃 강제" : "정상")} 완료)");
     }
 
     private IEnumerator GameOverRoutine(float delay)
