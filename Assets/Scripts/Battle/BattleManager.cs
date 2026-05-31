@@ -6003,7 +6003,7 @@ public class BattleManager : MonoBehaviour
     /// <summary>영입 다이얼로그 — 적 재활성화(페이드인), 메시지, YES/NO 버튼, 분기 처리.</summary>
     private IEnumerator RecruitDialogRoutine(Abyssdawn.CompanionSO data)
     {
-        // 1) 마지막에 죽은 적의 sprite 다시 켜고 alpha 0 → 1 페이드인 (자연스러운 재등장)
+        // 1) 마지막에 죽은 적의 sprite를 화면 중앙으로 옮기고 alpha 0 → 1 페이드인 (자연스러운 재등장)
         SpriteRenderer recruitSpriteRef = null;
         Color recruitSpriteOriginalColor = Color.white;
         if (_lastDefeatedEnemy != null)
@@ -6011,6 +6011,19 @@ public class BattleManager : MonoBehaviour
             recruitSpriteRef = _lastDefeatedEnemy.GetComponent<SpriteRenderer>();
             if (recruitSpriteRef != null)
             {
+                // 화면 중앙으로 위치 이동 (메인 카메라 기준 월드 중앙).
+                // z는 기존 sprite의 z 유지(카메라와의 거리), 카메라 정면 중앙에 배치.
+                Camera cam = Camera.main;
+                if (cam != null)
+                {
+                    Vector3 spritePos = recruitSpriteRef.transform.position;
+                    Vector3 centerWorld = cam.transform.position
+                        + cam.transform.forward * Mathf.Abs(spritePos.z - cam.transform.position.z);
+                    centerWorld.z = spritePos.z; // 2D 정렬 유지
+                    recruitSpriteRef.transform.position = centerWorld;
+                    Debug.Log($"[Recruit] 다이얼로그: '{_lastDefeatedEnemy.enemyName}' 화면 중앙으로 이동 {spritePos} → {centerWorld}");
+                }
+
                 recruitSpriteOriginalColor = recruitSpriteRef.color;
                 recruitSpriteRef.color = new Color(recruitSpriteOriginalColor.r, recruitSpriteOriginalColor.g, recruitSpriteOriginalColor.b, 0f);
                 recruitSpriteRef.enabled = true;
@@ -6027,10 +6040,12 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        // 2) "원함" 메시지 시퀀스 (영어 — 폰트 한글 미지원으로 깨짐 회피)
+        // 2) 영입 권유 문구 — CompanionRecruitPhrases에서 랜덤 선택 ({0}에 동료 이름 삽입).
+        string invitePhrase = Abyssdawn.CompanionRecruitPhrases.GetRandomPhrase($"<color=#FFD700>{data.CompanionName}</color>");
+        Debug.Log($"[Recruit] 랜덤 권유 문구: \"{invitePhrase}\"");
         yield return StartCoroutine(WaitForMessageSequence(new System.Collections.Generic.List<string>
         {
-            $"<color=#FFD700>{data.CompanionName}</color> wants to join your party!"
+            invitePhrase
         }));
 
         // 3) YES/NO 패널 — 커스텀 우선, 없으면 런타임 생성
