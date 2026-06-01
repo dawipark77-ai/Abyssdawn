@@ -4,7 +4,14 @@ using UnityEngine.UI;
 
 /// <summary>
 /// StatusPanel의 슬롯 버튼(SlotButton1~4)으로 스테이터스 탭을 전환하는 컨트롤러.
-/// 한 번에 하나의 슬롯 내용만 표시한다.
+/// 한 번에 하나의 슬롯만 표시한다.
+///
+/// [2026-05-25 BUGFIX] 켜고 끄는 대상은 "부모 Slot1~4 GameObject"이다.
+///   이전 버그: 자식 내용(Character_Slot1/Companion_SLot)만 SetActive 했더니
+///   부모 Slot1~4가 꺼져 있어 자식을 켜도 화면에 안 보였음.
+///   수정: 부모 Slot1~4를 토글 → 부모가 켜지면 자식 내용도 함께 보임.
+///   따라서 Inspector의 slotRoot 필드에는 Slot1/Slot2/Slot3/Slot4(부모)를 연결한다.
+///   (Character_Slot1이나 Companion_SLot 자식이 아니라 그 부모 Slot)
 ///
 /// 슬롯 활성(SetActive) 제어는 이 컴포넌트가 단독으로 맡는다:
 ///   - DungeonStatusView는 slots[0].slotRoot=None이라 SetActive를 안 함 (텍스트만 갱신)
@@ -13,7 +20,7 @@ using UnityEngine.UI;
 /// 동작:
 ///   - Awake: 각 SlotButton.onClick을 코드로 동적 연결 → SelectSlot(index)
 ///   - OnEnable(패널 열림): 기본 탭(index 0 = Slot1/Hero)만 표시
-///   - 버튼 클릭: 해당 content만 SetActive(true), 나머지 SetActive(false)
+///   - 버튼 클릭: 해당 부모 Slot만 SetActive(true), 나머지 부모 Slot SetActive(false)
 ///   - 빈 슬롯(동료 없음)도 버튼 누르면 그대로 SetActive(true) — 동료 유무로 막지 않음
 /// </summary>
 public class StatusTabController : MonoBehaviour
@@ -24,8 +31,9 @@ public class StatusTabController : MonoBehaviour
         [Tooltip("이 슬롯의 버튼 (SlotButton1~4)")]
         public Button slotButton;
 
-        [Tooltip("이 버튼이 보여줄 내용 GameObject (Character_Slot1 / Companion_SLot2~4)")]
-        public GameObject content;
+        [Tooltip("이 버튼이 보여줄 '부모 Slot' GameObject (Slot1 / Slot2 / Slot3 / Slot4). " +
+                 "자식 Character_Slot1/Companion_SLot이 아니라 그 부모 Slot을 연결할 것.")]
+        public GameObject slotRoot;
     }
 
     [Header("Slot Tabs (Element 0 = Slot1/Hero 기본 탭)")]
@@ -72,8 +80,10 @@ public class StatusTabController : MonoBehaviour
     }
 
     /// <summary>
-    /// 지정 인덱스 슬롯의 content만 표시하고 나머지는 숨긴다.
+    /// 지정 인덱스의 부모 Slot만 표시하고 나머지 부모 Slot은 숨긴다.
+    /// 부모 Slot이 켜지면 그 자식 내용(Character_Slot1/Companion_SLot)도 함께 보인다.
     /// 빈 슬롯(동료 없음)도 무조건 SetActive(true) — 동료 유무로 막지 않음.
+    /// 한 번에 하나의 부모 Slot만 켜짐(나머지는 반드시 꺼짐).
     /// </summary>
     public void SelectSlot(int index)
     {
@@ -82,12 +92,12 @@ public class StatusTabController : MonoBehaviour
         for (int i = 0; i < tabs.Count; i++)
         {
             var tab = tabs[i];
-            if (tab == null || tab.content == null) continue;
+            if (tab == null || tab.slotRoot == null) continue;
 
             bool show = (i == index);
-            if (tab.content.activeSelf != show)
+            if (tab.slotRoot.activeSelf != show)
             {
-                tab.content.SetActive(show);
+                tab.slotRoot.SetActive(show);
             }
         }
     }
