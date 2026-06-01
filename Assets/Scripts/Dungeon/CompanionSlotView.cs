@@ -42,11 +42,12 @@ public class CompanionSlotView : MonoBehaviour
         public TextMeshProUGUI lukText;
 
         [Header("BattleSkills")]
-        [Tooltip("ActiveSkills 아이콘 6칸. 채워지지 않는 칸은 SetActive(false).")]
-        public Image[] activeSkillIcons = new Image[6];
+        // PassiveSkills를 ActiveSkills보다 먼저 선언 → Inspector에서 위쪽에 표시.
+        [Tooltip("PassiveSkills 아이콘 3칸 (PassiveSkills Slot1~3). 채워지지 않는 칸은 SetActive(false).")]
+        public Image[] passiveSkillIcons = new Image[3];   // 3칸
 
-        [Tooltip("PassiveSkills 아이콘 3칸. 채워지지 않는 칸은 SetActive(false).")]
-        public Image[] passiveSkillIcons = new Image[3];
+        [Tooltip("ActiveSkills 아이콘 6칸 (ActiveSkills Slot1~6). 채워지지 않는 칸은 SetActive(false).")]
+        public Image[] activeSkillIcons = new Image[6];    // 6칸
     }
 
     [Header("Slots (Slot2=0, Slot3=1, Slot4=2 — ActiveRoster 인덱스와 1:1)")]
