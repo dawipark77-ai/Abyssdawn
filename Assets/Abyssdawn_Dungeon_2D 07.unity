@@ -4517,6 +4517,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 91794893}
+  - component: {fileID: 91794894}
   m_Layer: 5
   m_Name: Reserves
   m_TagString: Untagged
@@ -4544,6 +4545,35 @@ RectTransform:
   m_AnchoredPosition: {x: 0.00018311, y: 0.0018311}
   m_SizeDelta: {x: 1011, y: 1511.3}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &91794894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91794892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d09034c8a8e1744da49fc3292db7eaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReservesView
+  slots:
+  - slotRoot: {fileID: 1892158900}
+    nameText: {fileID: 892154394}
+    lvText: {fileID: 1549099080}
+    hpText: {fileID: 671764368}
+    mpText: {fileID: 2003150628}
+  - slotRoot: {fileID: 994227888}
+    nameText: {fileID: 1407760339}
+    lvText: {fileID: 1388561673}
+    hpText: {fileID: 1569347567}
+    mpText: {fileID: 474526682}
+  - slotRoot: {fileID: 511253812}
+    nameText: {fileID: 835857108}
+    lvText: {fileID: 352515647}
+    hpText: {fileID: 1061626674}
+    mpText: {fileID: 2095524338}
+  lvPlaceholder: "\u2014"
 --- !u!1 &92940705
 GameObject:
   m_ObjectHideFlags: 0
