@@ -1104,7 +1104,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &24126016
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1325,6 +1325,8 @@ MonoBehaviour:
     slotRoot: {fileID: 702286101}
   - slotButton: {fileID: 1894186523}
     slotRoot: {fileID: 1070246425}
+  - slotButton: {fileID: 773187055}
+    slotRoot: {fileID: 91794892}
   defaultTabIndex: 0
 --- !u!1 &29166818
 GameObject:
