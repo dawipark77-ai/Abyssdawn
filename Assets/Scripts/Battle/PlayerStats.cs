@@ -57,6 +57,10 @@ public class PlayerStats : MonoBehaviour
     /// <summary>영입 동료일 때 원본 CompanionSO. 프리셋 Warrior/Rogue/Wizard는 null.</summary>
     [HideInInspector] public Abyssdawn.CompanionSO companionSource;
 
+    // [2026-05-25 ID 3단계] 영입 개체 고유 ID. ActiveRoster Entry.id와 1:1 매칭용.
+    // 0 = 미할당. Restore 시 entry.id를 받아 채워짐. Sync가 이 id로 정확한 entry를 갱신.
+    [HideInInspector] public int companionId = 0;
+
     public bool IsRecruitedCompanion => companionSource != null;
 
     // GameManager 호환용: 현재 직업 에셋의 이름을 반환

@@ -108,15 +108,42 @@ public static class CompanionPartyPersistence
 
             string path = GetResourcePath(stats.companionSource);
 
-            // ActiveRoster에서 같은 resourcePath의 첫 entry 찾기
+            // [2026-05-25 ID 3단계] 매칭 우선순위:
+            //   1) stats.companionId != 0 → entry.id == companionId 정확 매칭 (같은 종 2마리 구분)
+            //   2) companionId == 0(미할당) → resourcePath 첫 매칭 폴백 (안전장치)
+            //   3) 어느 쪽도 못 찾음 → 신규 Add (새 id 발급)
             Entry match = null;
-            for (int i = 0; i < ActiveRoster.Count; i++)
+
+            if (stats.companionId != 0)
             {
-                if (ActiveRoster[i] != null && ActiveRoster[i].resourcePath == path)
+                for (int i = 0; i < ActiveRoster.Count; i++)
                 {
-                    match = ActiveRoster[i];
-                    break;
+                    if (ActiveRoster[i] != null && ActiveRoster[i].id == stats.companionId)
+                    {
+                        match = ActiveRoster[i];
+                        break;
+                    }
                 }
+                if (match != null)
+                    Debug.Log($"[Sync-DIAG] 인스턴스 companionId={stats.companionId} → entry.id={match.id} 매칭, HP/MP 갱신 ({stats.currentHP}/{stats.currentMP})");
+                else
+                    Debug.LogWarning($"[Sync-DIAG] 인스턴스 companionId={stats.companionId} → 해당 id의 entry 없음. 신규 Add로 처리");
+            }
+            else
+            {
+                // id=0 → resourcePath 첫 매칭 폴백
+                for (int i = 0; i < ActiveRoster.Count; i++)
+                {
+                    if (ActiveRoster[i] != null && ActiveRoster[i].resourcePath == path)
+                    {
+                        match = ActiveRoster[i];
+                        break;
+                    }
+                }
+                if (match != null)
+                    Debug.Log($"[Sync-DIAG] 인스턴스 companionId=0 → resourcePath 폴백 매칭 (entry.id={match.id}, path='{path}'), HP/MP 갱신");
+                else
+                    Debug.Log($"[Sync-DIAG] 인스턴스 companionId=0 → resourcePath 폴백도 실패 ('{path}'). 신규 Add로 처리");
             }
 
             if (match != null)

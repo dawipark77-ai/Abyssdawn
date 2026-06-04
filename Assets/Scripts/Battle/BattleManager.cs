@@ -2229,6 +2229,7 @@ public class BattleManager : MonoBehaviour
 
             ally.currentHP = Mathf.Clamp(entry.currentHP, 0, ally.maxHP);
             ally.currentMP = Mathf.Clamp(entry.currentMP, 0, ally.maxMP);
+            ally.companionId = entry.id;   // [2026-05-25 ID 3단계] entry.id를 인스턴스로 전달 (Sync id 매칭용)
             _companionInstances.Add(ally);
             restored++;
         }
