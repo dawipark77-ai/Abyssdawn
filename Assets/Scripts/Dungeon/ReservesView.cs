@@ -14,14 +14,14 @@ using Abyssdawn;            // CompanionSO
 ///   - LV는 CompanionSO에 레벨 없음 → "—" 표시 (레벨업 안 하는 고정 스탯 동료)
 ///
 /// 갱신: OnEnable 1회 (WaitlistPaths는 던전에서 변동 없음).
-/// 빈 대기 슬롯(동료 없음)은 slotRoot.SetActive(false)로 숨김.
+/// [2026-05-25] 빈 대기 슬롯도 틀은 항상 표시(slotRoot SetActive(true) 유지). 값 텍스트만 ""로 비움.
 /// </summary>
 public class ReservesView : MonoBehaviour
 {
     [System.Serializable]
     public class ReserveSlot
     {
-        [Tooltip("이 대기 슬롯 전체 GameObject (Reserves1~3). 동료 없으면 SetActive(false)로 숨김.")]
+        [Tooltip("이 대기 슬롯 전체 GameObject (Reserves1~3). 빈 슬롯도 틀은 항상 표시(SetActive true), 값만 비움.")]
         public GameObject slotRoot;
 
         [Header("값 텍스트 (라벨은 씬의 정적 텍스트, 여기엔 값 _text만 연결)")]
@@ -54,22 +54,24 @@ public class ReservesView : MonoBehaviour
             var slot = slots[i];
             if (slot == null) continue;
 
-            // 해당 인덱스에 대기 동료가 없으면 슬롯 숨김
+            // [2026-05-25] 빈 슬롯도 틀은 항상 표시 — slotRoot는 끄지 않고 값만 비운다.
+            if (slot.slotRoot != null) slot.slotRoot.SetActive(true);
+
+            // 해당 인덱스에 대기 동료가 없으면 값만 비움 (틀은 유지)
             if (waitlist == null || i >= waitlist.Count || string.IsNullOrEmpty(waitlist[i]))
             {
-                if (slot.slotRoot != null) slot.slotRoot.SetActive(false);
+                ClearSlot(slot);
                 continue;
             }
 
             CompanionSO so = CompanionPartyPersistence.LoadCompanion(waitlist[i]);
             if (so == null)
             {
-                Debug.LogWarning($"[ReservesView] 대기 슬롯 {i}: LoadCompanion 실패 '{waitlist[i]}' → 슬롯 숨김");
-                if (slot.slotRoot != null) slot.slotRoot.SetActive(false);
+                Debug.LogWarning($"[ReservesView] 대기 슬롯 {i}: LoadCompanion 실패 '{waitlist[i]}' → 값 비움 (틀 유지)");
+                ClearSlot(slot);
                 continue;
             }
 
-            if (slot.slotRoot != null) slot.slotRoot.SetActive(true);
             FillSlot(slot, so);
         }
     }
@@ -80,5 +82,14 @@ public class ReservesView : MonoBehaviour
         if (slot.lvText != null)   slot.lvText.text   = lvPlaceholder;          // 레벨 없음 → "—"
         if (slot.hpText != null)   slot.hpText.text   = $"{so.HP} / {so.HP}";   // 대기 중 풀피 (max/max)
         if (slot.mpText != null)   slot.mpText.text   = $"{so.MP} / {so.MP}";
+    }
+
+    /// <summary>빈 대기 슬롯 — 값 텍스트만 비움(라벨은 씬 정적 텍스트라 안 건드림). 틀은 유지.</summary>
+    private void ClearSlot(ReserveSlot slot)
+    {
+        if (slot.nameText != null) slot.nameText.text = "";
+        if (slot.lvText != null)   slot.lvText.text   = "";
+        if (slot.hpText != null)   slot.hpText.text   = "";
+        if (slot.mpText != null)   slot.mpText.text   = "";
     }
 }
