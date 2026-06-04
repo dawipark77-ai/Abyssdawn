@@ -6281,7 +6281,11 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("[Recruit-DIAG] → 대기열 분기 진입 (활성 fail, 대기 pass)");
             _companionWaitlist.Add(data);
-            CompanionPartyPersistence.WaitlistPaths.Add(CompanionPartyPersistence.GetResourcePath(data));
+            // [2025-05-25 ID 2단계] WaitlistPaths가 List<WaitEntry>로 바뀜.
+            // 이 AcceptCompanion 메서드는 죽은 코드(TryRecruitLastDefeatedMonster 미호출 체인)이며,
+            // _nextCompanionId가 private이라 여기서 id 발급 불가 → 줄 비활성화(컴파일 통과용).
+            // 실제 대기열 등록은 CompanionPartyPersistence.TryAddActive(다이얼로그 경로)가 담당.
+            // CompanionPartyPersistence.WaitlistPaths.Add(CompanionPartyPersistence.GetResourcePath(data));
             Debug.Log($"[Recruit] → 활성 파티 가득 — 대기열에 추가: '{data.CompanionName}' (대기 {_companionWaitlist.Count}/{maxCompanionWaitlist})");
         }
         else

@@ -20,15 +20,27 @@ public static class CompanionPartyPersistence
         public int currentMP;
     }
 
+    // [2026-05-25 ID 2단계] 대기열 전용 경량 항목. id + resourcePath만 보관.
+    // 대기 동료는 전투 참전을 안 하므로 currentHP/MP 변동이 없음 → Entry의 HP/MP 필드 불필요.
+    // 의미 있는 필드만 둬서 데이터 의도를 명확히 함. (활성 승격 시 HP/MP는 CompanionSO.HP로 채우면 됨)
+    [Serializable]
+    public class WaitEntry
+    {
+        public int id;
+        public string resourcePath;
+    }
+
     // [2026-05-25 ID 1단계] 동료 개체 ID 순차 카운터. 발급 시마다 ++.
-    // static이라 Domain Reload 시 1로 리셋 — 세션 내 유일성만 보장(저장/로드는 이번 범위 아님).
+    // 활성·대기 전체에서 공유 → 전역 유일. static이라 Domain Reload 시 1로 리셋
+    // (세션 내 유일성만 보장, 저장/로드는 이번 범위 아님).
     private static int _nextCompanionId = 1;
 
     public const int MaxActive = 3;
     public const int MaxWaitlist = 3;
 
     public static readonly List<Entry> ActiveRoster = new List<Entry>(MaxActive);
-    public static readonly List<string> WaitlistPaths = new List<string>(MaxWaitlist);
+    // [2026-05-25 ID 2단계] List<string> → List<WaitEntry> (id 포함). 이름은 호환 위해 WaitlistPaths 유지.
+    public static readonly List<WaitEntry> WaitlistPaths = new List<WaitEntry>(MaxWaitlist);
 
     public static void Clear()
     {
@@ -63,8 +75,10 @@ public static class CompanionPartyPersistence
 
         if (WaitlistPaths.Count < MaxWaitlist)
         {
-            // [1단계 제외] WaitlistPaths는 List<string> 그대로 — ID 미발급 (2단계로 미룸)
-            WaitlistPaths.Add(path);
+            // [2단계] 대기열도 id 발급 (_nextCompanionId 공유 → 활성·대기 전역 유일)
+            int waitId = _nextCompanionId++;
+            WaitlistPaths.Add(new WaitEntry { id = waitId, resourcePath = path });
+            Debug.Log($"[Companion-ID] 발급(대기열): resourcePath='{path}', id={waitId} (TryAddActive 대기열)");
             return false;
         }
 
