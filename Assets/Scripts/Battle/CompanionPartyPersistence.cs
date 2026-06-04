@@ -38,13 +38,52 @@ public static class CompanionPartyPersistence
     public const int MaxActive = 3;
     public const int MaxWaitlist = 3;
 
+    // [2026-05-25 고정 3칸] ActiveRoster는 항상 Count==MaxActive(3) 고정. 각 칸은 Entry 또는 null.
+    //   - ActiveRoster[0]=슬롯0(Companion_SLot2), [1]=슬롯1(Slot3), [2]=슬롯2(Slot4) — 인덱스=슬롯 고정.
+    //   - 방출 시 그 칸을 null로 (당겨오기 없음, 빈 자리 유지). RemoveAt 금지.
+    //   - "실제 동료 수"는 CountActive()로 (Count는 항상 3이므로 의미 없음).
+    // static 생성자에서 null 3칸으로 초기화.
     public static readonly List<Entry> ActiveRoster = new List<Entry>(MaxActive);
     // [2026-05-25 ID 2단계] List<string> → List<WaitEntry> (id 포함). 이름은 호환 위해 WaitlistPaths 유지.
+    // (이번 1차 작업에서 WaitlistPaths는 가변 리스트 그대로 — 고정 칸 변경은 별도 작업)
     public static readonly List<WaitEntry> WaitlistPaths = new List<WaitEntry>(MaxWaitlist);
+
+    static CompanionPartyPersistence()
+    {
+        EnsureActiveRosterFixedSize();
+    }
+
+    /// <summary>ActiveRoster를 항상 MaxActive(3)칸으로 보장. 부족하면 null로 채움.</summary>
+    private static void EnsureActiveRosterFixedSize()
+    {
+        while (ActiveRoster.Count < MaxActive) ActiveRoster.Add(null);
+        // 혹시 초과분이 있으면 잘라냄(방어적 — 정상 흐름에선 발생 안 함)
+        while (ActiveRoster.Count > MaxActive) ActiveRoster.RemoveAt(ActiveRoster.Count - 1);
+    }
+
+    /// <summary>활성 동료 실제 수 (null 아닌 칸 수). 영입 가드는 이 값으로 판정.</summary>
+    public static int CountActive()
+    {
+        int n = 0;
+        for (int i = 0; i < ActiveRoster.Count; i++)
+            if (ActiveRoster[i] != null) n++;
+        return n;
+    }
+
+    /// <summary>대기열 실제 수 (null 아닌 항목). WaitlistPaths는 가변이라 보통 Count와 같지만 일관성 위해 제공.</summary>
+    public static int CountWait()
+    {
+        int n = 0;
+        for (int i = 0; i < WaitlistPaths.Count; i++)
+            if (WaitlistPaths[i] != null) n++;
+        return n;
+    }
 
     public static void Clear()
     {
+        // [2026-05-25 고정 3칸] Clear 후에도 ActiveRoster는 3칸 null 유지.
         ActiveRoster.Clear();
+        EnsureActiveRosterFixedSize();
         WaitlistPaths.Clear();
     }
 
@@ -64,15 +103,20 @@ public static class CompanionPartyPersistence
     public static bool TryAddActive(CompanionSO data, int currentHP, int currentMP)
     {
         if (data == null) return false;
+        EnsureActiveRosterFixedSize();
         string path = GetResourcePath(data);
-        if (ActiveRoster.Count < MaxActive)
+
+        // [2026-05-25 고정 3칸] 빈 null 칸을 앞에서부터 찾아 채움 (Add 대신).
+        int slot = FindFirstEmptyActiveSlot();
+        if (slot >= 0)
         {
             int newId = _nextCompanionId++;
-            ActiveRoster.Add(new Entry { id = newId, resourcePath = path, currentHP = currentHP, currentMP = currentMP });
-            Debug.Log($"[Companion-ID] 발급: resourcePath='{path}', id={newId} (TryAddActive)");
+            ActiveRoster[slot] = new Entry { id = newId, resourcePath = path, currentHP = currentHP, currentMP = currentMP };
+            Debug.Log($"[Companion-ID] 발급: resourcePath='{path}', id={newId} (TryAddActive, slot={slot})");
             return true;
         }
 
+        // 빈 칸 없음(3칸 다 참) → 대기열로
         if (WaitlistPaths.Count < MaxWaitlist)
         {
             // [2단계] 대기열도 id 발급 (_nextCompanionId 공유 → 활성·대기 전역 유일)
@@ -83,6 +127,14 @@ public static class CompanionPartyPersistence
         }
 
         return false;
+    }
+
+    /// <summary>ActiveRoster에서 가장 앞의 빈(null) 칸 인덱스. 없으면 -1.</summary>
+    private static int FindFirstEmptyActiveSlot()
+    {
+        for (int i = 0; i < ActiveRoster.Count; i++)
+            if (ActiveRoster[i] == null) return i;
+        return -1;
     }
 
     /// <summary>
@@ -101,6 +153,7 @@ public static class CompanionPartyPersistence
     public static void SyncActiveFromInstances(IReadOnlyList<PlayerStats> companions)
     {
         if (companions == null) return;
+        EnsureActiveRosterFixedSize();
 
         foreach (var stats in companions)
         {
@@ -154,18 +207,19 @@ public static class CompanionPartyPersistence
             }
             else
             {
-                // 못 찾으면 신규 Add (단 MaxActive 초과 금지)
-                if (ActiveRoster.Count < MaxActive)
+                // 못 찾으면 빈 null 칸을 찾아 채움 (고정 3칸 — Add 대신)
+                int slot = FindFirstEmptyActiveSlot();
+                if (slot >= 0)
                 {
                     int newId = _nextCompanionId++;
-                    ActiveRoster.Add(new Entry
+                    ActiveRoster[slot] = new Entry
                     {
                         id = newId,
                         resourcePath = path,
                         currentHP = stats.currentHP,
                         currentMP = stats.currentMP
-                    });
-                    Debug.Log($"[Companion-ID] 발급: resourcePath='{path}', id={newId} (SyncActiveFromInstances 신규분)");
+                    };
+                    Debug.Log($"[Companion-ID] 발급: resourcePath='{path}', id={newId} (SyncActiveFromInstances 신규분, slot={slot})");
                 }
             }
         }

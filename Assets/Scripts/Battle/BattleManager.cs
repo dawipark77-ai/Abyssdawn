@@ -576,12 +576,17 @@ public class BattleManager : MonoBehaviour
     void Awake()
     {
         Debug.Log("[PERSISTENCE_DEBUG] BattleManager.Awake RUNNING");
-        Debug.Log($"[Recruit-DIAG] BattleManager.Awake — static 초기 상태 점검: ActiveRoster.Count={CompanionPartyPersistence.ActiveRoster.Count}, WaitlistPaths.Count={CompanionPartyPersistence.WaitlistPaths.Count}, MaxActive={CompanionPartyPersistence.MaxActive}, MaxWaitlist={CompanionPartyPersistence.MaxWaitlist}");
-        if (CompanionPartyPersistence.ActiveRoster.Count > 0 || CompanionPartyPersistence.WaitlistPaths.Count > 0)
+        // [2026-05-25 고정 3칸] ActiveRoster.Count는 항상 3(null 포함). 잔존 판정은 CountActive()(실제 동료 수)로.
+        Debug.Log($"[Recruit-DIAG] BattleManager.Awake — static 초기 상태 점검: CountActive={CompanionPartyPersistence.CountActive()}/{CompanionPartyPersistence.MaxActive}, WaitlistPaths.Count={CompanionPartyPersistence.WaitlistPaths.Count}, MaxWaitlist={CompanionPartyPersistence.MaxWaitlist}");
+        if (CompanionPartyPersistence.CountActive() > 0 || CompanionPartyPersistence.WaitlistPaths.Count > 0)
         {
             Debug.LogWarning($"[Recruit-DIAG] ⚠ Awake 시점 ActiveRoster/Waitlist에 이미 항목 있음 — Domain Reload 비활성화 또는 이전 세션 잔존 데이터 의심");
             for (int i = 0; i < CompanionPartyPersistence.ActiveRoster.Count; i++)
-                Debug.LogWarning($"[Recruit-DIAG]   ActiveRoster[{i}]: resourcePath='{CompanionPartyPersistence.ActiveRoster[i].resourcePath}', HP={CompanionPartyPersistence.ActiveRoster[i].currentHP}, MP={CompanionPartyPersistence.ActiveRoster[i].currentMP}");
+            {
+                var e = CompanionPartyPersistence.ActiveRoster[i];
+                if (e == null) continue;   // 빈 슬롯은 건너뜀
+                Debug.LogWarning($"[Recruit-DIAG]   ActiveRoster[{i}]: id={e.id}, resourcePath='{e.resourcePath}', HP={e.currentHP}, MP={e.currentMP}");
+            }
         }
         startWithFullParty = false; // [Anti-Gravity] 강제 Solo 모드 설정 (인스펙터 값 무시)
         ForceDisableUIPanels();
@@ -2216,6 +2221,7 @@ public class BattleManager : MonoBehaviour
         int restored = 0;
         foreach (var entry in CompanionPartyPersistence.ActiveRoster)
         {
+            if (entry == null) continue;   // [2026-05-25 고정 3칸] 빈 슬롯(null)은 건너뜀
             if (_companionInstances.Count >= maxActiveCompanions) break;
             var so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
             if (so == null)
@@ -6017,7 +6023,8 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
-        bool hasActiveSlot = CompanionPartyPersistence.ActiveRoster.Count < CompanionPartyPersistence.MaxActive;
+        // [2026-05-25 고정 3칸] ActiveRoster.Count는 항상 3이므로 CountActive()(실제 동료 수)로 판정.
+        bool hasActiveSlot = CompanionPartyPersistence.CountActive() < CompanionPartyPersistence.MaxActive;
         bool hasWaitSlot = CompanionPartyPersistence.WaitlistPaths.Count < CompanionPartyPersistence.MaxWaitlist;
         if (!hasActiveSlot && !hasWaitSlot)
         {
