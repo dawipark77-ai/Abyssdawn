@@ -12,10 +12,17 @@ public static class CompanionPartyPersistence
     [Serializable]
     public class Entry
     {
+        // [2026-05-25 ID 1단계] 영입 개체별 고유 ID. 같은 종(resourcePath 동일)이라도 개체 구분용.
+        // 나중에 개체 이름 부여, 정확한 방출/순서 이동에 사용. 세션 내 유일성만 보장(영속화는 별도).
+        public int id;
         public string resourcePath;
         public int currentHP;
         public int currentMP;
     }
+
+    // [2026-05-25 ID 1단계] 동료 개체 ID 순차 카운터. 발급 시마다 ++.
+    // static이라 Domain Reload 시 1로 리셋 — 세션 내 유일성만 보장(저장/로드는 이번 범위 아님).
+    private static int _nextCompanionId = 1;
 
     public const int MaxActive = 3;
     public const int MaxWaitlist = 3;
@@ -48,12 +55,15 @@ public static class CompanionPartyPersistence
         string path = GetResourcePath(data);
         if (ActiveRoster.Count < MaxActive)
         {
-            ActiveRoster.Add(new Entry { resourcePath = path, currentHP = currentHP, currentMP = currentMP });
+            int newId = _nextCompanionId++;
+            ActiveRoster.Add(new Entry { id = newId, resourcePath = path, currentHP = currentHP, currentMP = currentMP });
+            Debug.Log($"[Companion-ID] 발급: resourcePath='{path}', id={newId} (TryAddActive)");
             return true;
         }
 
         if (WaitlistPaths.Count < MaxWaitlist)
         {
+            // [1단계 제외] WaitlistPaths는 List<string> 그대로 — ID 미발급 (2단계로 미룸)
             WaitlistPaths.Add(path);
             return false;
         }
@@ -106,12 +116,15 @@ public static class CompanionPartyPersistence
                 // 못 찾으면 신규 Add (단 MaxActive 초과 금지)
                 if (ActiveRoster.Count < MaxActive)
                 {
+                    int newId = _nextCompanionId++;
                     ActiveRoster.Add(new Entry
                     {
+                        id = newId,
                         resourcePath = path,
                         currentHP = stats.currentHP,
                         currentMP = stats.currentMP
                     });
+                    Debug.Log($"[Companion-ID] 발급: resourcePath='{path}', id={newId} (SyncActiveFromInstances 신규분)");
                 }
             }
         }
