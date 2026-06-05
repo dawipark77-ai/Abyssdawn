@@ -44,13 +44,15 @@ public static class CompanionPartyPersistence
     //   - "실제 동료 수"는 CountActive()로 (Count는 항상 3이므로 의미 없음).
     // static 생성자에서 null 3칸으로 초기화.
     public static readonly List<Entry> ActiveRoster = new List<Entry>(MaxActive);
-    // [2026-05-25 ID 2단계] List<string> → List<WaitEntry> (id 포함). 이름은 호환 위해 WaitlistPaths 유지.
-    // (이번 1차 작업에서 WaitlistPaths는 가변 리스트 그대로 — 고정 칸 변경은 별도 작업)
+    // [2026-05-25 방출 작업] WaitlistPaths도 ActiveRoster처럼 고정 3칸(null 허용)으로 전환.
+    //   - WaitlistPaths[0]=Reserves1, [1]=Reserves2, [2]=Reserves3 — 인덱스=슬롯 고정.
+    //   - 방출 시 그 칸을 null로 (당겨오기 없음, 빈 자리 유지). 활성과 일관.
     public static readonly List<WaitEntry> WaitlistPaths = new List<WaitEntry>(MaxWaitlist);
 
     static CompanionPartyPersistence()
     {
         EnsureActiveRosterFixedSize();
+        EnsureWaitlistFixedSize();
     }
 
     /// <summary>ActiveRoster를 항상 MaxActive(3)칸으로 보장. 부족하면 null로 채움.</summary>
@@ -59,6 +61,21 @@ public static class CompanionPartyPersistence
         while (ActiveRoster.Count < MaxActive) ActiveRoster.Add(null);
         // 혹시 초과분이 있으면 잘라냄(방어적 — 정상 흐름에선 발생 안 함)
         while (ActiveRoster.Count > MaxActive) ActiveRoster.RemoveAt(ActiveRoster.Count - 1);
+    }
+
+    /// <summary>WaitlistPaths를 항상 MaxWaitlist(3)칸으로 보장. 부족하면 null로 채움.</summary>
+    private static void EnsureWaitlistFixedSize()
+    {
+        while (WaitlistPaths.Count < MaxWaitlist) WaitlistPaths.Add(null);
+        while (WaitlistPaths.Count > MaxWaitlist) WaitlistPaths.RemoveAt(WaitlistPaths.Count - 1);
+    }
+
+    /// <summary>WaitlistPaths에서 가장 앞의 빈(null) 칸 인덱스. 없으면 -1.</summary>
+    private static int FindFirstEmptyWaitSlot()
+    {
+        for (int i = 0; i < WaitlistPaths.Count; i++)
+            if (WaitlistPaths[i] == null) return i;
+        return -1;
     }
 
     /// <summary>활성 동료 실제 수 (null 아닌 칸 수). 영입 가드는 이 값으로 판정.</summary>
@@ -81,10 +98,11 @@ public static class CompanionPartyPersistence
 
     public static void Clear()
     {
-        // [2026-05-25 고정 3칸] Clear 후에도 ActiveRoster는 3칸 null 유지.
+        // [2026-05-25 고정 3칸] Clear 후에도 ActiveRoster·WaitlistPaths는 3칸 null 유지.
         ActiveRoster.Clear();
         EnsureActiveRosterFixedSize();
         WaitlistPaths.Clear();
+        EnsureWaitlistFixedSize();
     }
 
     /// <summary>Resources.Load 경로 (Assets/Resources/ 하위, 확장자 제외).</summary>
@@ -104,6 +122,7 @@ public static class CompanionPartyPersistence
     {
         if (data == null) return false;
         EnsureActiveRosterFixedSize();
+        EnsureWaitlistFixedSize();
         string path = GetResourcePath(data);
 
         // [2026-05-25 고정 3칸] 빈 null 칸을 앞에서부터 찾아 채움 (Add 대신).
@@ -116,17 +135,58 @@ public static class CompanionPartyPersistence
             return true;
         }
 
-        // 빈 칸 없음(3칸 다 참) → 대기열로
-        if (WaitlistPaths.Count < MaxWaitlist)
+        // 빈 칸 없음(3칸 다 참) → 대기열로 (대기열도 고정 3칸 빈 칸 채우기)
+        int waitSlot = FindFirstEmptyWaitSlot();
+        if (waitSlot >= 0)
         {
             // [2단계] 대기열도 id 발급 (_nextCompanionId 공유 → 활성·대기 전역 유일)
             int waitId = _nextCompanionId++;
-            WaitlistPaths.Add(new WaitEntry { id = waitId, resourcePath = path });
-            Debug.Log($"[Companion-ID] 발급(대기열): resourcePath='{path}', id={waitId} (TryAddActive 대기열)");
+            WaitlistPaths[waitSlot] = new WaitEntry { id = waitId, resourcePath = path };
+            Debug.Log($"[Companion-ID] 발급(대기열): resourcePath='{path}', id={waitId} (TryAddActive 대기열, slot={waitSlot})");
             return false;
         }
 
         return false;
+    }
+
+    /// <summary>활성 슬롯 방출 — 해당 칸을 null로 (빈 자리 유지, 당겨오기 없음).</summary>
+    public static bool ReleaseActive(int slotIndex)
+    {
+        EnsureActiveRosterFixedSize();
+        if (slotIndex < 0 || slotIndex >= ActiveRoster.Count)
+        {
+            Debug.LogWarning($"[Release] ReleaseActive: 잘못된 slotIndex={slotIndex} (범위 0~{ActiveRoster.Count - 1})");
+            return false;
+        }
+        var e = ActiveRoster[slotIndex];
+        if (e == null)
+        {
+            Debug.LogWarning($"[Release] ReleaseActive: slot {slotIndex} 이미 비어 있음");
+            return false;
+        }
+        Debug.Log($"[Release] 활성 동료 방출 — slot={slotIndex}, id={e.id}, path='{e.resourcePath}' → null");
+        ActiveRoster[slotIndex] = null;
+        return true;
+    }
+
+    /// <summary>대기열 슬롯 방출 — 해당 칸을 null로 (빈 자리 유지, 당겨오기 없음).</summary>
+    public static bool ReleaseWait(int slotIndex)
+    {
+        EnsureWaitlistFixedSize();
+        if (slotIndex < 0 || slotIndex >= WaitlistPaths.Count)
+        {
+            Debug.LogWarning($"[Release] ReleaseWait: 잘못된 slotIndex={slotIndex} (범위 0~{WaitlistPaths.Count - 1})");
+            return false;
+        }
+        var w = WaitlistPaths[slotIndex];
+        if (w == null)
+        {
+            Debug.LogWarning($"[Release] ReleaseWait: slot {slotIndex} 이미 비어 있음");
+            return false;
+        }
+        Debug.Log($"[Release] 대기 동료 방출 — slot={slotIndex}, id={w.id}, path='{w.resourcePath}' → null");
+        WaitlistPaths[slotIndex] = null;
+        return true;
     }
 
     /// <summary>ActiveRoster에서 가장 앞의 빈(null) 칸 인덱스. 없으면 -1.</summary>

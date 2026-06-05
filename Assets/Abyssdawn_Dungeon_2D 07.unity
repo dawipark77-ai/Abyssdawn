@@ -1098,13 +1098,14 @@ GameObject:
   - component: {fileID: 24126020}
   - component: {fileID: 24126021}
   - component: {fileID: 24126022}
+  - component: {fileID: 24126023}
   m_Layer: 5
   m_Name: StatusPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &24126016
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1329,6 +1330,31 @@ MonoBehaviour:
   - slotButton: {fileID: 773187055}
     slotRoot: {fileID: 91794892}
   defaultTabIndex: 0
+--- !u!114 &24126023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24126015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39aac584088c7d64b836045c2111eb7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReleaseController
+  activeReleaseButtons:
+  - {fileID: 1105614082}
+  - {fileID: 1117339382}
+  - {fileID: 1712310876}
+  reserveReleaseButtons:
+  - {fileID: 565413840}
+  - {fileID: 1316163084}
+  - {fileID: 241137957}
+  confirmPanel: {fileID: 1572321942}
+  yesButton: {fileID: 877107388}
+  noButton: {fileID: 2042602138}
+  companionSlotView: {fileID: 24126021}
+  reservesView: {fileID: 91794894}
 --- !u!1 &25048391
 GameObject:
   m_ObjectHideFlags: 0

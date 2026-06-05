@@ -73,10 +73,13 @@ public class CompanionSlotView : MonoBehaviour
             var slot = slots[i];
             if (slot == null) continue;
 
-            // 해당 인덱스에 동료가 없으면 슬롯 숨김
+            // [2026-05-25 방출 작업] 빈 슬롯도 틀은 항상 표시 — slotRoot는 끄지 않고 값만 비운다 (ReservesView와 통일).
+            if (slot.slotRoot != null) slot.slotRoot.SetActive(true);
+
+            // 해당 인덱스에 동료가 없으면 값만 비움 (틀 유지)
             if (roster == null || i >= roster.Count || roster[i] == null)
             {
-                if (slot.slotRoot != null) slot.slotRoot.SetActive(false);
+                ClearSlot(slot);
                 continue;
             }
 
@@ -84,14 +87,32 @@ public class CompanionSlotView : MonoBehaviour
             CompanionSO so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
             if (so == null)
             {
-                Debug.LogWarning($"[CompanionSlotView] 슬롯 {i}: LoadCompanion 실패 '{entry.resourcePath}' → 슬롯 숨김");
-                if (slot.slotRoot != null) slot.slotRoot.SetActive(false);
+                Debug.LogWarning($"[CompanionSlotView] 슬롯 {i}: LoadCompanion 실패 '{entry.resourcePath}' → 값 비움 (틀 유지)");
+                ClearSlot(slot);
                 continue;
             }
 
-            if (slot.slotRoot != null) slot.slotRoot.SetActive(true);
             FillSlot(slot, entry, so);
         }
+    }
+
+    /// <summary>빈 활성 슬롯 — 값 텍스트/스킬 아이콘 비움(라벨은 씬 정적 텍스트라 안 건드림). 틀은 유지.</summary>
+    private void ClearSlot(CompanionSlot slot)
+    {
+        if (slot.nameText != null) slot.nameText.text = "";
+        if (slot.expText != null)  slot.expText.text  = "";
+        if (slot.hpText != null)   slot.hpText.text   = "";
+        if (slot.mpText != null)   slot.mpText.text   = "";
+        if (slot.statHpText != null) slot.statHpText.text = "";
+        if (slot.statMpText != null) slot.statMpText.text = "";
+        if (slot.strText != null)  slot.strText.text  = "";
+        if (slot.defText != null)  slot.defText.text  = "";
+        if (slot.magText != null)  slot.magText.text  = "";
+        if (slot.agiText != null)  slot.agiText.text  = "";
+        if (slot.lukText != null)  slot.lukText.text  = "";
+        // 스킬 아이콘 전부 숨김 (빈 리스트 전달 = 모두 SetActive(false))
+        FillSkillIcons(slot.activeSkillIcons, null);
+        FillPassiveIcons(slot.passiveSkillIcons, null);
     }
 
     private void FillSlot(CompanionSlot slot, CompanionPartyPersistence.Entry entry, CompanionSO so)

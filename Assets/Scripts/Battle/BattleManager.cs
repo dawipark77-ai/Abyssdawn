@@ -577,8 +577,8 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Log("[PERSISTENCE_DEBUG] BattleManager.Awake RUNNING");
         // [2026-05-25 고정 3칸] ActiveRoster.Count는 항상 3(null 포함). 잔존 판정은 CountActive()(실제 동료 수)로.
-        Debug.Log($"[Recruit-DIAG] BattleManager.Awake — static 초기 상태 점검: CountActive={CompanionPartyPersistence.CountActive()}/{CompanionPartyPersistence.MaxActive}, WaitlistPaths.Count={CompanionPartyPersistence.WaitlistPaths.Count}, MaxWaitlist={CompanionPartyPersistence.MaxWaitlist}");
-        if (CompanionPartyPersistence.CountActive() > 0 || CompanionPartyPersistence.WaitlistPaths.Count > 0)
+        Debug.Log($"[Recruit-DIAG] BattleManager.Awake — static 초기 상태 점검: CountActive={CompanionPartyPersistence.CountActive()}/{CompanionPartyPersistence.MaxActive}, CountWait={CompanionPartyPersistence.CountWait()}/{CompanionPartyPersistence.MaxWaitlist}");
+        if (CompanionPartyPersistence.CountActive() > 0 || CompanionPartyPersistence.CountWait() > 0)
         {
             Debug.LogWarning($"[Recruit-DIAG] ⚠ Awake 시점 ActiveRoster/Waitlist에 이미 항목 있음 — Domain Reload 비활성화 또는 이전 세션 잔존 데이터 의심");
             for (int i = 0; i < CompanionPartyPersistence.ActiveRoster.Count; i++)
@@ -6023,9 +6023,9 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
-        // [2026-05-25 고정 3칸] ActiveRoster.Count는 항상 3이므로 CountActive()(실제 동료 수)로 판정.
+        // [2026-05-25 고정 3칸] ActiveRoster/WaitlistPaths.Count는 항상 3이므로 CountActive()/CountWait()(실제 수)로 판정.
         bool hasActiveSlot = CompanionPartyPersistence.CountActive() < CompanionPartyPersistence.MaxActive;
-        bool hasWaitSlot = CompanionPartyPersistence.WaitlistPaths.Count < CompanionPartyPersistence.MaxWaitlist;
+        bool hasWaitSlot = CompanionPartyPersistence.CountWait() < CompanionPartyPersistence.MaxWaitlist;
         if (!hasActiveSlot && !hasWaitSlot)
         {
             Debug.LogWarning($"[Recruit] ⚠ 굴림은 성공했지만 활성+대기 슬롯 모두 가득 — '{so.MonsterName}' 다이얼로그 스킵");
