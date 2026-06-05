@@ -179,6 +179,15 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("[GM:DIAG] Save ABORT: player null");
             return;
         }
+
+        // [2026-05-25 동료 HP 뭉개짐 수정] 영입 동료는 staticPartyData 저장 제외.
+        // 같은 종 동료는 playerName 키가 동일해 충돌 → 동료의 진실의 소스는 CompanionPartyPersistence.ActiveRoster.
+        // SaveFromPlayer 구현부 1곳에서 막아 모든 호출처를 일괄 차단.
+        if (player.IsRecruitedCompanion)
+        {
+            Debug.Log($"[GM-Skip] 동료 '{player.playerName}' (companionId={player.companionId}) GameManager 저장 스킵 — ActiveRoster가 소스");
+            return;
+        }
         // (구) statData 단일 소스 가드 제거 — 런타임은 PlayerStats, 씬 전환 시 staticPartyData로 영속화
 
         if (string.IsNullOrEmpty(player.playerName))
@@ -213,6 +222,14 @@ public class GameManager : MonoBehaviour
         if (player == null)
         {
             Debug.LogWarning("[GM:DIAG] Apply ABORT: player null");
+            return;
+        }
+
+        // [2026-05-25 동료 HP 뭉개짐 수정] 영입 동료는 staticPartyData 복원 제외 (playerName 키 공유 방지).
+        // 동료의 진실의 소스는 CompanionPartyPersistence.ActiveRoster. ApplyToPlayer 구현부 1곳에서 일괄 차단.
+        if (player.IsRecruitedCompanion)
+        {
+            Debug.Log($"[GM-Skip] 동료 '{player.playerName}' (companionId={player.companionId}) GameManager 복원 스킵 (ApplyToPlayer) — ActiveRoster가 소스");
             return;
         }
         // (구) statData 단일 소스 가드 제거 — staticPartyData에서 씬 전환 후 복원

@@ -988,7 +988,12 @@ public class PlayerStats : MonoBehaviour
             Debug.Log($"[PlayerStats:DIAG] Awake GM dict | HasKey('{playerName}')={_diagHasKey} | Dict count={gmInst.partyData.Count} | Keys=[{_diagKeysStr}]");
         }
 
-        if (gmInst != null && !string.IsNullOrEmpty(playerName) && gmInst.partyData.ContainsKey(playerName))
+        // [2026-05-25 동료 HP 뭉개짐 수정] 영입 동료는 Awake GameManager 복원도 제외 (playerName 키 공유 방지).
+        if (IsRecruitedCompanion)
+        {
+            Debug.Log($"[GM-Skip] 동료 '{playerName}' (companionId={companionId}) Awake GameManager 복원 스킵 — ActiveRoster가 소스");
+        }
+        else if (gmInst != null && !string.IsNullOrEmpty(playerName) && gmInst.partyData.ContainsKey(playerName))
         {
             Debug.Log($"[PlayerStats:DIAG] Awake Before restore | HP={currentHP}, MP={currentMP}, EXP={exp}, Lv={level}");
             gmInst.ApplyToPlayer(this);
@@ -1032,7 +1037,12 @@ public class PlayerStats : MonoBehaviour
             }
 
             // GameManager에 첫 등록 — 다음 씬 전환부터 영속화 인프라 동작
-            if (gmInst != null && !string.IsNullOrEmpty(playerName))
+            // [2026-05-25 동료 HP 뭉개짐 수정] 영입 동료는 GameManager 저장 제외 (playerName 키 공유 방지).
+            if (IsRecruitedCompanion)
+            {
+                Debug.Log($"[GM-Skip] 동료 '{playerName}' (companionId={companionId}) GameManager 초기 저장 스킵 — ActiveRoster가 소스");
+            }
+            else if (gmInst != null && !string.IsNullOrEmpty(playerName))
             {
                 gmInst.SaveFromPlayer(this);
                 Debug.Log($"[PlayerStats] GameManager에 초기 스냅샷 저장: HP {currentHP}/{maxHP}, MP {currentMP}/{maxMP}");
@@ -1082,6 +1092,15 @@ public class PlayerStats : MonoBehaviour
 
     private void TryRestoreFromGameManager(string context)
     {
+        // [2026-05-25 동료 HP 뭉개짐 수정] 영입 동료는 GameManager.staticPartyData 복원 제외.
+        // 같은 종 동료는 playerName("Rat")이 동일해 단일 키를 공유 → ActiveRoster 값을 덮어쓰는 버그.
+        // 동료의 진실의 소스는 CompanionPartyPersistence.ActiveRoster (Restore에서 ally.currentHP 설정).
+        if (IsRecruitedCompanion)
+        {
+            Debug.Log($"[GM-Skip] 동료 '{playerName}' (companionId={companionId}) GameManager 복원 스킵 — ActiveRoster가 소스 (ctx={context})");
+            return;
+        }
+
         Debug.Log($"[PlayerStats:DIAG] TryRestore({context}) | playerName='{playerName}' | InstanceID={GetInstanceID()}");
 
         if (string.IsNullOrEmpty(playerName))
