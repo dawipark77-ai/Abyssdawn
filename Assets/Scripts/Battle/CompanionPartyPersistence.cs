@@ -197,6 +197,91 @@ public static class CompanionPartyPersistence
         return -1;
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    // [2026-06-13 Tactics swap] 슬롯 자리 바꾸기 — "동료끼리만".
+    //   Hero 이동·빈 칸 압축 문제는 이번 범위 밖(다음 작업).
+    //   세 함수 모두 인덱스=슬롯 고정 원칙 유지(당겨오기 없음, 빈 칸은 그대로 자리 교환).
+    // ─────────────────────────────────────────────────────────────────
+
+    /// <summary>활성 ↔ 활성: ActiveRoster[i]와 [j]의 Entry 참조 맞바꿈 (null 포함 가능).</summary>
+    public static bool SwapActive(int i, int j)
+    {
+        EnsureActiveRosterFixedSize();
+        if (i < 0 || i >= ActiveRoster.Count || j < 0 || j >= ActiveRoster.Count)
+        {
+            Debug.LogWarning($"[Swap] SwapActive: 잘못된 인덱스 i={i}, j={j} (범위 0~{ActiveRoster.Count - 1})");
+            return false;
+        }
+        if (i == j) return false;
+        var tmp = ActiveRoster[i];
+        ActiveRoster[i] = ActiveRoster[j];
+        ActiveRoster[j] = tmp;
+        Debug.Log($"[Swap] 활성↔활성 — ActiveRoster[{i}] ↔ ActiveRoster[{j}]");
+        return true;
+    }
+
+    /// <summary>대기 ↔ 대기: WaitlistPaths[i]와 [j]의 WaitEntry 참조 맞바꿈 (null 포함 가능).</summary>
+    public static bool SwapWait(int i, int j)
+    {
+        EnsureWaitlistFixedSize();
+        if (i < 0 || i >= WaitlistPaths.Count || j < 0 || j >= WaitlistPaths.Count)
+        {
+            Debug.LogWarning($"[Swap] SwapWait: 잘못된 인덱스 i={i}, j={j} (범위 0~{WaitlistPaths.Count - 1})");
+            return false;
+        }
+        if (i == j) return false;
+        var tmp = WaitlistPaths[i];
+        WaitlistPaths[i] = WaitlistPaths[j];
+        WaitlistPaths[j] = tmp;
+        Debug.Log($"[Swap] 대기↔대기 — WaitlistPaths[{i}] ↔ WaitlistPaths[{j}]");
+        return true;
+    }
+
+    /// <summary>
+    /// 활성 ↔ 대기: 타입이 달라(Entry vs WaitEntry) 변환하며 맞바꿈.
+    ///   - 활성→대기: 새 WaitEntry{ id, resourcePath } 생성. currentHP/MP는 버림(WaitEntry에 자리 없음).
+    ///   - 대기→활성: 새 Entry 생성, HP/MP는 CompanionSO.HP/MP로 풀피 시작.
+    ///   - 한쪽이 null이면 이동만 (반대편 칸은 null이 됨).
+    /// </summary>
+    public static bool SwapActiveWait(int activeIndex, int waitIndex)
+    {
+        EnsureActiveRosterFixedSize();
+        EnsureWaitlistFixedSize();
+        if (activeIndex < 0 || activeIndex >= ActiveRoster.Count ||
+            waitIndex < 0 || waitIndex >= WaitlistPaths.Count)
+        {
+            Debug.LogWarning($"[Swap] SwapActiveWait: 잘못된 인덱스 active={activeIndex}, wait={waitIndex}");
+            return false;
+        }
+
+        Entry a = ActiveRoster[activeIndex];      // Entry 또는 null
+        WaitEntry w = WaitlistPaths[waitIndex];   // WaitEntry 또는 null
+
+        if (a == null && w == null) return false; // 둘 다 비어 있으면 할 일 없음
+
+        // 활성→대기: Entry → WaitEntry (HP/MP 버림)
+        WaitEntry newWait = (a != null)
+            ? new WaitEntry { id = a.id, resourcePath = a.resourcePath }
+            : null;
+
+        // 대기→활성: WaitEntry → Entry (풀피)
+        Entry newActive = null;
+        if (w != null)
+        {
+            var so = LoadCompanion(w.resourcePath);
+            int hp = (so != null) ? so.HP : 0;
+            int mp = (so != null) ? so.MP : 0;
+            if (so == null)
+                Debug.LogWarning($"[Swap] SwapActiveWait: CompanionSO 로드 실패 '{w.resourcePath}' → HP/MP 0으로 승격");
+            newActive = new Entry { id = w.id, resourcePath = w.resourcePath, currentHP = hp, currentMP = mp };
+        }
+
+        ActiveRoster[activeIndex] = newActive;
+        WaitlistPaths[waitIndex] = newWait;
+        Debug.Log($"[Swap] 활성↔대기 — ActiveRoster[{activeIndex}] ↔ WaitlistPaths[{waitIndex}] (활성→대기 HP버림, 대기→활성 풀피)");
+        return true;
+    }
+
     /// <summary>
     /// [2026-05-25 방식①] 전투 참전 동료 인스턴스의 현재 HP/MP를 ActiveRoster에 반영.
     ///
