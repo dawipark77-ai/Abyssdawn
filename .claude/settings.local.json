@@ -6,7 +6,8 @@
       "Bash(else echo \"Folder does not exist\")",
       "Bash(fi)",
       "Bash(git commit -m ' *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git config *)"
     ]
   }
 }
