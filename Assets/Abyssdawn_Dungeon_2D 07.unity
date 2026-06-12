@@ -967,7 +967,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &14906142
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1045,39 +1045,47 @@ MonoBehaviour:
     lvText: {fileID: 479030352}
     hpText: {fileID: 489359814}
     mpText: {fileID: 1172634263}
+    button: {fileID: 0}
   activeSlots:
   - slotRoot: {fileID: 328372680}
     nameText: {fileID: 325196266}
     lvText: {fileID: 8898005}
     hpText: {fileID: 832277973}
     mpText: {fileID: 245484088}
+    button: {fileID: 0}
   - slotRoot: {fileID: 48378513}
     nameText: {fileID: 179794754}
     lvText: {fileID: 1830441972}
     hpText: {fileID: 49399774}
     mpText: {fileID: 45178252}
+    button: {fileID: 0}
   - slotRoot: {fileID: 1777457014}
     nameText: {fileID: 1460080738}
     lvText: {fileID: 269621836}
     hpText: {fileID: 155999472}
     mpText: {fileID: 36150773}
+    button: {fileID: 0}
   reserveSlots:
   - slotRoot: {fileID: 570914845}
     nameText: {fileID: 1424744826}
     lvText: {fileID: 1181852564}
     hpText: {fileID: 1488350054}
     mpText: {fileID: 1578439139}
+    button: {fileID: 0}
   - slotRoot: {fileID: 1772053238}
     nameText: {fileID: 1275742844}
     lvText: {fileID: 751131653}
     hpText: {fileID: 618818553}
     mpText: {fileID: 1119674766}
+    button: {fileID: 0}
   - slotRoot: {fileID: 244171853}
     nameText: {fileID: 1229470966}
     lvText: {fileID: 644356616}
     hpText: {fileID: 1349751243}
     mpText: {fileID: 215579509}
+    button: {fileID: 0}
   lvPlaceholder: "\u2014"
+  selectedColor: {r: 1, g: 0.85, b: 0.3, a: 1}
 --- !u!1 &16876489
 GameObject:
   m_ObjectHideFlags: 0
