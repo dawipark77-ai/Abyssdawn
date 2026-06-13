@@ -302,8 +302,10 @@ public class PlayerStats : MonoBehaviour
     [HideInInspector]
     public bool isFrontRow = true; // 레거시 호환 - IsFrontRow 프로퍼티는 currentSlot 기반으로 계산됩니다.
 
-    public bool IsFrontRow => SlotHelper.IsFrontRow(currentSlot);
-    public bool IsBackRow => SlotHelper.IsBackRow(currentSlot);
+    // [슬롯 표준화 Phase 1] 아군은 모델 B(전열=Slot1,2 / 후열=Slot3,4)를 따른다.
+    //   적의 7슬롯 SlotHelper(모델 A, 1~4 전부 전열)가 아니라 AllyRowHelper를 본다.
+    public bool IsFrontRow => AllyRowHelper.IsFrontRow(currentSlot);
+    public bool IsBackRow => AllyRowHelper.IsBackRow(currentSlot);
 
     // 소문자 버전 (GameManager 등 기존 레거시 스크립트 호환용)
     public int attack  => Attack;
