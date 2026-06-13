@@ -7,7 +7,11 @@
       "Bash(fi)",
       "Bash(git commit -m ' *)",
       "Bash(git add *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git commit --allow-empty -m 'checkpoint: before Phase 1 \\(ally front/back row wiring\\) *)",
+      "Bash(git commit -m 'feat: Phase 1 - ally front/back row wiring \\(slots 1,2 front / 3,4 back\\) *)",
+      "Bash(git commit -m 'refactor: Phase 1.5 Step 1 - remove dead 7-slot code *)",
+      "Bash(git push *)"
     ]
   }
 }
