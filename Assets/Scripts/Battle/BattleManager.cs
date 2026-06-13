@@ -5730,8 +5730,7 @@ public class BattleManager : MonoBehaviour
             {
                 float healPercent = 5f;
 
-                // [슬롯 표준화 Phase 1] 아군 후열 판정이 AllyRowHelper(모델 B)로 배선됨.
-                //   이제 슬롯 3,4에 있을 때 실제로 후열 보너스(+2%)가 발동한다.
+                // [슬롯 표준화] 아군 후열 판정(SlotHelper 모델 B). 슬롯 3,4에서 후열 보너스(+2%) 발동.
                 if (attacker.IsBackRow)
                 {
                     healPercent += 2f;

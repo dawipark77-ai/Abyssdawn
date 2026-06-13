@@ -91,12 +91,16 @@ namespace AbyssdawnBattle
     /// </summary>
     public static class SlotHelper
     {
+        // [Phase 1.5 Step 2] 행 판정을 모델 B로 통일: 전열 = 슬롯 1,2 / 후열 = 슬롯 3,4.
+        //   적·아군 공용 권위. 실제 전투는 4슬롯(1~4)만 사용하므로 슬롯 5~7은 후열로 간주(잔재, Step 5에서 제거).
+        //   ※ ToSlotMask/ContainsSlot 등 비트 유틸리티는 모델과 무관 — 건드리지 않음.
+
         /// <summary>
-        /// 슬롯 인덱스(1-7)로부터 전열/후열 타입 반환. Slot1~4 = Front, Slot5~7 = Back.
+        /// 슬롯 인덱스로부터 전열/후열 타입 반환. 슬롯 1,2 = Front, 그 외 = Back.
         /// </summary>
         public static RowType GetRow(int slotIndex)
         {
-            return slotIndex <= 4 ? RowType.Front : RowType.Back;
+            return (slotIndex >= 1 && slotIndex <= 2) ? RowType.Front : RowType.Back;
         }
 
         /// <summary>
@@ -106,44 +110,41 @@ namespace AbyssdawnBattle
         {
             if (slot == BattleSlot.Center) return RowType.Front;
             int index = (int)slot;
-            return index <= 4 ? RowType.Front : RowType.Back;
+            return (index >= 1 && index <= 2) ? RowType.Front : RowType.Back;
         }
 
         /// <summary>
-        /// 슬롯 인덱스(1-7)가 전열(1~4)인지 확인
+        /// 슬롯 인덱스가 전열(1,2)인지 확인
         /// </summary>
         public static bool IsFrontRow(int slotIndex)
         {
-            return slotIndex >= 1 && slotIndex <= 4;
+            return slotIndex >= 1 && slotIndex <= 2;
         }
 
         /// <summary>
-        /// BattleSlot이 전열(Slot1~4)인지 확인. Center는 전열로 간주하지 않음.
+        /// BattleSlot이 전열(Slot1,2)인지 확인. Center는 전열로 간주하지 않음.
         /// </summary>
         public static bool IsFrontRow(BattleSlot slot)
         {
             return slot == BattleSlot.Slot1
-                || slot == BattleSlot.Slot2
-                || slot == BattleSlot.Slot3
-                || slot == BattleSlot.Slot4;
+                || slot == BattleSlot.Slot2;
         }
 
         /// <summary>
-        /// 슬롯 인덱스(1-7)가 후열(5~7)인지 확인
+        /// 슬롯 인덱스가 후열(3,4)인지 확인
         /// </summary>
         public static bool IsBackRow(int slotIndex)
         {
-            return slotIndex >= 5 && slotIndex <= 7;
+            return slotIndex >= 3 && slotIndex <= 4;
         }
 
         /// <summary>
-        /// BattleSlot이 후열(Slot5~7)인지 확인
+        /// BattleSlot이 후열(Slot3,4)인지 확인
         /// </summary>
         public static bool IsBackRow(BattleSlot slot)
         {
-            return slot == BattleSlot.Slot5
-                || slot == BattleSlot.Slot6
-                || slot == BattleSlot.Slot7;
+            return slot == BattleSlot.Slot3
+                || slot == BattleSlot.Slot4;
         }
 
         /// <summary>
