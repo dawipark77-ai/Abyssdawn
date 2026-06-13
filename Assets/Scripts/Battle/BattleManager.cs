@@ -667,54 +667,8 @@ public class BattleManager : MonoBehaviour
         public SpawnPattern(int[] s, int fc, string l) { slots = s; frontCount = fc; label = l; }
     }
 
-    /// <summary>
-    /// 몬스터 수(n)별 스폰 패턴 풀. 각 n에 여러 포메이션 후보가 있어 전투마다 다양하게 나온다.
-    /// 런타임에 뽑힌 MonsterSO들의 AllowedSlots와 호환되는 패턴 중 하나를 랜덤 선택한다.
-    /// 모든 슬롯은 1~4 범위. 후열 개념은 frontCount로 추상화 (더 이상 물리 슬롯 5~7 없음).
-    /// </summary>
-    private static readonly SpawnPattern[][] SPAWN_PATTERNS = new SpawnPattern[][]
-    {
-        null,                                               // index 0 (미사용)
-
-        // n=1 : 단독 (Center 고정, 분단선 없음)
-        new SpawnPattern[]
-        {
-            new SpawnPattern(new[] { 0 }, 0, "Solo"),
-        },
-
-        // n=2 : 2명
-        new SpawnPattern[]
-        {
-            new SpawnPattern(new[] { 2, 3 }, 2, "2/0"),     // 전원 전열 중앙
-            new SpawnPattern(new[] { 1, 2 }, 1, "1/1_L"),   // 1front(Slot1) + 1back(Slot2)
-            new SpawnPattern(new[] { 2, 3 }, 1, "1/1_M"),   // 1front(Slot2) + 1back(Slot3)
-            new SpawnPattern(new[] { 3, 4 }, 1, "1/1_R"),   // 1front(Slot3) + 1back(Slot4)
-            new SpawnPattern(new[] { 1, 4 }, 1, "1/1_X"),   // 좌우 양끝 분리
-            new SpawnPattern(new[] { 3, 4 }, 0, "0/2"),     // 전원 후열 (우측)
-        },
-
-        // n=3 : 3명
-        new SpawnPattern[]
-        {
-            new SpawnPattern(new[] { 1, 2, 3 }, 3, "3/0_L"),// 전원 전열 좌측
-            new SpawnPattern(new[] { 2, 3, 4 }, 3, "3/0_R"),// 전원 전열 우측
-            new SpawnPattern(new[] { 1, 2, 3 }, 2, "2/1"),  // 2front(1,2) + 1back(3)
-            new SpawnPattern(new[] { 2, 3, 4 }, 2, "2/1_R"),// 2front(2,3) + 1back(4)
-            new SpawnPattern(new[] { 1, 2, 3 }, 1, "1/2"),  // 1front(1) + 2back(2,3)
-            new SpawnPattern(new[] { 2, 3, 4 }, 1, "1/2_R"),// 1front(2) + 2back(3,4)
-            new SpawnPattern(new[] { 2, 3, 4 }, 0, "0/3"),  // 전원 후열
-        },
-
-        // n=4 : 4명 (전 슬롯 사용)
-        new SpawnPattern[]
-        {
-            new SpawnPattern(new[] { 1, 2, 3, 4 }, 4, "4/0"),   // 전원 전열
-            new SpawnPattern(new[] { 1, 2, 3, 4 }, 3, "3/1"),   // 3front + 1back
-            new SpawnPattern(new[] { 1, 2, 3, 4 }, 2, "2/2"),   // 2front + 2back (표준)
-            new SpawnPattern(new[] { 1, 2, 3, 4 }, 1, "1/3"),   // 1front + 3back
-            new SpawnPattern(new[] { 1, 2, 3, 4 }, 0, "0/4"),   // 전원 후열
-        },
-    };
+    // [Phase 1.5 Step 1] SPAWN_PATTERNS 제거 — 사용처 0건의 죽은 코드였음.
+    //   실제 스폰은 AssignSlotsByAllowedSlots()가 담당(슬롯 1~4, 최대 4마리).
 
     /// <summary>
     /// monsters 배열 순서대로 대응하는 Transform 슬롯을 반환한다.
@@ -1209,34 +1163,8 @@ public class BattleManager : MonoBehaviour
         Fail_NoTransform,   // 목표 슬롯 Transform이 씬에 없음
     }
 
-    /// <summary>
-    /// 수평 이웃 슬롯을 반환한다. 행을 넘지 않는다.
-    /// direction: -1 = 왼쪽, +1 = 오른쪽. 끝이거나 행 경계면 None.
-    /// 전열: 1-2-3-4, 후열: 5-6-7 로 이웃 관계가 정의된다.
-    /// </summary>
-    private BattleSlot GetHorizontalNeighbor(BattleSlot slot, int direction)
-    {
-        int idx = (int)slot;
-        if (direction != -1 && direction != 1) return BattleSlot.None;
-
-        // 전열 (1~4)
-        if (idx >= 1 && idx <= 4)
-        {
-            int next = idx + direction;
-            if (next >= 1 && next <= 4) return (BattleSlot)next;
-            return BattleSlot.None;
-        }
-
-        // 후열 (5~7)
-        if (idx >= 5 && idx <= 7)
-        {
-            int next = idx + direction;
-            if (next >= 5 && next <= 7) return (BattleSlot)next;
-            return BattleSlot.None;
-        }
-
-        return BattleSlot.None;
-    }
+    // [Phase 1.5 Step 1] GetHorizontalNeighbor(비4, 5~7 처리) 제거 — 호출자 0건의 죽은 코드.
+    //   살아있는 수평 이동은 아래 GetHorizontalNeighbor4(1~4 전용)가 담당.
 
     /// <summary>
     /// 4슬롯 전용(1~4) 수평 이웃. 분단선·전후열 UI와 무관하게 한 줄로만 이어진다.
@@ -1251,32 +1179,8 @@ public class BattleManager : MonoBehaviour
         return BattleSlot.None;
     }
 
-    /// <summary>
-    /// 주어진 슬롯에서 반대 행(전→후 / 후→전)으로 X좌표가 가장 가까운 슬롯을 반환한다.
-    /// "뒤로 밀치기" / "앞으로 당기기" 매핑의 기본 규칙. 슬롯 Transform이 씬에 세팅되어 있어야 함.
-    /// </summary>
-    private BattleSlot GetNearestSlotInOppositeRow(BattleSlot from)
-    {
-        Transform src = SlotTransformByIndex((int)from);
-        if (src == null) return BattleSlot.None;
-
-        int start, end;
-        if (SlotHelper.IsFrontRow(from)) { start = 5; end = 7; }
-        else if (SlotHelper.IsBackRow(from)) { start = 1; end = 4; }
-        else return BattleSlot.None;
-
-        float sx = src.position.x;
-        float bestDist = float.MaxValue;
-        int bestIdx = 0;
-        for (int i = start; i <= end; i++)
-        {
-            Transform t = SlotTransformByIndex(i);
-            if (t == null) continue;
-            float d = Mathf.Abs(t.position.x - sx);
-            if (d < bestDist) { bestDist = d; bestIdx = i; }
-        }
-        return bestIdx == 0 ? BattleSlot.None : (BattleSlot)bestIdx;
-    }
+    // [Phase 1.5 Step 1] GetNearestSlotInOppositeRow 제거 — 호출자 0건의 죽은 코드.
+    //   슬롯 5~7을 목표로 하던 전↔후열 밀치기/당기기 매핑(7슬롯 잔재).
 
     /// <summary>
     /// 핵심 이동 API. 빈 슬롯이면 Move, 점유 슬롯이면 Swap.
