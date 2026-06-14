@@ -300,14 +300,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform slotPointCenter;
     [Tooltip("SlotPoint_1 ~ SlotPoint_4 (전열, 왼쪽부터)")]
     [SerializeField] private Transform[] slotPointsFront = new Transform[4];
-    [Tooltip("SlotPoint_5 ~ SlotPoint_7 (후열, 왼쪽부터)")]
-    [SerializeField] private Transform[] slotPointsBack = new Transform[3];
     [SerializeField] private GameObject monsterPrefab;
     [SerializeField] private float monsterScaleMultiplier = 1f;
-
-    [Tooltip("후열(Slot5~7) 몬스터에 추가로 곱하는 스케일 배율 (원근감용). 1 = 그대로, 0.75 = 25% 축소.")]
-    [Range(0.1f, 1f)]
-    [SerializeField] private float backRowScaleMultiplier = 0.75f;
 
     [Header("분단선 (고정 12|34)")]
     [Tooltip("항상 표시되는 단일 분단선 오브젝트")]
@@ -632,15 +626,7 @@ public class BattleManager : MonoBehaviour
                 slotPointsFront[i] = enemySpawnRoot.Find($"SlotPoint_{i + 1}");
         }
 
-        if (slotPointsBack == null || slotPointsBack.Length != 3)
-            slotPointsBack = new Transform[3];
-        for (int i = 0; i < 3; i++)
-        {
-            if (slotPointsBack[i] == null)
-                slotPointsBack[i] = enemySpawnRoot.Find($"SlotPoint_{i + 5}");
-        }
-
-        Debug.Log($"[SLOT_AUTO] Center={slotPointCenter?.name}, Front=[{string.Join(",", System.Array.ConvertAll(slotPointsFront, t => t?.name ?? "null"))}], Back=[{string.Join(",", System.Array.ConvertAll(slotPointsBack, t => t?.name ?? "null"))}]");
+        Debug.Log($"[SLOT_AUTO] Center={slotPointCenter?.name}, Front=[{string.Join(",", System.Array.ConvertAll(slotPointsFront, t => t?.name ?? "null"))}]");
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -974,17 +960,6 @@ public class BattleManager : MonoBehaviour
                 if (k < slotPointsFront.Length - 1) raw.Append(", ");
             }
         }
-        raw.Append("]\n  slotPointsBack  = [");
-        if (slotPointsBack != null)
-        {
-            for (int k = 0; k < slotPointsBack.Length; k++)
-            {
-                string nm = slotPointsBack[k] == null ? "null" : slotPointsBack[k].name;
-                int iid = slotPointsBack[k] == null ? 0 : slotPointsBack[k].GetInstanceID();
-                raw.Append($"{k}:{nm}(id={iid})");
-                if (k < slotPointsBack.Length - 1) raw.Append(", ");
-            }
-        }
         raw.Append("]\n");
 
         // 교차 매핑 검증: 각 몬스터 Transform이 어느 slot 배열과 매칭되는지
@@ -1005,8 +980,6 @@ public class BattleManager : MonoBehaviour
             }
             if (slotPointsFront != null)
                 for (int k = 0; k < slotPointsFront.Length; k++) Check(slotPointsFront[k], $"Front[{k}]({slotPointsFront[k]?.name})");
-            if (slotPointsBack != null)
-                for (int k = 0; k < slotPointsBack.Length; k++) Check(slotPointsBack[k], $"Back[{k}]({slotPointsBack[k]?.name})");
             Check(slotPointCenter, $"Center({slotPointCenter?.name})");
             raw.Append($"  [{i}] {es.enemyName} world=({p.x:F2},{p.y:F2}) → 가장 가까운 SlotPoint: {closest} (dist²={bestDist:F3})\n");
         }
@@ -1411,13 +1384,6 @@ public class BattleManager : MonoBehaviour
                 if (slotPointsFront[k] == slot) return (BattleSlot)(k + 1); // Slot1~Slot4
             }
         }
-        if (slotPointsBack != null)
-        {
-            for (int k = 0; k < slotPointsBack.Length; k++)
-            {
-                if (slotPointsBack[k] == slot) return (BattleSlot)(k + 5); // Slot5~Slot7
-            }
-        }
         if (slotPointCenter == slot) return BattleSlot.Center;
         return BattleSlot.None;
     }
@@ -1439,15 +1405,6 @@ public class BattleManager : MonoBehaviour
                 if (slotPointsFront[k] == null) continue;
                 if ((slotPointsFront[k].position - target.position).sqrMagnitude < eps)
                     return k + 1; // 1~4
-            }
-        }
-        if (slotPointsBack != null)
-        {
-            for (int k = 0; k < slotPointsBack.Length; k++)
-            {
-                if (slotPointsBack[k] == null) continue;
-                if ((slotPointsBack[k].position - target.position).sqrMagnitude < eps)
-                    return k + 5; // 5~7
             }
         }
         if (slotPointCenter != null &&
@@ -1517,26 +1474,10 @@ public class BattleManager : MonoBehaviour
     {
         if (idx1Based >= 1 && idx1Based <= 4 && slotPointsFront != null && slotPointsFront.Length >= 4)
             return slotPointsFront[idx1Based - 1];
-        if (idx1Based >= 5 && idx1Based <= 7 && slotPointsBack != null && slotPointsBack.Length >= 3)
-            return slotPointsBack[idx1Based - 5];
         return null;
     }
 
-    /// <summary>
-    /// 주어진 Transform이 slotPointsBack(Slot5~7)에 속하는지 확인.
-    /// 원근감용 후열 스케일 적용 여부를 판단한다.
-    /// </summary>
-    private bool IsSlotInBackRow(Transform slot)
-    {
-        if (slot == null || slotPointsBack == null) return false;
-        for (int b = 0; b < slotPointsBack.Length; b++)
-        {
-            if (slot == slotPointsBack[b]) return true;
-        }
-        return false;
-    }
-
-    /// <summary>
+/// <summary>
     /// 분단선은 항상 12|34 중앙 고정.
     /// 시스템 판정에는 관여하지 않고, 전열/후열 시각 가이드로만 사용한다.
     /// </summary>
@@ -1553,38 +1494,10 @@ public class BattleManager : MonoBehaviour
         Debug.LogWarning("[DIVIDER] divider(단일 분단선)가 Inspector에 연결되지 않았습니다.");
     }
 
-    /// <summary>
-    /// FormationType에 대응하는 슬롯 Transform 배열을 반환 (레거시).
-    /// 현재 스폰 로직은 AssignSlotsByAllowedSlots()로 대체되어 직접 호출되지 않지만,
-    /// 외부 참조 및 FormationType enum 호환성을 위해 남겨둠.
-    /// </summary>
-    private Transform[] GetSlotsForFormation(FormationType formation)
-    {
-        Transform F(int idx1Based) =>
-            (slotPointsFront != null && idx1Based >= 1 && idx1Based <= slotPointsFront.Length)
-                ? slotPointsFront[idx1Based - 1] : null;
-        Transform B(int idx1Based) =>
-            (slotPointsBack != null && idx1Based >= 5 && idx1Based - 5 < slotPointsBack.Length)
-                ? slotPointsBack[idx1Based - 5] : null;
+    // [Phase 1.5 Step 4] GetSlotsForFormation 제거 — 호출자 0건의 죽은 레거시 메서드(slotPointsBack 의존).
+    //   실제 스폰은 AssignSlotsByAllowedSlots()가 담당. FormationType enum은 보존(다른 곳에서 쓰일 수 있음).
 
-        switch (formation)
-        {
-            case FormationType.Single:
-                return new[] { slotPointCenter };
-            case FormationType.All_Front:
-                return new[] { F(1), F(2), F(3), F(4) };
-            case FormationType.Three_Front:
-                return new[] { F(1), F(2), F(3), B(5) };
-            case FormationType.Two_Two:
-                // 전열 중앙 2칸(2,3)과 후열(5,6)이 엇갈림 배치되도록
-                return new[] { F(2), F(3), B(5), B(6) };
-            case FormationType.One_Front:
-                return new[] { F(1), B(5), B(6), B(7) };
-            default:
-                return new[] { slotPointCenter };
-        }
-    }
-    
+
     void OnEnable()
     {
         ForceDisableUIPanels();
@@ -2562,7 +2475,7 @@ public class BattleManager : MonoBehaviour
             // World Space Canvas (이름/HP/MP UI) 정렬. SpriteRenderer와 같은 sortingOrder 규칙 적용.
             // 단, 몬스터 스프라이트보다 UI가 항상 앞에 오도록 +5 오프셋을 둔다.
             Canvas[] canvases = obj.GetComponentsInChildren<Canvas>(includeInactive: true);
-            int canvasOrder = IsSlotInBackRow(slot) ? 15 : 25;
+            int canvasOrder = 25;
             foreach (Canvas cv in canvases)
             {
                 if (cv == null) continue;
@@ -2592,13 +2505,9 @@ public class BattleManager : MonoBehaviour
                 float scaleY = slotWorldHeight / spriteHeight;
                 float scale = Mathf.Min(scaleX, scaleY);
 
-                // 후열(slotPointsBack에 속하는 슬롯)이면 추가 축소 배율 적용
-                bool isBackRow = IsSlotInBackRow(slot);
-                float rowMultiplier = isBackRow ? backRowScaleMultiplier : 1f;
-
-                float finalScale = scale * monsterScaleMultiplier * monsters[i].ScaleMultiplier * rowMultiplier;
+                float finalScale = scale * monsterScaleMultiplier * monsters[i].ScaleMultiplier;
                 obj.transform.localScale = new Vector3(finalScale, finalScale, 1f);
-                Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 최종 스케일: {finalScale} (후열 배율={(isBackRow ? backRowScaleMultiplier : 1f)})");
+                Debug.Log($"[SCALE_DEBUG] {monsters[i].MonsterName} 최종 스케일: {finalScale}");
             }
 
             // 스프라이트·스케일 확정 후 BoxCollider2D를 스프라이트 크기에 맞게 설정
