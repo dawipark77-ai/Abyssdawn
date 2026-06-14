@@ -1994,15 +1994,43 @@ public class BattleManager : MonoBehaviour
         RestoreCompanionInstancesFromPersistence();
 
         activePartyMembers.Clear();
-        activePartyMembers.Add(player);
+        activePartyMembers.Add(player);   // [0] = Hero (슬롯 1 고정)
 
         companionSkillsByMember.Clear();
-        foreach (var companion in _companionInstances)
+
+        // [Phase 2 압축 제거] 슬롯 번호 고정 조립: ActiveRoster[k] → activePartyMembers[k+1] (슬롯 k+2).
+        //   빈 칸(null)을 null로 보존해 "보이는 자리 = 전투 자리"를 만든다. (기존 append 압축 폐기)
+        //   매칭: ActiveRoster[k].id == ally.companionId (RestoreCompanion에서 심음) — 같은 종 2마리도 정확히 구분.
+        var roster = CompanionPartyPersistence.ActiveRoster;
+        for (int k = 0; k < CompanionPartyPersistence.MaxActive; k++)   // k=0..2 → 슬롯 2,3,4
         {
-            if (companion == null || companion == player) continue;
-            activePartyMembers.Add(companion);
-            RegisterCompanionSkills(companion);
-            EnsureVisualForPartyMember(companion, false);
+            var entry = (roster != null && k < roster.Count) ? roster[k] : null;
+            PlayerStats matched = null;
+            if (entry != null)
+            {
+                foreach (var c in _companionInstances)
+                {
+                    if (c != null && c != player && c.companionId == entry.id)
+                    {
+                        matched = c;
+                        break;
+                    }
+                }
+            }
+
+            activePartyMembers.Add(matched);   // 인스턴스 또는 null(빈 슬롯 보존)
+            if (matched != null)
+            {
+                RegisterCompanionSkills(matched);
+                EnsureVisualForPartyMember(matched, false);
+            }
+        }
+
+        // 끝쪽 빈 칸만 제거(중간 빈 칸은 슬롯 보존 위해 유지). 프리셋 디버그 경로의 append 호환 + 불필요한 trailing null 정리.
+        for (int i = activePartyMembers.Count - 1; i >= 1; i--)
+        {
+            if (activePartyMembers[i] == null) activePartyMembers.RemoveAt(i);
+            else break;
         }
 
         if (includePresetAlliesIfNoCompanions && _companionInstances.Count == 0)
