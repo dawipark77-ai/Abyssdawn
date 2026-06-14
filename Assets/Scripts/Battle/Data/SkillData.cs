@@ -66,8 +66,8 @@ namespace AbyssdawnBattle
     /// <summary>
     /// 슬롯 마스크 (Flags enum) - 스킬 조건 표현용
     /// 예: SlotMask.Front | SlotMask.Slot3 = 전열 + 3번 슬롯
-    /// Front/Back/Any의 의미는 레거시 호환을 위해 유지 (Slot1~4만 포함).
-    /// Slot5~7, Center는 별도 비트로 추가됨.
+    /// [Phase 1.5 Step 3] Front/Back/Any를 모델 B(4슬롯)로 재정의: 전열=1,2 / 후열=3,4 / 전체=1~4.
+    ///   개별 비트(Slot1~7, Center)와 None은 불변. Slot5~7은 죽은 잔재(Step 5에서 제거 예정).
     /// </summary>
     [System.Flags]
     public enum SlotMask
@@ -81,9 +81,9 @@ namespace AbyssdawnBattle
         Slot6 = 1 << 5,      // 32
         Slot7 = 1 << 6,      // 64
         Center = 1 << 7,     // 128
-        Front = Slot1 | Slot2 | Slot3 | Slot4,   // 전열 (1, 2, 3, 4)
-        Back = Slot5 | Slot6 | Slot7,            // 후열 (5, 6, 7)
-        Any = Front | Back                       // 전체 (1~7)
+        Front = Slot1 | Slot2,            // 전열 (1, 2)
+        Back = Slot3 | Slot4,             // 후열 (3, 4)
+        Any = Slot1 | Slot2 | Slot3 | Slot4  // 전체 (1~4)
     }
 
     /// <summary>
