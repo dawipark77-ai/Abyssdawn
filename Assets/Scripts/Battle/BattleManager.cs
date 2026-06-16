@@ -1994,23 +1994,28 @@ public class BattleManager : MonoBehaviour
         RestoreCompanionInstancesFromPersistence();
 
         activePartyMembers.Clear();
-        activePartyMembers.Add(player);   // [0] = Hero (슬롯 1 고정)
-
         companionSkillsByMember.Clear();
 
-        // [Phase 2 압축 제거] 슬롯 번호 고정 조립: ActiveRoster[k] → activePartyMembers[k+1] (슬롯 k+2).
-        //   빈 칸(null)을 null로 보존해 "보이는 자리 = 전투 자리"를 만든다. (기존 append 압축 폐기)
-        //   매칭: ActiveRoster[k].id == ally.companionId (RestoreCompanion에서 심음) — 같은 종 2마리도 정확히 구분.
-        var roster = CompanionPartyPersistence.ActiveRoster;
-        for (int k = 0; k < CompanionPartyPersistence.MaxActive; k++)   // k=0..2 → 슬롯 2,3,4
+        // [Hero 이동 Step 2] MainLine 4칸 occupancy 기반 조립.
+        //   슬롯 s == heroSlotIndex면 Hero, 그 외엔 ActiveRoster 동료(오름차순). 빈 칸은 null 보존.
+        //   heroSlotIndex=0이면 occupancy=[Hero, ActiveRoster0, 1, 2]로 기존(압축 제거)과 완전히 동일.
+        //   매칭: token.entry.id == ally.companionId (RestoreCompanion에서 심음) — 같은 종 2마리도 정확히 구분.
+        var occupancy = CompanionPartyPersistence.BuildMainLineOccupancy();
+        for (int s = 0; s < occupancy.Length; s++)
         {
-            var entry = (roster != null && k < roster.Count) ? roster[k] : null;
+            var token = occupancy[s];
+            if (token.IsHero)
+            {
+                activePartyMembers.Add(player);   // 이 슬롯 = Hero
+                continue;
+            }
+
             PlayerStats matched = null;
-            if (entry != null)
+            if (token.IsCompanion && token.entry != null)
             {
                 foreach (var c in _companionInstances)
                 {
-                    if (c != null && c != player && c.companionId == entry.id)
+                    if (c != null && c != player && c.companionId == token.entry.id)
                     {
                         matched = c;
                         break;
