@@ -49,6 +49,15 @@ public static class CompanionPartyPersistence
     //   - 방출 시 그 칸을 null로 (당겨오기 없음, 빈 자리 유지). 활성과 일관.
     public static readonly List<WaitEntry> WaitlistPaths = new List<WaitEntry>(MaxWaitlist);
 
+    // [2026-06-15 Hero 이동 Step 1] MainLine 슬롯 수 = Hero 1 + 동료 MaxActive(3) = 4.
+    public const int MainLineSlots = MaxActive + 1;
+
+    // [2026-06-15 Hero 이동 Step 1] Hero가 위치한 MainLine 슬롯 인덱스 (0=슬롯1 ~ 3=슬롯4).
+    //   ActiveRoster[0,1,2]는 "Hero를 뺀 나머지 슬롯을 오름차순으로" 채운다.
+    //   ActiveRoster처럼 static — 씬 전환 간 유지, Domain Reload 시 0으로 리셋. Clear()에서도 0.
+    //   기본값 0이면 Hero=슬롯1로 기존 동작과 완전히 동일.
+    public static int heroSlotIndex = 0;
+
     static CompanionPartyPersistence()
     {
         EnsureActiveRosterFixedSize();
@@ -103,6 +112,7 @@ public static class CompanionPartyPersistence
         EnsureActiveRosterFixedSize();
         WaitlistPaths.Clear();
         EnsureWaitlistFixedSize();
+        heroSlotIndex = 0;   // [2026-06-15 Hero 이동 Step 1] Hero 위치도 기본(슬롯1)으로 리셋
     }
 
     /// <summary>Resources.Load 경로 (Assets/Resources/ 하위, 확장자 제외).</summary>
@@ -368,5 +378,142 @@ public static class CompanionPartyPersistence
                 }
             }
         }
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // [2026-06-15 Hero 이동 Step 1] MainLine 4칸 occupancy 토대.
+    //   아직 아무 데서도 호출하지 않음(죽은 코드). Step 2~4에서 사용.
+    //   진실의 소스는 (heroSlotIndex + ActiveRoster). occupancy는 그 파생 표현.
+    // ═════════════════════════════════════════════════════════════════
+
+    /// <summary>MainLine 한 칸이 무엇인지: 빈칸 / Hero / 동료(Entry).</summary>
+    public enum MainLineKind { Empty, Hero, Companion }
+
+    /// <summary>MainLine 4칸 표현 토큰. kind==Companion일 때만 entry 유효.</summary>
+    public struct MainLineToken
+    {
+        public MainLineKind kind;
+        public Entry entry;   // Companion일 때만 유효
+
+        public bool IsHero => kind == MainLineKind.Hero;
+        public bool IsCompanion => kind == MainLineKind.Companion;
+        public bool IsEmpty => kind == MainLineKind.Empty;
+
+        public static MainLineToken HeroToken => new MainLineToken { kind = MainLineKind.Hero, entry = null };
+        public static MainLineToken EmptyToken => new MainLineToken { kind = MainLineKind.Empty, entry = null };
+        public static MainLineToken Companion(Entry e) => new MainLineToken { kind = MainLineKind.Companion, entry = e };
+    }
+
+    /// <summary>
+    /// 현재 (heroSlotIndex + ActiveRoster)로부터 MainLine 4칸 occupancy를 만든다.
+    ///   슬롯 s == heroSlotIndex → Hero. 그 외 → ActiveRoster를 오름차순으로 하나씩(빈칸은 Empty).
+    /// </summary>
+    public static MainLineToken[] BuildMainLineOccupancy()
+    {
+        EnsureActiveRosterFixedSize();
+        int h = Mathf.Clamp(heroSlotIndex, 0, MainLineSlots - 1);
+
+        var occ = new MainLineToken[MainLineSlots];
+        int ci = 0;   // ActiveRoster 진행 인덱스 (비-Hero 슬롯마다 증가)
+        for (int s = 0; s < MainLineSlots; s++)
+        {
+            if (s == h)
+            {
+                occ[s] = MainLineToken.HeroToken;
+            }
+            else
+            {
+                Entry e = (ci < ActiveRoster.Count) ? ActiveRoster[ci] : null;
+                ci++;
+                occ[s] = (e != null) ? MainLineToken.Companion(e) : MainLineToken.EmptyToken;
+            }
+        }
+        return occ;
+    }
+
+    /// <summary>
+    /// MainLine 슬롯 인덱스(0~3) → ActiveRoster 인덱스(0~2). Hero 슬롯이면 -1.
+    ///   비-Hero 슬롯이 "Hero 제외 오름차순"에서 몇 번째인지: s &lt; hero면 s, s &gt; hero면 s-1.
+    /// </summary>
+    public static int MainLineSlotToRosterIndex(int slot)
+    {
+        if (slot < 0 || slot >= MainLineSlots) return -1;
+        int h = Mathf.Clamp(heroSlotIndex, 0, MainLineSlots - 1);
+        if (slot == h) return -1;   // Hero 슬롯은 ActiveRoster에 대응 없음
+        return (slot < h) ? slot : slot - 1;
+    }
+
+    /// <summary>
+    /// ActiveRoster 인덱스(0~2) → MainLine 슬롯 인덱스(0~3). (MainLineSlotToRosterIndex의 역)
+    ///   Hero 슬롯을 건너뛴 오름차순이므로: rosterIndex &lt; hero면 그대로, 아니면 +1.
+    /// </summary>
+    public static int RosterIndexToMainLineSlot(int rosterIndex)
+    {
+        if (rosterIndex < 0 || rosterIndex >= MaxActive) return -1;
+        int h = Mathf.Clamp(heroSlotIndex, 0, MainLineSlots - 1);
+        return (rosterIndex < h) ? rosterIndex : rosterIndex + 1;
+    }
+
+    /// <summary>
+    /// 두 MainLine 슬롯(0~3)의 점유자를 맞바꾼다. occupancy 라운드트립으로 (heroSlotIndex, ActiveRoster) 재도출.
+    ///   - 한쪽이 Hero면 heroSlotIndex가 갱신됨 (Hero 이동).
+    ///   - 둘 다 동료면 heroSlotIndex 불변 + ActiveRoster만 교환 (동료끼리 swap도 이 헬퍼로 통일 가능).
+    ///   - 빈칸과의 교환은 "이동"으로 자연 처리됨.
+    /// </summary>
+    public static bool SwapMainLine(int slotA, int slotB)
+    {
+        if (slotA < 0 || slotA >= MainLineSlots || slotB < 0 || slotB >= MainLineSlots)
+        {
+            Debug.LogWarning($"[HeroMove] SwapMainLine: 잘못된 슬롯 a={slotA}, b={slotB} (범위 0~{MainLineSlots - 1})");
+            return false;
+        }
+        if (slotA == slotB) return false;
+
+        EnsureActiveRosterFixedSize();
+        var occ = BuildMainLineOccupancy();
+
+        // 두 칸 교환
+        var tmp = occ[slotA];
+        occ[slotA] = occ[slotB];
+        occ[slotB] = tmp;
+
+        // 역산 ① 새 Hero 슬롯 = Hero 토큰 위치
+        int newHero = heroSlotIndex;
+        for (int s = 0; s < MainLineSlots; s++)
+        {
+            if (occ[s].IsHero) { newHero = s; break; }
+        }
+
+        // 역산 ② ActiveRoster = 비-Hero 슬롯을 오름차순으로 (Companion이면 entry, 빈칸은 null)
+        var newRoster = new Entry[MaxActive];
+        int ci = 0;
+        for (int s = 0; s < MainLineSlots; s++)
+        {
+            if (s == newHero) continue;
+            if (ci < MaxActive)
+                newRoster[ci] = occ[s].IsCompanion ? occ[s].entry : null;
+            ci++;
+        }
+
+        // 반영
+        heroSlotIndex = newHero;
+        for (int k = 0; k < MaxActive; k++)
+            ActiveRoster[k] = newRoster[k];
+
+        Debug.Log($"[HeroMove] SwapMainLine({slotA},{slotB}) → heroSlotIndex={heroSlotIndex}, ActiveRoster=[{DescribeRoster()}]");
+        return true;
+    }
+
+    /// <summary>디버그용 ActiveRoster 요약 문자열.</summary>
+    private static string DescribeRoster()
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int k = 0; k < ActiveRoster.Count; k++)
+        {
+            if (k > 0) sb.Append(", ");
+            var e = ActiveRoster[k];
+            sb.Append(e != null ? $"id{e.id}" : "null");
+        }
+        return sb.ToString();
     }
 }
