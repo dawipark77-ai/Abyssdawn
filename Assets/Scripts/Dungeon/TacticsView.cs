@@ -8,12 +8,13 @@ using Abyssdawn;            // CompanionSO
 /// <summary>
 /// Tactics 화면에 파티 정보를 표시하는 컴포넌트 (1차: 표시만, swap은 다음 작업).
 ///
-/// 표시 매핑:
-///   - heroSlot (MainLine Slot1) = Hero (PlayerStats) — 실제 level
-///   - activeSlots[0/1/2] (MainLine Slot2/3/4) = ActiveRoster[0/1/2] — LV "—"
+/// 표시 매핑 (Hero 이동 Step 3: occupancy 기반):
+///   - mainlineSlots[0~3] (MainLine Slot1~4) = BuildMainLineOccupancy()의 각 칸
+///       · Hero 토큰 → Hero(PlayerStats) 표시 (Hero가 어느 슬롯이든 그 자리에)
+///       · Companion 토큰 → 해당 ActiveRoster Entry 표시 — LV "—"
+///       · Empty → 값 비움
 ///   - reserveSlots[0/1/2] (Reserves Slot1~3) = WaitlistPaths[0/1/2] — LV "—", HP 풀피(max/max)
 ///
-/// 데이터 소스가 3종(PlayerStats / Entry / WaitEntry)이라 Hero는 단일 필드, 동료는 리스트로 분리.
 /// 갱신: OnEnable 1회 (CompanionSlotView/ReservesView와 동일). 빈 슬롯은 틀 유지 + 값 비움.
 /// </summary>
 public class TacticsView : MonoBehaviour
@@ -32,14 +33,16 @@ public class TacticsView : MonoBehaviour
         public Button button;
     }
 
-    [Header("Hero (MainLine Slot1)")]
-    public SlotRefs heroSlot;
-
-    [Header("Active Companions (MainLine Slot2/3/4 = ActiveRoster 0/1/2)")]
-    public List<SlotRefs> activeSlots = new List<SlotRefs>();
+    [Header("MainLine Slots (Slot1~4 통합, 인덱스 0=Slot1 … 3=Slot4)")]
+    [Tooltip("MainLine 4칸. 비워두면 OnEnable에서 legacy heroSlot+activeSlots로 자동 이관(재배선 불필요).")]
+    public List<SlotRefs> mainlineSlots = new List<SlotRefs>();
 
     [Header("Reserve Companions (Reserves Slot1~3 = WaitlistPaths 0/1/2)")]
     public List<SlotRefs> reserveSlots = new List<SlotRefs>();
+
+    // [Hero 이동 Step 3] 레거시 필드 — mainlineSlots로 자동 이관용(HideInInspector). 기존 씬 배선을 보존해 무재배선.
+    [SerializeField, HideInInspector] private SlotRefs heroSlot;          // 구: MainLine Slot1
+    [SerializeField, HideInInspector] private List<SlotRefs> activeSlots = new List<SlotRefs>();  // 구: MainLine Slot2/3/4
 
     [Header("표시 설정")]
     [Tooltip("레벨 없는 동료의 LV 칸 표시 문자열")]
@@ -53,7 +56,7 @@ public class TacticsView : MonoBehaviour
     // [2026-06-13 Tactics swap] 클릭→선택→맞바꿈. 이번엔 "동료끼리만".
     //   Hero(MainLine Slot1)는 선택은 되되 교환은 막고 로그만 남긴 뒤 선택 해제.
     // ─────────────────────────────────────────────────────────────────
-    private enum SlotRegion { Hero, Active, Wait }
+    private enum SlotRegion { Mainline, Wait }   // [Hero 이동 Step 3] Hero/Active 통합 → Mainline(0~3)
 
     private bool _hasSelection = false;
     private SlotRegion _selRegion;
@@ -64,32 +67,46 @@ public class TacticsView : MonoBehaviour
 
     private void OnEnable()
     {
+        EnsureMainlineSlots();   // [Hero 이동 Step 3] legacy heroSlot+activeSlots → mainlineSlots 자동 이관
         WireButtons();   // onClick 동적 연결 (RemoveAll → AddListener, 인덱스 클로저 캡처)
         ClearSelection();
         Refresh();
     }
 
+    /// <summary>mainlineSlots가 비어 있으면 legacy heroSlot+activeSlots에서 자동 이관(재배선 불필요).</summary>
+    private void EnsureMainlineSlots()
+    {
+        if (mainlineSlots != null && mainlineSlots.Exists(s => s != null)) return;   // 이미 배선됨
+
+        var migrated = new List<SlotRefs>(CompanionPartyPersistence.MainLineSlots);
+        if (heroSlot != null) migrated.Add(heroSlot);                 // [0] = Slot1
+        if (activeSlots != null) foreach (var s in activeSlots) migrated.Add(s);  // [1~3] = Slot2/3/4
+        if (migrated.Count > 0)
+        {
+            mainlineSlots = migrated;
+            Debug.Log($"[TacticsView] mainlineSlots 자동 이관 (legacy heroSlot+activeSlots → {migrated.Count}칸)");
+        }
+    }
+
     /// <summary>Hero + 활성 + 대기 슬롯 전체 갱신. 외부 호출 가능.</summary>
     public void Refresh()
     {
-        // ── Hero ──
         var player = FindFirstObjectByType<PlayerStats>();
-        FillHero(heroSlot, player);
 
-        // ── 활성 동료 (ActiveRoster) ──
-        var roster = CompanionPartyPersistence.ActiveRoster;
-        for (int i = 0; i < activeSlots.Count; i++)
+        // ── MainLine 4칸 (occupancy 기반: Hero가 어느 슬롯이든 그 자리에 표시) ──
+        var occ = CompanionPartyPersistence.BuildMainLineOccupancy();
+        for (int s = 0; s < mainlineSlots.Count; s++)
         {
-            var slot = activeSlots[i];
+            var slot = mainlineSlots[s];
             if (slot == null) continue;
             if (slot.slotRoot != null) slot.slotRoot.SetActive(true);
 
-            if (roster == null || i >= roster.Count || roster[i] == null)
-            {
+            if (s < occ.Length && occ[s].IsHero)
+                FillHero(slot, player);
+            else if (s < occ.Length && occ[s].IsCompanion && occ[s].entry != null)
+                FillActive(slot, occ[s].entry);
+            else
                 ClearSlot(slot);
-                continue;
-            }
-            FillActive(slot, roster[i]);
         }
 
         // ── 대기 동료 (WaitlistPaths) ──
@@ -108,7 +125,7 @@ public class TacticsView : MonoBehaviour
             FillReserve(slot, waitlist[i]);
         }
 
-        Debug.Log($"[TacticsView] Refresh — active={CompanionPartyPersistence.CountActive()}, wait={CompanionPartyPersistence.CountWait()}, hero={(player != null ? player.playerName : "NULL")}");
+        Debug.Log($"[TacticsView] Refresh — active={CompanionPartyPersistence.CountActive()}, wait={CompanionPartyPersistence.CountWait()}, heroSlotIndex={CompanionPartyPersistence.heroSlotIndex}, hero={(player != null ? player.playerName : "NULL")}");
     }
 
     private void FillHero(SlotRefs slot, PlayerStats player)
@@ -164,9 +181,8 @@ public class TacticsView : MonoBehaviour
     /// <summary>7개 슬롯 Button의 onClick을 코드로 연결. 인덱스를 로컬 복사해 클로저로 캡처.</summary>
     private void WireButtons()
     {
-        WireOne(heroSlot, SlotRegion.Hero, 0);
-        for (int i = 0; i < activeSlots.Count; i++)
-            WireOne(activeSlots[i], SlotRegion.Active, i);
+        for (int s = 0; s < mainlineSlots.Count; s++)
+            WireOne(mainlineSlots[s], SlotRegion.Mainline, s);
         for (int i = 0; i < reserveSlots.Count; i++)
             WireOne(reserveSlots[i], SlotRegion.Wait, i);
     }
@@ -234,16 +250,23 @@ public class TacticsView : MonoBehaviour
     /// <summary>두 슬롯 영역/인덱스로 실제 데이터 교환. Hero가 끼면 막고 로그만.</summary>
     private void TrySwap(SlotRegion ra, int ia, SlotRegion rb, int ib)
     {
-        // Hero 관련 swap은 이번 범위 밖 — 막고 로그만
-        if (ra == SlotRegion.Hero || rb == SlotRegion.Hero)
+        int hero = CompanionPartyPersistence.heroSlotIndex;
+
+        // Hero가 있는 MainLine 칸이 끼면 이번 단계(Step 3)에선 막음 — Hero 이동은 Step 4에서 SwapMainLine으로 허용.
+        bool aIsHero = (ra == SlotRegion.Mainline && ia == hero);
+        bool bIsHero = (rb == SlotRegion.Mainline && ib == hero);
+        if (aIsHero || bIsHero)
         {
-            Debug.Log("[TacticsSwap] Hero는 아직 이동 불가 — swap 취소 (다음 작업: 파티 순서 데이터 모델)");
+            Debug.Log("[TacticsSwap] Hero는 아직 이동 불가 — swap 취소 (Step 4에서 허용 예정)");
             return;
         }
 
-        if (ra == SlotRegion.Active && rb == SlotRegion.Active)
+        if (ra == SlotRegion.Mainline && rb == SlotRegion.Mainline)
         {
-            CompanionPartyPersistence.SwapActive(ia, ib);
+            // 둘 다 동료 칸 → MainLine 슬롯을 ActiveRoster 인덱스로 변환 후 교환
+            int ri = CompanionPartyPersistence.MainLineSlotToRosterIndex(ia);
+            int rj = CompanionPartyPersistence.MainLineSlotToRosterIndex(ib);
+            CompanionPartyPersistence.SwapActive(ri, rj);
         }
         else if (ra == SlotRegion.Wait && rb == SlotRegion.Wait)
         {
@@ -251,10 +274,11 @@ public class TacticsView : MonoBehaviour
         }
         else
         {
-            // 한쪽 활성 + 한쪽 대기 (순서 무관하게 정규화)
-            int activeIdx = (ra == SlotRegion.Active) ? ia : ib;
-            int waitIdx   = (ra == SlotRegion.Wait)   ? ia : ib;
-            CompanionPartyPersistence.SwapActiveWait(activeIdx, waitIdx);
+            // 한쪽 MainLine(동료) + 한쪽 Reserve (순서 무관하게 정규화)
+            int mainSlot = (ra == SlotRegion.Mainline) ? ia : ib;
+            int waitIdx  = (ra == SlotRegion.Wait)     ? ia : ib;
+            int ri = CompanionPartyPersistence.MainLineSlotToRosterIndex(mainSlot);
+            CompanionPartyPersistence.SwapActiveWait(ri, waitIdx);
         }
     }
 
@@ -262,9 +286,8 @@ public class TacticsView : MonoBehaviour
     {
         switch (region)
         {
-            case SlotRegion.Hero:   return heroSlot;
-            case SlotRegion.Active: return (index >= 0 && index < activeSlots.Count)  ? activeSlots[index]  : null;
-            case SlotRegion.Wait:   return (index >= 0 && index < reserveSlots.Count) ? reserveSlots[index] : null;
+            case SlotRegion.Mainline: return (index >= 0 && index < mainlineSlots.Count) ? mainlineSlots[index] : null;
+            case SlotRegion.Wait:     return (index >= 0 && index < reserveSlots.Count)  ? reserveSlots[index]  : null;
             default: return null;
         }
     }
