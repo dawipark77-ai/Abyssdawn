@@ -247,26 +247,22 @@ public class TacticsView : MonoBehaviour
         Refresh();
     }
 
-    /// <summary>두 슬롯 영역/인덱스로 실제 데이터 교환. Hero가 끼면 막고 로그만.</summary>
+    /// <summary>
+    /// 두 슬롯 영역/인덱스로 실제 데이터 교환.
+    ///   - MainLine ↔ MainLine: SwapMainLine으로 통일 (Hero/동료 대칭 — Hero 이동·동료 swap 모두 처리).
+    ///   - MainLine(Hero) ↔ Reserve: 차단 (Hero는 대기열로 못 감).
+    ///   - MainLine(동료) ↔ Reserve: SwapActiveWait.
+    ///   - Reserve ↔ Reserve: SwapWait.
+    /// </summary>
     private void TrySwap(SlotRegion ra, int ia, SlotRegion rb, int ib)
     {
         int hero = CompanionPartyPersistence.heroSlotIndex;
 
-        // Hero가 있는 MainLine 칸이 끼면 이번 단계(Step 3)에선 막음 — Hero 이동은 Step 4에서 SwapMainLine으로 허용.
-        bool aIsHero = (ra == SlotRegion.Mainline && ia == hero);
-        bool bIsHero = (rb == SlotRegion.Mainline && ib == hero);
-        if (aIsHero || bIsHero)
-        {
-            Debug.Log("[TacticsSwap] Hero는 아직 이동 불가 — swap 취소 (Step 4에서 허용 예정)");
-            return;
-        }
-
         if (ra == SlotRegion.Mainline && rb == SlotRegion.Mainline)
         {
-            // 둘 다 동료 칸 → MainLine 슬롯을 ActiveRoster 인덱스로 변환 후 교환
-            int ri = CompanionPartyPersistence.MainLineSlotToRosterIndex(ia);
-            int rj = CompanionPartyPersistence.MainLineSlotToRosterIndex(ib);
-            CompanionPartyPersistence.SwapActive(ri, rj);
+            // [Hero 이동 Step 4] Hero가 끼든 동료끼리든 SwapMainLine 하나로 처리.
+            //   occupancy 라운드트립으로 heroSlotIndex/ActiveRoster를 알아서 갱신 → 다음 전투에 자동 반영.
+            CompanionPartyPersistence.SwapMainLine(ia, ib);
         }
         else if (ra == SlotRegion.Wait && rb == SlotRegion.Wait)
         {
@@ -274,9 +270,17 @@ public class TacticsView : MonoBehaviour
         }
         else
         {
-            // 한쪽 MainLine(동료) + 한쪽 Reserve (순서 무관하게 정규화)
+            // 한쪽 MainLine + 한쪽 Reserve (순서 무관하게 정규화)
             int mainSlot = (ra == SlotRegion.Mainline) ? ia : ib;
             int waitIdx  = (ra == SlotRegion.Wait)     ? ia : ib;
+
+            // Hero 자리는 대기열로 못 감 → 차단
+            if (mainSlot == hero)
+            {
+                Debug.Log("[TacticsSwap] Hero는 대기열로 갈 수 없음 — swap 취소");
+                return;
+            }
+
             int ri = CompanionPartyPersistence.MainLineSlotToRosterIndex(mainSlot);
             CompanionPartyPersistence.SwapActiveWait(ri, waitIdx);
         }
