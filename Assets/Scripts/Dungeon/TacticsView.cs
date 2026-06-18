@@ -52,6 +52,9 @@ public class TacticsView : MonoBehaviour
     [Tooltip("선택된 슬롯 강조 색 (버튼 이미지 틴트)")]
     public Color selectedColor = new Color(1f, 0.85f, 0.3f, 1f);
 
+    [Tooltip("갈 수 없는 슬롯 비활성 표시 색 (어두운 회색). Hero 선택 시 Reserves, Reserve 선택 시 Hero 슬롯에 적용.")]
+    public Color disabledColor = new Color(0.12f, 0.12f, 0.12f, 1f);
+
     // ─────────────────────────────────────────────────────────────────
     // [2026-06-13 Tactics swap] 클릭→선택→맞바꿈. 이번엔 "동료끼리만".
     //   Hero(MainLine Slot1)는 선택은 되되 교환은 막고 로그만 남긴 뒤 선택 해제.
@@ -64,6 +67,10 @@ public class TacticsView : MonoBehaviour
 
     private Image _hlImage;              // 현재 강조 중인 이미지
     private Color _hlOriginalColor;     // 강조 전 원래 색 (복원용)
+
+    // [Hero 이동 Step 5] 비활성(검정) 틴트 다중 추적 — 여러 슬롯을 동시에 검정 처리 후 한꺼번에 복원.
+    private struct DisabledTint { public Image img; public Color orig; }
+    private readonly List<DisabledTint> _disabledTints = new List<DisabledTint>();
 
     private void OnEnable()
     {
@@ -229,6 +236,7 @@ public class TacticsView : MonoBehaviour
             _selRegion = region;
             _selIndex = index;
             ApplyHighlight(GetSlot(region, index));
+            ApplyDisabledTints(region, index);   // [Step 5] 갈 수 없는 슬롯 검정 표시
             Debug.Log($"[TacticsSwap] 선택: {region} slot[{index}]");
             return;
         }
@@ -301,6 +309,7 @@ public class TacticsView : MonoBehaviour
         _hasSelection = false;
         _selIndex = -1;
         ClearHighlight();
+        ClearDisabledTints();   // [Step 5] 비활성(검정) 표시 전부 원복
     }
 
     /// <summary>슬롯 버튼 이미지를 selectedColor로 틴트. 기존 강조는 먼저 해제.</summary>
@@ -322,6 +331,53 @@ public class TacticsView : MonoBehaviour
             _hlImage.color = _hlOriginalColor;
             _hlImage = null;
         }
+    }
+
+    /// <summary>
+    /// [Step 5] 선택된 슬롯에 따라 "갈 수 없는 슬롯"을 disabledColor(검정)로 틴트.
+    ///   - Hero 슬롯(MainLine && index==heroSlotIndex) 선택 → Reserves 3칸 전부.
+    ///   - Reserve 슬롯 선택 → Hero가 있는 MainLine 슬롯 1칸.
+    ///   - 동료 슬롯(MainLine 비-Hero) 선택 → 없음.
+    /// </summary>
+    private void ApplyDisabledTints(SlotRegion region, int index)
+    {
+        ClearDisabledTints();   // 안전: 기존 비활성 먼저 복원
+        int hero = CompanionPartyPersistence.heroSlotIndex;
+
+        if (region == SlotRegion.Mainline && index == hero)
+        {
+            // Hero 선택 → Reserves 전부 비활성 (Hero는 대기열로 못 감)
+            for (int i = 0; i < reserveSlots.Count; i++)
+                DisableSlot(reserveSlots[i]);
+        }
+        else if (region == SlotRegion.Wait)
+        {
+            // Reserve 선택 → Hero가 있는 MainLine 슬롯 비활성 (대기자는 Hero 자리로 못 감)
+            if (hero >= 0 && hero < mainlineSlots.Count)
+                DisableSlot(mainlineSlots[hero]);
+        }
+        // 동료 슬롯(Mainline && index != hero) → 비활성 없음
+    }
+
+    /// <summary>한 슬롯을 disabledColor로 틴트하고, 원래 색을 복원용으로 기록.</summary>
+    private void DisableSlot(SlotRefs slot)
+    {
+        if (slot == null) return;
+        Image img = GetSlotImage(slot);
+        if (img == null) return;
+        _disabledTints.Add(new DisabledTint { img = img, orig = img.color });
+        img.color = disabledColor;
+    }
+
+    /// <summary>비활성(검정) 틴트된 모든 슬롯을 원래 색으로 복원.</summary>
+    private void ClearDisabledTints()
+    {
+        for (int i = 0; i < _disabledTints.Count; i++)
+        {
+            var d = _disabledTints[i];
+            if (d.img != null) d.img.color = d.orig;
+        }
+        _disabledTints.Clear();
     }
 
     private Image GetSlotImage(SlotRefs slot)
