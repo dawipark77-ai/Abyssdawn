@@ -16,9 +16,26 @@ namespace Abyssdawn
     {
         Normal,
         Elite,
-        Boss,
-        Beast,
-        Undead
+        Boss
+    }
+
+    /// <summary>
+    /// 몬스터 종족. 숫자를 명시해 순서 변경 시에도 직렬화 값이 흔들리지 않게 함.
+    /// </summary>
+    public enum MonsterRace
+    {
+        None = 0,
+        Beast = 1,          // 야수
+        Undead = 2,          // 언데드
+        Elemental = 3,        // 정령
+        Humanoid = 4,         // 인간형
+        DemiHuman = 5,        // 아인
+        DemonicBeast = 6,      // 마수
+        Demon = 7,           // 악마
+        Dragonkin = 8,         // 드래곤
+        Vermin = 9,           // 곤충/벌레형
+        Plant = 10,            // 식물형
+        Construct = 11          // 구조물/기계형
     }
 
     /// <summary>
@@ -118,6 +135,13 @@ namespace Abyssdawn
 
         [Tooltip("몬스터 등급 (Normal / Elite / Boss)")]
         [SerializeField] private MonsterType type = MonsterType.Normal;
+
+        [Tooltip("몬스터 종족 (None = 미지정)")]
+        [SerializeField] private MonsterRace race = MonsterRace.None;
+
+        [Header("본능 (Instinct)")]
+        [Tooltip("기본 공격을 대체할 스킬. 비워두면 일반 평타.")]
+        [SerializeField] private MonsterSkillData basicAttackOverride;
 
         [Header("기획 · 밸런스")]
         [Tooltip("몬스터 레벨 (1~). 종류마다 인스펙터에서 직접 설정.")]
@@ -241,9 +265,6 @@ namespace Abyssdawn
         [Range(0f, 1f)]
         [SerializeField] private float companionChance = 0f;
 
-        [Tooltip("동료화 시 사용할 CompanionSO (null = 동료화 불가)")]
-        [SerializeField] private CompanionSO companionData;
-
         // ──────────────────────────────────────────
         // 프로퍼티 (읽기 전용)
         // ──────────────────────────────────────────
@@ -263,6 +284,12 @@ namespace Abyssdawn
 
         /// <summary>몬스터 등급</summary>
         public MonsterType Type => type;
+
+        /// <summary>몬스터 종족 (None = 미지정)</summary>
+        public MonsterRace Race => race;
+
+        /// <summary>기본공격 override (null이면 일반 평타)</summary>
+        public MonsterSkillData BasicAttackOverride => basicAttackOverride;
 
         public int MonsterLevel => level;
 
@@ -340,9 +367,6 @@ namespace Abyssdawn
         /// <summary>동료 합류 확률 (0 = 불가)</summary>
         public float CompanionChance => companionChance;
 
-        /// <summary>동료화 데이터 (null = 불가)</summary>
-        public CompanionSO CompanionData => companionData;
-
         // ──────────────────────────────────────────
         // 편의 메서드
         // ──────────────────────────────────────────
@@ -358,9 +382,9 @@ namespace Abyssdawn
         }
 
         /// <summary>
-        /// 동료화 가능 여부 (확률 > 0이고 companionData가 있어야 함)
+        /// 동료화 가능 여부 (확률 > 0)
         /// </summary>
-        public bool CanBecomCompanion => companionChance > 0f && companionData != null;
+        public bool CanBecomCompanion => companionChance > 0f;
 
         private static readonly SlotMask FourSlotMask =
             SlotMask.Slot1 | SlotMask.Slot2 | SlotMask.Slot3 | SlotMask.Slot4;

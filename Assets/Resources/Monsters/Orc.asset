@@ -17,6 +17,7 @@ MonoBehaviour:
   scaleMultiplier: 1.4
   hoverOffsetY: 0
   type: 0
+  race: 0
   level: 9
   hp: 150
   mp: 0
@@ -40,4 +41,3 @@ MonoBehaviour:
   goldReward: 0
   dropTable: []
   companionChance: 0.1
-  companionData: {fileID: 11400000, guid: b40e843b076249c886c49954bc11828f, type: 2}

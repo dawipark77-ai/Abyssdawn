@@ -16,7 +16,9 @@ MonoBehaviour:
   sprite: {fileID: -3882002067681905023, guid: df0c6636c362af94281ba8d050c43cb8, type: 3}
   scaleMultiplier: 0.4
   hoverOffsetY: 0
-  type: 3
+  type: 0
+  race: 1
+  basicAttackOverride: {fileID: 11400000, guid: c8f5d1a3b96e4827bc1a0d4e6f819203, type: 2}
   level: 2
   hp: 28
   mp: 0
@@ -28,7 +30,8 @@ MonoBehaviour:
   physResist: 0
   magResist: 0
   statusResist: 0
-  activeSkills: []
+  activeSkills:
+  - {fileID: 11400000, guid: a04e9f8e7ad743258b0360ef39bb46f2, type: 2}
   passiveSkills: []
   aiPattern: 0
   rowPreference: 0
@@ -42,4 +45,3 @@ MonoBehaviour:
   - item: {fileID: 0}
     dropChance: 0
   companionChance: 1
-  companionData: {fileID: 11400000, guid: 5ff4cbf795254a27bef1c7cc262bad6a, type: 2}

@@ -65,7 +65,7 @@ public class ReservesView : MonoBehaviour
                 continue;
             }
 
-            CompanionSO so = CompanionPartyPersistence.LoadCompanion(waitlist[i].resourcePath);
+            MonsterSO so = CompanionPartyPersistence.LoadCompanion(waitlist[i].resourcePath);
             if (so == null)
             {
                 Debug.LogWarning($"[ReservesView] 대기 슬롯 {i}: LoadCompanion 실패 '{waitlist[i].resourcePath}' (id={waitlist[i].id}) → 값 비움 (틀 유지)");
@@ -77,9 +77,9 @@ public class ReservesView : MonoBehaviour
         }
     }
 
-    private void FillSlot(ReserveSlot slot, CompanionSO so)
+    private void FillSlot(ReserveSlot slot, MonsterSO so)
     {
-        if (slot.nameText != null) slot.nameText.text = so.CompanionName;
+        if (slot.nameText != null) slot.nameText.text = so.MonsterName;
         if (slot.lvText != null)   slot.lvText.text   = lvPlaceholder;          // 레벨 없음 → "—"
         if (slot.hpText != null)   slot.hpText.text   = $"{so.HP} / {so.HP}";   // 대기 중 풀피 (max/max)
         if (slot.mpText != null)   slot.mpText.text   = $"{so.MP} / {so.MP}";

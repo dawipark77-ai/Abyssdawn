@@ -155,14 +155,14 @@ public class TacticsView : MonoBehaviour
 
     private void FillActive(SlotRefs slot, CompanionPartyPersistence.Entry entry)
     {
-        CompanionSO so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
+        MonsterSO so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
         if (so == null)
         {
             Debug.LogWarning($"[TacticsView] 활성: LoadCompanion 실패 '{entry.resourcePath}' → 값 비움");
             ClearSlot(slot);
             return;
         }
-        if (slot.nameText != null) slot.nameText.text = so.CompanionName;
+        if (slot.nameText != null) slot.nameText.text = so.MonsterName;
         if (slot.lvText != null)   slot.lvText.text   = lvPlaceholder;             // 동료 LV "—"
         if (slot.hpText != null)   slot.hpText.text   = $"{entry.currentHP} / {so.HP}";   // 현재HP(entry) / 최대(so)
         if (slot.mpText != null)   slot.mpText.text   = $"{entry.currentMP} / {so.MP}";
@@ -170,14 +170,14 @@ public class TacticsView : MonoBehaviour
 
     private void FillReserve(SlotRefs slot, CompanionPartyPersistence.WaitEntry wait)
     {
-        CompanionSO so = CompanionPartyPersistence.LoadCompanion(wait.resourcePath);
+        MonsterSO so = CompanionPartyPersistence.LoadCompanion(wait.resourcePath);
         if (so == null)
         {
             Debug.LogWarning($"[TacticsView] 대기: LoadCompanion 실패 '{wait.resourcePath}' → 값 비움");
             ClearSlot(slot);
             return;
         }
-        if (slot.nameText != null) slot.nameText.text = so.CompanionName;
+        if (slot.nameText != null) slot.nameText.text = so.MonsterName;
         if (slot.lvText != null)   slot.lvText.text   = lvPlaceholder;            // 동료 LV "—"
         if (slot.hpText != null)   slot.hpText.text   = $"{so.HP} / {so.HP}";     // 대기 중 풀피 (max/max)
         if (slot.mpText != null)   slot.mpText.text   = $"{so.MP} / {so.MP}";

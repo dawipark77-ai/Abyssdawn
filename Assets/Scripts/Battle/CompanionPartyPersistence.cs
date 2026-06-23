@@ -116,19 +116,19 @@ public static class CompanionPartyPersistence
     }
 
     /// <summary>Resources.Load 경로 (Assets/Resources/ 하위, 확장자 제외).</summary>
-    public static string GetResourcePath(CompanionSO so)
+    public static string GetResourcePath(MonsterSO so)
     {
         if (so == null) return null;
-        return $"Monsters/CompanionData/{so.name}";
+        return $"Monsters/{so.name}";
     }
 
-    public static CompanionSO LoadCompanion(string resourcePath)
+    public static MonsterSO LoadCompanion(string resourcePath)
     {
         if (string.IsNullOrEmpty(resourcePath)) return null;
-        return Resources.Load<CompanionSO>(resourcePath);
+        return Resources.Load<MonsterSO>(resourcePath);
     }
 
-    public static bool TryAddActive(CompanionSO data, int currentHP, int currentMP)
+    public static bool TryAddActive(MonsterSO data, int currentHP, int currentMP)
     {
         if (data == null) return false;
         EnsureActiveRosterFixedSize();

@@ -27,6 +27,7 @@ public class CompanionSlotView : MonoBehaviour
         public GameObject slotRoot;
 
         [Header("BasicPanel")]
+        public TextMeshProUGUI lvText;       // 추가 — 몬스터 레벨
         public TextMeshProUGUI nameText;
         public TextMeshProUGUI expText;   // 동료는 레벨업 없음 → "—"
         public TextMeshProUGUI hpText;    // currentHP / maxHP
@@ -48,6 +49,7 @@ public class CompanionSlotView : MonoBehaviour
 
         [Tooltip("ActiveSkills 아이콘 6칸 (ActiveSkills Slot1~6). 채워지지 않는 칸은 SetActive(false).")]
         public Image[] activeSkillIcons = new Image[6];    // 6칸
+        public Image instinctIcon;           // 추가 — 본능(BasicAttackOverride) 아이콘
     }
 
     [Header("Slots (Slot2=0, Slot3=1, Slot4=2 — ActiveRoster 인덱스와 1:1)")]
@@ -84,7 +86,7 @@ public class CompanionSlotView : MonoBehaviour
             }
 
             var entry = roster[i];
-            CompanionSO so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
+            MonsterSO so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
             if (so == null)
             {
                 Debug.LogWarning($"[CompanionSlotView] 슬롯 {i}: LoadCompanion 실패 '{entry.resourcePath}' → 값 비움 (틀 유지)");
@@ -115,10 +117,12 @@ public class CompanionSlotView : MonoBehaviour
         FillPassiveIcons(slot.passiveSkillIcons, null);
     }
 
-    private void FillSlot(CompanionSlot slot, CompanionPartyPersistence.Entry entry, CompanionSO so)
+    private void FillSlot(CompanionSlot slot, CompanionPartyPersistence.Entry entry, MonsterSO so)
     {
+        Debug.Log($"[FillSlot] so={so?.MonsterName}, ActiveSkills={so?.ActiveSkills?.Count ?? -1}");
         // ── BasicPanel ──
-        if (slot.nameText != null) slot.nameText.text = so.CompanionName;
+        if (slot.nameText != null) slot.nameText.text = so.MonsterName;
+        if (slot.lvText != null)   slot.lvText.text   = so.MonsterLevel.ToString();
         if (slot.expText != null)  slot.expText.text  = expPlaceholder;   // 동료는 레벨업 없음
         if (slot.hpText != null)   slot.hpText.text   = $"{entry.currentHP} / {so.HP}";
         if (slot.mpText != null)   slot.mpText.text   = $"{entry.currentMP} / {so.MP}";
@@ -135,28 +139,48 @@ public class CompanionSlotView : MonoBehaviour
         // ── BattleSkills: ActiveSkills (SkillData.skillIcon) ──
         FillSkillIcons(slot.activeSkillIcons, so.ActiveSkills);
 
+        // ── 본능 (Instinct) 아이콘 ──
+        if (slot.instinctIcon != null)
+        {
+            var instinct = so.BasicAttackOverride;
+            if (instinct != null && instinct.skillIcon != null)
+            {
+                slot.instinctIcon.sprite = instinct.skillIcon;
+                slot.instinctIcon.gameObject.SetActive(true);
+            }
+            else
+            {
+                slot.instinctIcon.gameObject.SetActive(false);
+            }
+        }
+
         // ── BattleSkills: PassiveSkills (PassiveData.passiveIcon) ──
         FillPassiveIcons(slot.passiveSkillIcons, so.PassiveSkills);
     }
 
     private void FillSkillIcons(Image[] icons, IReadOnlyList<SkillData> skills)
     {
-        if (icons == null) return;
+        if (icons == null) { Debug.Log("[FillSkill] icons 배열 null"); return; }
         int count = (skills != null) ? skills.Count : 0;
+        Debug.Log($"[FillSkill] 스킬 수={count}, 아이콘 슬롯 수={icons.Length}");
 
         for (int i = 0; i < icons.Length; i++)
         {
             Image img = icons[i];
-            if (img == null) continue;
+            if (img == null) { Debug.Log($"[FillSkill] Slot{i} Image null"); continue; }
 
             if (i < count && skills[i] != null && skills[i].skillIcon != null)
             {
                 img.sprite = skills[i].skillIcon;
                 img.gameObject.SetActive(true);
+                Debug.Log($"[FillSkill] Slot{i} 아이콘 표시: {skills[i].skillName}");
             }
             else
             {
-                img.gameObject.SetActive(false); // 빈 칸 숨김
+                img.gameObject.SetActive(false);
+                string reason = i >= count ? "인덱스 초과" :
+                                skills[i] == null ? "스킬 null" : "skillIcon null";
+                Debug.Log($"[FillSkill] Slot{i} 숨김 — 이유: {reason}");
             }
         }
     }

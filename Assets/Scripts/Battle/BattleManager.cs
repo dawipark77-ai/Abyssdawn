@@ -149,7 +149,6 @@ public class BattleManager : MonoBehaviour
 
     // [2026-05-24] 영입 시스템 (1차) — Warrior/Rogue/Wizard 시스템과 별개
     private List<PlayerStats> _companionInstances = new List<PlayerStats>();   // 활성 동료 (max maxActiveCompanions)
-    private List<Abyssdawn.CompanionSO> _companionWaitlist = new List<Abyssdawn.CompanionSO>();  // 대기열 (max maxCompanionWaitlist)
     private EnemyStats _lastDefeatedEnemy;                                     // EnemyStats.HandleDeath가 갱신
     public bool playerTurn = true;
 
@@ -190,7 +189,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] Transform[] partyStatusIconRows;
     // [2026-05-24] partyPortraitImages는 신규 필드 — null 시작이 SerializedObjectList NRE를
     // 유발할 가능성이 있어 명시적으로 빈 배열로 초기화. Inspector에서 비어 있어도 안전.
-    [Tooltip("슬롯 1~4 초상화 (영입 동료 CompanionSO.Portrait). 비어 있으면 이름·HP/MP만 갱신.")]
+    [Tooltip("슬롯 1~4 초상화 (영입 동료 MonsterSO.sprite). 비어 있으면 이름·HP/MP만 갱신.")]
     [SerializeField] Image[] partyPortraitImages = new Image[0];
 
     // 파티 관련 구조체 및 열거형
@@ -1785,11 +1784,11 @@ public class BattleManager : MonoBehaviour
         // [2026-05-24] 영입 다이얼로그 분기 — WaitForSeconds(delay) 전에 굴림.
         // 굴림 성공 + 슬롯 여유 → 적 sprite 켜고 메시지 + YES/NO 다이얼로그.
         // 굴림 실패 또는 슬롯 부족 → 기존 흐름(시퀀스 대기 또는 일반 delay).
-        bool recruitFlow = TryInitiateRecruitDialog(out Abyssdawn.CompanionSO recruitData);
+        bool recruitFlow = TryInitiateRecruitDialog(out Abyssdawn.MonsterSO recruitData);
 
         if (recruitFlow)
         {
-            Debug.Log($"[Recruit] 영입 다이얼로그 흐름 활성 — '{recruitData.CompanionName}' (기존 {delay}s 자동 딜레이 무시)");
+            Debug.Log($"[Recruit] 영입 다이얼로그 흐름 활성 — '{recruitData.MonsterName}' (기존 {delay}s 자동 딜레이 무시)");
 
             // [2026-05-25 BUGFIX] wasPlayingSequence 스냅샷 의존 제거 → 무조건 가드로 일원화.
             // 이전 결함: 시퀀스 시작이 이 코루틴 첫 프레임보다 늦거나 멀티 레벨업으로
@@ -3643,15 +3642,21 @@ public class BattleManager : MonoBehaviour
 
         // 적은 랜덤 파티 멤버 공격
         PlayerStats target = GetRandomAlivePartyMember();
+
+        // [Bite] 기본공격 override는 MonsterSO.basicAttackOverride로 직접 지정 (Race 자동 분기·Resources.Load 폐기).
+        MonsterSkillData biteOverride = (enemy != null && enemy.sourceMonster != null)
+            ? enemy.sourceMonster.BasicAttackOverride
+            : null;
+
         if (target != null && target.currentHP > 0)
         {
-            if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, null))
+            if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, biteOverride))
             {
                 AddMessage($"{target.playerName} evaded {enemy.enemyName}'s attack!");
             }
             else
             {
-                bool critical = CheckCritical(enemy.luck);
+                bool critical = CheckCritical(enemy.luck, biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f);
 
                 // 적 상태이상 attackDebuff 적용
                 float attackDebuffPct = enemy.GetStatusEffectAttackDebuff() / 100f;
@@ -3661,7 +3666,18 @@ public class BattleManager : MonoBehaviour
 
                 Debug.Log($"[BattleLog] Enemy Attack: {effectiveAttack}, Player Defense: {target.Defense} (base: {target.baseDefense} + bonus: {target.GetDefenseBonus()}), Critical: {critical}");
 
-                int damage = CalculateDQDamage(effectiveAttack, target.Defense, critical);
+                // [Bite] Beast 평타 대체 시 공격력 보정
+                if (biteOverride != null && biteOverride.isBasicAttackOverride)
+                {
+                    effectiveAttack = Mathf.RoundToInt(effectiveAttack * biteOverride.atkMultiplierOverride);
+                }
+
+                int damage = CalculateDQDamage(
+                    effectiveAttack,
+                    target.Defense,
+                    critical,
+                    (biteOverride != null && biteOverride.isBasicAttackOverride) ? biteOverride.randomRollMaxOverride : 1.15f
+                );
                 damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.playerName);
 
                 if (target.isDefending)
@@ -4782,13 +4798,24 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || target == null) return;
 
-        if (!RollPhysicalHit_PlayerVsEnemy(attacker, target, null))
+        // [Bite] 동료의 원본 MonsterSO에 기본공격 override가 있으면 평타 대체.
+        //   Hero는 companionSource == null → biteOverride = null → 아래 4곳 전부 기존과 동일 동작.
+        MonsterSkillData biteOverride = (attacker.companionSource != null)
+            ? attacker.companionSource.BasicAttackOverride
+            : null;
+
+        if (!RollPhysicalHit_PlayerVsEnemy(attacker, target, biteOverride))
         {
             AddMessage($"{target.enemyName} evaded {attacker.playerName}!");
         }
         else
         {
-            bool critical = CheckCritical(attacker.luck);
+            bool critical = CheckCritical(attacker.luck, biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f);
+
+            // [Bite] ATK 보정용 로컬 (attacker.Attack은 읽기전용 computed라 로컬에 받아 곱함)
+            int effectiveAttack = attacker.Attack;
+            if (biteOverride != null && biteOverride.isBasicAttackOverride)
+                effectiveAttack = Mathf.RoundToInt(effectiveAttack * biteOverride.atkMultiplierOverride);
 
             // [DEBUG LOG] 데미지 계산 전 스탯 확인
             Debug.Log($"[BattleLog] Player Attack Stats - Base: {attacker.baseAttack}, Bonus: {attacker.GetAttackBonus()}, Final: {attacker.Attack}");
@@ -4801,7 +4828,8 @@ public class BattleManager : MonoBehaviour
             {
                 // ───────── 쌍수 기본 공격 ─────────
                 // 1) 한손 기준 깡뎀 합
-                int singleBaseDamage = CalculateDQDamage(attacker.Attack, target.defense, false);
+                int singleBaseDamage = CalculateDQDamage(effectiveAttack, target.defense, false,
+                    biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBaseDamage = Mathf.Max(singleBaseDamage, 1);
 
                 // 2) 쌍수 방어 파괴 공식
@@ -4864,7 +4892,8 @@ public class BattleManager : MonoBehaviour
             else
             {
                 // 한손/방패: fn = 1.0, 깡뎀 + 방어 파괴 (추가딜)
-                int singleBase = CalculateDQDamage(attacker.Attack, target.defense, false);
+                int singleBase = CalculateDQDamage(effectiveAttack, target.defense, false,
+                    biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBase = Mathf.Max(singleBase, 1);
 
                 float singleCoeff = GetArmorBreakCoefficient(attacker);
@@ -5595,11 +5624,11 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- Damage Calculation --------------------
-    private int CalculateDQDamage(int atk, int def, bool isCritical)
+    private int CalculateDQDamage(int atk, int def, bool isCritical, float randomMax = 1.15f)
     {
         float baseValue = (atk * 2f - def) / 2f;
         if (baseValue < 1f) baseValue = 1f;
-        int damage = Mathf.FloorToInt(baseValue * UnityEngine.Random.Range(0.85f, 1.15f));
+        int damage = Mathf.FloorToInt(baseValue * UnityEngine.Random.Range(0.85f, randomMax));
         if (isCritical) damage = Mathf.FloorToInt(damage * 1.5f);
         return Mathf.Max(damage, 1);
     }
@@ -5650,10 +5679,10 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- Critical / Evasion --------------------
-    private bool CheckCritical(int luck)
+    private bool CheckCritical(int luck, float bonusPercent = 0f)
     {
         float roll = UnityEngine.Random.Range(0f, 100f);
-        return roll < criticalChance + luck;
+        return roll < criticalChance + luck + bonusPercent;
     }
 
     /// <summary>
@@ -5797,40 +5826,6 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[Recruit] 마지막 사망 적 갱신: '{(enemy != null ? enemy.enemyName : "NULL")}' (sourceMonster={(enemy != null && enemy.sourceMonster != null ? enemy.sourceMonster.MonsterName : "NULL")})");
     }
 
-    /// <summary>승리 시점에 마지막 죽은 적 1마리로 영입 판정. 콘솔 로그만, UI 없음.</summary>
-    private void TryRecruitLastDefeatedMonster()
-    {
-        Debug.Log("[Recruit] === TryRecruitLastDefeatedMonster 진입 ===");
-        if (_lastDefeatedEnemy == null)
-        {
-            Debug.Log("[Recruit] _lastDefeatedEnemy == NULL → 영입 판정 스킵");
-            return;
-        }
-        var so = _lastDefeatedEnemy.sourceMonster;
-        if (so == null)
-        {
-            Debug.LogWarning($"[Recruit] '{_lastDefeatedEnemy.enemyName}' sourceMonster == NULL → 영입 판정 스킵 (Init이 MonsterSO 없이 호출됐을 수 있음)");
-            return;
-        }
-        if (!so.CanBecomCompanion)
-        {
-            Debug.Log($"[Recruit] '{so.MonsterName}' 영입 불가 — CanBecomCompanion=false (companionChance={so.CompanionChance:F2}, companionData={(so.CompanionData != null ? so.CompanionData.CompanionName : "NULL")})");
-            return;
-        }
-
-        float roll = Random.value;
-        bool success = roll <= so.CompanionChance;
-        if (success)
-        {
-            Debug.Log($"[Recruit] ✅ 영입 성공! '{so.MonsterName}' (확률 {so.CompanionChance:P0}, 굴림 {roll:F3})");
-            AcceptCompanion(so.CompanionData);
-        }
-        else
-        {
-            Debug.Log($"[Recruit] ❌ 영입 실패 — '{so.MonsterName}' (확률 {so.CompanionChance:P0}, 굴림 {roll:F3})");
-        }
-    }
-
     // ──────────────────────────────────────────────────────────────────
     // [2026-05-24] 영입 다이얼로그 흐름 (ReturnToDungeonRoutine 내부에서 사용)
     // - TryInitiateRecruitDialog: 굴림 + 슬롯 체크. 가능하면 CompanionSO 반환.
@@ -5841,7 +5836,7 @@ public class BattleManager : MonoBehaviour
     // ──────────────────────────────────────────────────────────────────
 
     /// <summary>마지막 적의 영입 굴림 + 슬롯 여유 체크. 가능하면 recruitData를 반환.</summary>
-    private bool TryInitiateRecruitDialog(out Abyssdawn.CompanionSO recruitData)
+    private bool TryInitiateRecruitDialog(out Abyssdawn.MonsterSO recruitData)
     {
         recruitData = null;
         if (_lastDefeatedEnemy == null)
@@ -5855,9 +5850,9 @@ public class BattleManager : MonoBehaviour
             Debug.LogWarning($"[Recruit] '{_lastDefeatedEnemy.enemyName}' sourceMonster == NULL → 다이얼로그 스킵");
             return false;
         }
-        if (!so.CanBecomCompanion || so.CompanionData == null)
+        if (!so.CanBecomCompanion)
         {
-            Debug.Log($"[Recruit] '{so.MonsterName}' 영입 불가 (CanBecomCompanion={so.CanBecomCompanion}, CompanionData={(so.CompanionData == null ? "NULL" : so.CompanionData.CompanionName)})");
+            Debug.Log($"[Recruit] '{so.MonsterName}' 영입 불가 (CanBecomCompanion={so.CanBecomCompanion}, companionChance={so.CompanionChance:F2})");
             return false;
         }
 
@@ -5879,12 +5874,12 @@ public class BattleManager : MonoBehaviour
         }
 
         Debug.Log($"[Recruit] ✅ 굴림 성공 + 슬롯 여유 — '{so.MonsterName}' 다이얼로그 진입 (확률 {so.CompanionChance:P0}, 굴림 {roll:F3}, active {CompanionPartyPersistence.ActiveRoster.Count}/{CompanionPartyPersistence.MaxActive}, wait {CompanionPartyPersistence.WaitlistPaths.Count}/{CompanionPartyPersistence.MaxWaitlist})");
-        recruitData = so.CompanionData;
+        recruitData = so;
         return true;
     }
 
     /// <summary>영입 다이얼로그 — 적 재활성화(페이드인), 메시지, YES/NO 버튼, 분기 처리.</summary>
-    private IEnumerator RecruitDialogRoutine(Abyssdawn.CompanionSO data)
+    private IEnumerator RecruitDialogRoutine(Abyssdawn.MonsterSO data)
     {
         // 1) 마지막에 죽은 적의 sprite를 화면 중앙으로 옮기고 alpha 0 → 1 페이드인 (자연스러운 재등장)
         SpriteRenderer recruitSpriteRef = null;
@@ -5924,7 +5919,7 @@ public class BattleManager : MonoBehaviour
         }
 
         // 2) 영입 권유 문구 — CompanionRecruitPhrases에서 랜덤 선택 ({0}에 동료 이름 삽입).
-        string invitePhrase = Abyssdawn.CompanionRecruitPhrases.GetRandomPhrase($"<color=#FFD700>{data.CompanionName}</color>");
+        string invitePhrase = Abyssdawn.CompanionRecruitPhrases.GetRandomPhrase($"<color=#FFD700>{data.MonsterName}</color>");
         Debug.Log($"[Recruit] 랜덤 권유 문구: \"{invitePhrase}\"");
         yield return StartCoroutine(WaitForMessageSequence(new System.Collections.Generic.List<string>
         {
@@ -5987,14 +5982,14 @@ public class BattleManager : MonoBehaviour
             // "동료가 되었다" 메시지 (영어)
             yield return StartCoroutine(WaitForMessageSequence(new System.Collections.Generic.List<string>
             {
-                $"<color=#90EE90>{data.CompanionName}</color> joined your party!"
+                $"<color=#90EE90>{data.MonsterName}</color> joined your party!"
             }));
 
             yield return new WaitForSeconds(3f);
         }
         else
         {
-            Debug.Log($"[Recruit] NO → '{data.CompanionName}' 영입 거절, 즉시 맵 복귀");
+            Debug.Log($"[Recruit] NO → '{data.MonsterName}' 영입 거절, 즉시 맵 복귀");
         }
     }
 
@@ -6079,81 +6074,11 @@ public class BattleManager : MonoBehaviour
         return go.GetComponent<Button>();
     }
 
-    /// <summary>활성 슬롯 또는 대기열에 동료 배치.</summary>
-    private void AcceptCompanion(Abyssdawn.CompanionSO data)
-    {
-        Debug.Log($"[Recruit-DIAG] === AcceptCompanion 진입 === data={(data == null ? "NULL" : data.CompanionName)}");
-        if (data == null)
-        {
-            Debug.LogWarning("[Recruit] AcceptCompanion: CompanionSO == NULL → 무시");
-            return;
-        }
-
-        // [2026-05-24] 영입 판정은 _companionInstances 단일 가드 — 인스턴스가 진실의 단일 소스.
-        // ActiveRoster/WaitlistPaths(CompanionPartyPersistence)는 영속화 그림자로만 유지.
-        // 영입 직후 TryAddActive로 그림자 동기화는 계속 수행하지만, 가드에는 영향 X.
-        // (별도 작업 예정: LoadCompanion 실패 시 stale entry 청소)
-        int instCount = _companionInstances.Count;
-        int rosterCount = CompanionPartyPersistence.ActiveRoster.Count;
-        int waitInstCount = _companionWaitlist.Count;
-        int waitRosterCount = CompanionPartyPersistence.WaitlistPaths.Count;
-        bool guardActiveInst = instCount < maxActiveCompanions;
-        bool guardWaitInst = waitInstCount < maxCompanionWaitlist;
-        // 참고용 — 그림자 동기 상태 모니터링. 분기에는 사용 X.
-        bool shadowActiveSync = rosterCount == instCount;
-        bool shadowWaitSync = waitRosterCount == waitInstCount;
-        Debug.Log($"[Recruit-DIAG] 가드 상태 (판정=instances만, roster는 영속화 그림자):");
-        Debug.Log($"[Recruit-DIAG]   ├─ 활성: _companionInstances={instCount}/{maxActiveCompanions} (pass={guardActiveInst}) | shadow ActiveRoster={rosterCount}/{CompanionPartyPersistence.MaxActive} (sync={shadowActiveSync})");
-        Debug.Log($"[Recruit-DIAG]   └─ 대기: _companionWaitlist={waitInstCount}/{maxCompanionWaitlist} (pass={guardWaitInst}) | shadow WaitlistPaths={waitRosterCount}/{CompanionPartyPersistence.MaxWaitlist} (sync={shadowWaitSync})");
-        if (!shadowActiveSync || !shadowWaitSync)
-        {
-            Debug.LogWarning($"[Recruit-DIAG] ⚠ 그림자 불일치 — instances vs roster 카운트 불일치. 영속화 동기화 점검 필요 (영입 판정엔 영향 없음).");
-        }
-
-        if (guardActiveInst)
-        {
-            Debug.Log("[Recruit-DIAG] → 활성 슬롯 분기 진입 (instances pass)");
-            var ally = CreateAllyFromCompanion(data);
-            if (ally == null)
-            {
-                Debug.LogError("[Recruit-DIAG] ✗ CreateAllyFromCompanion이 NULL 반환 → 추가 실패");
-                return;
-            }
-            _companionInstances.Add(ally);
-            bool added = CompanionPartyPersistence.TryAddActive(data, ally.currentHP, ally.currentMP);
-            Debug.Log($"[Recruit-DIAG] TryAddActive(그림자) 반환={added}, ActiveRoster.Count(after)={CompanionPartyPersistence.ActiveRoster.Count}");
-            RegisterCompanionSkills(ally);
-
-            if (!activePartyMembers.Contains(ally))
-                activePartyMembers.Add(ally);
-
-            RebuildPlayerStatusPanel();
-            UpdateStatusUI();
-            Debug.Log($"[Recruit] → 활성 파티 슬롯 {_companionInstances.Count + 1}/4 (동료 {_companionInstances.Count}/{maxActiveCompanions}): '{data.CompanionName}'");
-        }
-        else if (guardWaitInst)
-        {
-            Debug.Log("[Recruit-DIAG] → 대기열 분기 진입 (활성 fail, 대기 pass)");
-            _companionWaitlist.Add(data);
-            // [2025-05-25 ID 2단계] WaitlistPaths가 List<WaitEntry>로 바뀜.
-            // 이 AcceptCompanion 메서드는 죽은 코드(TryRecruitLastDefeatedMonster 미호출 체인)이며,
-            // _nextCompanionId가 private이라 여기서 id 발급 불가 → 줄 비활성화(컴파일 통과용).
-            // 실제 대기열 등록은 CompanionPartyPersistence.TryAddActive(다이얼로그 경로)가 담당.
-            // CompanionPartyPersistence.WaitlistPaths.Add(CompanionPartyPersistence.GetResourcePath(data));
-            Debug.Log($"[Recruit] → 활성 파티 가득 — 대기열에 추가: '{data.CompanionName}' (대기 {_companionWaitlist.Count}/{maxCompanionWaitlist})");
-        }
-        else
-        {
-            Debug.LogWarning($"[Recruit-DIAG] ✗ instances 기준 모두 가득 — 거절 (활성 instances {instCount}/{maxActiveCompanions}, 대기 instances {waitInstCount}/{maxCompanionWaitlist})");
-            Debug.LogWarning($"[Recruit] ⚠ 활성·대기열 모두 가득 — '{data.CompanionName}' 거절");
-        }
-    }
-
-    /// <summary>CompanionSO 고정 스탯/스킬로 PlayerStats 인스턴스 동적 생성.
+    /// <summary>MonsterSO 고정 스탯/스킬로 PlayerStats 인스턴스 동적 생성.
     /// SetActive 패턴 — 비활성 상태에서 statData를 포함한 전체 셋업을 마친 뒤 활성화하여
     /// PlayerStats.Awake가 statData null인 상태로 실행되는 false positive 에러 차단.
     /// </summary>
-    private PlayerStats CreateAllyFromCompanion(Abyssdawn.CompanionSO data)
+    private PlayerStats CreateAllyFromCompanion(Abyssdawn.MonsterSO data)
     {
         if (data == null) return null;
 
@@ -6162,7 +6087,7 @@ public class BattleManager : MonoBehaviour
         // Unity는 비활성 GameObject에 부착된 컴포넌트의 Awake를 호출하지 않음.
         // 표준 패턴 — "fully construct, then activate".
         // ─────────────────────────────────────────────────────────────
-        GameObject allyObj = new GameObject($"Companion_{data.CompanionName}");
+        GameObject allyObj = new GameObject($"Companion_{data.MonsterName}");
         allyObj.SetActive(false);
         Debug.Log($"[Recruit] CreateAllyFromCompanion: GameObject '{allyObj.name}' 생성 + 비활성화 (Awake 차단 모드)");
 
@@ -6175,7 +6100,7 @@ public class BattleManager : MonoBehaviour
         // STEP 2: PlayerStats 컴포넌트 부착 (비활성이라 Awake 안 됨)
         // ─────────────────────────────────────────────────────────────
         PlayerStats allyStats = allyObj.AddComponent<PlayerStats>();
-        allyStats.playerName = data.CompanionName;
+        allyStats.playerName = data.MonsterName;
         allyStats.companionSource = data;
 
         // ─────────────────────────────────────────────────────────────
@@ -6189,7 +6114,7 @@ public class BattleManager : MonoBehaviour
         allyStats.exp = 0;
         allyStats.maxExp = int.MaxValue; // 사실상 레벨업 차단
 
-        // CompanionSO 고정 7스탯 → base*에 복사
+        // 7스탯은 MonsterSO에서 직접 읽음.
         allyStats.baseHP      = data.HP;
         allyStats.baseMP      = data.MP;
         allyStats.baseAttack  = data.ATK;
@@ -6212,7 +6137,7 @@ public class BattleManager : MonoBehaviour
             // PassiveData는 별도 타입. equippedPassives는 List<SkillData>이므로 직접 호환 안 됨.
             // 1차에서는 패시브 스킬 효과 미적용 — 로그만 남기고 빈 리스트로.
             // (PassiveData → SkillData 변환 또는 별도 적용 경로는 2차에서 처리)
-            Debug.LogWarning($"[Recruit] '{data.CompanionName}' PassiveSkills {data.PassiveSkills.Count}개 — 1차에서는 미적용 (2차 작업 대기)");
+            Debug.LogWarning($"[Recruit] '{data.MonsterName}' PassiveSkills {data.PassiveSkills.Count}개 — 1차에서는 미적용 (2차 작업 대기)");
         }
 
         // 풀피로 초기화
@@ -6231,7 +6156,7 @@ public class BattleManager : MonoBehaviour
         // STEP 5: 검증 로그 — statData/스킬/스탯이 제대로 들어갔는지 가시화
         // ─────────────────────────────────────────────────────────────
         bool statDataOK = allyStats.statData != null;
-        Debug.Log($"[Recruit] CreateAllyFromCompanion: '{data.CompanionName}' 생성 완료");
+        Debug.Log($"[Recruit] CreateAllyFromCompanion: '{data.MonsterName}' 생성 완료");
         Debug.Log($"[Recruit]   ├─ statData={(statDataOK ? "OK" : "NULL!")} (InstanceID={(statDataOK ? allyStats.statData.GetInstanceID() : 0)})");
         Debug.Log($"[Recruit]   ├─ HP {allyStats.currentHP}/{allyStats.maxHP}, MP {allyStats.currentMP}/{allyStats.maxMP}");
         Debug.Log($"[Recruit]   ├─ ATK {allyStats.Attack}, DEF {allyStats.Defense}, MAG {allyStats.Magic}, AGI {allyStats.Agility}, LUK {allyStats.Luck}");
@@ -6244,7 +6169,7 @@ public class BattleManager : MonoBehaviour
         float classHpMult = cc != null ? cc.hpMultiplier : 1f;
         int equipHp = allyStats.GetEquipmentHPBonus();
         int totalHpBonus = allyStats.GetHPBonus(); // maxHP - baseHP
-        Debug.Log($"[Recruit-DIAG] HP 분해 — '{data.CompanionName}'");
+        Debug.Log($"[Recruit-DIAG] HP 분해 — '{data.MonsterName}'");
         Debug.Log($"[Recruit-DIAG]   ├─ CompanionSO.HP={data.HP} → baseHP={allyStats.baseHP} (그대로 복사)");
         Debug.Log($"[Recruit-DIAG]   ├─ characterClass={(cc == null ? "NULL ✓" : $"'{cc.className}' ⚠ (자동 할당된 듯 — Awake가 SetClass 실행)")}");
         Debug.Log($"[Recruit-DIAG]   ├─ class hpMultiplier={classHpMult:F2}, hpBonus={classHpBonus}");
@@ -7737,7 +7662,7 @@ private void CacheHeroSkills()
                 if (partyPortraitImages != null && i < partyPortraitImages.Length && partyPortraitImages[i] != null)
                 {
                     Sprite portrait = m.IsRecruitedCompanion && m.companionSource != null
-                        ? m.companionSource.Portrait
+                        ? m.companionSource.sprite
                         : null;
                     partyPortraitImages[i].sprite = portrait;
                     partyPortraitImages[i].enabled = portrait != null;

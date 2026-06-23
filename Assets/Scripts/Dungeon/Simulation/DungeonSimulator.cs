@@ -1725,18 +1725,14 @@ namespace Abyssdawn
             if (!CanPartyAcceptAnotherMonsterCompanion(player)) return false;
             var m = PickReplacementMonsterFromEnemyParty(enemyParty, playerLevel, rng);
             if (m == null) return false;
-            var cd = m.CompanionData;
-            if (cd == null) return false;
-            if (!TryAddMonsterCompanionToParty(player, m, cd, ref floorNotes))
+            if (!TryAddMonsterCompanionToParty(player, m, ref floorNotes))
                 return false;
-            string nm = string.IsNullOrWhiteSpace(cd.CompanionName)
-                ? (string.IsNullOrWhiteSpace(m.MonsterName) ? m.name : m.MonsterName)
-                : cd.CompanionName;
+            string nm = string.IsNullOrWhiteSpace(m.MonsterName) ? m.name : m.MonsterName;
             floorNotes = AppendSemiColonNote(floorNotes, "companion_replace_join:" + (string.IsNullOrEmpty(nm) ? "?" : nm.Replace(';', ',')));
             return true;
         }
 
-        /// <summary>전투 승리 직후 — 해당 전투 적 목록에서 균등 1체를 골라 <see cref="MonsterSO.CompanionChance"/> 1회만 굴립니다. 성공 시 <see cref="CompanionSO"/> 기반 유닛을 파티에 추가합니다(몬스터 동료 최대 3, 아군 슬롯 최대 4).</summary>
+        /// <summary>전투 승리 직후 — 해당 전투 적 목록에서 균등 1체를 골라 <see cref="MonsterSO.CompanionChance"/> 1회만 굴립니다. 성공 시 <see cref="MonsterSO"/> 기반 유닛을 파티에 추가합니다(몬스터 동료 최대 3, 아군 슬롯 최대 4).</summary>
         private static void TryRollCompanionAfterVictory(
             DungeonSimPlayer player,
             List<MonsterSO> enemyParty,
@@ -1812,14 +1808,7 @@ namespace Abyssdawn
                 return;
             }
 
-            var cd = m.CompanionData;
-            if (cd == null)
-            {
-                LogRow(mName, mLv, chStr, rollStr, 0, "no_companion_so", "", 0);
-                return;
-            }
-
-            if (!TryAddMonsterCompanionToParty(player, m, cd, ref floorNotes))
+            if (!TryAddMonsterCompanionToParty(player, m, ref floorNotes))
             {
                 LogRow(mName, mLv, chStr, rollStr, 0, "add_failed", "", 0);
                 return;
@@ -1827,9 +1816,7 @@ namespace Abyssdawn
 
             int joinedSlot = (int)player.Units[player.Units.Count - 1].Slot;
 
-            string historyName = string.IsNullOrWhiteSpace(cd.CompanionName)
-                ? (string.IsNullOrWhiteSpace(m.MonsterName) ? m.name : m.MonsterName)
-                : cd.CompanionName;
+            string historyName = string.IsNullOrWhiteSpace(m.MonsterName) ? m.name : m.MonsterName;
             player.SimCompanionJoinsTotal++;
             player.LastCompanionJoinedName = historyName;
             player.SimCompanionJoinHistory.Add(historyName);
@@ -1926,7 +1913,6 @@ namespace Abyssdawn
         private static bool TryAddMonsterCompanionToParty(
             DungeonSimPlayer player,
             MonsterSO sourceMonster,
-            CompanionSO comp,
             ref string floorNotes)
         {
             var occ = new BattleSimUnit[SimDungeonMaxAllySlots + 1];
@@ -1936,7 +1922,7 @@ namespace Abyssdawn
                 int sn = (int)u.Slot;
                 if (sn >= 1 && sn <= SimDungeonMaxAllySlots) occ[sn] = u;
             }
-            if (!TryPickEmptyAllySlotForCompanion(occ, comp.AllowedSlots, out BattleSlot slot))
+            if (!TryPickEmptyAllySlotForCompanion(occ, sourceMonster.AllowedSlots, out BattleSlot slot))
             {
                 floorNotes = AppendSemiColonNote(floorNotes, "companion_join_fail:no_slot");
                 return false;
@@ -1945,29 +1931,27 @@ namespace Abyssdawn
             var unit = new BattleSimUnit
             {
                 Team = BattleSimTeam.Ally,
-                DisplayName = string.IsNullOrWhiteSpace(comp.CompanionName)
-                    ? (string.IsNullOrWhiteSpace(sourceMonster.MonsterName) ? sourceMonster.name : sourceMonster.MonsterName)
-                    : comp.CompanionName,
+                DisplayName = string.IsNullOrWhiteSpace(sourceMonster.MonsterName) ? sourceMonster.name : sourceMonster.MonsterName,
                 Slot = slot,
                 SimIsMonsterCompanion = true,
                 SimStatLayerEquipmentEnabled = false,
                 SimAiPattern = sourceMonster.AIPattern,
-                MaxHP = Mathf.Max(1, comp.HP),
-                CurrentHP = Mathf.Max(1, comp.HP),
-                MaxMP = Mathf.Max(0, comp.MP),
-                CurrentMP = Mathf.Max(0, comp.MP),
-                Attack = Mathf.Max(0, comp.ATK),
-                Defense = Mathf.Max(0, comp.DEF),
-                Magic = Mathf.Max(0, comp.MAG),
-                Agility = Mathf.Max(0, comp.AGI),
-                Luck = Mathf.Max(0, comp.LUK),
+                MaxHP = Mathf.Max(1, sourceMonster.HP),
+                CurrentHP = Mathf.Max(1, sourceMonster.HP),
+                MaxMP = Mathf.Max(0, sourceMonster.MP),
+                CurrentMP = Mathf.Max(0, sourceMonster.MP),
+                Attack = Mathf.Max(0, sourceMonster.ATK),
+                Defense = Mathf.Max(0, sourceMonster.DEF),
+                Magic = Mathf.Max(0, sourceMonster.MAG),
+                Agility = Mathf.Max(0, sourceMonster.AGI),
+                Luck = Mathf.Max(0, sourceMonster.LUK),
                 SimDungeonPartyLevel = Mathf.Max(1, player.Level),
                 SimCompanionMonsterLevel = Mathf.Max(0, sourceMonster.MonsterLevel),
                 SimSkills = new List<SkillData>()
             };
-            if (comp.ActiveSkills != null)
+            if (sourceMonster.ActiveSkills != null)
             {
-                foreach (var sk in comp.ActiveSkills)
+                foreach (var sk in sourceMonster.ActiveSkills)
                     if (sk != null) unit.SimSkills.Add(sk);
             }
             player.Units.Add(unit);

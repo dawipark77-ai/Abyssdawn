@@ -16,7 +16,8 @@ MonoBehaviour:
   sprite: {fileID: 454009205973811108, guid: 8a0eaf3689f1b7e4e883c6046533a5d2, type: 3}
   scaleMultiplier: 1.5
   hoverOffsetY: 0
-  type: 4
+  type: 0
+  race: 2
   level: 12
   hp: 250
   mp: 0
@@ -40,4 +41,3 @@ MonoBehaviour:
   goldReward: 0
   dropTable: []
   companionChance: 0.1
-  companionData: {fileID: 11400000, guid: 8b5db2855e164bd8871cfdc0552812f5, type: 2}

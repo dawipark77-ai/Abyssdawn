@@ -54,8 +54,8 @@ public class PlayerStats : MonoBehaviour
     [Header("2. 캐릭터 정보")]
     public string playerName = "Hero";
 
-    /// <summary>영입 동료일 때 원본 CompanionSO. 프리셋 Warrior/Rogue/Wizard는 null.</summary>
-    [HideInInspector] public Abyssdawn.CompanionSO companionSource;
+    /// <summary>영입 동료일 때 원본 MonsterSO. 프리셋 Warrior/Rogue/Wizard는 null.</summary>
+    [HideInInspector] public Abyssdawn.MonsterSO companionSource;
 
     // [2026-05-25 ID 3단계] 영입 개체 고유 ID. ActiveRoster Entry.id와 1:1 매칭용.
     // 0 = 미할당. Restore 시 entry.id를 받아 채워짐. Sync가 이 id로 정확한 entry를 갱신.

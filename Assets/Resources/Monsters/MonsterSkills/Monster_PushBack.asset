@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e4c93a1f2d4856ab09cd3e5f7081a2, type: 3}
+  m_Name: Monster_PushBack
+  m_EditorClassIdentifier: 
+  skillID: Monster_PushBack
+  skillName: "\uBC00\uC5B4\uB0B4\uAE30"
+  skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
+  description: "\uB300\uBBF8\uC9C0\u2193, \uBA85\uC911 \uC2DC \uB300\uC0C1\uC744
+    1\uC2AC\uB86F \uD6C4\uD1F4\uC2DC\uD0A8\uB2E4. (\uC790\uB9AC\uC774\uB3D9 \uB85C\uC9C1\uC740
+    \uBCC4\uB3C4 \uC5F0\uB3D9 \uD544\uC694)"
+  usageType: 0
+  damageType: 1
+  scalingStat: 1
+  weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 3
+    allowedTargetSlots: 3
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0.65
+  maxMult: 0.75
+  hitCount: 1
+  accuracy: 0.88
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 0
+  isBasicAttackOverride: 0
+  atkMultiplierOverride: 0
+  randomRollMaxOverride: 0
