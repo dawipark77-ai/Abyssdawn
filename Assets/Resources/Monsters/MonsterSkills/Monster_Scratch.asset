@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillID: Monster_Scratch
   skillName: Scratch
-  skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
+  skillIcon: {fileID: 2874756452421268667, guid: dd47eec43950c3b4e9c29a32d7980b7d, type: 3}
   description: "2\uC5F0\uD0C0 + \uCD9C\uD608 \uBD80\uC5EC. \uD0C0\uACA9\uB9C8\uB2E4
     \uBA85\uC911 \uB3C5\uB9BD \uD310\uC815."
   usageType: 0

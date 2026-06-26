@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillID: Monster_Bite
   skillName: Bite
-  skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
+  skillIcon: {fileID: -3504630673186957658, guid: de470716e5ee2094aa72d0862083ed16, type: 3}
   description: "\uC57C\uC218(Beast) \uC804\uC6A9 \uD3C9\uD0C0 \uB300\uCCB4. \uB2E4\uB978
     \uC885\uC871\uC740 \uC801\uC6A9\uB418\uC9C0 \uC54A\uC74C."
   usageType: 0

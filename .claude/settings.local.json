@@ -11,7 +11,23 @@
       "Bash(git commit --allow-empty -m 'checkpoint: before Phase 1 \\(ally front/back row wiring\\) *)",
       "Bash(git commit -m 'feat: Phase 1 - ally front/back row wiring \\(slots 1,2 front / 3,4 back\\) *)",
       "Bash(git commit -m 'refactor: Phase 1.5 Step 1 - remove dead 7-slot code *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git commit -m 'refactor: Phase 1.5 Step 3 - redefine SlotMask Front/Back/Any to model B \\(4-slot\\) *)",
+      "Bash(git commit -m 'refactor: Phase 1.5 Step 4 - remove dead back-row transform code \\(slotPointsBack, back-row scale, GetSlotsForFormation\\) *)",
+      "Bash(git fetch *)",
+      "Bash(git rev-list *)",
+      "Bash(git diff *)",
+      "Bash(Select-String '^@@')",
+      "Bash(git commit -m 'feat: remove party compaction - companions keep slot position in battle *)",
+      "Bash(Get-Content \"Assets/Scripts/Dungeon/TacticsView.cs.meta\")",
+      "Bash(Select-String \"guid\")",
+      "Bash(git commit --allow-empty -m 'checkpoint: before Hero move implementation *)",
+      "Bash(git commit -m 'feat: Hero move Step 3 - TacticsView unified 4-slot occupancy display *)",
+      "Bash(git commit -m 'docs: combat/skill handoff for next section \\(monster skills, AI, slot-move, buffs\\) *)",
+      "Bash(rm -f \"Assets/Scripts/Battle/Data/Monsters/CompanionSO.cs\" \"Assets/Scripts/Battle/Data/Monsters/CompanionSO.cs.meta\")",
+      "Bash(rm -rf \"Assets/Resources/Monsters/CompanionData\" \"Assets/Resources/Monsters/CompanionData.meta\")",
+      "Bash(ls Assets/Resources/Monsters/CompanionData)",
+      "Bash(ls Assets/Scripts/Battle/Data/Monsters/CompanionSO.cs)"
     ]
   }
 }
