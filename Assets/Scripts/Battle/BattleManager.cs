@@ -3629,6 +3629,149 @@ public class BattleManager : MonoBehaviour
         Destroy(effectBg);
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    // [Enemy AI] 매 턴 행동 "선택" 레이어 (decision layer)
+    //   PlanNeo(가드/Fallback) → Arc(Delta 후보·Sigma 가중치·Omega 리스크)
+    //   → Zeta(역전) → Quantum(노이즈) 순으로 가중 랜덤 선택.
+    //   ※ 이번 단계는 "선택"만 구현한다. Skill/Defend/Flee의 실제 실행 경로는
+    //     아직 없으므로 ExecuteEnemyTurn에서 평타로 fallback(PlanNeo)하며,
+    //     선택 결과는 로그로만 남긴다. 실행 경로는 다음 단계에서 연결.
+    // ─────────────────────────────────────────────────────────────────
+    private enum EnemyActionType { Attack, Skill, Defend, Flee }
+
+    private struct EnemyActionDecision
+    {
+        public EnemyActionType type;
+        public SkillData skill;   // type == Skill일 때만 유효
+    }
+
+    private EnemyActionDecision SelectEnemyAction(EnemyStats enemy)
+    {
+        var fallback = new EnemyActionDecision { type = EnemyActionType.Attack, skill = null };
+        if (enemy == null) return fallback;
+
+        Abyssdawn.AIPattern pattern = (enemy.sourceMonster != null)
+            ? enemy.sourceMonster.AIPattern
+            : Abyssdawn.AIPattern.Aggressive;
+
+        float hpRatio = (enemy.maxHP > 0) ? (float)enemy.currentHP / enemy.maxHP : 1f;
+
+        // [Arc/Delta] 행동 후보 + [Sigma] 패턴 기본 가중치 + [Omega] 리스크 조정
+        var candidates = new List<(EnemyActionType type, SkillData skill, float weight)>();
+
+        // 공격(평타) — 항상 후보
+        candidates.Add((EnemyActionType.Attack, null, AttackBaseWeight(pattern)));
+
+        // 스킬 — 시전 슬롯 조건 + MP 충족분만 후보. [Zeta]용 최강 스킬도 함께 추적.
+        SkillData strongestCastable = null;
+        float strongestPower = -1f;
+        if (enemy.sourceMonster != null && enemy.sourceMonster.ActiveSkills != null)
+        {
+            foreach (var skill in enemy.sourceMonster.ActiveSkills)
+            {
+                if (skill == null || !CanEnemyCastSkill(enemy, skill)) continue;
+
+                float w = SkillBaseWeight(pattern, skill);
+                // [Omega] HP 소모 스킬 = 고위험 → 가중치 감소
+                if (skill.hpCostPercent > 0f) w *= 0.6f;
+                // [Omega] 명중률 낮을수록 소폭 감소 (accuracy 0~1 → 0.7~1.0 배)
+                w *= Mathf.Lerp(0.7f, 1f, Mathf.Clamp01(skill.accuracy));
+                candidates.Add((EnemyActionType.Skill, skill, Mathf.Max(0.01f, w)));
+
+                if (skill.maxMult > strongestPower)
+                {
+                    strongestPower = skill.maxMult;
+                    strongestCastable = skill;
+                }
+            }
+        }
+
+        // 방어 — HP 50% 이하일 때 후보 추가
+        if (hpRatio <= 0.5f)
+            candidates.Add((EnemyActionType.Defend, null, DefendBaseWeight(pattern)));
+
+        // 도망 — HP 20% 이하일 때 후보 추가
+        if (hpRatio <= 0.2f)
+            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern)));
+
+        // [Zeta] 역전 시나리오 — HP 20% 이하에서 5% 확률로 최강 스킬 강제 선택
+        if (hpRatio <= 0.2f && strongestCastable != null && Random.value < 0.05f)
+        {
+            Debug.Log($"[EnemyAI/Zeta] {enemy.enemyName} 역전 발동 → 최강 스킬 '{strongestCastable.skillName}'");
+            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = strongestCastable };
+        }
+
+        // [Quantum] 최종 가중치에 ±10% 노이즈
+        float totalWeight = 0f;
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            float noisy = candidates[i].weight * Random.Range(0.9f, 1.1f);
+            candidates[i] = (candidates[i].type, candidates[i].skill, noisy);
+            totalWeight += noisy;
+        }
+        if (totalWeight <= 0f) return fallback;   // [PlanNeo] 안전
+
+        // 가중 랜덤 선택
+        float roll = Random.value * totalWeight;
+        foreach (var c in candidates)
+        {
+            roll -= c.weight;
+            if (roll <= 0f)
+                return new EnemyActionDecision { type = c.type, skill = c.skill };
+        }
+
+        return fallback;   // [PlanNeo] Fallback
+    }
+
+    /// <summary>적이 지금 이 스킬을 시전할 수 있는지 — 시전 슬롯 조건 + MP 충족.</summary>
+    private bool CanEnemyCastSkill(EnemyStats enemy, SkillData skill)
+    {
+        if (skill == null || skill.targeting == null) return false;
+        if (!skill.targeting.CanCastFrom(enemy.currentSlot)) return false;
+        if (enemy.currentMP < skill.mpCost) return false;
+        return true;
+    }
+
+    // [Sigma] 패턴별 기본 가중치 ─────────────────────────────────────────
+    private float AttackBaseWeight(Abyssdawn.AIPattern p) => p switch
+    {
+        Abyssdawn.AIPattern.Aggressive => 1.0f,
+        Abyssdawn.AIPattern.Defensive  => 0.6f,
+        Abyssdawn.AIPattern.Support    => 0.5f,
+        _ => 1.0f
+    };
+
+    private float SkillBaseWeight(Abyssdawn.AIPattern p, SkillData skill)
+    {
+        // 지원/버프 스킬 = 타겟이 적이 아닌 것(Ally/Self)
+        bool isSupportSkill = skill.targeting != null &&
+                              (skill.targeting.targetFaction == TargetFaction.Ally ||
+                               skill.targeting.targetFaction == TargetFaction.Self);
+        switch (p)
+        {
+            case Abyssdawn.AIPattern.Aggressive: return isSupportSkill ? 0.4f : 1.0f;
+            case Abyssdawn.AIPattern.Defensive:  return isSupportSkill ? 0.7f : 0.6f;
+            case Abyssdawn.AIPattern.Support:    return isSupportSkill ? 1.0f : 0.5f;
+            default: return 1.0f;
+        }
+    }
+
+    private float DefendBaseWeight(Abyssdawn.AIPattern p) => p switch
+    {
+        Abyssdawn.AIPattern.Aggressive => 0.3f,
+        Abyssdawn.AIPattern.Defensive  => 1.0f,
+        Abyssdawn.AIPattern.Support    => 0.7f,
+        _ => 0.3f
+    };
+
+    private float FleeBaseWeight(Abyssdawn.AIPattern p) => p switch
+    {
+        Abyssdawn.AIPattern.Aggressive => 0.5f,
+        Abyssdawn.AIPattern.Defensive  => 0.7f,
+        Abyssdawn.AIPattern.Support    => 0.6f,
+        _ => 0.5f
+    };
+
     private IEnumerator ExecuteEnemyTurn(EnemyStats enemy)
     {
         if (enemy == null || enemy.currentHP <= 0 || enemy.IsDead()) yield break;
@@ -3639,6 +3782,12 @@ public class BattleManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(actionDelay);
+
+        // [Enemy AI] 행동 선택 레이어 — 이번 단계는 선택만. Skill/Defend/Flee 실행 경로 미구현 → 평타 fallback.
+        EnemyActionDecision decision = SelectEnemyAction(enemy);
+        Debug.Log($"[EnemyAI] {enemy.enemyName} (AI={(enemy.sourceMonster != null ? enemy.sourceMonster.AIPattern.ToString() : "?")}) → 선택: {decision.type}{(decision.skill != null ? $" ('{decision.skill.skillName}')" : "")}");
+        if (decision.type != EnemyActionType.Attack)
+            Debug.Log($"[EnemyAI] {decision.type} 실행 경로 미구현 → 평타로 fallback (PlanNeo)");
 
         // 적은 랜덤 파티 멤버 공격
         PlayerStats target = GetRandomAlivePartyMember();
