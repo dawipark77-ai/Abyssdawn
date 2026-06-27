@@ -321,6 +321,12 @@ public class EnemyStats : MonoBehaviour
         // }
     }
 
+    /// <summary>방어 자세 플래그 (1턴 유지)</summary>
+    public bool isDefending = false;
+
+    /// <summary>방어 시 피해 경감율 — 플레이어와 동일 (0.4 = 40% 경감)</summary>
+    public float defenceReduction = 0.4f;
+
     // 데미지 처리
     public int TakeDamage(int damage, bool isCritical = false)
     {

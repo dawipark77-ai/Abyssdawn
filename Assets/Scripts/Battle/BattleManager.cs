@@ -3786,6 +3786,14 @@ public class BattleManager : MonoBehaviour
         // [Enemy AI] 행동 선택 레이어 — 이번 단계는 선택만. Skill/Defend/Flee 실행 경로 미구현 → 평타 fallback.
         EnemyActionDecision decision = SelectEnemyAction(enemy);
         Debug.Log($"[EnemyAI] {enemy.enemyName} (AI={(enemy.sourceMonster != null ? enemy.sourceMonster.AIPattern.ToString() : "?")}) → 선택: {decision.type}{(decision.skill != null ? $" ('{decision.skill.skillName}')" : "")}");
+        if (decision.type == EnemyActionType.Defend)
+        {
+            enemy.isDefending = true;
+            AddMessage($"{enemy.enemyName}은(는) 방어 자세를 취했다!");
+            yield return new WaitForSeconds(actionDelay);
+            UpdateStatusUI();
+            yield break;
+        }
         if (decision.type != EnemyActionType.Attack)
             Debug.Log($"[EnemyAI] {decision.type} 실행 경로 미구현 → 평타로 fallback (PlanNeo)");
 
@@ -5026,6 +5034,13 @@ public class BattleManager : MonoBehaviour
 
                 int hit1Slot = ApplySlotDamageToTarget(hit1, target.currentSlot, target.enemyName);
                 int hit2Slot = ApplySlotDamageToTarget(hit2, target.currentSlot, target.enemyName);
+                if (target.isDefending)
+                {
+                    hit1Slot = Mathf.FloorToInt(hit1Slot * (1f - target.defenceReduction));
+                    hit2Slot = Mathf.FloorToInt(hit2Slot * (1f - target.defenceReduction));
+                    target.isDefending = false;
+                    AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+                }
                 int applied1 = target.TakeDamage(hit1Slot, critical);
                 int applied2 = 0;
                 if (!target.IsDead())
@@ -5068,6 +5083,13 @@ public class BattleManager : MonoBehaviour
 
                 int singleBaseSlot = ApplySlotDamageToTarget(singleBase, target.currentSlot, target.enemyName);
                 int singleArmorSlot = ApplySlotDamageToTarget(singleArmor, target.currentSlot, target.enemyName);
+                if (target.isDefending)
+                {
+                    singleBaseSlot = Mathf.FloorToInt(singleBaseSlot * (1f - target.defenceReduction));
+                    singleArmorSlot = Mathf.FloorToInt(singleArmorSlot * (1f - target.defenceReduction));
+                    target.isDefending = false;
+                    AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+                }
                 int applied1 = target.TakeDamage(singleBaseSlot, critical);
                 int applied2 = 0;
                 if (singleArmor > 0 && !target.IsDead())
@@ -5629,6 +5651,12 @@ public class BattleManager : MonoBehaviour
             Debug.Log($"[BattleLog] Skill Final Damage (with armor break): base={baseDamage}, armorBreak={armorBreakDamage}, total={damage}");
 
             damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.enemyName);
+            if (target.isDefending)
+            {
+                damage = Mathf.FloorToInt(damage * (1f - target.defenceReduction));
+                target.isDefending = false;
+                AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+            }
             // 데미지 적용 (적이 흔들림) - 크리티컬 여부 전달
             target.TakeDamage(damage, critical);
             totalDamage += damage;
@@ -5754,6 +5782,12 @@ public class BattleManager : MonoBehaviour
             damage = ApplyOffensivePassiveBonuses(attacker, skill, target, damage);
 
             damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.enemyName);
+            if (target.isDefending)
+            {
+                damage = Mathf.FloorToInt(damage * (1f - target.defenceReduction));
+                target.isDefending = false;
+                AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+            }
             target.TakeDamage(damage, critical);
             totalDamage += damage;
 
