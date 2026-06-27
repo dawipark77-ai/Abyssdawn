@@ -3772,6 +3772,32 @@ public class BattleManager : MonoBehaviour
         _ => 0.5f
     };
 
+    // [Enemy AI] 도망(Flee) 실행 — 리스트 제거 없이(인덱스 안정) 처치 처리 + EXP 0.
+    //   ※ EnemyStats.isDead/spriteRenderer/statusUI는 private이라 접근 불가 →
+    //     currentHP=0(IsDead()/AllEnemiesDefeated가 '처치됨'으로 인식) + GetComponent + StatusUI 프로퍼티로 보정.
+    private IEnumerator HandleFlee(EnemyStats enemy)
+    {
+        // 1. 메시지
+        AddMessage($"{enemy.enemyName}은(는) 전투에서 도망쳤다!");
+        yield return new WaitForSeconds(actionDelay);
+
+        // 2. 상태 처리 (리스트 제거 없이 — 인덱스 안정성 보장)
+        enemy.currentHP = 0;    // IsDead()/AllEnemiesDefeated가 '처치됨'으로 인식 (isDead는 private이라 대체)
+        enemy.expReward = 0;    // EXP 없음
+        enemy.activeStatusEffects.Clear();
+
+        // 3. 시각 처리 (spriteRenderer/statusUI는 private → 접근 가능한 경로로)
+        var sr = enemy.GetComponent<SpriteRenderer>();
+        if (sr != null) sr.enabled = false;
+        Collider2D col = enemy.GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+        if (enemy.StatusUI != null) enemy.StatusUI.SetActive(false);
+
+        // 4. 전투 종료 체크 — 기존 AllEnemiesDefeated() 경로 활용
+        UpdateStatusUI();
+        CheckBattleEnd();
+    }
+
     private IEnumerator ExecuteEnemyTurn(EnemyStats enemy)
     {
         if (enemy == null || enemy.currentHP <= 0 || enemy.IsDead()) yield break;
@@ -3792,6 +3818,11 @@ public class BattleManager : MonoBehaviour
             AddMessage($"{enemy.enemyName}은(는) 방어 자세를 취했다!");
             yield return new WaitForSeconds(actionDelay);
             UpdateStatusUI();
+            yield break;
+        }
+        if (decision.type == EnemyActionType.Flee)
+        {
+            yield return StartCoroutine(HandleFlee(enemy));
             yield break;
         }
         if (decision.type != EnemyActionType.Attack)
