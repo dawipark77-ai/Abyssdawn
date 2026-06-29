@@ -3665,10 +3665,12 @@ public class BattleManager : MonoBehaviour
         // 스킬 — 시전 슬롯 조건 + MP 충족분만 후보. [Zeta]용 최강 스킬도 함께 추적.
         SkillData strongestCastable = null;
         float strongestPower = -1f;
+        Debug.Log($"[EnemyAI-Skill] sourceMonster={enemy.sourceMonster?.MonsterName ?? "NULL"}, ActiveSkills={enemy.sourceMonster?.ActiveSkills?.Count ?? -1}");
         if (enemy.sourceMonster != null && enemy.sourceMonster.ActiveSkills != null)
         {
             foreach (var skill in enemy.sourceMonster.ActiveSkills)
             {
+                Debug.Log($"[EnemyAI-Skill-Check] skill={skill.skillName}, CanCast={CanEnemyCastSkill(enemy, skill)}, w={SkillBaseWeight(pattern, skill):F2}");
                 if (skill == null || !CanEnemyCastSkill(enemy, skill)) continue;
 
                 float w = SkillBaseWeight(pattern, skill);
@@ -3727,9 +3729,14 @@ public class BattleManager : MonoBehaviour
     private bool CanEnemyCastSkill(EnemyStats enemy, SkillData skill)
     {
         if (skill == null || skill.targeting == null) return false;
-        if (!skill.targeting.CanCastFrom(enemy.currentSlot)) return false;
         if (enemy.currentMP < skill.mpCost) return false;
-        return true;
+
+        // Center/None은 단독 배치 슬롯 — Slot1 기준으로 판정
+        BattleSlot checkSlot = enemy.currentSlot;
+        if (checkSlot == BattleSlot.None || checkSlot == BattleSlot.Center)
+            checkSlot = BattleSlot.Slot1;
+
+        return skill.targeting.CanCastFrom(checkSlot);
     }
 
     // [Sigma] 패턴별 기본 가중치 ─────────────────────────────────────────
@@ -3778,7 +3785,7 @@ public class BattleManager : MonoBehaviour
     private IEnumerator HandleFlee(EnemyStats enemy)
     {
         // 1. 메시지
-        AddMessage($"{enemy.enemyName}은(는) 전투에서 도망쳤다!");
+        AddMessage($"{enemy.enemyName} fled from battle!");
         yield return new WaitForSeconds(actionDelay);
 
         // 2. 상태 처리 (리스트 제거 없이 — 인덱스 안정성 보장)
@@ -3815,7 +3822,7 @@ public class BattleManager : MonoBehaviour
         if (decision.type == EnemyActionType.Defend)
         {
             enemy.isDefending = true;
-            AddMessage($"{enemy.enemyName}은(는) 방어 자세를 취했다!");
+            AddMessage($"{enemy.enemyName} takes a defensive stance!");
             yield return new WaitForSeconds(actionDelay);
             UpdateStatusUI();
             yield break;
@@ -3825,8 +3832,15 @@ public class BattleManager : MonoBehaviour
             yield return StartCoroutine(HandleFlee(enemy));
             yield break;
         }
-        if (decision.type != EnemyActionType.Attack)
-            Debug.Log($"[EnemyAI] {decision.type} 실행 경로 미구현 → 평타로 fallback (PlanNeo)");
+        if (decision.type == EnemyActionType.Skill && decision.skill != null)
+        {
+            PlayerStats skillTarget = GetRandomAlivePartyMember();
+            if (skillTarget != null && skillTarget.currentHP > 0)
+            {
+                yield return StartCoroutine(ExecuteEnemySkill(enemy, skillTarget, decision.skill));
+                yield break;
+            }
+        }
 
         // 적은 랜덤 파티 멤버 공격
         PlayerStats target = GetRandomAlivePartyMember();
@@ -5070,7 +5084,7 @@ public class BattleManager : MonoBehaviour
                     hit1Slot = Mathf.FloorToInt(hit1Slot * (1f - target.defenceReduction));
                     hit2Slot = Mathf.FloorToInt(hit2Slot * (1f - target.defenceReduction));
                     target.isDefending = false;
-                    AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+                    AddMessage($"{target.enemyName} defended and reduced the damage!");
                 }
                 int applied1 = target.TakeDamage(hit1Slot, critical);
                 int applied2 = 0;
@@ -5119,7 +5133,7 @@ public class BattleManager : MonoBehaviour
                     singleBaseSlot = Mathf.FloorToInt(singleBaseSlot * (1f - target.defenceReduction));
                     singleArmorSlot = Mathf.FloorToInt(singleArmorSlot * (1f - target.defenceReduction));
                     target.isDefending = false;
-                    AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+                    AddMessage($"{target.enemyName} defended and reduced the damage!");
                 }
                 int applied1 = target.TakeDamage(singleBaseSlot, critical);
                 int applied2 = 0;
@@ -5439,6 +5453,117 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    /// <summary>적 스킬이 플레이어(아군)에게 상태이상을 거는 경로</summary>
+    private void ApplyCurseEffectsToPlayer(PlayerStats target, SkillData skill)
+    {
+        if (skill.curseEffect == null || skill.curseApplyChance <= 0f) return;
+        if (UnityEngine.Random.value < skill.curseApplyChance)
+        {
+            int dur = skill.damageType == DamageType.Physical
+                ? skill.curseEffect.physicalDuration
+                : skill.curseEffect.magicalDuration;
+            if (dur > 0)
+            {
+                target.ApplyStatusEffect(skill.curseEffect, dur);
+                AddMessage($"{target.playerName} is afflicted with {skill.curseEffect.effectType}!");
+            }
+        }
+    }
+
+    /// <summary>적 스킬용 스탯 스케일 값 — EnemyStats에 GetScaleValue가 없어 직접 분기.</summary>
+    private int GetEnemyScaleValue(EnemyStats enemy, ScaleStat stat)
+    {
+        return stat switch
+        {
+            ScaleStat.Attack  => enemy.attack,
+            ScaleStat.Defense => enemy.defense,
+            ScaleStat.Magic   => enemy.magic,
+            ScaleStat.Agility => enemy.Agility,
+            ScaleStat.Luck    => enemy.luck,
+            _                 => enemy.attack   // None 또는 미정의 → attack
+        };
+    }
+
+    /// <summary>적이 SkillData 기반 스킬을 플레이어에게 시전. (평타와 별개 경로)</summary>
+    private IEnumerator ExecuteEnemySkill(EnemyStats enemy, PlayerStats target, SkillData skill)
+    {
+        // 1. MP 차감
+        enemy.currentMP = Mathf.Max(0, enemy.currentMP - skill.mpCost);
+
+        // 2. HP 코스트
+        if (skill.hpCostPercent > 0f)
+        {
+            int hpCost = Mathf.RoundToInt(enemy.maxHP * skill.hpCostPercent / 100f);
+            enemy.currentHP = Mathf.Max(1, enemy.currentHP - hpCost);
+        }
+
+        int hits = Mathf.Max(1, skill.hitCount);
+        int totalDamage = 0;
+
+        for (int i = 0; i < hits; i++)
+        {
+            // 3. 타격마다 독립 명중 판정
+            if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, skill))
+            {
+                AddMessage($"{enemy.enemyName}'s {skill.skillName} missed!");
+                continue;
+            }
+
+            // 4. 크리티컬
+            bool critical = CheckCritical(enemy.luck, skill.critBonusPercent);
+
+            // 5. 데미지 계산
+            int baseStat = GetEnemyScaleValue(enemy, skill.scalingStat);
+            float mult = UnityEngine.Random.Range(skill.minMult, skill.maxMult);
+            float baseValue = (baseStat * 2f - target.Defense) / 2f;
+            if (baseValue < 1f) baseValue = 1f;
+            int damage = Mathf.FloorToInt(baseValue * mult);
+            if (critical) damage = Mathf.FloorToInt(damage * 1.5f);
+            damage = Mathf.Max(1, damage);
+
+            // 6. 슬롯 보정
+            damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.playerName);
+
+            // 7. 적 방어 경감 (isDefending)
+            if (target.isDefending)
+            {
+                damage = Mathf.FloorToInt(damage * (1f - target.defenceReduction));
+                target.isDefending = false;
+                AddMessage($"{target.playerName} defended and reduced the damage!");
+            }
+
+            // 8. 방패 블록 — TryBlock(PlayerStats, out float) 시그니처에 맞춤
+            if (TryBlock(target, out float blockReduction))
+            {
+                damage = Mathf.Max(0, Mathf.FloorToInt(damage - blockReduction));
+                if (damage <= 0)
+                {
+                    AddMessage($"{target.playerName} blocked {skill.skillName} completely!");
+                    continue;
+                }
+                AddMessage($"{target.playerName} blocked part of {skill.skillName}! (DR {blockReduction:F0})");
+            }
+
+            // 9. 데미지 적용
+            target.TakeDamage(damage);
+            totalDamage += damage;
+            AddMessage($"{enemy.enemyName} uses {skill.skillName}! {target.playerName} takes {damage} damage{(critical ? " (Critical!)" : "")}.");
+
+            // 10. 상태이상 (타격마다)
+            ApplyCurseEffectsToPlayer(target, skill);
+
+            if (target.currentHP <= 0) break;
+
+            if (hits > 1)
+                yield return new WaitForSeconds(0.3f);
+        }
+
+        // 11. UI 갱신
+        ShakePlayerStatusUI(target);
+        UpdateStatusUI();
+        CheckBattleEnd();
+    }
+
     private IEnumerator ExecuteSkill(PlayerStats attacker, SkillData skill, EnemyStats target)
     {
         if (attacker == null || skill == null) yield break;
@@ -5686,7 +5811,7 @@ public class BattleManager : MonoBehaviour
             {
                 damage = Mathf.FloorToInt(damage * (1f - target.defenceReduction));
                 target.isDefending = false;
-                AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+                AddMessage($"{target.enemyName} defended and reduced the damage!");
             }
             // 데미지 적용 (적이 흔들림) - 크리티컬 여부 전달
             target.TakeDamage(damage, critical);
@@ -5817,7 +5942,7 @@ public class BattleManager : MonoBehaviour
             {
                 damage = Mathf.FloorToInt(damage * (1f - target.defenceReduction));
                 target.isDefending = false;
-                AddMessage($"{target.enemyName}은(는) 방어 자세로 피해를 줄였다!");
+                AddMessage($"{target.enemyName} defended and reduced the damage!");
             }
             target.TakeDamage(damage, critical);
             totalDamage += damage;
