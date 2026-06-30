@@ -13,6 +13,16 @@ namespace AbyssdawnBattle
     /// 용도: 평타 처리/ExecuteEnemyTurn 단계에서 MonsterRace==Beast 등 조건일 때 자동 적용되는 보정값.
     ///   (예: 물기 = 야수 전용 평타 대체)
     /// </summary>
+    /// <summary>몬스터 스킬 자동 분류 (디자이너가 hp/mpCost 책정 시 참고용).</summary>
+    public enum MonsterSkillCategory
+    {
+        Physical,       // 물리 공격
+        MagicAttack,    // 마법 공격
+        Buff,           // 아군 강화
+        Debuff,         // 적 약화/상태이상
+        Heal            // 회복
+    }
+
     [CreateAssetMenu(fileName = "New Monster Skill", menuName = "Battle/Monster Skill Data")]
     public class MonsterSkillData : SkillData
     {
@@ -20,5 +30,43 @@ namespace AbyssdawnBattle
         public bool isBasicAttackOverride;
         public float atkMultiplierOverride;
         public float randomRollMaxOverride;
+
+        /// <summary>
+        /// 기존 필드(damageType / targeting.targetFaction / effects / curseEffect)를 조합한 자동 분류.
+        /// 읽기 전용 — 실행 로직은 사용하지 않으며, 디자이너가 hp/mpCost 책정 시 참고용.
+        /// ※ get-only 프로퍼티라 Unity Inspector에는 노출되지 않음 (ReadOnly 어트리뷰트 미보유).
+        /// </summary>
+        public MonsterSkillCategory Category
+        {
+            get
+            {
+                // 회복: damageType None + targetFaction Ally/Self + effects에 Recovery 포함
+                if (damageType == DamageType.None &&
+                    (targeting.targetFaction == TargetFaction.Ally || targeting.targetFaction == TargetFaction.Self) &&
+                    effects != null && effects.Exists(e => e.effectType == EffectType.Recovery))
+                    return MonsterSkillCategory.Heal;
+
+                // 버프: damageType None + targetFaction Ally/Self + effects에 Buff* 포함
+                if (damageType == DamageType.None &&
+                    (targeting.targetFaction == TargetFaction.Ally || targeting.targetFaction == TargetFaction.Self) &&
+                    effects != null && effects.Exists(e => e.effectType.ToString().StartsWith("Buff")))
+                    return MonsterSkillCategory.Buff;
+
+                // 디버프: targetFaction Enemy + (curseEffect 있음 또는 effects에 Debuff* 포함)
+                if (targeting.targetFaction == TargetFaction.Enemy &&
+                    ((curseEffect != null && curseApplyChance > 0f) ||
+                     (effects != null && effects.Exists(e => e.effectType.ToString().StartsWith("Debuff")))))
+                {
+                    // 데미지도 같이 있으면 공격 스킬의 부가효과로 보고, 데미지 타입을 우선한다
+                    if (damageType == DamageType.Physical) return MonsterSkillCategory.Physical;
+                    if (damageType == DamageType.Magic) return MonsterSkillCategory.MagicAttack;
+                    return MonsterSkillCategory.Debuff;
+                }
+
+                // 순수 공격: damageType 기준
+                if (damageType == DamageType.Magic) return MonsterSkillCategory.MagicAttack;
+                return MonsterSkillCategory.Physical; // 기본값
+            }
+        }
     }
 }
