@@ -3643,6 +3643,42 @@ public class BattleManager : MonoBehaviour
     {
         public EnemyActionType type;
         public SkillData skill;   // type == Skill일 때만 유효
+        public PlayerStats target;   // 타겟 지능이 선택한 공격 대상 (null이면 랜덤)
+    }
+
+    /// <summary>AIPattern별 타겟 선택. null 반환 시 ExecuteEnemyTurn이 랜덤으로 폴백.</summary>
+    private PlayerStats SelectEnemyTarget(EnemyStats enemy, Abyssdawn.AIPattern pattern)
+    {
+        List<PlayerStats> alive = activePartyMembers
+            .Where(p => p != null && p.currentHP > 0)
+            .ToList();
+        if (alive.Count == 0) return null;
+
+        switch (pattern)
+        {
+            case Abyssdawn.AIPattern.Aggressive:
+                // HP 비율 가장 낮은 아군 우선 (약점 공략)
+                return alive.OrderBy(p => (float)p.currentHP / Mathf.Max(1, p.maxHP)).First();
+
+            case Abyssdawn.AIPattern.Defensive:
+                // 방어 중인 아군 제외, 후열 우선 (안전한 타겟)
+                var nonDefending = alive.Where(p => !p.isDefending).ToList();
+                var pool = nonDefending.Count > 0 ? nonDefending : alive;
+                var backRow = pool.Where(p => SlotHelper.IsBackRow(p.currentSlot)).ToList();
+                return backRow.Count > 0
+                    ? backRow[UnityEngine.Random.Range(0, backRow.Count)]
+                    : pool[UnityEngine.Random.Range(0, pool.Count)];
+
+            case Abyssdawn.AIPattern.Support:
+                // 후열 아군 우선 (힐러/마법사 견제)
+                var back = alive.Where(p => SlotHelper.IsBackRow(p.currentSlot)).ToList();
+                return back.Count > 0
+                    ? back[UnityEngine.Random.Range(0, back.Count)]
+                    : alive[UnityEngine.Random.Range(0, alive.Count)];
+
+            default:
+                return GetRandomAlivePartyMember();
+        }
     }
 
     private EnemyActionDecision SelectEnemyAction(EnemyStats enemy)
@@ -3654,7 +3690,17 @@ public class BattleManager : MonoBehaviour
             ? enemy.sourceMonster.AIPattern
             : Abyssdawn.AIPattern.Aggressive;
 
+        // fallback 반환에도 타겟 지능 적용 (pattern 확정 후 설정)
+        fallback.target = SelectEnemyTarget(enemy, pattern);
+
         float hpRatio = (enemy.maxHP > 0) ? (float)enemy.currentHP / enemy.maxHP : 1f;
+
+        // [Phase] MonsterSO 전환점 기준으로 페이즈 판정
+        float desperateThreshold = (enemy.sourceMonster != null) ? enemy.sourceMonster.DesperatePhaseThreshold : 0.5f;
+        float criticalThreshold  = (enemy.sourceMonster != null) ? enemy.sourceMonster.CriticalPhaseThreshold  : 0.2f;
+
+        bool isDesperatePhase = hpRatio <= desperateThreshold;
+        bool isCriticalPhase  = hpRatio <= criticalThreshold;
 
         // [Arc/Delta] 행동 후보 + [Sigma] 패턴 기본 가중치 + [Omega] 리스크 조정
         var candidates = new List<(EnemyActionType type, SkillData skill, float weight)>();
@@ -3688,19 +3734,19 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        // 방어 — HP 50% 이하일 때 후보 추가
-        if (hpRatio <= 0.5f)
-            candidates.Add((EnemyActionType.Defend, null, DefendBaseWeight(pattern)));
+        // [Phase] 방어 — Desperate 페이즈에서 후보 추가 (가중치 ×2)
+        if (isDesperatePhase)
+            candidates.Add((EnemyActionType.Defend, null, DefendBaseWeight(pattern) * 2f));
 
-        // 도망 — HP 20% 이하일 때 후보 추가
-        if (hpRatio <= 0.2f)
-            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern)));
+        // [Phase] 도망 — Critical 페이즈에서 후보 추가 (가중치 ×3)
+        if (isCriticalPhase)
+            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f));
 
-        // [Zeta] 역전 시나리오 — HP 20% 이하에서 5% 확률로 최강 스킬 강제 선택
-        if (hpRatio <= 0.2f && strongestCastable != null && Random.value < 0.05f)
+        // [Zeta] 역전 시나리오 — Critical 페이즈에서 15% 확률로 최강 스킬 강제 선택
+        if (isCriticalPhase && strongestCastable != null && Random.value < 0.15f)
         {
             Debug.Log($"[EnemyAI/Zeta] {enemy.enemyName} 역전 발동 → 최강 스킬 '{strongestCastable.skillName}'");
-            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = strongestCastable };
+            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = strongestCastable, target = SelectEnemyTarget(enemy, pattern) };
         }
 
         // [Quantum] 최종 가중치에 ±10% 노이즈
@@ -3719,7 +3765,7 @@ public class BattleManager : MonoBehaviour
         {
             roll -= c.weight;
             if (roll <= 0f)
-                return new EnemyActionDecision { type = c.type, skill = c.skill };
+                return new EnemyActionDecision { type = c.type, skill = c.skill, target = SelectEnemyTarget(enemy, pattern) };
         }
 
         return fallback;   // [PlanNeo] Fallback
@@ -3841,7 +3887,7 @@ public class BattleManager : MonoBehaviour
         }
         if (decision.type == EnemyActionType.Skill && decision.skill != null)
         {
-            PlayerStats skillTarget = GetRandomAlivePartyMember();
+            PlayerStats skillTarget = decision.target ?? GetRandomAlivePartyMember();
             if (skillTarget != null && skillTarget.currentHP > 0)
             {
                 yield return StartCoroutine(ExecuteEnemySkill(enemy, skillTarget, decision.skill));
@@ -3849,8 +3895,8 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        // 적은 랜덤 파티 멤버 공격
-        PlayerStats target = GetRandomAlivePartyMember();
+        // 적은 랜덤 파티 멤버 공격 (타겟 지능이 고른 대상 우선, 없으면 랜덤)
+        PlayerStats target = decision.target ?? GetRandomAlivePartyMember();
 
         // [Bite] 기본공격 override는 MonsterSO.basicAttackOverride로 직접 지정 (Race 자동 분기·Resources.Load 폐기).
         MonsterSkillData biteOverride = (enemy != null && enemy.sourceMonster != null)

@@ -211,6 +211,15 @@ namespace Abyssdawn
         [Tooltip("AI가 우선시하는 전투 전략 (Aggressive / Defensive / Support)")]
         [SerializeField] private AIPattern aiPattern = AIPattern.Aggressive;
 
+        [Header("페이즈 (Phase)")]
+        [Tooltip("Desperate 페이즈 진입 HP 비율 (기본 0.5 = 50% 이하)")]
+        [Range(0f, 1f)] [SerializeField] private float desperatePhaseThreshold = 0.5f;
+        public float DesperatePhaseThreshold => desperatePhaseThreshold;
+
+        [Tooltip("Critical 페이즈 진입 HP 비율 (기본 0.2 = 20% 이하)")]
+        [Range(0f, 1f)] [SerializeField] private float criticalPhaseThreshold = 0.2f;
+        public float CriticalPhaseThreshold => criticalPhaseThreshold;
+
         // ──────────────────────────────────────────
         // 파티 배치
         // ──────────────────────────────────────────
