@@ -29,7 +29,7 @@ MonoBehaviour:
   luk: 4
   physResist: 0
   magResist: 0
-  statusResist: 0
+  statusResist: 0.5
   activeSkills:
   - {fileID: 11400000, guid: a04e9f8e7ad743258b0360ef39bb46f2, type: 2}
   passiveSkills:

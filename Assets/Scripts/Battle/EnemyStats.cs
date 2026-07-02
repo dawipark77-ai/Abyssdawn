@@ -46,6 +46,9 @@ public class EnemyStats : MonoBehaviour
     public int Agility = 0;
     public int luck = 0;
 
+    [Tooltip("상태이상 저항 배율 (1.0 = 기본, 0.5 = 적용 확률 절반). MonsterSO.StatusResist에서 복사됨.")]
+    public float statusResist = 1f;
+
     [Header("Battle Position")]
     [Tooltip("현재 슬롯 위치 (BattleLine에서 자동 설정됨). 슬롯 1,2 = 전열, 슬롯 3,4 = 후열.")]
     public BattleSlot currentSlot = BattleSlot.Slot1;
@@ -152,6 +155,7 @@ public class EnemyStats : MonoBehaviour
         luck         = so.LUK;
         allowedSlots = so.AllowedSlots;
         expReward    = so.ExpReward;
+        statusResist = so.StatusResist;
 
         // 스프라이트는 BattleManager에서 selectedSprites[i]로 직접 주입 — 여기서 건드리지 않음
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
@@ -411,7 +415,8 @@ public class EnemyStats : MonoBehaviour
     {
         if (effect == null) return false;
 
-        if (UnityEngine.Random.value > effect.physicalApplyChance) return false;
+        float effectiveChance = effect.physicalApplyChance * statusResist;
+        if (UnityEngine.Random.value > effectiveChance) return false;
 
         return ApplyStatusEffectDirect(effect, effect.physicalDuration);
     }

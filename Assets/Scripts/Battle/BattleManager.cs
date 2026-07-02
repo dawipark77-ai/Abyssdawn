@@ -3731,6 +3731,13 @@ public class BattleManager : MonoBehaviour
         if (skill == null || skill.targeting == null) return false;
         if (enemy.currentMP < skill.mpCost) return false;
 
+        if (skill.hpCostPercent > 0f)
+        {
+            int hpCost = Mathf.RoundToInt(enemy.maxHP * skill.hpCostPercent / 100f);
+            if (enemy.currentHP <= hpCost)
+                return false;
+        }
+
         // Center/None은 단독 배치 슬롯 — Slot1 기준으로 판정
         BattleSlot checkSlot = enemy.currentSlot;
         if (checkSlot == BattleSlot.None || checkSlot == BattleSlot.Center)

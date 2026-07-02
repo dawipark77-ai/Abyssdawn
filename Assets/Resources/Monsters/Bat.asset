@@ -29,7 +29,7 @@ MonoBehaviour:
   luk: 5
   physResist: 0
   magResist: 0
-  statusResist: 0
+  statusResist: 0.5
   activeSkills: []
   passiveSkills: []
   aiPattern: 0

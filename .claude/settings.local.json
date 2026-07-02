@@ -27,7 +27,8 @@
       "Bash(rm -f \"Assets/Scripts/Battle/Data/Monsters/CompanionSO.cs\" \"Assets/Scripts/Battle/Data/Monsters/CompanionSO.cs.meta\")",
       "Bash(rm -rf \"Assets/Resources/Monsters/CompanionData\" \"Assets/Resources/Monsters/CompanionData.meta\")",
       "Bash(ls Assets/Resources/Monsters/CompanionData)",
-      "Bash(ls Assets/Scripts/Battle/Data/Monsters/CompanionSO.cs)"
+      "Bash(ls Assets/Scripts/Battle/Data/Monsters/CompanionSO.cs)",
+      "Bash(git commit *)"
     ]
   }
 }
