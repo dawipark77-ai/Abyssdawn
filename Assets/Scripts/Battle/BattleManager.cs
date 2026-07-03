@@ -3777,6 +3777,12 @@ public class BattleManager : MonoBehaviour
         if (skill == null || skill.targeting == null) return false;
         if (enemy.currentMP < skill.mpCost) return false;
 
+        // 회복 스킬: HP가 이미 최대치면 사용 불가
+        if (skill is MonsterSkillData msd && msd.Category == MonsterSkillCategory.Heal)
+        {
+            if (enemy.currentHP >= enemy.maxHP) return false;
+        }
+
         if (skill.hpCostPercent > 0f)
         {
             int hpCost = Mathf.RoundToInt(enemy.maxHP * skill.hpCostPercent / 100f);
@@ -5548,6 +5554,22 @@ public class BattleManager : MonoBehaviour
         {
             int hpCost = Mathf.RoundToInt(enemy.maxHP * skill.hpCostPercent / 100f);
             enemy.currentHP = Mathf.Max(1, enemy.currentHP - hpCost);
+        }
+
+        // [Heal 분기] 회복 스킬이면 데미지 루프 진입하지 않고 즉시 처리 후 종료
+        if (skill is MonsterSkillData healSkill && healSkill.Category == MonsterSkillCategory.Heal)
+        {
+            // 회복량 = effects의 Recovery 항목 effectAmount(% of maxHP). 없으면 5f 폴백.
+            float healPercent = 5f;
+            var recEffect = healSkill.Effects?.FirstOrDefault(e => e != null && e.effectType == EffectType.Recovery);
+            if (recEffect != null) healPercent = recEffect.effectAmount;
+
+            int healAmount = Mathf.RoundToInt(enemy.maxHP * healPercent / 100f);
+            enemy.Heal(healAmount);
+            AddMessage($"{enemy.enemyName} uses {skill.skillName} and recovers {healAmount} HP!");
+            yield return new WaitForSeconds(actionDelay);
+            UpdateStatusUI();
+            yield break;
         }
 
         int hits = Mathf.Max(1, skill.hitCount);
