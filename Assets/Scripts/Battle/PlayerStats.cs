@@ -1284,7 +1284,12 @@ public class PlayerStats : MonoBehaviour
         return reduction;
     }
 
-    public void Heal(int amount) { currentHP = Mathf.Min(currentHP + amount, maxHP); }
+    public void Heal(int amount)
+    {
+        // [StatMod 4단계] 받는 회복량 배율 적용.
+        amount = Mathf.RoundToInt(ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived, amount));
+        currentHP = Mathf.Min(currentHP + amount, maxHP);
+    }
     public void UseMP(int amount) { currentMP = Mathf.Clamp(currentMP - amount, 0, maxMP); }
     void Die() { Debug.Log($"{playerName} 사망"); }
     
@@ -1309,6 +1314,15 @@ public class PlayerStats : MonoBehaviour
         if (resistChance > 0f && UnityEngine.Random.Range(0f, 100f) < resistChance)
         {
             Debug.Log($"[StatusEffect] {playerName}가 Luck 보너스로 {effect.effectType}을 저항했습니다.");
+            return false;
+        }
+
+        // [StatMod 4단계] Luck 저항 통과 후, 자신의 StatusResist 배율을 적용 확률에 곱함.
+        //   (1.0=기본, 1.0 미만이면 추가 저항 확률 발생 — statusResist가 낮을수록 안 걸림)
+        float statusResistMod = ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f);
+        if (statusResistMod < 1f && UnityEngine.Random.value > statusResistMod)
+        {
+            Debug.Log($"[StatusEffect] {playerName}가 StatusResist 보정으로 {effect.effectType}을 저항했습니다.");
             return false;
         }
 
@@ -1409,22 +1423,38 @@ public class PlayerStats : MonoBehaviour
         OnStatusChanged?.Invoke();
     }
 
-    /// <summary>공격력 감소 디버프 합산</summary>
-    public float GetStatusEffectAttackDebuff()
+    // [StatMod 전환] GetStatusEffectAttackDebuff / GetStatusEffectDefenseDebuff 제거됨.
+    //   → 아래 StatModifier 시스템으로 대체.
+    [System.NonSerialized] public List<ActiveStatModifier> activeStatModifiers = new List<ActiveStatModifier>();
+
+    public float ApplyStatModifiers(AbyssdawnBattle.ModStatType type, float baseValue)
+        => StatCalculator.CalculateFinalStat(baseValue,
+            StatModifierQuery.Collect(activeStatusEffects, activeStatModifiers, type));
+
+    public void AddStatModifier(StatModifier mod, object source, int turns = -1)
     {
-        float total = 0f;
-        foreach (var se in activeStatusEffects)
-            total += se.data.attackDebuff;
-        return Mathf.Min(total, 100f);
+        activeStatModifiers.Add(new ActiveStatModifier
+        {
+            modifier = mod,
+            source = source,
+            remainingTurns = turns
+        });
     }
 
-    /// <summary>방어력 감소 디버프 합산</summary>
-    public float GetStatusEffectDefenseDebuff()
+    public void RemoveStatModifiersFromSource(object source)
     {
-        float total = 0f;
-        foreach (var se in activeStatusEffects)
-            total += se.data.defenseDebuff;
-        return Mathf.Min(total, 100f);
+        activeStatModifiers.RemoveAll(m => m.source == source);
+    }
+
+    public void TickStatModifiers()
+    {
+        for (int i = activeStatModifiers.Count - 1; i >= 0; i--)
+        {
+            if (activeStatModifiers[i].remainingTurns < 0) continue; // 영구
+            activeStatModifiers[i].remainingTurns--;
+            if (activeStatModifiers[i].remainingTurns <= 0)
+                activeStatModifiers.RemoveAt(i);
+        }
     }
 
     /// <summary>행동 불가 상태 확인 (Stun)</summary>

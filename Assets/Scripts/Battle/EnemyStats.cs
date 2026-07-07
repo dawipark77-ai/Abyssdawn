@@ -360,7 +360,10 @@ public class EnemyStats : MonoBehaviour
     public void Heal(int amount)
     {
         if (isDead) return;
-        
+
+        // [StatMod 4단계] 받는 회복량 배율 적용.
+        amount = Mathf.RoundToInt(ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived, amount));
+
         currentHP += amount;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
 
@@ -416,6 +419,8 @@ public class EnemyStats : MonoBehaviour
         if (effect == null) return false;
 
         float effectiveChance = effect.physicalApplyChance * statusResist;
+        // [StatMod 4단계] statusResist 필드 곱 이후, 상태이상/버프의 StatusResist 배율 순차 적용.
+        effectiveChance = ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, effectiveChance);
         if (UnityEngine.Random.value > effectiveChance) return false;
 
         return ApplyStatusEffectDirect(effect, effect.physicalDuration);
@@ -565,26 +570,38 @@ public class EnemyStats : MonoBehaviour
     /// </summary>
     public int GetCurseRemainingTurns(StatusEffectType type) => GetStatusEffectRemainingTurns(type);
 
-    /// <summary>
-    /// 공격력 감소 디버프 합산
-    /// </summary>
-    public float GetStatusEffectAttackDebuff()
+    // [StatMod 전환] GetStatusEffectAttackDebuff / GetStatusEffectDefenseDebuff 제거됨.
+    //   → 아래 StatModifier 시스템으로 대체.
+    [System.NonSerialized] public List<ActiveStatModifier> activeStatModifiers = new List<ActiveStatModifier>();
+
+    public float ApplyStatModifiers(AbyssdawnBattle.ModStatType type, float baseValue)
+        => StatCalculator.CalculateFinalStat(baseValue,
+            StatModifierQuery.Collect(activeStatusEffects, activeStatModifiers, type));
+
+    public void AddStatModifier(StatModifier mod, object source, int turns = -1)
     {
-        float total = 0f;
-        foreach (var se in activeStatusEffects)
-            total += se.data.attackDebuff;
-        return Mathf.Min(total, 100f);
+        activeStatModifiers.Add(new ActiveStatModifier
+        {
+            modifier = mod,
+            source = source,
+            remainingTurns = turns
+        });
     }
 
-    /// <summary>
-    /// 방어력 감소 디버프 합산
-    /// </summary>
-    public float GetStatusEffectDefenseDebuff()
+    public void RemoveStatModifiersFromSource(object source)
     {
-        float total = 0f;
-        foreach (var se in activeStatusEffects)
-            total += se.data.defenseDebuff;
-        return Mathf.Min(total, 100f);
+        activeStatModifiers.RemoveAll(m => m.source == source);
+    }
+
+    public void TickStatModifiers()
+    {
+        for (int i = activeStatModifiers.Count - 1; i >= 0; i--)
+        {
+            if (activeStatModifiers[i].remainingTurns < 0) continue; // 영구
+            activeStatModifiers[i].remainingTurns--;
+            if (activeStatModifiers[i].remainingTurns <= 0)
+                activeStatModifiers.RemoveAt(i);
+        }
     }
 
     /// <summary>행동 불가 상태 확인 (Stun)</summary>

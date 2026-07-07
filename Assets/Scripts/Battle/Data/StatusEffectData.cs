@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -66,15 +67,10 @@ namespace AbyssdawnBattle
         [Range(0f, 1f)]
         public float selfApplyChance = 0f;
 
+        [Header("스탯 모디파이어")]
+        public List<StatModifier> statModifiers = new List<StatModifier>();
+
         [Header("디버프 효과 (선택사항)")]
-        [Tooltip("공격력 감소 비율 % (0이면 무효)")]
-        [Range(0f, 100f)]
-        public float attackDebuff = 0f;
-
-        [Tooltip("방어력 감소 비율 % (0이면 무효)")]
-        [Range(0f, 100f)]
-        public float defenseDebuff = 0f;
-
         [Tooltip("행동 불가 여부 (Stun)")]
         public bool preventAction = false;
 

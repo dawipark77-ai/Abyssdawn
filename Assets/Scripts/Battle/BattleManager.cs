@@ -3919,11 +3919,9 @@ public class BattleManager : MonoBehaviour
             {
                 bool critical = CheckCritical(enemy.luck, biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f);
 
-                // 적 상태이상 attackDebuff 적용
-                float attackDebuffPct = enemy.GetStatusEffectAttackDebuff() / 100f;
-                int effectiveAttack = Mathf.Max(0, Mathf.FloorToInt(enemy.attack * (1f - attackDebuffPct)));
-                if (attackDebuffPct > 0f)
-                    Debug.Log($"[StatusDebuff] {enemy.enemyName} attack reduced by {attackDebuffPct * 100f:F0}%: {enemy.attack} → {effectiveAttack}");
+                // [StatMod 4단계] 적 공격력에 상태이상/버프 배율 적용.
+                int effectiveAttack = Mathf.FloorToInt(
+                    enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, enemy.attack));
 
                 Debug.Log($"[BattleLog] Enemy Attack: {effectiveAttack}, Player Defense: {target.Defense} (base: {target.baseDefense} + bonus: {target.GetDefenseBonus()}), Critical: {critical}");
 
@@ -3935,7 +3933,7 @@ public class BattleManager : MonoBehaviour
 
                 int damage = CalculateDQDamage(
                     effectiveAttack,
-                    target.Defense,
+                    Mathf.FloorToInt(target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.Defense)),
                     critical,
                     (biteOverride != null && biteOverride.isBasicAttackOverride) ? biteOverride.randomRollMaxOverride : 1.15f
                 );
@@ -3997,6 +3995,7 @@ public class BattleManager : MonoBehaviour
 
                 int hpBefore = member.currentHP;
                 member.ProcessStatusEffectsEndOfTurn();
+                member.TickStatModifiers();
 
                 if (member.currentHP < hpBefore)
                 {
@@ -4023,6 +4022,7 @@ public class BattleManager : MonoBehaviour
 
                 int hpBefore = enemy.currentHP;
                 enemy.ProcessStatusEffectsEndOfTurn();
+                enemy.TickStatModifiers();
 
                 if (enemy.currentHP < hpBefore)
                 {
@@ -5074,7 +5074,9 @@ public class BattleManager : MonoBehaviour
             bool critical = CheckCritical(attacker.luck, biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f);
 
             // [Bite] ATK 보정용 로컬 (attacker.Attack은 읽기전용 computed라 로컬에 받아 곱함)
-            int effectiveAttack = attacker.Attack;
+            // [StatMod 4단계] 상태이상/버프 배율 적용 후 Bite 배율 적용.
+            int effectiveAttack = Mathf.FloorToInt(
+                attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, attacker.Attack));
             if (biteOverride != null && biteOverride.isBasicAttackOverride)
                 effectiveAttack = Mathf.RoundToInt(effectiveAttack * biteOverride.atkMultiplierOverride);
 
@@ -5089,7 +5091,8 @@ public class BattleManager : MonoBehaviour
             {
                 // ───────── 쌍수 기본 공격 ─────────
                 // 1) 한손 기준 깡뎀 합
-                int singleBaseDamage = CalculateDQDamage(effectiveAttack, target.defense, false,
+                int singleBaseDamage = CalculateDQDamage(effectiveAttack,
+                    Mathf.FloorToInt(target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense)), false,
                     biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBaseDamage = Mathf.Max(singleBaseDamage, 1);
 
@@ -5160,7 +5163,8 @@ public class BattleManager : MonoBehaviour
             else
             {
                 // 한손/방패: fn = 1.0, 깡뎀 + 방어 파괴 (추가딜)
-                int singleBase = CalculateDQDamage(effectiveAttack, target.defense, false,
+                int singleBase = CalculateDQDamage(effectiveAttack,
+                    Mathf.FloorToInt(target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense)), false,
                     biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBase = Mathf.Max(singleBase, 1);
 
@@ -5516,7 +5520,9 @@ public class BattleManager : MonoBehaviour
     private void ApplyCurseEffectsToPlayer(PlayerStats target, SkillData skill)
     {
         if (skill.curseEffect == null || skill.curseApplyChance <= 0f) return;
-        if (UnityEngine.Random.value < skill.curseApplyChance)
+        // [StatMod 4단계] 대상의 StatusResist 배율 적용.
+        float chance = skill.curseApplyChance * target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f);
+        if (UnityEngine.Random.value < chance)
         {
             int dur = skill.damageType == DamageType.Physical
                 ? skill.curseEffect.physicalDuration
@@ -5850,6 +5856,17 @@ public class BattleManager : MonoBehaviour
                 baseStat = attacker.Attack;
             }
 
+            // [StatMod 4단계] 실제 사용된 스탯 종류에 따라 배율 적용.
+            if (skill.scalingStat == ScaleStat.Magic)
+            {
+                baseStat = Mathf.FloorToInt(attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Magic, baseStat));
+            }
+            else if (skill.scalingStat == ScaleStat.Attack || skill.scalingStat == ScaleStat.None ||
+                     skill.scalingStat == ScaleStat.CurrentHPPercent || skill.scalingStat == ScaleStat.CurrentMPPercent)
+            {
+                baseStat = Mathf.FloorToInt(attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, baseStat));
+            }
+
             // [DEBUG LOG] 스킬 데미지 계산 정보
             Debug.Log($"[BattleLog] Skill {skill.skillName} - Base Stat: {baseStat}, Multiplier: {multiplier:F2}, Critical: {critical}, Scale: {scaleMultiplier:F2}");
 
@@ -6000,6 +6017,17 @@ public class BattleManager : MonoBehaviour
             else if (skill.scalingStat == ScaleStat.None)
             {
                 baseStat = attacker.Attack;
+            }
+
+            // [StatMod 4단계] 실제 사용된 스탯 종류에 따라 배율 적용.
+            if (skill.scalingStat == ScaleStat.Magic)
+            {
+                baseStat = Mathf.FloorToInt(attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Magic, baseStat));
+            }
+            else if (skill.scalingStat == ScaleStat.Attack || skill.scalingStat == ScaleStat.None ||
+                     skill.scalingStat == ScaleStat.CurrentHPPercent || skill.scalingStat == ScaleStat.CurrentMPPercent)
+            {
+                baseStat = Mathf.FloorToInt(attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, baseStat));
             }
 
             int damage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier);
@@ -6155,9 +6183,12 @@ public class BattleManager : MonoBehaviour
         float attackerLuck,
         float passiveAccuracyBonus,
         float itemAccuracyBonus,
-        BattleSlot defenderSlot)
+        BattleSlot defenderSlot,
+        float accuracyModMultiplier = 1f)
     {
         float skillAcc = usedSkill != null ? usedSkill.accuracy : 1f;
+        // [StatMod 4단계] 공격자 상태이상/버프의 명중 배율 적용.
+        skillAcc *= accuracyModMultiplier;
         float slotAcc = SlotBalanceTable.GetHitChanceMultiplier(defenderSlot);
         float combinedAcc = skillAcc * slotAcc;
 
@@ -6178,7 +6209,8 @@ public class BattleManager : MonoBehaviour
             attacker.Luck,
             attacker.GetPassiveAccuracyBonus(),
             attacker.GetEquipmentAccuracyBonus(),
-            defender.currentSlot);
+            defender.currentSlot,
+            attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy, 1f));
     }
 
     private (float finalChance, float skillAcc, float slotAcc) EvaluateHitChance(SkillData usedSkill, PlayerStats attacker, PlayerStats defender)
@@ -6206,7 +6238,8 @@ public class BattleManager : MonoBehaviour
             attacker.luck,
             0f,
             0f,
-            defender.currentSlot);
+            defender.currentSlot,
+            attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy, 1f));
     }
 
     private bool RollPhysicalHit_PlayerVsEnemy(PlayerStats attacker, EnemyStats target, SkillData skillOrNull)
