@@ -242,7 +242,8 @@ public class BattleManager : MonoBehaviour
         {
             player = p;
             enemy = null;
-            agility = p.Agility;
+            // [StatMod 5단계] Speed 배율 적용 후 턴 순서용 agility로 캡처.
+            agility = Mathf.RoundToInt(p.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Speed, p.Agility));
             isPlayer = true;
         }
 
@@ -250,7 +251,8 @@ public class BattleManager : MonoBehaviour
         {
             player = null;
             enemy = e;
-            agility = e.Agility;
+            // [StatMod 5단계] Speed 배율 적용 후 턴 순서용 agility로 캡처.
+            agility = Mathf.RoundToInt(e.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Speed, e.Agility));
             isPlayer = false;
         }
     }
@@ -3917,7 +3919,9 @@ public class BattleManager : MonoBehaviour
             }
             else
             {
-                bool critical = CheckCritical(enemy.luck, biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f);
+                // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계 — baseValue=0f는 가산 전용 사용.
+                bool critical = CheckCritical(enemy.luck, (biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f)
+                    + enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
 
                 // [StatMod 4단계] 적 공격력에 상태이상/버프 배율 적용.
                 int effectiveAttack = Mathf.FloorToInt(
@@ -3935,7 +3939,8 @@ public class BattleManager : MonoBehaviour
                     effectiveAttack,
                     Mathf.FloorToInt(target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.Defense)),
                     critical,
-                    (biteOverride != null && biteOverride.isBasicAttackOverride) ? biteOverride.randomRollMaxOverride : 1.15f
+                    (biteOverride != null && biteOverride.isBasicAttackOverride) ? biteOverride.randomRollMaxOverride : 1.15f,
+                    enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f)
                 );
                 damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.playerName);
 
@@ -5071,7 +5076,9 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            bool critical = CheckCritical(attacker.luck, biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f);
+            // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계 — baseValue=0f는 가산 전용 사용.
+            bool critical = CheckCritical(attacker.luck, (biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f)
+                + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
 
             // [Bite] ATK 보정용 로컬 (attacker.Attack은 읽기전용 computed라 로컬에 받아 곱함)
             // [StatMod 4단계] 상태이상/버프 배율 적용 후 Bite 배율 적용.
@@ -5133,8 +5140,10 @@ public class BattleManager : MonoBehaviour
                 // 크리티컬이면 두 타 모두 동일 배율 적용
                 if (critical)
                 {
-                    hit1 = Mathf.Max(1, Mathf.FloorToInt(hit1 * 1.5f));
-                    hit2 = Mathf.Max(1, Mathf.FloorToInt(hit2 * 1.5f));
+                    // [StatMod 5단계] 공격자 CritDamage 배율을 1회 계산해 재사용.
+                    float critDmgMult = attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f);
+                    hit1 = Mathf.Max(1, Mathf.FloorToInt(hit1 * critDmgMult));
+                    hit2 = Mathf.Max(1, Mathf.FloorToInt(hit2 * critDmgMult));
                 }
 
                 Debug.Log($"[BattleLog] Dual basic attack - base1:{baseHit1}, base2:{baseHit2}, armor1:{armorHit1}, armor2:{armorHit2}, f1:{f1:F2}, f2:{f2:F2}");
@@ -5182,8 +5191,10 @@ public class BattleManager : MonoBehaviour
 
                 if (critical)
                 {
-                    singleBase  = Mathf.Max(1, Mathf.FloorToInt(singleBase  * 1.5f));
-                    singleArmor = Mathf.Max(0, Mathf.FloorToInt(singleArmor * 1.5f));
+                    // [StatMod 5단계] 공격자 CritDamage 배율을 1회 계산해 재사용.
+                    float critDmgMult = attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f);
+                    singleBase  = Mathf.Max(1, Mathf.FloorToInt(singleBase  * critDmgMult));
+                    singleArmor = Mathf.Max(0, Mathf.FloorToInt(singleArmor * critDmgMult));
                 }
 
                 int singleTotal = singleBase + singleArmor;
@@ -5591,15 +5602,26 @@ public class BattleManager : MonoBehaviour
             }
 
             // 4. 크리티컬
-            bool critical = CheckCritical(enemy.luck, skill.critBonusPercent);
+            // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
+            bool critical = CheckCritical(enemy.luck, skill.critBonusPercent
+                + enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
 
             // 5. 데미지 계산
             int baseStat = GetEnemyScaleValue(enemy, skill.scalingStat);
+            // Attack/Magic 배율 적용
+            if (skill.scalingStat == ScaleStat.Magic)
+                baseStat = Mathf.FloorToInt(
+                    enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Magic, baseStat));
+            else
+                baseStat = Mathf.FloorToInt(
+                    enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, baseStat));
             float mult = UnityEngine.Random.Range(skill.minMult, skill.maxMult);
-            float baseValue = (baseStat * 2f - target.Defense) / 2f;
+            float defValue = target.ApplyStatModifiers(
+                AbyssdawnBattle.ModStatType.Defense, target.Defense);
+            float baseValue = (baseStat * 2f - defValue) / 2f;
             if (baseValue < 1f) baseValue = 1f;
             int damage = Mathf.FloorToInt(baseValue * mult);
-            if (critical) damage = Mathf.FloorToInt(damage * 1.5f);
+            if (critical) damage = Mathf.FloorToInt(damage * enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f));
             damage = Mathf.Max(1, damage);
 
             // 6. 슬롯 보정
@@ -5839,7 +5861,8 @@ public class BattleManager : MonoBehaviour
             }
 
             // 회피하지 않았으면 데미지 계산
-            bool critical = CheckCritical(attacker.luck);
+            // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
+            bool critical = CheckCritical(attacker.luck, attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
             float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
 
             // 스탯 스케일링
@@ -5891,7 +5914,7 @@ public class BattleManager : MonoBehaviour
             // 크리티컬은 깡뎀 + 방어 파괴 합산에 배율 적용
             if (critical)
             {
-                damage = Mathf.FloorToInt(damage * 1.5f);
+                damage = Mathf.FloorToInt(damage * attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f));
             }
 
             damage = Mathf.Max(1, damage);
@@ -6003,7 +6026,8 @@ public class BattleManager : MonoBehaviour
                 continue;
             }
 
-            bool critical = CheckCritical(attacker.luck);
+            // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
+            bool critical = CheckCritical(attacker.luck, attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
             float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
 
             float baseStat = attacker.GetScaleValue(skill.scalingStat);
@@ -6033,7 +6057,7 @@ public class BattleManager : MonoBehaviour
             int damage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier);
             if (critical)
             {
-                damage = Mathf.FloorToInt(damage * 1.5f);
+                damage = Mathf.FloorToInt(damage * attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f));
             }
             damage = Mathf.Max(1, damage);
 
@@ -6066,12 +6090,12 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- Damage Calculation --------------------
-    private int CalculateDQDamage(int atk, int def, bool isCritical, float randomMax = 1.15f)
+    private int CalculateDQDamage(int atk, int def, bool isCritical, float randomMax = 1.15f, float critDamageMultiplier = 1.5f)
     {
         float baseValue = (atk * 2f - def) / 2f;
         if (baseValue < 1f) baseValue = 1f;
         int damage = Mathf.FloorToInt(baseValue * UnityEngine.Random.Range(0.85f, randomMax));
-        if (isCritical) damage = Mathf.FloorToInt(damage * 1.5f);
+        if (isCritical) damage = Mathf.FloorToInt(damage * critDamageMultiplier);
         return Mathf.Max(damage, 1);
     }
 
