@@ -3895,6 +3895,14 @@ public class BattleManager : MonoBehaviour
         }
         if (decision.type == EnemyActionType.Skill && decision.skill != null)
         {
+            // Self 타겟 스킬(버프 등)은 플레이어 타겟 불필요
+            if (decision.skill is MonsterSkillData msd &&
+                msd.targeting.targetFaction == TargetFaction.Self)
+            {
+                yield return StartCoroutine(ExecuteEnemySkill(enemy, null, decision.skill));
+                yield break;
+            }
+
             PlayerStats skillTarget = decision.target ?? GetRandomAlivePartyMember();
             if (skillTarget != null && skillTarget.currentHP > 0)
             {
@@ -5584,6 +5592,73 @@ public class BattleManager : MonoBehaviour
             int healAmount = Mathf.RoundToInt(enemy.maxHP * healPercent / 100f);
             enemy.Heal(healAmount);
             AddMessage($"{enemy.enemyName} uses {skill.skillName} and recovers {healAmount} HP!");
+            yield return new WaitForSeconds(actionDelay);
+            UpdateStatusUI();
+            yield break;
+        }
+
+        // [Buff 분기]
+        if (skill is MonsterSkillData buffSkill && buffSkill.Category == MonsterSkillCategory.Buff)
+        {
+            if (skill.curseEffect != null && skill.curseApplyChance > 0f &&
+                UnityEngine.Random.value <= skill.curseApplyChance)
+            {
+                // 같은 source 스킬이 이미 있으면 제거 후 재추가 (타이머 갱신)
+                enemy.RemoveStatModifiersFromSource(skill);
+                foreach (var mod in skill.curseEffect.statModifiers)
+                {
+                    enemy.AddStatModifier(mod, skill, skill.curseEffect.physicalDuration);
+                }
+                AddMessage($"{enemy.enemyName} uses {skill.skillName}!");
+            }
+            yield return new WaitForSeconds(actionDelay);
+            UpdateStatusUI();
+            yield break;
+        }
+
+        // [Debuff 분기 — 순수 디버프 스킬만 (Physical+Debuff는 데미지 루프로)]
+        if (skill is MonsterSkillData debuffSkill && debuffSkill.Category == MonsterSkillCategory.Debuff)
+        {
+            if (target != null && skill.curseEffect != null)
+            {
+                float effectiveChance = skill.curseApplyChance *
+                    target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f);
+                if (UnityEngine.Random.value <= effectiveChance)
+                {
+                int currentStacks = target.activeStatModifiers
+                    .Count(m => m.source is SkillData sd && sd.skillID == skill.skillID);
+
+                if (currentStacks == 0)
+                {
+                    // 첫 적용: 2스택 (-0.10)
+                    for (int s = 0; s < 2; s++)
+                        foreach (var mod in skill.curseEffect.statModifiers)
+                            target.AddStatModifier(mod, skill, skill.curseEffect.physicalDuration);
+                    AddMessage($"{enemy.enemyName} uses {skill.skillName}! " +
+                              $"{target.playerName}'s accuracy is reduced!");
+                }
+                else if (currentStacks < 4)
+                {
+                    // 추가 중첩: 1스택 + 전체 타이머 갱신
+                    foreach (var mod in skill.curseEffect.statModifiers)
+                        target.AddStatModifier(mod, skill, skill.curseEffect.physicalDuration);
+                    foreach (var am in target.activeStatModifiers
+                        .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
+                        am.remainingTurns = skill.curseEffect.physicalDuration;
+                    AddMessage($"{enemy.enemyName} uses {skill.skillName}! " +
+                              $"Effect refreshed and stacked!");
+                }
+                else
+                {
+                    // 최대 스택 도달: 타이머만 갱신
+                    foreach (var am in target.activeStatModifiers
+                        .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
+                        am.remainingTurns = skill.curseEffect.physicalDuration;
+                    AddMessage($"{enemy.enemyName} uses {skill.skillName}! " +
+                              $"Effect timer refreshed!");
+                }
+                }
+            }
             yield return new WaitForSeconds(actionDelay);
             UpdateStatusUI();
             yield break;

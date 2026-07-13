@@ -46,16 +46,26 @@ namespace AbyssdawnBattle
                     effects != null && effects.Exists(e => e.effectType == EffectType.Recovery))
                     return MonsterSkillCategory.Heal;
 
-                // 버프: damageType None + targetFaction Ally/Self + effects에 Buff* 포함
+                // 버프: damageType None + targetFaction Ally/Self + (effects에 Buff* 포함 또는 curseEffect.statModifiers에 이로운 배율 포함)
                 if (damageType == DamageType.None &&
                     (targeting.targetFaction == TargetFaction.Ally || targeting.targetFaction == TargetFaction.Self) &&
-                    effects != null && effects.Exists(e => e.effectType.ToString().StartsWith("Buff")))
+                    (
+                        (effects != null && effects.Exists(e => e.effectType.ToString().StartsWith("Buff"))) ||
+                        (curseEffect != null && curseEffect.statModifiers != null &&
+                         curseEffect.statModifiers.Exists(m =>
+                             (m.modType == AbyssdawnBattle.StatModType.PercentMult && m.value > 1f) ||
+                             (m.modType == AbyssdawnBattle.StatModType.Flat && m.value > 0f)))
+                    ))
                     return MonsterSkillCategory.Buff;
 
-                // 디버프: targetFaction Enemy + (curseEffect 있음 또는 effects에 Debuff* 포함)
+                // 디버프: targetFaction Enemy + (curseEffect 있음 또는 effects에 Debuff* 포함 또는 curseEffect.statModifiers에 해로운 배율 포함)
                 if (targeting.targetFaction == TargetFaction.Enemy &&
                     ((curseEffect != null && curseApplyChance > 0f) ||
-                     (effects != null && effects.Exists(e => e.effectType.ToString().StartsWith("Debuff")))))
+                     (effects != null && effects.Exists(e => e.effectType.ToString().StartsWith("Debuff"))) ||
+                     (curseEffect != null && curseEffect.statModifiers != null &&
+                      curseEffect.statModifiers.Exists(m =>
+                          (m.modType == AbyssdawnBattle.StatModType.PercentMult && m.value < 1f) ||
+                          (m.modType == AbyssdawnBattle.StatModType.Flat && m.value < 0f)))))
                 {
                     // 데미지도 같이 있으면 공격 스킬의 부가효과로 보고, 데미지 타입을 우선한다
                     if (damageType == DamageType.Physical) return MonsterSkillCategory.Physical;

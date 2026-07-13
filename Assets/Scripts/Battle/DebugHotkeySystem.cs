@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Abyssdawn;
 
 /// <summary>
 /// ?붾쾭洹??ロ궎 ?쒖뒪?? F1~F10?쇰줈 寃뚯엫 ?곹깭 ?꾪솚, ???뚰솚, ?뚯뒪??湲곕뒫 ?ㅽ뻾
@@ -10,7 +11,11 @@ public class DebugHotkeySystem : MonoBehaviour
     public BattleManager battleManager;
     public PlayerStats playerStats;
     public List<EnemyStats> enemyPrefabs = new List<EnemyStats>(); // ?몄뒪?숉꽣?먯꽌 ?좊떦?????꾨━?밸뱾
-    
+
+    [Header("-- Test Companion --")]
+    [Tooltip("Test companion MonsterSO. Press F11 to add to current party.")]
+    public MonsterSO testCompanion;
+
     [Header("Spawn Settings")]
     public Transform spawnCenter; // ???앹꽦 以묒떖 ?꾩튂
     public float spawnOffset = 2f; // ??媛꾧꺽
@@ -64,6 +69,8 @@ public class DebugHotkeySystem : MonoBehaviour
         {
             RestartBattleWithRandomEnemy();
         }
+        else if (Input.GetKeyDown(KeyCode.F11))
+            AddTestCompanion();
         else if (Input.GetKeyDown(KeyCode.F6))
         {
             HealPlayer();
@@ -339,7 +346,22 @@ public class DebugHotkeySystem : MonoBehaviour
         Vector3 right = Camera.main != null ? Camera.main.transform.right : Vector3.right;
         return center + right * (index * spawnOffset);
     }
-    
+
+    // F11: Add testCompanion to the active companion party
+    private void AddTestCompanion()
+    {
+        if (testCompanion == null)
+        {
+            Debug.Log("[Debug] testCompanion이 설정되지 않았습니다.");
+            return;
+        }
+        bool added = CompanionPartyPersistence.TryAddActive(
+            testCompanion, testCompanion.HP, testCompanion.MP);
+        Debug.Log(added
+            ? $"[Debug] {testCompanion.MonsterName} 파티 추가 완료."
+            : $"[Debug] {testCompanion.MonsterName} 추가 실패 (파티/대기열 꽉 참).");
+    }
+
 }
 
 
