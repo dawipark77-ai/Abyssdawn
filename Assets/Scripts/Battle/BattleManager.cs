@@ -1104,7 +1104,8 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.F11))
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            && Input.GetKeyDown(KeyCode.F3))
         {
             ShuffleAllEnemies();
         }
@@ -3999,55 +4000,61 @@ public class BattleManager : MonoBehaviour
         // 아군 상태이상 데미지 처리
         foreach (var member in activePartyMembers)
         {
-            if (member != null && member.activeStatusEffects.Count > 0 && member.currentHP > 0)
+            if (member != null && member.currentHP > 0)
             {
-                // 이번 턴 DoT를 발생시킬 효과 미리 스냅샷 (appliedThisTurn=false && DoT > 0)
-                var dotEffects = member.activeStatusEffects
-                    .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
-                    .ToList();
-
-                int hpBefore = member.currentHP;
-                member.ProcessStatusEffectsEndOfTurn();
-                member.TickStatModifiers();
-
-                if (member.currentHP < hpBefore)
+                if (member.activeStatusEffects.Count > 0)
                 {
-                    foreach (var se in dotEffects)
+                    // 이번 턴 DoT를 발생시킬 효과 미리 스냅샷 (appliedThisTurn=false && DoT > 0)
+                    var dotEffects = member.activeStatusEffects
+                        .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
+                        .ToList();
+
+                    int hpBefore = member.currentHP;
+                    member.ProcessStatusEffectsEndOfTurn();
+
+                    if (member.currentHP < hpBefore)
                     {
-                        int dmg = Mathf.Max(1, Mathf.FloorToInt(member.maxHP * se.data.physicalDamagePerTurn));
-                        string col = GetStatusColor(se.data.effectType);
-                        AddMessage($"{member.playerName} suffered <color={col}>{dmg} damage</color> from <color={col}>{se.data.effectType}</color>!");
+                        foreach (var se in dotEffects)
+                        {
+                            int dmg = Mathf.Max(1, Mathf.FloorToInt(member.maxHP * se.data.physicalDamagePerTurn));
+                            string col = GetStatusColor(se.data.effectType);
+                            AddMessage($"{member.playerName} suffered <color={col}>{dmg} damage</color> from <color={col}>{se.data.effectType}</color>!");
+                        }
+                        ShakePlayerStatusUI(member);
+                        anyCurseDamage = true;
                     }
-                    ShakePlayerStatusUI(member);
-                    anyCurseDamage = true;
                 }
+                member.TickStatModifiers();   // ← 조건 밖으로 이동 (activeStatusEffects가 없어도 항상 호출)
             }
         }
 
         // 적 상태이상 데미지 처리
         foreach (var enemy in activeEnemies)
         {
-            if (enemy != null && enemy.activeStatusEffects.Count > 0 && enemy.currentHP > 0 && !enemy.IsDead())
+            if (enemy != null && enemy.currentHP > 0 && !enemy.IsDead())
             {
-                var dotEffects = enemy.activeStatusEffects
-                    .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
-                    .ToList();
-
-                int hpBefore = enemy.currentHP;
-                enemy.ProcessStatusEffectsEndOfTurn();
-                enemy.TickStatModifiers();
-
-                if (enemy.currentHP < hpBefore)
+                if (enemy.activeStatusEffects.Count > 0)
                 {
-                    foreach (var se in dotEffects)
+                    var dotEffects = enemy.activeStatusEffects
+                        .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
+                        .ToList();
+
+                    int hpBefore = enemy.currentHP;
+                    enemy.ProcessStatusEffectsEndOfTurn();
+
+                    if (enemy.currentHP < hpBefore)
                     {
-                        int dmg = Mathf.Max(1, Mathf.FloorToInt(enemy.maxHP * se.data.physicalDamagePerTurn));
-                        string col = GetStatusColor(se.data.effectType);
-                        AddMessage($"{enemy.enemyName} suffered <color={col}>{dmg} damage</color> from <color={col}>{se.data.effectType}</color>!");
+                        foreach (var se in dotEffects)
+                        {
+                            int dmg = Mathf.Max(1, Mathf.FloorToInt(enemy.maxHP * se.data.physicalDamagePerTurn));
+                            string col = GetStatusColor(se.data.effectType);
+                            AddMessage($"{enemy.enemyName} suffered <color={col}>{dmg} damage</color> from <color={col}>{se.data.effectType}</color>!");
+                        }
+                        enemy.UpdateStatusUI();
+                        anyCurseDamage = true;
                     }
-                    enemy.UpdateStatusUI();
-                    anyCurseDamage = true;
                 }
+                enemy.TickStatModifiers();   // ← 조건 밖으로 이동 (activeStatusEffects가 없어도 항상 호출)
             }
         }
 
@@ -4236,6 +4243,12 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
+
+    /// <summary>디버그/외부 조회용 — activePartyMembers는 private이라 직접 접근 불가.</summary>
+    public List<PlayerStats> GetActivePartyMembers() => activePartyMembers;
+
+    /// <summary>디버그/외부 조회용 — activeEnemies는 private이라 직접 접근 불가.</summary>
+    public List<EnemyStats> GetActiveEnemies() => activeEnemies;
 
     private PlayerStats GetRandomAlivePartyMember()
     {
@@ -5427,6 +5440,12 @@ public class BattleManager : MonoBehaviour
     private bool IsSelfTargetSkill(SkillData skill)
     {
         if (skill == null) return false;
+
+        // targeting.targetFaction이 Self면 무조건 Self 스킬
+        if (skill.targeting != null &&
+            skill.targeting.targetFaction == TargetFaction.Self)
+            return true;
+
         if (skill.Effects == null || skill.Effects.Count == 0)
         {
             return skill.isRecovery || skill.isDefensive;
@@ -5460,6 +5479,22 @@ public class BattleManager : MonoBehaviour
                         AddMessage($"{attacker.playerName} used {skill.skillName}! Defense increased!");
                     }
                     break;
+            }
+        }
+
+        // [MonsterSkillData Buff 분기] curseEffect.statModifiers 기반 Self 버프
+        if (skill is MonsterSkillData msd && msd.Category == MonsterSkillCategory.Buff)
+        {
+            if (msd.curseEffect != null && msd.curseApplyChance > 0f &&
+                UnityEngine.Random.value <= msd.curseApplyChance)
+            {
+                // 같은 source 스킬이 이미 있으면 제거 후 재추가 (타이머 갱신)
+                attacker.RemoveStatModifiersFromSource(skill);
+                foreach (var mod in msd.curseEffect.statModifiers)
+                {
+                    attacker.AddStatModifier(mod, skill, msd.curseEffect.physicalDuration);
+                }
+                AddMessage($"{attacker.playerName} uses {skill.skillName}!");
             }
         }
     }
@@ -5504,14 +5539,52 @@ public class BattleManager : MonoBehaviour
         {
             if (UnityEngine.Random.value < skill.curseApplyChance)
             {
-                // 마법 스킬이면 magicalDuration, 물리면 physicalDuration 사용
-                bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magic;
-                int dur = isMagic ? skill.curseEffect.magicalDuration : skill.curseEffect.physicalDuration;
-                bool applied = target.ApplyStatusEffectDirect(skill.curseEffect, dur);
-                if (applied)
+                // [분기] statModifiers가 있으면 activeStatModifiers 경로
+                if (skill.curseEffect.statModifiers != null && skill.curseEffect.statModifiers.Count > 0)
                 {
-                    string cCol = GetStatusColor(skill.curseEffect.effectType);
-                    AddMessage($"{target.enemyName} is afflicted with <color={cCol}>{skill.curseEffect.variantId}</color>!");
+                    bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magic;
+                    int dur = isMagic ? skill.curseEffect.magicalDuration : skill.curseEffect.physicalDuration;
+                    if (dur > 0)
+                    {
+                        int currentStacks = target.activeStatModifiers
+                            .Count(m => m.source is SkillData sd && sd.skillID == skill.skillID);
+
+                        if (currentStacks == 0)
+                        {
+                            for (int s = 0; s < 2; s++)
+                                foreach (var mod in skill.curseEffect.statModifiers)
+                                    target.AddStatModifier(mod, skill, dur);
+                            AddMessage($"{target.enemyName} Accuracy reduced by 10%!");
+                        }
+                        else if (currentStacks < 4)
+                        {
+                            foreach (var mod in skill.curseEffect.statModifiers)
+                                target.AddStatModifier(mod, skill, dur);
+                            foreach (var am in target.activeStatModifiers
+                                .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
+                                am.remainingTurns = dur;
+                            AddMessage($"{target.enemyName} Accuracy further reduced! Stack {currentStacks + 1}");
+                        }
+                        else
+                        {
+                            foreach (var am in target.activeStatModifiers
+                                .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
+                                am.remainingTurns = dur;
+                            AddMessage($"{target.enemyName} Accuracy debuff timer refreshed!");
+                        }
+                    }
+                }
+                else
+                {
+                    // 기존 경로: activeStatusEffects
+                    bool isMagic = skill.damageType == AbyssdawnBattle.DamageType.Magic;
+                    int dur = isMagic ? skill.curseEffect.magicalDuration : skill.curseEffect.physicalDuration;
+                    bool applied = target.ApplyStatusEffectDirect(skill.curseEffect, dur);
+                    if (applied)
+                    {
+                        string cCol = GetStatusColor(skill.curseEffect.effectType);
+                        AddMessage($"{target.enemyName} is afflicted with <color={cCol}>{skill.curseEffect.variantId}</color>!");
+                    }
                 }
             }
         }
@@ -5539,18 +5612,61 @@ public class BattleManager : MonoBehaviour
     private void ApplyCurseEffectsToPlayer(PlayerStats target, SkillData skill)
     {
         if (skill.curseEffect == null || skill.curseApplyChance <= 0f) return;
-        // [StatMod 4단계] 대상의 StatusResist 배율 적용.
-        float chance = skill.curseApplyChance * target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f);
-        if (UnityEngine.Random.value < chance)
+
+        // [StatMod] 대상의 StatusResist 배율 적용
+        float chance = skill.curseApplyChance *
+            target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f);
+        if (UnityEngine.Random.value >= chance) return;
+
+        // [분기] curseEffect에 statModifiers가 있으면 activeStatModifiers 경로
+        if (skill.curseEffect.statModifiers != null && skill.curseEffect.statModifiers.Count > 0)
         {
             int dur = skill.damageType == DamageType.Physical
                 ? skill.curseEffect.physicalDuration
                 : skill.curseEffect.magicalDuration;
-            if (dur > 0)
+            if (dur <= 0) return;
+
+            // 현재 같은 source(skill) 스택 수 확인
+            int currentStacks = target.activeStatModifiers
+                .Count(m => m.source is SkillData sd && sd.skillID == skill.skillID);
+
+            if (currentStacks == 0)
             {
-                target.ApplyStatusEffect(skill.curseEffect, dur);
-                AddMessage($"{target.playerName} is afflicted with {skill.curseEffect.effectType}!");
+                // 첫 적용: 2스택 (-0.10)
+                for (int s = 0; s < 2; s++)
+                    foreach (var mod in skill.curseEffect.statModifiers)
+                        target.AddStatModifier(mod, skill, dur);
+                AddMessage($"{target.playerName} is afflicted! Accuracy reduced by 10%!");
             }
+            else if (currentStacks < 4)
+            {
+                // 추가 중첩: 1스택 + 타이머 갱신
+                foreach (var mod in skill.curseEffect.statModifiers)
+                    target.AddStatModifier(mod, skill, dur);
+                foreach (var am in target.activeStatModifiers
+                    .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
+                    am.remainingTurns = dur;
+                AddMessage($"{target.playerName} Accuracy further reduced! Stack {currentStacks + 1}");
+            }
+            else
+            {
+                // 최대 스택: 타이머만 갱신
+                foreach (var am in target.activeStatModifiers
+                    .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
+                    am.remainingTurns = dur;
+                AddMessage($"{target.playerName} Accuracy debuff timer refreshed!");
+            }
+            return;
+        }
+
+        // [기존 경로] statModifiers 없으면 activeStatusEffects 경로 유지
+        int duration = skill.damageType == DamageType.Physical
+            ? skill.curseEffect.physicalDuration
+            : skill.curseEffect.magicalDuration;
+        if (duration > 0)
+        {
+            target.ApplyStatusEffect(skill.curseEffect, duration);
+            AddMessage($"{target.playerName} is afflicted with {skill.curseEffect.effectType}!");
         }
     }
 
@@ -6283,7 +6399,8 @@ public class BattleManager : MonoBehaviour
         float passiveAccuracyBonus,
         float itemAccuracyBonus,
         BattleSlot defenderSlot,
-        float accuracyModMultiplier = 1f)
+        float accuracyModMultiplier = 1f,
+        float evasionModMultiplier = 0f)
     {
         float skillAcc = usedSkill != null ? usedSkill.accuracy : 1f;
         // [StatMod 4단계] 공격자 상태이상/버프의 명중 배율 적용.
@@ -6292,7 +6409,10 @@ public class BattleManager : MonoBehaviour
         float combinedAcc = skillAcc * slotAcc;
 
         float agiModifier = BattleSimCombatMath.ComputeAgilityHitModifier(attackerAgility, defenderAgility);
-        float finalHitChance = combinedAcc * agiModifier + (attackerLuck * 0.002f) + passiveAccuracyBonus + itemAccuracyBonus;
+        // [StatMod 6단계] 방어자 회피율 적용 — 0=회피 없음, 최대 0.8(80% 명중 감소)로 클램프.
+        evasionModMultiplier = Mathf.Clamp(evasionModMultiplier, 0f, 0.8f);
+        float finalHitChance = combinedAcc * agiModifier * (1f - evasionModMultiplier)
+            + (attackerLuck * 0.002f) + passiveAccuracyBonus + itemAccuracyBonus;
         float clamped = Mathf.Clamp(finalHitChance, 0.2f, 0.98f);
         return (clamped, skillAcc, slotAcc);
     }
@@ -6301,6 +6421,8 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || defender == null)
             return (0.2f, 1f, SlotBalanceTable.GetHitChanceMultiplier(BattleSlot.Slot1));
+        float evasionMod = Mathf.Clamp(
+            defender.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion, 0f), 0f, 0.8f);
         return ComputeHitChanceCore(
             usedSkill,
             attacker.Agility,
@@ -6309,7 +6431,8 @@ public class BattleManager : MonoBehaviour
             attacker.GetPassiveAccuracyBonus(),
             attacker.GetEquipmentAccuracyBonus(),
             defender.currentSlot,
-            attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy, 1f));
+            attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy, 1f),
+            evasionMod);
     }
 
     private (float finalChance, float skillAcc, float slotAcc) EvaluateHitChance(SkillData usedSkill, PlayerStats attacker, PlayerStats defender)
@@ -6330,6 +6453,8 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || defender == null)
             return (0.2f, 1f, SlotBalanceTable.GetHitChanceMultiplier(BattleSlot.Slot1));
+        float evasionMod = Mathf.Clamp(
+            defender.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion, 0f), 0f, 0.8f);
         return ComputeHitChanceCore(
             usedSkill,
             attacker.Agility,
@@ -6338,7 +6463,8 @@ public class BattleManager : MonoBehaviour
             0f,
             0f,
             defender.currentSlot,
-            attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy, 1f));
+            attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy, 1f),
+            evasionMod);
     }
 
     private bool RollPhysicalHit_PlayerVsEnemy(PlayerStats attacker, EnemyStats target, SkillData skillOrNull)

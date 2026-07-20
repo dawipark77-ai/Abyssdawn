@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using Abyssdawn;
 
 /// <summary>
@@ -69,6 +70,9 @@ public class DebugHotkeySystem : MonoBehaviour
         {
             RestartBattleWithRandomEnemy();
         }
+        else if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+              && Input.GetKeyDown(KeyCode.F11))
+            LogAllCombatantStats();
         else if (Input.GetKeyDown(KeyCode.F11))
             AddTestCompanion();
         else if (Input.GetKeyDown(KeyCode.F6))
@@ -360,6 +364,83 @@ public class DebugHotkeySystem : MonoBehaviour
         Debug.Log(added
             ? $"[Debug] {testCompanion.MonsterName} 파티 추가 완료."
             : $"[Debug] {testCompanion.MonsterName} 추가 실패 (파티/대기열 꽉 참).");
+    }
+
+    // F12: 전체 전투원(아군+적)의 최종(StatModifier 반영) 스탯을 콘솔에 출력
+    private void LogAllCombatantStats()
+    {
+        battleManager = Object.FindFirstObjectByType<BattleManager>();
+        if (battleManager == null)
+        {
+            Debug.Log("[StatLog] BattleManager 미연결");
+            return;
+        }
+
+        Debug.Log("========== [StatLog] 전체 전투원 스탯 ==========");
+
+        // 아군
+        foreach (var member in battleManager.GetActivePartyMembers())
+        {
+            if (member == null || member.currentHP <= 0) continue;
+
+            float atkFinal  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack,         member.Attack);
+            float defFinal  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense,        member.Defense);
+            float magFinal  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Magic,          member.Magic);
+            float spdFinal  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Speed,          member.Agility);
+            float evasion   = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion,        0f);
+            float accuracy  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy,       1f);
+            float critChance= 25f + member.Luck
+                            + member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance,     0f);
+            float critDmg   = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage,     1.5f);
+            float healRcv   = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived,1f);
+            float stResist  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist,   1f);
+
+            Debug.Log($"[아군] {member.playerName} HP:{member.currentHP}/{member.maxHP}\n" +
+                      $"  [기본] ATK:{member.Attack}  DEF:{member.Defense}  " +
+                      $"MAG:{member.Magic}  SPD:{member.Agility}  LUK:{member.Luck}\n" +
+                      $"  [최종] ATK:{atkFinal:F1}  DEF:{defFinal:F1}  " +
+                      $"MAG:{magFinal:F1}  SPD:{spdFinal:F1}  LUK:{member.Luck}\n" +
+                      $"  명중배율:{accuracy:F2}  회피:{evasion:F2}  " +
+                      $"크리확률:{critChance:F1}%  크리데미지:x{critDmg:F2}\n" +
+                      $"  회복효율:x{healRcv:F2}  상태이상저항:x{stResist:F2}");
+
+            Debug.Log($"  [활성 모디파이어] {member.activeStatModifiers.Count}개: " +
+                      string.Join(", ", member.activeStatModifiers.Select(m =>
+                          $"{m.modifier.statType} {m.modifier.modType} {m.modifier.value:F2} (남은턴:{m.remainingTurns})")));
+        }
+
+        // 적
+        foreach (var enemy in battleManager.GetActiveEnemies())
+        {
+            if (enemy == null || enemy.IsDead()) continue;
+
+            float atkFinal  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack,          enemy.attack);
+            float defFinal  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense,         enemy.defense);
+            float magFinal  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Magic,           enemy.magic);
+            float spdFinal  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Speed,           enemy.Agility);
+            float evasion   = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion,         0f);
+            float accuracy  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy,        1f);
+            float critChance= 25f + enemy.luck
+                            + enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance,      0f);
+            float critDmg   = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage,      1.5f);
+            float healRcv   = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived, 1f);
+            float stResist  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist,    1f);
+
+            Debug.Log($"[적] {enemy.enemyName} HP:{enemy.currentHP}/{enemy.maxHP}\n" +
+                      $"  [기본] ATK:{enemy.attack}  DEF:{enemy.defense}  " +
+                      $"MAG:{enemy.magic}  SPD:{enemy.Agility}  LUK:{enemy.luck}\n" +
+                      $"  [최종] ATK:{atkFinal:F1}  DEF:{defFinal:F1}  " +
+                      $"MAG:{magFinal:F1}  SPD:{spdFinal:F1}  LUK:{enemy.luck}\n" +
+                      $"  명중배율:{accuracy:F2}  회피:{evasion:F2}  " +
+                      $"크리확률:{critChance:F1}%  크리데미지:x{critDmg:F2}\n" +
+                      $"  회복효율:x{healRcv:F2}  상태이상저항:x{stResist:F2}");
+
+            Debug.Log($"  [활성 모디파이어] {enemy.activeStatModifiers.Count}개: " +
+                      string.Join(", ", enemy.activeStatModifiers.Select(m =>
+                          $"{m.modifier.statType} {m.modifier.modType} {m.modifier.value:F2} (남은턴:{m.remainingTurns})")));
+        }
+
+        Debug.Log("=================================================");
     }
 
 }

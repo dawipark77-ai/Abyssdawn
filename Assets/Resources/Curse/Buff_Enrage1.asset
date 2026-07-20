@@ -16,8 +16,8 @@ MonoBehaviour:
   variantId: Buff_Enrage1
   itemIcon: {fileID: 0}
   flatIcon: {fileID: 0}
-  physicalDuration: 1
-  magicalDuration: 1
+  physicalDuration: 2
+  magicalDuration: 2
   physicalDamagePerTurn: 0
   physicalApplyChance: 1
   magicalDamagePerTurn: 0
