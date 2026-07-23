@@ -5881,7 +5881,7 @@ public class BattleManager : MonoBehaviour
         // HP 소모
         if (skill.hpCostPercent > 0)
         {
-            int hpCost = Mathf.FloorToInt(attacker.maxHP * (skill.hpCostPercent / 100f));
+            int hpCost = Mathf.Max(1, Mathf.RoundToInt(attacker.maxHP * (skill.hpCostPercent / 100f)));
             attacker.currentHP -= hpCost;
             attacker.currentHP = Mathf.Max(0, attacker.currentHP);
             Debug.Log($"[BattleManager] {attacker.playerName} used {skill.skillName} and lost {hpCost} HP. Current HP: {attacker.currentHP}/{attacker.maxHP}");
