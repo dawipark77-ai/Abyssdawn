@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7e4c93a1f2d4856ab09cd3e5f7081a2, type: 3}
-  m_Name: Monster_PushBack
-  m_EditorClassIdentifier: 
-  skillID: Monster_PushBack
-  skillName: Push Back
-  skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
-  description: "\uB300\uBBF8\uC9C0\u2193, \uBA85\uC911 \uC2DC \uB300\uC0C1\uC744
-    1\uC2AC\uB86F \uD6C4\uD1F4\uC2DC\uD0A8\uB2E4. (\uC790\uB9AC\uC774\uB3D9 \uB85C\uC9C1\uC740
-    \uBCC4\uB3C4 \uC5F0\uB3D9 \uD544\uC694)"
+  m_Name: Monster_Tackle
+  m_EditorClassIdentifier:
+  skillID: Monster_Tackle
+  skillName: Tackle
+  skillIcon: {fileID: 0}
+  description: Slams into the target with full body weight. Deals damage and pushes
+    target back.
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -26,11 +25,11 @@ MonoBehaviour:
     targetFaction: 0
     allowedCasterSlots: 3
     allowedTargetSlots: 3
-    specificSlots: 
-  hpCostPercent: 0
+    specificSlots:
+  hpCostPercent: 5
   mpCost: 0
-  minMult: 0.65
-  maxMult: 0.75
+  minMult: 1
+  maxMult: 1.15
   hitCount: 1
   accuracy: 0.88
   selfDmgPercent: 0
@@ -44,7 +43,7 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: 
+  dunbreakDescription:
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -57,7 +56,7 @@ MonoBehaviour:
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
   armorBreakPercent: 0
-  requiresPreviousSkillId: 
+  requiresPreviousSkillId:
   requiresSameTarget: 0
   preemptive: 0
   endsTurnImmediately: 0

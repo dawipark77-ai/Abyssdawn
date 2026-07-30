@@ -1215,6 +1215,53 @@ public class BattleManager : MonoBehaviour
         return MoveResult.Success_Swapped;
     }
 
+    /// <summary>아군(PlayerStats)을 지정 슬롯으로 이동. currentSlot 갱신 + 리스트 순서 교체 + UI 갱신.</summary>
+    private bool MovePlayerToSlot(PlayerStats mover, BattleSlot targetSlot)
+    {
+        if (mover == null || mover.currentHP <= 0) return false;
+        if (targetSlot == BattleSlot.None) return false;
+        if (mover.currentSlot == targetSlot) return false;
+
+        // 목표 슬롯에 있는 다른 파티원 찾기 (스왑용)
+        PlayerStats occupant = null;
+        foreach (var m in activePartyMembers)
+        {
+            if (m != null && m != mover && m.currentSlot == targetSlot)
+            {
+                occupant = m;
+                break;
+            }
+        }
+
+        BattleSlot fromSlot = mover.currentSlot;
+
+        if (occupant == null)
+        {
+            // 빈 슬롯: 단순 이동
+            mover.currentSlot = targetSlot;
+        }
+        else
+        {
+            // 점유 슬롯: 스왑
+            mover.currentSlot = targetSlot;
+            occupant.currentSlot = fromSlot;
+        }
+
+        // activePartyMembers를 currentSlot 순서로 정렬 후 위치 갱신
+        activePartyMembers.Sort((a, b) =>
+        {
+            if (a == null) return 1;
+            if (b == null) return -1;
+            return ((int)a.currentSlot).CompareTo((int)b.currentSlot);
+        });
+        PositionPartyMembers();
+        UpdateStatusUI();
+
+        Debug.Log($"[PlayerMove] {mover.playerName} {fromSlot} → {targetSlot}" +
+                  (occupant != null ? $" (swap with {occupant.playerName})" : ""));
+        return true;
+    }
+
     /// <summary>
     /// currentSlot + 월드 위치 + 렌더링 순서를 한 번에 갱신한다.
     /// HoverOffsetY는 (현재 월드 Y - 이전 슬롯 Y)로 역산해 새 슬롯에서도 유지된다.
@@ -3660,8 +3707,27 @@ public class BattleManager : MonoBehaviour
         switch (pattern)
         {
             case Abyssdawn.AIPattern.Aggressive:
-                // HP 비율 가장 낮은 아군 우선 (약점 공략)
-                return alive.OrderBy(p => (float)p.currentHP / Mathf.Max(1, p.maxHP)).First();
+            {
+                // HP 낮을수록 가중치 높음 (역수 방식) — 다키스트 던전 참고
+                float totalWeight = 0f;
+                var weights = new float[alive.Count];
+                for (int i = 0; i < alive.Count; i++)
+                {
+                    float hpRatio = (float)alive[i].currentHP / Mathf.Max(1, alive[i].maxHP);
+                    // HP 비율 역수. 최소 0.1 보장 (HP 0 방지)
+                    weights[i] = 1f / Mathf.Max(0.1f, hpRatio);
+                    totalWeight += weights[i];
+                }
+                float roll = UnityEngine.Random.Range(0f, totalWeight);
+                float cumulative = 0f;
+                for (int i = 0; i < alive.Count; i++)
+                {
+                    cumulative += weights[i];
+                    if (roll <= cumulative)
+                        return alive[i];
+                }
+                return alive[alive.Count - 1];
+            }
 
             case Abyssdawn.AIPattern.Defensive:
                 // 방어 중인 아군 제외, 후열 우선 (안전한 타겟)
@@ -3719,8 +3785,8 @@ public class BattleManager : MonoBehaviour
         {
             foreach (var skill in enemy.sourceMonster.ActiveSkills)
             {
-                Debug.Log($"[EnemyAI-Skill-Check] skill={skill.skillName}, CanCast={CanEnemyCastSkill(enemy, skill)}, w={SkillBaseWeight(pattern, skill):F2}");
                 if (skill == null || !CanEnemyCastSkill(enemy, skill)) continue;
+                Debug.Log($"[EnemyAI-Skill-Check] skill={skill.skillName}, CanCast=True, w={SkillBaseWeight(pattern, skill):F2}");
 
                 float w = SkillBaseWeight(pattern, skill);
                 // [Omega] HP 소모 스킬 = 고위험 → 가중치 감소
@@ -5845,6 +5911,27 @@ public class BattleManager : MonoBehaviour
 
             // 10. 상태이상 (타격마다)
             ApplyCurseEffectsToPlayer(target, skill);
+
+            // 11. 밀기/당기기
+            if (skill is MonsterSkillData pushSkill && pushSkill.slotShiftAmount != 0
+                && UnityEngine.Random.value <= pushSkill.slotShiftChance)
+            {
+                int direction = pushSkill.slotShiftAmount > 0 ? 1 : -1;
+                int steps = Mathf.Abs(pushSkill.slotShiftAmount);
+                BattleSlot currentSlot = target.currentSlot;
+                for (int step = 0; step < steps; step++)
+                {
+                    BattleSlot nextSlot = GetHorizontalNeighbor4(currentSlot, direction);
+                    if (nextSlot == BattleSlot.None) break;
+                    currentSlot = nextSlot;
+                }
+                if (currentSlot != target.currentSlot)
+                {
+                    bool pushed = MovePlayerToSlot(target, currentSlot);
+                    if (pushed)
+                        AddMessage($"{target.playerName} is knocked back!");
+                }
+            }
 
             if (target.currentHP <= 0) break;
 

@@ -26,6 +26,13 @@ namespace AbyssdawnBattle
     [CreateAssetMenu(fileName = "New Monster Skill", menuName = "Battle/Monster Skill Data")]
     public class MonsterSkillData : SkillData
     {
+        [Header("Slot Push/Pull (밀기/당기기)")]
+        [Tooltip("0=없음. 양수=대상을 후열 방향으로 N칸. 음수=전열 방향으로 N칸.")]
+        public int slotShiftAmount = 0;
+        [Tooltip("밀기 발동 확률 (0~1). 1=명중 시 항상.")]
+        [Range(0f, 1f)]
+        public float slotShiftChance = 1f;
+
         [Header("Basic Attack Override (Bite 전용)")]
         public bool isBasicAttackOverride;
         public float atkMultiplierOverride;
