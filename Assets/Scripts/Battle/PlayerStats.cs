@@ -37,6 +37,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private int _fallbackBaseMP;
     [SerializeField] private int _fallbackBaseAttack;
     [SerializeField] private int _fallbackBaseDefense;
+    [SerializeField] private int _fallbackBaseMagicDefense;
     [SerializeField] private int _fallbackBaseMagic;
     [SerializeField] private int _fallbackBaseAgility;
     [SerializeField] private int _fallbackBaseLuck;
@@ -88,6 +89,11 @@ public class PlayerStats : MonoBehaviour
     {
         get { EnsureBaseStatsSeeded(); return _fallbackBaseDefense; }
         set { EnsureBaseStatsSeeded(); _fallbackBaseDefense = value; }
+    }
+    public int baseMagicDefense
+    {
+        get { EnsureBaseStatsSeeded(); return _fallbackBaseMagicDefense; }
+        set { EnsureBaseStatsSeeded(); _fallbackBaseMagicDefense = value; }
     }
     public int baseMagic
     {
@@ -241,6 +247,20 @@ public class PlayerStats : MonoBehaviour
 
             // 3. + 기타
             return baseValue + classBonus + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus() + GetTraitBonus(PassiveBonusStat.Defense);
+        }
+    }
+
+    public int MagicDefense
+    {
+        get
+        {
+            int pureBase = baseMagicDefense;
+            float multiplier = characterClass != null ? characterClass.defenseMultiplier : 1.0f;
+            int baseValue = Mathf.RoundToInt(pureBase * multiplier);
+            int classBonus = characterClass != null ? characterClass.defenseBonus : 0;
+            return baseValue + classBonus + GetPassiveDefenseBonus() + GetEquipmentMagicDefenseBonus();
+            // 주의: 나중에 MagicDefense 전용 패시브 보너스로 분리 가능
+            // 지금은 Defense와 같은 패시브 보너스 공유 (Phase 1 심플 버전). 장비 보너스는 magicDefenseBonus 전용 필드 사용.
         }
     }
 
@@ -686,6 +706,17 @@ public class PlayerStats : MonoBehaviour
         int total = 0;
         foreach (var item in GetEquippedItemsList())
             if (item != null) total += item.defenseBonus;
+        return total;
+    }
+
+    /// <summary>
+    /// 장비로부터 마법 방어력(마방) 보정치를 가져옵니다.
+    /// </summary>
+    public int GetEquipmentMagicDefenseBonus()
+    {
+        int total = 0;
+        foreach (var item in GetEquippedItemsList())
+            if (item != null) total += item.magicDefenseBonus;
         return total;
     }
 

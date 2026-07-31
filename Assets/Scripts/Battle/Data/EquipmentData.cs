@@ -70,7 +70,10 @@ namespace AbyssdawnBattle
         
         [Tooltip("Defense bonus")]
         public int defenseBonus = 0;
-        
+
+        [Tooltip("Magic defense bonus")]
+        public int magicDefenseBonus = 0;
+
         [Tooltip("Magic bonus")]
         public int magicBonus = 0;
 

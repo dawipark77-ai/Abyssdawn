@@ -49,6 +49,9 @@ public class EnemyStats : MonoBehaviour
     [Tooltip("상태이상 저항 배율 (1.0 = 기본, 0.5 = 적용 확률 절반). MonsterSO.StatusResist에서 복사됨.")]
     public float statusResist = 1f;
 
+    public float magResist = 1f;   // 마법 피해 저항 배율 (0~1, MonsterSO.MagResist에서 초기화)
+    public float physResist = 1f;  // 물리 피해 저항 배율 (0~1, MonsterSO.PhysResist에서 초기화)
+
     [Header("Battle Position")]
     [Tooltip("현재 슬롯 위치 (BattleLine에서 자동 설정됨). 슬롯 1,2 = 전열, 슬롯 3,4 = 후열.")]
     public BattleSlot currentSlot = BattleSlot.Slot1;
@@ -156,6 +159,8 @@ public class EnemyStats : MonoBehaviour
         allowedSlots = so.AllowedSlots;
         expReward    = so.ExpReward;
         statusResist = so.StatusResist;
+        magResist    = so.MagResist;
+        physResist   = so.PhysResist;
 
         // 스프라이트는 BattleManager에서 selectedSprites[i]로 직접 주입 — 여기서 건드리지 않음
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();

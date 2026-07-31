@@ -5873,8 +5873,20 @@ public class BattleManager : MonoBehaviour
                 baseStat = Mathf.FloorToInt(
                     enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, baseStat));
             float mult = UnityEngine.Random.Range(skill.minMult, skill.maxMult);
-            float defValue = target.ApplyStatModifiers(
-                AbyssdawnBattle.ModStatType.Defense, target.Defense);
+            float defValue;
+            if (skill is MonsterSkillData msdDef && msdDef.Category == MonsterSkillCategory.MagicAttack)
+            {
+                // 마법 스킬: MagicDefense DQ 공식
+                float mdef = target.ApplyStatModifiers(
+                    AbyssdawnBattle.ModStatType.Defense, target.MagicDefense);
+                defValue = mdef;
+            }
+            else
+            {
+                // 물리 스킬: 기존 물리 Defense
+                defValue = target.ApplyStatModifiers(
+                    AbyssdawnBattle.ModStatType.Defense, target.Defense);
+            }
             float baseValue = (baseStat * 2f - defValue) / 2f;
             if (baseValue < 1f) baseValue = 1f;
             int damage = Mathf.FloorToInt(baseValue * mult);
@@ -6189,6 +6201,21 @@ public class BattleManager : MonoBehaviour
 
             int damage = baseDamage + armorBreakDamage;
 
+            // 방어력/마방 적용 (DQ 표준)
+            if (skill.damageType == DamageType.Physical)
+            {
+                // 물리: DQ 공식 — (damage×2 - defense) / 2
+                float defValue = target.ApplyStatModifiers(
+                    AbyssdawnBattle.ModStatType.Defense, target.defense);
+                float reduced = (damage * 2f - defValue) / 2f;
+                damage = Mathf.Max(1, Mathf.FloorToInt(reduced));
+            }
+            else if (skill.damageType == DamageType.Magic)
+            {
+                // 마법: magResist 배율 곱셈
+                damage = Mathf.Max(1, Mathf.FloorToInt(damage * target.magResist));
+            }
+
             // 크리티컬은 깡뎀 + 방어 파괴 합산에 배율 적용
             if (critical)
             {
@@ -6349,6 +6376,22 @@ public class BattleManager : MonoBehaviour
                 target.isDefending = false;
                 AddMessage($"{target.enemyName} defended and reduced the damage!");
             }
+
+            // 방어력/마방 적용 (DQ 표준)
+            if (skill.damageType == DamageType.Physical)
+            {
+                // 물리: DQ 공식 — (damage×2 - defense) / 2
+                float defValue = target.ApplyStatModifiers(
+                    AbyssdawnBattle.ModStatType.Defense, target.defense);
+                float reduced = (damage * 2f - defValue) / 2f;
+                damage = Mathf.Max(1, Mathf.FloorToInt(reduced));
+            }
+            else if (skill.damageType == DamageType.Magic)
+            {
+                // 마법: magResist 배율 곱셈
+                damage = Mathf.Max(1, Mathf.FloorToInt(damage * target.magResist));
+            }
+
             target.TakeDamage(damage, critical);
             totalDamage += damage;
 
