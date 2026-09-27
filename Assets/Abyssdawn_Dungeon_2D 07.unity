@@ -28971,6 +28971,7 @@ MonoBehaviour:
   _fallbackBaseMP: 0
   _fallbackBaseAttack: 0
   _fallbackBaseDefense: 0
+  _fallbackBaseMagicDefense: 0
   _fallbackBaseMagic: 0
   _fallbackBaseAgility: 0
   _fallbackBaseLuck: 0
