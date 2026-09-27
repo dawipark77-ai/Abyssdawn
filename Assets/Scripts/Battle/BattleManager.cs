@@ -288,6 +288,9 @@ public class BattleManager : MonoBehaviour
     public Canvas canvas;
     public Transform enemyStatusPanel;
 
+    [Tooltip("적 상태창. 상단 적 카드 버튼 → OnEnemyStatusCardClicked(1~4)로 열림.")]
+    [SerializeField] private EnemyStatusPanel enemyInspectPanel;
+
     [Header("━━━━━━━━━━ 적 진영 UI ━━━━━━━━━━")]
     [SerializeField] Image[] enemyMonsterImages;
     [SerializeField] TMP_Text[] enemyNameTexts;
@@ -4349,6 +4352,50 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- 버튼 이벤트 --------------------
+    /// <summary>
+    /// 상단 적 카드 버튼용. slotNumber = 1~4 (카드 순서 = 카드에 표시된 번호).
+    /// 카드 배치와 같은 규칙(GetEnemyByCardNumber)으로 누른 순간의 적을 찾으므로,
+    /// 몬스터가 자리이동해도 항상 그 카드에 지금 표시된 적의 상태창이 열린다.
+    /// </summary>
+    public void OnEnemyStatusCardClicked(int slotNumber)
+    {
+        EnemyStats es = GetEnemyByCardNumber(slotNumber);
+
+        if (enemyInspectPanel == null)
+        {
+            Debug.LogWarning("[BattleManager] enemyInspectPanel이 연결되지 않았습니다.");
+            return;
+        }
+
+        if (es == null || es.IsDead()) return;
+
+        enemyInspectPanel.Show(es);
+    }
+
+    /// <summary>
+    /// 상단 카드 n번(1-based)에 표시 중인 적. AssignDisplayNumbers와 똑같은 규칙:
+    /// 죽은 적 포함 전체를 currentSlot 오름차순(Slot1~7 → Center)으로 정렬한 n번째.
+    /// (enemyLine은 Slot1~4만 담아 단독 배치(Center)를 못 찾고,
+    ///  GetMonsterByNumber는 죽은 적을 빼고 세어 사망 후 카드와 번호가 어긋나므로 쓰지 않는다)
+    /// </summary>
+    private EnemyStats GetEnemyByCardNumber(int cardNumber)
+    {
+        if (cardNumber < 1 || activeEnemies == null) return null;
+
+        var ordered = new List<(EnemyStats stats, int slotKey)>();
+        foreach (EnemyStats es in activeEnemies)
+        {
+            if (es == null) continue;
+            int key = (int)es.currentSlot;
+            if (key == 0) key = int.MaxValue;
+            ordered.Add((es, key));
+        }
+        ordered.Sort((a, b) => a.slotKey.CompareTo(b.slotKey));
+
+        int idx = cardNumber - 1;
+        return idx < ordered.Count ? ordered[idx].stats : null;
+    }
+
     public void OnAttackButton()
     {
         if (currentPhase != BattlePhase.Command || !playerTurn || battleEnded || waitingForTargetSelection || turnInProgress) return;

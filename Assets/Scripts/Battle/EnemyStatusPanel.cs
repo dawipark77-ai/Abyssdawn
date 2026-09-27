@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -20,6 +19,8 @@ public class EnemyStatusPanel : MonoBehaviour
     [SerializeField] private bool hideOnAwake = true;
     [Tooltip("열려 있는 동안 매 프레임 갱신 (버프/HP 변화 실시간 반영)")]
     [SerializeField] private bool refreshWhileOpen = true;
+    [Tooltip("상태창 Canvas 표시 순서. 다른 전투 UI(기본 0, 카드 버튼 5)보다 커야 맨 앞에 뜬다.")]
+    [SerializeField] private int sortingOrder = 100;
 
     [Header("Identity")]
     [SerializeField] private TMP_Text monsterName;
@@ -27,7 +28,16 @@ public class EnemyStatusPanel : MonoBehaviour
     [SerializeField] private TMP_Text monsterRace;
     [SerializeField] private TMP_Text monsterType;
     [SerializeField] private Image instinctIcon;
-    [SerializeField] private TMP_Text curseStat;
+
+    [Header("Curse Icons (CurseStat)")]
+    [Tooltip("현재 걸린 저주 아이콘이 자동 배치될 영역 (CurseStat). 아이콘은 코드가 만든다.")]
+    [SerializeField] private RectTransform curseIconContainer;
+    [SerializeField] private float curseIconSize = 64f;
+    [SerializeField] private float curseIconSpacing = 6f;
+    [Tooltip("아이콘 위에 남은 턴(오른쪽 아래) / 스택 수(오른쪽 위) 표시")]
+    [SerializeField] private bool showCurseCounts = true;
+    [Tooltip("저주 에셋에 아이콘이 없을 때 대신 쓸 이미지. 비우면 회색 사각형")]
+    [SerializeField] private Sprite fallbackCurseIcon;
 
     [Header("HP / MP")]
     [SerializeField] private TMP_Text hp;
@@ -72,8 +82,28 @@ public class EnemyStatusPanel : MonoBehaviour
 
     private void Awake()
     {
+        BringToFront();
         if (closeButton != null) closeButton.onClick.AddListener(Hide);
         if (hideOnAwake) Root.SetActive(false);
+    }
+
+    /// <summary>
+    /// 상태창 캔버스를 다른 모든 전투 UI보다 앞에 고정.
+    /// 캔버스들의 Sort Order가 같으면 Unity가 앞뒤를 보장하지 않으므로 코드로 명시한다.
+    /// </summary>
+    private void BringToFront()
+    {
+        Canvas canvas = Root.GetComponent<Canvas>();
+        if (canvas == null) canvas = Root.GetComponentInChildren<Canvas>(true);
+        if (canvas == null) canvas = GetComponentInParent<Canvas>(true);
+        if (canvas == null)
+        {
+            Debug.LogWarning("[EnemyStatusPanel] Canvas를 찾지 못해 표시 순서를 올리지 못했습니다.");
+            return;
+        }
+
+        canvas.overrideSorting = true;   // 다른 Canvas 안에 들어가 있어도 독자 순서 사용
+        canvas.sortingOrder = sortingOrder;
     }
 
     private void OnDestroy()
@@ -117,7 +147,7 @@ public class EnemyStatusPanel : MonoBehaviour
         var instinct = so != null ? so.BasicAttackOverride : null;
         SetIcon(instinctIcon, instinct != null ? instinct.skillIcon : null);
 
-        SetText(curseStat, BuildStatusEffectText(e));
+        RefreshCurseIcons(e);
 
         // ── HP / MP ──
         SetText(hp, $"{e.currentHP}/{e.maxHP}");
@@ -172,16 +202,76 @@ public class EnemyStatusPanel : MonoBehaviour
         return _battleManager != null ? _battleManager.criticalChance : 25f;
     }
 
+    // ─────────────────────────────────────────
+    // 저주 아이콘 (CurseStat)
+    // ─────────────────────────────────────────
+
+    private struct CurseEntry
+    {
+        public Sprite icon;
+        public int turns;   // -1 = 영구
+        public int stacks;
+    }
+
+    private class CurseIconSlot
+    {
+        public GameObject root;
+        public RectTransform rect;
+        public Image image;
+        public TextMeshProUGUI turns;
+        public TextMeshProUGUI stacks;
+    }
+
+    private readonly List<CurseEntry> _curseEntries = new List<CurseEntry>();
+    private readonly List<CurseIconSlot> _curseSlots = new List<CurseIconSlot>();
+    private readonly List<object> _srcOrder = new List<object>();
+    private readonly Dictionary<object, int> _srcCount = new Dictionary<object, int>();
+    private readonly Dictionary<object, int> _srcTurns = new Dictionary<object, int>();
+
     /// <summary>
-    /// 현재 걸려 있는 저주 전부. 두 경로를 모두 읽는다:
+    /// 현재 걸린 저주 아이콘을 CurseStat 영역에 왼쪽 위부터 채운다 (넘치면 다음 줄).
+    /// 아이콘 GameObject는 한 번 만들면 재사용하고, 남는 칸은 숨긴다.
+    /// </summary>
+    private void RefreshCurseIcons(EnemyStats e)
+    {
+        if (curseIconContainer == null) return;
+
+        CollectCurses(e, _curseEntries);
+
+        float step = curseIconSize + curseIconSpacing;
+        int perRow = Mathf.Max(1, Mathf.FloorToInt((curseIconContainer.rect.width + curseIconSpacing) / step));
+
+        for (int i = 0; i < _curseEntries.Count; i++)
+        {
+            CurseEntry entry = _curseEntries[i];
+            CurseIconSlot slot = GetOrCreateCurseSlot(i);
+
+            slot.root.SetActive(true);
+            slot.rect.sizeDelta = new Vector2(curseIconSize, curseIconSize);
+            slot.rect.anchoredPosition = new Vector2((i % perRow) * step, -(i / perRow) * step);
+
+            Sprite icon = entry.icon != null ? entry.icon : fallbackCurseIcon;
+            slot.image.sprite = icon;
+            slot.image.color = icon != null ? Color.white : new Color(0.4f, 0.4f, 0.4f, 0.9f);
+
+            SetText(slot.turns, showCurseCounts && entry.turns >= 0 ? entry.turns.ToString() : "");
+            SetText(slot.stacks, showCurseCounts && entry.stacks > 1 ? $"x{entry.stacks}" : "");
+        }
+
+        for (int i = _curseEntries.Count; i < _curseSlots.Count; i++)
+            _curseSlots[i].root.SetActive(false);
+    }
+
+    /// <summary>
+    /// 현재 걸린 저주 전부. 두 경로를 모두 읽는다:
     ///  ① activeStatusEffects — 출혈/독/점화/스턴 등 (ApplyStatusEffect 경로)
     ///  ② activeStatModifiers — 눈긁기처럼 statModifiers를 가진 저주 (ApplyCurseEffects의 스택 경로)
-    /// ②는 출처 스킬별로 묶어 스택 수를 표시하고, 이로운 버프(격분 등)는 제외한다.
-    /// 표기: 이름 (남은 턴) / 이름 xN (남은 턴)
+    /// ②는 출처 스킬별로 묶어 스택 수를 세고, 이로운 버프(격분 등)는 제외한다.
+    /// 아이콘은 적 카드(UpdateEnemyStatusIcons)와 같은 규칙: flatIcon 우선, 없으면 itemIcon.
     /// </summary>
-    private string BuildStatusEffectText(EnemyStats e)
+    private void CollectCurses(EnemyStats e, List<CurseEntry> result)
     {
-        var sb = new StringBuilder();
+        result.Clear();
 
         // ① 상태이상 인스턴스
         if (e.activeStatusEffects != null)
@@ -189,70 +279,100 @@ public class EnemyStatusPanel : MonoBehaviour
             foreach (var se in e.activeStatusEffects)
             {
                 if (se == null || se.data == null) continue;
-                AppendEntry(sb, $"{GetEffectLabel(se.data)} ({se.remainingTurns})");
+                result.Add(new CurseEntry { icon = GetEffectIcon(se.data), turns = se.remainingTurns, stacks = 1 });
             }
         }
 
         // ② 스탯 디버프 — 출처(source)별로 묶기, 등장 순서 유지
-        if (e.activeStatModifiers != null)
+        if (e.activeStatModifiers == null) return;
+
+        _srcOrder.Clear();
+        _srcCount.Clear();
+        _srcTurns.Clear();
+
+        foreach (var am in e.activeStatModifiers)
         {
-            var order = new List<object>();
-            var entryCount = new Dictionary<object, int>();
-            var maxTurns = new Dictionary<object, int>();
+            if (am == null || am.modifier == null || am.source == null) continue;
+            if (!IsHarmful(am.modifier)) continue;
 
-            foreach (var am in e.activeStatModifiers)
+            if (!_srcCount.ContainsKey(am.source))
             {
-                if (am == null || am.modifier == null || am.source == null) continue;
-                if (!IsHarmful(am.modifier)) continue;
-
-                if (!entryCount.ContainsKey(am.source))
-                {
-                    order.Add(am.source);
-                    entryCount[am.source] = 0;
-                    maxTurns[am.source] = am.remainingTurns;
-                }
-                entryCount[am.source]++;
-                maxTurns[am.source] = Mathf.Max(maxTurns[am.source], am.remainingTurns);
+                _srcOrder.Add(am.source);
+                _srcCount[am.source] = 0;
+                _srcTurns[am.source] = am.remainingTurns;
             }
-
-            foreach (var src in order)
-            {
-                string label = src.ToString();
-                int modsPerStack = 1;
-
-                if (src is AbyssdawnBattle.SkillData sd)
-                {
-                    if (sd.curseEffect != null)
-                    {
-                        label = GetEffectLabel(sd.curseEffect);
-                        if (sd.curseEffect.statModifiers != null && sd.curseEffect.statModifiers.Count > 0)
-                            modsPerStack = sd.curseEffect.statModifiers.Count;
-                    }
-                    else
-                    {
-                        label = sd.skillName;
-                    }
-                }
-
-                int stacks = Mathf.Max(1, entryCount[src] / modsPerStack);
-                string stackText = stacks > 1 ? $" x{stacks}" : "";
-                string turnText = maxTurns[src] >= 0 ? $" ({maxTurns[src]})" : "";
-                AppendEntry(sb, $"{label}{stackText}{turnText}");
-            }
+            _srcCount[am.source]++;
+            _srcTurns[am.source] = Mathf.Max(_srcTurns[am.source], am.remainingTurns);
         }
 
-        return sb.Length > 0 ? sb.ToString() : "-";
+        foreach (var src in _srcOrder)
+        {
+            StatusEffectSO effect = (src as AbyssdawnBattle.SkillData)?.curseEffect;
+
+            int modsPerStack = 1;
+            if (effect != null && effect.statModifiers != null && effect.statModifiers.Count > 0)
+                modsPerStack = effect.statModifiers.Count;
+
+            result.Add(new CurseEntry
+            {
+                icon = effect != null ? GetEffectIcon(effect) : null,
+                turns = _srcTurns[src],
+                stacks = Mathf.Max(1, _srcCount[src] / modsPerStack)
+            });
+        }
     }
 
-    private static string GetEffectLabel(StatusEffectSO effect)
+    private static Sprite GetEffectIcon(StatusEffectSO effect)
     {
-        return string.IsNullOrEmpty(effect.variantId) ? effect.effectType.ToString() : effect.variantId;
+        return effect.flatIcon != null ? effect.flatIcon : effect.itemIcon;
     }
 
-    private static void AppendEntry(StringBuilder sb, string entry)
+    private CurseIconSlot GetOrCreateCurseSlot(int index)
     {
-        if (sb.Length > 0) sb.Append(", ");
-        sb.Append(entry);
+        while (_curseSlots.Count <= index)
+        {
+            var go = new GameObject($"CurseIcon_{_curseSlots.Count}", typeof(RectTransform), typeof(Image));
+            go.layer = curseIconContainer.gameObject.layer;
+            go.transform.SetParent(curseIconContainer, false);
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 1f); // 왼쪽 위 기준
+
+            var img = go.GetComponent<Image>();
+            img.raycastTarget = false;
+            img.preserveAspect = true;
+
+            _curseSlots.Add(new CurseIconSlot
+            {
+                root = go,
+                rect = rt,
+                image = img,
+                turns = CreateCountLabel(go.transform, "Turns", new Vector2(1f, 0f), TextAlignmentOptions.BottomRight),
+                stacks = CreateCountLabel(go.transform, "Stacks", new Vector2(1f, 1f), TextAlignmentOptions.TopRight)
+            });
+        }
+        return _curseSlots[index];
+    }
+
+    private TextMeshProUGUI CreateCountLabel(Transform parent, string name, Vector2 corner, TextAlignmentOptions align)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
+        go.layer = parent.gameObject.layer;
+        go.transform.SetParent(parent, false);
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = corner;
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = new Vector2(curseIconSize, curseIconSize * 0.5f);
+
+        var tmp = go.GetComponent<TextMeshProUGUI>();
+        tmp.fontSize = curseIconSize * 0.35f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = align;
+        tmp.color = Color.white;
+        tmp.raycastTarget = false;
+        tmp.text = "";
+        return tmp;
     }
 
     /// <summary>
