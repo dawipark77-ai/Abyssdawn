@@ -31,7 +31,7 @@ MonoBehaviour:
   magResist: 0
   statusResist: 0.5
   activeSkills:
-  - {fileID: 11400000, guid: 07e47eebd0354b5584e781b3db392b19, type: 2}
+  - {fileID: 11400000, guid: a04e9f8e7ad743258b0360ef39bb46f2, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   passiveSkills:
