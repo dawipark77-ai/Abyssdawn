@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 /// <summary>
@@ -9,6 +8,7 @@ using UnityEngine.UI;
 /// [2026-09-29] 예전 버전은 씬의 "모든" 버튼 중 이름에 Back/Left 등이 들어간 것을 찾아 기존 기능을 지우고
 ///   이동을 연결해서, 메뉴의 뒤로가기 버튼까지 망가뜨릴 수 있었다. 이제 MovePad 안의 버튼만, 정확한 이름으로 찾는다.
 ///   또 MovePad 버튼들은 이미 삭제된 PlayerMover 를 가리키고 있어 모바일에서 이동이 불가능했다.
+/// [2026-09-28] 클릭(onClick) 대신 DungeonHoldButton 을 붙여 "꾹 누르면 연속 이동"을 지원.
 /// </summary>
 public class DungeonInputBinder : MonoBehaviour
 {
@@ -42,12 +42,16 @@ public class DungeonInputBinder : MonoBehaviour
         int count = 0;
         foreach (var button in pad.GetComponentsInChildren<Button>(true))
         {
-            UnityAction action = ActionFor(player, button.name);
-            if (action == null) continue;
-            button.onClick.AddListener(action);
+            DungeonDirection dir;
+            if (!TryDirectionFor(button.name, out dir)) continue;
+
+            var hold = button.GetComponent<DungeonHoldButton>();
+            if (hold == null) hold = button.gameObject.AddComponent<DungeonHoldButton>();
+            hold.player = player;
+            hold.direction = dir;
             count++;
         }
-        Debug.Log($"[DungeonInputBinder] '{padName}' 버튼 {count}개를 4방향 이동에 연결했습니다.");
+        Debug.Log($"[DungeonInputBinder] '{padName}' 버튼 {count}개를 4방향 이동(꾹 누르면 연속 이동)에 연결했습니다.");
         return count;
     }
 
@@ -55,28 +59,28 @@ public class DungeonInputBinder : MonoBehaviour
     /// 탑다운 절대 방향 이동: 위=북, 아래=남, 왼쪽=서, 오른쪽=동.
     /// L Side / R Side(옛 1인칭 게걸음 버튼)는 왼쪽/오른쪽과 같게 둔다.
     /// </summary>
-    private static UnityAction ActionFor(DungeonGridPlayer player, string buttonName)
+    private static bool TryDirectionFor(string buttonName, out DungeonDirection dir)
     {
         switch (buttonName.Trim().ToLowerInvariant())
         {
             case "up":
             case "forward":
             case "btn_forward":
-                return player.MoveNorth;
+                dir = DungeonDirection.North; return true;
             case "down":
             case "back":
             case "backward":
-                return player.MoveSouth;
+                dir = DungeonDirection.South; return true;
             case "left":
             case "l side":
             case "btn_left":
-                return player.MoveWest;
+                dir = DungeonDirection.West; return true;
             case "right":
             case "r side":
             case "btn_right":
-                return player.MoveEast;
+                dir = DungeonDirection.East; return true;
             default:
-                return null;
+                dir = DungeonDirection.North; return false;
         }
     }
 }

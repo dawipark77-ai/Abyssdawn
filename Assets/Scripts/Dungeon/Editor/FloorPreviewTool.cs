@@ -6,7 +6,8 @@ using UnityEngine;
 /// 게임을 실행하지 않고 층 생성 결과를 PNG 로 미리 본다 (층 설정표 조정용).
 /// 메뉴: Abyssdawn → Dungeon → 층 미리보기 (1~10층 PNG)
 /// 결과: 프로젝트 폴더/FloorPreviews/ (Assets 밖이라 임포트되지 않음)
-/// 색: 검정 암반 / 밝은 회색 방 / 어두운 회색 통로 / 주황 문 / 초록 시작 / 하늘 계단 / 노랑 마을 입구
+/// 색: 검정 암반 / 밝은 회색 방 / 어두운 회색 통로 / 주황 문 / 초록 시작 / 연두 올라가는 계단 / 하늘 내려가는 계단 /
+///     노랑 마을 입구 / 금색 보물상자 / 빨강 함정 / 파랑 샘
 /// </summary>
 public static class FloorPreviewTool
 {
@@ -54,6 +55,10 @@ public static class FloorPreviewTool
         Color start = new Color(0.3f, 0.95f, 0.35f);
         Color stairs = new Color(0.35f, 0.85f, 1f);
         Color gate = new Color(1f, 0.85f, 0.2f);
+        Color up = new Color(0.6f, 1f, 0.55f);
+        Color chest = new Color(1f, 0.76f, 0.22f);
+        Color trap = new Color(1f, 0.25f, 0.25f);
+        Color spring = new Color(0.35f, 0.55f, 1f);
 
         int w = data.width * CellPx, h = data.height * CellPx;
         var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
@@ -66,9 +71,13 @@ public static class FloorPreviewTool
                 var p = new Vector2Int(x, y);
                 FloorCell c = data.cells[x, y];
                 Color col = c.terrain == FloorTerrain.Room ? room : c.terrain == FloorTerrain.Corridor ? corridor : rock;
-                if (p == data.startPos) col = start;
+                if (c.feature == FloorFeature.StairsUp) col = up;
+                else if (p == data.startPos) col = start;
                 else if (c.feature == FloorFeature.StairsDown) col = stairs;
                 else if (c.feature == FloorFeature.TownGate) col = gate;
+                else if (c.feature == FloorFeature.Chest) col = chest;
+                else if (c.feature == FloorFeature.Trap) col = trap;
+                else if (c.feature == FloorFeature.Spring) col = spring;
                 FillCell(pixels, w, h, x, y, col, 0);
             }
         }

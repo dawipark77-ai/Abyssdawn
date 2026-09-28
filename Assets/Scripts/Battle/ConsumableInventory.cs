@@ -329,5 +329,8 @@ public class ConsumableInventory : MonoBehaviour
         }
 
         Debug.Log($"[Grant] 총 {totalAdded}개 아이템 지급 완료");
+
+        // 장비도 함께 (인벤토리가 이제 가진 장비만 보여주므로 테스트할 때 필요)
+        EquipmentBag.GrantAllForTest();
     }
 }

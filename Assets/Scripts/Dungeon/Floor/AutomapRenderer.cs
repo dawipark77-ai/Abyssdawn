@@ -8,7 +8,8 @@ using UnityEngine.Tilemaps;
 ///  - 드러난 걸을 수 있는 칸: 바닥 채움 (반투명)
 ///  - 드러난 칸과 암반 사이 경계: 흰 벽선
 ///  - 문: 방과 통로가 만나는 경계에 짧은 막대
-///  - 계단(▼)·마을 입구(◆): 아이콘
+///  - 아이콘: 계단(계단 모양 + 위/아래 화살표), 마을 입구(◆), 보물상자(열림/닫힘), 회복의 샘(사용 전/후),
+///    함정(✕ — 밟아서 발견한 것만, 종류별 색 / 다 쓴 함정은 회색)
 /// 드러나지 않은 곳은 아무것도 그리지 않는다 (= 안개).
 ///
 /// 벽 조각마다 오브젝트를 만들던 기존 방식(DungeonWallLineDrawer) 대신 메시 1개라 맵 크기와 무관하게 가볍다.
@@ -22,14 +23,25 @@ public class AutomapRenderer : MonoBehaviour
     public Color floorColor = new Color(0f, 0f, 0f, 0.55f);
     public Color wallColor = Color.white;
     public Color doorColor = new Color(1f, 0.72f, 0.3f, 1f);
+    [Tooltip("내려가는 계단")]
     public Color stairsColor = new Color(0.45f, 0.9f, 1f, 1f);
+    [Tooltip("올라가는 계단")]
+    public Color stairsUpColor = new Color(0.6f, 1f, 0.55f, 1f);
     public Color townGateColor = new Color(1f, 0.86f, 0.25f, 1f);
+    public Color chestColor = new Color(1f, 0.76f, 0.22f, 1f);
+    public Color springColor = new Color(0.35f, 0.7f, 1f, 1f);
+    public Color spentColor = new Color(0.5f, 0.5f, 0.52f, 0.85f);
+    public Color spikeTrapColor = new Color(1f, 0.3f, 0.25f, 1f);
+    public Color teleportTrapColor = new Color(0.8f, 0.45f, 1f, 1f);
+    public Color alarmTrapColor = new Color(1f, 0.6f, 0.2f, 1f);
+    public Color pitfallTrapColor = new Color(0.9f, 0.2f, 0.45f, 1f);
 
     [Header("Size (칸 크기 대비 비율)")]
     [Range(0.01f, 0.3f)] public float wallThickness = 0.08f;
     [Range(0.1f, 1f)] public float doorLength = 0.55f;
     [Range(0.01f, 0.4f)] public float doorThickness = 0.14f;
     [Range(0.1f, 1f)] public float iconSize = 0.6f;
+    [Range(0.1f, 1f)] public float stairsIconSize = 0.85f;
 
     [Header("Rendering")]
     [Tooltip("비우면 Sprite-Unlit 셰이더로 자동 생성")]
@@ -39,6 +51,7 @@ public class AutomapRenderer : MonoBehaviour
     public int sortingOrder = 5;
 
     private DungeonFloorData _data;
+    private DungeonFloorState _state;
     private HashSet<Vector2Int> _revealed;
     private Tilemap _reference;
     private Mesh _mesh;
@@ -74,10 +87,12 @@ public class AutomapRenderer : MonoBehaviour
         mr.receiveShadows = false;
     }
 
-    public void Bind(DungeonFloorData data, HashSet<Vector2Int> revealed, Tilemap referenceTilemap)
+    /// <summary>층 데이터 + 그 층의 탐험 기록(드러난 칸·연 상자·발견한 함정·쓴 샘)을 연결하고 다시 그린다.</summary>
+    public void Bind(DungeonFloorData data, DungeonFloorState state, Tilemap referenceTilemap)
     {
         _data = data;
-        _revealed = revealed;
+        _state = state;
+        _revealed = state != null ? state.revealed : null;
         _reference = referenceTilemap;
         Rebuild();
     }
@@ -140,9 +155,21 @@ public class AutomapRenderer : MonoBehaviour
                 else AddRect(mid, cs.x * doorLength * 0.5f, dt * 0.5f, doorColor);
             }
 
-            // 4) 아이콘
-            if (_revealed.Contains(_data.stairsPos)) AddStairsIcon(CellCenter(_data.stairsPos), cs);
+            // 4) 아이콘 — 드러난 칸에 있는 것만 (함정은 밟아서 발견한 것만)
+            if (_revealed.Contains(_data.stairsPos)) AddStairsIcon(CellCenter(_data.stairsPos), cs, false, stairsColor);
+            if (_data.hasStairsUp && _revealed.Contains(_data.stairsUpPos)) AddStairsIcon(CellCenter(_data.stairsUpPos), cs, true, stairsUpColor);
             if (_data.hasTownGate && _revealed.Contains(_data.townGatePos)) AddDiamond(CellCenter(_data.townGatePos), cs, townGateColor);
+
+            foreach (var p in _data.chests)
+                if (_revealed.Contains(p)) AddChestIcon(CellCenter(p), cs, _state.openedChests.Contains(p));
+            foreach (var p in _data.springs)
+                if (_revealed.Contains(p)) AddSpringIcon(CellCenter(p), cs, _state.usedSprings.Contains(p));
+            foreach (var p in _data.traps)
+            {
+                if (!_state.knownTraps.Contains(p)) continue;
+                FloorTrapType type = _data.GetCell(p).trap;
+                AddTrapIcon(CellCenter(p), cs, IsTrapSpent(type) ? spentColor : TrapColor(type));
+            }
         }
 
         _mesh.Clear();
@@ -218,17 +245,136 @@ public class AutomapRenderer : MonoBehaviour
         _tris.Add(i); _tris.Add(i + 2); _tris.Add(i + 3);
     }
 
-    /// <summary>내려가는 계단: 아래를 가리키는 삼각형 + 윗단 막대.</summary>
-    private void AddStairsIcon(Vector3 c, Vector2 cs)
+    /// <summary>발견한 함정 중 다 써서 더는 작동하지 않는 것. 가시 함정만 계속 작동한다.</summary>
+    public static bool IsTrapSpent(FloorTrapType type)
+    {
+        return type != FloorTrapType.Spike;
+    }
+
+    private Color TrapColor(FloorTrapType type)
+    {
+        switch (type)
+        {
+            case FloorTrapType.Teleport: return teleportTrapColor;
+            case FloorTrapType.Alarm: return alarmTrapColor;
+            case FloorTrapType.Pitfall: return pitfallTrapColor;
+            default: return spikeTrapColor;
+        }
+    }
+
+    // 아이콘은 칸 중심 기준 -1~1 단위 좌표로 그린다 (s = 반지름, mirror = 좌우 반전).
+    private static Vector3 P(Vector3 c, float s, float x, float y, bool mirror)
+    {
+        return new Vector3(c.x + (mirror ? -x : x) * s, c.y + y * s, c.z);
+    }
+
+    private void AddRectLocal(Vector3 c, float s, float x0, float y0, float x1, float y1, bool mirror, Color color)
+    {
+        AddQuad(P(c, s, x0, y0, mirror), P(c, s, x0, y1, mirror), P(c, s, x1, y1, mirror), P(c, s, x1, y0, mirror), color);
+    }
+
+    private void AddTriangle(Vector3 a, Vector3 b, Vector3 d, Color color)
+    {
+        int i = _verts.Count;
+        _verts.Add(a); _verts.Add(b); _verts.Add(d);
+        for (int k = 0; k < 3; k++) _colors.Add(color);
+        // 스프라이트 셰이더는 양면(Cull Off)이라 감긴 방향(좌우 반전 포함)은 상관없다.
+        // 반투명 색이 두 번 겹쳐 진해지므로 양면으로 두 번 넣지 않는다.
+        _tris.Add(i); _tris.Add(i + 1); _tris.Add(i + 2);
+    }
+
+    private void AddQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Color color)
+    {
+        AddTriangle(a, b, c, color);
+        AddTriangle(a, c, d, color);
+    }
+
+    /// <summary>
+    /// 계단: 3단 계단 실루엣 + 화살표.
+    ///  올라가는 계단 = 오른쪽으로 올라가는 계단 + 위 화살표(왼쪽)
+    ///  내려가는 계단 = 좌우 반전(오른쪽으로 내려가는 계단) + 아래 화살표(오른쪽)
+    /// </summary>
+    private void AddStairsIcon(Vector3 c, Vector2 cs, bool up, Color color)
+    {
+        float s = Mathf.Min(cs.x, cs.y) * stairsIconSize * 0.5f;
+        bool mirror = !up;
+
+        // 받침 (배경 그림 위에서도 잘 보이게)
+        AddRectLocal(c, s, -1.05f, -1.05f, 1.05f, 1.05f, false, new Color(0f, 0f, 0f, 0.55f));
+
+        // 계단 3단: x -0.2~1.0 을 3등분, 한 단 높이 0.55
+        const float x0 = -0.2f, w = 0.4f, h = 0.55f, bottom = -0.9f;
+        for (int i = 0; i < 3; i++)
+            AddRectLocal(c, s, x0 + i * w, bottom, x0 + (i + 1) * w, bottom + (i + 1) * h, mirror, color);
+
+        // 화살표: 계단이 없는 빈 쪽 (x ≈ -0.62)
+        const float ax = -0.62f;
+        if (up)
+        {
+            AddRectLocal(c, s, ax - 0.11f, -0.85f, ax + 0.11f, 0.25f, mirror, color);
+            AddTriangle(P(c, s, ax - 0.34f, 0.2f, mirror), P(c, s, ax, 0.92f, mirror), P(c, s, ax + 0.34f, 0.2f, mirror), color);
+        }
+        else
+        {
+            AddRectLocal(c, s, ax - 0.11f, -0.25f, ax + 0.11f, 0.85f, mirror, color);
+            AddTriangle(P(c, s, ax - 0.34f, -0.2f, mirror), P(c, s, ax, -0.92f, mirror), P(c, s, ax + 0.34f, -0.2f, mirror), color);
+        }
+    }
+
+    /// <summary>보물상자: 몸통 + 뚜껑 + 자물쇠. 연 상자는 회색에 뚜껑이 들린 모양.</summary>
+    private void AddChestIcon(Vector3 c, Vector2 cs, bool opened)
     {
         float s = Mathf.Min(cs.x, cs.y) * iconSize * 0.5f;
-        int i = _verts.Count;
-        _verts.Add(new Vector3(c.x - s, c.y + s * 0.35f, c.z));
-        _verts.Add(new Vector3(c.x + s, c.y + s * 0.35f, c.z));
-        _verts.Add(new Vector3(c.x, c.y - s, c.z));
-        for (int k = 0; k < 3; k++) _colors.Add(stairsColor);
-        _tris.Add(i); _tris.Add(i + 1); _tris.Add(i + 2);
-        AddRect(new Vector3(c.x, c.y + s * 0.75f, c.z), s, s * 0.14f, stairsColor);
+        Color body = opened ? spentColor : chestColor;
+        Color dark = new Color(0.25f, 0.15f, 0.05f, 1f);
+        AddRectLocal(c, s, -0.8f, -0.65f, 0.8f, 0.15f, false, body);
+        if (opened)
+        {
+            AddRectLocal(c, s, -0.7f, 0.0f, 0.7f, 0.15f, false, new Color(0.1f, 0.1f, 0.1f, 1f)); // 빈 속
+            AddRectLocal(c, s, -0.8f, 0.45f, 0.8f, 0.75f, false, body);                           // 들린 뚜껑
+        }
+        else
+        {
+            AddRectLocal(c, s, -0.8f, 0.22f, 0.8f, 0.6f, false, Color.Lerp(body, Color.white, 0.25f));
+            AddRectLocal(c, s, -0.12f, -0.15f, 0.12f, 0.32f, false, dark);
+        }
+    }
+
+    /// <summary>회복의 샘: 파란 원 + 밝은 속. 쓴 샘은 회색 원 + 어두운 속.</summary>
+    private void AddSpringIcon(Vector3 c, Vector2 cs, bool used)
+    {
+        float s = Mathf.Min(cs.x, cs.y) * iconSize * 0.5f;
+        AddCircle(c, s * 0.85f, used ? spentColor : springColor);
+        AddCircle(c, s * 0.42f, used ? new Color(0.12f, 0.12f, 0.14f, 1f) : new Color(0.8f, 0.93f, 1f, 1f));
+    }
+
+    /// <summary>함정: ✕ 표시.</summary>
+    private void AddTrapIcon(Vector3 c, Vector2 cs, Color color)
+    {
+        float s = Mathf.Min(cs.x, cs.y) * iconSize * 0.5f;
+        const float t = 0.2f; // 획 두께의 절반 (단위 좌표)
+        AddQuad(P(c, s, -0.8f - t, -0.8f + t, false), P(c, s, 0.8f - t, 0.8f + t, false),
+                P(c, s, 0.8f + t, 0.8f - t, false), P(c, s, -0.8f + t, -0.8f - t, false), color);
+        AddQuad(P(c, s, -0.8f - t, 0.8f - t, false), P(c, s, 0.8f - t, -0.8f - t, false),
+                P(c, s, 0.8f + t, -0.8f + t, false), P(c, s, -0.8f + t, 0.8f + t, false), color);
+    }
+
+    private void AddCircle(Vector3 c, float r, Color color)
+    {
+        const int segments = 18;
+        int center = _verts.Count;
+        _verts.Add(c);
+        _colors.Add(color);
+        for (int k = 0; k <= segments; k++)
+        {
+            float a = k * Mathf.PI * 2f / segments;
+            _verts.Add(new Vector3(c.x + Mathf.Cos(a) * r, c.y + Mathf.Sin(a) * r, c.z));
+            _colors.Add(color);
+        }
+        for (int k = 0; k < segments; k++)
+        {
+            _tris.Add(center); _tris.Add(center + k + 2); _tris.Add(center + k + 1);
+        }
     }
 
     private void AddDiamond(Vector3 c, Vector2 cs, Color color)

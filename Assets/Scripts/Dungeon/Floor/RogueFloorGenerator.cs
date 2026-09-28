@@ -15,7 +15,9 @@ using UnityEngine;
 ///     꺾는 지점은 두 방 사이 틈에서만 고르므로 다른 방을 관통하지 않고, 방 옆면에 달라붙지도 않는다.
 ///  5. 남은 공간은 암반으로 둔다 (미로로 채우지 않음).
 ///  6. 시작 위치와 계단(시작 방이 아닌 랜덤 방)을 방 안에 둔다. 마을 층이면 마을 입구도 방 안에 둔다.
-///  7. 시작점에서 모든 방·계단·마을 입구까지 갈 수 있는지 검증. 실패하면 시드 +1 로 재시도(결정론 유지).
+///     2층부터는 시작 자리에 올라가는 계단을 둔다 (위층에서 내려와 도착하는 곳).
+///  7. 보물상자·숨겨진 함정·회복의 샘을 배치한다 (문 칸 제외).
+///  8. 시작점에서 모든 방·계단·마을 입구까지 갈 수 있는지 검증. 실패하면 시드 +1 로 재시도(결정론 유지).
 ///
 /// 전용 난수기(System.Random)를 쓰므로 Unity 전역 난수(인카운터·전투)와 섞이지 않는다.
 /// 같은 (층, 시드, 설정)이면 항상 같은 층이 나온다 — 전투 후 복귀 시 그대로 재생성.
@@ -199,26 +201,230 @@ public static class RogueFloorGenerator
         for (int i = 0; i < data.rooms.Count; i++) if (!data.rooms[i].isGone) realRooms.Add(data.rooms[i]);
 
         List<Vector2Int> taken = new List<Vector2Int>();
+        DoorZones zones = new DoorZones(data);
 
-        FloorRoom startRoom = realRooms[rng.Next(realRooms.Count)];
-        data.startPos = RandomFreeCell(rng, startRoom.bounds, taken);
+        FloorRoom startRoom = PickRoomWithClearCell(rng, realRooms, null, null, data, taken, zones);
+        data.startPos = PickFeatureCell(data, rng, startRoom.bounds, taken, zones);
         taken.Add(data.startPos);
 
-        FloorRoom stairsRoom = PickRoomExcept(rng, realRooms, startRoom, null);
-        data.stairsPos = RandomFreeCell(rng, stairsRoom.bounds, taken);
+        FloorRoom stairsRoom = PickRoomWithClearCell(rng, realRooms, startRoom, null, data, taken, zones);
+        data.stairsPos = PickFeatureCell(data, rng, stairsRoom.bounds, taken, zones);
         taken.Add(data.stairsPos);
         data.cells[data.stairsPos.x, data.stairsPos.y].feature = FloorFeature.StairsDown;
 
         if (cfg.floorType == FloorType.Town)
         {
-            FloorRoom gateRoom = PickRoomExcept(rng, realRooms, startRoom, stairsRoom);
-            data.townGatePos = RandomFreeCell(rng, gateRoom.bounds, taken);
+            FloorRoom gateRoom = PickRoomWithClearCell(rng, realRooms, startRoom, stairsRoom, data, taken, zones);
+            data.townGatePos = PickFeatureCell(data, rng, gateRoom.bounds, taken, zones);
             data.hasTownGate = true;
             data.cells[data.townGatePos.x, data.townGatePos.y].feature = FloorFeature.TownGate;
         }
 
+        // ── 7. 올라가는 계단: 2층부터, 위층에서 내려와 도착하는 시작 자리에 ──
+        if (floorNumber > 1)
+        {
+            data.hasStairsUp = true;
+            data.stairsUpPos = data.startPos;
+            data.cells[data.startPos.x, data.startPos.y].feature = FloorFeature.StairsUp;
+        }
+
+        // ── 8. 탐험 요소 (보물상자 · 숨겨진 함정 · 회복의 샘) ──
+        // 이 단계의 난수는 모두 배치 이후에 쓰므로, 요소를 추가해도 방·통로 모양은 바뀌지 않는다.
+        PlaceContents(data, rng, cfg, realRooms, startRoom, zones);
+
         return data;
     }
+
+    /// <summary>
+    /// 문 주변 구역. 계단·마을 입구·상자·샘·시작 자리는 문 바로 앞에 두지 않는다 (함정은 예외).
+    ///  near   = 문 칸(방 쪽)과 그 둘레 8칸 — 가장 먼저 피한다
+    ///  beside = 문 칸과 상하좌우 4칸 — 방이 작아 near 를 다 피할 수 없을 때 그래도 피한다
+    ///  door   = 문 칸 자체 (방 쪽·통로 쪽)
+    /// </summary>
+    private class DoorZones
+    {
+        public readonly HashSet<Vector2Int> near = new HashSet<Vector2Int>();
+        public readonly HashSet<Vector2Int> beside = new HashSet<Vector2Int>();
+        public readonly HashSet<Vector2Int> door = new HashSet<Vector2Int>();
+
+        public DoorZones(DungeonFloorData data)
+        {
+            for (int i = 0; i < data.doors.Count; i++)
+            {
+                Vector2Int r = data.doors[i].roomCell;
+                door.Add(r);
+                door.Add(data.doors[i].corridorCell);
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        Vector2Int p = new Vector2Int(r.x + dx, r.y + dy);
+                        near.Add(p);
+                        if (dx == 0 || dy == 0) beside.Add(p);
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>문 둘레 8칸 밖의 빈칸이 하나라도 있는 방인지.</summary>
+    private static bool HasClearCell(DungeonFloorData data, RectInt bounds, List<Vector2Int> taken, DoorZones zones)
+    {
+        for (int x = bounds.x; x < bounds.xMax; x++)
+        {
+            for (int y = bounds.y; y < bounds.yMax; y++)
+            {
+                Vector2Int p = new Vector2Int(x, y);
+                if (!taken.Contains(p) && data.cells[x, y].feature == FloorFeature.None && !zones.near.Contains(p)) return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// exclude 를 뺀 방 중 문에서 떨어진 빈칸이 있는 방을 랜덤으로. 그런 방이 없으면 PickRoomExcept 와 같은 규칙.
+    /// → 작은 방에 문이 여럿이라 계단·상자가 문 앞에 붙는 일을 줄인다.
+    /// </summary>
+    private static FloorRoom PickRoomWithClearCell(System.Random rng, List<FloorRoom> rooms, FloorRoom exclude1, FloorRoom exclude2,
+                                                   DungeonFloorData data, List<Vector2Int> taken, DoorZones zones)
+    {
+        List<FloorRoom> pool = new List<FloorRoom>();
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            FloorRoom r = rooms[i];
+            if (r == exclude1 || r == exclude2) continue;
+            if (HasClearCell(data, r.bounds, taken, zones)) pool.Add(r);
+        }
+        if (pool.Count > 0) return pool[rng.Next(pool.Count)];
+        return PickRoomExcept(rng, rooms, exclude1, exclude2);
+    }
+
+    /// <summary>테스트용: 방이 작아 문 바로 옆에 둘 수밖에 없었던 횟수.</summary>
+    public static int DoorFallbackCount;
+
+    /// <summary>
+    /// 특수 요소(계단·마을 입구·상자·샘·시작 자리)를 놓을 칸. 문에서 떨어진 칸을 우선하고,
+    /// 방이 작아 불가능하면 단계적으로 조건을 푼다: 문 둘레 8칸 밖 → 문 상하좌우 밖 → 문 칸만 아니면 → 아무 빈칸.
+    /// </summary>
+    private static Vector2Int PickFeatureCell(DungeonFloorData data, System.Random rng, RectInt bounds, List<Vector2Int> taken, DoorZones zones)
+    {
+        for (int tier = 0; tier < 4; tier++)
+        {
+            List<Vector2Int> free = new List<Vector2Int>();
+            for (int x = bounds.x; x < bounds.xMax; x++)
+            {
+                for (int y = bounds.y; y < bounds.yMax; y++)
+                {
+                    Vector2Int p = new Vector2Int(x, y);
+                    if (taken.Contains(p)) continue;
+                    if (data.cells[x, y].feature != FloorFeature.None) continue;
+                    if (tier == 0 && zones.near.Contains(p)) continue;
+                    if (tier == 1 && zones.beside.Contains(p)) continue;
+                    if (tier == 2 && zones.door.Contains(p)) continue;
+                    free.Add(p);
+                }
+            }
+            if (free.Count > 0)
+            {
+                if (tier > 0) DoorFallbackCount++;
+                return free[rng.Next(free.Count)];
+            }
+        }
+        return bounds.position;
+    }
+
+    /// <summary>PickFeatureCell 결과가 실제로 빈칸일 때만 true (방에 빈칸이 하나도 없으면 false).</summary>
+    private static bool TryPickFeatureCell(DungeonFloorData data, System.Random rng, RectInt bounds, List<Vector2Int> taken, DoorZones zones, out Vector2Int result)
+    {
+        result = PickFeatureCell(data, rng, bounds, taken, zones);
+        return !taken.Contains(result) && data.cells[result.x, result.y].feature == FloorFeature.None;
+    }
+
+    /// <summary>
+    /// 보물상자·함정·샘 배치.
+    /// 상자·샘은 문 바로 앞을 피해 문에서 떨어진 칸에 (PickFeatureCell). 함정은 문 칸만 아니면 어디든.
+    /// 함정은 시작 방에 두지 않는다 (도착하자마자 밟는 일 방지).
+    /// </summary>
+    private static void PlaceContents(DungeonFloorData data, System.Random rng, FloorTableEntry cfg,
+                                      List<FloorRoom> realRooms, FloorRoom startRoom, DoorZones zones)
+    {
+        List<Vector2Int> taken = new List<Vector2Int>();
+        taken.Add(data.startPos);
+
+        HashSet<Vector2Int> blocked = new HashSet<Vector2Int>();
+        for (int i = 0; i < data.doors.Count; i++)
+        {
+            blocked.Add(data.doors[i].roomCell);
+            blocked.Add(data.doors[i].corridorCell);
+        }
+
+        List<FloorRoom> otherRooms = new List<FloorRoom>();
+        for (int i = 0; i < realRooms.Count; i++) if (realRooms[i] != startRoom) otherRooms.Add(realRooms[i]);
+        if (otherRooms.Count == 0) otherRooms.AddRange(realRooms);
+
+        // 보물상자: 아무 방 (시작 방 포함 — 첫 방에서 바로 발견하는 재미)
+        int chestMax = Math.Max(0, cfg.maxChests);
+        int chests = rng.Next(Clamp(cfg.minChests, 0, chestMax), chestMax + 1);
+        for (int i = 0; i < chests; i++)
+        {
+            Vector2Int p;
+            FloorRoom room = PickRoomWithClearCell(rng, realRooms, null, null, data, taken, zones);
+            if (!TryPickFeatureCell(data, rng, room.bounds, taken, zones, out p)) continue;
+            data.cells[p.x, p.y].feature = FloorFeature.Chest;
+            data.chests.Add(p);
+        }
+
+        // 회복의 샘: 확률로 하나, 시작 방이 아닌 방
+        if (rng.NextDouble() < cfg.springChance)
+        {
+            Vector2Int p;
+            FloorRoom room = PickRoomWithClearCell(rng, realRooms, otherRooms.Count < realRooms.Count ? startRoom : null, null, data, taken, zones);
+            if (TryPickFeatureCell(data, rng, room.bounds, taken, zones, out p))
+            {
+                data.cells[p.x, p.y].feature = FloorFeature.Spring;
+                data.springs.Add(p);
+            }
+        }
+
+        // 숨겨진 함정: 시작 방을 뺀 방·통로의 빈 칸
+        List<Vector2Int> trapCells = new List<Vector2Int>();
+        for (int x = 0; x < data.width; x++)
+        {
+            for (int y = 0; y < data.height; y++)
+            {
+                Vector2Int p = new Vector2Int(x, y);
+                FloorCell c = data.cells[x, y];
+                if (!c.IsWalkable || c.feature != FloorFeature.None || blocked.Contains(p)) continue;
+                if (c.roomId == startRoom.id) continue;
+                trapCells.Add(p);
+            }
+        }
+        Shuffle(trapCells, rng);
+        int trapMax = Math.Max(0, cfg.maxTraps);
+        int traps = Math.Min(rng.Next(Clamp(cfg.minTraps, 0, trapMax), trapMax + 1), trapCells.Count);
+        for (int i = 0; i < traps; i++)
+        {
+            Vector2Int p = trapCells[i];
+            data.cells[p.x, p.y].feature = FloorFeature.Trap;
+            data.cells[p.x, p.y].trap = PickTrapType(rng, data.floorNumber);
+            data.traps.Add(p);
+        }
+    }
+
+    /// <summary>
+    /// 층이 깊을수록 함정 종류가 늘어난다.
+    ///  1층~ 가시(4) / 2층~ 전송(2) / 3층~ 경보(2) / 4층~ 구멍(1)   (괄호 = 가중치)
+    /// </summary>
+    private static FloorTrapType PickTrapType(System.Random rng, int floor)
+    {
+        List<FloorTrapType> pool = new List<FloorTrapType>();
+        for (int i = 0; i < 4; i++) pool.Add(FloorTrapType.Spike);
+        if (floor >= 2) { pool.Add(FloorTrapType.Teleport); pool.Add(FloorTrapType.Teleport); }
+        if (floor >= 3) { pool.Add(FloorTrapType.Alarm); pool.Add(FloorTrapType.Alarm); }
+        if (floor >= 4) pool.Add(FloorTrapType.Pitfall);
+        return pool[rng.Next(pool.Count)];
+    }
+
 
     /// <summary>A(왼쪽) ↔ B(오른쪽). A 오른쪽 벽의 문 → 한 번 꺾기 → B 왼쪽 벽의 문.</summary>
     private static void ConnectHorizontal(DungeonFloorData data, System.Random rng, FloorRoom a, FloorRoom b)
@@ -321,18 +527,6 @@ public static class RogueFloorGenerator
         return pool[rng.Next(pool.Count)];
     }
 
-    private static Vector2Int RandomFreeCell(System.Random rng, RectInt bounds, List<Vector2Int> taken)
-    {
-        List<Vector2Int> free = new List<Vector2Int>();
-        for (int x = bounds.x; x < bounds.xMax; x++)
-            for (int y = bounds.y; y < bounds.yMax; y++)
-            {
-                Vector2Int p = new Vector2Int(x, y);
-                if (!taken.Contains(p)) free.Add(p);
-            }
-        if (free.Count == 0) return bounds.position;
-        return free[rng.Next(free.Count)];
-    }
 
     // ─────────────────────────────────────────────
     // 검증

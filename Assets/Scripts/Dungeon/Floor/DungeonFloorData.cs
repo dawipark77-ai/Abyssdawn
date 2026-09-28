@@ -16,8 +16,14 @@ using UnityEngine;
 /// <summary>칸의 지형. Rock = 막힌 암반(걸을 수 없음).</summary>
 public enum FloorTerrain { Rock = 0, Room = 1, Corridor = 2 }
 
-/// <summary>칸 위의 특수 요소.</summary>
-public enum FloorFeature { None = 0, StairsDown = 1, TownGate = 2 }
+/// <summary>칸 위의 특수 요소. 한 칸에 하나.</summary>
+public enum FloorFeature { None = 0, StairsDown = 1, TownGate = 2, StairsUp = 3, Chest = 4, Trap = 5, Spring = 6 }
+
+/// <summary>
+/// 숨겨진 함정 종류 (이상한 던전 / 위저드리).
+///  Spike = 최대 HP 일부 피해 / Teleport = 층 안 랜덤 방으로 전송 / Alarm = 즉시 전투 / Pitfall = 아래층으로 추락
+/// </summary>
+public enum FloorTrapType { None = 0, Spike = 1, Teleport = 2, Alarm = 3, Pitfall = 4 }
 
 /// <summary>층 종류. Town = 마을 층(마을 구현 전까지는 일반 층 + 마을 입구 타일).</summary>
 public enum FloorType { Dungeon = 0, Town = 1 }
@@ -27,6 +33,7 @@ public struct FloorCell
     public FloorTerrain terrain;
     public int roomId;            // 방 칸이면 방 번호, 아니면 -1
     public FloorFeature feature;
+    public FloorTrapType trap;    // feature == Trap 일 때 종류
 
     public bool IsWalkable { get { return terrain != FloorTerrain.Rock; } }
 }
@@ -69,6 +76,14 @@ public class DungeonFloorData
     public Vector2Int stairsPos;
     public bool hasTownGate;
     public Vector2Int townGatePos;
+    /// <summary>올라가는 계단 (2층부터, 시작 위치 = 위층에서 내려와 도착하는 자리).</summary>
+    public bool hasStairsUp;
+    public Vector2Int stairsUpPos;
+
+    // 탐험 요소 위치 (열림·발견·사용 여부는 층 데이터가 아닌 DungeonFloorState 가 기억한다)
+    public readonly List<Vector2Int> chests = new List<Vector2Int>();
+    public readonly List<Vector2Int> traps = new List<Vector2Int>();
+    public readonly List<Vector2Int> springs = new List<Vector2Int>();
 
     /// <summary>검증 실패로 재시도했을 때 실제로 쓰인 시드 (디버그용).</summary>
     public int generatedSeed;
@@ -121,9 +136,19 @@ public class DungeonFloorData
         return rooms[id];
     }
 
+    /// <summary>걸을 수 있는 칸 수 (탐험률 계산용).</summary>
+    public int CountWalkable()
+    {
+        int n = 0;
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                if (cells[x, y].IsWalkable) n++;
+        return n;
+    }
+
     /// <summary>
     /// 디버그용 글자 지도. revealed 를 주면 드러난 칸만 그린다(null = 전부).
-    /// # 암반, . 방, , 통로, @ 시작, &gt; 계단, T 마을 입구
+    /// # 암반, . 방, , 통로, @ 시작, &gt; 내려가는 계단, &lt; 올라가는 계단, T 마을 입구, $ 보물상자, ^ 함정, ~ 샘
     /// </summary>
     public string ToAscii(ICollection<Vector2Int> revealed)
     {
@@ -137,9 +162,13 @@ public class DungeonFloorData
 
                 FloorCell c = cells[x, y];
                 char ch;
-                if (p == startPos) ch = '@';
+                if (c.feature == FloorFeature.StairsUp) ch = '<';
+                else if (p == startPos) ch = '@';
                 else if (c.feature == FloorFeature.StairsDown) ch = '>';
                 else if (c.feature == FloorFeature.TownGate) ch = 'T';
+                else if (c.feature == FloorFeature.Chest) ch = '$';
+                else if (c.feature == FloorFeature.Trap) ch = '^';
+                else if (c.feature == FloorFeature.Spring) ch = '~';
                 else if (c.terrain == FloorTerrain.Room) ch = '.';
                 else if (c.terrain == FloorTerrain.Corridor) ch = ',';
                 else ch = '#';

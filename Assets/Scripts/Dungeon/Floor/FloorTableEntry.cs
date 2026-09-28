@@ -41,6 +41,16 @@ public class FloorTableEntry
     [Tooltip("이 층들의 인카운터 확률. -1 이면 씬의 DungeonEncounter 설정값 그대로 사용")]
     public float encounterChance = -1f;
 
+    [Header("탐험 요소")]
+    [Tooltip("보물상자 개수 범위 (방 안에 배치)")]
+    public int minChests = 1;
+    public int maxChests = 2;
+    [Tooltip("숨겨진 함정 개수 범위 (방·통로에 배치, 밟기 전엔 보이지 않음). 종류는 층이 깊을수록 늘어난다")]
+    public int minTraps = 0;
+    public int maxTraps = 2;
+    [Tooltip("회복의 샘이 생길 확률 (0~1)")]
+    [Range(0f, 1f)] public float springChance = 0.3f;
+
     public int FloorWidth { get { return sectionCols * sectionWidth; } }
     public int FloorHeight { get { return sectionRows * sectionHeight; } }
 
@@ -67,6 +77,17 @@ public class FloorTableEntry
         e.maxExtraLinks = extraMax;
         return e;
     }
+
+    /// <summary>탐험 요소 개수 설정 (기본값 표 작성용).</summary>
+    public FloorTableEntry WithContents(int chestMin, int chestMax, int trapMin, int trapMax, float spring)
+    {
+        minChests = chestMin;
+        maxChests = chestMax;
+        minTraps = trapMin;
+        maxTraps = trapMax;
+        springChance = spring;
+        return this;
+    }
 }
 
 /// <summary>층 설정표 기본값과 조회 규칙.</summary>
@@ -75,16 +96,17 @@ public static class FloorTableDefaults
     /// <summary>
     /// 베타 10층 기본 설정. 세로 화면(가로 약 16칸 보임)에 맞춰 초반 층은 가로 16칸 이하.
     ///   1층 마을 / 2~4층 2×2 / 5층 마을 / 6~8층 2×3 / 9~10층 3×3 / 11층~ 3×4 (계속 사용)
+    /// 보물상자·함정·샘은 깊을수록 많아진다.
     /// </summary>
     public static List<FloorTableEntry> CreateBeta()
     {
         List<FloorTableEntry> list = new List<FloorTableEntry>();
-        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1));
-        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1));
-        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1));
-        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1));
-        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2));
-        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3));
+        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 0, 1, 0.5f));
+        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.3f));
+        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 0, 1, 0.5f));
+        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 2, 3, 0.3f));
+        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 2, 4, 0.35f));
+        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 3, 6, 0.35f));
         return list;
     }
 

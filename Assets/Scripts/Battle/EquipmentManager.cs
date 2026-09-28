@@ -198,7 +198,10 @@ public class EquipmentManager : MonoBehaviour
 
         Debug.Log("[EquipmentManager] 장비를 PlayerStatData에 저장했습니다.");
 
-        // UI 업데이트
+        // UI 업데이트 — 인스펙터 연결이 비어 있으면 씬에서 찾는다 (상태창이 꺼져 있어도 찾음)
+        // [2026-09-29] 던전 씬에서 연결이 비어 있어 장착해도 상태창 장비 칸이 계속 "Empty" 였다.
+        if (equipmentUIController == null)
+            equipmentUIController = FindFirstObjectByType<EquipmentUIController>(FindObjectsInactive.Include);
         if (equipmentUIController != null)
         {
             equipmentUIController.RefreshAllSlots();

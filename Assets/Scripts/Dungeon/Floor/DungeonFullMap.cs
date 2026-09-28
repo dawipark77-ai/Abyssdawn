@@ -7,6 +7,7 @@ using UnityEngine.UI;
 ///  - 카메라가 층 전체가 한 화면에 들어오게 축소 (DungeonCameraFollow.SetOverview)
 ///  - 벽선을 굵게 해서 축소해도 잘 보이게 (AutomapRenderer.SetLineScale)
 ///  - 이동 잠금 + 이동 패드 숨김 (지도를 보다 실수로 움직여 전투가 시작되는 것 방지)
+///  - 층 번호 옆에 탐험률 표시 (B3 · Mapped 42%)
 /// 지도 내용은 평소와 같다 — 가본 곳만 보인다.
 /// MapManager 가 실행 시 자동으로 붙이고 버튼을 이름으로 찾아 연결하므로 씬에서 따로 연결할 필요 없다.
 /// </summary>
@@ -46,6 +47,8 @@ public class DungeonFullMap : MonoBehaviour
 
     public void Toggle()
     {
+        // 확인창(계단·샘 등)이 떠 있는 동안에는 열지 않는다
+        if (!IsOpen && DungeonHud.Instance != null && DungeonHud.Instance.IsDialogOpen) return;
         SetOpen(!IsOpen);
     }
 
@@ -62,6 +65,9 @@ public class DungeonFullMap : MonoBehaviour
         }
         IsOpen = open;
 
+        // 전체 지도를 열면 떠 있던 창(상태·인벤토리 등)은 닫는다
+        if (open && DungeonPanelGroup.Instance != null) DungeonPanelGroup.Instance.CloseAll();
+
         follow.SetOverview(open);
 
         AutomapRenderer automap = _map != null ? _map.automapRenderer : null;
@@ -69,7 +75,15 @@ public class DungeonFullMap : MonoBehaviour
         if (automap != null) automap.SetLineScale(open ? Mathf.Sqrt(follow.ZoomRatio) : 1f);
 
         DungeonGridPlayer player = FindFirstObjectByType<DungeonGridPlayer>();
-        if (player != null) player.inputLocked = open;
+        if (player != null)
+        {
+            if (open) player.LockInput(this);
+            else player.UnlockInput(this);
+        }
+
+        // 층 번호 옆에 탐험률 (세계수의 미궁식 지도 완성도)
+        DungeonHud hud = DungeonHud.Instance;
+        if (hud != null) hud.SetFloor(DungeonPersistentData.currentFloor, open && _map != null ? _map.ExploredRatio : -1f);
 
         // GameObject.Find 는 켜진 오브젝트만 찾으므로, 숨기기 전에 찾아 둔다.
         if (_movePad == null) _movePad = GameObject.Find(DungeonInputBinder.DefaultPadName);

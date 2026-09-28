@@ -170,6 +170,7 @@ public class InventoryUIManager : MonoBehaviour
 
         if (consumableInventory != null)
             consumableInventory.OnInventoryChanged += RefreshGrid;
+        EquipmentBag.OnChanged += RefreshGrid;
 
         RefreshGrid();
         UpdateTabVisuals();
@@ -177,6 +178,7 @@ public class InventoryUIManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        EquipmentBag.OnChanged -= RefreshGrid;
         if (consumableInventory != null)
             consumableInventory.OnInventoryChanged -= RefreshGrid;
     }
@@ -202,13 +204,13 @@ public class InventoryUIManager : MonoBehaviour
 
     public void AddItem(EquipmentData item)
     {
-        if (item != null && !equipmentItems.Contains(item))
-            equipmentItems.Add(item);
+        EquipmentBag.Add(item);
     }
 
     public void RemoveItem(EquipmentData item)
     {
         equipmentItems.Remove(item);
+        EquipmentBag.Remove(item);
     }
 
     // ═════════════════════════════════════════════════════════
@@ -248,29 +250,40 @@ public class InventoryUIManager : MonoBehaviour
         // 파괴된 인벤 UI에서 그리드를 건드리지 않도록 차단.
         if (!this || gridContent == null)
             return;
-
-        foreach (Transform child in gridContent)
+        // 그리드를 만드는 도중 가방이 바뀌어(장착 장비를 가방에 합칠 때) 다시 불리면 무시 — 슬롯이 두 번 생기는 것 방지
+        if (_refreshingGrid) return;
+        _refreshingGrid = true;
+        try
         {
-            if (child.gameObject == itemSlotTemplate) continue;
-            Destroy(child.gameObject);
-        }
+            foreach (Transform child in gridContent)
+            {
+                if (child.gameObject == itemSlotTemplate) continue;
+                Destroy(child.gameObject);
+            }
 
-        if (currentTab == InventoryTab.Consumable)
-        {
-            PopulateConsumableGrid();
-            return;
-        }
+            if (currentTab == InventoryTab.Consumable)
+            {
+                PopulateConsumableGrid();
+                return;
+            }
 
-        // 전체 탭: 장비 + 소비 모두 표시
-        if (currentTab == InventoryTab.All)
-        {
-            PopulateConsumableGrid();
+            // 전체 탭: 장비 + 소비 모두 표시
+            if (currentTab == InventoryTab.All)
+            {
+                PopulateConsumableGrid();
+                PopulateEquipmentGrid();
+                return;
+            }
+
             PopulateEquipmentGrid();
-            return;
         }
-
-        PopulateEquipmentGrid();
+        finally
+        {
+            _refreshingGrid = false;
+        }
     }
+
+    private bool _refreshingGrid;
 
     private void PopulateEquipmentGrid()
     {
@@ -405,13 +418,19 @@ public class InventoryUIManager : MonoBehaviour
         return 999;
     }
 
+    /// <summary>
+    /// 표시할 장비 = 가진 장비(EquipmentBag). 장착 중인 장비와 인스펙터 목록(equipmentItems, 테스트용)은 가방에 합쳐 둔다.
+    /// [2026-09-29] 이전에는 Resources 의 모든 장비(allEquipmentDatabase)를 보여줘서 얻지 않은 장비가 전부 보였다.
+    /// </summary>
     private List<EquipmentData> GetFilteredEquipment()
     {
-        var db = (allEquipmentDatabase != null && allEquipmentDatabase.Count > 0)
-            ? allEquipmentDatabase
-            : equipmentItems;
+        foreach (var e in equipmentItems) EquipmentBag.Add(e);
+        if (equipmentManager != null)
+            foreach (var e in equipmentManager.GetEquippedItems()) EquipmentBag.Add(e);
 
-        return db.FindAll(e => e != null);
+        var owned = new List<EquipmentData>();
+        foreach (var e in EquipmentBag.Items) if (e != null) owned.Add(e);
+        return owned;
     }
 
     private GameObject CreateSlot()
@@ -1027,7 +1046,10 @@ public class InventoryUIManager : MonoBehaviour
         }
 
         if (selectedItem == null) return;
+        // 장착 중이면 먼저 해제한 뒤 버린다 (이전에는 인스펙터 목록에서만 빠지고 화면·장착 상태는 그대로였다)
+        if (IsEquipped(selectedItem)) OnUnequipClicked(selectedItem);
         equipmentItems.Remove(selectedItem);
+        EquipmentBag.Remove(selectedItem);
         selectedItem = null;
         AnimateDetail(false);
         RefreshGrid();

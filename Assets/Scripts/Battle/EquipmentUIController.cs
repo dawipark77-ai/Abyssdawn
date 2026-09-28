@@ -40,6 +40,12 @@ public class EquipmentUIController : MonoBehaviour
         RefreshAllSlots();
     }
 
+    // 상태창을 열 때마다 최신 장비로 갱신 (꺼져 있는 동안 바뀐 장비 반영)
+    void OnEnable()
+    {
+        RefreshAllSlots();
+    }
+
     /// <summary>
     /// 모든 장비 슬롯 UI를 업데이트합니다.
     /// </summary>
