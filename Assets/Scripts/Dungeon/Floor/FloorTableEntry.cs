@@ -1,0 +1,109 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+// ※ C# 5 문법만 사용 (DungeonFloorData.cs 머리말 참고).
+
+/// <summary>
+/// 층 설정표의 한 줄 — "minFloor ~ maxFloor 층은 이 설정으로 생성".
+/// 층 크기 = (구획 열 × 구획 폭) × (구획 행 × 구획 높이).
+/// </summary>
+[Serializable]
+public class FloorTableEntry
+{
+    [Tooltip("이 설정을 쓰는 첫 층")]
+    public int minFloor = 1;
+    [Tooltip("이 설정을 쓰는 마지막 층")]
+    public int maxFloor = 1;
+    public FloorType floorType = FloorType.Dungeon;
+
+    [Header("구획 (로그식: 구획마다 방 하나)")]
+    public int sectionCols = 2;
+    public int sectionRows = 2;
+    [Tooltip("구획 하나의 가로 칸 수. 방 최대 폭 = 구획 폭 - 3 (좌 1칸, 우 2칸 여백)")]
+    public int sectionWidth = 8;
+    [Tooltip("구획 하나의 세로 칸 수. 방 최대 높이 = 구획 높이 - 3")]
+    public int sectionHeight = 10;
+
+    [Header("방")]
+    public int minRoomWidth = 3;
+    public int minRoomHeight = 3;
+
+    [Header("빈 구획 (방 없이 통로 교차점만 있는 구획)")]
+    public int minGoneSections = 0;
+    public int maxGoneSections = 0;
+
+    [Header("여분 연결 (돌아가는 길)")]
+    public int minExtraLinks = 0;
+    public int maxExtraLinks = 1;
+
+    [Header("인카운터")]
+    [Tooltip("이 층들의 인카운터 확률. -1 이면 씬의 DungeonEncounter 설정값 그대로 사용")]
+    public float encounterChance = -1f;
+
+    public int FloorWidth { get { return sectionCols * sectionWidth; } }
+    public int FloorHeight { get { return sectionRows * sectionHeight; } }
+
+    public bool Contains(int floor)
+    {
+        return floor >= minFloor && floor <= maxFloor;
+    }
+
+    public static FloorTableEntry Create(int minFloor, int maxFloor, FloorType type,
+                                         int cols, int rows, int sectionWidth, int sectionHeight,
+                                         int goneMin, int goneMax, int extraMin, int extraMax)
+    {
+        FloorTableEntry e = new FloorTableEntry();
+        e.minFloor = minFloor;
+        e.maxFloor = maxFloor;
+        e.floorType = type;
+        e.sectionCols = cols;
+        e.sectionRows = rows;
+        e.sectionWidth = sectionWidth;
+        e.sectionHeight = sectionHeight;
+        e.minGoneSections = goneMin;
+        e.maxGoneSections = goneMax;
+        e.minExtraLinks = extraMin;
+        e.maxExtraLinks = extraMax;
+        return e;
+    }
+}
+
+/// <summary>층 설정표 기본값과 조회 규칙.</summary>
+public static class FloorTableDefaults
+{
+    /// <summary>
+    /// 베타 10층 기본 설정. 세로 화면(가로 약 16칸 보임)에 맞춰 초반 층은 가로 16칸 이하.
+    ///   1층 마을 / 2~4층 2×2 / 5층 마을 / 6~8층 2×3 / 9~10층 3×3 / 11층~ 3×4 (계속 사용)
+    /// </summary>
+    public static List<FloorTableEntry> CreateBeta()
+    {
+        List<FloorTableEntry> list = new List<FloorTableEntry>();
+        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1));
+        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1));
+        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1));
+        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1));
+        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2));
+        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3));
+        return list;
+    }
+
+    /// <summary>
+    /// floor 에 해당하는 설정. 해당 줄이 없으면 가장 깊은 줄(maxFloor 최대)을 계속 사용.
+    /// 표가 비어 있으면 베타 기본값에서 찾는다.
+    /// </summary>
+    public static FloorTableEntry Find(List<FloorTableEntry> entries, int floor)
+    {
+        if (entries == null || entries.Count == 0) entries = CreateBeta();
+
+        FloorTableEntry deepest = null;
+        for (int i = 0; i < entries.Count; i++)
+        {
+            FloorTableEntry e = entries[i];
+            if (e == null) continue;
+            if (e.Contains(floor)) return e;
+            if (deepest == null || e.maxFloor > deepest.maxFloor) deepest = e;
+        }
+        return deepest;
+    }
+}

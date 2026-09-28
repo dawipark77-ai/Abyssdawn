@@ -8,6 +8,8 @@ public static class DungeonPersistentData
     public static Vector2Int lastPlayerGridPos;
     public static DungeonDirection lastPlayerFacing;
     public static System.Collections.Generic.HashSet<Vector2Int> revealedTiles = new System.Collections.Generic.HashSet<Vector2Int>();
+    // 마을 입구로 나갔을 때 돌아올 던전 씬 (DungeonTownGate)
+    public static string returnSceneName;
 
     // Player Stats Persistence
     public static bool hasPlayerStats = false;
@@ -24,7 +26,8 @@ public static class DungeonPersistentData
         currentSeed = -1;
         currentFloor = 1;
         revealedTiles.Clear();
-        
+        returnSceneName = null;
+
         hasPlayerStats = false;
         heroHP = 0;
         heroMaxHP = 0;

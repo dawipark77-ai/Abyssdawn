@@ -38,6 +38,16 @@ namespace Genesis01.Dungeon
 
         void Start()
         {
+            // [2026-09-29] 탑다운 격자 이동(DungeonGridPlayer)이 있는 씬에서는 끈다.
+            // 같은 W/A/S/D 입력을 함께 읽으면서 벽 검사 없는 가상 위치로 인카운터를 한 번 더 굴리고,
+            // 카메라 위치를 되돌려 카메라 추적(DungeonCameraFollow)과도 충돌했다.
+            if (FindFirstObjectByType<DungeonGridPlayer>() != null)
+            {
+                Debug.Log("[DungeonPlayerMovement] 격자 이동(DungeonGridPlayer)이 있어 1인칭 이동을 비활성화합니다.");
+                enabled = false;
+                return;
+            }
+
             if (mainCamera == null) mainCamera = Camera.main;
             if (mainCamera != null)
             {

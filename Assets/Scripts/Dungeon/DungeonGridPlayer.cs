@@ -6,13 +6,12 @@ public enum DungeonDirection { North, East, South, West }
 public class DungeonGridPlayer : MonoBehaviour
 {
     [Header("References")]
-    public Tilemap wallTilemap;  // 벽 타일맵 (충돌 검사용)
-    public Tilemap floorTilemap; // 바닥 타일맵 (월드 좌표 정렬용)
-    public Tilemap fogTilemap;
-    public MapManager mapManager; // 맵 정보(크기, 타일맵) 참조
-    public int viewRadius = 1;
+    public Tilemap wallTilemap;  // 층 데이터가 없을 때만 쓰는 옛 충돌 검사용
+    public Tilemap floorTilemap; // 칸 좌표 → 월드 좌표 정렬용
+    public MapManager mapManager; // 층 데이터(이동 판정·지도 공개·계단) 참조
     public Vector2Int gridPos = new Vector2Int(2, 2);
     public DungeonDirection facing = DungeonDirection.North;
+    [HideInInspector] public bool inputLocked; // 전체 지도 등이 열려 있는 동안 이동 금지
 
     [Header("Minimap Settings")]
     public RectTransform playerCursor;
@@ -33,14 +32,7 @@ public class DungeonGridPlayer : MonoBehaviour
 
         UpdateWorldPosition();
         UpdateView();
-        
-        // 데이터 복구 시 안개 상태 복구
-        if (DungeonPersistentData.hasSavedState)
-        {
-            RestoreFog();
-        }
-        
-        RevealFog();
+        // 층 생성·배치·지도 공개는 MapManager 가 담당한다 (층 데이터 기준).
     }
 
     void Update()
@@ -60,50 +52,41 @@ public class DungeonGridPlayer : MonoBehaviour
 
     private void TryMoveTo(DungeonDirection dir)
     {
+        if (inputLocked) return;
         EnsureReferences();
 
         facing = dir;
-        
-        // Check for block-based walls using tilemap
-        Vector2Int moveDir = GetDirVector(dir);
-        Vector2Int nextPos = gridPos + moveDir;
 
-        // 맵 범위 체크 (mapManager 정보를 우선 사용)
-        if (mapManager != null)
+        Vector2Int nextPos = gridPos + GetDirVector(dir);
+        if (!CanWalk(nextPos))
         {
-            if (nextPos.x < 0 || nextPos.y < 0 || nextPos.x >= mapManager.width || nextPos.y >= mapManager.height)
-            {
-                Debug.Log($"[Player] 이동 불가: 맵 범위를 벗어남 ({nextPos.x}, {nextPos.y})");
-                return;
-            }
-        }
-
-        // 타일맵에서 벽 체크 (타일이 있으면 벽 = 이동 불가)
-        Vector3Int tilePos = new Vector3Int(nextPos.x, -nextPos.y, 0);
-        if (wallTilemap != null && wallTilemap.HasTile(tilePos))
-        {
-            Debug.Log($"[Player] 이동 불가: 벽에 막힘 ({nextPos.x}, {nextPos.y})");
+            Debug.Log($"[Player] 이동 불가: 막힌 칸 ({nextPos.x}, {nextPos.y})");
+            UpdateView();
             return;
         }
 
-        // Move to next tile
         gridPos = nextPos;
         UpdateWorldPosition();
         UpdateView();
-        RevealFog();
 
-        // 출구에 도달하면 다음 층 생성
-        if (mapManager != null && gridPos == mapManager.ExitPos)
-        {
-            Debug.Log($"[Player] Exit reached at ({gridPos.x}, {gridPos.y}) -> Next floor");
-            mapManager.GenerateNextFloor();
-            return;
-        }
-        
-        // 랜덤 인카운터 체크
+        // 지도 공개 + 계단·마을 입구 처리. 층을 떠났으면 인카운터 판정하지 않는다.
+        if (mapManager != null && mapManager.OnPlayerEntered(gridPos)) return;
+
+        // 랜덤 인카운터 체크 (이동에 성공했을 때만 1회)
         DungeonEncounter.Instance?.CheckEncounter(gridPos);
-        
+
         Debug.Log($"[Player] Moved to ({gridPos.x}, {gridPos.y}) | Facing: {facing}");
+    }
+
+    /// <summary>이동 가능 여부는 층 데이터로 판정. 층 데이터가 없을 때만 옛 벽 타일맵을 본다.</summary>
+    private bool CanWalk(Vector2Int pos)
+    {
+        if (mapManager != null && mapManager.FloorData != null)
+            return mapManager.FloorData.IsWalkable(pos);
+
+        if (mapManager != null && (pos.x < 0 || pos.y < 0 || pos.x >= mapManager.width || pos.y >= mapManager.height))
+            return false;
+        return wallTilemap == null || !wallTilemap.HasTile(new Vector3Int(pos.x, -pos.y, 0));
     }
 
     private Vector2Int GetDirVector(DungeonDirection dir)
@@ -173,11 +156,6 @@ public class DungeonGridPlayer : MonoBehaviour
                 }
             }
         }
-
-        if (fogTilemap == null && mapManager != null)
-        {
-            fogTilemap = mapManager.fogTilemap;
-        }
     }
 
     void UpdateWorldPosition()
@@ -219,84 +197,14 @@ public class DungeonGridPlayer : MonoBehaviour
         }
     }
 
+    /// <summary>순간 이동 (층 배치·복원용). 인카운터·계단 판정은 하지 않는다. 지도 공개는 MapManager 가 한다.</summary>
     public void Teleport(Vector2Int pos)
     {
         EnsureReferences();
         gridPos = pos;
         UpdateWorldPosition();
         UpdateView();
-        RevealFog();
-        
-        // 랜덤 인카운터 체크 (텔레포트 시에는 인카운터 발생 안 함)
-        // DungeonEncounter.Instance?.CheckEncounter(gridPos);
-        
         Debug.Log($"[Player] Teleported to ({pos.x}, {pos.y})");
-    }
-
-    // 벽선 그리기 컴포넌트 캐시 (성능 최적화)
-    private Genesis01.Dungeon.DungeonWallLineDrawer cachedWallDrawer = null;
-    private float lastWallUpdateTime = 0f;
-    private const float WALL_UPDATE_INTERVAL = 0.1f; // 0.1초마다만 업데이트
-
-    void RevealFog()
-    {
-        if (fogTilemap == null) return;
-
-        bool fogChanged = false;
-        for (int y = -viewRadius; y <= viewRadius; y++)
-        {
-            for (int x = -viewRadius; x <= viewRadius; x++)
-            {
-                Vector2Int worldGridPos = new Vector2Int(gridPos.x + x, gridPos.y + y);
-                Vector3Int tilePos = new Vector3Int(worldGridPos.x, -worldGridPos.y, 0);
-                
-                if (fogTilemap.HasTile(tilePos))
-                {
-                    fogTilemap.SetTile(tilePos, null);
-                    // 탐험 영역 저장 (중복 체크)
-                    if (!DungeonPersistentData.revealedTiles.Contains(worldGridPos))
-                    {
-                        DungeonPersistentData.revealedTiles.Add(worldGridPos);
-                        fogChanged = true;
-                    }
-                }
-            }
-        }
-        
-        // 벽선 가시성 업데이트 (안개 시스템 연동)
-        // 성능 최적화: 캐시 사용 및 업데이트 빈도 제한
-        if (fogChanged && Time.time - lastWallUpdateTime > WALL_UPDATE_INTERVAL)
-        {
-            if (cachedWallDrawer == null)
-            {
-                cachedWallDrawer = FindFirstObjectByType<Genesis01.Dungeon.DungeonWallLineDrawer>();
-            }
-            
-            if (cachedWallDrawer != null)
-            {
-                cachedWallDrawer.UpdateWallVisibility();
-                lastWallUpdateTime = Time.time;
-            }
-        }
-    }
-
-    void RestoreFog()
-    {
-        if (fogTilemap == null) return;
-        
-        Debug.Log($"[Player] Restoring fog for {DungeonPersistentData.revealedTiles.Count} tiles.");
-        foreach (var pos in DungeonPersistentData.revealedTiles)
-        {
-            Vector3Int tilePos = new Vector3Int(pos.x, -pos.y, 0);
-            fogTilemap.SetTile(tilePos, null);
-        }
-        
-        // 벽선 가시성도 함께 업데이트
-        Genesis01.Dungeon.DungeonWallLineDrawer wallDrawer = FindFirstObjectByType<Genesis01.Dungeon.DungeonWallLineDrawer>();
-        if (wallDrawer != null)
-        {
-            wallDrawer.UpdateWallVisibility();
-        }
     }
 
     private void OnDrawGizmos()
