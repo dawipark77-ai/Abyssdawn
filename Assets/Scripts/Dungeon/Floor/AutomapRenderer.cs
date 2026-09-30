@@ -31,6 +31,8 @@ public class AutomapRenderer : MonoBehaviour
     public Color gridColor = new Color(1f, 1f, 1f, 0.04f);
     [Tooltip("드러난 바닥 위의 격자 (칸이 보일 정도로만 옅게)")]
     public Color revealedGridColor = new Color(1f, 1f, 1f, 0.08f);
+    [Tooltip("안개: 가 본 곳이지만 지금 시야 밖인 칸을 덮는 색 (픽셀 던전식 흐림). a=0 이면 흐림 없음")]
+    public Color rememberedFogColor = new Color(0f, 0f, 0f, 0.6f);
     [Tooltip("내려가는 계단")]
     public Color stairsColor = new Color(0.45f, 0.9f, 1f, 1f);
     [Tooltip("올라가는 계단")]
@@ -43,6 +45,9 @@ public class AutomapRenderer : MonoBehaviour
     public Color teleportTrapColor = new Color(0.8f, 0.45f, 1f, 1f);
     public Color alarmTrapColor = new Color(1f, 0.6f, 0.2f, 1f);
     public Color pitfallTrapColor = new Color(0.9f, 0.2f, 0.45f, 1f);
+    [Tooltip("벽 화로(불 있는 방) — 바깥 불꽃 / 안쪽 불꽃")]
+    public Color brazierColor = new Color(1f, 0.55f, 0.15f, 1f);
+    public Color brazierCoreColor = new Color(1f, 0.92f, 0.55f, 1f);
 
     [Header("Size (칸 크기 대비 비율)")]
     [Range(0.01f, 0.3f)] public float wallThickness = 0.08f;
@@ -62,6 +67,7 @@ public class AutomapRenderer : MonoBehaviour
     private DungeonFloorData _data;
     private DungeonFloorState _state;
     private HashSet<Vector2Int> _revealed;
+    private HashSet<Vector2Int> _visible; // 지금 시야 안의 칸 (null 이면 흐림 처리 안 함)
     private Tilemap _reference;
     private Mesh _mesh;
     private float _lineScale = 1f;
@@ -104,6 +110,12 @@ public class AutomapRenderer : MonoBehaviour
         _revealed = state != null ? state.revealed : null;
         _reference = referenceTilemap;
         Rebuild();
+    }
+
+    /// <summary>지금 보이는 칸 목록을 연결 (MapManager 가 매 걸음 갱신). 이 밖의 기억된 칸은 흐리게 그린다.</summary>
+    public void SetVisible(HashSet<Vector2Int> visible)
+    {
+        _visible = visible;
     }
 
     /// <summary>벽선·문 굵기 배율. 전체 지도처럼 축소해 볼 때 선이 너무 가늘어지지 않게 키운다 (평소 1).</summary>
@@ -185,6 +197,8 @@ public class AutomapRenderer : MonoBehaviour
             if (_data.hasStairsUp && _revealed.Contains(_data.stairsUpPos)) AddStairsIcon(CellCenter(_data.stairsUpPos), cs, true, stairsUpColor);
             if (_data.hasTownGate && _revealed.Contains(_data.townGatePos)) AddDiamond(CellCenter(_data.townGatePos), cs, townGateColor);
 
+            foreach (var room in _data.rooms)
+                if (room.lit && _revealed.Contains(room.brazierCell)) AddFlameIcon(CellCenter(room.brazierCell), cs);
             foreach (var p in _data.chests)
                 if (_revealed.Contains(p)) AddChestIcon(CellCenter(p), cs, _state.openedChests.Contains(p));
             foreach (var p in _data.springs)
@@ -194,6 +208,24 @@ public class AutomapRenderer : MonoBehaviour
                 if (!_state.knownTraps.Contains(p)) continue;
                 FloorTrapType type = _data.GetCell(p).trap;
                 AddTrapIcon(CellCenter(p), cs, IsTrapSpent(type) ? spentColor : TrapColor(type));
+            }
+
+            // 5) 안개 — 가 본 곳이지만 지금 시야 밖인 칸을 어둡게 덮는다 (벽선·아이콘까지 흐리게, 맨 위에 그림).
+            //    벽이 있는 쪽으로만 벽선 두께 절반만큼 넓혀, 이웃한 밝은 칸은 건드리지 않는다.
+            if (_visible != null && rememberedFogColor.a > 0f)
+            {
+                float half = t * 0.5f + 0.001f;
+                foreach (var p in _revealed)
+                {
+                    if (_visible.Contains(p) || !_data.IsWalkable(p)) continue;
+                    Vector3 c = CellCenter(p);
+                    float left = cs.x * 0.5f + (_data.IsWalkable(p + Dirs[3]) ? 0f : half);
+                    float right = cs.x * 0.5f + (_data.IsWalkable(p + Dirs[1]) ? 0f : half);
+                    float up = cs.y * 0.5f + (_data.IsWalkable(p + Dirs[0]) ? 0f : half);
+                    float down = cs.y * 0.5f + (_data.IsWalkable(p + Dirs[2]) ? 0f : half);
+                    AddQuad(new Vector3(c.x - left, c.y - down, c.z), new Vector3(c.x - left, c.y + up, c.z),
+                            new Vector3(c.x + right, c.y + up, c.z), new Vector3(c.x + right, c.y - down, c.z), rememberedFogColor);
+                }
             }
         }
 
@@ -388,6 +420,16 @@ public class AutomapRenderer : MonoBehaviour
         float s = Mathf.Min(cs.x, cs.y) * iconSize * 0.5f;
         AddCircle(c, s * 0.85f, used ? spentColor : springColor);
         AddCircle(c, s * 0.42f, used ? new Color(0.12f, 0.12f, 0.14f, 1f) : new Color(0.8f, 0.93f, 1f, 1f));
+    }
+
+    /// <summary>벽 화로: 바깥 불꽃(주황 물방울) + 안쪽 불꽃(노랑) + 받침.</summary>
+    private void AddFlameIcon(Vector3 c, Vector2 cs)
+    {
+        float s = Mathf.Min(cs.x, cs.y) * iconSize * 0.5f;
+        AddRectLocal(c, s, -0.45f, -0.9f, 0.45f, -0.7f, false, new Color(0.35f, 0.25f, 0.2f, 1f));   // 받침
+        AddTriangle(P(c, s, -0.55f, -0.6f, false), P(c, s, 0f, 0.95f, false), P(c, s, 0.55f, -0.6f, false), brazierColor);
+        AddCircle(P(c, s, 0f, -0.45f, false), s * 0.5f, brazierColor);
+        AddTriangle(P(c, s, -0.28f, -0.5f, false), P(c, s, 0f, 0.4f, false), P(c, s, 0.28f, -0.5f, false), brazierCoreColor);
     }
 
     /// <summary>함정: ✕ 표시.</summary>

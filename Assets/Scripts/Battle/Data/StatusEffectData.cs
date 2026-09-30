@@ -15,7 +15,10 @@ namespace AbyssdawnBattle
         Ignite,
         Weakness,   // 약화 (공격력/방어력 감소)
         Slow,       // 둔화 (임시 수치 0 — 추후 민첩 감소)
-        Silence     // 침묵 (스킬 사용 불가)
+        Silence,    // 침묵 (스킬 사용 불가)
+        // ※ 새 종류는 반드시 맨 뒤에 추가 — 에셋에는 숫자로 저장되므로 중간에 끼우면 기존 에셋의 종류가 바뀐다.
+        Blind,      // 실명 (명중 감소) — [2026-10-01] 약화(Weakness)에서 분리
+        Enrage      // 분노 (몬스터 자기 강화) — [2026-10-01] 약화(Weakness)에서 분리
     }
 
     /// <summary>

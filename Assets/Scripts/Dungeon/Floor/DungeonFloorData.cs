@@ -59,6 +59,9 @@ public class FloorRoom
     public RectInt bounds;         // 방 영역. isGone 이면 교차점 1x1
     public bool isGone;
     public readonly List<FloorDoor> doors = new List<FloorDoor>();
+    /// <summary>벽에 불(화로)이 있는 방 — 안에서는 시야가 넓어진다 (MapManager). brazierCell = 불이 걸린 벽 옆 칸 (지도 아이콘 위치).</summary>
+    public bool lit;
+    public Vector2Int brazierCell;
 }
 
 public class DungeonFloorData

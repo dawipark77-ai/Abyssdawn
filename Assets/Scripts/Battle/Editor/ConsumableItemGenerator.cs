@@ -236,7 +236,8 @@ public static class ConsumableItemGenerator
         StatusEffectType.Stun,
         StatusEffectType.Weakness,
         StatusEffectType.Slow,
-        StatusEffectType.Silence
+        StatusEffectType.Silence,
+        StatusEffectType.Blind   // 분노(Enrage)는 몬스터 자기 강화라 제외
     };
 }
 #endif

@@ -17,6 +17,8 @@ public class DungeonFloorState
     public readonly HashSet<Vector2Int> usedSprings = new HashSet<Vector2Int>();
     /// <summary>계단으로 처음 내려가며 탐험 EXP 를 받았는지 (한 층에 한 번).</summary>
     public bool clearRewarded;
+    /// <summary>한 번이라도 들어가 본 방 (처음 들어설 때만 연속 이동을 멈추기 위해).</summary>
+    public readonly HashSet<int> enteredRooms = new HashSet<int>();
 
     public DungeonFloorState(int floor, int seed)
     {

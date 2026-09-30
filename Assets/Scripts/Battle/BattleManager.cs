@@ -132,7 +132,7 @@ public class BattleManager : MonoBehaviour
     public bool battleEnded = false;
 
     [Header("Scene Names")]
-    [Tooltip("사망 시 리셋할 1층 던전 씬 이름")]
+    [Tooltip("사망 시 돌아갈 던전 씬 — 들어왔던 던전 씬을 모를 때만 사용 (평소엔 들어왔던 씬의 1층으로 돌아감)")]
     public string startDungeonScene = "Abyssdawn_Dungeon_2D 07";
 
     [Header("Consumable Inventory")]
@@ -224,6 +224,7 @@ public class BattleManager : MonoBehaviour
     private List<TextMeshProUGUI> playerStatusNameTexts = new List<TextMeshProUGUI>();
     private List<TextMeshProUGUI> playerStatusHPTexts = new List<TextMeshProUGUI>();
     private List<TextMeshProUGUI> playerStatusMPTexts = new List<TextMeshProUGUI>();
+    private List<TextMeshProUGUI> playerStatusLevelTexts = new List<TextMeshProUGUI>(); // 카드의 레벨 숫자 (LvText, 없으면 null)
     private List<Image> playerStatusBackgrounds = new List<Image>();
     private List<Transform> playerStatusIconRows = new List<Transform>();
     private List<List<Image>> playerStatusIconImages = new List<List<Image>>();
@@ -1937,6 +1938,10 @@ public class BattleManager : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
+        // [2026-10-01] 게임 오버 후에는 들어왔던 던전 씬으로 (층·상태는 아래에서 1층으로 초기화).
+        //   고정 씬 이름(startDungeonScene)은 들어온 씬을 모를 때만 — 전엔 항상 07 로 가서 08 에서 죽으면 다른 씬이 열렸다.
+        string restartScene = !string.IsNullOrEmpty(DungeonEncounter.lastDungeonScene) ? DungeonEncounter.lastDungeonScene : startDungeonScene;
+
         // HP/MP 최대값으로 리셋 (SO에 직접 기록)
         foreach (var member in activePartyMembers)
         {
@@ -1959,9 +1964,9 @@ public class BattleManager : MonoBehaviour
         EquipmentBag.ResetForNewRun(playerStatData);
         PlayerStats.PendingLevelUpNotes.Clear();
 
-        Debug.Log("[BattleManager] Game Over — resetting to floor 1.");
+        Debug.Log($"[BattleManager] Game Over — resetting to floor 1 in '{restartScene}'.");
         DungeonEncounter.justReturnedFromBattle = false; // 게임오버는 새 시작이므로 쿨다운 없음
-        EncounterTransition.LoadSceneWithFade(startDungeonScene);
+        EncounterTransition.LoadSceneWithFade(restartScene);
     }
 
     private void ForceDisableUIPanels()
@@ -7470,7 +7475,9 @@ public class BattleManager : MonoBehaviour
             AbyssdawnBattle.StatusEffectType.Bleed   => "#8B0000",
             AbyssdawnBattle.StatusEffectType.Stun    => "#FFD700",
             AbyssdawnBattle.StatusEffectType.Poison  => "#4B6B2A",
-            _                                        => "#FFFFFF",
+            AbyssdawnBattle.StatusEffectType.Blind   => "#9A8FC0",
+            AbyssdawnBattle.StatusEffectType.Enrage  => "#FF3030",
+            _                                       => "#FFFFFF",
         };
     }
 
@@ -7560,6 +7567,7 @@ public class BattleManager : MonoBehaviour
         playerStatusNameTexts.Clear();
         playerStatusHPTexts.Clear();
         playerStatusMPTexts.Clear();
+        playerStatusLevelTexts.Clear();
         playerStatusTexts.Clear();
         playerStatusBackgrounds.Clear();
         playerStatusIconRows.Clear();
@@ -7705,6 +7713,11 @@ public class BattleManager : MonoBehaviour
             foundSlots.Add(slot);
         }
 
+        // PartyBar 자체의 투명 배경은 클릭 대상이 아님 — 정렬 순서(10)가 전투 메뉴 캔버스(0)보다 위라서
+        // 메뉴 버튼이 PartyBar 영역(화면 아래 527px)에 들어오면 클릭을 가로챈다. (카드 PartySlot 들은 그대로)
+        Graphic barBackground = slotRoot.GetComponent<Graphic>();
+        if (barBackground != null) barBackground.raycastTarget = false;
+
         playerStatusTexts.Clear();
         playerStatusBackgrounds.Clear();
 
@@ -7729,6 +7742,7 @@ public class BattleManager : MonoBehaviour
             playerStatusNameTexts.Add(nameText);
             playerStatusHPTexts.Add(hpText);
             playerStatusMPTexts.Add(mpText);
+            playerStatusLevelTexts.Add(PartyCardVisuals.FindText(slot, PartyCardVisuals.LevelTextNames));
 
             Transform statusIconRow = FindNamedDescendantRecursive(slot, "StatusIconRow");
             playerStatusIconRows.Add(statusIconRow);
@@ -7945,36 +7959,8 @@ public class BattleManager : MonoBehaviour
     {
         if (index < 0 || index >= playerStatusIconImages.Count) return;
 
-        List<Image> icons = playerStatusIconImages[index];
-        if (icons == null || icons.Count == 0) return;
-
-        for (int i = 0; i < icons.Count; i++)
-        {
-            if (icons[i] == null) continue;
-            icons[i].enabled = false;
-            icons[i].sprite = null;
-            icons[i].color = new Color(1f, 1f, 1f, 0f);
-        }
-
-        if (member == null || member.activeStatusEffects == null) return;
-
-        int shown = 0;
-        foreach (var status in member.activeStatusEffects)
-        {
-            if (shown >= icons.Count) break;
-            if (status == null || status.data == null) continue;
-
-            Sprite iconSprite = status.data.flatIcon != null ? status.data.flatIcon : status.data.itemIcon;
-            if (iconSprite == null) continue;
-
-            Image iconImage = icons[shown];
-            if (iconImage == null) continue;
-
-            iconImage.sprite = iconSprite;
-            iconImage.enabled = true;
-            iconImage.color = Color.white;
-            shown++;
-        }
+        // 던전 파티 카드와 같은 규칙 — 오른쪽 칸부터, 칸보다 많으면 1.5초마다 돌아가며 (PartyCardVisuals)
+        PartyCardVisuals.ShowStatusIcons(playerStatusIconImages[index], member);
     }
 
     private void UpdateEnemyStatusIcons(int index, EnemyStats enemyStats)
@@ -8308,52 +8294,8 @@ private void CacheHeroSkills()
     }
 
     // ========== UI 업데이트 --------------------
-    private const string DeathSkullResource = "UI/DeathSkull";
-    private const string DeathSkullObjectName = "DeathSkull";
-    private static Sprite _deathSkullSprite;
-
-    /// <summary>
-    /// 쓰러진 아군 카드에 해골 그림을 깐다 (카드 배경 위, 이름·HP 글자 아래). 살아나면 숨긴다.
-    /// 그림: Resources/UI/DeathSkull.png — 없으면 아무것도 하지 않음.
-    /// </summary>
-    private static void SetDeathSkull(Transform card, bool dead)
-    {
-        if (card == null) return;
-        Transform existing = card.Find(DeathSkullObjectName);
-        if (!dead)
-        {
-            if (existing != null) existing.gameObject.SetActive(false);
-            return;
-        }
-        if (existing == null)
-        {
-            if (_deathSkullSprite == null)
-            {
-                Texture2D tex = Resources.Load<Texture2D>(DeathSkullResource);
-                if (tex == null)
-                {
-                    Debug.LogWarning($"[BattleManager] 사망 해골 그림 'Resources/{DeathSkullResource}' 을(를) 찾지 못했습니다.");
-                    return;
-                }
-                _deathSkullSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
-            }
-            var go = new GameObject(DeathSkullObjectName, typeof(RectTransform));
-            go.transform.SetParent(card, false);
-            go.transform.SetAsFirstSibling(); // 카드 배경 위, 글자 아래
-            var rt = (RectTransform)go.transform;
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = new Vector2(6f, 6f);
-            rt.offsetMax = new Vector2(-6f, -6f);
-            var img = go.AddComponent<Image>();
-            img.sprite = _deathSkullSprite;
-            img.preserveAspect = true;
-            img.raycastTarget = false;
-            img.color = new Color(1f, 1f, 1f, 0.9f);
-            existing = go.transform;
-        }
-        existing.gameObject.SetActive(true);
-    }
+    /// <summary>쓰러진 아군 카드에 해골 그림 — 던전 파티 카드(DungeonPartyBar)와 공용 (PartyCardVisuals).</summary>
+    private static void SetDeathSkull(Transform card, bool dead) => PartyCardVisuals.SetDeathSkull(card, dead);
 
     private void UpdateStatusUI()
     {
@@ -8419,6 +8361,12 @@ private void CacheHeroSkills()
                     if (i < playerStatusMPTexts.Count && playerStatusMPTexts[i] != null)
                         playerStatusMPTexts[i].color = isDead ? downedTextColor : aliveTextColor;
 
+                    if (i < playerStatusLevelTexts.Count && playerStatusLevelTexts[i] != null)
+                    {
+                        playerStatusLevelTexts[i].text = PartyCardVisuals.LevelOf(member).ToString();
+                        playerStatusLevelTexts[i].color = isDead ? downedTextColor : aliveTextColor;
+                    }
+
                     SetDeathSkull(innerBgTrans, isDead);
 
                     if (bg != null)
@@ -8439,6 +8387,8 @@ private void CacheHeroSkills()
                         playerStatusHPTexts[i].text = "";
                     if (i < playerStatusMPTexts.Count && playerStatusMPTexts[i] != null)
                         playerStatusMPTexts[i].text = "";
+                    if (i < playerStatusLevelTexts.Count && playerStatusLevelTexts[i] != null)
+                        playerStatusLevelTexts[i].text = "";
                     if (bg != null) bg.color = inactiveSlotColor;
                     SetDeathSkull(innerBgTrans, false);
                     UpdatePlayerStatusIcons(i, null);

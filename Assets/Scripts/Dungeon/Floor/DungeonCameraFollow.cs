@@ -26,6 +26,12 @@ public class DungeonCameraFollow : MonoBehaviour
     [Tooltip("전체 지도 때 층 가장자리 바깥 여백 (월드 단위)")]
     public float overviewMargin = 1f;
 
+    [Header("화면 UI 가 가리는 영역 (화면 높이 비율)")]
+    [Tooltip("아래쪽 UI(파티 카드 + 메뉴 버튼)가 덮는 높이. 0.28 = 화면 아래 28%. 플레이어·지도는 그 위의 빈 곳 가운데에 보인다")]
+    [Range(0f, 0.8f)] public float bottomUiFraction = 0.28f;
+    [Tooltip("위쪽 UI(ENTROPY·층 표시)가 덮는 높이")]
+    [Range(0f, 0.5f)] public float topUiFraction = 0.06f;
+
     [Header("여백 (월드 단위) — UI에 가려지는 쪽을 늘리면 된다")]
     public float paddingTop = 0.5f;
     public float paddingBottom = 0.5f;
@@ -122,11 +128,24 @@ public class DungeonCameraFollow : MonoBehaviour
         return viewSize > 0f ? viewSize : _sceneSize;
     }
 
-    /// <summary>층 전체 + 여백이 화면에 들어오는 크기. 평소보다 더 확대되지는 않는다.</summary>
+    /// <summary>UI 에 가려지지 않고 보이는 세로 비율 (위·아래 UI 를 뺀 나머지).</summary>
+    private float VisibleFraction => Mathf.Max(0.1f, 1f - bottomUiFraction - topUiFraction);
+
+    /// <summary>
+    /// 보이는 영역의 가운데가 화면 가운데에서 얼마나 위에 있는지 (월드 단위, 카메라 크기 halfH 기준).
+    /// 카메라를 이만큼 내리면 플레이어가 UI 사이 빈 곳 가운데에 보인다.
+    /// </summary>
+    private float VisibleCenterOffset(float halfH)
+    {
+        float centerFraction = bottomUiFraction + VisibleFraction * 0.5f; // 화면 아래에서부터 (0~1)
+        return (centerFraction - 0.5f) * 2f * halfH;
+    }
+
+    /// <summary>층 전체 + 여백이 보이는 영역(UI 사이)에 들어오는 크기. 평소보다 더 확대되지는 않는다.</summary>
     private float OverviewSize()
     {
         if (!_hasBounds || _cam == null) return NormalSize();
-        float halfH = _floorRect.height * 0.5f + overviewMargin;
+        float halfH = (_floorRect.height * 0.5f + overviewMargin) / VisibleFraction;
         float halfW = _floorRect.width * 0.5f + overviewMargin;
         return Mathf.Max(NormalSize(), halfH, halfW / _cam.aspect);
     }
@@ -134,7 +153,8 @@ public class DungeonCameraFollow : MonoBehaviour
     private Vector3 OverviewPosition()
     {
         Vector2 c = _hasBounds ? _floorRect.center : (Vector2)transform.position;
-        return new Vector3(c.x, c.y, transform.position.z);
+        float halfH = _cam != null ? _cam.orthographicSize : 0f;
+        return new Vector3(c.x, c.y - VisibleCenterOffset(halfH), transform.position.z);
     }
 
     private void ApplySize()
@@ -165,18 +185,23 @@ public class DungeonCameraFollow : MonoBehaviour
     {
         Vector3 p = target.position;
         p.z = transform.position.z;
-        if (!clampToFloor || !_hasBounds || _cam == null || !_cam.orthographic) return p;
+        if (_cam == null || !_cam.orthographic) return p;
 
         float halfH = _cam.orthographicSize;
         float halfW = halfH * _cam.aspect;
+        // 플레이어가 화면 가운데가 아니라 UI 사이 빈 곳 가운데에 오도록 카메라를 내린다
+        float shift = VisibleCenterOffset(halfH);
+        p.y -= shift;
+        if (!clampToFloor || !_hasBounds) return p;
 
         float minX = _floorRect.xMin - paddingSide + halfW;
         float maxX = _floorRect.xMax + paddingSide - halfW;
         p.x = minX > maxX ? _floorRect.center.x : Mathf.Clamp(p.x, minX, maxX);
 
-        float minY = _floorRect.yMin - paddingBottom + halfH;
-        float maxY = _floorRect.yMax + paddingTop - halfH;
-        p.y = minY > maxY ? _floorRect.center.y : Mathf.Clamp(p.y, minY, maxY);
+        // 세로 범위도 보이는 영역 기준: 층 아래 끝이 아래 UI 바로 위, 위 끝이 위 UI 바로 아래까지
+        float minY = _floorRect.yMin - paddingBottom + halfH - bottomUiFraction * 2f * halfH;
+        float maxY = _floorRect.yMax + paddingTop - halfH + topUiFraction * 2f * halfH;
+        p.y = minY > maxY ? _floorRect.center.y - shift : Mathf.Clamp(p.y, minY, maxY);
         return p;
     }
 

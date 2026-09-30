@@ -20,7 +20,7 @@ MonoBehaviour:
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0
   mpRecoveryPercent: 0
-  cureTypes: 01000000020000000300000000000000040000000500000006000000
+  cureTypes: 0100000002000000030000000000000004000000050000000600000007000000
   attackBuffPercent: 0
   agilityBuff: 0
   evasionBuff: 0

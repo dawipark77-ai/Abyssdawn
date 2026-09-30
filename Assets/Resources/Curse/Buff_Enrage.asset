@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ee3885eebfa6c649bb3c5fbb7ea0273, type: 3}
   m_Name: Buff_Enrage
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
-  effectType: 4
+  effectType: 8
   variantId: Buff_Enrage
   itemIcon: {fileID: 0}
   flatIcon: {fileID: 0}

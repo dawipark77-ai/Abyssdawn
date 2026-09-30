@@ -50,6 +50,10 @@ public class MapManager : MonoBehaviour
     public bool followCamera = true;
     [Tooltip("평소 지도 확대 정도 (카메라 Orthographic Size). 작을수록 지도가 크게 보인다. 씬 원래 값은 14. 플레이 중 바꾸면 바로 반영")]
     public float mapViewSize = 8f;
+    [Tooltip("화면 아래 UI(파티 카드 + 메뉴 버튼)가 덮는 높이 비율. 지도·플레이어는 그 위 빈 곳 가운데에 보인다. 키우면 지도가 위로 올라감. 플레이 중 바꾸면 바로 반영")]
+    [Range(0f, 0.8f)] public float mapBottomUi = 0.28f;
+    [Tooltip("화면 위 UI(ENTROPY·층 표시)가 덮는 높이 비율")]
+    [Range(0f, 0.5f)] public float mapTopUi = 0.06f;
     [Tooltip("화면 배경 스프라이트 (월드의 Sprite 오브젝트). 넣기만 하면 실행 시 카메라 화면에 정확히 맞춰진다 — 위치·크기 조정 불필요. " +
              "Order in Layer 는 지도(5)·플레이어(10)보다 작게")]
     public SpriteRenderer screenBackground;
@@ -79,6 +83,16 @@ public class MapManager : MonoBehaviour
     [Range(0f, 1f)] public float chestEquipmentChance = 0.3f;
     [Tooltip("보물상자에서 '지식의 서'(스킬 포인트 LP +1)가 나올 확률 — 스톤샤드식 전투 외 성장 수단")]
     [Range(0f, 1f)] public float chestTomeChance = 0.12f;
+
+    [Header("Sight (안개 시야)")]
+    [Tooltip("기본 시야 반경 (칸)")]
+    public int baseSightRadius = 3;
+    [Tooltip("어두운 층의 기본 시야 반경")]
+    public int darkSightRadius = 1;
+    [Tooltip("불(화로) 있는 방 안이거나 플레이어가 빛을 들고 있을 때 더해지는 반경")]
+    public int lightSightBonus = 2;
+    [Tooltip("테스트용: 지금 층을 어두운 층으로 취급")]
+    public bool forceDarkFloor = false;
 
     [Header("Growth (전투 외 성장 — 스톤샤드식)")]
     [Tooltip("걸을 때 자연 회복: 이 걸음 수마다 HP 1 (0 이면 끔)")]
@@ -117,9 +131,10 @@ public class MapManager : MonoBehaviour
         bool restoring = DungeonPersistentData.hasSavedState;
         if (!restoring)
         {
-            // 새 탐험: 층 기억·위험도 초기화
+            // 새 탐험: 층 기억·위험도·빛 초기화
             DungeonPersistentData.floors.Clear();
             DungeonPersistentData.danger = 0f;
+            DungeonPersistentData.playerLightSteps = 0;
         }
 
         _player = FindFirstObjectByType<DungeonGridPlayer>();
@@ -135,6 +150,9 @@ public class MapManager : MonoBehaviour
         if (fullMap == null) fullMap = gameObject.AddComponent<DungeonFullMap>();
         fullMap.Setup(this, fullMapButtonName);
 
+        // 화면 아래 파티 카드 (전투의 PartyBar 를 그대로 배치하면 자동 연결)
+        if (FindFirstObjectByType<DungeonPartyBar>() == null) gameObject.AddComponent<DungeonPartyBar>();
+
         // 창(상태·인벤토리·Oath & Path 등)은 한 번에 하나만 열리게
         Transform canvas = DungeonPanelGroup.FindPanelCanvas(uiCanvasName);
         if (canvas != null) DungeonPanelGroup.Setup(canvas);
@@ -146,7 +164,14 @@ public class MapManager : MonoBehaviour
         // 플레이 중 인스펙터에서 확대 값을 바꾸면 바로 카메라에 반영 (플레이를 끝내면 값은 되돌아가니 기억해 두고 다시 입력)
         if (!Application.isPlaying || Camera.main == null) return;
         DungeonCameraFollow follow = Camera.main.GetComponent<DungeonCameraFollow>();
-        if (follow != null) follow.viewSize = mapViewSize;
+        if (follow != null) ApplyCameraSettings(follow);
+    }
+
+    private void ApplyCameraSettings(DungeonCameraFollow follow)
+    {
+        follow.viewSize = mapViewSize;
+        follow.bottomUiFraction = mapBottomUi;
+        follow.topUiFraction = mapTopUi;
     }
 
     /// <summary>다음 층으로 (기존 API 호환). 위층에서 내려온 자리 = 올라가는 계단 위에 도착.</summary>
@@ -179,11 +204,12 @@ public class MapManager : MonoBehaviour
         if (FloorData == null) return false;
 
         TickWalkRegen();
-        bool newlyRevealed = RevealAt(pos);
+        TickPlayerLight();
+        RevealAt(pos);
         FloorRoom room = FloorData.GetRoomAt(pos);
-        if (newlyRevealed && room != null)
+        if (room != null && !room.isGone && FloorState.enteredRooms.Add(room.id))
         {
-            // 처음 들어선 방: 연속 이동을 멈춘다 (방 안을 확인할 수 있게. 알림 문구는 띄우지 않음)
+            // 처음 들어선 방: 연속 이동을 멈춘다 (안개 속 방을 둘러볼 수 있게. 알림 문구는 띄우지 않음)
             if (_player != null) _player.InterruptHold();
         }
 
@@ -213,15 +239,71 @@ public class MapManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>pos 기준으로 지도를 공개. 새로 드러난 칸이 있으면 자동 지도를 다시 그리고 true.</summary>
+    /// <summary>
+    /// 지금 시야 반경 (칸). 기본 3 / 어두운 층 1, 불 있는 방 안이거나 빛을 들고 있으면 +2.
+    ///   보통 층: 3 (불 있으면 5) · 어두운 층: 1 (불 있으면 3)
+    /// </summary>
+    public int SightRadiusAt(Vector2Int pos)
+    {
+        bool dark = forceDarkFloor || (CurrentFloorSettings != null && CurrentFloorSettings.darkFloor);
+        int r = dark ? darkSightRadius : baseSightRadius;
+        FloorRoom room = FloorData != null ? FloorData.GetRoomAt(pos) : null;
+        bool litRoom = room != null && room.lit;
+        bool carryingLight = DungeonPersistentData.playerLightSteps > 0;
+        if (litRoom || carryingLight) r += lightSightBonus;
+        return Mathf.Max(1, r);
+    }
+
+    /// <summary>
+    /// 플레이어가 steps 걸음 동안 빛을 든다 (시야 +2). 횃불·새벽불 등 빛 아이템이 정해지면 여기에 연결.
+    /// </summary>
+    public void AddPlayerLight(int steps)
+    {
+        DungeonPersistentData.playerLightSteps = Mathf.Max(0, DungeonPersistentData.playerLightSteps + steps);
+        if (_player != null) RevealAt(_player.gridPos);
+        Debug.Log($"[MapManager] 빛 {DungeonPersistentData.playerLightSteps}걸음 (시야 {SightRadiusAt(_player != null ? _player.gridPos : Vector2Int.zero)}칸)");
+    }
+
+    private void TickPlayerLight()
+    {
+        if (DungeonPersistentData.playerLightSteps <= 0) return;
+        DungeonPersistentData.playerLightSteps--;
+        if (DungeonPersistentData.playerLightSteps == 0) Toast("<color=#AAAAAA>Your light fades...</color>");
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    // 테스트용: Ctrl+L = 빛 30걸음, Ctrl+K = 어두운 층 켜고 끄기
+    private void Update()
+    {
+        bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        if (!ctrl || _player == null) return;
+        if (Input.GetKeyDown(KeyCode.L)) AddPlayerLight(30);
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            forceDarkFloor = !forceDarkFloor;
+            Debug.Log($"[MapManager] (테스트) 어두운 층 {(forceDarkFloor ? "켬" : "끔")} — 시야 {SightRadiusAt(_player.gridPos)}칸");
+        }
+    }
+#endif
+
+    // 지금 보이는 칸 (매 걸음 새로 계산). 자동 지도가 이 밖의 기억된 칸을 흐리게 그린다
+    private readonly HashSet<Vector2Int> _visible = new HashSet<Vector2Int>();
+
+    /// <summary>
+    /// pos 기준으로 시야를 계산해 지도를 공개하고, 보이는 칸이 바뀌었으니 자동 지도를 다시 그린다.
+    /// 새로 기억된 칸이 있으면 true.
+    /// </summary>
     public bool RevealAt(Vector2Int pos)
     {
         if (FloorData == null || FloorState == null) return false;
-        if (!FloorVisibility.RevealAround(FloorData, pos, FloorState.revealed)) return false;
-
-        if (automapRenderer != null) automapRenderer.Rebuild();
+        bool changed = FloorVisibility.RevealAround(FloorData, pos, FloorState.revealed, SightRadiusAt(pos), _visible);
+        if (automapRenderer != null)
+        {
+            automapRenderer.SetVisible(_visible);
+            automapRenderer.Rebuild();
+        }
         // 지도 완성(100%)은 알림 없이 전체 지도의 탐험률로만 보여준다 (DungeonFullMap)
-        return true;
+        return changed;
     }
 
     // ─────────────────────────────────────────
@@ -636,7 +718,7 @@ public class MapManager : MonoBehaviour
 
         DungeonCameraFollow follow = cam.GetComponent<DungeonCameraFollow>();
         if (follow == null) follow = cam.gameObject.AddComponent<DungeonCameraFollow>();
-        follow.viewSize = mapViewSize;
+        ApplyCameraSettings(follow);
         if (screenBackground != null) follow.screenBackground = screenBackground;
         follow.Setup(_player.transform, automapRenderer.FloorWorldRect());
     }

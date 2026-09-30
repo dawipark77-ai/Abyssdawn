@@ -19,6 +19,9 @@ public static class DungeonPersistentData
     // 위험도 게이지 (0~1, 세계수의 미궁식). 가득 차면 반드시 전투. 전투가 시작되면 0.
     public static float danger;
 
+    // 플레이어가 들고 있는 빛이 남은 걸음 수 (0 이면 빛 없음). 시야 +2 (MapManager.SightRadiusAt)
+    public static int playerLightSteps;
+
     /// <summary>floor 층의 기록. 없으면 새 시드로 만든다.</summary>
     public static DungeonFloorState GetOrCreateFloor(int floor)
     {
@@ -49,6 +52,7 @@ public static class DungeonPersistentData
         returnSceneName = null;
         floors.Clear();
         danger = 0f;
+        playerLightSteps = 0;
 
         hasPlayerStats = false;
         heroHP = 0;

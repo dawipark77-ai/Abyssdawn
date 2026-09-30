@@ -46,6 +46,12 @@ public class FloorTableEntry
     public int minDeadEnds = 0;
     public int maxDeadEnds = 2;
 
+    [Header("빛 (안개 시야)")]
+    [Tooltip("벽에 불(화로)이 걸린 방이 될 확률 (0~1). 불 있는 방 안에서는 시야가 넓어진다")]
+    [Range(0f, 1f)] public float litRoomChance = 0.3f;
+    [Tooltip("어두운 층 — 기본 시야가 1칸으로 줄어든다 (불·횃불이 있으면 조금 넓어짐)")]
+    public bool darkFloor = false;
+
     [Header("인카운터")]
     [Tooltip("이 층들의 인카운터 확률. -1 이면 씬의 DungeonEncounter 설정값 그대로 사용")]
     public float encounterChance = -1f;

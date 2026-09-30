@@ -241,7 +241,39 @@ public static class RogueFloorGenerator
         // 이 단계의 난수는 모두 배치 이후에 쓰므로, 요소를 추가해도 방·통로 모양은 바뀌지 않는다.
         PlaceContents(data, rng, cfg, realRooms, startRoom, zones);
 
+        // ── 9. 불 있는 방 (벽 화로) — 난수를 맨 뒤에 써서 방·통로·요소 배치는 바뀌지 않는다 ──
+        PlaceBraziers(data, rng, cfg, realRooms);
+
         return data;
+    }
+
+    /// <summary>방마다 litRoomChance 확률로 벽에 불을 건다. 불은 벽에 붙은 방 칸(요소 없는 칸) 하나에 표시.</summary>
+    private static void PlaceBraziers(DungeonFloorData data, System.Random rng, FloorTableEntry cfg, List<FloorRoom> realRooms)
+    {
+        for (int i = 0; i < realRooms.Count; i++)
+        {
+            FloorRoom room = realRooms[i];
+            if (rng.NextDouble() >= cfg.litRoomChance) continue;
+
+            List<Vector2Int> wallSide = new List<Vector2Int>();
+            for (int x = room.bounds.x; x < room.bounds.xMax; x++)
+            {
+                for (int y = room.bounds.y; y < room.bounds.yMax; y++)
+                {
+                    Vector2Int p = new Vector2Int(x, y);
+                    FloorCell c = data.cells[x, y];
+                    if (c.roomId != room.id || c.feature != FloorFeature.None) continue;
+                    // 상하좌우 중 암반이 있으면 벽 옆 칸
+                    for (int d = 0; d < 4; d++)
+                    {
+                        if (!data.IsWalkable(p + Dir4[d])) { wallSide.Add(p); break; }
+                    }
+                }
+            }
+            if (wallSide.Count == 0) continue;
+            room.lit = true;
+            room.brazierCell = wallSide[rng.Next(wallSide.Count)];
+        }
     }
 
     /// <summary>

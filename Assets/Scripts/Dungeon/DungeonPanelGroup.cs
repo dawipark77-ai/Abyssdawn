@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// 던전 화면의 창(패널)들을 한 번에 하나만 열리게 한다.
-/// 어떤 창이 새로 열리면, 그전에 열려 있던 다른 창은 자동으로 닫히고 새 창은 살짝 페이드 인된다.
+/// 어떤 창이 새로 열리면, 그전에 열려 있던 다른 창은 자동으로 닫히고 새 창은 맨 앞으로 와서 살짝 페이드 인된다.
 /// 전체 지도가 열려 있으면 그것도 닫는다 (전체 지도를 열 때는 반대로 창들을 닫음 — DungeonFullMap).
 ///
 /// 각 버튼(Skills, Oath & Path, 하단 메뉴 등)이 제각각 SetActive 로 창을 열기 때문에,
@@ -109,7 +109,8 @@ public class DungeonPanelGroup : MonoBehaviour
                 }
                 else
                 {
-                    // 이번에 열린 창 → 페이드 인
+                    // 이번에 열린 창 → 맨 앞으로 (파티 카드·메뉴 등 Canvas 안의 다른 것들 위에) + 페이드 인
+                    p.transform.SetAsLastSibling();
                     if (fadeInSeconds > 0f) StartCoroutine(FadeIn(p));
                 }
             }
