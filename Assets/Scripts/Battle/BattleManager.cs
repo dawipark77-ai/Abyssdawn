@@ -1895,13 +1895,13 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogWarning("[BattleManager] No last dungeon scene saved. Returning to 0.");
             Debug.Log("[BM:DIAG] LoadScene(0) — sceneToLoad empty");
-            SceneManager.LoadScene(0);
+            EncounterTransition.LoadSceneWithFade(0);
         }
         else
         {
             Debug.Log("[BattleManager] Returning to dungeon: " + sceneToLoad);
             Debug.Log($"[BM:DIAG] LoadScene('{sceneToLoad}') — dict count BEFORE LoadScene={GameManager.staticPartyData.Count}");
-            SceneManager.LoadScene(sceneToLoad);
+            EncounterTransition.LoadSceneWithFade(sceneToLoad); // 어두워졌다가 던전이 밝아짐
         }
     }
 
@@ -1961,7 +1961,7 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("[BattleManager] Game Over — resetting to floor 1.");
         DungeonEncounter.justReturnedFromBattle = false; // 게임오버는 새 시작이므로 쿨다운 없음
-        SceneManager.LoadScene(startDungeonScene);
+        EncounterTransition.LoadSceneWithFade(startDungeonScene);
     }
 
     private void ForceDisableUIPanels()
@@ -2486,7 +2486,8 @@ public class BattleManager : MonoBehaviour
         }
 
         int currentFloor = DungeonPersistentData.currentFloor;
-        MonsterSO[] monsters = LoadMonsterSOsForFloor(currentFloor);
+        // 던전에서 미리 정한 몬스터(전환 연출 실루엣과 같은 몬스터)가 있으면 그것으로, 없으면 여기서 뽑는다
+        MonsterSO[] monsters = EncounterPlan.Take() ?? LoadMonsterSOsForFloor(currentFloor);
 
         if (monsters == null || monsters.Length == 0)
         {
@@ -2873,7 +2874,11 @@ public class BattleManager : MonoBehaviour
     /// 지정 층에 등장 가능한 MonsterSO에서 Rat만 스폰합니다(임시). 스폰 수 1마리.
     /// Resources/Monsters, CanSpawnOnFloor, Rat 강제 폴백.
     /// </summary>
-    private MonsterSO[] LoadMonsterSOsForFloor(int floor)
+    /// <summary>
+    /// 층에 맞는 몬스터 무리를 뽑는다. 던전(DungeonEncounter)이 인카운터 때 미리 불러 EncounterPlan 에 넣고,
+    /// 전투 시작 시 그 몬스터를 쓴다 (전환 연출 실루엣과 실제 전투가 같게). static — 전투 씬 밖에서도 호출 가능.
+    /// </summary>
+    public static MonsterSO[] LoadMonsterSOsForFloor(int floor)
     {
         Debug.Log("[BATTLE_DEBUG] LoadMonsterSOsForFloor 진입");
         Debug.Log($"[FLOOR_DEBUG] LoadMonsterSOsForFloor 호출, floor: {floor}");

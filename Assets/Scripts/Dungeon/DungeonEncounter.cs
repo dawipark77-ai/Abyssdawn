@@ -96,6 +96,7 @@ public class DungeonEncounter : MonoBehaviour
 
     void StartEncounter()
     {
+        if (EncounterTransition.IsPlaying) return; // 전환 연출 중 중복 발동 방지
         Debug.Log("[DungeonEncounter] >>> STARTING ENCOUNTER! <<<");
         SetDanger(0f);
 
@@ -118,7 +119,24 @@ public class DungeonEncounter : MonoBehaviour
             Debug.Log("[DungeonEncounter] Saved " + stats.playerName + " stats to GM. HP: " + stats.currentHP + "/" + stats.maxHP);
         }
 
-        Debug.Log("[DungeonEncounter] Loading battle scene: " + battleSceneName);
-        SceneManager.LoadScene(battleSceneName);
+        // 이번에 나올 몬스터를 미리 정해 둔다 (전환 연출의 실루엣 = 실제로 나올 몬스터, 전투 씬이 같은 몬스터로 시작)
+        Abyssdawn.MonsterSO[] monsters = BattleManager.LoadMonsterSOsForFloor(DungeonPersistentData.currentFloor);
+        EncounterPlan.Set(monsters);
+
+        Debug.Log("[DungeonEncounter] Loading battle scene with transition: " + battleSceneName);
+        EncounterTransition.EnterBattle(battleSceneName, monsters);
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    // 테스트용: Ctrl+E = 즉시 인카운터 (전환 연출 확인용)
+    void Update()
+    {
+        if (EncounterTransition.IsPlaying) return;
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.E))
+        {
+            Debug.Log("[DungeonEncounter] (테스트) Ctrl+E 강제 인카운터");
+            StartEncounter();
+        }
+    }
+#endif
 }
