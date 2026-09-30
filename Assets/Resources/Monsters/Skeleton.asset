@@ -26,8 +26,8 @@ MonoBehaviour:
   mag: 0
   agi: 5
   luk: 2
-  physResist: 0.2
-  magResist: 0
+  physResist: 0.8
+  magResist: 1
   statusResist: 0
   activeSkills: []
   passiveSkills: []
@@ -40,4 +40,4 @@ MonoBehaviour:
   expReward: 0
   goldReward: 0
   dropTable: []
-  companionChance: 0.2
+  companionChance: 0.03125

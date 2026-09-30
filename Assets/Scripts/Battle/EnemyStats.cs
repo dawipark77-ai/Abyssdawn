@@ -333,6 +333,10 @@ public class EnemyStats : MonoBehaviour
     /// <summary>방어 자세 플래그 (1턴 유지)</summary>
     public bool isDefending = false;
 
+    // 모아 치기(MonsterSkillData.chargeTurns) 예고 중인 스킬과 대상 — 다음 자기 턴에 발동, 스턴되면 취소
+    [System.NonSerialized] public SkillData pendingChargeSkill;
+    [System.NonSerialized] public PlayerStats pendingChargeTarget;
+
     /// <summary>방어 시 피해 경감율 — 플레이어와 동일 (0.4 = 40% 경감)</summary>
     public float defenceReduction = 0.4f;
 
@@ -349,8 +353,13 @@ public class EnemyStats : MonoBehaviour
 
         Debug.Log($"{enemyName} took {damage} damage. HP: {currentHP}/{maxHP}");
 
+        // 피해 숫자 팝업 (+ 크리티컬이면 순간 멈춤·화면 흔들림)
+        BattleFx.EnemyHit(this, damage, isCritical);
+
         if (currentHP <= 0)
         {
+            BattleFx.ClearIntent(this);
+            pendingChargeSkill = null;
             HandleDeath();
         }
         else

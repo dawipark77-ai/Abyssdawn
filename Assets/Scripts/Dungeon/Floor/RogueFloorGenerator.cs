@@ -117,6 +117,7 @@ public static class RogueFloorGenerator
                             data.cells[cx, cy].roomId = room.id;
                         }
                     }
+                    if (rng.NextDouble() < cfg.shapedRoomChance) ShapeRoom(data, rng, room);
                 }
 
                 data.rooms.Add(room);
@@ -186,15 +187,23 @@ public static class RogueFloorGenerator
         }
 
         // ── 4. 설계도대로 통로 파기 ──
+        // reserved = 방 영역 + 둘레 1칸. 두 줄 통로의 둘째 줄·막다른 길은 여기에 들어가지 않는다
+        //   → 방 모양(깎인 모서리·기둥)을 망가뜨리지 않고, 통로가 문 이외의 곳에서 방에 닿지 않는다.
+        bool[,] reserved = BuildReserved(data);
         for (int e = 0; e < edges.Count; e++)
         {
             if (!used[e]) continue;
             FloorRoom a = sectionRooms[edges[e][0]];
             FloorRoom b = sectionRooms[edges[e][1]];
             bool horizontal = edges[e][1] == edges[e][0] + 1;
-            if (horizontal) ConnectHorizontal(data, rng, a, b);
-            else ConnectVertical(data, rng, a, b);
+            List<Vector2Int> path = horizontal ? ConnectHorizontal(data, rng, a, b) : ConnectVertical(data, rng, a, b);
+            if (rng.NextDouble() < cfg.wideCorridorChance) WidenPath(data, path, reserved, rng);
         }
+
+        // ── 4-b. 막다른 길 ──
+        int deadMax = Math.Max(0, cfg.maxDeadEnds);
+        int deadEnds = rng.Next(Clamp(cfg.minDeadEnds, 0, deadMax), deadMax + 1);
+        for (int i = 0; i < deadEnds; i++) TryDigDeadEnd(data, rng, reserved);
 
         // ── 6. 시작 / 계단 / 마을 입구 ──
         List<FloorRoom> realRooms = new List<FloorRoom>();
@@ -275,7 +284,8 @@ public static class RogueFloorGenerator
             for (int y = bounds.y; y < bounds.yMax; y++)
             {
                 Vector2Int p = new Vector2Int(x, y);
-                if (!taken.Contains(p) && data.cells[x, y].feature == FloorFeature.None && !zones.near.Contains(p)) return true;
+                if (!taken.Contains(p) && data.cells[x, y].terrain == FloorTerrain.Room &&
+                    data.cells[x, y].feature == FloorFeature.None && !zones.near.Contains(p)) return true;
             }
         }
         return false;
@@ -317,6 +327,7 @@ public static class RogueFloorGenerator
                 {
                     Vector2Int p = new Vector2Int(x, y);
                     if (taken.Contains(p)) continue;
+                    if (data.cells[x, y].terrain != FloorTerrain.Room) continue; // 깎인 모서리·기둥 제외
                     if (data.cells[x, y].feature != FloorFeature.None) continue;
                     if (tier == 0 && zones.near.Contains(p)) continue;
                     if (tier == 1 && zones.beside.Contains(p)) continue;
@@ -337,7 +348,8 @@ public static class RogueFloorGenerator
     private static bool TryPickFeatureCell(DungeonFloorData data, System.Random rng, RectInt bounds, List<Vector2Int> taken, DoorZones zones, out Vector2Int result)
     {
         result = PickFeatureCell(data, rng, bounds, taken, zones);
-        return !taken.Contains(result) && data.cells[result.x, result.y].feature == FloorFeature.None;
+        return !taken.Contains(result) && data.cells[result.x, result.y].terrain == FloorTerrain.Room &&
+               data.cells[result.x, result.y].feature == FloorFeature.None;
     }
 
     /// <summary>
@@ -426,14 +438,17 @@ public static class RogueFloorGenerator
     }
 
 
-    /// <summary>A(왼쪽) ↔ B(오른쪽). A 오른쪽 벽의 문 → 한 번 꺾기 → B 왼쪽 벽의 문.</summary>
-    private static void ConnectHorizontal(DungeonFloorData data, System.Random rng, FloorRoom a, FloorRoom b)
+    /// <summary>
+    /// A(왼쪽) ↔ B(오른쪽). A 오른쪽 벽의 문 → 한 번 꺾기 → B 왼쪽 벽의 문. 판 통로 칸들을 순서대로 돌려준다.
+    /// 문은 벽면에서 실제 방 칸인 줄만 고른다 (L자·십자 방은 벽면 일부가 깎여 있음).
+    /// </summary>
+    private static List<Vector2Int> ConnectHorizontal(DungeonFloorData data, System.Random rng, FloorRoom a, FloorRoom b)
     {
         Vector2Int pa, pb;
         if (a.isGone) pa = a.bounds.position;
         else
         {
-            int y = a.bounds.y + rng.Next(a.bounds.height);
+            int y = PickEdgeRow(data, rng, a, a.bounds.xMax - 1);
             pa = new Vector2Int(a.bounds.xMax, y);
             AddDoor(data, a, new Vector2Int(a.bounds.xMax - 1, y), pa);
         }
@@ -441,7 +456,7 @@ public static class RogueFloorGenerator
         if (b.isGone) pb = b.bounds.position;
         else
         {
-            int y = b.bounds.y + rng.Next(b.bounds.height);
+            int y = PickEdgeRow(data, rng, b, b.bounds.x);
             pb = new Vector2Int(b.bounds.x - 1, y);
             AddDoor(data, b, new Vector2Int(b.bounds.x, y), pb);
         }
@@ -452,19 +467,21 @@ public static class RogueFloorGenerator
         if (lo > hi) { lo = Math.Min(pa.x, pb.x); hi = Math.Max(pa.x, pb.x); }
         int tx = lo + rng.Next(hi - lo + 1);
 
-        DigHorizontal(data, pa.x, tx, pa.y);
-        DigVertical(data, tx, pa.y, pb.y);
-        DigHorizontal(data, tx, pb.x, pb.y);
+        List<Vector2Int> path = new List<Vector2Int>();
+        DigHorizontal(data, pa.x, tx, pa.y, path);
+        DigVertical(data, tx, pa.y, pb.y, path);
+        DigHorizontal(data, tx, pb.x, pb.y, path);
+        return path;
     }
 
     /// <summary>A(위) ↔ B(아래). A 아래 벽의 문 → 한 번 꺾기 → B 위 벽의 문.</summary>
-    private static void ConnectVertical(DungeonFloorData data, System.Random rng, FloorRoom a, FloorRoom b)
+    private static List<Vector2Int> ConnectVertical(DungeonFloorData data, System.Random rng, FloorRoom a, FloorRoom b)
     {
         Vector2Int pa, pb;
         if (a.isGone) pa = a.bounds.position;
         else
         {
-            int x = a.bounds.x + rng.Next(a.bounds.width);
+            int x = PickEdgeColumn(data, rng, a, a.bounds.yMax - 1);
             pa = new Vector2Int(x, a.bounds.yMax);
             AddDoor(data, a, new Vector2Int(x, a.bounds.yMax - 1), pa);
         }
@@ -472,7 +489,7 @@ public static class RogueFloorGenerator
         if (b.isGone) pb = b.bounds.position;
         else
         {
-            int x = b.bounds.x + rng.Next(b.bounds.width);
+            int x = PickEdgeColumn(data, rng, b, b.bounds.y);
             pb = new Vector2Int(x, b.bounds.y - 1);
             AddDoor(data, b, new Vector2Int(x, b.bounds.y), pb);
         }
@@ -482,9 +499,181 @@ public static class RogueFloorGenerator
         if (lo > hi) { lo = Math.Min(pa.y, pb.y); hi = Math.Max(pa.y, pb.y); }
         int ty = lo + rng.Next(hi - lo + 1);
 
-        DigVertical(data, pa.x, pa.y, ty);
-        DigHorizontal(data, pa.x, pb.x, ty);
-        DigVertical(data, pb.x, ty, pb.y);
+        List<Vector2Int> path = new List<Vector2Int>();
+        DigVertical(data, pa.x, pa.y, ty, path);
+        DigHorizontal(data, pa.x, pb.x, ty, path);
+        DigVertical(data, pb.x, ty, pb.y, path);
+        return path;
+    }
+
+    /// <summary>세로 벽면(열 edgeX)에서 방 칸인 줄 중 하나.</summary>
+    private static int PickEdgeRow(DungeonFloorData data, System.Random rng, FloorRoom room, int edgeX)
+    {
+        List<int> rows = new List<int>();
+        for (int y = room.bounds.y; y < room.bounds.yMax; y++)
+            if (data.cells[edgeX, y].roomId == room.id) rows.Add(y);
+        return rows.Count > 0 ? rows[rng.Next(rows.Count)] : room.bounds.y + room.bounds.height / 2;
+    }
+
+    /// <summary>가로 벽면(줄 edgeY)에서 방 칸인 열 중 하나.</summary>
+    private static int PickEdgeColumn(DungeonFloorData data, System.Random rng, FloorRoom room, int edgeY)
+    {
+        List<int> cols = new List<int>();
+        for (int x = room.bounds.x; x < room.bounds.xMax; x++)
+            if (data.cells[x, edgeY].roomId == room.id) cols.Add(x);
+        return cols.Count > 0 ? cols[rng.Next(cols.Count)] : room.bounds.x + room.bounds.width / 2;
+    }
+
+    // ─────────────────────────────────────────────
+    // 모양 다양성: 방 모양 · 두 줄 통로 · 막다른 길
+    // ─────────────────────────────────────────────
+
+    /// <summary>
+    /// 직사각형 방을 다른 모양으로 깎는다 (깎은 칸 = 암반). 네 벽면 모두 방 칸이 최소 한 칸은 남아 문을 낼 수 있다.
+    ///  L자: 한 모서리를 깎음 / 십자: 네 모서리를 깎음 / 고리: 가운데를 비움(두께 2) / 기둥: 안쪽 네 곳에 기둥 1칸
+    /// </summary>
+    private static void ShapeRoom(DungeonFloorData data, System.Random rng, FloorRoom room)
+    {
+        RectInt b = room.bounds;
+        int w = b.width, h = b.height;
+        List<int> shapes = new List<int>();
+        if (w >= 4 && h >= 4) shapes.Add(0);
+        if (w >= 5 && h >= 5) { shapes.Add(1); shapes.Add(3); }
+        if (w >= 6 && h >= 6) shapes.Add(2);
+        if (shapes.Count == 0) return;
+
+        switch (shapes[rng.Next(shapes.Count)])
+        {
+            case 0: // L자
+            {
+                int cw = 1 + rng.Next(w / 2);
+                int ch = 1 + rng.Next(h / 2);
+                int corner = rng.Next(4);
+                int x0 = (corner == 0 || corner == 2) ? b.x : b.xMax - cw;
+                int y0 = (corner == 0 || corner == 1) ? b.y : b.yMax - ch;
+                CarveRock(data, x0, y0, cw, ch);
+                break;
+            }
+            case 1: // 십자
+            {
+                int cw = Math.Max(1, w / 3), ch = Math.Max(1, h / 3);
+                CarveRock(data, b.x, b.y, cw, ch);
+                CarveRock(data, b.xMax - cw, b.y, cw, ch);
+                CarveRock(data, b.x, b.yMax - ch, cw, ch);
+                CarveRock(data, b.xMax - cw, b.yMax - ch, cw, ch);
+                break;
+            }
+            case 2: // 고리 (가운데 암반, 둘레 두께 2)
+                CarveRock(data, b.x + 2, b.y + 2, w - 4, h - 4);
+                break;
+            default: // 기둥 넷
+                CarveRock(data, b.x + 1, b.y + 1, 1, 1);
+                CarveRock(data, b.xMax - 2, b.y + 1, 1, 1);
+                CarveRock(data, b.x + 1, b.yMax - 2, 1, 1);
+                CarveRock(data, b.xMax - 2, b.yMax - 2, 1, 1);
+                break;
+        }
+    }
+
+    private static void CarveRock(DungeonFloorData data, int x0, int y0, int w, int h)
+    {
+        for (int x = x0; x < x0 + w; x++)
+        {
+            for (int y = y0; y < y0 + h; y++)
+            {
+                if (x < 0 || y < 0 || x >= data.width || y >= data.height) continue;
+                data.cells[x, y].terrain = FloorTerrain.Rock;
+                data.cells[x, y].roomId = -1;
+            }
+        }
+    }
+
+    /// <summary>방 영역 + 둘레 1칸 (빈 구획 제외).</summary>
+    private static bool[,] BuildReserved(DungeonFloorData data)
+    {
+        bool[,] reserved = new bool[data.width, data.height];
+        for (int i = 0; i < data.rooms.Count; i++)
+        {
+            FloorRoom r = data.rooms[i];
+            if (r.isGone) continue;
+            for (int x = r.bounds.x - 1; x <= r.bounds.xMax; x++)
+                for (int y = r.bounds.y - 1; y <= r.bounds.yMax; y++)
+                    if (x >= 0 && y >= 0 && x < data.width && y < data.height) reserved[x, y] = true;
+        }
+        return reserved;
+    }
+
+    /// <summary>
+    /// 통로를 두 줄로 넓힌다: 경로 칸마다 진행 방향의 옆 칸을 하나 더 판다 (한쪽으로만, 경로 내내 같은 쪽).
+    /// 방 둘레(reserved)와 지도 가장자리는 파지 않으므로 문 앞은 한 줄로 남는다.
+    /// </summary>
+    private static void WidenPath(DungeonFloorData data, List<Vector2Int> path, bool[,] reserved, System.Random rng)
+    {
+        if (path.Count < 2) return;
+        int side = rng.Next(2) == 0 ? 1 : -1;
+        for (int i = 0; i < path.Count; i++)
+        {
+            Vector2Int prev = path[i > 0 ? i - 1 : i + 1];
+            Vector2Int p = path[i];
+            bool horizontalStep = prev.y == p.y;
+            Vector2Int lane = horizontalStep ? new Vector2Int(p.x, p.y + side) : new Vector2Int(p.x + side, p.y);
+            DigExtra(data, lane, reserved);
+            // 꺾이는 곳의 대각선도 채워 모서리가 톱니가 되지 않게
+            DigExtra(data, new Vector2Int(p.x + side, p.y + side), reserved);
+        }
+    }
+
+    private static void DigExtra(DungeonFloorData data, Vector2Int p, bool[,] reserved)
+    {
+        if (p.x < 1 || p.y < 1 || p.x >= data.width - 1 || p.y >= data.height - 1) return;
+        if (reserved[p.x, p.y] || data.cells[p.x, p.y].terrain != FloorTerrain.Rock) return;
+        data.cells[p.x, p.y].terrain = FloorTerrain.Corridor;
+        data.cells[p.x, p.y].roomId = -1;
+    }
+
+    private static readonly Vector2Int[] Dir4 = { new Vector2Int(0, -1), new Vector2Int(1, 0), new Vector2Int(0, 1), new Vector2Int(-1, 0) };
+
+    /// <summary>
+    /// 막다른 길: 기존 통로 칸에서 암반 쪽으로 2~5칸 곧게 판다. 다른 통로·방에 닿으면 멈추고, 2칸이 안 되면 취소.
+    /// (이상한 던전·세계수의 미궁의 "가 봐야 아는 길")
+    /// </summary>
+    private static void TryDigDeadEnd(DungeonFloorData data, System.Random rng, bool[,] reserved)
+    {
+        List<Vector2Int> corridors = new List<Vector2Int>();
+        for (int x = 1; x < data.width - 1; x++)
+            for (int y = 1; y < data.height - 1; y++)
+                if (data.cells[x, y].terrain == FloorTerrain.Corridor && !reserved[x, y]) corridors.Add(new Vector2Int(x, y));
+        if (corridors.Count == 0) return;
+
+        for (int attempt = 0; attempt < 12; attempt++)
+        {
+            Vector2Int start = corridors[rng.Next(corridors.Count)];
+            Vector2Int dir = Dir4[rng.Next(4)];
+            int want = 2 + rng.Next(4);
+            List<Vector2Int> dug = new List<Vector2Int>();
+            Vector2Int cur = start;
+            for (int step = 0; step < want; step++)
+            {
+                Vector2Int n = cur + dir;
+                if (n.x < 1 || n.y < 1 || n.x >= data.width - 1 || n.y >= data.height - 1) break;
+                if (reserved[n.x, n.y] || data.cells[n.x, n.y].terrain != FloorTerrain.Rock) break;
+                // 새 칸의 이웃(온 곳 제외)이 모두 암반이어야 다른 길과 붙지 않는 깔끔한 막다른 길이 된다
+                bool touches = false;
+                for (int d = 0; d < 4; d++)
+                {
+                    Vector2Int m = n + Dir4[d];
+                    if (m == cur) continue;
+                    if (data.IsWalkable(m)) { touches = true; break; }
+                }
+                if (touches) break;
+                data.cells[n.x, n.y].terrain = FloorTerrain.Corridor;
+                data.cells[n.x, n.y].roomId = -1;
+                dug.Add(n);
+                cur = n;
+            }
+            if (dug.Count >= 2) return;
+            for (int i = 0; i < dug.Count; i++) data.cells[dug[i].x, dug[i].y].terrain = FloorTerrain.Rock;
+        }
     }
 
     private static void AddDoor(DungeonFloorData data, FloorRoom room, Vector2Int roomCell, Vector2Int corridorCell)
@@ -494,16 +683,33 @@ public static class RogueFloorGenerator
         data.doors.Add(door);
     }
 
-    private static void DigHorizontal(DungeonFloorData data, int x0, int x1, int y)
+    /// <summary>x0 → x1 방향으로 판다 (path 에 진행 순서대로 추가).</summary>
+    private static void DigHorizontal(DungeonFloorData data, int x0, int x1, int y, List<Vector2Int> path)
     {
-        int from = Math.Min(x0, x1), to = Math.Max(x0, x1);
-        for (int x = from; x <= to; x++) SetCorridor(data, x, y);
+        int step = x1 >= x0 ? 1 : -1;
+        for (int x = x0; ; x += step)
+        {
+            SetCorridor(data, x, y);
+            AddPath(path, new Vector2Int(x, y));
+            if (x == x1) break;
+        }
     }
 
-    private static void DigVertical(DungeonFloorData data, int x, int y0, int y1)
+    /// <summary>y0 → y1 방향으로 판다 (path 에 진행 순서대로 추가).</summary>
+    private static void DigVertical(DungeonFloorData data, int x, int y0, int y1, List<Vector2Int> path)
     {
-        int from = Math.Min(y0, y1), to = Math.Max(y0, y1);
-        for (int y = from; y <= to; y++) SetCorridor(data, x, y);
+        int step = y1 >= y0 ? 1 : -1;
+        for (int y = y0; ; y += step)
+        {
+            SetCorridor(data, x, y);
+            AddPath(path, new Vector2Int(x, y));
+            if (y == y1) break;
+        }
+    }
+
+    private static void AddPath(List<Vector2Int> path, Vector2Int p)
+    {
+        if (path.Count == 0 || path[path.Count - 1] != p) path.Add(p);
     }
 
     /// <summary>암반만 통로로 바꾼다 (방 칸은 절대 덮어쓰지 않음).</summary>

@@ -80,6 +80,28 @@ public class ConsumableInventory : MonoBehaviour
         s_sessionDawnCharges = dawnChaliceCharges;
     }
 
+    /// <summary>
+    /// 새 탐험(게임 오버 후 재시작): 주운 소비 아이템을 모두 비우고 새벽의 잔을 최대로 채운다.
+    /// [2026-09-30] 이전에는 게임 오버 후에도 새벽의 잔 차지·아이템이 그대로 이어졌다 (세션 저장소 s_sessionDawnCharges).
+    /// </summary>
+    public static void ResetForNewRun()
+    {
+        if (_instance != null)
+        {
+            _instance.slots.Clear();
+            _instance.dawnChaliceCharges = _instance.dawnChaliceMaxCharges;
+            _instance.FlushSessionDawnCharges();
+            _instance.OnInventoryChanged?.Invoke();
+            Debug.Log($"[ConsumableInventory] 새 탐험 — 아이템 초기화, 새벽의 잔 {_instance.dawnChaliceCharges}/{_instance.dawnChaliceMaxCharges}");
+        }
+        else
+        {
+            // 인스턴스가 없으면 다음 Awake 에서 최대치로 시작하도록 세션 값만 지운다
+            s_sessionDawnCharges = SessionDawnUnset;
+            Debug.Log("[ConsumableInventory] 새 탐험 — 세션 차지 초기화 (다음 생성 시 최대치)");
+        }
+    }
+
     private void Start()
     {
         AutoInitializeDawnChalice();

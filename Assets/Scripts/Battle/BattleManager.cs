@@ -153,7 +153,9 @@ public class BattleManager : MonoBehaviour
     public bool playerTurn = true;
 
     [Header("RPG Percent Settings")]
-    [Range(0, 100)] public float criticalChance = 25f; // 크리티컬 확률
+    // [2026-09-30] 25 → 5 (드퀘 수준). 25%는 적의 4타 중 1타가 1.5배라 운에 좌우되는 게임이 됨 (10층 밸런스 시뮬레이션)
+    public const float DefaultCriticalChance = 5f;
+    [Range(0, 100)] public float criticalChance = DefaultCriticalChance; // 크리티컬 기본 확률 (+ 행운 + 스킬/버프 보너스)
     [Range(0, 100)] public float evasionChance = 10f;  // 회피 확률
 
     // ========== 파티 시스템 ==========
@@ -1952,6 +1954,11 @@ public class BattleManager : MonoBehaviour
         CompanionPartyPersistence.Clear();
         DestroyAllCompanionInstances();
 
+        // [2026-09-30] 아이템·장비도 새 탐험 상태로 (새벽의 잔 최대 충전, 주운 아이템·장비 초기화, 장착 장비 = 시작 장비)
+        ConsumableInventory.ResetForNewRun();
+        EquipmentBag.ResetForNewRun(playerStatData);
+        PlayerStats.PendingLevelUpNotes.Clear();
+
         Debug.Log("[BattleManager] Game Over — resetting to floor 1.");
         DungeonEncounter.justReturnedFromBattle = false; // 게임오버는 새 시작이므로 쿨다운 없음
         SceneManager.LoadScene(startDungeonScene);
@@ -3032,7 +3039,7 @@ public class BattleManager : MonoBehaviour
             CheckBattleEnd();
             return;
         }
-        
+
         // 커맨드 페이즈: Main 대신 PrepareNextCommand()에서 FightSubPanel 연다
         if (actionPanel != null) actionPanel.SetActive(false);
         if (skillPanel != null) skillPanel.SetActive(false);
@@ -3456,6 +3463,8 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteResolutionQueue()
     {
         // 턴 순서 다시 구성 (민첩 순)
+        // 드퀘·진여신전생식: 적·아군 모두 행동을 정한 뒤 동시에 시작, 순서는 AGI × 랜덤(0.8~1.2).
+        // AGI 차이가 크면(10 vs 3) 항상 높은 쪽이 먼저, 작으면(10 vs 8) 낮은 쪽이 먼저 움직일 수도 있다.
         BuildTurnOrder();
 
         Debug.Log($"[BattleManager] Starting resolution queue. Order size: {turnOrder.Count}");
@@ -3942,10 +3951,35 @@ public class BattleManager : MonoBehaviour
         if (enemy.IsStunned())
         {
             AddMessage($"{enemy.enemyName} is <color=#FFD700>stunned</color> and cannot act!");
+            // 모으던 힘이 스턴으로 흩어진다 (모아 치기를 끊는 방법)
+            if (enemy.pendingChargeSkill != null)
+            {
+                enemy.pendingChargeSkill = null;
+                enemy.pendingChargeTarget = null;
+                BattleFx.ClearIntent(enemy);
+                AddMessage($"{enemy.enemyName}'s gathered power fades away!");
+            }
             yield break;
         }
 
         yield return new WaitForSeconds(actionDelay);
+
+        // [모아 치기] 지난 턴에 예고했던 스킬을 지금 발동
+        if (enemy.pendingChargeSkill != null)
+        {
+            SkillData charged = enemy.pendingChargeSkill;
+            PlayerStats chargedTarget = enemy.pendingChargeTarget;
+            enemy.pendingChargeSkill = null;
+            enemy.pendingChargeTarget = null;
+            BattleFx.ClearIntent(enemy);
+            if (chargedTarget == null || chargedTarget.currentHP <= 0) chargedTarget = GetRandomAlivePartyMember();
+            if (chargedTarget != null)
+            {
+                AddMessage($"<color=#FF7A30>{enemy.enemyName} unleashes {charged.skillName}!</color>");
+                yield return StartCoroutine(ExecuteEnemySkill(enemy, chargedTarget, charged));
+            }
+            yield break;
+        }
 
         // [Enemy AI] 행동 선택 레이어 — 이번 단계는 선택만. Skill/Defend/Flee 실행 경로 미구현 → 평타 fallback.
         EnemyActionDecision decision = SelectEnemyAction(enemy);
@@ -3976,6 +4010,20 @@ public class BattleManager : MonoBehaviour
             PlayerStats skillTarget = decision.target ?? GetRandomAlivePartyMember();
             if (skillTarget != null && skillTarget.currentHP > 0)
             {
+                // [모아 치기] 이번 턴은 예고만 — 다음 자기 턴에 발동 (그사이 방어·선제 처치·스턴으로 대응)
+                if (decision.skill is MonsterSkillData chargeSkill && chargeSkill.chargeTurns > 0)
+                {
+                    enemy.pendingChargeSkill = chargeSkill;
+                    enemy.pendingChargeTarget = skillTarget;
+                    string msg = string.IsNullOrEmpty(chargeSkill.chargeMessage)
+                        ? $"{enemy.enemyName} is gathering power!"
+                        : string.Format(chargeSkill.chargeMessage, enemy.enemyName);
+                    AddMessage($"<color=#FF7A30>{msg}</color>");
+                    BattleFx.SetIntent(enemy, chargeSkill.chargeIntentLabel);
+                    Debug.Log($"[EnemyAI] {enemy.enemyName} 모아 치기 예고: {chargeSkill.skillName} → 다음 턴 {skillTarget.playerName}");
+                    yield return new WaitForSeconds(actionDelay);
+                    yield break;
+                }
                 yield return StartCoroutine(ExecuteEnemySkill(enemy, skillTarget, decision.skill));
                 yield break;
             }
@@ -3994,6 +4042,7 @@ public class BattleManager : MonoBehaviour
             if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, biteOverride))
             {
                 AddMessage($"{target.playerName} evaded {enemy.enemyName}'s attack!");
+                BattleFx.AllyMiss(target);
             }
             else
             {
@@ -4045,6 +4094,7 @@ public class BattleManager : MonoBehaviour
                 Debug.Log($"[BattleLog] Enemy Final Damage: {damage}");
 
                 int hpBefore = target.currentHP;
+                if (critical) BattleFx.MarkAllyCritical();
                 target.TakeDamage(damage);
                 AddMessage(critical ? $"{enemy.enemyName} critical hit! {target.playerName} took {damage} damage!" :
                                       $"{enemy.enemyName} attacked {target.playerName} and dealt {damage} damage!");
@@ -4136,6 +4186,16 @@ public class BattleManager : MonoBehaviour
     }
     
     // 아군 UI 흔들림 효과
+    /// <summary>아군 상태 카드(배경)의 RectTransform — 피해 숫자 팝업 위치용 (BattleFx).</summary>
+    public RectTransform GetPlayerCardRect(PlayerStats player)
+    {
+        int i = activePartyMembers.IndexOf(player);
+        if (i < 0) return null;
+        if (i < playerStatusBackgrounds.Count && playerStatusBackgrounds[i] != null) return playerStatusBackgrounds[i].rectTransform;
+        if (i < playerStatusTexts.Count && playerStatusTexts[i] != null) return playerStatusTexts[i].rectTransform;
+        return null;
+    }
+
     public void ShakePlayerStatusUI(PlayerStats player)
     {
         if (player == null || playerStatusTexts.Count == 0) return;
@@ -5207,6 +5267,7 @@ public class BattleManager : MonoBehaviour
         if (!RollPhysicalHit_PlayerVsEnemy(attacker, target, biteOverride))
         {
             AddMessage($"{target.enemyName} evaded {attacker.playerName}!");
+            BattleFx.EnemyMiss(target);
         }
         else
         {
@@ -5291,6 +5352,8 @@ public class BattleManager : MonoBehaviour
                     target.isDefending = false;
                     AddMessage($"{target.enemyName} defended and reduced the damage!");
                 }
+                hit1Slot = ApplyPhysResist(hit1Slot, target);
+                hit2Slot = ApplyPhysResist(hit2Slot, target);
                 int applied1 = target.TakeDamage(hit1Slot, critical);
                 int applied2 = 0;
                 if (!target.IsDead())
@@ -5343,6 +5406,8 @@ public class BattleManager : MonoBehaviour
                     target.isDefending = false;
                     AddMessage($"{target.enemyName} defended and reduced the damage!");
                 }
+                singleBaseSlot = ApplyPhysResist(singleBaseSlot, target);
+                if (singleArmorSlot > 0) singleArmorSlot = ApplyPhysResist(singleArmorSlot, target);
                 int applied1 = target.TakeDamage(singleBaseSlot, critical);
                 int applied2 = 0;
                 if (singleArmor > 0 && !target.IsDead())
@@ -5902,6 +5967,7 @@ public class BattleManager : MonoBehaviour
             if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, skill))
             {
                 AddMessage($"{enemy.enemyName}'s {skill.skillName} missed!");
+                BattleFx.AllyMiss(target);
                 continue;
             }
 
@@ -5964,6 +6030,7 @@ public class BattleManager : MonoBehaviour
             }
 
             // 9. 데미지 적용
+            if (critical) BattleFx.MarkAllyCritical();
             target.TakeDamage(damage);
             totalDamage += damage;
             AddMessage($"{enemy.enemyName} uses {skill.skillName}! {target.playerName} takes {damage} damage{(critical ? " (Critical!)" : "")}.");
@@ -6183,6 +6250,7 @@ public class BattleManager : MonoBehaviour
             {
                 // 회피됨
                 evadedHits++;
+                BattleFx.EnemyMiss(target);
                 if (hits > 1)
                 {
                     AddMessage($"Hit {i + 1}: {target.enemyName} evaded!");
@@ -6256,6 +6324,7 @@ public class BattleManager : MonoBehaviour
                     AbyssdawnBattle.ModStatType.Defense, target.defense);
                 float reduced = (damage * 2f - defValue) / 2f;
                 damage = Mathf.Max(1, Mathf.FloorToInt(reduced));
+                damage = ApplyPhysResist(damage, target);
             }
             else if (skill.damageType == DamageType.Magic)
             {
@@ -6375,6 +6444,7 @@ public class BattleManager : MonoBehaviour
             if (missed2)
             {
                 AddMessage($"{target.enemyName} evaded {attacker.playerName}'s {skill.skillName}!");
+                BattleFx.EnemyMiss(target);
                 continue;
             }
 
@@ -6432,6 +6502,7 @@ public class BattleManager : MonoBehaviour
                     AbyssdawnBattle.ModStatType.Defense, target.defense);
                 float reduced = (damage * 2f - defValue) / 2f;
                 damage = Mathf.Max(1, Mathf.FloorToInt(reduced));
+                damage = ApplyPhysResist(damage, target);
             }
             else if (skill.damageType == DamageType.Magic)
             {
@@ -6455,6 +6526,17 @@ public class BattleManager : MonoBehaviour
         {
             AddMessage($"Mandritto total damage: {totalDamage}");
         }
+    }
+
+    /// <summary>
+    /// 적의 물리 저항 적용 (MonsterSO.physResist: 1 = 정상 피해, 0.8 = 20% 덜 받음, 0 = 면역). 최소 1.
+    /// [2026-09-30] 이전에는 physResist 를 읽기만 하고 피해 계산에 쓰지 않았다 (마법의 magResist 만 적용).
+    /// </summary>
+    private static int ApplyPhysResist(int damage, EnemyStats target)
+    {
+        if (target == null || damage <= 0) return damage;
+        float r = Mathf.Clamp01(target.physResist);
+        return Mathf.Max(1, Mathf.FloorToInt(damage * r));
     }
 
     // -------------------- Damage Calculation --------------------
@@ -6684,6 +6766,9 @@ public class BattleManager : MonoBehaviour
     // - BuildRecruitYesNoPanel / MakeRecruitDialogButton: 런타임 UI 생성
     // ──────────────────────────────────────────────────────────────────
 
+    /// <summary>같은 종 동료를 이미 데리고 있을 때 영입 확률 배율 (드퀘5식 2마리째 감소).</summary>
+    public const float DuplicateCompanionChanceMultiplier = 0.25f;
+
     /// <summary>마지막 적의 영입 굴림 + 슬롯 여유 체크. 가능하면 recruitData를 반환.</summary>
     private bool TryInitiateRecruitDialog(out Abyssdawn.MonsterSO recruitData)
     {
@@ -6705,11 +6790,15 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        // [2026-09-30] 드퀘5식: 같은 종을 이미 데리고 있으면 2마리째부터 확률 1/4 (같은 종으로 파티가 채워지는 것 방지)
+        int owned = CompanionPartyPersistence.CountOwned(so);
+        float chance = so.CompanionChance * (owned > 0 ? DuplicateCompanionChanceMultiplier : 1f);
+
         float roll = Random.value;
-        bool rollSuccess = roll <= so.CompanionChance;
+        bool rollSuccess = roll <= chance;
         if (!rollSuccess)
         {
-            Debug.Log($"[Recruit] ❌ 굴림 실패 — '{so.MonsterName}' (확률 {so.CompanionChance:P0}, 굴림 {roll:F3})");
+            Debug.Log($"[Recruit] ❌ 굴림 실패 — '{so.MonsterName}' (확률 {chance:P1}{(owned > 0 ? $", 같은 종 {owned}마리 보유로 1/4" : "")}, 굴림 {roll:F3})");
             return false;
         }
 
@@ -8214,6 +8303,53 @@ private void CacheHeroSkills()
     }
 
     // ========== UI 업데이트 --------------------
+    private const string DeathSkullResource = "UI/DeathSkull";
+    private const string DeathSkullObjectName = "DeathSkull";
+    private static Sprite _deathSkullSprite;
+
+    /// <summary>
+    /// 쓰러진 아군 카드에 해골 그림을 깐다 (카드 배경 위, 이름·HP 글자 아래). 살아나면 숨긴다.
+    /// 그림: Resources/UI/DeathSkull.png — 없으면 아무것도 하지 않음.
+    /// </summary>
+    private static void SetDeathSkull(Transform card, bool dead)
+    {
+        if (card == null) return;
+        Transform existing = card.Find(DeathSkullObjectName);
+        if (!dead)
+        {
+            if (existing != null) existing.gameObject.SetActive(false);
+            return;
+        }
+        if (existing == null)
+        {
+            if (_deathSkullSprite == null)
+            {
+                Texture2D tex = Resources.Load<Texture2D>(DeathSkullResource);
+                if (tex == null)
+                {
+                    Debug.LogWarning($"[BattleManager] 사망 해골 그림 'Resources/{DeathSkullResource}' 을(를) 찾지 못했습니다.");
+                    return;
+                }
+                _deathSkullSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            var go = new GameObject(DeathSkullObjectName, typeof(RectTransform));
+            go.transform.SetParent(card, false);
+            go.transform.SetAsFirstSibling(); // 카드 배경 위, 글자 아래
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(6f, 6f);
+            rt.offsetMax = new Vector2(-6f, -6f);
+            var img = go.AddComponent<Image>();
+            img.sprite = _deathSkullSprite;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+            img.color = new Color(1f, 1f, 1f, 0.9f);
+            existing = go.transform;
+        }
+        existing.gameObject.SetActive(true);
+    }
+
     private void UpdateStatusUI()
     {
         string heroHpLine = player != null ? $"HP: {player.currentHP} / {player.maxHP}" : "HP: -";
@@ -8278,6 +8414,8 @@ private void CacheHeroSkills()
                     if (i < playerStatusMPTexts.Count && playerStatusMPTexts[i] != null)
                         playerStatusMPTexts[i].color = isDead ? downedTextColor : aliveTextColor;
 
+                    SetDeathSkull(innerBgTrans, isDead);
+
                     if (bg != null)
                     {
                         // 현재 턴인 캐릭터 강조 (선택적)
@@ -8297,6 +8435,7 @@ private void CacheHeroSkills()
                     if (i < playerStatusMPTexts.Count && playerStatusMPTexts[i] != null)
                         playerStatusMPTexts[i].text = "";
                     if (bg != null) bg.color = inactiveSlotColor;
+                    SetDeathSkull(innerBgTrans, false);
                     UpdatePlayerStatusIcons(i, null);
                 }
             }

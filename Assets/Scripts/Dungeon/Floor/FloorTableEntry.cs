@@ -37,6 +37,15 @@ public class FloorTableEntry
     public int minExtraLinks = 0;
     public int maxExtraLinks = 1;
 
+    [Header("모양 다양성")]
+    [Tooltip("방이 직사각형이 아닌 모양(L자·십자·가운데 빈 고리·기둥 방)이 될 확률 (0~1)")]
+    [Range(0f, 1f)] public float shapedRoomChance = 0.45f;
+    [Tooltip("통로 하나가 두 줄(폭 2) 통로가 될 확률 (0~1). 문 바로 앞은 항상 한 줄")]
+    [Range(0f, 1f)] public float wideCorridorChance = 0.3f;
+    [Tooltip("막다른 길 개수 범위")]
+    public int minDeadEnds = 0;
+    public int maxDeadEnds = 2;
+
     [Header("인카운터")]
     [Tooltip("이 층들의 인카운터 확률. -1 이면 씬의 DungeonEncounter 설정값 그대로 사용")]
     public float encounterChance = -1f;
@@ -78,6 +87,16 @@ public class FloorTableEntry
         return e;
     }
 
+    /// <summary>모양 다양성 설정 (기본값 표 작성용).</summary>
+    public FloorTableEntry WithShapes(float shapedRooms, float wideCorridors, int deadEndMin, int deadEndMax)
+    {
+        shapedRoomChance = shapedRooms;
+        wideCorridorChance = wideCorridors;
+        minDeadEnds = deadEndMin;
+        maxDeadEnds = deadEndMax;
+        return this;
+    }
+
     /// <summary>탐험 요소 개수 설정 (기본값 표 작성용).</summary>
     public FloorTableEntry WithContents(int chestMin, int chestMax, int trapMin, int trapMax, float spring)
     {
@@ -101,14 +120,21 @@ public static class FloorTableDefaults
     public static List<FloorTableEntry> CreateBeta()
     {
         List<FloorTableEntry> list = new List<FloorTableEntry>();
-        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 0, 1, 0.5f));
-        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.3f));
-        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 0, 1, 0.5f));
-        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 2, 3, 0.3f));
-        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 2, 4, 0.35f));
-        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 3, 6, 0.35f));
+        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 0, 1, 0.5f).WithShapes(0.3f, 0.2f, 0, 1));
+        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.3f).WithShapes(0.4f, 0.3f, 0, 2));
+        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 0, 1, 0.5f).WithShapes(0.4f, 0.3f, 0, 1));
+        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 2, 3, 0.3f).WithShapes(0.5f, 0.35f, 1, 2));
+        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 2, 4, 0.35f).WithShapes(0.55f, 0.4f, 1, 3));
+        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 3, 6, 0.35f).WithShapes(0.6f, 0.4f, 2, 4));
+        for (int i = 0; i < list.Count; i++) list[i].encounterChance = BetaEncounterChance;
         return list;
     }
+
+    /// <summary>
+    /// [2026-09-30] 인카운터 확률 0.09 → 0.05 (위험도 게이지 기준 평균 약 24걸음마다 전투).
+    /// 전투는 줄이고 한 번 한 번을 무겁게 — 전투 사이 회복 수단이 적어 0.09(약 15걸음)면 층당 7회 전투로 버틸 수 없었다 (10층 시뮬레이션).
+    /// </summary>
+    public const float BetaEncounterChance = 0.05f;
 
     /// <summary>
     /// floor 에 해당하는 설정. 해당 줄이 없으면 가장 깊은 줄(maxFloor 최대)을 계속 사용.

@@ -32,8 +32,14 @@ public class DungeonCameraFollow : MonoBehaviour
     public float paddingSide = 0.5f;
 
     [Header("배경")]
-    [Tooltip("화면 전체를 덮는 월드 배경 스프라이트를 찾아 카메라에 붙인다")]
+    [Tooltip("화면 배경 스프라이트. 지정하면 위치·크기를 몰라도 카메라 화면에 정확히 맞춰 붙인다 (MapManager 가 넘겨줌)")]
+    public SpriteRenderer screenBackground;
+    [Tooltip("Cover = 비율 유지하며 화면을 꽉 채움(넘치는 가장자리는 잘림) / Stretch = 화면 비율에 맞춰 늘림(찌그러질 수 있음)")]
+    public BackgroundFit backgroundFit = BackgroundFit.Cover;
+    [Tooltip("screenBackground 가 비어 있을 때: 화면을 거의 덮는 월드 배경 스프라이트를 찾아 카메라에 붙인다")]
     public bool carryFullscreenBackground = true;
+
+    public enum BackgroundFit { Cover, Stretch }
 
     private Camera _cam;
     private Rect _floorRect;
@@ -87,13 +93,16 @@ public class DungeonCameraFollow : MonoBehaviour
         _initialized = true;
         _cam = GetComponent<Camera>();
         _sceneSize = _cam.orthographicSize;
+        if (screenBackground != null) FitScreenBackground();
         // 배경은 카메라가 움직이기 전(원래 배치 상태)에 붙여야 화면 속 위치가 유지된다.
-        if (carryFullscreenBackground) CarryFullscreenBackground();
+        else if (carryFullscreenBackground) CarryFullscreenBackground();
     }
 
     private void LateUpdate()
     {
         if (_cam == null) return;
+        // 화면 비율이 바뀌면(기기·게임 창 크기) 배경을 다시 맞춘다
+        if (screenBackground != null && !Mathf.Approximately(_cam.aspect, _fitAspect)) FitScreenBackground();
         ApplySize(); // 인스펙터에서 viewSize 를 바꾸면 바로 반영
 
         if (_overview)
@@ -169,6 +178,45 @@ public class DungeonCameraFollow : MonoBehaviour
         float maxY = _floorRect.yMax + paddingTop - halfH;
         p.y = minY > maxY ? _floorRect.center.y : Mathf.Clamp(p.y, minY, maxY);
         return p;
+    }
+
+    private float _fitAspect = -1f;
+
+    /// <summary>
+    /// screenBackground 를 카메라 자식으로 옮기고 카메라 화면 크기에 정확히 맞춘다 (씬에서 어디에 어떤 크기로 두었든 상관없음).
+    /// 스프라이트의 기준점(pivot)이 가운데가 아니어도 화면 한가운데에 오도록 보정한다.
+    /// 기준은 씬 원래 카메라 크기(_sceneSize) — 확대/전체 지도 때는 ScaleBackgrounds 가 같은 비율로 키운다.
+    /// </summary>
+    private void FitScreenBackground()
+    {
+        SpriteRenderer sr = screenBackground;
+        if (sr == null || sr.sprite == null || _cam == null || !_cam.orthographic) return;
+
+        Transform t = sr.transform;
+        t.SetParent(transform, false);
+        t.localRotation = Quaternion.identity;
+
+        float viewH = _sceneSize * 2f;
+        float viewW = viewH * _cam.aspect;
+        Bounds b = sr.sprite.bounds; // 크기 1 기준 (월드 단위)
+        float sx = viewW / Mathf.Max(0.0001f, b.size.x);
+        float sy = viewH / Mathf.Max(0.0001f, b.size.y);
+        if (backgroundFit == BackgroundFit.Cover) sx = sy = Mathf.Max(sx, sy);
+
+        // 카메라 앞, 지도와 같은 평면(z=0)에 둔다. 앞뒤 순서는 Order in Layer 로 정해짐 (지도 5, 플레이어 10 보다 작게)
+        float depth = Mathf.Abs(transform.position.z);
+        Vector3 scale = new Vector3(sx, sy, 1f);
+        Vector3 pos = new Vector3(-b.center.x * sx, -b.center.y * sy, depth);
+
+        int i = _backgrounds.IndexOf(t);
+        if (i < 0) { _backgrounds.Add(t); _bgScales.Add(scale); _bgPositions.Add(pos); }
+        else { _bgScales[i] = scale; _bgPositions[i] = pos; }
+        t.localScale = scale;
+        t.localPosition = pos;
+        _fitAspect = _cam.aspect;
+        ScaleBackgrounds();
+
+        Debug.Log($"[DungeonCameraFollow] 화면 배경 '{sr.name}'을(를) 카메라 화면에 맞췄습니다 ({backgroundFit}, 화면 {viewW:0.##}x{viewH:0.##}, 배율 {sx:0.###}x{sy:0.###}).");
     }
 
     private void CarryFullscreenBackground()

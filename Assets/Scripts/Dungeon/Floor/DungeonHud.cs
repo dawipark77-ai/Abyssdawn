@@ -64,7 +64,19 @@ public class DungeonHud : MonoBehaviour
     private TextMeshProUGUI _dialogText, _yesText, _noText;
     private Action<bool> _dialogCallback;
 
-    public bool IsDialogOpen => _dialog != null && _dialog.activeSelf;
+    public bool IsDialogOpen => (_dialog != null && _dialog.activeSelf) || IsLevelUpOpen;
+
+    // ── 레벨업 선택 화면 ──
+    private GameObject _levelUp;
+    private TextMeshProUGUI _lvTitle, _lvRandom, _lvPrompt;
+    private readonly TextMeshProUGUI[] _lvStatLabels = new TextMeshProUGUI[5];
+    private PlayerStats _lvHero;
+    private int _lvDismissedAtLevel = -1;
+    private float _lvNextCheck;
+    private static readonly StatType[] LvStats = { StatType.Attack, StatType.Defense, StatType.Magic, StatType.Agility, StatType.Luck };
+    private static readonly string[] LvStatNames = { "STR", "DEF", "MAG", "AGI", "LUK" };
+
+    public bool IsLevelUpOpen => _levelUp != null && _levelUp.activeSelf;
 
     private void Awake()
     {
@@ -91,9 +103,167 @@ public class DungeonHud : MonoBehaviour
             _dangerFill.color = c;
         }
 
-        if (!IsDialogOpen) return;
+        CheckLevelUp();
+
+        if (_dialog == null || !_dialog.activeSelf) return;
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space)) CloseDialog(true);
         else if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace)) CloseDialog(false);
+    }
+
+    // ─────────────────────────────────────────
+    // 레벨업 선택 화면: 무작위 성장 1개(자동) + 자유 스탯 1개(선택)
+    // ─────────────────────────────────────────
+
+    /// <summary>
+    /// 주인공에게 자유 스탯 포인트가 있으면 선택 화면을 띄운다 (전투에서 레벨업하고 던전으로 돌아왔을 때 포함).
+    /// 다른 확인창·창(상태·인벤토리)·전체 지도가 열려 있으면 닫힐 때까지 기다린다.
+    /// "Later" 를 누르면 다음 레벨업 전까지 다시 띄우지 않는다 (상태창의 + 버튼으로 나중에 분배 가능).
+    /// </summary>
+    private void CheckLevelUp()
+    {
+        if (IsLevelUpOpen || Time.unscaledTime < _lvNextCheck) return;
+        _lvNextCheck = Time.unscaledTime + 0.25f;
+
+        if (_dialog != null && _dialog.activeSelf) return;
+        if (DungeonPanelGroup.Instance != null && DungeonPanelGroup.Instance.AnyOpen) return;
+        var fullMap = FindFirstObjectByType<DungeonFullMap>();
+        if (fullMap != null && fullMap.IsOpen) return;
+
+        DungeonGridPlayer gridPlayer = CurrentPlayer;
+        PlayerStats hero = gridPlayer != null ? gridPlayer.GetComponent<PlayerStats>() : null;
+        if (hero == null || hero.FreeStatPoints <= 0 || hero.level <= _lvDismissedAtLevel) return;
+        ShowLevelUp(hero);
+    }
+
+    public void ShowLevelUp(PlayerStats hero)
+    {
+        if (hero == null || _levelUp == null) return;
+        _lvHero = hero;
+
+        // 아직 보여주지 않은 이 주인공의 레벨업 기록 → 무작위 성장 내용
+        var parts = new List<string>();
+        for (int i = PlayerStats.PendingLevelUpNotes.Count - 1; i >= 0; i--)
+        {
+            PlayerStats.LevelUpNote n = PlayerStats.PendingLevelUpNotes[i];
+            if (n.playerName != hero.playerName) continue;
+            string line = $"Lv {n.level}: " + (n.hasRandomStat ? $"<color=#FFD24A>{StatName(n.randomStat)} +1</color>" : "-");
+            if (n.hpGain > 0) line += $"  <color=#FF8C8C>HP +{n.hpGain}</color>";
+            if (n.mpGain > 0) line += $"  <color=#8CB4FF>MP +{n.mpGain}</color>";
+            parts.Insert(0, line);
+            PlayerStats.PendingLevelUpNotes.RemoveAt(i);
+        }
+        _lvRandom.text = parts.Count > 0
+            ? "Random growth\n" + string.Join("\n", parts)
+            : "Random growth applied";
+
+        RefreshLevelUp();
+        _levelUp.SetActive(true);
+        _levelUp.transform.SetAsLastSibling();
+        DungeonGridPlayer p = CurrentPlayer;
+        if (p != null) p.LockInput(_levelUp);
+    }
+
+    private static DungeonGridPlayer CurrentPlayer => FindFirstObjectByType<DungeonGridPlayer>();
+
+    private void RefreshLevelUp()
+    {
+        if (_lvHero == null) return;
+        _lvTitle.text = $"<color=#FFD24A>LEVEL UP!</color>  Lv {_lvHero.level}";
+        int pts = _lvHero.FreeStatPoints;
+        _lvPrompt.text = $"Choose a stat to raise  <color=#FFD24A>({pts} point{(pts == 1 ? "" : "s")})</color>";
+        int[] values = { _lvHero.Attack, _lvHero.Defense, _lvHero.Magic, _lvHero.Agility, _lvHero.Luck };
+        for (int i = 0; i < LvStats.Length; i++)
+        {
+            string extra = LvStats[i] == StatType.Defense ? "\n<size=70%><color=#FF8C8C>+3 HP</color></size>"
+                         : LvStats[i] == StatType.Magic ? "\n<size=70%><color=#8CB4FF>+3 MP</color></size>" : "\n<size=70%> </size>";
+            _lvStatLabels[i].text = $"<b>{LvStatNames[i]}</b>\n{values[i]} <color=#8CFF8C>+1</color>{extra}";
+        }
+    }
+
+    private void OnLevelUpStatChosen(int index)
+    {
+        if (_lvHero == null) return;
+        _lvHero.AllocateFreePoint(LvStats[index]);
+        Debug.Log($"[DungeonHud] 레벨업 자유 스탯: {LvStatNames[index]} +1 (남은 포인트 {_lvHero.FreeStatPoints})");
+        if (_lvHero.FreeStatPoints > 0) RefreshLevelUp();
+        else CloseLevelUp(false);
+    }
+
+    private void CloseLevelUp(bool later)
+    {
+        if (!IsLevelUpOpen) return;
+        if (later && _lvHero != null) _lvDismissedAtLevel = _lvHero.level;
+        _levelUp.SetActive(false);
+        DungeonGridPlayer p = CurrentPlayer;
+        if (p != null) p.UnlockInput(_levelUp);
+        _lvHero = null;
+    }
+
+    private static string StatName(StatType t)
+    {
+        for (int i = 0; i < LvStats.Length; i++) if (LvStats[i] == t) return LvStatNames[i];
+        return t.ToString();
+    }
+
+    private void BuildLevelUp()
+    {
+        Image blocker = CreateImage(_overlayRoot, "LevelUp", new Color(0f, 0f, 0f, 0.6f), true);
+        Stretch(blocker.rectTransform);
+        _levelUp = blocker.gameObject;
+
+        Image panel = CreatePopupPanel(blocker.rectTransform, "Panel", true);
+        SetAnchor(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 720f));
+
+        _lvTitle = CreateText(panel.rectTransform, "Title", 56, FontStyles.Bold, TextAlignmentOptions.Center);
+        Place(_lvTitle.rectTransform, 0f, -50f, 880f, 80f);
+
+        _lvRandom = CreateText(panel.rectTransform, "Random", 34, FontStyles.Normal, TextAlignmentOptions.Center);
+        Place(_lvRandom.rectTransform, 0f, -135f, 880f, 170f);
+
+        _lvPrompt = CreateText(panel.rectTransform, "Prompt", 36, FontStyles.Normal, TextAlignmentOptions.Center);
+        Place(_lvPrompt.rectTransform, 0f, -320f, 880f, 60f);
+
+        // 스탯 버튼 5개 (가로 한 줄)
+        const float w = 164f, gap = 14f;
+        float startX = -(w * 5 + gap * 4) / 2f + w / 2f;
+        for (int i = 0; i < 5; i++)
+        {
+            int index = i;
+            Image btnImg = CreateImage(panel.rectTransform, LvStatNames[i], new Color(0.12f, 0.1f, 0.06f, 0.92f), true);
+            var rt = btnImg.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(startX + i * (w + gap), -395f);
+            rt.sizeDelta = new Vector2(w, 180f);
+            Image border = CreateImage(rt, "Border", new Color(0.85f, 0.68f, 0.3f, 0.9f), false);
+            Stretch(border.rectTransform, -3f);
+            border.transform.SetAsFirstSibling();
+            Image inner = CreateImage(rt, "Inner", new Color(0.12f, 0.1f, 0.06f, 1f), false);
+            Stretch(inner.rectTransform);
+            inner.transform.SetSiblingIndex(1);
+            var btn = btnImg.gameObject.AddComponent<Button>();
+            btn.targetGraphic = btnImg;
+            btn.onClick.AddListener(() => OnLevelUpStatChosen(index));
+            _lvStatLabels[i] = CreateText(rt, "Label", 38, FontStyles.Normal, TextAlignmentOptions.Center);
+            Stretch(_lvStatLabels[i].rectTransform, 6f);
+        }
+
+        // 나중에 (포인트는 남고 상태창 + 버튼으로 분배 가능)
+        TextMeshProUGUI later = CreateButton(panel.rectTransform, "Later", new Vector2(0f, 40f), new Color(0.1f, 0.1f, 0.1f, 0.85f),
+                                             new Color(0.8f, 0.8f, 0.8f), () => CloseLevelUp(true));
+        later.fontSize = 32;
+        later.text = "Later";
+        ((RectTransform)later.transform.parent).sizeDelta = new Vector2(220f, 70f);
+
+        _levelUp.SetActive(false);
+    }
+
+    private static void Place(RectTransform rt, float x, float topY, float w, float h)
+    {
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(x, topY);
+        rt.sizeDelta = new Vector2(w, h);
     }
 
     // ─────────────────────────────────────────
@@ -144,7 +314,7 @@ public class DungeonHud : MonoBehaviour
     /// <summary>예/아니오 확인창. 열려 있는 동안 플레이어 이동 잠금. Enter/Space = 예, Esc = 아니오.</summary>
     public void Confirm(string message, string yesLabel, string noLabel, Action<bool> onResult)
     {
-        if (IsDialogOpen) CloseDialog(false);
+        CloseDialog(false);
         _dialogText.text = message;
         _yesText.text = yesLabel;
         _noText.text = noLabel;
@@ -158,7 +328,7 @@ public class DungeonHud : MonoBehaviour
 
     private void CloseDialog(bool result)
     {
-        if (!IsDialogOpen) return;
+        if (_dialog == null || !_dialog.activeSelf) return;
         _dialog.SetActive(false);
         var player = FindFirstObjectByType<DungeonGridPlayer>();
         if (player != null) player.UnlockInput(this);
@@ -220,6 +390,9 @@ public class DungeonHud : MonoBehaviour
         _infoRoot = CreateCanvas("Info", InfoSortingOrder, false);
         _overlayRoot = CreateCanvas("Overlay", OverlaySortingOrder, true);
 
+        // 화면 테두리 (금색 이중선 + 모서리 장식). 배경을 무엇으로 바꿔도 테두리는 그대로 — 맨 먼저 만들어 다른 정보 뒤에
+        BuildScreenFrame();
+
         // 층 번호 (위 가운데, 오른쪽 위 MapButton·왼쪽 위 글자와 겹치지 않게 가운데)
         _floorBg = CreateImage(_infoRoot, "FloorLabel", new Color(0f, 0f, 0f, 0.5f), false).rectTransform;
         SetAnchor(_floorBg, new Vector2(0.5f, 1f), new Vector2(0f, -36f), new Vector2(220f, 84f));
@@ -252,6 +425,7 @@ public class DungeonHud : MonoBehaviour
         toastBg.gameObject.SetActive(false);
 
         BuildDialog();
+        BuildLevelUp();
     }
 
     private void BuildDialog()
@@ -307,6 +481,42 @@ public class DungeonHud : MonoBehaviour
             _popupSprite.name = "SubPanelBackground (sliced)";
             return _popupSprite;
         }
+    }
+
+    // ─────────────────────────────────────────
+    // 화면 테두리
+    // ─────────────────────────────────────────
+
+    public const string ScreenFrameResource = "UI/ScreenFrame";
+    // 모서리 장식이 늘어나지 않도록 9분할할 테두리 폭 (원본 픽셀, 장식 약 100px + 여유)
+    private const float ScreenFrameBorder = 120f;
+    // 테두리 이미지가 이 폭(캔버스 기준 1080)일 때 원본 비율 그대로 보인다
+    private const float ScreenFrameDesignWidth = 1080f;
+
+    /// <summary>
+    /// Resources/UI/ScreenFrame (배경을 투명하게 오려낸 금색 테두리)을 화면 전체에 9분할로 깐다.
+    /// 곧은 선만 늘어나고 모서리 장식은 원래 모양 그대로. 터치는 막지 않는다.
+    /// 정보 캔버스(기존 UI 아래)에 있으므로 창(상태·인벤토리 등)이 열리면 그 뒤에 가려진다.
+    /// </summary>
+    private void BuildScreenFrame()
+    {
+        Texture2D tex = Resources.Load<Texture2D>(ScreenFrameResource);
+        if (tex == null)
+        {
+            Debug.LogWarning($"[DungeonHud] 화면 테두리 'Resources/{ScreenFrameResource}' 을(를) 찾지 못해 테두리 없이 진행합니다.");
+            return;
+        }
+        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f, 0,
+                                      SpriteMeshType.FullRect, new Vector4(ScreenFrameBorder, ScreenFrameBorder, ScreenFrameBorder, ScreenFrameBorder));
+        sprite.name = "ScreenFrame (sliced)";
+
+        Image frame = CreateImage(_infoRoot, "ScreenFrame", Color.white, false);
+        frame.sprite = sprite;
+        frame.type = Image.Type.Sliced;
+        frame.fillCenter = false; // 가운데는 어차피 투명 — 그리지 않음
+        frame.pixelsPerUnitMultiplier = tex.width / ScreenFrameDesignWidth;
+        Stretch(frame.rectTransform);
+        frame.transform.SetAsFirstSibling();
     }
 
     private static Image CreatePopupPanel(RectTransform parent, string name, bool raycast)

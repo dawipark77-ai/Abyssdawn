@@ -20,19 +20,23 @@ MonoBehaviour:
   race: 1
   basicAttackOverride: {fileID: 11400000, guid: c8f5d1a3b96e4827bc1a0d4e6f819203, type: 2}
   level: 2
-  hp: 22
+  hp: 19
   mp: 0
-  atk: 9
+  atk: 7
   def: 2
   mag: 0
-  agi: 22
+  agi: 12
   luk: 5
-  physResist: 0
-  magResist: 0
+  physResist: 1
+  magResist: 1
   statusResist: 0.5
-  activeSkills: []
+  activeSkills:
+  - {fileID: 11400000, guid: a04e9f8e7ad743258b0360ef39bb46f2, type: 2}
+  - {fileID: 11400000, guid: c75307f0e4fe4e7395ead00f082e8770, type: 2}
   passiveSkills: []
   aiPattern: 0
+  desperatePhaseThreshold: 0.5
+  criticalPhaseThreshold: 0.2
   rowPreference: 0
   allowedSlots: 0
   minFloor: 0
@@ -41,4 +45,4 @@ MonoBehaviour:
   expReward: 0
   goldReward: 0
   dropTable: []
-  companionChance: 0.3
+  companionChance: 0.125

@@ -38,6 +38,15 @@ namespace AbyssdawnBattle
         public float atkMultiplierOverride;
         public float randomRollMaxOverride;
 
+        [Header("Charge (모아 치기 — 한 턴 예고 후 다음 턴 발동)")]
+        [Tooltip("0=바로 사용. 1=이번 턴은 기를 모으며 예고(머리 위 표시 + 메시지), 다음 자기 턴에 발동. " +
+                 "모으는 중에 스턴되면 취소된다 → 플레이어는 방어하거나 먼저 쓰러뜨리거나 스턴으로 끊을지 고른다")]
+        [Range(0, 1)] public int chargeTurns = 0;
+        [Tooltip("예고 메시지. {0} = 몬스터 이름. 비우면 기본 문구")]
+        public string chargeMessage = "";
+        [Tooltip("모으는 동안 몬스터 머리 위에 뜨는 짧은 표시")]
+        public string chargeIntentLabel = "!! HEAVY BLOW";
+
         /// <summary>
         /// 기존 필드(damageType / targeting.targetFaction / effects / curseEffect)를 조합한 자동 분류.
         /// 읽기 전용 — 실행 로직은 사용하지 않으며, 디자이너가 hp/mpCost 책정 시 참고용.

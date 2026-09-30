@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatData
   baseHP: 20
   baseMP: 0
-  baseAttack: 100
+  baseAttack: 5
   baseDefense: 5
   baseMagic: 5
-  baseAgility: 100
+  baseAgility: 5
   baseLuck: 3
   currentJob: {fileID: 11400000, guid: 8a0e4d071afd8734db05c41ff62774b9, type: 2}
   equippedSkills:

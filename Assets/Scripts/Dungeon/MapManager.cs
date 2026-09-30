@@ -50,6 +50,9 @@ public class MapManager : MonoBehaviour
     public bool followCamera = true;
     [Tooltip("평소 지도 확대 정도 (카메라 Orthographic Size). 작을수록 지도가 크게 보인다. 씬 원래 값은 14. 플레이 중 바꾸면 바로 반영")]
     public float mapViewSize = 8f;
+    [Tooltip("화면 배경 스프라이트 (월드의 Sprite 오브젝트). 넣기만 하면 실행 시 카메라 화면에 정확히 맞춰진다 — 위치·크기 조정 불필요. " +
+             "Order in Layer 는 지도(5)·플레이어(10)보다 작게")]
+    public SpriteRenderer screenBackground;
 
     [Header("Full Map")]
     [Tooltip("전체 지도를 여닫는 버튼 오브젝트 이름 (실행 시 이름으로 찾아 자동 연결)")]
@@ -74,6 +77,16 @@ public class MapManager : MonoBehaviour
     public float alarmDelay = 0.8f;
     [Tooltip("보물상자에서 장비가 나올 확률 (아직 없는 장비 중에서). 나머지는 소비 아이템")]
     [Range(0f, 1f)] public float chestEquipmentChance = 0.3f;
+    [Tooltip("보물상자에서 '지식의 서'(스킬 포인트 LP +1)가 나올 확률 — 스톤샤드식 전투 외 성장 수단")]
+    [Range(0f, 1f)] public float chestTomeChance = 0.12f;
+
+    [Header("Growth (전투 외 성장 — 스톤샤드식)")]
+    [Tooltip("걸을 때 자연 회복: 이 걸음 수마다 HP 1 (0 이면 끔)")]
+    public int stepsPerRegenHP = 12;
+    [Tooltip("층을 계단으로 처음 내려갈 때 받는 탐험 EXP = 값 × 층 번호")]
+    public int floorClearExpPerFloor = 20;
+    [Tooltip("그 층 지도를 100% 채우고 내려가면 추가로 받는 EXP = 값 × 층 번호")]
+    public int mapCompleteExpPerFloor = 20;
 
     [HideInInspector] public int width;
     [HideInInspector] public int height;
@@ -94,6 +107,7 @@ public class MapManager : MonoBehaviour
     private DungeonHud _hud;
     private float _sceneEncounterChance = -1f;
     private int _walkableCount;
+    private int _regenSteps;
     private List<ConsumableItemSO> _loot;
 
     void Start()
@@ -164,6 +178,7 @@ public class MapManager : MonoBehaviour
     {
         if (FloorData == null) return false;
 
+        TickWalkRegen();
         bool newlyRevealed = RevealAt(pos);
         FloorRoom room = FloorData.GetRoomAt(pos);
         if (newlyRevealed && room != null)
@@ -219,9 +234,47 @@ public class MapManager : MonoBehaviour
         _hud.Confirm($"Stairs lead down.\nDescend to <b>B{next}</b>?", "Descend", "Stay", ok =>
         {
             if (!ok) return;
+            string reward = GrantFloorClearExp();
             ChangeFloor(next, Arrival.Start);
-            Toast($"You descend to B{next}.");
+            Toast($"You descend to B{next}." + reward);
         });
+    }
+
+    /// <summary>
+    /// 걸을 때 자연 회복 (스톤샤드식). stepsPerRegenHP 걸음마다 HP 1.
+    /// 전투 사이 회복 수단이 포션·샘뿐이면 층이 길수록 버틸 수 없어서 넣었다 (10층 시뮬레이션).
+    /// </summary>
+    private void TickWalkRegen()
+    {
+        if (stepsPerRegenHP <= 0) return;
+        if (++_regenSteps < stepsPerRegenHP) return;
+        _regenSteps = 0;
+        PlayerStats hero = GetHeroStats();
+        if (hero != null && hero.currentHP > 0 && hero.currentHP < hero.maxHP) hero.currentHP += 1;
+    }
+
+    /// <summary>
+    /// 층을 계단으로 처음 내려갈 때 탐험 EXP (+ 지도를 다 채웠으면 추가). 알림에 붙일 문구를 돌려준다.
+    /// 같은 층은 한 번만 (위층에서 다시 내려와도 없음).
+    /// </summary>
+    private string GrantFloorClearExp()
+    {
+        if (FloorState == null || FloorState.clearRewarded) return "";
+        FloorState.clearRewarded = true;
+
+        int floor = FloorData.floorNumber;
+        int exp = Mathf.Max(0, floorClearExpPerFloor) * floor;
+        bool mapped = ExploredRatio >= 0.9999f;
+        int mapExp = mapped ? Mathf.Max(0, mapCompleteExpPerFloor) * floor : 0;
+        int total = exp + mapExp;
+        PlayerStats hero = GetHeroStats();
+        if (hero == null || total <= 0) return "";
+
+        hero.AddExp(total);
+        Debug.Log($"[MapManager] B{floor} 탐험 EXP +{total} (클리어 {exp}{(mapped ? $", 지도 완성 {mapExp}" : "")})");
+        return mapped
+            ? $"\n<size=80%><color=#FFD24A>Explored B{floor}: +{exp} EXP  ·  Map complete: +{mapExp} EXP</color></size>"
+            : $"\n<size=80%><color=#FFD24A>Explored B{floor}: +{exp} EXP</color></size>";
     }
 
     private void AskAscend()
@@ -252,6 +305,21 @@ public class MapManager : MonoBehaviour
     private void OpenChest(Vector2Int pos)
     {
         if (_player != null) _player.InterruptHold();
+
+        // 지식의 서: 스킬 포인트(LP) +1 — 전투 외 성장 수단
+        if (Random.value < chestTomeChance)
+        {
+            PlayerStats hero = GetHeroStats();
+            if (hero != null)
+            {
+                hero.skillPoints += 1;
+                FloorState.openedChests.Add(pos);
+                Toast("Opened a chest: <color=#B98CFF>Tome of Lore</color>!\n<size=75%>+1 LP (skill point)</size>");
+                Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → 지식의 서 (LP {hero.skillPoints})");
+                if (automapRenderer != null) automapRenderer.Rebuild();
+                return;
+            }
+        }
 
         // 장비 (아직 없는 것 중에서) — 장비를 얻는 유일한 경로
         if (Random.value < chestEquipmentChance)
@@ -454,7 +522,8 @@ public class MapManager : MonoBehaviour
                     for (int y = r.bounds.y; y < r.bounds.yMax; y++)
                     {
                         var p = new Vector2Int(x, y);
-                        if (FloorData.GetCell(p).feature == FloorFeature.None) cells.Add(p);
+                        FloorCell c = FloorData.GetCell(p);
+                        if (c.roomId == r.id && c.feature == FloorFeature.None) cells.Add(p); // 기둥·깎인 모서리 제외
                     }
             }
         }
@@ -568,6 +637,7 @@ public class MapManager : MonoBehaviour
         DungeonCameraFollow follow = cam.GetComponent<DungeonCameraFollow>();
         if (follow == null) follow = cam.gameObject.AddComponent<DungeonCameraFollow>();
         follow.viewSize = mapViewSize;
+        if (screenBackground != null) follow.screenBackground = screenBackground;
         follow.Setup(_player.transform, automapRenderer.FloorWorldRect());
     }
 

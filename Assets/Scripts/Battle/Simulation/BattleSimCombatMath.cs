@@ -8,7 +8,7 @@ namespace AbyssdawnBattle
     /// </summary>
     public static class BattleSimCombatMath
     {
-        public const float DefaultCriticalChanceBase = 25f;
+        public const float DefaultCriticalChanceBase = 5f; // 본편 BattleManager.DefaultCriticalChance 와 동일 (2026-09-30 25 → 5)
         public const float CriticalDamageMultiplier = 1.5f;
 
         /// <summary>가드 중 받는 피해 배율 (1 = 감소 없음). 0.8 = 20% 경감.</summary>
@@ -70,10 +70,14 @@ namespace AbyssdawnBattle
             return SlotDmgByIndex[i];
         }
 
+        /// <summary>
+        /// 명중 AGI 보정 = clamp(0.9 + (공격자 AGI − 방어자 AGI) × 0.015, 0.7, 1.15). 본편 BattleManager 도 이 함수를 쓴다.
+        /// [2026-09-30] 0.8 + 차이×0.02 (0.6~1.2) → 완화. 이전 식은 AGI 3 전사가 빠른 적에게 약 57%만 명중해 헛치기가 너무 잦았다.
+        /// </summary>
         public static float ComputeAgilityHitModifier(float attackerAgility, float defenderAgility)
         {
-            float raw = 0.8f + (attackerAgility - defenderAgility) * 0.02f;
-            return Mathf.Clamp(raw, 0.6f, 1.2f);
+            float raw = 0.9f + (attackerAgility - defenderAgility) * 0.015f;
+            return Mathf.Clamp(raw, 0.7f, 1.15f);
         }
 
         /// <summary>

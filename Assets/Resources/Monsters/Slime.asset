@@ -40,4 +40,4 @@ MonoBehaviour:
   expReward: 10
   goldReward: 0
   dropTable: []
-  companionChance: 0.3
+  companionChance: 0.125

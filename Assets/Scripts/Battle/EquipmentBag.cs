@@ -46,6 +46,35 @@ public static class EquipmentBag
         OnChanged?.Invoke();
     }
 
+    // ── 탐험 시작 시 장착 장비 (게임 오버 후 되돌릴 기준) ──
+    private static bool _startGearCaptured;
+    private static EquipmentData[] _startGear;
+
+    /// <summary>
+    /// 플레이 세션에서 처음 한 번, 시작 장비(HeroData 에 넣어 둔 장비)를 기억한다. EquipmentManager.Awake 가 호출.
+    /// </summary>
+    public static void CaptureStartGear(PlayerStatData data)
+    {
+        if (_startGearCaptured || data == null) return;
+        _startGearCaptured = true;
+        _startGear = new[] { data.rightHand, data.leftHand, data.body, data.accessory1, data.accessory2 };
+    }
+
+    /// <summary>
+    /// 새 탐험(게임 오버 후 재시작): 주운 장비를 모두 잃고, 장착 장비를 시작 장비로 되돌린다.
+    /// </summary>
+    public static void ResetForNewRun(PlayerStatData data)
+    {
+        Clear();
+        if (!_startGearCaptured || data == null) return;
+        data.rightHand = _startGear[0];
+        data.leftHand = _startGear[1];
+        data.body = _startGear[2];
+        data.accessory1 = _startGear[3];
+        data.accessory2 = _startGear[4];
+        Debug.Log("[EquipmentBag] 새 탐험 — 주운 장비 초기화, 장착 장비를 시작 장비로 되돌림");
+    }
+
     /// <summary>테스트용: Resources 의 모든 장비 지급 (ConsumableInventory 의 F12 테스트 지급과 함께).</summary>
     public static int GrantAllForTest()
     {

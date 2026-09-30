@@ -29,7 +29,8 @@ MonoBehaviour:
   physResist: 1
   magResist: 1
   statusResist: 1
-  activeSkills: []
+  activeSkills:
+  - {fileID: 11400000, guid: 296faba3aebc453880e9276e512fb480, type: 2}
   passiveSkills: []
   aiPattern: 0
   rowPreference: 1
@@ -40,4 +41,4 @@ MonoBehaviour:
   expReward: 60
   goldReward: 0
   dropTable: []
-  companionChance: 0.1
+  companionChance: 0.125

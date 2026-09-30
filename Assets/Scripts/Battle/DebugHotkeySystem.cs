@@ -389,7 +389,7 @@ public class DebugHotkeySystem : MonoBehaviour
             float spdFinal  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Speed,          member.Agility);
             float evasion   = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion,        0f);
             float accuracy  = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy,       1f);
-            float critChance= 25f + member.Luck
+            float critChance= battleManager.criticalChance + member.Luck
                             + member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance,     0f);
             float critDmg   = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage,     1.5f);
             float healRcv   = member.ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived,1f);
@@ -420,7 +420,7 @@ public class DebugHotkeySystem : MonoBehaviour
             float spdFinal  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Speed,           enemy.Agility);
             float evasion   = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion,         0f);
             float accuracy  = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy,        1f);
-            float critChance= 25f + enemy.luck
+            float critChance= battleManager.criticalChance + enemy.luck
                             + enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance,      0f);
             float critDmg   = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage,      1.5f);
             float healRcv   = enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived, 1f);

@@ -37,6 +37,9 @@ public class EquipmentManager : MonoBehaviour
             Debug.LogError("[EquipmentManager] PlayerStats 컴포넌트를 찾을 수 없습니다!");
         }
 
+        // 게임 오버 후 되돌릴 시작 장비 기억 (세션에서 처음 한 번)
+        EquipmentBag.CaptureStartGear(playerStatData);
+
         // PlayerStatData에서 장비 로드
         LoadEquipmentFromData();
     }

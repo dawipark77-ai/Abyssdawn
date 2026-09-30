@@ -20,9 +20,17 @@ using UnityEngine.Tilemaps;
 public class AutomapRenderer : MonoBehaviour
 {
     [Header("Colors")]
-    public Color floorColor = new Color(0f, 0f, 0f, 0.55f);
+    [Tooltip("드러난 통로 바닥 채움 — 배경이 20% 비쳐 보이는 반투명 검정")]
+    public Color floorColor = new Color(0f, 0f, 0f, 0.8f);
+    [Tooltip("드러난 방 바닥 채움 — 통로와 같은 반투명 검정 (격자는 그 위에 보임)")]
+    public Color roomFloorColor = new Color(0f, 0f, 0f, 0.8f);
     public Color wallColor = Color.white;
-    public Color doorColor = new Color(1f, 0.72f, 0.3f, 1f);
+    [Tooltip("닫힌 문 (칸 경계 전체를 막는 막대)")]
+    public Color doorColor = new Color(0.35f, 0.65f, 1f, 1f);
+    [Tooltip("층 전체에 깔리는 칸 격자 (세계수의 미궁식 지도 방안). a=0 이면 격자 없음")]
+    public Color gridColor = new Color(1f, 1f, 1f, 0.04f);
+    [Tooltip("드러난 바닥 위의 격자 (칸이 보일 정도로만 옅게)")]
+    public Color revealedGridColor = new Color(1f, 1f, 1f, 0.08f);
     [Tooltip("내려가는 계단")]
     public Color stairsColor = new Color(0.45f, 0.9f, 1f, 1f);
     [Tooltip("올라가는 계단")]
@@ -38,8 +46,9 @@ public class AutomapRenderer : MonoBehaviour
 
     [Header("Size (칸 크기 대비 비율)")]
     [Range(0.01f, 0.3f)] public float wallThickness = 0.08f;
-    [Range(0.1f, 1f)] public float doorLength = 0.55f;
-    [Range(0.01f, 0.4f)] public float doorThickness = 0.14f;
+    [Range(0.1f, 1f)] public float doorLength = 1f;
+    [Range(0.01f, 0.4f)] public float doorThickness = 0.16f;
+    [Range(0.005f, 0.1f)] public float gridThickness = 0.025f;
     [Range(0.1f, 1f)] public float iconSize = 0.6f;
     [Range(0.1f, 1f)] public float stairsIconSize = 0.85f;
 
@@ -119,14 +128,29 @@ public class AutomapRenderer : MonoBehaviour
             Vector2 cs = CellSize();
             float t = Mathf.Min(cs.x, cs.y) * wallThickness * _lineScale;
 
-            // 1) 바닥 채움 — 먼저 그려야 선이 위에 올라간다
-            if (floorColor.a > 0f)
+            // 0) 층 전체 격자 (지도 방안) — 가장 아래
+            if (gridColor.a > 0f) AddFloorGrid(cs);
+
+            // 1) 바닥 채움 — 먼저 그려야 선이 위에 올라간다. 방은 불투명 검정, 통로는 반투명
+            foreach (var p in _revealed)
             {
+                if (!_data.IsWalkable(p)) continue;
+                Color fill = _data.GetCell(p).terrain == FloorTerrain.Room ? roomFloorColor : floorColor;
+                if (fill.a <= 0f) continue;
+                AddRect(CellCenter(p), cs.x * 0.5f, cs.y * 0.5f, fill);
+            }
+
+            // 1-b) 드러난 바닥 위 격자 (칸 경계가 또렷하게 보이도록 바닥보다 조금 진하게)
+            if (revealedGridColor.a > 0f)
+            {
+                float gt = Mathf.Min(cs.x, cs.y) * gridThickness;
                 foreach (var p in _revealed)
                 {
                     if (!_data.IsWalkable(p)) continue;
                     Vector3 c = CellCenter(p);
-                    AddRect(c, cs.x * 0.5f, cs.y * 0.5f, floorColor);
+                    // 오른쪽·아래 경계만 그려 겹치지 않게 (이웃도 걸을 수 있는 칸일 때만 — 벽 쪽은 벽선이 그림)
+                    if (_data.IsWalkable(p + Dirs[1])) AddRect(new Vector3(c.x + cs.x * 0.5f, c.y, c.z), gt * 0.5f, cs.y * 0.5f, revealedGridColor);
+                    if (_data.IsWalkable(p + Dirs[2])) AddRect(new Vector3(c.x, c.y - cs.y * 0.5f, c.z), cs.x * 0.5f, gt * 0.5f, revealedGridColor);
                 }
             }
 
@@ -142,7 +166,8 @@ public class AutomapRenderer : MonoBehaviour
                 }
             }
 
-            // 3) 문 — 방 칸 또는 문 바깥 칸이 드러나 있으면 표시
+            // 3) 닫힌 문 — 방 칸 또는 문 바깥 칸이 드러나 있으면 표시.
+            //    칸 경계 전체 + 벽 두께만큼 양끝을 늘려 양옆 벽선과 틈 없이 이어진다 (= 확실히 닫힌 문)
             float dt = Mathf.Min(cs.x, cs.y) * doorThickness * _lineScale;
             foreach (var door in _data.doors)
             {
@@ -151,8 +176,8 @@ public class AutomapRenderer : MonoBehaviour
                 Vector3 b = CellCenter(door.corridorCell);
                 Vector3 mid = (a + b) * 0.5f;
                 bool vertical = Mathf.Abs(a.x - b.x) > Mathf.Abs(a.y - b.y); // 좌우로 붙은 문 → 경계선은 세로
-                if (vertical) AddRect(mid, dt * 0.5f, cs.y * doorLength * 0.5f, doorColor);
-                else AddRect(mid, cs.x * doorLength * 0.5f, dt * 0.5f, doorColor);
+                if (vertical) AddRect(mid, dt * 0.5f, cs.y * doorLength * 0.5f + t * 0.5f, doorColor);
+                else AddRect(mid, cs.x * doorLength * 0.5f + t * 0.5f, dt * 0.5f, doorColor);
             }
 
             // 4) 아이콘 — 드러난 칸에 있는 것만 (함정은 밟아서 발견한 것만)
@@ -243,6 +268,23 @@ public class AutomapRenderer : MonoBehaviour
         for (int k = 0; k < 4; k++) _colors.Add(color);
         _tris.Add(i); _tris.Add(i + 1); _tris.Add(i + 2);
         _tris.Add(i); _tris.Add(i + 2); _tris.Add(i + 3);
+    }
+
+    /// <summary>층 전체(가로·세로 모든 칸 경계)에 옅은 격자선. 드러나지 않은 곳에도 깔려 지도 방안처럼 보인다.</summary>
+    private void AddFloorGrid(Vector2 cs)
+    {
+        float gt = Mathf.Min(cs.x, cs.y) * gridThickness;
+        Rect r = FloorWorldRect();
+        for (int x = 0; x <= _data.width; x++)
+        {
+            float wx = r.xMin + x * cs.x;
+            AddRect(new Vector3(wx, r.center.y, 0f), gt * 0.5f, r.height * 0.5f, gridColor);
+        }
+        for (int y = 0; y <= _data.height; y++)
+        {
+            float wy = r.yMax - y * cs.y;
+            AddRect(new Vector3(r.center.x, wy, 0f), r.width * 0.5f, gt * 0.5f, gridColor);
+        }
     }
 
     /// <summary>발견한 함정 중 다 써서 더는 작동하지 않는 것. 가시 함정만 계속 작동한다.</summary>

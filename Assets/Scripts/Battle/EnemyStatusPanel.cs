@@ -199,7 +199,7 @@ public class EnemyStatusPanel : MonoBehaviour
     private float GetBaseCriticalChance()
     {
         if (_battleManager == null) _battleManager = FindFirstObjectByType<BattleManager>();
-        return _battleManager != null ? _battleManager.criticalChance : 25f;
+        return _battleManager != null ? _battleManager.criticalChance : BattleManager.DefaultCriticalChance;
     }
 
     // ─────────────────────────────────────────

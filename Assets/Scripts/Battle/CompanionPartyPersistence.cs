@@ -105,6 +105,19 @@ public static class CompanionPartyPersistence
         return n;
     }
 
+    /// <summary>같은 종(MonsterSO)의 동료를 몇 마리 데리고 있는지 (참전 + 대기).</summary>
+    public static int CountOwned(MonsterSO so)
+    {
+        string path = GetResourcePath(so);
+        if (path == null) return 0;
+        int n = 0;
+        for (int i = 0; i < ActiveRoster.Count; i++)
+            if (ActiveRoster[i] != null && ActiveRoster[i].resourcePath == path) n++;
+        for (int i = 0; i < WaitlistPaths.Count; i++)
+            if (WaitlistPaths[i] != null && WaitlistPaths[i].resourcePath == path) n++;
+        return n;
+    }
+
     public static void Clear()
     {
         // [2026-05-25 고정 3칸] Clear 후에도 ActiveRoster·WaitlistPaths는 3칸 null 유지.

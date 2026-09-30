@@ -21,9 +21,10 @@ public static class FloorVisibility
         FloorRoom room = data.GetRoomAt(pos);
         if (room != null)
         {
+            // 방 영역 안이라도 깎인 모서리·기둥(암반)은 제외 — 방 칸만
             for (int x = room.bounds.x; x < room.bounds.xMax; x++)
                 for (int y = room.bounds.y; y < room.bounds.yMax; y++)
-                    changed |= revealed.Add(new Vector2Int(x, y));
+                    if (data.cells[x, y].roomId == room.id) changed |= revealed.Add(new Vector2Int(x, y));
             return changed;
         }
 

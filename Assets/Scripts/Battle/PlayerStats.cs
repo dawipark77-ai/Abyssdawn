@@ -1265,6 +1265,7 @@ public class PlayerStats : MonoBehaviour
                 currentHP = 1;
                 Debug.Log($"[LastStand] {playerName} Last Stand triggered! Survived with 1 HP. (chance {survivalChance:F0}%)");
                 NotifyStatusChanged();
+                BattleFx.AllyHit(this, finalDamage);
                 return finalDamage;
             }
             else
@@ -1274,6 +1275,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         currentHP = Mathf.Clamp(newHP, 0, maxHP);
+        BattleFx.AllyHit(this, finalDamage); // 피해 숫자 팝업 (전투 씬에서만)
         if (currentHP <= 0) Die();
         return finalDamage;
     }
@@ -1515,6 +1517,26 @@ public class PlayerStats : MonoBehaviour
     private int _lvUpMagGain;
     private int _lvUpAgiGain;
     private int _lvUpLukGain;
+    private bool _lvUpHasRandomStat;
+    private StatType _lvUpRandomStat;
+
+    /// <summary>레벨업 한 번의 기록 (레벨업 선택 화면 표시용).</summary>
+    public struct LevelUpNote
+    {
+        public string playerName;
+        public int level;
+        public bool hasRandomStat;
+        public StatType randomStat;
+        public int hpGain;
+        public int mpGain;
+    }
+
+    /// <summary>
+    /// 아직 보여주지 않은 레벨업 기록. 레벨업은 주로 전투 씬에서 일어나고 선택 화면은 던전에서 뜨므로
+    /// 씬이 바뀌어도 남도록 static. 던전의 레벨업 선택 화면(DungeonHud)이 꺼내 쓰고 지운다.
+    /// </summary>
+    public static readonly System.Collections.Generic.List<LevelUpNote> PendingLevelUpNotes =
+        new System.Collections.Generic.List<LevelUpNote>();
 
     private void LevelUp()
     {
@@ -1529,11 +1551,24 @@ public class PlayerStats : MonoBehaviour
         _lvUpMagGain = 0;
         _lvUpAgiGain = 0;
         _lvUpLukGain = 0;
+        _lvUpHasRandomStat = false;
 
         ApplyHpMpGrowth();
         ApplyCombinedClassMemoryRandomStatGrowth();
         ApplyHpMpBonusFromDefenseMagicGainedThisLevel();
         GrantFreeStatPoint();
+
+        // 레벨업 = 무작위 스탯 1개(직업 성장률 가중) + 자유 스탯 1개(플레이어 선택 — 던전의 레벨업 선택 화면)
+        PendingLevelUpNotes.Add(new LevelUpNote
+        {
+            playerName = playerName,
+            level = level,
+            hasRandomStat = _lvUpHasRandomStat,
+            randomStat = _lvUpRandomStat,
+            hpGain = _lvUpHpGain,
+            mpGain = _lvUpMpGain,
+        });
+        if (PendingLevelUpNotes.Count > 30) PendingLevelUpNotes.RemoveAt(0);
         GrantSkillPoint();  // [2026-05-24] 매 레벨업마다 LP +1 자동 지급
         currentHP = maxHP;
         currentMP = maxMP;
@@ -1675,6 +1710,8 @@ public class PlayerStats : MonoBehaviour
 
         AddAllocatedStat(chosen, 1);
         TrackStatGain(chosen, 1);
+        _lvUpHasRandomStat = true;
+        _lvUpRandomStat = chosen;
     }
 
     private void GetMemoryLevelUpChanceBonusSums(out float atk, out float def, out float mag, out float agi, out float luk)
