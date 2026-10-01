@@ -46,6 +46,9 @@ public class StatusTabController : MonoBehaviour
 
     private bool _listenersBound = false;
 
+    /// <summary>지금 보이는 탭 인덱스 (0 = Slot1/Hero). 던전 파티 카드를 다시 누르면 닫는 판단에 사용 (DungeonPartyBar).</summary>
+    public int CurrentIndex { get; private set; } = -1;
+
     private void Awake()
     {
         BindButtonListeners();
@@ -88,6 +91,7 @@ public class StatusTabController : MonoBehaviour
     public void SelectSlot(int index)
     {
         Debug.Log($"[StatusTabController] SelectSlot({index}) — tabs.Count={tabs.Count}");
+        CurrentIndex = index;
 
         for (int i = 0; i < tabs.Count; i++)
         {

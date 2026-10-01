@@ -7,6 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 전투 연출 — 전부 코드로 만든다 (씬에 배치할 것 없음). 전투 씬(BattleManager 가 있을 때)에서만 동작.
 ///  - 피해 숫자 팝업: 적(스프라이트 머리 위) / 아군(상태 카드 위). 크리티컬은 크게 + "CRITICAL", 빗나감은 "MISS"
+///  - 회복 숫자 팝업: 같은 위치에 초록색 "+숫자" (PlayerStats.Heal / EnemyStats.Heal)
 ///  - 크리티컬: 순간 멈춤(히트 스톱) + 화면 흔들림
 ///  - 모아 치기 예고: 적 머리 위에 깜빡이는 경고 표시 (EnemyStats.pendingChargeSkill)
 /// 행동 순서는 드퀘·진여신전생식으로 미리 보여주지 않는다 (해결 단계 시작 때 AGI × 랜덤으로 정해짐).
@@ -79,6 +80,25 @@ public class BattleFx : MonoBehaviour
         if (fx == null || p == null) return;
         Vector2? pos = fx.AllyAnchor(p);
         if (pos != null) fx.Popup(pos.Value, "MISS", new Color(0.7f, 0.7f, 0.75f), false);
+    }
+
+    private static readonly Color HealColor = new Color(0.35f, 1f, 0.45f);
+
+    /// <summary>아군이 회복함 (PlayerStats.Heal 이 호출). amount = 실제로 오른 HP — 상태 카드 위에 초록 "+숫자".</summary>
+    public static void AllyHeal(PlayerStats p, int amount)
+    {
+        var fx = Get();
+        if (fx == null || p == null) return;
+        Vector2? pos = fx.AllyAnchor(p);
+        if (pos != null) fx.Popup(pos.Value, $"+{Mathf.Max(0, amount)}", HealColor, false);
+    }
+
+    /// <summary>적이 회복함 (EnemyStats.Heal 이 호출). 머리 위에 초록 "+숫자".</summary>
+    public static void EnemyHeal(EnemyStats e, int amount)
+    {
+        var fx = Get();
+        if (fx == null || e == null) return;
+        fx.Popup(fx.EnemyAnchor(e), $"+{Mathf.Max(0, amount)}", HealColor, false);
     }
 
     /// <summary>적 머리 위 예고 표시 (모아 치기 등).</summary>

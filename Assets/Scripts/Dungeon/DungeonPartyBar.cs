@@ -11,6 +11,7 @@ using Abyssdawn;   // MonsterSO
 ///  - 주인공: 씬의 PlayerStats 실시간 (HP/MP, 상태이상 아이콘). 함정·샘·레벨업 즉시 반영 (PlayerStats.OnStatusChanged).
 ///  - 동료: ActiveRoster 의 현재 HP/MP + MonsterSO 의 최대치·이름. 던전에서는 동료 상태이상 기록이 없어 아이콘은 비움.
 ///  - 쓰러진 캐릭터: 글자 붉게 + 해골 그림 (전투와 동일, PartyCardVisuals).
+///  - 카드를 누르면 스테이터스 창이 그 캐릭터의 탭으로 열림 (같은 카드를 다시 누르면 닫힘).
 /// 배치(위치·크기)는 씬에서 직접 — 이 스크립트는 값만 채운다. MapManager 가 실행 시 자동으로 붙인다.
 /// </summary>
 public class DungeonPartyBar : MonoBehaviour
@@ -190,10 +191,68 @@ public class DungeonPartyBar : MonoBehaviour
             _cards.Clear();
             return false;
         }
-        // 던전의 카드는 보기 전용 — 투명한 카드 배경이 이동 버튼 등의 터치를 가로채지 않게
+        // 터치는 카드 자체만 받는다 — 카드 묶음의 투명 배경·글자·아이콘은 이동 버튼 등의 터치를 가로채지 않게
         foreach (Graphic g in partyBar.GetComponentsInChildren<Graphic>(true)) g.raycastTarget = false;
+        for (int i = 0; i < _cards.Count; i++)
+            if (_cards[i] != null) MakeCardClickable(_cards[i].slot, i);
 
         Debug.Log($"[DungeonPartyBar] '{partyBar.name}' 연결 — 카드 {found}/{CompanionPartyPersistence.MainLineSlots}장");
         return true;
+    }
+
+    // ─────────────────────────────────────────
+    // 카드 터치 → 스테이터스 창
+    // ─────────────────────────────────────────
+
+    /// <summary>카드(PartySlot) 전체를 누를 수 있게 — 카드 자신의 Image 만 터치를 받고, 누르면 OnCardClicked(index).</summary>
+    private void MakeCardClickable(Transform slot, int index)
+    {
+        Graphic target = slot.GetComponent<Graphic>();
+        if (target == null)
+        {
+            var img = slot.gameObject.AddComponent<Image>();
+            img.color = new Color(1f, 1f, 1f, 0f);
+            target = img;
+        }
+        target.raycastTarget = true;
+
+        Button button = slot.GetComponent<Button>();
+        if (button == null) button = slot.gameObject.AddComponent<Button>();
+        button.transition = Selectable.Transition.None; // 눌러도 카드 색은 그대로
+        button.targetGraphic = target;
+        button.onClick.RemoveAllListeners(); // 카드 버튼은 이 스크립트 전용 (다시 연결될 때 중복 방지)
+        button.onClick.AddListener(() => OnCardClicked(index));
+    }
+
+    /// <summary>
+    /// 카드를 누르면 스테이터스 창을 그 카드의 캐릭터 탭으로 연다.
+    /// 스테이터스 창의 탭 순서는 고정(Slot1 = 주인공, Slot2~4 = 동료 ActiveRoster 0~2)이라,
+    /// 주인공 자리를 옮겨도 "누른 카드의 캐릭터"가 나오도록 카드 번호를 탭 번호로 바꾼다.
+    /// (기본 배치 — 주인공이 1번 — 에서는 1번 카드 = 1번 슬롯 그대로)
+    /// 같은 카드를 다시 누르면 창을 닫는다 (STATUS 버튼과 같은 토글).
+    /// </summary>
+    public void OnCardClicked(int cardIndex)
+    {
+        var occupancy = CompanionPartyPersistence.BuildMainLineOccupancy();
+        int tab = (cardIndex < occupancy.Length && occupancy[cardIndex].IsHero)
+            ? 0
+            : CompanionPartyPersistence.MainLineSlotToRosterIndex(cardIndex) + 1;
+        if (tab < 0) return;
+
+        var tabs = FindFirstObjectByType<StatusTabController>(FindObjectsInactive.Include);
+        if (tabs == null)
+        {
+            Debug.LogWarning("[DungeonPartyBar] 스테이터스 창(StatusTabController)을 찾지 못했습니다.");
+            return;
+        }
+        GameObject panel = tabs.gameObject;
+
+        if (panel.activeInHierarchy && tabs.CurrentIndex == tab)
+        {
+            panel.SetActive(false);
+            return;
+        }
+        if (!panel.activeSelf) panel.SetActive(true); // 열리면 기본 탭(주인공)으로 초기화되므로 아래에서 다시 고름
+        tabs.SelectSlot(tab);
     }
 }

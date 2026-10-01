@@ -1321,7 +1321,9 @@ public class PlayerStats : MonoBehaviour
     {
         // [StatMod 4단계] 받는 회복량 배율 적용.
         amount = Mathf.RoundToInt(ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived, amount));
+        int before = currentHP;
         currentHP = Mathf.Min(currentHP + amount, maxHP);
+        BattleFx.AllyHeal(this, currentHP - before); // 전투 중이면 카드 위에 초록 숫자 (실제 회복량)
     }
     public void UseMP(int amount) { currentMP = Mathf.Clamp(currentMP - amount, 0, maxMP); }
     void Die() { Debug.Log($"{playerName} 사망"); }

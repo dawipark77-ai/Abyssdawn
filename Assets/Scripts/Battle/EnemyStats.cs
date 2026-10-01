@@ -378,8 +378,10 @@ public class EnemyStats : MonoBehaviour
         // [StatMod 4단계] 받는 회복량 배율 적용.
         amount = Mathf.RoundToInt(ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived, amount));
 
+        int before = currentHP;
         currentHP += amount;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
+        BattleFx.EnemyHeal(this, currentHP - before); // 머리 위에 초록 숫자 (실제 회복량)
 
         UpdateStatusUI();
 

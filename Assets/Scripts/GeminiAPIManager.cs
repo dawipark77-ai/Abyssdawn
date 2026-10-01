@@ -9,8 +9,10 @@ namespace Genesis01
     public class GeminiAPIManager : MonoBehaviour
     {
         [Header("Gemini API Settings")]
-        [Tooltip("Enter your Google AI Studio API Key here")]
-        [SerializeField] private string apiKey = "YOUR_API_KEY_HERE";
+        // [2026-10-02] 키를 씬에 저장하지 않는다 (씬 파일은 git 에 올라감). 비워 두면 Windows 환경 변수 GEMINI_API_KEY 를 읽는다.
+        [Tooltip("비워 두십시오. 키는 Windows 환경 변수 GEMINI_API_KEY 에 넣습니다 (여기 넣으면 씬 파일에 저장되어 git 에 올라감)")]
+        [SerializeField] private string apiKey = "";
+        private const string ApiKeyEnvVar = "GEMINI_API_KEY";
         // [2026-05-24] gemini-1.5-flash가 v1beta에서 deprecated되어 404 발생.
         // 현행 가능한 모델: gemini-2.5-flash(권장), gemini-2.5-pro, gemini-2.0-flash, gemini-flash-latest
         [Tooltip("사용할 Gemini 모델. 기본: gemini-2.5-flash. 다른 옵션: gemini-2.5-pro / gemini-2.0-flash / gemini-flash-latest")]
@@ -40,7 +42,14 @@ namespace Genesis01
 
         private IEnumerator PostRequest(string prompt, Action<string> onSuccess, Action<string> onError)
         {
-            string url = string.Format(ApiUrlFormat, modelName, apiKey);
+            string key = !string.IsNullOrWhiteSpace(apiKey) ? apiKey : Environment.GetEnvironmentVariable(ApiKeyEnvVar);
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                Debug.LogWarning($"[GeminiAPIManager] API 키가 없습니다 — 환경 변수 {ApiKeyEnvVar} 를 설정하십시오.");
+                onError?.Invoke("Missing API key");
+                yield break;
+            }
+            string url = string.Format(ApiUrlFormat, modelName, key);
 
             // Create JSON body
             var requestBody = new GeminiRequest

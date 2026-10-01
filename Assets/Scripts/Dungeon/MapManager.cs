@@ -62,6 +62,10 @@ public class MapManager : MonoBehaviour
     [Tooltip("전체 지도를 여닫는 버튼 오브젝트 이름 (실행 시 이름으로 찾아 자동 연결)")]
     public string fullMapButtonName = DungeonFullMap.DefaultButtonName;
 
+    [Header("Search")]
+    [Tooltip("탐색 버튼 오브젝트 이름 (실행 시 이름으로 찾아 자동 연결). 반경·턴 소모·연출은 실행 중 붙는 DungeonSearch 에서")]
+    public string searchButtonName = DungeonSearch.DefaultButtonName;
+
     [Header("UI")]
     [Tooltip("창들(상태·인벤토리 등)이 들어 있는 Canvas 이름. 창은 한 번에 하나만 열린다 (DungeonPanelGroup)")]
     public string uiCanvasName = "Canvas";
@@ -149,6 +153,11 @@ public class MapManager : MonoBehaviour
         DungeonFullMap fullMap = GetComponent<DungeonFullMap>();
         if (fullMap == null) fullMap = gameObject.AddComponent<DungeonFullMap>();
         fullMap.Setup(this, fullMapButtonName);
+
+        // 탐색 (서치 버튼 — 주변의 숨겨진 함정 찾기)
+        DungeonSearch search = GetComponent<DungeonSearch>();
+        if (search == null) search = gameObject.AddComponent<DungeonSearch>();
+        search.Setup(this, searchButtonName);
 
         // 화면 아래 파티 카드 (전투의 PartyBar 를 그대로 배치하면 자동 연결)
         if (FindFirstObjectByType<DungeonPartyBar>() == null) gameObject.AddComponent<DungeonPartyBar>();
@@ -304,6 +313,45 @@ public class MapManager : MonoBehaviour
         }
         // 지도 완성(100%)은 알림 없이 전체 지도의 탐험률로만 보여준다 (DungeonFullMap)
         return changed;
+    }
+
+    // ─────────────────────────────────────────
+    // 탐색 (DungeonSearch — 서치 버튼)
+    // ─────────────────────────────────────────
+
+    /// <summary>
+    /// pos 주변 radius 칸 안의 숨겨진 것(지금은 아직 모르는 함정)을 찾아 found 에 담는다. 아직 드러내지는 않는다.
+    /// 범위 규칙은 시야와 같다: 둥근 반경, 벽 너머·문 너머는 찾지 못함 (FloorVisibility).
+    /// 숨겨진 문 등이 생기면 여기에 추가.
+    /// </summary>
+    public void FindHiddenAround(Vector2Int pos, int radius, List<Vector2Int> found)
+    {
+        found.Clear();
+        if (FloorData == null || FloorState == null) return;
+        var area = new HashSet<Vector2Int>();
+        FloorVisibility.ComputeVisible(FloorData, pos, radius, area);
+        foreach (Vector2Int p in FloorData.traps)
+            if (area.Contains(p) && !FloorState.knownTraps.Contains(p)) found.Add(p);
+    }
+
+    /// <summary>찾은 함정을 드러낸다 — 이후 자동 지도에 함정 표시(X)가 그려지고 층 기억에 남는다.</summary>
+    public void RevealFound(List<Vector2Int> found)
+    {
+        if (FloorState == null || found == null || found.Count == 0) return;
+        foreach (Vector2Int p in found) FloorState.knownTraps.Add(p);
+        if (automapRenderer != null) automapRenderer.Rebuild();
+    }
+
+    /// <summary>제자리에서 한 턴이 지남 (탐색 등): 걸음 회복·빛 소모가 한 걸음만큼 진행된다.</summary>
+    public void PassTurnInPlace()
+    {
+        TickWalkRegen();
+        TickPlayerLight();
+    }
+
+    public string TrapName(Vector2Int pos)
+    {
+        return FloorData != null ? FloorData.GetCell(pos).trap.ToString() : "";
     }
 
     // ─────────────────────────────────────────
