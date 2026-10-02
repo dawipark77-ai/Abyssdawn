@@ -166,6 +166,18 @@ public class MapManager : MonoBehaviour
         Transform canvas = DungeonPanelGroup.FindPanelCanvas(uiCanvasName);
         if (canvas != null) DungeonPanelGroup.Setup(canvas);
         else Debug.LogWarning($"[MapManager] 창들이 들어 있는 '{uiCanvasName}' 을(를) 찾지 못해 창 겹침 방지를 켜지 못했습니다.");
+
+        // 게임을 켜고 처음 들어왔으면: 저장이 있으면 이어서 할지 묻는다 (게임 오버·전투 복귀 때는 묻지 않음)
+        if (!SaveSystem.LaunchChecked)
+        {
+            SaveSystem.LaunchChecked = true;
+            if (!restoring && SaveSystem.HasSave) AskContinueFromSave();
+        }
+        if (!string.IsNullOrEmpty(SaveSystem.PendingNotice))
+        {
+            Toast(SaveSystem.PendingNotice); // 게임 오버 후 마지막 저장에서 깨어남 등
+            SaveSystem.PendingNotice = null;
+        }
     }
 
     private void OnValidate()
@@ -422,9 +434,72 @@ public class MapManager : MonoBehaviour
     {
         _hud.Confirm("The town gate.\nEnter the town?", "Enter", "Stay", ok =>
         {
+            if (ok) OpenTown();
+        });
+    }
+
+    // ─────────────────────────────────────────
+    // 마을 (메뉴식): 여관 · 상점 · 저장
+    // ─────────────────────────────────────────
+
+    private void OpenTown()
+    {
+        _hud.ShowTown(AskInn, () => Toast("The shop is not open yet."), AskSave, null);
+    }
+
+    private void AskInn()
+    {
+        _hud.Confirm("Rest at the inn?\n<size=75%><color=#9FC8FF>Fully restores HP and MP for the whole party.</color></size>", "Rest", "Cancel", ok =>
+        {
+            if (ok) RestAtInn();
+        });
+    }
+
+    /// <summary>여관: 주인공·참전 동료 전원 HP/MP 완전 회복 + 주인공 상태이상 해제.</summary>
+    private void RestAtInn()
+    {
+        PlayerStats hero = GetHeroStats();
+        if (hero != null)
+        {
+            hero.RemoveAllStatusEffects();
+            hero.currentHP = hero.maxHP;
+            hero.currentMP = hero.maxMP;
+            GameManager.EnsureInstance().SaveFromPlayer(hero);
+        }
+        foreach (var entry in CompanionPartyPersistence.ActiveRoster)
+        {
+            if (entry == null) continue;
+            var so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
+            if (so == null) continue;
+            entry.currentHP = so.HP;
+            entry.currentMP = so.MP;
+        }
+        _hud.Flash(new Color(1f, 0.85f, 0.5f, 0.45f), 0.6f);
+        Toast("<color=#FFD24A>You rest at the inn.</color>\n<size=80%>The whole party is fully restored.</size>");
+        Debug.Log("[MapManager] 여관 — 파티 전원 HP/MP 완전 회복");
+    }
+
+    private void AskSave()
+    {
+        _hud.Confirm("Record your journey?\n<size=75%><color=#9FC8FF>Your previous save will be overwritten.</color></size>", "Save", "Cancel", ok =>
+        {
             if (!ok) return;
-            if (!DungeonTownGate.Enter(townSceneName, _player))
-                Toast("The town is not open yet.");
+            string err;
+            if (SaveSystem.Save(out err)) Toast("<color=#FFD24A>Your journey has been recorded.</color>");
+            else Toast("<color=#FF6B6B>Save failed.</color>\n<size=75%>" + err + "</size>");
+        });
+    }
+
+    /// <summary>게임을 켜고 던전에 처음 들어왔을 때, 저장이 있으면 이어서 할지 묻는다 (게임 오버 후에는 묻지 않음).</summary>
+    private void AskContinueFromSave()
+    {
+        SaveSystem.SaveData d = SaveSystem.Peek();
+        if (d == null) return;
+        _hud.Confirm($"Continue your journey?\n<size=75%><color=#9FC8FF>B{d.currentFloor}  ·  Lv {d.heroLevel}  ·  saved {d.savedAt}</color></size>", "Continue", "New Game", ok =>
+        {
+            if (!ok) return;
+            string err;
+            if (!SaveSystem.Load(out err)) Toast("<color=#FF6B6B>Could not load the save.</color>\n<size=75%>" + err + "</size>");
         });
     }
 

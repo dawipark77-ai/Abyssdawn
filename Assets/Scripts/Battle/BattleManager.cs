@@ -92,6 +92,9 @@ public class BattleManager : MonoBehaviour
     [Tooltip("줄 완료 후 다음 줄로 진행할 키")]
     public KeyCode messageAdvanceKey = KeyCode.Space;
 
+    /// <summary>켜면 전투 메시지가 입력 없이 다음 줄로 넘어간다. 자동 플레이 테스트(DungeonAutoPilot) 전용.</summary>
+    public static bool AutoAdvanceMessages;
+
     [Tooltip("마우스 좌클릭으로도 다음 줄로 진행")]
     public bool messageAdvanceOnMouseClick = true;
 
@@ -1958,6 +1961,25 @@ public class BattleManager : MonoBehaviour
         GameManager.EnsureInstance().ClearAllData();
         CompanionPartyPersistence.Clear();
         DestroyAllCompanionInstances();
+        PlayerStats.PendingLevelUpNotes.Clear();
+        DungeonEncounter.justReturnedFromBattle = false;
+
+        // [2026-10-03] 저장이 있으면 마지막으로 저장한 곳(마을)에서 다시 시작 — 층·지도·주인공·동료·소지품 모두 저장 당시로.
+        //   저장이 없을 때만 아래처럼 1층부터 새 탐험.
+        if (SaveSystem.HasSave)
+        {
+            SaveSystem.PendingNotice = "<color=#FF6B6B>Your party has fallen...</color>\n<size=80%>You awaken at your last save.</size>";
+            if (SaveSystem.Load(out string loadError))
+            {
+                Debug.Log("[BattleManager] Game Over — 마지막 저장에서 다시 시작");
+                yield break;
+            }
+            SaveSystem.PendingNotice = null;
+            Debug.LogWarning($"[BattleManager] Game Over — 저장 불러오기 실패({loadError}), 1층부터 새로 시작");
+            DungeonPersistentData.ClearState();
+            GameManager.EnsureInstance().ClearAllData();
+            CompanionPartyPersistence.Clear();
+        }
 
         // [2026-09-30] 아이템·장비도 새 탐험 상태로 (새벽의 잔 최대 충전, 주운 아이템·장비 초기화, 장착 장비 = 시작 장비)
         ConsumableInventory.ResetForNewRun();
@@ -7459,6 +7481,7 @@ public class BattleManager : MonoBehaviour
     /// <summary>이번 프레임에 진행 입력(키 또는 마우스 좌클릭)이 들어왔는지.</summary>
     private bool IsAdvanceInputPressedThisFrame()
     {
+        if (AutoAdvanceMessages) return true; // 자동 플레이 테스트(DungeonAutoPilot)용 — 평소엔 꺼져 있음
         if (Input.GetKeyDown(messageAdvanceKey)) return true;
         if (messageAdvanceOnMouseClick && Input.GetMouseButtonDown(0)) return true;
         return false;

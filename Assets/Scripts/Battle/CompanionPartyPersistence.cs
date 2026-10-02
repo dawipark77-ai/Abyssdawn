@@ -35,6 +35,13 @@ public static class CompanionPartyPersistence
     // (세션 내 유일성만 보장, 저장/로드는 이번 범위 아님).
     private static int _nextCompanionId = 1;
 
+    /// <summary>다음에 발급할 동료 ID — 저장·불러오기(SaveSystem)용.</summary>
+    public static int NextCompanionId
+    {
+        get { return _nextCompanionId; }
+        set { _nextCompanionId = Mathf.Max(1, value); }
+    }
+
     public const int MaxActive = 3;
     public const int MaxWaitlist = 3;
 

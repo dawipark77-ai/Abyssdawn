@@ -46,7 +46,7 @@ MonoBehaviour:
   minFloor: 0
   maxFloor: 0
   spawnWeight: 0
-  expReward: 5
+  expReward: 15
   goldReward: 0
   dropTable:
   - item: {fileID: 11400000, guid: e0d8da405b906cd45a2c35baadd4a6d0, type: 2}

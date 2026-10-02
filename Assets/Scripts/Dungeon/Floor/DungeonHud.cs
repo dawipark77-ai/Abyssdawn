@@ -78,6 +78,11 @@ public class DungeonHud : MonoBehaviour
 
     public bool IsLevelUpOpen => _levelUp != null && _levelUp.activeSelf;
 
+    // ── 마을 메뉴 (여관 · 상점 · 저장) ──
+    private GameObject _town;
+    private Action _townInn, _townShop, _townSave, _townLeave;
+    public bool IsTownOpen => _town != null && _town.activeSelf;
+
     private void Awake()
     {
         if (_instance != null && _instance != this) { Destroy(gameObject); return; }
@@ -105,6 +110,7 @@ public class DungeonHud : MonoBehaviour
 
         CheckLevelUp();
 
+        if (IsTownOpen && (_dialog == null || !_dialog.activeSelf) && Input.GetKeyDown(KeyCode.Escape)) { CloseTown(); return; }
         if (_dialog == null || !_dialog.activeSelf) return;
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space)) CloseDialog(true);
         else if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace)) CloseDialog(false);
@@ -125,6 +131,7 @@ public class DungeonHud : MonoBehaviour
         _lvNextCheck = Time.unscaledTime + 0.25f;
 
         if (_dialog != null && _dialog.activeSelf) return;
+        if (IsTownOpen) return;
         if (DungeonPanelGroup.Instance != null && DungeonPanelGroup.Instance.AnyOpen) return;
         var fullMap = FindFirstObjectByType<DungeonFullMap>();
         if (fullMap != null && fullMap.IsOpen) return;
@@ -348,6 +355,7 @@ public class DungeonHud : MonoBehaviour
         {
             _toastText.text = _toasts.Dequeue();
             _toastGroup.gameObject.SetActive(true);
+            _toastGroup.transform.SetAsLastSibling(); // 마을 메뉴·확인창 위에 보이게
             yield return Fade(_toastGroup, 0f, 1f, 0.15f);
             // 뒤에 기다리는 알림이 있으면 조금 빨리 넘긴다
             yield return new WaitForSeconds(_toasts.Count > 0 ? ToastSeconds * 0.6f : ToastSeconds);
@@ -426,6 +434,98 @@ public class DungeonHud : MonoBehaviour
 
         BuildDialog();
         BuildLevelUp();
+        BuildTown();
+        _dialog.transform.SetAsLastSibling(); // 확인창은 마을 메뉴 위에 뜬다
+    }
+
+    // ─────────────────────────────────────────
+    // 마을 메뉴 — 여관 · 상점 · 저장 (가로형 팝업). 열려 있는 동안 이동 잠금.
+    // ─────────────────────────────────────────
+
+    /// <summary>마을 메뉴를 연다. 각 버튼은 해당 동작을 부르고 메뉴는 열린 채로 둔다 (Leave 만 닫음).</summary>
+    public void ShowTown(Action onInn, Action onShop, Action onSave, Action onLeave)
+    {
+        _townInn = onInn; _townShop = onShop; _townSave = onSave; _townLeave = onLeave;
+        _town.SetActive(true);
+        _dialog.transform.SetAsLastSibling();
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.LockInput(_town);
+    }
+
+    public void CloseTown()
+    {
+        if (!IsTownOpen) return;
+        _town.SetActive(false);
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.UnlockInput(_town);
+        Action leave = _townLeave;
+        _townInn = _townShop = _townSave = _townLeave = null;
+        if (leave != null) leave();
+    }
+
+    private void BuildTown()
+    {
+        Image blocker = CreateImage(_overlayRoot, "Town", new Color(0f, 0f, 0f, 0.55f), true);
+        Stretch(blocker.rectTransform);
+        _town = blocker.gameObject;
+
+        Image panel = CreatePopupPanel(blocker.rectTransform, "Panel", true);
+        SetAnchor(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 600f));
+
+        TextMeshProUGUI title = CreateText(panel.rectTransform, "Title", 58, FontStyles.Bold, TextAlignmentOptions.Center);
+        title.text = "<color=#FFD24A>TOWN</color>";
+        Place(title.rectTransform, 0f, -46f, 880f, 76f);
+        TextMeshProUGUI sub = CreateText(panel.rectTransform, "Subtitle", 32, FontStyles.Normal, TextAlignmentOptions.Center);
+        sub.text = "<color=#BBBBBB>A moment of light above the abyss.</color>";
+        Place(sub.rectTransform, 0f, -122f, 880f, 50f);
+
+        // 명령 3개 (가로 한 줄)
+        string[] names = { "Inn", "Shop", "Save" };
+        string[] descs = { "Rest and fully\nrecover the party", "Buy and sell\nsupplies", "Record your\njourney" };
+        const float w = 270f, gap = 24f;
+        float startX = -(w * 3 + gap * 2) / 2f + w / 2f;
+        for (int i = 0; i < 3; i++)
+        {
+            int index = i;
+            Image btnImg = CreateImage(panel.rectTransform, names[i], new Color(0.12f, 0.1f, 0.06f, 0.92f), true);
+            var rt = btnImg.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(startX + i * (w + gap), -200f);
+            rt.sizeDelta = new Vector2(w, 230f);
+            Image border = CreateImage(rt, "Border", new Color(0.85f, 0.68f, 0.3f, 0.9f), false);
+            Stretch(border.rectTransform, -3f);
+            border.transform.SetAsFirstSibling();
+            Image inner = CreateImage(rt, "Inner", new Color(0.12f, 0.1f, 0.06f, 1f), false);
+            Stretch(inner.rectTransform);
+            inner.transform.SetSiblingIndex(1);
+            var btn = btnImg.gameObject.AddComponent<Button>();
+            btn.targetGraphic = btnImg;
+            btn.onClick.AddListener(() => OnTownCommand(index));
+            TextMeshProUGUI label = CreateText(rt, "Label", 50, FontStyles.Bold, TextAlignmentOptions.Center);
+            label.text = names[i];
+            label.color = new Color(1f, 0.92f, 0.65f);
+            Place(label.rectTransform, 0f, -30f, w - 20f, 70f);
+            TextMeshProUGUI desc = CreateText(rt, "Desc", 28, FontStyles.Normal, TextAlignmentOptions.Center);
+            desc.text = "<color=#BBBBBB>" + descs[i] + "</color>";
+            Place(desc.rectTransform, 0f, -110f, w - 24f, 100f);
+        }
+
+        // 마을 나가기 (명령이 아니라 창 닫기)
+        TextMeshProUGUI leave = CreateButton(panel.rectTransform, "Leave", new Vector2(0f, 40f), new Color(0.1f, 0.1f, 0.1f, 0.85f),
+                                             new Color(0.85f, 0.85f, 0.85f), CloseTown);
+        leave.text = "Leave";
+        leave.fontSize = 34;
+        ((RectTransform)leave.transform.parent).sizeDelta = new Vector2(240f, 76f);
+
+        _town.SetActive(false);
+    }
+
+    private void OnTownCommand(int index)
+    {
+        if (_dialog != null && _dialog.activeSelf) return; // 확인창이 떠 있으면 무시
+        Action a = index == 0 ? _townInn : index == 1 ? _townShop : _townSave;
+        if (a != null) a();
     }
 
     private void BuildDialog()

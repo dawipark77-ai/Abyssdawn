@@ -274,6 +274,16 @@ public class ConsumableInventory : MonoBehaviour
     //  새벽의 잔 — 5층 보충 포인트
     // ═════════════════════════════════════════════════════════
 
+    /// <summary>저장 파일에서 불러온 소지품으로 통째로 바꾼다 (SaveSystem).</summary>
+    public void RestoreFromSave(List<ConsumableSlot> savedSlots, int chaliceCharges)
+    {
+        slots.Clear();
+        if (savedSlots != null) slots.AddRange(savedSlots);
+        dawnChaliceCharges = Mathf.Clamp(chaliceCharges, 0, dawnChaliceMaxCharges);
+        FlushSessionDawnCharges();
+        OnInventoryChanged?.Invoke();
+    }
+
     /// <summary>
     /// 5층마다 있는 보충 장소에서 호출합니다. 최대치까지 충전합니다.
     /// </summary>
