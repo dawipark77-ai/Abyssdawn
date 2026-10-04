@@ -96,6 +96,57 @@ public class PlayerStatData : ScriptableObject
     }
 
     /// <summary>
+    /// 새 탐험 (저장 없이 죽음) — 배운 스킬·장착 스킬·장착 패시브를 모두 비운다.
+    /// 슬롯 개수(액티브 6, 패시브 3)는 유지하고 내용만 null. 스킬 포인트는 주인공 새로 생성 시 StartingSkillPoints 로.
+    /// </summary>
+    public void ResetSkillsForNewRun()
+    {
+        if (learnedSkills == null) learnedSkills = new List<AbyssdawnBattle.SkillData>();
+        learnedSkills.Clear();
+        ClearSlots(ref equippedSkills, 6);
+        ClearSlots(ref equippedPassives, 3);
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        Debug.Log("[PlayerStatData] 새 탐험 — 배운 스킬·장착 스킬·패시브 초기화");
+    }
+
+    /// <summary>
+    /// 막 배운 스킬을 빈 슬롯에 자동 장착 (액티브 → equippedSkills 6칸, 패시브 → equippedPassives 3칸).
+    /// 이미 장착돼 있거나 빈 칸이 없으면 false — 그때는 SelectedSkill 패널에서 직접 장착.
+    /// </summary>
+    public bool AutoEquipIfFree(AbyssdawnBattle.SkillData skill)
+    {
+        if (skill == null) return false;
+        bool passive = skill.IsPassive;
+        if (passive) { if (equippedPassives == null) equippedPassives = new List<AbyssdawnBattle.SkillData>(); }
+        else if (equippedSkills == null) equippedSkills = new List<AbyssdawnBattle.SkillData>();
+        var list = passive ? equippedPassives : equippedSkills;
+        int slots = passive ? 3 : 6;
+        if (list.Contains(skill)) return false;
+        while (list.Count < slots) list.Add(null);
+        for (int i = 0; i < slots; i++)
+        {
+            if (list[i] != null) continue;
+            list[i] = skill;
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+            Debug.Log($"[PlayerStatData] '{skill.skillName}' 자동 장착 → {(passive ? "패시브" : "액티브")} 슬롯 {i + 1}");
+            return true;
+        }
+        return false;
+    }
+
+    private static void ClearSlots(ref List<AbyssdawnBattle.SkillData> list, int minCount)
+    {
+        if (list == null) list = new List<AbyssdawnBattle.SkillData>();
+        int count = Mathf.Max(list.Count, minCount);
+        list.Clear();
+        for (int i = 0; i < count; i++) list.Add(null);
+    }
+
+    /// <summary>
     /// 양손 무기 장착 규칙 강제 — 오른손이 TwoHanded면 왼손 자동 해제
     /// 인스펙터 직접 편집 시에도 작동
     /// </summary>

@@ -61,10 +61,29 @@ public class SkillTreeNode : MonoBehaviour
     private SkillState currentState = SkillState.Locked;
     private SwordSkillTreeManager treeManager;
     
+    /// <summary>
+    /// 부모 오브젝트에 같은 스킬의 노드가 이미 있으면 이 노드는 중복(씬에 이중으로 붙은 것).
+    /// 중복 노드는 버튼을 가로채지 않고 트리 관리에서도 빠진다 — 부모 노드가 상태·클릭을 담당.
+    /// (예전에는 자식 노드가 부모 버튼의 리스너를 지우고 자기 것으로 바꿔, 숨겨진 백업 팝업이 열리는 문제가 있었음)
+    /// </summary>
+    public bool IsDuplicateNode()
+    {
+        if (transform.parent == null) return false;
+        var parentNode = transform.parent.GetComponent<SkillTreeNode>();
+        return parentNode != null && parentNode != this && parentNode.skillData == skillData;
+    }
+
     private void Awake()
     {
         Debug.Log($"[SkillTreeNode] ⚡ Awake 시작 - {gameObject.name}");
-        
+
+        if (IsDuplicateNode())
+        {
+            Debug.Log($"[SkillTreeNode] {gameObject.name}: 부모에 같은 스킬 노드가 있어 중복 노드로 비활성화");
+            enabled = false;
+            return;
+        }
+
         // 버튼이 없으면 자동으로 찾기 (자신 → 자식 → 부모 → 형제 순서로 검색)
         if (nodeButton == null)
         {
@@ -307,8 +326,12 @@ public class SkillTreeNode : MonoBehaviour
         if (skillDetailPopup == null)
         {
             Debug.Log($"[SkillTreeNode] {gameObject.name}: SkillDetailPopup을 자동으로 찾는 중...");
-            skillDetailPopup = FindObjectOfType<SkillDetailPopup>(true);
-            
+            // 같은 패널 안의 팝업을 우선 (부모를 거슬러 올라가며 검색) — 숨겨진 Backup_Panels 팝업을 잡지 않도록
+            for (Transform t = transform.parent; t != null && skillDetailPopup == null; t = t.parent)
+                skillDetailPopup = t.GetComponentInChildren<SkillDetailPopup>(true);
+            if (skillDetailPopup == null)
+                skillDetailPopup = FindObjectOfType<SkillDetailPopup>(true);
+
             if (skillDetailPopup != null)
             {
                 Debug.Log($"[SkillTreeNode] ✅ {gameObject.name}: SkillDetailPopup 자동 검색 성공 - {skillDetailPopup.gameObject.name}");

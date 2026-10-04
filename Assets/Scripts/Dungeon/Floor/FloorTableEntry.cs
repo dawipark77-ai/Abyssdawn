@@ -56,6 +56,9 @@ public class FloorTableEntry
     [Tooltip("이 층들의 인카운터 확률. -1 이면 씬의 DungeonEncounter 설정값 그대로 사용")]
     public float encounterChance = -1f;
 
+    [Tooltip("한 번 전투에 나오는 몬스터 수 1·2·3·4마리의 가중치 (예: 55,30,12,3). 4마리면 2/2 대열")]
+    public float[] groupSizeWeights = new float[] { 1f, 0f, 0f, 0f };
+
     [Header("탐험 요소")]
     [Tooltip("보물상자 개수 범위 (방 안에 배치)")]
     public int minChests = 1;
@@ -94,6 +97,28 @@ public class FloorTableEntry
     }
 
     /// <summary>모양 다양성 설정 (기본값 표 작성용).</summary>
+    /// <summary>몬스터 수 1~4마리 가중치.</summary>
+    public FloorTableEntry WithGroups(float one, float two, float three, float four)
+    {
+        groupSizeWeights = new float[] { one, two, three, four };
+        return this;
+    }
+
+    /// <summary>roll01 (0~1 난수)로 몬스터 수 1~4를 고른다. 가중치가 없으면 1.</summary>
+    public int PickGroupSize(float roll01)
+    {
+        float total = 0f;
+        if (groupSizeWeights != null) for (int i = 0; i < groupSizeWeights.Length && i < 4; i++) total += Math.Max(0f, groupSizeWeights[i]);
+        if (total <= 0f) return 1;
+        float r = roll01 * total;
+        for (int i = 0; i < groupSizeWeights.Length && i < 4; i++)
+        {
+            r -= Math.Max(0f, groupSizeWeights[i]);
+            if (r <= 0f) return i + 1;
+        }
+        return 1;
+    }
+
     public FloorTableEntry WithShapes(float shapedRooms, float wideCorridors, int deadEndMin, int deadEndMax)
     {
         shapedRoomChance = shapedRooms;
@@ -126,12 +151,13 @@ public static class FloorTableDefaults
     public static List<FloorTableEntry> CreateBeta()
     {
         List<FloorTableEntry> list = new List<FloorTableEntry>();
-        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 0, 1, 0.5f).WithShapes(0.3f, 0.2f, 0, 1));
-        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.3f).WithShapes(0.4f, 0.3f, 0, 2));
-        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 0, 1, 0.5f).WithShapes(0.4f, 0.3f, 0, 1));
-        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 2, 3, 0.3f).WithShapes(0.5f, 0.35f, 1, 2));
-        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 2, 4, 0.35f).WithShapes(0.55f, 0.4f, 1, 3));
-        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 3, 6, 0.35f).WithShapes(0.6f, 0.4f, 2, 4));
+        // 몬스터 수 가중치 (1·2·3·4마리) — [2026-10-04] 같은 몬스터 최대 4마리까지, 4마리면 2/2 대열
+        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 0, 1, 0.5f).WithShapes(0.3f, 0.2f, 0, 1).WithGroups(55, 30, 12, 3));
+        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.3f).WithShapes(0.4f, 0.3f, 0, 2).WithGroups(40, 35, 18, 7));
+        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 0, 1, 0.5f).WithShapes(0.4f, 0.3f, 0, 1).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 2, 3, 0.3f).WithShapes(0.5f, 0.35f, 1, 2).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 2, 4, 0.35f).WithShapes(0.55f, 0.4f, 1, 3).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 3, 6, 0.35f).WithShapes(0.6f, 0.4f, 2, 4).WithGroups(30, 35, 22, 13));
         for (int i = 0; i < list.Count; i++) list[i].encounterChance = BetaEncounterChance;
         return list;
     }

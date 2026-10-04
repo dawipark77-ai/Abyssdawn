@@ -120,6 +120,8 @@ public class EnemyStats : MonoBehaviour
     [Header("Level Info")]
     public int level = 1;
     public int expReward = 10;
+    /// <summary>쓰러뜨리면 주는 골드 (MonsterSO.GoldReward). 도망치면 0.</summary>
+    public int goldReward = 0;
 
     void Awake()
     {
@@ -158,6 +160,7 @@ public class EnemyStats : MonoBehaviour
         luck         = so.LUK;
         allowedSlots = so.AllowedSlots;
         expReward    = so.ExpReward;
+        goldReward   = so.GoldReward;
         statusResist = so.StatusResist;
         magResist    = so.MagResist;
         physResist   = so.PhysResist;

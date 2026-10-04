@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 ///  - 주인공 수치: GameManager.PartyMemberData (레벨·EXP·HP/MP·기본 스탯·분배 포인트·LP)
 ///  - 주인공 장비·스킬·종의 기억·직업 (HeroData — 에셋 이름으로)
 ///  - 동료: 참전 3칸(빈칸 포함)·대기 3칸·주인공 자리·다음 ID
-///  - 소비 아이템·새벽의 잔 충전, 가진 장비 목록
+///  - 소비 아이템·새벽의 잔 충전, 가진 장비 목록, 소지금
 /// 저장하지 않는 것: 전투 중 상태이상 (마을에서만 저장하므로 없음), 아직 보여주지 않은 레벨업 기록.
 /// </summary>
 public static class SaveSystem
@@ -72,6 +72,7 @@ public static class SaveSystem
         public List<ItemSave> consumables = new List<ItemSave>();
         public int chaliceCharges;
         public List<string> equipmentBag = new List<string>();
+        public int gold = PlayerWallet.StartingGold;
         // 이어서 하기 창에 보여줄 요약
         public int heroLevel;
     }
@@ -127,8 +128,9 @@ public static class SaveSystem
                 d.accessory1 = NameOf(sd.accessory1); d.accessory2 = NameOf(sd.accessory2);
                 d.memory1 = NameOf(sd.memorySlot1); d.memory2 = NameOf(sd.memorySlot2); d.memory3 = NameOf(sd.memorySlot3);
                 foreach (var s in sd.learnedSkills) if (s != null) d.learnedSkills.Add(s.name);
-                foreach (var s in sd.equippedSkills) if (s != null) d.equippedSkills.Add(s.name);
-                foreach (var s in sd.equippedPassives) if (s != null) d.equippedPassives.Add(s.name);
+                // 장착 슬롯은 빈 칸도 "" 로 남겨 슬롯 위치를 보존
+                foreach (var s in sd.equippedSkills) d.equippedSkills.Add(s != null ? s.name : "");
+                foreach (var s in sd.equippedPassives) d.equippedPassives.Add(s != null ? s.name : "");
             }
 
             foreach (var e in CompanionPartyPersistence.ActiveRoster)
@@ -143,6 +145,7 @@ public static class SaveSystem
                 d.chaliceCharges = inv.dawnChaliceCharges;
             }
             foreach (var e in EquipmentBag.Items) if (e != null) d.equipmentBag.Add(e.name);
+            d.gold = PlayerWallet.Gold;
 
             File.WriteAllText(FilePath, JsonUtility.ToJson(d, true));
             Debug.Log($"[SaveSystem] 저장 완료 — B{d.currentFloor} Lv{d.heroLevel} → {FilePath}");
@@ -212,13 +215,16 @@ public static class SaveSystem
             PlayerStatData sd = hero != null ? hero.statData : null;
             if (sd != null)
             {
-                sd.currentJob = Find<CharacterClass>(d.job) ?? sd.currentJob;
+                // 같은 이름이면 지금 직업 유지 — Class_Warrior 가 두 곳(Resources/Classes, Scripts/.../Classes)에 있어
+                //   이름 검색이 다른 쪽을 집으면 HeroData 가 쓸데없이 바뀌었다 (내용은 동일)
+                if (sd.currentJob == null || sd.currentJob.name != d.job)
+                    sd.currentJob = Find<CharacterClass>(d.job) ?? sd.currentJob;
                 sd.rightHand = Find<EquipmentData>(d.rightHand); sd.leftHand = Find<EquipmentData>(d.leftHand); sd.body = Find<EquipmentData>(d.body);
                 sd.accessory1 = Find<EquipmentData>(d.accessory1); sd.accessory2 = Find<EquipmentData>(d.accessory2);
                 sd.memorySlot1 = Find<MemoryOfSpeciesData>(d.memory1); sd.memorySlot2 = Find<MemoryOfSpeciesData>(d.memory2); sd.memorySlot3 = Find<MemoryOfSpeciesData>(d.memory3);
                 FillList(sd.learnedSkills, d.learnedSkills);
-                FillList(sd.equippedSkills, d.equippedSkills);
-                FillList(sd.equippedPassives, d.equippedPassives);
+                FillSlots(sd.equippedSkills, d.equippedSkills, 6);
+                FillSlots(sd.equippedPassives, d.equippedPassives, 3);
             }
 
             // 동료
@@ -246,6 +252,7 @@ public static class SaveSystem
             if (ConsumableInventory.Instance != null) ConsumableInventory.Instance.RestoreFromSave(slots, d.chaliceCharges);
             EquipmentBag.Clear();
             foreach (var n in d.equipmentBag) { var e = Find<EquipmentData>(n); if (e != null) EquipmentBag.Add(e); }
+            PlayerWallet.Set(d.gold);
             PlayerStats.PendingLevelUpNotes.Clear();
 
             Debug.Log($"[SaveSystem] 불러오기 — B{d.currentFloor} Lv{d.heroLevel} ({d.savedAt}), 씬 '{d.sceneName}'");
@@ -299,5 +306,15 @@ public static class SaveSystem
         target.Clear();
         if (names == null) return;
         foreach (var n in names) { var s = Find<SkillData>(n); if (s != null) target.Add(s); }
+    }
+
+    /// <summary>장착 슬롯 복원: "" 은 빈 칸(null). 최소 minCount 칸 유지.</summary>
+    private static void FillSlots(List<SkillData> target, List<string> names, int minCount)
+    {
+        if (target == null) return;
+        target.Clear();
+        if (names != null)
+            foreach (var n in names) target.Add(string.IsNullOrEmpty(n) ? null : Find<SkillData>(n));
+        while (target.Count < minCount) target.Add(null);
     }
 }

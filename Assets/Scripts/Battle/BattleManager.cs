@@ -1984,6 +1984,9 @@ public class BattleManager : MonoBehaviour
         // [2026-09-30] 아이템·장비도 새 탐험 상태로 (새벽의 잔 최대 충전, 주운 아이템·장비 초기화, 장착 장비 = 시작 장비)
         ConsumableInventory.ResetForNewRun();
         EquipmentBag.ResetForNewRun(playerStatData);
+        PlayerWallet.ResetForNewRun();
+        // [2026-10-04] 저장 없이 죽으면 스킬도 처음부터 (배운 스킬·장착 슬롯 비움, SP 는 새 주인공 생성 시 1)
+        if (playerStatData != null) playerStatData.ResetSkillsForNewRun();
         PlayerStats.PendingLevelUpNotes.Clear();
 
         Debug.Log($"[BattleManager] Game Over — resetting to floor 1 in '{restartScene}'.");
@@ -2905,6 +2908,9 @@ public class BattleManager : MonoBehaviour
     /// 층에 맞는 몬스터 무리를 뽑는다. 던전(DungeonEncounter)이 인카운터 때 미리 불러 EncounterPlan 에 넣고,
     /// 전투 시작 시 그 몬스터를 쓴다 (전환 연출 실루엣과 실제 전투가 같게). static — 전투 씬 밖에서도 호출 가능.
     /// </summary>
+    /// <summary>지금 등장시키는 몬스터 (EXP·골드를 정한 것만). 새 몬스터 수치가 정해지면 여기에 이름을 추가.</summary>
+    public static readonly string[] BetaSpawnPool = { "Rat", "Bat" };
+
     public static MonsterSO[] LoadMonsterSOsForFloor(int floor)
     {
         Debug.Log("[BATTLE_DEBUG] LoadMonsterSOsForFloor 진입");
@@ -2928,9 +2934,9 @@ public class BattleManager : MonoBehaviour
         if (candidates.Count == 0)
             return new MonsterSO[0];
 
-        // (임시) 스폰 풀: Rat만 — 다른 MonsterSO는 제외
+        // (베타 진행 중) 스폰 풀: 수치를 정한 몬스터만 — 쥐(B1~), 박쥐(B2~). 나머지는 수치가 정해지면 BetaSpawnPool 에 추가
         candidates = candidates
-            .Where(so => string.Equals(so.MonsterName, "Rat", System.StringComparison.OrdinalIgnoreCase))
+            .Where(so => BetaSpawnPool.Any(n => string.Equals(so.MonsterName, n, System.StringComparison.OrdinalIgnoreCase)))
             .ToList();
         if (candidates.Count == 0)
         {
@@ -2942,7 +2948,7 @@ public class BattleManager : MonoBehaviour
                 return new MonsterSO[0];
             }
             candidates = new List<MonsterSO> { ratSo };
-            Debug.LogWarning("[BattleManager] 층 조건에 맞는 Rat가 없어 Rat SO를 강제 사용합니다(테스트).");
+            Debug.LogWarning("[BattleManager] 층 조건에 맞는 몬스터가 없어 Rat SO를 사용합니다.");
         }
 
         // SpawnWeight 합산
@@ -2950,8 +2956,8 @@ public class BattleManager : MonoBehaviour
         if (totalWeight <= 0f)
             totalWeight = candidates.Count; // 가중치가 모두 0이면 균등 분배
 
-        // 스폰 수: (임시) 플레이 테스트용 — 항상 1마리. 복원 시: Mathf.Clamp(Random.Range(1,5),1,4)
-        int count = 1;
+        // 스폰 수 1~4: 층 설정표(FloorTableEntry.groupSizeWeights)의 가중치. 몬스터마다 따로 뽑으므로 섞여 나오거나 같은 몬스터가 여럿(최대 4)
+        int count = Mathf.Clamp(FloorTableDefaults.Find(null, floor).PickGroupSize(UnityEngine.Random.value), 1, 4);
         Debug.Log($"[BattleManager] LoadMonsterSOsForFloor({floor}) → candidates: {candidates.Count}, count: {count}");
 
         // 중복 허용: 같은 몬스터가 여러 번 뽑힐 수 있도록 pool에서 제거하지 않는다.
@@ -3963,6 +3969,7 @@ public class BattleManager : MonoBehaviour
         // 2. 상태 처리 (리스트 제거 없이 — 인덱스 안정성 보장)
         enemy.currentHP = 0;    // IsDead()/AllEnemiesDefeated가 '처치됨'으로 인식 (isDead는 private이라 대체)
         enemy.expReward = 0;    // EXP 없음
+        enemy.goldReward = 0;   // 골드도 없음
         enemy.activeStatusEffects.Clear();
 
         // 3. 시각 처리 (spriteRenderer/statusUI는 private → 접근 가능한 경로로)
@@ -5326,7 +5333,7 @@ public class BattleManager : MonoBehaviour
                 // ───────── 쌍수 기본 공격 ─────────
                 // 1) 한손 기준 깡뎀 합
                 int singleBaseDamage = CalculateDQDamage(effectiveAttack,
-                    Mathf.FloorToInt(target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense)), false,
+                    Mathf.FloorToInt(PenetratedDefense(attacker, target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense))), false,
                     biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBaseDamage = Mathf.Max(singleBaseDamage, 1);
 
@@ -5402,7 +5409,7 @@ public class BattleManager : MonoBehaviour
             {
                 // 한손/방패: fn = 1.0, 깡뎀 + 방어 파괴 (추가딜)
                 int singleBase = CalculateDQDamage(effectiveAttack,
-                    Mathf.FloorToInt(target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense)), false,
+                    Mathf.FloorToInt(PenetratedDefense(attacker, target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense))), false,
                     biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBase = Mathf.Max(singleBase, 1);
 
@@ -5692,6 +5699,22 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        // [플레이어 버프 스킬] curseEffect(StatusEffectSO)의 statModifiers 를 자신에게 건다 (예: Sharp Edge — 방어 관통 +8%, 3턴)
+        //   수정치는 라운드 끝마다 1씩 줄어 쓴 라운드에도 1회 깎이므로 +1 → 다음 자기 턴부터 physicalDuration 번 유지.
+        if (!(skill is MonsterSkillData) && skill.curseEffect != null &&
+            skill.curseEffect.statModifiers != null && skill.curseEffect.statModifiers.Count > 0)
+        {
+            int dur = Mathf.Max(1, skill.curseEffect.physicalDuration);
+            attacker.RemoveStatModifiersFromSource(skill); // 다시 쓰면 타이머만 갱신 (중첩 없음)
+            var parts = new List<string>();
+            foreach (var mod in skill.curseEffect.statModifiers)
+            {
+                attacker.AddStatModifier(mod, skill, dur + 1);
+                parts.Add(DescribeBuffModifier(mod));
+            }
+            AddMessage($"{attacker.playerName} used {skill.skillName}! {string.Join(", ", parts)} for {dur} turns!");
+        }
+
         // [MonsterSkillData Buff 분기] curseEffect.statModifiers 기반 Self 버프
         if (skill is MonsterSkillData msd && msd.Category == MonsterSkillCategory.Buff)
         {
@@ -5707,6 +5730,29 @@ public class BattleManager : MonoBehaviour
                 AddMessage($"{attacker.playerName} uses {skill.skillName}!");
             }
         }
+    }
+
+    /// <summary>버프 로그용: 수정치를 "Armor penetration +8%" 같은 짧은 영어 문구로.</summary>
+    private static string DescribeBuffModifier(StatModifier mod)
+    {
+        string name = mod.statType == AbyssdawnBattle.ModStatType.ArmorPen ? "Armor penetration" : mod.statType.ToString();
+        switch (mod.modType)
+        {
+            case StatModType.Flat:
+                if (mod.statType == AbyssdawnBattle.ModStatType.ArmorPen) return $"{name} +{mod.value * 100f:0.#}%";
+                if (mod.statType == AbyssdawnBattle.ModStatType.CritChance) return $"{name} +{mod.value:0.#}%";
+                return $"{name} +{mod.value:0.#}";
+            case StatModType.PercentAdd: return $"{name} +{mod.value * 100f:0.#}%";
+            default: return $"{name} x{mod.value:0.##}";
+        }
+    }
+
+    /// <summary>공격자의 방어 관통(ArmorPen, 0~1)을 반영한 대상 방어력. 예: 관통 0.08 → 방어력 8 은 7.36.</summary>
+    private static float PenetratedDefense(PlayerStats attacker, float defense)
+    {
+        if (attacker == null || defense <= 0f) return defense;
+        float pen = Mathf.Clamp01(attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.ArmorPen, 0f));
+        return defense * (1f - pen);
     }
 
     private void ApplyRecoveryEffect(PlayerStats attacker, SkillData skill, SkillEffect effect)
@@ -6159,7 +6205,7 @@ public class BattleManager : MonoBehaviour
             // Mandritto: 전열 2명 동시 공격 (멀티 타겟)
             if (skill.skillName == "Mandritto")
             {
-                yield return StartCoroutine(ExecuteMandritto(attacker, skill));
+                yield return StartCoroutine(ExecuteMandritto(attacker, skill, target));
             }
             else
             {
@@ -6299,7 +6345,7 @@ public class BattleManager : MonoBehaviour
 
             // 회피하지 않았으면 데미지 계산
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
-            bool critical = CheckCritical(attacker.luck, attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
             float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
 
             // 스탯 스케일링
@@ -6352,8 +6398,8 @@ public class BattleManager : MonoBehaviour
             if (skill.damageType == DamageType.Physical)
             {
                 // 물리: DQ 공식 — (damage×2 - defense) / 2
-                float defValue = target.ApplyStatModifiers(
-                    AbyssdawnBattle.ModStatType.Defense, target.defense);
+                float defValue = PenetratedDefense(attacker, target.ApplyStatModifiers(
+                    AbyssdawnBattle.ModStatType.Defense, target.defense));
                 float reduced = (damage * 2f - defValue) / 2f;
                 damage = Mathf.Max(1, Mathf.FloorToInt(reduced));
                 damage = ApplyPhysResist(damage, target);
@@ -6451,15 +6497,30 @@ public class BattleManager : MonoBehaviour
     /// Mandritto: 전열(앞열) 적 2명 동시 타격
     /// 현재는 activeEnemies 리스트의 앞에서부터 살아있는 최대 2명을 전열로 간주
     /// </summary>
-    private IEnumerator ExecuteMandritto(PlayerStats attacker, SkillData skill)
+    private IEnumerator ExecuteMandritto(PlayerStats attacker, SkillData skill, EnemyStats selectedTarget)
     {
         if (attacker == null || skill == null) yield break;
 
-        // SlotMask 기반으로 타겟 슬롯 결정 (스킬의 allowedTargetSlots 활용)
-        SlotMask targetMask = (skill.targeting != null) ? skill.targeting.allowedTargetSlots : SlotMask.Front;
-        List<EnemyStats> frontRowEnemies = enemyLine.GetCharactersInMask(targetMask)
-            .Where(e => e != null && e.currentHP > 0)
+        // [2026-10-05] 적 앞열 = 슬롯 1~4 (+ 단독 Center). 고른 적 + 그 옆에서 가장 가까운 앞열 적 = 최대 2명.
+        //   예전에는 allowedTargetSlots(=Slot1 만)로 레거시 4칸 BattleLine 을 걸러, 2/2 대열(2·3·5·6)이나
+        //   Center 단독 적이면 아무도 맞지 않고 HP 만 소모됐다.
+        List<EnemyStats> front = activeEnemies
+            .Where(e => e != null && e.currentHP > 0 &&
+                        (((int)e.currentSlot >= 1 && (int)e.currentSlot <= 4) || e.currentSlot == BattleSlot.Center))
             .ToList();
+        EnemyStats anchor = (selectedTarget != null && front.Contains(selectedTarget))
+            ? selectedTarget
+            : front.OrderBy(e => (int)e.currentSlot).FirstOrDefault();
+        List<EnemyStats> frontRowEnemies = new List<EnemyStats>();
+        if (anchor != null)
+        {
+            frontRowEnemies.Add(anchor);
+            EnemyStats second = front.Where(e => e != anchor)
+                .OrderBy(e => Mathf.Abs((int)e.currentSlot - (int)anchor.currentSlot))
+                .ThenBy(e => (int)e.currentSlot)
+                .FirstOrDefault();
+            if (second != null) frontRowEnemies.Add(second);
+        }
 
         if (frontRowEnemies.Count == 0) yield break;
 
@@ -6481,7 +6542,7 @@ public class BattleManager : MonoBehaviour
             }
 
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
-            bool critical = CheckCritical(attacker.luck, attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
             float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
 
             float baseStat = attacker.GetScaleValue(skill.scalingStat);
@@ -6530,8 +6591,8 @@ public class BattleManager : MonoBehaviour
             if (skill.damageType == DamageType.Physical)
             {
                 // 물리: DQ 공식 — (damage×2 - defense) / 2
-                float defValue = target.ApplyStatModifiers(
-                    AbyssdawnBattle.ModStatType.Defense, target.defense);
+                float defValue = PenetratedDefense(attacker, target.ApplyStatModifiers(
+                    AbyssdawnBattle.ModStatType.Defense, target.defense));
                 float reduced = (damage * 2f - defValue) / 2f;
                 damage = Mathf.Max(1, Mathf.FloorToInt(reduced));
                 damage = ApplyPhysResist(damage, target);
@@ -6582,7 +6643,7 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 공격 패시브(Sharp Edge 등)에 의한 추가 데미지 보정
+    /// 공격 패시브에 의한 추가 데미지 보정 (현재 해당 패시브 없음 — 새 공격 패시브는 여기에 추가)
     /// </summary>
     private int ApplyOffensivePassiveBonuses(PlayerStats attacker, SkillData usedSkill, EnemyStats target, int baseDamage)
     {
@@ -6594,24 +6655,9 @@ public class BattleManager : MonoBehaviour
         foreach (var passive in attacker.statData.equippedPassives)
         {
             if (passive == null || !passive.IsPassive) continue;
+            if (!attacker.IsPassiveWeaponOk(passive)) continue; // 검 패시브는 검 장착 시에만
 
-            // Sharp Edge: 방어 관통 효과를 "추가 피해 %"로 단순 모델링
-            if (passive.skillName == "Sharp Edge")
-            {
-                float penPercent = 0.08f; // 기본 8%
-
-                // 무기 공격력 보정치 × 0.1% 만큼 추가 관통 → 총 공격력 보정치를 사용
-                int equipAtk = attacker.GetEquipmentAttackBonus();
-                penPercent += equipAtk * 0.001f; // 예: +10 공격 → +1% 추가
-
-                // 앞열 적 대상이면 추가 +5%
-                if (IsFrontRowEnemy(target))
-                {
-                    penPercent += 0.05f;
-                }
-
-                result = Mathf.FloorToInt(result * (1f + penPercent));
-            }
+            // [2026-10-05] Sharp Edge 는 액티브 버프(방어 관통, ModStatType.ArmorPen)로 바뀌어 여기서 처리하지 않음 → PenetratedDefense
         }
 
         return Mathf.Max(result, 1);
@@ -6643,6 +6689,7 @@ public class BattleManager : MonoBehaviour
         foreach (var passive in attacker.statData.equippedPassives)
         {
             if (passive == null || !passive.IsPassive) continue;
+            if (!attacker.IsPassiveWeaponOk(passive)) continue;
 
             // Combat Breathing: 스킬 사용 시 HP 5% 회복, 후열이면 +2% 추가
             if (passive.skillName == "Combat Breathing")
@@ -8815,6 +8862,20 @@ private void CacheHeroSkills()
             else
             {
                 Debug.LogWarning($"[BM:DIAG] Victory but totalExp=0 — AddExp not called");
+            }
+
+            // [2026-10-04] 골드: 쓰러뜨린 몬스터마다 GoldReward × 0.8~1.2 (도망친 몬스터는 0)
+            int totalGold = 0;
+            foreach (var e in activeEnemies)
+            {
+                if (e == null || e.goldReward <= 0) continue;
+                totalGold += Mathf.Max(1, Mathf.RoundToInt(e.goldReward * UnityEngine.Random.Range(0.8f, 1.2f)));
+            }
+            if (totalGold > 0)
+            {
+                PlayerWallet.Add(totalGold);
+                AddMessage($"Found <color=#FFD24A>{totalGold} Gold</color>!");
+                Debug.Log($"[BattleManager] 골드 +{totalGold} → {PlayerWallet.Gold}G");
             }
 
             if (actionPanel != null) actionPanel.SetActive(false);

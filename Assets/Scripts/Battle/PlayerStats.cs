@@ -30,6 +30,9 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private int _fallbackFreeStatPoints = 0;
     [SerializeField] private int _fallbackSkillPoints = 0;
 
+    /// <summary>새 게임 시작 시 주는 스킬 포인트 (LP).</summary>
+    public const int StartingSkillPoints = 1;
+
     // [2026-05-24] Base 스탯 7종을 SO에서 분리. SO(PlayerStatData)는 초기 시드값
     // 템플릿으로만 사용. 런타임 변동은 모두 _fallbackBase*에만 기록되어
     // Play 모드 종료 후 .asset 누적 오염을 차단.
@@ -449,6 +452,7 @@ public class PlayerStats : MonoBehaviour
         foreach (var passive in statData.equippedPassives)
         {
             if (passive == null || !passive.IsPassive) continue;
+            if (!IsPassiveWeaponOk(passive)) continue; // 무기 조건 불충족 (예: 검 패시브인데 검 미장착)
 
             Debug.Log($"  - Checking passive: {passive.skillName}");
 
@@ -559,6 +563,7 @@ public class PlayerStats : MonoBehaviour
         foreach (var passive in statData.equippedPassives)
         {
             if (passive == null || !passive.IsPassive) continue;
+            if (!IsPassiveWeaponOk(passive)) continue;
 
             if (passive.Effects != null && passive.Effects.Count > 0)
             {
@@ -587,16 +592,31 @@ public class PlayerStats : MonoBehaviour
     /// 현재 장착된 패시브 목록에서 특정 이름의 패시브를 가지고 있는지 확인
     /// (SO ID 시스템 도입 전까지 임시로 skillName 문자열을 사용)
     /// </summary>
-    private bool HasEquippedPassiveByName(string skillName)
+    public bool HasEquippedPassiveByName(string skillName)
     {
         if (statData == null || statData.equippedPassives == null) return false;
         foreach (var passive in statData.equippedPassives)
         {
             if (passive == null) continue;
             if (!passive.IsPassive) continue;
+            if (!IsPassiveWeaponOk(passive)) continue;
             if (passive.skillName == skillName) return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// 패시브의 무기 조건(weaponCategory)을 현재 오른손 무기가 만족하는지.
+    /// None 이면 조건 없음. 예: 검 Lore 패시브는 검(Sword)을 들고 있어야 발동.
+    /// </summary>
+    public bool IsPassiveWeaponOk(SkillData passive)
+    {
+        if (passive == null) return false;
+        if (passive.weaponCategory == WeaponCategory.None) return true;
+        // 장비 스탯 보너스(GetEquippedItemsList)와 같은 출처: EquipmentManager 우선, 없으면 statData
+        var em = GetComponent<EquipmentManager>();
+        var rh = em != null ? em.rightHand : (statData != null ? statData.rightHand : null);
+        return rh != null && rh.weaponCategory == passive.weaponCategory;
     }
 
     /// <summary>
@@ -606,12 +626,8 @@ public class PlayerStats : MonoBehaviour
     /// </summary>
     private int GetBasicSwordsmanshipAttackBonus()
     {
+        // 검 장착 여부는 HasEquippedPassiveByName → IsPassiveWeaponOk 에서 확인 (weaponCategory = Sword)
         if (!HasEquippedPassiveByName("Basic Swordsmanship")) return 0;
-
-        // TODO: "검 장착 여부" 체크는 장비 타입 시스템 도입 시 EquipmentManager 기반으로 교체
-        bool hasSwordEquipped = true;
-
-        if (!hasSwordEquipped) return 0;
 
         int bonus = 2;
         bonus += Mathf.FloorToInt(level * 0.25f);
@@ -855,7 +871,7 @@ public class PlayerStats : MonoBehaviour
         float total = 0f;
         // equippedPassives는 SkillData 타입 (패시브 스킬) — backflowSuppression 필드 합산
         foreach (var passive in statData.equippedPassives)
-            if (passive != null) total += passive.backflowSuppression;
+            if (passive != null && IsPassiveWeaponOk(passive)) total += passive.backflowSuppression;
         return total;
     }
 
@@ -1037,6 +1053,13 @@ public class PlayerStats : MonoBehaviour
 
         if (!restoredFromGameManager)
         {
+            // [2026-10-04] 새 게임(이어받을 기록 없음): 시작 스킬 포인트 지급. 저장을 불러오면 저장 값이 우선.
+            if (!IsRecruitedCompanion)
+            {
+                _fallbackSkillPoints = StartingSkillPoints;
+                Debug.Log($"[PlayerStats] 새 게임 — 시작 스킬 포인트 {StartingSkillPoints}");
+            }
+
             if (_isFirstLaunch)
             {
                 Debug.Log("[PlayerStats] 첫 실행 감지 → HP/MP 풀 초기화");

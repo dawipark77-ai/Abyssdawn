@@ -68,6 +68,10 @@ public class SwordSkillTreeManager : MonoBehaviour
             allNodes = GetComponentsInChildren<SkillTreeNode>(true);
             Debug.Log($"[SwordSkillTreeManager] {allNodes.Length}개의 스킬 노드를 찾았습니다.");
         }
+
+        // 씬에 이중으로 붙은 중복 노드(부모와 같은 스킬)는 제외 — 부모 노드만 관리
+        if (allNodes != null)
+            allNodes = System.Array.FindAll(allNodes, n => n != null && !n.IsDuplicateNode());
     }
     
     private void Start()
@@ -291,7 +295,10 @@ public class SwordSkillTreeManager : MonoBehaviour
             {
                 playerStatData.learnedSkills.Add(skill);
             }
-            
+
+            // 빈 슬롯이 있으면 바로 장착 (전투는 장착된 스킬만 사용)
+            playerStatData.AutoEquipIfFree(skill);
+
             // 스킬 포인트 차감
             SetSkillPoints(GetSkillPoints() - requiredPoints);
             

@@ -62,6 +62,14 @@ public class MapManager : MonoBehaviour
     [Tooltip("전체 지도를 여닫는 버튼 오브젝트 이름 (실행 시 이름으로 찾아 자동 연결)")]
     public string fullMapButtonName = DungeonFullMap.DefaultButtonName;
 
+    [Header("Town Economy")]
+    [Tooltip("여관 요금 — 첫 마을 (B1)")]
+    public int innPriceFirstTown = 8;
+    [Tooltip("여관 요금 — 두 번째 마을 (B5)")]
+    public int innPriceSecondTown = 20;
+    [Tooltip("소지금을 표시할 글자 오브젝트 이름 (그 오브젝트나 자식의 TextMeshPro). 실행 시 자동 연결")]
+    public string moneyLabelName = "Money";
+
     [Header("Search")]
     [Tooltip("탐색 버튼 오브젝트 이름 (실행 시 이름으로 찾아 자동 연결). 반경·턴 소모·연출은 실행 중 붙는 DungeonSearch 에서")]
     public string searchButtonName = DungeonSearch.DefaultButtonName;
@@ -158,6 +166,9 @@ public class MapManager : MonoBehaviour
         DungeonSearch search = GetComponent<DungeonSearch>();
         if (search == null) search = gameObject.AddComponent<DungeonSearch>();
         search.Setup(this, searchButtonName);
+
+        // 소지금 표시 (화면의 "Money" 글자)
+        MoneyLabel.Bind(moneyLabelName);
 
         // 화면 아래 파티 카드 (전투의 PartyBar 를 그대로 배치하면 자동 연결)
         if (FindFirstObjectByType<DungeonPartyBar>() == null) gameObject.AddComponent<DungeonPartyBar>();
@@ -444,14 +455,20 @@ public class MapManager : MonoBehaviour
 
     private void OpenTown()
     {
-        _hud.ShowTown(AskInn, () => Toast("The shop is not open yet."), AskSave, null);
+        _hud.ShowTown(AskInn, _hud.ShowShop, AskSave, null);
     }
+
+    /// <summary>여관 요금: 첫 마을(B1~4) / 두 번째 마을(B5~).</summary>
+    private int InnPrice => FloorData != null && FloorData.floorNumber >= 5 ? innPriceSecondTown : innPriceFirstTown;
 
     private void AskInn()
     {
-        _hud.Confirm("Rest at the inn?\n<size=75%><color=#9FC8FF>Fully restores HP and MP for the whole party.</color></size>", "Rest", "Cancel", ok =>
+        int price = InnPrice;
+        _hud.Confirm($"Rest at the inn for <color=#FFD24A>{price} G</color>?\n<size=75%><color=#9FC8FF>Fully restores HP and MP for the whole party.\nYou have {PlayerWallet.Gold} G.</color></size>", "Rest", "Cancel", ok =>
         {
-            if (ok) RestAtInn();
+            if (!ok) return;
+            if (!PlayerWallet.TrySpend(price)) { Toast("<color=#FF6B6B>Not enough gold.</color>"); return; }
+            RestAtInn();
         });
     }
 

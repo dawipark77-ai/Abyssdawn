@@ -83,6 +83,14 @@ public class DungeonHud : MonoBehaviour
     private Action _townInn, _townShop, _townSave, _townLeave;
     public bool IsTownOpen => _town != null && _town.activeSelf;
 
+    // ── 상점 (마을 위에 뜸) ──
+    private GameObject _shop, _shopRowTemplate;
+    private RectTransform _shopRows;
+    private TextMeshProUGUI _shopGold, _shopEmpty;
+    private Image _shopBuyTab, _shopSellTab;
+    private bool _shopSelling;
+    public bool IsShopOpen => _shop != null && _shop.activeSelf;
+
     private void Awake()
     {
         if (_instance != null && _instance != this) { Destroy(gameObject); return; }
@@ -110,6 +118,7 @@ public class DungeonHud : MonoBehaviour
 
         CheckLevelUp();
 
+        if (IsShopOpen && (_dialog == null || !_dialog.activeSelf) && Input.GetKeyDown(KeyCode.Escape)) { CloseShop(); return; }
         if (IsTownOpen && (_dialog == null || !_dialog.activeSelf) && Input.GetKeyDown(KeyCode.Escape)) { CloseTown(); return; }
         if (_dialog == null || !_dialog.activeSelf) return;
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space)) CloseDialog(true);
@@ -435,7 +444,248 @@ public class DungeonHud : MonoBehaviour
         BuildDialog();
         BuildLevelUp();
         BuildTown();
+        BuildShop();
         _dialog.transform.SetAsLastSibling(); // 확인창은 마을 메뉴 위에 뜬다
+    }
+
+    // ─────────────────────────────────────────
+    // 상점 — 사기 / 팔기 탭. 규칙은 TownShop, 화면은 프리팹(Resources/UI/ShopPanel) 또는 코드 기본 모양.
+    // 프리팹을 꾸밀 때 지킬 이름: Rows(목록 부모) 안의 RowTemplate(한 줄 견본: Icon, Name, Info, Price, Owned, ActionButton/Label),
+    //                         Gold, Empty, BuyTab, SellTab, Close
+    // ─────────────────────────────────────────
+
+    public const string ShopPanelResource = "UI/ShopPanel";
+
+    public void ShowShop()
+    {
+        if (_shop == null) return;
+        _shopSelling = false;
+        _shop.SetActive(true);
+        _shop.transform.SetAsLastSibling();
+        _dialog.transform.SetAsLastSibling();
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.LockInput(_shop);
+        RefreshShop();
+    }
+
+    public void CloseShop()
+    {
+        if (!IsShopOpen) return;
+        _shop.SetActive(false);
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.UnlockInput(_shop);
+    }
+
+    private void BuildShop()
+    {
+        GameObject prefab = Resources.Load<GameObject>(ShopPanelResource);
+        _shop = prefab != null ? Instantiate(prefab, _overlayRoot, false) : BuildShopPanel(_overlayRoot);
+        _shop.name = "ShopPanel";
+
+        Transform rows = FindChildRecursive(_shop.transform, "Rows");
+        _shopRows = rows as RectTransform;
+        Transform tmpl = FindChildRecursive(_shop.transform, "RowTemplate");
+        _shopRowTemplate = tmpl != null ? tmpl.gameObject : null;
+        if (_shopRowTemplate != null) _shopRowTemplate.SetActive(false);
+        _shopGold = FindText(_shop.transform, "Gold");
+        _shopEmpty = FindText(_shop.transform, "Empty");
+
+        foreach (Button b in _shop.GetComponentsInChildren<Button>(true))
+        {
+            switch (b.name)
+            {
+                case "BuyTab": _shopBuyTab = b.targetGraphic as Image; b.onClick.AddListener(() => { _shopSelling = false; RefreshShop(); }); break;
+                case "SellTab": _shopSellTab = b.targetGraphic as Image; b.onClick.AddListener(() => { _shopSelling = true; RefreshShop(); }); break;
+                case "Close": b.onClick.AddListener(CloseShop); break;
+            }
+        }
+        if (_shopRows == null || _shopRowTemplate == null)
+            Debug.LogWarning("[DungeonHud] 상점 창에 Rows / RowTemplate 이 없습니다. 목록을 표시할 수 없습니다.");
+        _shop.SetActive(false);
+    }
+
+    private void RefreshShop()
+    {
+        if (_shopGold != null) _shopGold.text = $"<color=#FFD24A>{PlayerWallet.Gold} G</color>";
+        if (_shopBuyTab != null) _shopBuyTab.color = _shopSelling ? ShopTabOff : ShopTabOn;
+        if (_shopSellTab != null) _shopSellTab.color = _shopSelling ? ShopTabOn : ShopTabOff;
+        if (_shopRows == null || _shopRowTemplate == null) return;
+
+        // 지난 목록 지우기 (견본은 남김)
+        for (int i = _shopRows.childCount - 1; i >= 0; i--)
+        {
+            Transform c = _shopRows.GetChild(i);
+            if (c.gameObject != _shopRowTemplate) Destroy(c.gameObject);
+        }
+
+        List<TownShop.Entry> list = _shopSelling ? TownShop.SellList() : TownShop.BuyList();
+        if (_shopEmpty != null)
+        {
+            _shopEmpty.gameObject.SetActive(list.Count == 0);
+            _shopEmpty.text = _shopSelling ? "Nothing to sell." : "Nothing for sale.";
+        }
+        foreach (TownShop.Entry e in list)
+        {
+            GameObject row = Instantiate(_shopRowTemplate, _shopRows, false);
+            row.name = "Row_" + e.asset.name;
+            row.SetActive(true);
+            int price = _shopSelling ? e.SellPrice : e.BuyPrice;
+
+            Transform icon = FindChildRecursive(row.transform, "Icon");
+            Image iconImg = icon != null ? icon.GetComponent<Image>() : null;
+            if (iconImg != null) { iconImg.sprite = e.Icon; iconImg.enabled = e.Icon != null; iconImg.preserveAspect = true; }
+            SetText(row.transform, "Name", e.Name);
+            SetText(row.transform, "Info", TownShop.InfoText(e));
+            SetText(row.transform, "Price", $"<color=#FFD24A>{price} G</color>");
+            SetText(row.transform, "Owned", TownShop.OwnedText(e));
+
+            Transform act = FindChildRecursive(row.transform, "ActionButton");
+            Button btn = act != null ? act.GetComponent<Button>() : null;
+            if (btn != null)
+            {
+                bool alreadyOwned = !_shopSelling && e.equipment != null && EquipmentBag.Contains(e.equipment); // 장비는 하나씩만
+                SetText(act, "Label", _shopSelling ? "Sell" : alreadyOwned ? "Owned" : "Buy");
+                bool canBuy = _shopSelling || (!alreadyOwned && PlayerWallet.Gold >= price);
+                btn.interactable = canBuy;
+                TownShop.Entry captured = e;
+                bool selling = _shopSelling;
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() =>
+                {
+                    string msg = selling ? TownShop.Sell(captured) : TownShop.Buy(captured);
+                    if (!string.IsNullOrEmpty(msg)) Toast(msg);
+                    RefreshShop();
+                });
+            }
+        }
+    }
+
+    private static readonly Color ShopTabOn = new Color(0.48f, 0.35f, 0.1f, 0.95f);
+    private static readonly Color ShopTabOff = new Color(0.1f, 0.1f, 0.1f, 0.85f);
+
+    private static Transform FindChildRecursive(Transform root, string name)
+    {
+        if (root == null) return null;
+        foreach (Transform c in root)
+        {
+            if (c.name == name) return c;
+            Transform f = FindChildRecursive(c, name);
+            if (f != null) return f;
+        }
+        return null;
+    }
+
+    private static TextMeshProUGUI FindText(Transform root, string name)
+    {
+        Transform t = FindChildRecursive(root, name);
+        if (t == null) return null;
+        var tmp = t.GetComponent<TextMeshProUGUI>();
+        return tmp != null ? tmp : t.GetComponentInChildren<TextMeshProUGUI>(true);
+    }
+
+    private static void SetText(Transform root, string name, string text)
+    {
+        TextMeshProUGUI t = FindText(root, name);
+        if (t != null) t.text = text;
+    }
+
+    /// <summary>코드로 만드는 기본 상점 창. 프리팹을 처음 만들 때도 이것을 저장했다.</summary>
+    public static GameObject BuildShopPanel(RectTransform parent)
+    {
+        Image blocker = CreateImage(parent, "ShopPanel", new Color(0f, 0f, 0f, 0.6f), true);
+        Stretch(blocker.rectTransform);
+
+        Image panel = CreatePopupPanel(blocker.rectTransform, "Panel", true);
+        SetAnchor(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 1500f));
+
+        TextMeshProUGUI title = CreateText(panel.rectTransform, "Title", 58, FontStyles.Bold, TextAlignmentOptions.Center);
+        title.text = "<color=#FFD24A>SHOP</color>";
+        Place(title.rectTransform, 0f, -46f, 880f, 76f);
+
+        TextMeshProUGUI gold = CreateText(panel.rectTransform, "Gold", 40, FontStyles.Bold, TextAlignmentOptions.Right);
+        gold.text = "<color=#FFD24A>0 G</color>";
+        Place(gold.rectTransform, 300f, -56f, 300f, 60f);
+
+        // 탭
+        for (int i = 0; i < 2; i++)
+        {
+            string n = i == 0 ? "BuyTab" : "SellTab";
+            Image tab = CreateImage(panel.rectTransform, n, i == 0 ? ShopTabOn : ShopTabOff, true);
+            Place(tab.rectTransform, i == 0 ? -150f : 150f, -140f, 280f, 76f);
+            var b = tab.gameObject.AddComponent<Button>();
+            b.targetGraphic = tab;
+            TextMeshProUGUI l = CreateText(tab.rectTransform, "Label", 38, FontStyles.Bold, TextAlignmentOptions.Center);
+            l.text = i == 0 ? "Buy" : "Sell";
+            Stretch(l.rectTransform);
+        }
+
+        // 목록
+        var rowsGo = new GameObject("Rows", typeof(RectTransform));
+        rowsGo.transform.SetParent(panel.rectTransform, false);
+        var rows = (RectTransform)rowsGo.transform;
+        Place(rows, 0f, -240f, 900f, 1080f);
+        var layout = rowsGo.AddComponent<VerticalLayoutGroup>();
+        layout.spacing = 12f;
+        layout.childAlignment = TextAnchor.UpperCenter;
+        layout.childControlWidth = true;
+        layout.childForceExpandWidth = true;
+        layout.childControlHeight = false;
+        layout.childForceExpandHeight = false;
+
+        // 한 줄 견본
+        Image row = CreateImage(rows, "RowTemplate", new Color(0.12f, 0.1f, 0.06f, 0.92f), false);
+        row.rectTransform.sizeDelta = new Vector2(900f, 140f);
+        Image rowBorder = CreateImage(row.rectTransform, "Border", new Color(0.85f, 0.68f, 0.3f, 0.6f), false);
+        Stretch(rowBorder.rectTransform, -2f);
+        rowBorder.transform.SetAsFirstSibling();
+        Image rowInner = CreateImage(row.rectTransform, "Inner", new Color(0.12f, 0.1f, 0.06f, 1f), false);
+        Stretch(rowInner.rectTransform);
+        rowInner.transform.SetSiblingIndex(1);
+
+        Image icon = CreateImage(row.rectTransform, "Icon", Color.white, false);
+        RowPlace(icon.rectTransform, 20f, 0f, 100f, 100f);
+        TextMeshProUGUI name = CreateText(row.rectTransform, "Name", 40, FontStyles.Bold, TextAlignmentOptions.Left);
+        RowPlace(name.rectTransform, 140f, 26f, 440f, 56f);
+        TextMeshProUGUI info = CreateText(row.rectTransform, "Info", 28, FontStyles.Normal, TextAlignmentOptions.Left);
+        info.color = new Color(0.75f, 0.75f, 0.75f);
+        RowPlace(info.rectTransform, 140f, -30f, 440f, 50f);
+        TextMeshProUGUI price = CreateText(row.rectTransform, "Price", 36, FontStyles.Bold, TextAlignmentOptions.Right);
+        RowPlace(price.rectTransform, 560f, 26f, 140f, 50f);
+        TextMeshProUGUI owned = CreateText(row.rectTransform, "Owned", 26, FontStyles.Normal, TextAlignmentOptions.Right);
+        owned.color = new Color(0.75f, 0.75f, 0.75f);
+        RowPlace(owned.rectTransform, 560f, -30f, 140f, 44f);
+
+        Image act = CreateImage(row.rectTransform, "ActionButton", new Color(0.48f, 0.35f, 0.1f, 0.95f), true);
+        RowPlace(act.rectTransform, 724f, 0f, 156f, 84f);
+        var actBtn = act.gameObject.AddComponent<Button>();
+        actBtn.targetGraphic = act;
+        TextMeshProUGUI actLabel = CreateText(act.rectTransform, "Label", 36, FontStyles.Bold, TextAlignmentOptions.Center);
+        actLabel.text = "Buy";
+        actLabel.color = new Color(1f, 0.92f, 0.65f);
+        Stretch(actLabel.rectTransform);
+
+        TextMeshProUGUI empty = CreateText(panel.rectTransform, "Empty", 36, FontStyles.Normal, TextAlignmentOptions.Center);
+        empty.text = "Nothing to sell.";
+        empty.color = new Color(0.7f, 0.7f, 0.7f);
+        Place(empty.rectTransform, 0f, -420f, 880f, 60f);
+        empty.gameObject.SetActive(false);
+
+        TextMeshProUGUI close = CreateButton(panel.rectTransform, "Close", new Vector2(0f, 44f), new Color(0.1f, 0.1f, 0.1f, 0.85f),
+                                             new Color(0.85f, 0.85f, 0.85f), null);
+        close.text = "Close";
+        close.fontSize = 34;
+        ((RectTransform)close.transform.parent).sizeDelta = new Vector2(240f, 76f);
+
+        return blocker.gameObject;
+    }
+
+    /// <summary>한 줄 안에서 왼쪽 기준 x, 세로 가운데 기준 y 로 배치.</summary>
+    private static void RowPlace(RectTransform rt, float leftX, float centerY, float w, float h)
+    {
+        rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
+        rt.pivot = new Vector2(0f, 0.5f);
+        rt.anchoredPosition = new Vector2(leftX, centerY);
+        rt.sizeDelta = new Vector2(w, h);
     }
 
     // ─────────────────────────────────────────
@@ -463,11 +713,51 @@ public class DungeonHud : MonoBehaviour
         if (leave != null) leave();
     }
 
+    /// <summary>
+    /// 마을 창 프리팹 (Resources/UI/TownPanel.prefab). 있으면 그대로 쓰고, 없으면 코드로 기본 모양을 만든다.
+    /// 프리팹은 마음대로 꾸며도 된다 — 버튼만 이름이 "Inn" / "Shop" / "Save" / "Leave" 인 Button 이면 동작이 연결된다.
+    /// </summary>
+    public const string TownPanelResource = "UI/TownPanel";
+
     private void BuildTown()
     {
-        Image blocker = CreateImage(_overlayRoot, "Town", new Color(0f, 0f, 0f, 0.55f), true);
+        GameObject prefab = Resources.Load<GameObject>(TownPanelResource);
+        if (prefab != null)
+        {
+            _town = Instantiate(prefab, _overlayRoot, false);
+            _town.name = prefab.name;
+        }
+        else
+        {
+            _town = BuildTownPanel(_overlayRoot);
+        }
+        BindTownButtons(_town);
+        _town.SetActive(false);
+    }
+
+    /// <summary>이름으로 버튼을 찾아 마을 동작을 연결한다 (프리팹 배치를 바꿔도 이름만 같으면 됨).</summary>
+    private void BindTownButtons(GameObject root)
+    {
+        int bound = 0;
+        foreach (Button b in root.GetComponentsInChildren<Button>(true))
+        {
+            switch (b.name)
+            {
+                case "Inn": b.onClick.AddListener(() => OnTownCommand(0)); bound++; break;
+                case "Shop": b.onClick.AddListener(() => OnTownCommand(1)); bound++; break;
+                case "Save": b.onClick.AddListener(() => OnTownCommand(2)); bound++; break;
+                case "Leave": b.onClick.AddListener(CloseTown); bound++; break;
+            }
+        }
+        if (bound < 4)
+            Debug.LogWarning($"[DungeonHud] 마을 창에서 버튼 {bound}/4개만 찾았습니다. 이름이 Inn / Shop / Save / Leave 인 Button 이 있어야 합니다.");
+    }
+
+    /// <summary>코드로 만드는 기본 마을 창 (화면 전체 어두운 막 + 가운데 가로형 팝업). 프리팹을 처음 만들 때도 이것을 저장했다.</summary>
+    public static GameObject BuildTownPanel(RectTransform parent)
+    {
+        Image blocker = CreateImage(parent, "TownPanel", new Color(0f, 0f, 0f, 0.55f), true);
         Stretch(blocker.rectTransform);
-        _town = blocker.gameObject;
 
         Image panel = CreatePopupPanel(blocker.rectTransform, "Panel", true);
         SetAnchor(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 600f));
@@ -486,7 +776,6 @@ public class DungeonHud : MonoBehaviour
         float startX = -(w * 3 + gap * 2) / 2f + w / 2f;
         for (int i = 0; i < 3; i++)
         {
-            int index = i;
             Image btnImg = CreateImage(panel.rectTransform, names[i], new Color(0.12f, 0.1f, 0.06f, 0.92f), true);
             var rt = btnImg.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
@@ -501,7 +790,6 @@ public class DungeonHud : MonoBehaviour
             inner.transform.SetSiblingIndex(1);
             var btn = btnImg.gameObject.AddComponent<Button>();
             btn.targetGraphic = btnImg;
-            btn.onClick.AddListener(() => OnTownCommand(index));
             TextMeshProUGUI label = CreateText(rt, "Label", 50, FontStyles.Bold, TextAlignmentOptions.Center);
             label.text = names[i];
             label.color = new Color(1f, 0.92f, 0.65f);
@@ -513,12 +801,12 @@ public class DungeonHud : MonoBehaviour
 
         // 마을 나가기 (명령이 아니라 창 닫기)
         TextMeshProUGUI leave = CreateButton(panel.rectTransform, "Leave", new Vector2(0f, 40f), new Color(0.1f, 0.1f, 0.1f, 0.85f),
-                                             new Color(0.85f, 0.85f, 0.85f), CloseTown);
+                                             new Color(0.85f, 0.85f, 0.85f), null);
         leave.text = "Leave";
         leave.fontSize = 34;
         ((RectTransform)leave.transform.parent).sizeDelta = new Vector2(240f, 76f);
 
-        _town.SetActive(false);
+        return blocker.gameObject;
     }
 
     private void OnTownCommand(int index)
@@ -565,11 +853,17 @@ public class DungeonHud : MonoBehaviour
     /// Resources/UI/SubPanelBackground 를 9분할 스프라이트로 만든다 (원본 이미지 설정은 건드리지 않음).
     /// 이미지를 못 찾으면 null → 어두운 단색 패널로 대신한다.
     /// </summary>
+    /// <summary>팝업 테두리 스프라이트 에셋 (SubPanelBackground 복사본, 9분할 테두리 56 설정). 프리팹에 저장할 수 있는 형태.</summary>
+    public const string PopupFrameSpriteResource = "UI/PopupFrame";
+
     public static Sprite PopupSprite
     {
         get
         {
             if (_popupSprite != null) return _popupSprite;
+            // 에셋이 있으면 그것을 (프리팹·씬에 저장 가능). 없으면 원본 텍스처를 실행 중에 9분할
+            Sprite asset = Resources.Load<Sprite>(PopupFrameSpriteResource);
+            if (asset != null) { _popupSprite = asset; return _popupSprite; }
             Texture2D tex = Resources.Load<Texture2D>(PopupBackgroundResource);
             if (tex == null)
             {
@@ -678,7 +972,7 @@ public class DungeonHud : MonoBehaviour
         SetAnchor(img.rectTransform, new Vector2(0.5f, 0f), bottomPos, new Vector2(280f, 88f));
         var button = img.gameObject.AddComponent<Button>();
         button.targetGraphic = img;
-        button.onClick.AddListener(() => onClick());
+        if (onClick != null) button.onClick.AddListener(() => onClick());
         TextMeshProUGUI label = CreateText(img.rectTransform, "Label", 40, FontStyles.Bold, TextAlignmentOptions.Center);
         label.color = fg;
         Stretch(label.rectTransform);

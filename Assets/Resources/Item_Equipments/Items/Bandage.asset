@@ -36,4 +36,5 @@ MonoBehaviour:
   isChargeable: 0
   maxCharges: 0
   currentCharges: 0
-  sellPrice: 0
+  buyPrice: 12
+  sellPrice: 6

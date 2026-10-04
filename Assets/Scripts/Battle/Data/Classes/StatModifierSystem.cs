@@ -9,7 +9,8 @@ namespace AbyssdawnBattle
         CritChance,   // 크리티컬 확률. Flat(퍼센트포인트 가산) 전용 설계 — 버프/디버프 에셋은 Flat으로 만들 것.
         CritDamage,   // 크리티컬 데미지 배율. PercentMult 권장.
         Speed,        // 턴 순서 계산용 속도(민첩) 배율.
-        Evasion       // 회피율 (방어자 기준, 명중률 감소)
+        Evasion,      // 회피율 (방어자 기준, 명중률 감소)
+        ArmorPen      // 방어 관통 (공격자 기준). Flat 전용 — 0.08 = 적 방어력 8% 무시. 최대 1.
     }
     // HealingReceived는 "받는 회복" 전용. 주는 회복은 별도 타입으로 나중에 추가.
 

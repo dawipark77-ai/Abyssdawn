@@ -15,13 +15,19 @@ MonoBehaviour:
   skillID: Swords_T1_04
   skillName: Sharp Edge
   skillIcon: {fileID: 0}
-  description: "\uAC80 \uACF5\uACA9 \uC2DC \uBC29\uC5B4 \uAD00\uD1B5 +8%. \uC7A5\uBE44
-    \uACF5\uACA9\uB825 \uBCF4\uC815\uCE58 \xD7 0.1\uB9CC\uD07C \uCD94\uAC00 \uBC29\uC5B4
-    \uAD00\uD1B5. \uC55E\uC5F4 \uC801 \uACF5\uACA9 \uC2DC \uBC29\uC5B4 \uAD00\uD1B5
-    \uCD94\uAC00 +5%. 3\uD134 \uC9C0\uC18D."
+  description: "[\uAC80 \uC804\uC6A9 \xB7 \uBC84\uD504] \uCE7C\uB0A0\uC744 \uBCBC\uB824
+    \uBC29\uC5B4\uB97C \uAFF0\uB6AB\uB294\uB2E4. \uD55C \uD134\uC744 \uC368\uC11C,
+    \uB2E4\uC74C 3\uD134 \uB3D9\uC548 \uC801 \uBC29\uC5B4\uB825\uC758 8%\uB97C \uBB34\uC2DC\uD558\uACE0
+    \uACF5\uACA9\uD55C\uB2E4. \uB2E4\uC2DC \uC4F0\uBA74 3\uD134\uC73C\uB85C \uAC31\uC2E0."
   usageType: 0
   damageType: 1
   scalingStat: 1
+  weaponCategory: 1
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -30,20 +36,38 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
-  effects:
-  - effectType: 3
-    recoveryTarget: 0
-    effectAmount: 8
-    curseData: {fileID: 0}
-    curseChance: 0
-  legacyCurseData: {fileID: 0}
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 11400000, guid: ae4a590f348c8dd44a1d67fb26f2719c, type: 2}
+  curseApplyChance: 1
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: fcbeb2fd6e7fa9a49873162e0d3d162f, type: 2}
   requiredLorePoints: 1

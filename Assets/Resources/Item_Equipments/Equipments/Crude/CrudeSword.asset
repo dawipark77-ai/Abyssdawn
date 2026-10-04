@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: CrudeSword
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: 
+  icon: {fileID: 0}
+  description: Every swing leaves a dull ache in the wrist. ATK +5, ACC -5%.
   equipmentName: Crude Sword
   equipmentIcon: {fileID: 5843060452261051782, guid: d68843735a6e85146b6764dbac708c2f, type: 3}
   flatIcon: {fileID: 5843060452261051782, guid: d68843735a6e85146b6764dbac708c2f, type: 3}
-  description: Every swing leaves a dull ache in the wrist. ATK +5, ACC -5%.
   equipmentType: 0
   isTwoHanded: 0
   weaponCategory: 1
@@ -23,6 +25,7 @@ MonoBehaviour:
   armourType: 0
   attackBonus: 5
   defenseBonus: 0
+  magicDefenseBonus: 0
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
@@ -37,3 +40,7 @@ MonoBehaviour:
   skill: {fileID: 0}
   weaponCurses:
   - {fileID: 11400000, guid: e24b03751c878b5468ba77a4dff1af5b, type: 2}
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 100
+  sellPrice: 50

@@ -15,12 +15,20 @@ MonoBehaviour:
   skillID: Swords_T1_03
   skillName: Mandritto
   skillIcon: {fileID: 0}
-  description: "\uC801 \uC55E\uC5F4 (1,2\uBC88)\uC744 \uB3D9\uC2DC\uC5D0 \uACF5\uACA9\uD558\uB294
-    \uD6A1\uBCA0\uAE30. \uCD5C\uB300 HP\uC758 4%\uB97C \uC18C\uBAA8\uD55C\uB2E4.
-    \uC55E\uC5F4\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5."
+  description: "[\uAC80 \uC804\uC6A9] \uC55E\uC5F4\uC758 \uC801 \uB458\uC744 \uD55C
+    \uBC88\uC5D0 \uD729\uC4F0\uB294 \uD6A1\uBCA0\uAE30. \uACE0\uB978 \uC801\uACFC
+    \uAC00\uC7A5 \uAC00\uAE4C\uC6B4 \uC55E\uC5F4 \uC801\uC5D0\uAC8C \uAC01\uAC01
+    \uACF5\uACA9\uB825\uC758 90% \uD53C\uD574. \uC544\uAD70 \uC55E\uC5F4(1\xB72\uBC88)\uC5D0\uC11C\uB9CC
+    \uC0AC\uC6A9 \uAC00\uB2A5. \uCD5C\uB300 HP\uC758 4% \uC18C\uBAA8."
   usageType: 0
   damageType: 1
   scalingStat: 1
+  weaponCategory: 1
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 3
+    allowedTargetSlots: 15
+    specificSlots: 
   hpCostPercent: 4
   mpCost: 0
   minMult: 0.9
@@ -29,20 +37,43 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects:
   - effectType: 1
     recoveryTarget: 0
     effectAmount: 0
-    curseData: {fileID: 0}
-    curseChance: 0
-  legacyCurseData: {fileID: 0}
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: fcbeb2fd6e7fa9a49873162e0d3d162f, type: 2}
   requiredLorePoints: 1

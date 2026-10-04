@@ -147,6 +147,8 @@ namespace AbyssdawnBattle
 
         [Space(10)]
         [Header("━━━━━━━━━━ Economy ━━━━━━━━━━")]
+        [Tooltip("Buy price at the town shop (gold). 0 = not sold")]
+        public int buyPrice = 0;
         [Tooltip("Sell price at shop (gold)")]
         public int sellPrice = 0;
     }
