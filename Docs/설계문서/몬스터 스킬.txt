@@ -1,0 +1,119 @@
+유니티 할일
+
+Rat   ×1.25  크리+8   (기본 Beast), 물기 빠른 속도, 
+Bat   ×1.20  크리+12  (Beast, 물기, ATK 낮음, 크리형) + (후열만, 초음파 공격, 원거리전용)
+껍질이 방패에 해당, 블록 20% 구현
+
+
+
+물기 -
+할퀴기 - 
+밀어내기 - 플레이어를 뒤로 밀어냄 (대형 전투에서 포지션 붕괴 학습)
+돌진 - 직선으로 빠르게 돌격 (선제 타이밍 학습)
+
+독침 - 독 상태이상 부여 (후열전용)
+독물기 - (전열전용)
+
+갑옷 찢기 - 방어력 감소 (디버프 위협 학습)
+
+무기 두드리기 - 공격력 감소 (양방향 디버프 존재 학습)
+
+울부짖기 - 아군(적군) 3턴 공격력 10% 상승
+동료부르기 - 같은 종족 1명 소환 (전투후이탈)
+
+움츠리기 - 방어 자세, 다음 턴 반격 (인내심 학습)
+흡혈 - 데미지와 동시에 체력 회복 (장기전 불리 학습)
+도망 - 전투 이탈 (경험치/보상 손실 학습)
+
+꼬리치기 - 전체 파티 약한 데미지 (범위 공격 존재 학습)
+뛰어오르기 - 전열 무시하고 후열 공격 (대형 중요성 학습)
+내려찍기 - 높은 데미지, 빗나가면 1턴 경직 (위험과 기회 학습)
+
+흙뿌리기 - 명중률 감소 (정확도 디버프 학습)
+도발 - 특정 대상만 공격하도록 강제 (어그로 개념 학습)
+비명 - 파티 전체 혼란 상태이상 (광역 상태이상 학습)
+
+땅 파기 - 물리 공격 회피, 다음 턴 기습 (회피 후 반격 패턴 학습)
+핏빛 포효 - 아군 몬스터 공격력 증가 (버프 위협 학습) 아군(적군) 전체 1턴 공격력 30%
+
+스킬 상세
+
+물기 재설계 — 평타 전용 (스킬 아님)
+인간 평타는 ExecuteAttack: HP 0%, ATK 그대로, 
+랜덤 0.85~1.15, 크리 = LUK만.
+
+야수 물기는 같은 평타 경로(ExecuteEnemyTurn)에서 아래 보정만 추가합니다.
+
+이름  물기 (Beast type 자동) 
+(야수전용 평타대체. 다른 종족은 별다른 대체가 없다면 기본공격 평타)
+ATK 배율    ×1.25   ← 시트 ATK보다 물리적으로 세게 물음
+크리 보너스 +8%
+랜덤 상한   1.22    ← 0.85~1.22 (가끔 세게 뜯김)
+HP 코스트   0%      ← 평타 규칙 유지
+MonsterSO type: Beast(Rat, Bat등)면 Inspector 비워도 위 값이 자동 적용됩니다.
+Goblin 등 비-Beast는 「공격」×1.0 그대로입니다.
+hitCount 1
+accuracy 0.97
+mpCost 0 / hpCostPercent 0
+scalingStat Attack / damageType Physical
+타겟 Any → Any (몬스터 어디서든, 아군 4슬롯)
+
+2. 할퀴기 (Scratch) — Monster_Scratch
+역할: 2연타 + 출혈. Quickhand 몬스터판.
+
+배율 minMult 0.58 / maxMult 0.68
+hitCount 2
+accuracy 0.90 (타격마다 독립 판정)
+mpCost 0
+curseEffect Bleed1_Dagger / curseApplyChance 0.25
+왜 이 수치인가
+
+1타당 0.58~0.68 → 2타 모두 명중 시 합계 1.16~1.36 (물기와 비슷하거나 약간 높음)
+명중 90% × 2 → 한 방 빗나가면 총딜은 물기보다 낮음 → 리스크·분산
+출혈 25% : 2턴 × 1.5% = 추가 ~3% MaxHP (교육용 DOT, 과하지 않음)
+Bow 속사(×0.7×2)보다 약간 낮게 잡아 초반 몬스터 위력 유지
+Rat 기준 예상 (DEF 10, 전열)
+
+2타 모두 명중: 1415
+1타만: 78
+
+3. 밀어내기 (Push Back) — Monster_PushBack
+역할: 유틸. 대미지 ↓, 포지션 붕괴 학습
+
+배율 minMult 0.65 / maxMult 0.75
+hitCount 1
+accuracy 0.88
+mpCost 0
+allowedCasterSlots Front(15) / allowedTargetSlots Slot1|2(3)
+특수: 명중 시 아군 1슬롯 후퇴 (BattleLine.PushBackward — 코드 미연동)
+왜 이 수치인가
+
+평타 대비 −25~35% 유틸 세금 (Rat 기준 810)
+전열→전열(1·2번)만 : 대형전에서 전열이 밀리는 상황만 유도
+명중 88% : 강제 이동이므로 너무 높으면 학습 효과 약함
+구현 메모
+EffectType에 Push 없음. skillID == Monster_PushBack 분기 + BattleLine.PushBackward 연동 필요.
+
+4. 돌진 (Charge) — Monster_Charge
+역할: 고위험·고보상, 선제 타이밍 학습
+
+배율 minMult 1.35 / maxMult 1.50
+hitCount 1
+accuracy 0.85
+hpCostPercent 3
+critBonusPercent 12
+preemptive true (적 AI 연동 전까지 플래그만)
+allowedCasterSlots Front / allowedTargetSlots Slot1|2
+왜 이 수치인가
+
+창 돌격 찌르기(×1.4)·Ruin Echo(×1.45) 보다 약간 낮게 — 몬스터 공용 T1
+Rat 기준 1719 (평타 +40~55%)
+명중 85% : 빗나가면 HP 3%만 잃고 헛돌진
+크리 +12% : Bat( 'lin(AGI 높음)과 궁합
+
+물기      45%
+할퀴기    30%
+밀어내기  15%  (전열 아군 있을 때만)
+돌진      10%  (자신 HP 50% 이상일 때)
+
+

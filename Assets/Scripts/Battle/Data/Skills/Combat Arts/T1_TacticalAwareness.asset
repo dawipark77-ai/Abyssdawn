@@ -12,17 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
   m_Name: T1_TacticalAwareness
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Warfare_T1_03
+  skillID: CombatArts_T2_TacticalAwareness
   skillName: Tactical Awareness
   skillIcon: {fileID: -8400421116468495983, guid: 2664d9dbb95aa5349b08846d3eac75ec, type: 3}
-  description: "\uBA85\uC911\uB960 +5%, \uD68C\uD53C\uC728 +5%. \uC801\uC774 2\uAE30
-    \uC774\uC0C1\uC77C \uB54C \uD06C\uB9AC\uD2F0\uCEE4\uB9AC \uD5A5\uB960 +3%"
+  description: "[\uD328\uC2DC\uBE0C] \uBA85\uC911\uB960 +5%, \uD68C\uD53C\uC728 +5%.
+    \uC0B4\uC544 \uC788\uB294 \uC801\uC774 2\uB9C8\uB9AC \uC774\uC0C1\uC774\uBA74
+    \uCE58\uBA85\uD0C0 \uD655\uB960 +3%."
   usageType: 1
   damageType: 0
   scalingStat: 4
+  weaponCategory: 0
   targeting:
-    targetFaction: 2
-    allowedCasterSlots: -1
+    targetFaction: 0
+    allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
   hpCostPercent: 0
@@ -33,21 +35,40 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
-  effects:
-  - effectType: 22
-    recoveryTarget: 0
-    effectAmount: 5
-    curseData: {fileID: 0}
-    curseChance: 0
-  legacyCurseData: {fileID: 0}
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  dunbreakChance: 0.8
+  dunbreakChance: 0
   dunbreakDescription: This turn, completely evade first enemy attack + counterattack
-  prerequisiteSkills: []
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 1863df04485d1394782ca83f3a9f211b, type: 2}
   requiredLorePoints: 1

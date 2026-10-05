@@ -1,0 +1,52 @@
+Assets/Resources/Classes/Class_Warrior.asset
+현재 설정값:
+
+basic status 
+atk 5
+def 5
+mag 5
+agi 5
+luc 3
+
+hp 100
+mp 10
+
+00 none class
+attackBonus: 0
+defenseBonus: 0
+magicBonus: 0
+agilityBonus: 0
+luckBonus: 0
+hpMultiplier: 0
+mpMultiplier: 0
+
+01 Warrior
+
+attackBonus: 5
+defenseBonus: 4
+magicBonus: -3
+agilityBonus: -2
+luckBonus: -1
+hpMultiplier: 1.3
+mpMultiplier: 0.9
+
+02 Wizard
+
+attackBonus: -3
+defenseBonus: -3
+magicBonus: 6
+agilityBonus: -1
+luckBonus: 0
+hpMultiplier: 0.75
+mpMultiplier: 1.4
+
+
+03 Thief
+
+attackBonus: 3
+defenseBonus: -2
+magicBonus: -1
+agilityBonus: 5
+luckBonus: 3
+hpMultiplier: 0.85
+mpMultiplier: 1.03

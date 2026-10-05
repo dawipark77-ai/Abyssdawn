@@ -1,0 +1,59 @@
+아비스던 성장 시스템 — 최종 정리본
+1. 직업별 데이터
+1-1. 초기 스탯 보정 (캐릭터 생성 시 1회 적용)
+직업ATKDEFMAGAGILUKHP배율MP배율None000001.001.00Warrior+5+4−3−2−11.300.90Monk+2−10+3+10.851.15Sister−10+3+1+21.001.00Thief+3−2−1+5+30.851.03Wizard−3−3+6−100.751.40
+1-2. HP/MP 레벨업 자동 증가량
+직업HP/LvMP/LvWarrior82Monk37Sister48Thief43Wizard210
+1-3. 5스탯 레벨업 성장 확률 (%)
+직업ATKDEFMAGAGILUK합계Warrior30%25%5%15%5%80%Monk30%5%10%30%5%80%Sister5%15%25%15%20%80%Thief15%5%5%30%25%80%Wizard5%5%35%10%25%80%
+확률 상한: 70% / 확률 하한: 5%
+
+2. 종의 기억 — 종족별 5종
+2-1. 인간 (Human) — 균형형
+기억명ATKDEFMAGAGILUKHP/LvMP/Lv고정 보정Shoulder+20%------ATK+2, DEF−1Chin-+20%-----DEF+1, AGI−1Lips--+15%---+0.15MAG+1, ATK−1Eyes---+15%+10%--AGI+1, LUK+1Skin-+10%---+0.2-HP+5%, MAG−1
+2-2. 오크 (Orc) — 물리 특화
+기억명ATKDEFMAGAGILUKHP/LvMP/Lv고정 보정Tusk+20%------ATK+2, MAG−1KneeJoint+15%--+10%---ATK+1, AGI−1RedBloodCells+15%----+0.3-HP+10%, ATK+1, LUK−1SubcutaneousFat-+20%---+0.2-DEF+2, AGI−1Greenskin---+15%--+0.15HP−10%, AGI+1, MP+5%
+2-3. 엘프 (Elf) — 마법/민첩
+기억명ATKDEFMAGAGILUKHP/LvMP/Lv고정 보정Ear--+20%---+0.2MAG+2, DEF−1Iris--+15%+10%---MAG+1, AGI+1Hair--+10%+10%+10%--MAG+1, LUK+1Skeleton---+20%---AGI+2, HP−10%Stomach--+15%---+0.25MAG+1, ATK−1
+2-4. 하플링 (Halfling) — 민첩/운
+기억명ATKDEFMAGAGILUKHP/LvMP/Lv고정 보정Foot---+20%---AGI+2, ATK−1CenterOfMass-+10%-+15%---AGI+1, DEF+1Eye----+15%--LUK+1, DEF−1Nose----+20%--LUK+2, MAG−1Metabolism---+10%+10%-+0.15LUK+1, HP−5%, MP+5%
+2-5. 드워프 (Dwarf) — 체력/방어
+기억명ATKDEFMAGAGILUKHP/LvMP/Lv고정 보정Ribcage-+10%---+0.3-HP+20%, AGI−1Skeleton-+20%---+0.2-DEF+2, AGI−2Forearm+20%------ATK+2, MAG−1Beard-+10%--+15%-+0.15LUK+1, AGI−1, MP+5%Retina+15%------ATK+1, LUK−1
+
+3. 종족별 특성 요약
+종족컨셉MP 기억주력 스탯 기억 분포인간균형형Lips (+0.15)ATK/DEF/MAG/AGI/LUK 골고루 1~2개씩오크물리 특화Greenskin (+0.15)ATK 3종(Tusk, KneeJoint, RedBloodCells), DEF 1종엘프마법/민첩Ear (+0.2), Stomach (+0.25)MAG 4종, AGI 2종, ATK/DEF 없음하플링민첩/운Metabolism (+0.15)AGI 3종, LUK 4종, ATK/DEF/MAG 약함드워프체력/방어Beard (+0.15)DEF 3종, HP 2종, ATK 2종
+
+4. 시스템 규칙
+종의 기억 선택
+
+슬롯 3개, 중복 선택 불가
+다른 종족 기억 크로스 선택 가능
+같은 종족 기억 3개 선택 시 종족 고유 스킬 해금
+
+확률 계산
+
+최종 확률 = 직업 기본 확률 + 종의 기억 보정 합산
+상한 70%, 하한 5%
+5스탯 각각 독립 판정
+
+HP/MP 성장
+
+직업별 HP/Lv, MP/Lv 자동 증가 (확정)
+종의 기억 HP/Lv, MP/Lv 보정 가산
+DEF 오를 때 HP 추가 보너스 (수치 미정)
+MAG 오를 때 MP 추가 보너스 (수치 미정)
+
+물리 공격 코스트
+
+모든 직업 물리 공격 = HP 코스트 (전체 HP 기반 %)
+Monk만 MP 코스트
+스킬마다 코스트 % 다름
+
+레벨업 시 처리 순서
+
+HP/Lv, MP/Lv 자동 증가 (직업 + 종의 기억 합산)
+5스탯 각각 확률 판정 (직업 + 종의 기억 합산, 상한 70% 하한 5%)
+자유선택 1포인트 (유저가 1스탯 +1 확정)
+DEF/MAG 오른 만큼 HP/MP 추가 보너스 (수치 미정)
+
+hp/mp는 def/mag 1포인트당 3씩 추가로 오름.

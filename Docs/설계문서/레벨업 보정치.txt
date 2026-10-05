@@ -1,0 +1,45 @@
+직업	ATK	DEF	MAG	AGI	LUK	HP배율	MP배율	HP/Lv	MP/Lv	ATK성장	DEF성장	MAG성장	AGI성장	LUK성장
+None	0	0	0	0	0	1.00	1.00	0	0	0	0	0	0	0
+Warrior	+5	+4	−3	−2	−1	1.30	0.90	8	2	0.8	0.6	0.1	0.4	0.2
+Monk	+2	−1	0	+3	+1	1.00	1.00	6	6	0.6	0.1	0.2	0.8	0.4
+Sister	−1	0	+3	+1	+2	1.00	1.00	4	8	0.1	0.2	0.6	0.4	0.6
+Thief	+3	−2	−1	+5	+3	0.85	1.03	4	3	0.4	0.2	0.1	0.8	0.6
+Wizard	−3	−3	+6	−1	0	0.75	1.40	2	10	0.1	0.1	0.8	0.2	0.4
+종의 기억 — 종류별 (MemoryOfSpeciesData 에셋)
+성장 열: 레벨업 가중치 / HP·MP 기대 증가에 쓰이는 값만 (소수는 에셋 그대로).
+
+인간 (Human)
+기억명	HP/Lv	MP/Lv	ATK/Lv	DEF/Lv	MAG/Lv	AGI/Lv	LUK/Lv	고정 보정 요약
+Chin	0	0	0	0.2	0	0	0	DEF+1, AGI−1
+Eyes	0	0	0	0	0	0	0.2	AGI−1, LUK+2
+Lips	0	0	0	0	0.2	0	0	ATK−1, MAG+1, LUK+1
+Shoulder	0	0	0.3	0	0	0	0	ATK+2, DEF−1
+Skin	0.2	0	0	0	0	0	0	HP+5%, DEF−1, MAG−1
+엘프 (Elf)
+기억명	HP/Lv	MP/Lv	ATK/Lv	DEF/Lv	MAG/Lv	AGI/Lv	LUK/Lv	고정 보정 요약
+Ear	0	0	0	0	0.3	0	0	DEF−1, MAG+2
+Hair	0	0	0	0	0.2	0	0	DEF−1, AGI+1, LUK+1
+Iris	0	0	0	0	0.3	0	0	DEF−1, AGI+2, LUK−1
+Skeleton	0	0	0	0	0	0.2	0	HP−10%, AGI+1
+Stomach	0	0.2	0	0	0	0	0	ATK−1, MAG+1
+오크 (Orc)
+기억명	HP/Lv	MP/Lv	ATK/Lv	DEF/Lv	MAG/Lv	AGI/Lv	LUK/Lv	고정 보정 요약
+Greenskin	0	0	0	0	0	0.2	0	HP−10%, AGI+1
+KneeJoint	0	0	0.2	0	0	0	0	ATK+1, AGI−1
+RedBloodCells	0	0	0.2	0	0	0	0	HP+10%, ATK+1, LUK−1
+SubcutaneousFat	0	0	0	0.3	0	0	0	DEF+2, AGI−1
+Tusk	0	0	0.3	0	0	0	0	ATK+2, MAG−1
+하플링 (Halfling)
+기억명	HP/Lv	MP/Lv	ATK/Lv	DEF/Lv	MAG/Lv	AGI/Lv	LUK/Lv	고정 보정 요약
+CenterOfMass	0	0	0	0	0	0.2	0	ATK−1, DEF+1, AGI+1
+Eye	0	0	0	0	0	0	0.2	DEF−1, LUK+1
+Foot	0	0	0	0	0	0.3	0	ATK−1, AGI+2
+Metabolism	0	0	0	0	0	0	0.2	HP−10%, LUK+1
+Nose	0	0	0	0	0	0	0.3	MAG−1, LUK+2
+드워프 (Dwarf)
+기억명	HP/Lv	MP/Lv	ATK/Lv	DEF/Lv	MAG/Lv	AGI/Lv	LUK/Lv	고정 보정 요약
+Beard	0	0	0	0	0	0	0.2	AGI−1, MAG+1, LUK+1
+Forearm	0	0	0.3	0	0	0	0	ATK+2, MAG−1
+Retina	0	0	0.2	0	0	0	0	ATK+1, LUK−1
+Ribcage	0.2	0	0	0	0	0	0	HP+20%, AGI−1
+Skeleton	0	0	0	0.3	0	0	0	DEF+2, AGI−2

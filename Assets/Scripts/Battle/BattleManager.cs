@@ -250,6 +250,8 @@ public class BattleManager : MonoBehaviour
             enemy = null;
             // [StatMod 5단계] Speed 배율 적용 후 턴 순서용 agility로 캡처.
             agility = Mathf.RoundToInt(p.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Speed, p.Agility));
+            // [2026-10-06] 전투학: 단련된 육체 — 행동 순서 계산 때 민첩 -5 (최소 1)
+            if (p.HasEquippedPassiveByName(PlayerStats.SkillHardenedBody)) agility = Mathf.Max(1, agility - 5);
             isPlayer = true;
         }
 
@@ -449,6 +451,9 @@ public class BattleManager : MonoBehaviour
             // Otherwise equipped weapon must match skill requirement
             bool weaponCompatible = skill.weaponCategory == AbyssdawnBattle.WeaponCategory.None
                                     || skill.weaponCategory == equippedCategory;
+            // [2026-10-06] 전투당 사용 횟수 / 쿨다운 — 다 쓴 스킬은 회색 + 사유 표시
+            string limitReason = weaponCompatible ? SkillLimitReason(currentControlledMember, skill) : null;
+            bool usable = weaponCompatible && limitReason == null;
 
             // 버튼 생성
             GameObject btnObj = new GameObject($"SkillButton_{i}", typeof(RectTransform), typeof(UnityEngine.UI.Button), typeof(UnityEngine.UI.Image));
@@ -472,7 +477,7 @@ public class BattleManager : MonoBehaviour
             UnityEngine.UI.Button btn = btnObj.GetComponent<UnityEngine.UI.Button>();
             UnityEngine.UI.Image btnImage = btnObj.GetComponent<UnityEngine.UI.Image>();
 
-            if (weaponCompatible)
+            if (usable)
             {
                 btnImage.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
                 btn.interactable = true;
@@ -500,7 +505,7 @@ public class BattleManager : MonoBehaviour
                 UnityEngine.UI.Image iconImage = iconObj.GetComponent<UnityEngine.UI.Image>();
                 iconImage.sprite = skill.skillIcon;
                 iconImage.preserveAspect = true;
-                if (!weaponCompatible) iconImage.color = new Color(1f, 1f, 1f, 0.35f);
+                if (!usable) iconImage.color = new Color(1f, 1f, 1f, 0.35f);
             }
 
             // 텍스트 추가 (아이콘 오른쪽에 배치)
@@ -515,11 +520,19 @@ public class BattleManager : MonoBehaviour
             textRT.offsetMax = new Vector2(-10, 0);
 
             TMPro.TextMeshProUGUI btnText = textObj.GetComponent<TMPro.TextMeshProUGUI>();
-            string costText = skill.hpCostPercent > 0 ? $"HP {skill.hpCostPercent}%" : $"MP {skill.mpCost}";
-            if (weaponCompatible)
+            string costText = skill.hpCostPercent > 0 ? $"HP {skill.hpCostPercent}%" : skill.mpCost > 0 ? $"MP {skill.mpCost}" : "No cost";
+            if (skill.usesPerBattle > 0)
+                costText += $" · {Mathf.Max(0, skill.usesPerBattle - GetCount(_skillUses, currentControlledMember, skill))}/{skill.usesPerBattle} per battle";
+            if (usable)
             {
                 btnText.text = $"{skill.skillName}\n<size=16><color=#AAAAAA>{costText}</color></size>";
                 btnText.color = Color.white;
+            }
+            else if (weaponCompatible)
+            {
+                // 전투당 횟수를 다 썼거나 쿨다운 중
+                btnText.text = $"{skill.skillName}\n<size=14><color=#888888>{limitReason}</color></size>";
+                btnText.color = new Color(0.5f, 0.5f, 0.5f, 1f);
             }
             else
             {
@@ -531,8 +544,8 @@ public class BattleManager : MonoBehaviour
             btnText.fontSize = Mathf.Min(25, btnHeight * 0.55f);
             btnText.alignment = TMPro.TextAlignmentOptions.Left;
 
-            // 리스너 추가 (only for compatible skills)
-            if (weaponCompatible)
+            // 리스너 추가 (only for usable skills)
+            if (usable)
             {
                 SkillData capturedSkill = skill;
                 btn.onClick.AddListener(() =>
@@ -1559,6 +1572,18 @@ public class BattleManager : MonoBehaviour
     void OnEnable()
     {
         ForceDisableUIPanels();
+        PlayerStats.OnLastStandPassive += HandleLastStandPassive;
+    }
+
+    void OnDisable()
+    {
+        PlayerStats.OnLastStandPassive -= HandleLastStandPassive;
+    }
+
+    private void HandleLastStandPassive(PlayerStats who)
+    {
+        if (who == null) return;
+        AddMessage($"<color=#FFD24A>{who.playerName} refuses to fall!</color> (Last Stand — 1 HP, damage taken -50% this turn)");
     }
 
     void Start()
@@ -3522,6 +3547,16 @@ public class BattleManager : MonoBehaviour
         // AGI 차이가 크면(10 vs 3) 항상 높은 쪽이 먼저, 작으면(10 vs 8) 낮은 쪽이 먼저 움직일 수도 있다.
         BuildTurnOrder();
 
+        // [2026-10-06] 선제 스킬(SkillData.preemptive, 예: 버티기 자세)은 순서와 상관없이 라운드 맨 처음에 발동
+        var preemptiveDone = new HashSet<AllyCommand>();
+        foreach (var pc in pendingCommands)
+        {
+            if (battleEnded) yield break;
+            if (pc == null || pc.actionType != "skill" || pc.skill == null || !pc.skill.preemptive) continue;
+            preemptiveDone.Add(pc);
+            yield return StartCoroutine(ExecuteAllyResolution(pc));
+        }
+
         Debug.Log($"[BattleManager] Starting resolution queue. Order size: {turnOrder.Count}");
         foreach (var actor in turnOrder)
         {
@@ -3536,7 +3571,7 @@ public class BattleManager : MonoBehaviour
                 Debug.Log($"[BattleManager] Executing player turn: {actor.player?.playerName}");
                 // 플레이어 액션 실행
                 AllyCommand cmd = pendingCommands.Find(c => c.actor == actor.player);
-                if (cmd != null)
+                if (cmd != null && !preemptiveDone.Contains(cmd))
                 {
                     yield return StartCoroutine(ExecuteAllyResolution(cmd));
                 }
@@ -3553,6 +3588,9 @@ public class BattleManager : MonoBehaviour
 
         // 모든 행동이 끝난 후 점화 데미지 처리 (가장 마지막)
         yield return StartCoroutine(ProcessAllIgniteDamage());
+
+        // 라운드 끝: 쿨다운 감소, 버티기 자세 보너스 만료
+        TickRoundEndSkillState();
 
         // 모든 액션 완료 후 상태 체크
         CheckBattleEnd();
@@ -3875,8 +3913,10 @@ public class BattleManager : MonoBehaviour
             candidates.Add((EnemyActionType.Defend, null, DefendBaseWeight(pattern) * 2f));
 
         // [Phase] 도망 — Critical 페이즈에서 후보 추가 (가중치 ×3)
-        if (isCriticalPhase)
-            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f));
+        // [2026-10-06] 위협의 함성에 걸린 적은 HP 30% 이하부터 도망을 고려하고, 도망 가중치 ×2
+        bool intimidated = IsIntimidated(enemy);
+        if (isCriticalPhase || (intimidated && hpRatio <= 0.3f))
+            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f * (intimidated ? 2f : 1f)));
 
         // [Zeta] 역전 시나리오 — Critical 페이즈에서 15% 확률로 최강 스킬 강제 선택
         if (isCriticalPhase && strongestCastable != null && Random.value < 0.15f)
@@ -4151,7 +4191,7 @@ public class BattleManager : MonoBehaviour
 
                 int hpBefore = target.currentHP;
                 if (critical) BattleFx.MarkAllyCritical();
-                target.TakeDamage(damage);
+                damage = target.TakeDamage(damage); // [2026-10-06] 메시지에 실제로 받은 피해 (방어·패시브·버티기 감소 후)
                 AddMessage(critical ? $"{enemy.enemyName} critical hit! {target.playerName} took {damage} damage!" :
                                       $"{enemy.enemyName} attacked {target.playerName} and dealt {damage} damage!");
                 // [LastStand] HP가 0이 아닌 1로 유지됐다면 불굴 발동
@@ -4570,6 +4610,14 @@ public class BattleManager : MonoBehaviour
                 AddMessage($"Requires {skill.weaponCategory} equipped!");
                 return;
             }
+        }
+
+        // 전투당 사용 횟수 / 쿨다운 (버튼이 이미 막지만 안전장치)
+        string limit = SkillLimitReason(currentControlledMember, skill);
+        if (limit != null)
+        {
+            AddMessage($"{skill.skillName}: {limit}.");
+            return;
         }
 
         // MP 체크
@@ -5328,7 +5376,7 @@ public class BattleManager : MonoBehaviour
         else
         {
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계 — baseValue=0f는 가산 전용 사용.
-            bool critical = CheckCritical(attacker.luck, (biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f)
+            bool critical = CheckCritical(attacker.luck, (biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f) + PlayerCritBonus(attacker)
                 + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
 
             // [Bite] ATK 보정용 로컬 (attacker.Attack은 읽기전용 computed라 로컬에 받아 곱함)
@@ -5353,6 +5401,7 @@ public class BattleManager : MonoBehaviour
                     Mathf.FloorToInt(PenetratedDefense(attacker, target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense))), false,
                     biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBaseDamage = Mathf.Max(singleBaseDamage, 1);
+                singleBaseDamage = ConsumeFollowUpBonus(attacker, singleBaseDamage); // 버티기 자세 다음 첫 공격 +20%
 
                 // 2) 쌍수 방어 파괴 공식
                 // 타격당 방어 파괴 = 적 현재 방어력 × 계수 × 0.35~0.45
@@ -5429,6 +5478,7 @@ public class BattleManager : MonoBehaviour
                     Mathf.FloorToInt(PenetratedDefense(attacker, target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, target.defense))), false,
                     biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.randomRollMaxOverride : 1.15f);
                 singleBase = Mathf.Max(singleBase, 1);
+                singleBase = ConsumeFollowUpBonus(attacker, singleBase); // 버티기 자세 다음 첫 공격 +20%
 
                 float singleCoeff = GetArmorBreakCoefficient(attacker);
                 int singleArmor = 0;
@@ -5693,9 +5743,150 @@ public class BattleManager : MonoBehaviour
         return false;
     }
 
+    // ─────────────────────────────────────────
+    // 쿨다운 · 전투당 사용 횟수 (2026-10-06)
+    // ─────────────────────────────────────────
+
+    /// <summary>쿨다운 전체 스위치. 꺼져 있으면 SkillData.cooldownTurns 는 무시 (DQ식 전투 — 투입 여부는 디자이너 결정, 기본 꺼짐).
+    /// 전투당 사용 횟수(usesPerBattle)는 이 스위치와 상관없이 항상 적용.</summary>
+    public static bool UseCooldowns = false;
+
+    private readonly Dictionary<PlayerStats, Dictionary<SkillData, int>> _skillCooldowns = new Dictionary<PlayerStats, Dictionary<SkillData, int>>();
+    private readonly Dictionary<PlayerStats, Dictionary<SkillData, int>> _skillUses = new Dictionary<PlayerStats, Dictionary<SkillData, int>>();
+
+    private static int GetCount(Dictionary<PlayerStats, Dictionary<SkillData, int>> table, PlayerStats who, SkillData skill)
+    {
+        Dictionary<SkillData, int> d; int v;
+        return who != null && skill != null && table.TryGetValue(who, out d) && d.TryGetValue(skill, out v) ? v : 0;
+    }
+
+    private static void SetCount(Dictionary<PlayerStats, Dictionary<SkillData, int>> table, PlayerStats who, SkillData skill, int value)
+    {
+        Dictionary<SkillData, int> d;
+        if (!table.TryGetValue(who, out d)) { d = new Dictionary<SkillData, int>(); table[who] = d; }
+        d[skill] = value;
+    }
+
+    /// <summary>지금 이 스킬을 못 쓰는 이유 (쓸 수 있으면 null). 버튼 표시·사용 차단에 공용.</summary>
+    private string SkillLimitReason(PlayerStats who, SkillData skill)
+    {
+        if (who == null || skill == null) return null;
+        if (skill.usesPerBattle > 0 && GetCount(_skillUses, who, skill) >= skill.usesPerBattle)
+            return skill.usesPerBattle == 1 ? "Used this battle" : $"Used {skill.usesPerBattle}/{skill.usesPerBattle}";
+        if (UseCooldowns && skill.cooldownTurns > 0)
+        {
+            int cd = GetCount(_skillCooldowns, who, skill);
+            if (cd > 0) return $"Cooldown {cd}";
+        }
+        return null;
+    }
+
+    /// <summary>스킬을 실제로 썼을 때 기록 (사용 횟수 +1, 쿨다운 시작).</summary>
+    private void RecordSkillUse(PlayerStats who, SkillData skill)
+    {
+        if (who == null || skill == null) return;
+        SetCount(_skillUses, who, skill, GetCount(_skillUses, who, skill) + 1);
+        // 라운드 끝마다 1씩 줄고, 쓴 라운드 끝에도 한 번 줄므로 +1 → 다음 라운드부터 cooldownTurns 라운드 동안 못 씀
+        if (UseCooldowns && skill.cooldownTurns > 0) SetCount(_skillCooldowns, who, skill, skill.cooldownTurns + 1);
+    }
+
+    /// <summary>라운드 끝: 쿨다운 1 감소, 버티기 자세 다음 공격 보너스 만료 처리.</summary>
+    private void TickRoundEndSkillState()
+    {
+        foreach (var kv in _skillCooldowns)
+        {
+            var keys = new List<SkillData>(kv.Value.Keys);
+            foreach (var k in keys) if (kv.Value[k] > 0) kv.Value[k]--;
+        }
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null || m.nextAttackBonusRounds <= 0) continue;
+            if (--m.nextAttackBonusRounds <= 0) m.nextAttackBonus = 0f;
+        }
+    }
+
+    // ─────────────────────────────────────────
+    // 전투학 (Combat Arts 페이지) 액티브 · 보조 효과 (2026-10-06)
+    // ─────────────────────────────────────────
+    private const string SkillBrace = "Brace";
+    private const string SkillSecondWind = "Second Wind";
+    private const string SkillIntimidatingShout = "Intimidating Shout";
+
+    /// <summary>전장의 직감: 살아 있는 적이 2마리 이상이면 치명타 +3%.</summary>
+    private float PlayerCritBonus(PlayerStats attacker)
+    {
+        if (attacker == null || !attacker.HasEquippedPassiveByName(PlayerStats.SkillTacticalAwareness)) return 0f;
+        int alive = 0;
+        foreach (var e in activeEnemies) if (e != null && e.currentHP > 0) alive++;
+        return alive >= 2 ? 3f : 0f;
+    }
+
+    /// <summary>버티기 자세 다음 첫 공격 피해 보너스를 적용하고 소모.</summary>
+    private int ConsumeFollowUpBonus(PlayerStats attacker, int damage)
+    {
+        if (attacker == null || attacker.nextAttackBonus <= 0f) return damage;
+        int boosted = Mathf.Max(1, Mathf.FloorToInt(damage * (1f + attacker.nextAttackBonus)));
+        attacker.nextAttackBonus = 0f;
+        attacker.nextAttackBonusRounds = 0;
+        return boosted;
+    }
+
+    /// <summary>전투학 액티브 (Brace / Second Wind / Intimidating Shout). 처리했으면 true.</summary>
+    private bool ApplyCombatArtsActive(PlayerStats attacker, SkillData skill)
+    {
+        switch (skill.skillName)
+        {
+            case SkillBrace:
+            {
+                // 이번 라운드 받는 피해 -50% (선제 발동이라 이번 라운드 모든 적 공격에 적용), 다음 라운드 첫 공격 +20%
+                attacker.RemoveStatModifiersFromSource(skill);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.DamageTaken, modType = StatModType.PercentMult, value = 0.5f }, skill, 1);
+                attacker.nextAttackBonus = 0.2f;
+                attacker.nextAttackBonusRounds = 2; // 이번 라운드 끝 + 다음 라운드 끝에 만료
+                AddMessage($"{attacker.playerName} braces! <color=#9FC8FF>Damage taken -50%</color> this turn, next attack +20%.");
+                return true;
+            }
+            case SkillSecondWind:
+            {
+                int heal = Mathf.Max(1, Mathf.FloorToInt(attacker.maxHP * 0.2f));
+                int before = attacker.currentHP;
+                attacker.Heal(heal);
+                bool hadBleed = attacker.activeStatusEffects.Exists(se => se.data != null && se.data.effectType == StatusEffectType.Bleed);
+                if (hadBleed) attacker.RemoveStatusEffect(StatusEffectType.Bleed);
+                AddMessage($"{attacker.playerName} catches a second wind! Recovered {attacker.currentHP - before} HP" + (hadBleed ? ", bleeding stopped." : "."));
+                return true;
+            }
+            case SkillIntimidatingShout:
+            {
+                // 적 전체 공격력 -15% (2라운드). HP 30% 이하인 적은 도망칠 확률 증가 (SelectEnemyAction)
+                int count = 0;
+                foreach (var e in activeEnemies)
+                {
+                    if (e == null || e.currentHP <= 0) continue;
+                    e.RemoveStatModifiersFromSource(skill);
+                    e.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 0.85f }, skill, 3);
+                    count++;
+                }
+                AddMessage($"{attacker.playerName} lets out an intimidating shout! <color=#FF9F6B>{count} enem{(count == 1 ? "y's" : "ies'")} attack -15%</color> for 2 turns.");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>위협의 함성에 걸린 적인지 (도망 확률 증가 판정용).</summary>
+    private static bool IsIntimidated(EnemyStats e)
+    {
+        if (e == null || e.activeStatModifiers == null) return false;
+        foreach (var m in e.activeStatModifiers)
+            if (m != null && m.source is SkillData sd && sd.skillName == SkillIntimidatingShout) return true;
+        return false;
+    }
+
     private void ApplySelfEffects(PlayerStats attacker, SkillData skill)
     {
         if (attacker == null || skill == null || skill.Effects == null) return;
+        if (ApplyCombatArtsActive(attacker, skill)) return;
 
         foreach (var effect in skill.Effects)
         {
@@ -6126,7 +6317,7 @@ public class BattleManager : MonoBehaviour
 
             // 9. 데미지 적용
             if (critical) BattleFx.MarkAllyCritical();
-            target.TakeDamage(damage);
+            damage = target.TakeDamage(damage); // [2026-10-06] 실제로 받은 피해로 표시
             totalDamage += damage;
             AddMessage($"{enemy.enemyName} uses {skill.skillName}! {target.playerName} takes {damage} damage{(critical ? " (Critical!)" : "")}.");
 
@@ -6171,6 +6362,9 @@ public class BattleManager : MonoBehaviour
         if (attacker == null || skill == null) yield break;
         // 타겟이 필요한 스킬인데 타겟이 없으면 리턴 (회복/방어 스킬 제외)
         if (target == null && !IsSelfTargetSkill(skill)) yield break;
+
+        // 전투당 사용 횟수 · 쿨다운 기록
+        RecordSkillUse(attacker, skill);
 
         // MP 소모
         if (skill.mpCost > 0)
@@ -6362,7 +6556,7 @@ public class BattleManager : MonoBehaviour
 
             // 회피하지 않았으면 데미지 계산
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
-            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + PlayerCritBonus(attacker) + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
             float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
 
             // 스탯 스케일링
@@ -6398,6 +6592,7 @@ public class BattleManager : MonoBehaviour
 
             // Sharp Edge 등 공격 패시브로 인한 추가 보정 (깡뎀에만 적용)
             baseDamage = ApplyOffensivePassiveBonuses(attacker, skill, target, baseDamage);
+            baseDamage = ConsumeFollowUpBonus(attacker, baseDamage); // 버티기 자세 다음 첫 공격 +20% (첫 타만)
 
             // --- 방어구 파괴 계산 (타수 일반화) ---
             int armorBreakDamage = 0;
@@ -6559,7 +6754,7 @@ public class BattleManager : MonoBehaviour
             }
 
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
-            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + PlayerCritBonus(attacker) + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
             float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
 
             float baseStat = attacker.GetScaleValue(skill.scalingStat);
@@ -6595,6 +6790,7 @@ public class BattleManager : MonoBehaviour
 
             // Sharp Edge 등 공격 패시브 보정
             damage = ApplyOffensivePassiveBonuses(attacker, skill, target, damage);
+            damage = ConsumeFollowUpBonus(attacker, damage); // 버티기 자세 다음 첫 공격 +20% (첫 대상만)
 
             damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.enemyName);
             if (target.isDefending)
@@ -6808,8 +7004,9 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || defender == null)
             return (0.2f, 1f, SlotBalanceTable.GetHitChanceMultiplier(BattleSlot.Slot1));
+        // 패시브 회피(전장의 직감 +5%) 포함
         float evasionMod = Mathf.Clamp(
-            defender.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion, 0f), 0f, 0.8f);
+            defender.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion, 0f) + defender.GetPassiveEvasionBonus(), 0f, 0.8f);
         return ComputeHitChanceCore(
             usedSkill,
             attacker.Agility,

@@ -178,6 +178,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -298,6 +300,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -467,6 +471,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2095,6 +2101,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2707,6 +2715,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -3922,6 +3932,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -5437,6 +5449,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -5602,6 +5616,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -6018,6 +6034,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -6860,7 +6878,7 @@ GameObject:
   - component: {fileID: 111504741}
   - component: {fileID: 111504744}
   m_Layer: 5
-  m_Name: Formation Discipline
+  m_Name: Intimidating Shout
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6884,8 +6902,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 135, y: -0.0023193}
-  m_SizeDelta: {x: 63.774, y: 58.942}
+  m_AnchoredPosition: {x: -170, y: -90}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &111504741
 MonoBehaviour:
@@ -6951,7 +6969,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -7881139419853764829, guid: d84ebf3262e43504aaeb9c974718cc48, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6981,7 +6999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 29f0d9db54b91ac458b27d9dbee54931, type: 2}
+  skillData: {fileID: 11400000, guid: 776eceb935f40804692c0007043bcbf8, type: 2}
   prerequisiteNodes:
   - {fileID: 1577875992}
   requiredSkillPoints: 1
@@ -6991,6 +7009,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -8033,6 +8053,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &124972148
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8713,6 +8734,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -9078,6 +9101,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -10087,6 +10112,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -10324,6 +10351,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -11012,6 +11041,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 1
 --- !u!114 &158811923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11092,6 +11122,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -11399,6 +11431,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -11823,6 +11857,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -12347,6 +12383,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -13402,7 +13440,7 @@ GameObject:
   - component: {fileID: 198841450}
   - component: {fileID: 198841449}
   m_Layer: 5
-  m_Name: Formation Discipline
+  m_Name: Intimidating Shout
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13439,7 +13477,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 29f0d9db54b91ac458b27d9dbee54931, type: 2}
+  skillData: {fileID: 11400000, guid: 776eceb935f40804692c0007043bcbf8, type: 2}
   prerequisiteNodes: []
   requiredSkillPoints: 1
   nodeButton: {fileID: 0}
@@ -13448,6 +13486,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -13548,6 +13588,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -14095,6 +14137,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -15607,6 +15651,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -15872,6 +15918,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -16716,6 +16764,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -16864,6 +16914,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -17325,6 +17377,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -17469,6 +17523,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -17978,6 +18034,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -18729,6 +18787,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -19822,6 +19882,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -20641,6 +20703,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &337419977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20859,6 +20922,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -21207,6 +21272,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -21274,6 +21341,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &348721795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21371,6 +21439,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -21745,6 +21815,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -22485,6 +22557,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -22629,6 +22703,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -22729,6 +22805,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -22970,6 +23048,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -23256,6 +23336,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -24079,6 +24161,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -24591,7 +24675,7 @@ GameObject:
   - component: {fileID: 398240007}
   - component: {fileID: 398240006}
   m_Layer: 5
-  m_Name: 'Tactical Awareness '
+  m_Name: Tactical Awareness
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24637,6 +24721,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -24737,6 +24823,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -24978,6 +25066,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -26359,6 +26449,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -26578,6 +26670,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -26678,6 +26772,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -27158,6 +27254,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -27339,6 +27437,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &434621669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27866,6 +27965,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -27966,6 +28067,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -28445,6 +28548,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -29588,6 +29693,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -29779,6 +29886,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -30916,6 +31025,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -32146,6 +32257,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -32328,6 +32441,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -33315,6 +33430,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -35453,6 +35570,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -35536,6 +35655,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -35703,6 +35824,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &593263057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35755,7 +35877,7 @@ GameObject:
   - component: {fileID: 595639990}
   - component: {fileID: 595639989}
   m_Layer: 5
-  m_Name: 'Tactical Awareness '
+  m_Name: Tactical Awareness
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35779,8 +35901,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -153, y: 0.000000035856}
-  m_SizeDelta: {x: 63.774, y: 58.942}
+  m_AnchoredPosition: {x: -170, y: 90}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &595639989
 MonoBehaviour:
@@ -35804,6 +35926,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -35871,7 +35995,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -8400421116468495983, guid: 2664d9dbb95aa5349b08846d3eac75ec, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -36365,6 +36489,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -36874,6 +37000,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -36978,6 +37106,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -37368,7 +37498,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &616121626
 MonoBehaviour:
@@ -37390,7 +37520,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Brace
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -38374,6 +38504,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -40675,6 +40807,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -42419,7 +42553,7 @@ GameObject:
   - component: {fileID: 702026323}
   - component: {fileID: 702026322}
   m_Layer: 5
-  m_Name: Shield Wall
+  m_Name: Brace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42443,8 +42577,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 95, y: 94}
-  m_SizeDelta: {x: 63.781, y: 58.942}
+  m_AnchoredPosition: {x: 0, y: 90}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &702026322
 MonoBehaviour:
@@ -42458,7 +42592,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 9e52ba0da4994fe47a97d8eed3c6b20f, type: 2}
+  skillData: {fileID: 11400000, guid: 18e71502597692148af154423eccb4ad, type: 2}
   prerequisiteNodes: []
   requiredSkillPoints: 1
   nodeButton: {fileID: 702026323}
@@ -42467,6 +42601,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -42534,7 +42670,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 9040223973580938310, guid: 4985a8268ae904544946ff1d15b75116, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -43139,6 +43275,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -43376,6 +43514,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -43617,6 +43757,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -44450,6 +44592,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -44685,6 +44829,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -44904,6 +45050,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -45192,6 +45340,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -45613,6 +45763,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -46872,6 +47024,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &760766203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46973,6 +47126,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -47121,6 +47276,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -48025,6 +48182,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -48754,6 +48913,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -49758,6 +49919,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -49923,6 +50086,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -50120,6 +50285,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -50264,6 +50431,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -50504,6 +50673,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -51306,6 +51477,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -52366,6 +52539,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -53860,6 +54035,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -54356,6 +54533,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -54637,6 +54816,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -54816,6 +54997,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -55705,6 +55888,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -55925,6 +56110,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -56573,6 +56760,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -56947,6 +57136,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -57023,7 +57214,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &898440669
 MonoBehaviour:
@@ -57045,7 +57236,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Second Wind
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -57321,6 +57512,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -58133,6 +58326,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -59359,6 +59554,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -59731,6 +59928,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -60657,6 +60856,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -60801,6 +61002,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -61900,6 +62103,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -62137,6 +62342,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -62191,7 +62398,7 @@ GameObject:
   - component: {fileID: 985359885}
   - component: {fileID: 985359884}
   m_Layer: 5
-  m_Name: Weapon Familiarity
+  m_Name: Last Stand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -62228,7 +62435,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 2aa582f670799bf419247e96259ff4b8, type: 2}
+  skillData: {fileID: 11400000, guid: 85a5697eb09cdd4459876db022559ab0, type: 2}
   prerequisiteNodes: []
   requiredSkillPoints: 1
   nodeButton: {fileID: 0}
@@ -62237,6 +62444,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -62532,6 +62741,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -63076,6 +63287,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -63735,6 +63948,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &999881101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65486,6 +65700,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -66179,6 +66395,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -66721,7 +66939,7 @@ GameObject:
   - component: {fileID: 1076601630}
   - component: {fileID: 1076601629}
   m_Layer: 5
-  m_Name: Focus
+  m_Name: Second Wind
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66758,7 +66976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 8908d8eaf3bad6f4dbdf4a344ab581af, type: 2}
+  skillData: {fileID: 11400000, guid: f5b95670f4839ef4b9827378e7628106, type: 2}
   prerequisiteNodes: []
   requiredSkillPoints: 1
   nodeButton: {fileID: 0}
@@ -66767,6 +66985,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -67873,6 +68093,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -68225,6 +68447,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &1110474320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68854,6 +69077,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -68958,6 +69183,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -69513,6 +69740,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -69909,7 +70138,7 @@ GameObject:
   - component: {fileID: 1135366473}
   - component: {fileID: 1135366472}
   m_Layer: 5
-  m_Name: Focus
+  m_Name: Second Wind
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -69933,8 +70162,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -112.79, y: 94}
-  m_SizeDelta: {x: 63.774, y: 58.942}
+  m_AnchoredPosition: {x: 170, y: 90}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1135366472
 MonoBehaviour:
@@ -69948,7 +70177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 8908d8eaf3bad6f4dbdf4a344ab581af, type: 2}
+  skillData: {fileID: 11400000, guid: f5b95670f4839ef4b9827378e7628106, type: 2}
   prerequisiteNodes:
   - {fileID: 1577875992}
   requiredSkillPoints: 1
@@ -69958,6 +70187,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -70025,7 +70256,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -4115274655291430038, guid: bfa8fa2bb381ba34080fc3506d6ada0f, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -70342,6 +70573,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -71313,6 +71546,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -71460,6 +71695,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -73986,6 +74223,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -74247,6 +74486,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -74326,8 +74567,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00054932, y: 225}
-  m_SizeDelta: {x: 63.774, y: 58.942}
+  m_AnchoredPosition: {x: 0, y: 270}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1203089305
 MonoBehaviour:
@@ -74351,6 +74592,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -74418,7 +74661,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 843639385197948872, guid: 039cd1b67ae44b7438bc5d896fe0f8fb, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -75493,7 +75736,7 @@ GameObject:
   - component: {fileID: 1223376001}
   - component: {fileID: 1223376000}
   m_Layer: 5
-  m_Name: Weapon Familiarity
+  m_Name: Last Stand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -75517,8 +75760,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00054932, y: -233}
-  m_SizeDelta: {x: 63.774, y: 58.942}
+  m_AnchoredPosition: {x: 0, y: -90}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1223376000
 MonoBehaviour:
@@ -75532,7 +75775,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 2aa582f670799bf419247e96259ff4b8, type: 2}
+  skillData: {fileID: 11400000, guid: 85a5697eb09cdd4459876db022559ab0, type: 2}
   prerequisiteNodes:
   - {fileID: 1577875992}
   requiredSkillPoints: 1
@@ -75542,6 +75785,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -75609,7 +75854,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -5816105751508217489, guid: 609d5d3bf3eed144e8b9b21aa45a3189, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -75889,6 +76134,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -76170,6 +76417,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -77748,6 +77997,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -78261,6 +78512,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -79172,7 +79425,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1277099706
 MonoBehaviour:
@@ -79194,7 +79447,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Tactical Awareness
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -79333,6 +79586,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -79645,6 +79900,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -80043,6 +80300,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -80313,6 +80572,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &1293390746
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81212,6 +81472,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!1 &1316163082
 GameObject:
   m_ObjectHideFlags: 0
@@ -81696,6 +81957,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -82294,6 +82557,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -84108,6 +84373,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -84510,6 +84777,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -84614,6 +84883,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -84899,6 +85170,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -85145,6 +85418,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -85293,6 +85568,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -85760,6 +86037,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -88199,6 +88478,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -88597,6 +88878,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -89609,6 +89892,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -89831,6 +90116,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -89996,6 +90283,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -90430,6 +90719,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -91026,6 +91317,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -91170,6 +91463,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -92624,6 +92919,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -92724,6 +93021,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -93242,6 +93541,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -95047,7 +95348,7 @@ GameObject:
   - component: {fileID: 1536058748}
   - component: {fileID: 1536058747}
   m_Layer: 5
-  m_Name: Shield Wall
+  m_Name: Brace
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95084,7 +95385,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f9a6ee73414ed4fb9766bb595ff55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeNode
-  skillData: {fileID: 11400000, guid: 9e52ba0da4994fe47a97d8eed3c6b20f, type: 2}
+  skillData: {fileID: 11400000, guid: 18e71502597692148af154423eccb4ad, type: 2}
   prerequisiteNodes: []
   requiredSkillPoints: 1
   nodeButton: {fileID: 0}
@@ -95093,6 +95394,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -95197,6 +95500,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -95341,6 +95646,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -96370,6 +96677,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &1555246441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96543,11 +96851,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LoreCategoryScroller
   viewport: {fileID: 496797380}
   content: {fileID: 2137290472}
+  viewports: []
   btnPrev: {fileID: 967802698}
   btnNext: {fileID: 1487347810}
   slotWidth: 0
   spacing: 8
+  addMaskIfMissing: 1
   scrollDuration: 0.2
+  disabledAlpha: 0.3
 --- !u!114 &1555347423
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97634,6 +97945,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -97675,8 +97988,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000038147, y: -0.0023193}
-  m_SizeDelta: {x: 63.774, y: 58.942}
+  m_AnchoredPosition: {x: 170, y: -90}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1577875992
 MonoBehaviour:
@@ -97700,6 +98013,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -97767,7 +98082,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 5329708327426976617, guid: 540bef903ad51c04697635fbf8c0260d, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -97848,6 +98163,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -98594,6 +98911,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -98660,6 +98979,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -99404,6 +99725,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -99552,6 +99875,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -99787,6 +100112,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -99887,6 +100214,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -100525,6 +100854,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &1636088285
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100641,6 +100971,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -101512,6 +101844,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -102462,6 +102796,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -102610,6 +102946,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -103336,7 +103674,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1679496797
 RectTransform:
   m_ObjectHideFlags: 0
@@ -104261,6 +104599,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -104488,6 +104828,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -105531,6 +105873,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -106268,6 +106612,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -106415,6 +106761,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -106671,6 +107019,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -107336,7 +107686,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1756399927
 MonoBehaviour:
@@ -107358,7 +107708,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Last Stand
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -107679,6 +108029,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -108197,6 +108549,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -108436,6 +108790,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -108978,6 +109334,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -109382,6 +109740,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -109596,7 +109956,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1789962274
 MonoBehaviour:
@@ -109618,7 +109978,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Intimidating Shout
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -112475,14 +112835,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 5131172506789782084, guid: ebe25e3270b3f54469300d004b3351b8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -112972,6 +113332,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &1845894616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114806,6 +115167,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 1, g: 1, b: 0.8, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -115090,6 +115453,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -115958,6 +116323,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -116363,6 +116730,7 @@ MonoBehaviour:
   allNodes: []
   skillPointsText: {fileID: 0}
   autoFindNodes: 1
+  drawLinks: 0
 --- !u!114 &1895869620
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117092,6 +117460,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -117240,6 +117610,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -117621,6 +117993,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -118027,6 +118401,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -118179,6 +118555,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -119032,6 +119410,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -119334,6 +119714,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -119846,6 +120228,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -119949,6 +120333,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -120069,7 +120455,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1974788958
 MonoBehaviour:
@@ -120091,7 +120477,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Combat Breathing
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -121879,6 +122265,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -122770,6 +123158,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -123407,6 +123797,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -123940,6 +124332,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -125140,6 +125534,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -125572,6 +125968,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -126234,6 +126632,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -126476,6 +126876,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -126733,7 +127135,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 116.11, y: 125.72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2087024031
 MonoBehaviour:
@@ -126755,7 +127157,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: Hardened Body
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -127330,6 +127732,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 510977864}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -127575,6 +127979,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -127678,7 +128084,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2101294279
 RectTransform:
   m_ObjectHideFlags: 0
@@ -127718,15 +128124,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 0}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -128587,6 +128993,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -128824,6 +129232,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -129200,6 +129610,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 0}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -129671,6 +130083,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -130504,6 +130918,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 1596719009}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}
@@ -131151,6 +131567,8 @@ MonoBehaviour:
   lockedOverlay: {fileID: 0}
   learnedEffect: {fileID: 0}
   skillDetailPopup: {fileID: 2101294282}
+  useLearnedBorder: 0
+  learnedBorderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
   lockedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   availableColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
   learnedColor: {r: 1, g: 1, b: 1, a: 1}

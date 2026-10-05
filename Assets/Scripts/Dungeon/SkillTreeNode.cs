@@ -40,6 +40,13 @@ public class SkillTreeNode : MonoBehaviour
     [Tooltip("스킬 상세 정보 팝업 (수동으로 연결)")]
     public SkillDetailPopup skillDetailPopup;
     
+    [Header("배운 스킬 테두리")]
+    [Tooltip("켜면 배운 스킬 노드에 옅은 황금색 테두리(Resources/UI/GlowBorder)를 두름. 트리 매니저가 켬")]
+    public bool useLearnedBorder = false;
+    [Tooltip("배운 스킬 테두리 색")]
+    public Color learnedBorderColor = new Color(0.96f, 0.87f, 0.58f, 1f);
+    private Image _learnedBorder;
+
     [Header("시각적 설정")]
     [Tooltip("잠긴 상태 색상 (회색, 어둡게)")]
     public Color lockedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
@@ -81,6 +88,9 @@ public class SkillTreeNode : MonoBehaviour
         {
             Debug.Log($"[SkillTreeNode] {gameObject.name}: 부모에 같은 스킬 노드가 있어 중복 노드로 비활성화");
             enabled = false;
+            // 중복 노드의 그림 칸(스프라이트 없는 흰 사각형)도 숨김 — 아이콘·색은 부모 노드가 그린다
+            var img = GetComponent<Image>();
+            if (img != null) img.enabled = false;
             return;
         }
 
@@ -582,6 +592,44 @@ public class SkillTreeNode : MonoBehaviour
                     nodeButton.interactable = true;
                 break;
         }
+
+        SetLearnedBorder(currentState == SkillState.Learned);
+    }
+
+    /// <summary>현재 상태 그대로 모양만 다시 그린다 (테두리 설정이 바뀐 뒤 등).</summary>
+    public void RefreshVisual()
+    {
+        UpdateVisualState();
+    }
+
+    /// <summary>배운 스킬이면 옅은 황금색 테두리만 둘러 마무리 (가운데는 비어 있는 9-slice 프레임).</summary>
+    private void SetLearnedBorder(bool on)
+    {
+        if (!useLearnedBorder)
+        {
+            if (_learnedBorder != null) _learnedBorder.gameObject.SetActive(false);
+            return;
+        }
+        if (_learnedBorder == null)
+        {
+            if (!on) return;
+            Sprite frame = Resources.Load<Sprite>("UI/GlowBorder");
+            if (frame == null) return;
+            var go = new GameObject("LearnedBorder", typeof(RectTransform));
+            go.transform.SetParent(transform, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(-6f, -6f);
+            rt.offsetMax = new Vector2(6f, 6f);
+            _learnedBorder = go.AddComponent<Image>();
+            _learnedBorder.sprite = frame;
+            _learnedBorder.type = Image.Type.Sliced;
+            _learnedBorder.fillCenter = false;
+            _learnedBorder.raycastTarget = false;
+        }
+        _learnedBorder.color = learnedBorderColor;
+        _learnedBorder.gameObject.SetActive(on);
     }
     
     /// <summary>

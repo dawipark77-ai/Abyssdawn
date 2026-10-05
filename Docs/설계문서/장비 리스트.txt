@@ -1,0 +1,58 @@
+무기
+
+조잡한 검 
+1. Crude Sword (조잡한 검)
+
+Equipment Type: Hand / Is Two Handed: false
+
+Attack Range: Melee / Weapon Category: Sword
+
+Stat Bonuses: Attack +5, Accuracy -0.05 (5%)
+
+Description: "휘두를 때마다 묘하게 손목이 아파옵니다."
+
+
+방패 
+
+조잡한 방패
+ Crude Shield (조잡한 방패)
+
+Equipment Type: Hand (Off-Hand용) / Is Two Handed: false
+
+Stat Bonuses: Defense +2
+
+Special: 패링 관련 수치는 나중에 시스템 구현 시 반영할 수 있게 Description에 기재해줘.
+
+Description: "방패라기보다는 땔감에 가까워 보입니다. 패링 실패 시 피해 2.5배 페널티."
+
+갑옷
+
+조잡한 갑옷
+ Crude Armor (조잡한 갑옷)
+
+Equipment Type: Armor
+
+Stat Bonuses: Defense +3, Agi -1
+
+Description: "방어력은 조금 생겼지만, 행동하기엔 꽤나 거북합니다."
+
+악세사리
+
+조잡한 팔찌
+Crude Bracelet (조잡한 팔찌)
+
+Equipment Type: Accessory
+
+Stat Bonuses: Hp Bonus +5
+
+Special: Description에 "어그로 수치 소폭 상승" 내용 포함.
+
+Description: "조잡한 장식들이 부딪히며 소리를 내어 적의 시선을 끕니다."
+조잡한 신발
+Crude Boots (조잡한 장화)
+
+Equipment Type: Accessory (또는 신발용 슬롯이 있다면 해당 슬롯)
+
+Stat Bonuses: Agi +1, Accuracy -0.03 (3%) (회피율 대신 명중률 하락으로 임시 대체)
+
+Description: "맨발보다는 낫지만, 자꾸 뒤꿈치가 까집니다."

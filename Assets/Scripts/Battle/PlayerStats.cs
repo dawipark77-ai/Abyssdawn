@@ -192,8 +192,29 @@ public class PlayerStats : MonoBehaviour
             int equipmentBonus = GetEquipmentHPBonus();
             int traitBonus = GetTraitBonus(PassiveBonusStat.HP);
 
-            return baseValue + classBonus + memoryFlatHp + memoryHpFromPercent + passiveBonus + equipmentBonus + traitBonus;
+            int total = baseValue + classBonus + memoryFlatHp + memoryHpFromPercent + passiveBonus + equipmentBonus + traitBonus;
+            // [2026-10-06] 전투학: 단련된 육체 — 최대 HP +8%
+            if (HasEquippedPassiveByName(SkillHardenedBody)) total += Mathf.RoundToInt(total * 0.08f);
+            return total;
         }
+    }
+
+    // ── 전투학(Combat Arts 페이지) 스킬 이름 — 효과는 이름으로 찾는다 (기존 Basic Swordsmanship 방식과 같음) ──
+    public const string SkillHardenedBody = "Hardened Body";
+    public const string SkillTacticalAwareness = "Tactical Awareness";
+    public const string SkillLastStand = "Last Stand";
+
+    /// <summary>최후의 저항(패시브)이 발동했을 때 — BattleManager 가 전투 메시지를 띄운다.</summary>
+    public static event Action<PlayerStats> OnLastStandPassive;
+
+    /// <summary>버티기 자세 다음 턴 첫 공격 피해 보너스 (0.2 = +20%). 남은 라운드가 0이 되면 사라짐.</summary>
+    [System.NonSerialized] public float nextAttackBonus = 0f;
+    [System.NonSerialized] public int nextAttackBonusRounds = 0;
+
+    /// <summary>패시브 회피 보너스 (0.05 = 적 명중 5% 감소). 전장의 직감.</summary>
+    public float GetPassiveEvasionBonus()
+    {
+        return HasEquippedPassiveByName(SkillTacticalAwareness) ? 0.05f : 0f;
     }
 
     public int maxMP
@@ -581,6 +602,11 @@ public class PlayerStats : MonoBehaviour
 
         // 기본 검술(Basic Swordsmanship) 명중률 +5%
         if (HasEquippedPassiveByName("Basic Swordsmanship"))
+        {
+            total += 0.05f;
+        }
+        // 전투학: 전장의 직감 명중률 +5%
+        if (HasEquippedPassiveByName(SkillTacticalAwareness))
         {
             total += 0.05f;
         }
@@ -1273,12 +1299,28 @@ public class PlayerStats : MonoBehaviour
         totalReduction = Mathf.Clamp(totalReduction, 0f, 0.9f);
 
         int finalDamage = Mathf.Max(1, Mathf.FloorToInt(damage * (1f - totalReduction)));
+        // [2026-10-06] 받는 피해 배율 (버티기 자세 0.5, 최후의 저항 0.5 등)
+        finalDamage = Mathf.Max(1, Mathf.FloorToInt(finalDamage * ApplyStatModifiers(AbyssdawnBattle.ModStatType.DamageTaken, 1f)));
 
         // 한 턴짜리 방어 상태/버프는 소모
         isDefending = false;
         defenseBuffAmount = 0f;
 
         int newHP = currentHP - finalDamage;
+
+        // [2026-10-06] 전투학: 최후의 저항 — 전투당 1회, 죽을 피해를 받으면 HP 1 + 1턴간 받는 피해 -50% (확정)
+        if (newHP <= 0 && !_lastStandUsed && HasEquippedPassiveByName(SkillLastStand))
+        {
+            _lastStandUsed = true;
+            currentHP = 1;
+            // 이번 라운드 끝 + 다음 라운드 끝에 1씩 줄어 다음 라운드까지 유지
+            AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.DamageTaken, modType = StatModType.PercentMult, value = 0.5f }, SkillLastStand, 2);
+            Debug.Log($"[LastStand-Passive] {playerName} 최후의 저항 발동 — HP 1 로 버팀");
+            NotifyStatusChanged();
+            BattleFx.AllyHit(this, finalDamage);
+            OnLastStandPassive?.Invoke(this);
+            return finalDamage;
+        }
 
         // [LastStand] HP가 0 이하로 떨어질 때, Human 종의 특성 발동 체크
         if (newHP <= 0 && !_lastStandUsed && HasSpecialEffect("LastStand"))
@@ -1338,6 +1380,12 @@ public class PlayerStats : MonoBehaviour
         if (HasEquippedPassiveByName("Basic Swordsmanship") && IsFrontRow)
         {
             reduction += 0.05f;
+        }
+        // 전투학: 단련된 육체 — 받는 피해 -5%, 전열이면 -3% 추가 (합계 -8%)
+        if (HasEquippedPassiveByName(SkillHardenedBody))
+        {
+            reduction += 0.05f;
+            if (IsFrontRow) reduction += 0.03f;
         }
 
         return reduction;
@@ -1467,7 +1515,9 @@ public class PlayerStats : MonoBehaviour
 
             if (se.data.physicalDamagePerTurn > 0f)
             {
-                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn));
+                // 전투학: 단련된 육체 — 출혈·점화 등 지속 피해 -20%
+                float dotMult = HasEquippedPassiveByName(SkillHardenedBody) ? 0.8f : 1f;
+                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn * dotMult));
                 currentHP = Mathf.Max(0, currentHP - dotDamage);
                 Debug.Log($"[StatusEffect] {playerName}이(가) {se.data.effectType}로 {dotDamage} DoT 피해. (남은 HP: {currentHP})");
             }

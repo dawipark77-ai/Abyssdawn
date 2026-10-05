@@ -1,0 +1,47 @@
+[몬스터 상태이상(출혈 등) 확률 메모]		(작성 2026-09-30 · 값은 현재 프로젝트 에셋 기준)
+
+※ 몬스터 → 아군 부여 확률 = 스킬의 부여 확률(curseApplyChance) × 대상의 상태이상 저항 배율
+   (상태이상 에셋 쪽의 physicalApplyChance 는 몬스터 스킬 경로에서는 쓰이지 않음)
+※ 출혈 피해 = 턴마다 최대 HP × 피해율, 지속 턴 동안
+※ 수정 위치: 스킬 확률 → Assets/Resources/Monsters/MonsterSkills/스킬.asset 의 curseApplyChance
+             출혈 수치 → Assets/Resources/Curse/Bleed*.asset
+※ 물리 저항(받는 물리 피해 배율, 1 = 정상): Skeleton · Skeleton Knight 0.8 (20% 덜 받음), 나머지 1
+
+
+[1] 몬스터별 공격 · 상태이상 (현재 값)
+몬스터	평타(기본공격)	액티브 스킬	상태이상	부여 확률	지속	피해/효과	메모(원하는 값)
+Rat	Bite(물기)	Rat Bite(쥐 물기)	출혈(Bleed1_Dagger)	35%	2턴	최대HP 1.5%/턴
+Bat	Bite(물기)	Scratch(할퀴기 2연타)	출혈(Bleed1_Dagger)	25%	2턴	최대HP 1.5%/턴
+Bat	(위와 같음)	Blind Scratch(눈긁기)	명중 감소	70%	3턴	첫 적중 -10%, 중첩 최대 -20%
+Goblin	일반 공격	없음	없음	-	-	-
+Slime	일반 공격	없음	없음	-	-	-
+Skeleton	일반 공격	없음	없음	-	-	-
+Wizard	일반 공격	없음	없음	-	-	-
+Orc	일반 공격	Heavy Swing(모아 치기)	없음	-	-	1턴 예고 → 다음 턴 공격 ×2.3~2.6
+Skeleton Knight	일반 공격	없음	없음	-	-	-
+
+
+[2] 몬스터 스킬 목록 (현재 값)
+스킬	타수	배율	명중	상태이상	부여 확률	비고	메모
+Bite(물기)	1	평타×1.25	97%	없음	-	야수 평타 대체 전용 (액티브 스킬로 넣으면 1 피해), 크리 +8%
+Rat Bite(쥐 물기)	1	0.9~1.1	95%	출혈(Bleed1_Dagger)	35%	Rat 액티브
+Scratch(할퀴기)	2	0.58~0.68	90%	출혈(Bleed1_Dagger)	25%	타격마다 명중 판정
+Blind Scratch(눈긁기)	1	0.30~0.40	85%	명중 감소(3턴, 중첩)	70%	첫 적중 2스택(-10%), 이후 1스택씩 최대 4스택. 전열에서만 사용
+Heavy Swing(모아 치기)	1	2.3~2.6	90%	없음	-	1턴 예고 후 발동. 모으는 중 스턴되면 취소
+Push Back(밀어내기)	1	0.65~0.75	88%	없음	-	명중 시 1칸 뒤로
+Tackle(몸통박치기)	1	1.00~1.15	88%	없음	-	명중 시 1칸 뒤로
+Enrage / Enrage I(격분)	-	-	-	자신 공격 +10%	100%	2턴
+Wound Licking(상처핥기)	-	-	-	자신 HP 5% 회복	-	HP 가득이면 못 씀
+
+
+[3] 상태이상 에셋 (현재 값)
+상태이상	종류	지속(물리/마법)	턴당 피해(물리/마법)	비고	메모
+Bleed1_Dagger	출혈	2 / 2턴	최대HP 1.5% / 1.5%
+Bleed2_Katana	출혈	3 / 3턴	최대HP 4% / 4%
+Curse_Poison	독	10 / 10턴	최대HP 2% / 2%
+Curse_Ignite	점화	2 / 3턴	최대HP 3% / 5%
+Curse_Stun	스턴	3 / 3턴	-	행동·스킬 불가
+Debuff_BlindScratch	명중 감소	3 / 3턴	-	1스택 -5%
+
+
+[4] 메모

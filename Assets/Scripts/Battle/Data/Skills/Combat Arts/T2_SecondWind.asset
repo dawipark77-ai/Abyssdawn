@@ -10,20 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: T1_CombatBreathing
+  m_Name: T2_SecondWind
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: CombatArts_T3_CombatBreathing
-  skillName: Combat Breathing
-  skillIcon: {fileID: 5329708327426976617, guid: 540bef903ad51c04697635fbf8c0260d, type: 3}
-  description: "[\uD328\uC2DC\uBE0C] \uC2A4\uD0AC\uC744 \uC4F8 \uB54C\uB9C8\uB2E4
-    \uCD5C\uB300 HP\uC758 5% \uD68C\uBCF5. \uB4B7\uC5F4\uC5D0 \uC788\uC73C\uBA74
-    +2% \uCD94\uAC00."
-  usageType: 1
+  skillID: CombatArts_T2_SecondWind
+  skillName: Second Wind
+  skillIcon: {fileID: -4115274655291430038, guid: bfa8fa2bb381ba34080fc3506d6ada0f, type: 3}
+  description: "[\uC561\uD2F0\uBE0C \xB7 \uC804\uD22C\uB2F9 1\uD68C] \uC228\uC744
+    \uACE8\uB77C \uCD5C\uB300 HP\uC758 20%\uB97C \uD68C\uBCF5\uD558\uACE0 \uCD9C\uD608\uC744
+    \uBA48\uCD98\uB2E4. \uC774\uBC88 \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0
+    \uC54A\uB294\uB2E4."
+  usageType: 0
   damageType: 0
-  scalingStat: 0
+  scalingStat: 2
   weaponCategory: 0
   targeting:
-    targetFaction: 0
+    targetFaction: 2
     allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
@@ -44,8 +45,7 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: This turn recovery x2, or +20% poison/bleed resistance for
-    1 turn
+  dunbreakDescription: This turn, critical hits cannot reduce HP below 1
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -62,7 +62,7 @@ MonoBehaviour:
   requiresSameTarget: 0
   preemptive: 0
   cooldownTurns: 0
-  usesPerBattle: 0
+  usesPerBattle: 1
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -71,5 +71,5 @@ MonoBehaviour:
   selfAgilityPenaltyTurns: 0
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
-  - {fileID: 11400000, guid: f5b95670f4839ef4b9827378e7628106, type: 2}
+  - {fileID: 11400000, guid: 1863df04485d1394782ca83f3a9f211b, type: 2}
   requiredLorePoints: 1

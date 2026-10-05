@@ -12,18 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
   m_Name: T1_HardenedBody
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Warfare_T1_02
+  skillID: CombatArts_T1_HardenedBody
   skillName: Hardened Body
   skillIcon: {fileID: 843639385197948872, guid: 039cd1b67ae44b7438bc5d896fe0f8fb, type: 3}
-  description: "Max HP +8%, \uAD6C\uB9E4 \uD53C\uD574 -5%, \uCD9C\uD0DC/\uC810\uD654
-    \uB3C4\uD2B8 \uD53C\uD574 -20%. \uC804\uC5F4\uC5D0 \uC788\uC744 \uB54C \uCD94\uAC00
-    \uD53C\uD574 \uAC10\uC18C +3%"
+  description: "[\uD328\uC2DC\uBE0C] \uCD5C\uB300 HP +8%, \uBC1B\uB294 \uD53C\uD574
+    -5% (\uC55E\uC5F4\uC774\uBA74 -8%), \uCD9C\uD608\xB7\uC810\uD654 \uB4F1 \uC9C0\uC18D
+    \uD53C\uD574 -20%. \uB300\uC2E0 \uBAB8\uC774 \uBB34\uAC70\uC6CC \uD589\uB3D9
+    \uC21C\uC11C\uAC00 \uB2A6\uC5B4\uC9C4\uB2E4 (\uBBFC\uCCA9 -5\uB85C \uACC4\uC0B0)."
   usageType: 1
   damageType: 0
   scalingStat: 2
+  weaponCategory: 0
   targeting:
-    targetFaction: 2
-    allowedCasterSlots: -1
+    targetFaction: 0
+    allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
   hpCostPercent: 0
@@ -34,21 +36,39 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
-  effects:
-  - effectType: 19
-    recoveryTarget: 0
-    effectAmount: 8
-    curseData: {fileID: 0}
-    curseChance: 0
-  legacyCurseData: {fileID: 0}
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
-  dunbreakChance: 1
+  dunbreakChance: 0
   dunbreakDescription: This turn, critical hits cannot reduce HP below 1
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

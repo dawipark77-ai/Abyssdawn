@@ -1,0 +1,67 @@
+
+01 Slash  
+Usage Type : Active
+type: Physical, 
+scale: Attack
+Cost: hpCost%: 5, mpCost: 0
+Multiplier: 1.5~1.8, hit: 1
+selfDmg: 0%, recovery: no, defensive: no, effect: 0
+
+02 Strong Slash
+Usage Type : Active
+type: Physical, 
+scale: Attack
+Cost: hpCost%: 10, mpCost: 0
+Multiplier: 2.0~2.5, hit: 1 
+selfDmg: 0%, recovery: no, defensive: no, effect: 0
+
+03 Fireball
+Usage Type : Active
+Damage type: Magic
+scale stat : Magic
+Cost : hpCost%: 0, mpCost: 5
+Multiplier: 1.8~2.3, hit: 1, 
+selfDmg: 전체 체력의 10% (percent 0), recovery: no, defensive: no, effect: 0
+Target Curse Type : Ignite (적에게 부여할 저주)
+Target Curse Chance : 10% (적이 저주에 걸릴 확율)
+Self Curse Type: Ignite (자신에게 부여할 저주)
+Self Curse Chance 10% (사용자가 저주에 걸릴 확율)
+
+04 Meditation
+Usage Type : Active
+scale: Magic
+type: Magic 
+Cost: hpCost%: 0, mpCost: 0
+mult: 0~0, hit: 1
+recovery: yes, defensive: no, effect: 7 (Recover 7% of total Mp)
+
+05 Magic Bolt
+Usage Type : Active
+type: Magic
+scale: Magic
+Cost:hpCost%: 0, mpCost: 3
+mult: 1.2~1.3, hit: 1, 
+selfDmg: 10% (percent 5), recovery: no, defensive: no, effect: 0
+
+06 Quickhand
+Usage Type : Active
+type: Physical, 
+scale: Agility
+cost: hpCost%: 0, mpCost: 0
+mult: 0.6~0.8, hit: 2, 
+selfDmg: 0%, recovery: no, defensive: no, effect: 0
+
+07 Shield Wall
+Usage Type : Passive 
+type: Physical
+Trigger: On Defense 
+scale: Defence 
+Cost: hpCost%: 0, mpCost: 0
+mult: 0~0, hit: 1 
+Target: Self
+Effect Type: Buff-Defense
+Effect Value: 20% (Flat +20)
+defensive: yes, effect: 20
+
+
+

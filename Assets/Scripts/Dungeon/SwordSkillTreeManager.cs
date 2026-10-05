@@ -385,6 +385,37 @@ public class SwordSkillTreeManager : MonoBehaviour
         }
         
         Debug.Log($"[SwordSkillTreeManager] 상태 업데이트 완료 - Locked: {lockedCount}, Available: {availableCount}, Learned: {learnedCount}, 건너뜀: {skippedCount}");
+
+        RefreshLinks();
+    }
+
+    // ── 노드 연결선 + 배운 스킬 테두리 ─────────────────────────
+    [Header("연결선 · 배운 스킬 테두리")]
+    [Tooltip("켜면 선행 스킬 → 다음 스킬 연결선을 긋고, 배운 스킬에 옅은 황금 테두리를 두름")]
+    public bool drawLinks = false;
+
+    // [2026-10-06] 우선 검 트리만. 다른 트리도 켜려면 이 목록에 이름을 넣거나 인스펙터에서 drawLinks 체크.
+    private static readonly HashSet<string> DefaultLinkedTrees = new HashSet<string> { "SwordLore" };
+
+    private SkillTreeLinks _links;
+
+    private bool LinksEnabled { get { return drawLinks || DefaultLinkedTrees.Contains(gameObject.name); } }
+
+    private void RefreshLinks()
+    {
+        if (!LinksEnabled || allNodes == null) return;
+        if (_links == null)
+        {
+            _links = GetComponent<SkillTreeLinks>();
+            if (_links == null) _links = gameObject.AddComponent<SkillTreeLinks>();
+        }
+        foreach (var n in allNodes)
+        {
+            if (n == null || n.useLearnedBorder) continue;
+            n.useLearnedBorder = true;
+            n.RefreshVisual(); // 이미 배운 노드도 테두리가 바로 보이도록 (UpdateState 는 배운 노드를 건너뜀)
+        }
+        _links.Refresh(allNodes);
     }
     
     /// <summary>
