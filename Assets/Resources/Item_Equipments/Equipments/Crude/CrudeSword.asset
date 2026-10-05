@@ -42,5 +42,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e24b03751c878b5468ba77a4dff1af5b, type: 2}
   magicAmplify: 1
   backflowSuppression: 0
-  buyPrice: 100
-  sellPrice: 50
+  buyPrice: 200
+  sellPrice: 100

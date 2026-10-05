@@ -34,6 +34,13 @@ public class StatusButtonGlowEffect : MonoBehaviour
     [Tooltip("감시할 포인트 종류. Status 버튼=FreeStatPoints, Skills 버튼=SkillPoints")]
     public WatchedStat watchedStat = WatchedStat.FreeStatPoints;
 
+    [Header("Border Style")]
+    [Tooltip("테두리 색 (기본: 옅은 황금색). alpha 는 깜빡임이 덮어씀")]
+    public Color borderColor = new Color(0.96f, 0.87f, 0.58f, 1f);
+
+    [Tooltip("켜면 Golden Border 이미지에 스프라이트가 없을 때 Resources/UI/GlowBorder(가운데가 빈 테두리 프레임)를 씌워 테두리만 반짝이게 함")]
+    public bool useFrameSprite = true;
+
     [Header("Blink Animation")]
     [Tooltip("깜빡임 ON/OFF. 끄면 maxAlpha로 고정 표시")]
     public bool blinkEnabled = true;
@@ -58,6 +65,31 @@ public class StatusButtonGlowEffect : MonoBehaviour
     private void Awake()
     {
         Debug.Log($"[Glow-DIAG] Awake — GameObject='{gameObject.name}', activeInHierarchy={gameObject.activeInHierarchy}, goldenBorder field={(goldenBorder == null ? "NULL" : goldenBorder.name)}");
+        ApplyBorderStyle();
+    }
+
+    /// <summary>
+    /// [2026-10-05] 버튼 전체가 하얗게 번쩍이던 것을 옅은 황금색 테두리만 반짝이도록.
+    /// 스프라이트 없는 Image(=꽉 찬 사각형)면 테두리 프레임을 9-slice 로 씌우고 가운데는 비운다.
+    /// </summary>
+    private void ApplyBorderStyle()
+    {
+        if (goldenBorder == null) return;
+        var img = goldenBorder.GetComponent<Image>();
+        if (img == null) return;
+        if (useFrameSprite && img.sprite == null)
+        {
+            var frame = Resources.Load<Sprite>("UI/GlowBorder");
+            if (frame != null)
+            {
+                img.sprite = frame;
+                img.type = Image.Type.Sliced;
+                img.fillCenter = false;
+            }
+        }
+        Color c = borderColor;
+        c.a = img.color.a;
+        img.color = c;
     }
 
     private void Start()

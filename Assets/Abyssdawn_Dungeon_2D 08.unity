@@ -69344,6 +69344,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StatusButtonGlowEffect
   goldenBorder: {fileID: 442694796}
   watchedStat: 0
+  borderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
+  useFrameSprite: 1
   blinkEnabled: 1
   blinkSpeed: 2.5
   minAlpha: 0.35
@@ -81152,7 +81154,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.00042725, y: 0}
+  m_AnchoredPosition: {x: 0.0004272461, y: 0}
   m_SizeDelta: {x: 0.00085449, y: -0.0051}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1315548589
@@ -93893,6 +93895,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StatusButtonGlowEffect
   goldenBorder: {fileID: 869039000}
   watchedStat: 1
+  borderColor: {r: 0.96, g: 0.87, b: 0.58, a: 1}
+  useFrameSprite: 1
   blinkEnabled: 1
   blinkSpeed: 2.5
   minAlpha: 0.35
@@ -103332,7 +103336,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1679496797
 RectTransform:
   m_ObjectHideFlags: 0

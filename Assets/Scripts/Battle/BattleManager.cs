@@ -1941,6 +1941,23 @@ public class BattleManager : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
+        // [2026-10-05] 게임 오버 창 — "Start Over"(처음부터) / "Last Save"(마지막 저장). 저장이 없으면 Last Save 는 잠김.
+        //   나중에 타이틀 화면이 생기면 Start Over 를 타이틀로 보내면 된다.
+        bool hasSave = SaveSystem.HasSave;
+        string saveInfo = null;
+        if (hasSave)
+        {
+            SaveSystem.SaveData d = SaveSystem.Peek();
+            if (d != null) saveInfo = $"<color=#9FC8FF>B{d.currentFloor}  ·  Lv {d.heroLevel}\n{d.savedAt}</color>";
+        }
+        GameOverScreen.Show(hasSave, saveInfo,
+            () => GameOverRestart(false),
+            () => GameOverRestart(true));
+    }
+
+    /// <summary>게임 오버 창에서 고른 대로 다시 시작. loadSave=true 면 마지막 저장, 실패하거나 false 면 B1 새 탐험.</summary>
+    private void GameOverRestart(bool loadSave)
+    {
         // [2026-10-01] 게임 오버 후에는 들어왔던 던전 씬으로 (층·상태는 아래에서 1층으로 초기화).
         //   고정 씬 이름(startDungeonScene)은 들어온 씬을 모를 때만 — 전엔 항상 07 로 가서 08 에서 죽으면 다른 씬이 열렸다.
         string restartScene = !string.IsNullOrEmpty(DungeonEncounter.lastDungeonScene) ? DungeonEncounter.lastDungeonScene : startDungeonScene;
@@ -1964,15 +1981,15 @@ public class BattleManager : MonoBehaviour
         PlayerStats.PendingLevelUpNotes.Clear();
         DungeonEncounter.justReturnedFromBattle = false;
 
-        // [2026-10-03] 저장이 있으면 마지막으로 저장한 곳(마을)에서 다시 시작 — 층·지도·주인공·동료·소지품 모두 저장 당시로.
-        //   저장이 없을 때만 아래처럼 1층부터 새 탐험.
-        if (SaveSystem.HasSave)
+        // [2026-10-03] Last Save: 마지막으로 저장한 곳(마을)에서 다시 시작 — 층·지도·주인공·동료·소지품 모두 저장 당시로.
+        //   Start Over 이거나 불러오기에 실패하면 아래처럼 1층부터 새 탐험 (저장 파일은 지우지 않음).
+        if (loadSave && SaveSystem.HasSave)
         {
             SaveSystem.PendingNotice = "<color=#FF6B6B>Your party has fallen...</color>\n<size=80%>You awaken at your last save.</size>";
             if (SaveSystem.Load(out string loadError))
             {
                 Debug.Log("[BattleManager] Game Over — 마지막 저장에서 다시 시작");
-                yield break;
+                return;
             }
             SaveSystem.PendingNotice = null;
             Debug.LogWarning($"[BattleManager] Game Over — 저장 불러오기 실패({loadError}), 1층부터 새로 시작");

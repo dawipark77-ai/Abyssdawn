@@ -1058,6 +1058,9 @@ public class PlayerStats : MonoBehaviour
             {
                 _fallbackSkillPoints = StartingSkillPoints;
                 Debug.Log($"[PlayerStats] 새 게임 — 시작 스킬 포인트 {StartingSkillPoints}");
+                // [2026-10-05] 새 게임이면 배운 스킬·장착 슬롯도 비운다. HeroData(SO)는 에디터에서 플레이 간에 값이 남아
+                //   (껐다 켜도) 이전 판에서 배운 스킬이 그대로 보이던 문제. 저장을 불러오면 SaveSystem 이 다시 채운다.
+                if (statData != null) statData.ResetSkillsForNewRun();
             }
 
             if (_isFirstLaunch)

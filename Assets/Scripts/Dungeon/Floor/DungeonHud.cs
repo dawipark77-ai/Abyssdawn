@@ -407,8 +407,8 @@ public class DungeonHud : MonoBehaviour
         _infoRoot = CreateCanvas("Info", InfoSortingOrder, false);
         _overlayRoot = CreateCanvas("Overlay", OverlaySortingOrder, true);
 
-        // 화면 테두리 (금색 이중선 + 모서리 장식). 배경을 무엇으로 바꿔도 테두리는 그대로 — 맨 먼저 만들어 다른 정보 뒤에
-        BuildScreenFrame();
+        // 화면 테두리 (금색 이중선 + 모서리 장식). [2026-10-05] 기본 끔 — 다시 쓰려면 ShowScreenFrame = true
+        if (ShowScreenFrame) BuildScreenFrame();
 
         // 층 번호 (위 가운데, 오른쪽 위 MapButton·왼쪽 위 글자와 겹치지 않게 가운데)
         _floorBg = CreateImage(_infoRoot, "FloorLabel", new Color(0f, 0f, 0f, 0.5f), false).rectTransform;
@@ -882,6 +882,8 @@ public class DungeonHud : MonoBehaviour
     // ─────────────────────────────────────────
 
     public const string ScreenFrameResource = "UI/ScreenFrame";
+    /// <summary>메인맵 화면 전체 금색 테두리 표시 여부. [2026-10-05] 사용자 요청으로 끔.</summary>
+    public static bool ShowScreenFrame = false;
     // 모서리 장식이 늘어나지 않도록 9분할할 테두리 폭 (원본 픽셀, 장식 약 100px + 여유)
     private const float ScreenFrameBorder = 120f;
     // 테두리 이미지가 이 폭(캔버스 기준 1080)일 때 원본 비율 그대로 보인다
