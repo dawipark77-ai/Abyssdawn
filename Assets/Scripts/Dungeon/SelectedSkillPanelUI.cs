@@ -239,6 +239,7 @@ public class SelectedSkillPanelUI : MonoBehaviour
     private void OnPassiveSlotClicked(int index)
     {
         if (currentSelectedSkill == null) return;
+        if (currentSelectedSkill.fieldSkill) return; // 탐험 스킬은 칸을 쓰지 않는다
         if (!currentSelectedSkill.IsPassive)
         {
             Debug.Log("[SelectedSkillPanelUI] 액티브 스킬은 패시브 슬롯에 넣을 수 없습니다.");

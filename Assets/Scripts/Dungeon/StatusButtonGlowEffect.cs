@@ -57,15 +57,123 @@ public class StatusButtonGlowEffect : MonoBehaviour
     [Range(0f, 1f)]
     public float maxAlpha = 1f;
 
+    [Header("Dawn Silver Lining (2026-10-07)")]
+    [Tooltip("새벽빛 테두리 — 오른쪽 위 모서리가 옅은 황금빛으로 가장 밝고, 테두리를 따라 멀어질수록 옅어져 반대편(왼쪽 아래)은 검게 꺼져 있다. 끄면 예전 금빛 테두리")]
+    public bool dawnLining = true;
+    [Tooltip("새벽빛 색 — 아비스던의 옅은 황금")]
+    public Color liningColor = new Color(0.96f, 0.87f, 0.58f, 1f);
+    [Tooltip("빛이 시작되는 오른쪽 위 모서리 끝의 반짝임 (황금이 하얗게 타오르는 부분)")]
+    public Color highlightColor = new Color(1f, 0.97f, 0.86f, 1f);
+    [Tooltip("꺼진 쪽 테두리 색 (검정)")]
+    public Color unlitColor = new Color(0f, 0f, 0f, 1f);
+    [Tooltip("테두리 두께 (px)")]
+    public float frameThickness = 6f;
+    [Tooltip("새벽빛이 닿는 거리 (0~1, 오른쪽 위 모서리 → 왼쪽 아래 모서리 대각선 기준). 숨쉬며 이 범위 안에서 늘었다 줄었다 한다")]
+    [Range(0.2f, 1f)] public float reachMin = 0.45f, reachMax = 0.85f;
+    [Tooltip("새벽빛 숨쉬기 속도 = 깜빡임 속도 × 이 값 (밝아오는 새벽 느낌으로 느리게)")]
+    [Range(0.2f, 2f)] public float liningSpeedMult = 0.65f;
+
     // 내부 상태
     private Coroutine _blinkRoutine;
-    private Graphic[] _glowGraphics; // goldenBorder 및 그 자식 모든 Graphic — alpha 일괄 적용
+    private Graphic[] _glowGraphics; // goldenBorder 및 그 자식 모든 Graphic — alpha 일괄 적용 (새벽빛 테두리 제외)
     private bool _subscribed = false;
+    private RawImage _dawnFrame;
+    private Texture2D _dawnTex;
+    private Color32[] _dawnPixels;
+    private float[] _dawnDist, _dawnMask;  // 픽셀마다: 오른쪽 위에서의 거리(0~1), 테두리 안(1)/밖(0) — 안티에일리어스 포함
+    private int _texW, _texH;
+    private float _lastReach = -1f;
 
     private void Awake()
     {
         Debug.Log($"[Glow-DIAG] Awake — GameObject='{gameObject.name}', activeInHierarchy={gameObject.activeInHierarchy}, goldenBorder field={(goldenBorder == null ? "NULL" : goldenBorder.name)}");
         ApplyBorderStyle();
+        BuildDawnFrame();
+    }
+
+    // ─────────────────────────────────────────
+    // 새벽빛 테두리 — 오른쪽 위 모서리부터 옅은 황금빛, 테두리를 따라 점점 옅어져 반대편은 검정
+    // ─────────────────────────────────────────
+
+    private void BuildDawnFrame()
+    {
+        if (!dawnLining || goldenBorder == null) return;
+        var host = (RectTransform)transform;                    // 버튼 크기 기준 (금테 오브젝트는 높이가 버튼과 다를 수 있음)
+        float w = Mathf.Max(20f, host.rect.width), h = Mathf.Max(20f, host.rect.height);
+
+        // 금빛 테두리 그림은 숨기고 (오브젝트는 켜고 끄기용으로 그대로) 새벽빛 테두리를 그 위치에 그린다
+        var gold = goldenBorder.GetComponent<Image>();
+        if (gold != null) gold.enabled = false;
+
+        var go = new GameObject("DawnFrame", typeof(RectTransform));
+        go.transform.SetParent(goldenBorder.transform, false);
+        var rt = (RectTransform)go.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.position = host.TransformPoint(host.rect.center);     // 버튼 가운데
+        rt.sizeDelta = new Vector2(w, h);
+        _dawnFrame = go.AddComponent<RawImage>();
+        _dawnFrame.raycastTarget = false;
+
+        // 화면에서 선명하도록 2배 해상도
+        _texW = Mathf.RoundToInt(w * 2f); _texH = Mathf.RoundToInt(h * 2f);
+        _dawnTex = new Texture2D(_texW, _texH, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+        _dawnPixels = new Color32[_texW * _texH];
+        _dawnDist = new float[_texW * _texH];
+        _dawnMask = new float[_texW * _texH];
+        float t = frameThickness * 2f;
+        float diag = Mathf.Sqrt(_texW * (float)_texW + _texH * (float)_texH);
+        for (int y = 0; y < _texH; y++)
+            for (int x = 0; x < _texW; x++)
+            {
+                int i = y * _texW + x;
+                // 테두리 띠: 바깥 가장자리에서 두께 t 안쪽까지 (1px 부드럽게)
+                float edge = Mathf.Min(Mathf.Min(x + 0.5f, _texW - x - 0.5f), Mathf.Min(y + 0.5f, _texH - y - 0.5f));
+                _dawnMask[i] = Mathf.Clamp01(t - edge + 0.5f);
+                // 오른쪽 위 모서리(텍스처 y 는 아래가 0)에서의 거리, 대각선 길이로 0~1
+                float dx = _texW - 1 - x, dy = _texH - 1 - y;
+                _dawnDist[i] = Mathf.Sqrt(dx * dx + dy * dy) / diag;
+            }
+        _dawnFrame.texture = _dawnTex;
+        PaintDawnFrame(reachMax, 1f);
+    }
+
+    /// <summary>reach 까지 새벽빛(옅은 황금)이 닿고 그 너머는 검정. 모서리 끝은 하얗게 (빛이 시작되는 곳).</summary>
+    private void PaintDawnFrame(float reach, float intensity)
+    {
+        if (_dawnTex == null) return;
+        Color lit = liningColor, dark = unlitColor;
+        for (int i = 0; i < _dawnPixels.Length; i++)
+        {
+            float m = _dawnMask[i];
+            if (m <= 0f) { _dawnPixels[i] = new Color32(0, 0, 0, 0); continue; }
+            float k = Mathf.Clamp01(1f - _dawnDist[i] / Mathf.Max(0.01f, reach));
+            k = k * k * (3f - 2f * k);                  // 부드럽게 옅어짐
+            k *= intensity;
+            Color c = Color.Lerp(dark, lit, k);
+            if (k > 0.8f) c = Color.Lerp(c, highlightColor, (k - 0.8f) / 0.2f); // 모서리 끝만 하얗게
+            c.a = m;
+            _dawnPixels[i] = c;
+        }
+        _dawnTex.SetPixels32(_dawnPixels);
+        _dawnTex.Apply(false);
+    }
+
+    /// <summary>새벽빛 숨쉬기: 닿는 거리가 reachMin~reachMax 로 늘었다 줄었다, 밝기 0.75~1.</summary>
+    private void AnimateDawnLining(float time)
+    {
+        if (_dawnTex == null) return;
+        float s = (Mathf.Sin(time * blinkSpeed * liningSpeedMult) + 1f) * 0.5f;
+        s = s * s * (3f - 2f * s);
+        float reach = Mathf.Lerp(reachMin, reachMax, s);
+        if (Mathf.Abs(reach - _lastReach) < 0.004f) return;   // 거의 같으면 다시 그리지 않음
+        _lastReach = reach;
+        PaintDawnFrame(reach, Mathf.Lerp(0.75f, 1f, s));
+    }
+
+    private void OnDestroy()
+    {
+        if (_dawnTex != null) Destroy(_dawnTex);
     }
 
     /// <summary>
@@ -206,8 +314,11 @@ public class StatusButtonGlowEffect : MonoBehaviour
     {
         if (_glowGraphics != null && _glowGraphics.Length > 0) return;
         if (goldenBorder == null) return;
-        // goldenBorder 자체 + 모든 자식 Graphic (Image, TMP_Text 등) 일괄 캐시
-        _glowGraphics = goldenBorder.GetComponentsInChildren<Graphic>(true);
+        // goldenBorder 자체 + 모든 자식 Graphic (Image, TMP_Text 등) 일괄 캐시 — 새벽빛(새벽빛)은 따로 움직이므로 제외
+        var all = goldenBorder.GetComponentsInChildren<Graphic>(true);
+        var list = new System.Collections.Generic.List<Graphic>();
+        foreach (var g in all) if (g != _dawnFrame) list.Add(g);
+        _glowGraphics = list.ToArray();
     }
 
     private void StopBlink()
@@ -256,6 +367,7 @@ public class StatusButtonGlowEffect : MonoBehaviour
                     g.color = c;
                 }
             }
+            AnimateDawnLining(Time.unscaledTime - startTime);
             yield return null;
         }
     }

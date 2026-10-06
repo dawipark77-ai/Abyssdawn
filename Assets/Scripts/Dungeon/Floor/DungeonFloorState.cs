@@ -14,6 +14,17 @@ public class DungeonFloorState
     public readonly HashSet<Vector2Int> revealed = new HashSet<Vector2Int>();
     public readonly HashSet<Vector2Int> openedChests = new HashSet<Vector2Int>();
     public readonly HashSet<Vector2Int> knownTraps = new HashSet<Vector2Int>();
+    /// <summary>한 번이라도 발동한 함정 (한 번 쓰는 함정은 이후 작동 안 함). [2026-10-07]</summary>
+    public readonly HashSet<Vector2Int> sprungTraps = new HashSet<Vector2Int>();
+    /// <summary>함정 해제로 없앤 함정. [2026-10-07]</summary>
+    public readonly HashSet<Vector2Int> disarmedTraps = new HashSet<Vector2Int>();
+
+    /// <summary>이 칸의 함정이 아직 작동하는지 (해제 안 됨 + 한 번 쓰는 함정이면 아직 안 밟음).</summary>
+    public bool IsTrapArmed(Vector2Int p, FloorTrapType type)
+    {
+        if (disarmedTraps.Contains(p)) return false;
+        return !(sprungTraps.Contains(p) && AutomapRenderer.IsTrapSpent(type));
+    }
     public readonly HashSet<Vector2Int> usedSprings = new HashSet<Vector2Int>();
     /// <summary>계단으로 처음 내려가며 탐험 EXP 를 받았는지 (한 층에 한 번).</summary>
     public bool clearRewarded;

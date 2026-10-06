@@ -45,6 +45,13 @@ public class AutomapRenderer : MonoBehaviour
     public Color teleportTrapColor = new Color(0.8f, 0.45f, 1f, 1f);
     public Color alarmTrapColor = new Color(1f, 0.6f, 0.2f, 1f);
     public Color pitfallTrapColor = new Color(0.9f, 0.2f, 0.45f, 1f);
+    // [2026-10-07] 상태이상 함정
+    public Color poisonTrapColor = new Color(0.45f, 0.95f, 0.35f, 1f);
+    public Color bladeTrapColor = new Color(0.95f, 0.15f, 0.2f, 1f);
+    public Color flameTrapColor = new Color(1f, 0.5f, 0.1f, 1f);
+    public Color gasTrapColor = new Color(0.65f, 0.7f, 1f, 1f);
+    public Color rockfallTrapColor = new Color(0.75f, 0.65f, 0.5f, 1f);
+    public Color netTrapColor = new Color(0.9f, 0.85f, 0.55f, 1f);
     [Tooltip("벽 화로(불 있는 방) — 바깥 불꽃 / 안쪽 불꽃")]
     public Color brazierColor = new Color(1f, 0.55f, 0.15f, 1f);
     public Color brazierCoreColor = new Color(1f, 0.92f, 0.55f, 1f);
@@ -207,7 +214,9 @@ public class AutomapRenderer : MonoBehaviour
             {
                 if (!_state.knownTraps.Contains(p)) continue;
                 FloorTrapType type = _data.GetCell(p).trap;
-                AddTrapIcon(CellCenter(p), cs, IsTrapSpent(type) ? spentColor : TrapColor(type));
+                // 해제했거나, 한 번 쓰는 함정을 이미 밟았으면 회색. 찾기만 한 함정은 아직 살아 있다
+                bool dead = _state.disarmedTraps.Contains(p) || (_state.sprungTraps.Contains(p) && IsTrapSpent(type));
+                AddTrapIcon(CellCenter(p), cs, dead ? spentColor : TrapColor(type));
             }
 
             // 5) 안개 — 가 본 곳이지만 지금 시야 밖인 칸을 어둡게 덮는다 (벽선·아이콘까지 흐리게, 맨 위에 그림).
@@ -319,10 +328,13 @@ public class AutomapRenderer : MonoBehaviour
         }
     }
 
-    /// <summary>발견한 함정 중 다 써서 더는 작동하지 않는 것. 가시 함정만 계속 작동한다.</summary>
+    /// <summary>
+    /// 발견한 함정 중 다 써서 더는 작동하지 않는 것. 장치가 다시 감기는 가시·칼날·화염은 계속 작동한다
+    /// (밟을 때마다 다시 발동 — 함정 해제로 없앨 수 있다).
+    /// </summary>
     public static bool IsTrapSpent(FloorTrapType type)
     {
-        return type != FloorTrapType.Spike;
+        return type != FloorTrapType.Spike && type != FloorTrapType.Blade && type != FloorTrapType.FlameVent;
     }
 
     private Color TrapColor(FloorTrapType type)
@@ -332,6 +344,12 @@ public class AutomapRenderer : MonoBehaviour
             case FloorTrapType.Teleport: return teleportTrapColor;
             case FloorTrapType.Alarm: return alarmTrapColor;
             case FloorTrapType.Pitfall: return pitfallTrapColor;
+            case FloorTrapType.PoisonDart: return poisonTrapColor;
+            case FloorTrapType.Blade: return bladeTrapColor;
+            case FloorTrapType.FlameVent: return flameTrapColor;
+            case FloorTrapType.BlindingGas: return gasTrapColor;
+            case FloorTrapType.Rockfall: return rockfallTrapColor;
+            case FloorTrapType.Net: return netTrapColor;
             default: return spikeTrapColor;
         }
     }

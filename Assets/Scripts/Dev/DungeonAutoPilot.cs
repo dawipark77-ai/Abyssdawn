@@ -45,6 +45,9 @@ public class DungeonAutoPilot : MonoBehaviour
     private class RunStats
     {
         public int battles, steps, maxFloor = 1, potions, chalice, springs, chests;
+        public int goblinBattles, fleeTries, fleeOk;
+        public readonly Dictionary<string, int> skillUses = new Dictionary<string, int>();
+        public readonly List<string> learned = new List<string>();
         public float startTime;
         public readonly StringBuilder floorLog = new StringBuilder();
     }
@@ -67,8 +70,11 @@ public class DungeonAutoPilot : MonoBehaviour
         string[] p = s.Split(',');
         int runs = p.Length > 0 && int.TryParse(p[0], out int r) ? r : 3;
         float spd = p.Length > 1 && float.TryParse(p[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float v) ? v : 5f;
-        try { System.IO.File.WriteAllText(ResultPath, $"[AutoPilot] {System.DateTime.Now:yyyy-MM-dd HH:mm:ss} 시작 — {runs}판, 속도 x{spd}\n"); } catch { }
-        Begin(runs, spd);
+        int stopAt = p.Length > 2 && int.TryParse(p[2], out int st) ? st : 11;
+        string bld = p.Length > 3 ? p[3] : "none";
+        bool sword = p.Length > 4 && p[4] == "1";
+        try { System.IO.File.AppendAllText(ResultPath, $"[AutoPilot] {System.DateTime.Now:yyyy-MM-dd HH:mm:ss} 시작 — {runs}판, 속도 x{spd}, 목표 B{stopAt - 1}, 빌드 {bld}{(sword ? ", 처음부터 조잡한 검" : "")}\n"); } catch { }
+        Begin(runs, spd, stopAt, bld, sword);
     }
 
     private static void AppendResult(string text)
@@ -76,7 +82,7 @@ public class DungeonAutoPilot : MonoBehaviour
         try { System.IO.File.AppendAllText(ResultPath, text + "\n"); } catch { }
     }
 
-    public static string Begin(int runs, float speed, int stopAtFloor = 11)
+    public static string Begin(int runs, float speed, int stopAtFloor = 11, string build = "none", bool startWithSword = false)
     {
         if (!Application.isPlaying) return "플레이 모드가 아닙니다.";
         if (Instance == null)
@@ -88,6 +94,8 @@ public class DungeonAutoPilot : MonoBehaviour
         Instance.runsTotal = runs;
         Instance.speed = speed;
         Instance.stopAtFloor = stopAtFloor;
+        Instance.build = string.IsNullOrEmpty(build) ? "none" : build;
+        Instance.startWithSword = startWithSword;
         Instance._stats = new RunStats { startTime = Time.realtimeSinceStartup };
         Instance._run = 1;
         Instance._summaries.Clear();
@@ -127,7 +135,10 @@ public class DungeonAutoPilot : MonoBehaviour
     private void EndRun(string result)
     {
         var hero = FindHero();
-        string line = $"[AutoPilot] RUN {_run} END: {result} | 최고 B{_stats.maxFloor} | Lv{(hero != null ? hero.level : 0)} | 전투 {_stats.battles} | 걸음 {_stats.steps} | 물약 {_stats.potions} 잔 {_stats.chalice} 샘 {_stats.springs} | {Time.realtimeSinceStartup - _stats.startTime:0}s\n{_stats.floorLog}";
+        var uses = new StringBuilder();
+        foreach (var kv in _stats.skillUses) uses.Append($"{kv.Key} {kv.Value}, ");
+        string line = $"[AutoPilot] RUN {_run} [{build}{(startWithSword ? "+sword" : "")}] END: {result} | 최고 B{_stats.maxFloor} | Lv{(hero != null ? hero.level : 0)} | 전투 {_stats.battles} (고블린 {_stats.goblinBattles}) | 도망 {_stats.fleeOk}/{_stats.fleeTries} | 걸음 {_stats.steps} | 물약 {_stats.potions} 잔 {_stats.chalice} 샘 {_stats.springs} | {Time.realtimeSinceStartup - _stats.startTime:0}s\n"
+                      + $"   배운 순서: {string.Join(", ", _stats.learned)}\n   스킬 사용: {uses}\n{_stats.floorLog}";
         _summaries.Add(line);
         Debug.Log(line);
         AppendResult(line);
@@ -175,7 +186,21 @@ public class DungeonAutoPilot : MonoBehaviour
 
     private void TickBattle(BattleManager bm)
     {
-        if (!_inBattle) { _inBattle = true; _stats.battles++; }
+        // 게임 오버 창 → Start Over (새 판)
+        var gameOver = FindFirstObjectByType<GameOverScreen>();
+        if (gameOver != null)
+        {
+            foreach (var b in gameOver.GetComponentsInChildren<Button>(true))
+                if (b.name == "RestartButton" && b.interactable) { b.onClick.Invoke(); break; }
+            return;
+        }
+
+        if (!_inBattle)
+        {
+            _inBattle = true; _stats.battles++;
+            var es = Get<List<EnemyStats>>(bm, "activeEnemies");
+            if (es != null && es.Exists(e => e != null && e.enemyName == "Goblin")) _stats.goblinBattles++;
+        }
 
         var hero = FindHero();
         if (hero != null && hero.currentHP <= 0 && !_deathLogged)
@@ -202,9 +227,14 @@ public class DungeonAutoPilot : MonoBehaviour
 
         MethodInfo queue = typeof(BattleManager).GetMethod("QueueAllyCommand", NP);
         if (queue == null) return;
+        LearnFromBuild(actor);
 
-        // HP 35% 미만이면 물약 (전투에서 쓸 수 있는 것)
-        if (actor.currentHP < actor.maxHP * 0.35f)
+        var alive = enemies.FindAll(e => e != null && e.currentHP > 0);
+        if (alive.Count == 0) return;
+        float hpR = actor.maxHP > 0 ? (float)actor.currentHP / actor.maxHP : 1f;
+
+        // HP 35% 미만이면 물약 (전투에서 쓸 수 있는 것), 없으면 숨 고르기
+        if (hpR < 0.35f)
         {
             ConsumableItemSO potion = FindHealItem(battle: true, allowChalice: true);
             if (potion != null)
@@ -213,12 +243,131 @@ public class DungeonAutoPilot : MonoBehaviour
                 queue.Invoke(bm, new object[] { actor, "item", null, null, 0, true, potion });
                 return;
             }
+            if (TrySkill(bm, queue, actor, "Second Wind", null)) return;
         }
 
-        EnemyStats target = null;
-        foreach (var e in enemies) if (e != null && e.currentHP > 0) { target = e; break; }
-        if (target == null) return;
+        // 질 것 같으면 도망 (DQ식 확률 — 실패하면 적만 행동)
+        if (ShouldFlee(actor, alive))
+        {
+            _stats.fleeTries++;
+            bm.OnRunButton();
+            if (bm.battleEnded) _stats.fleeOk++;
+            return;
+        }
+
+        EnemyStats target = PickTarget(actor, alive);
+        int front = alive.FindAll(e => (int)e.currentSlot <= 4 || e.currentSlot == BattleSlot.Center).Count;
+        bool tough = target.currentHP > ExpectedHit(actor, target);
+
+        // 상황별 스킬 (배운·장착한 것만, 무기·횟수·HP 조건은 TrySkill 이 확인)
+        if (alive.Count >= 3 && hpR > 0.5f && TrySkill(bm, queue, actor, "Intimidating Shout", null)) return;
+        if (alive.Count >= 2 && hpR > 0.5f && TrySkill(bm, queue, actor, "Counter Guard", null)) return;
+        if (alive.Count >= 2 && hpR < 0.6f && TrySkill(bm, queue, actor, "Brace", null)) return;
+        if (front >= 2 && hpR > 0.3f && TrySkill(bm, queue, actor, "Mandritto", target)) return;
+        if (tough && hpR >= 0.5f && TrySkill(bm, queue, actor, "Strong Slash", target)) return;
+        if (tough && hpR >= 0.3f && TrySkill(bm, queue, actor, "Slash", target)) return;
+
         queue.Invoke(bm, new object[] { actor, "attack", target, null, 0, false, null });
+    }
+
+    // ─────────────────────────────────────────
+    // 빌드 (스킬 조합) — 2026-10-06
+    // ─────────────────────────────────────────
+    public string build = "none";        // none / sword / arts / mixed
+    public bool startWithSword = false;   // 매 판 시작 시 조잡한 검 장착
+
+    private static readonly Dictionary<string, string[]> BuildOrders = new Dictionary<string, string[]>
+    {
+        { "sword", new[] { "Basic Swordsmanship", "Slash", "Strong Slash", "Mandritto", "Sharp Edge" } },
+        { "arts",  new[] { "Hardened Body", "Second Wind", "Brace", "Tactical Awareness", "Intimidating Shout", "Counter Guard", "Combat Breathing" } },
+        { "mixed", new[] { "Hardened Body", "Basic Swordsmanship", "Second Wind", "Slash", "Brace", "Strong Slash", "Tactical Awareness", "Mandritto", "Intimidating Shout", "Counter Guard" } },
+    };
+
+    private static Dictionary<string, SkillData> _skillByName;
+    private static SkillData SkillNamed(string name)
+    {
+        if (_skillByName == null)
+        {
+            _skillByName = new Dictionary<string, SkillData>();
+            foreach (var dir in new[] { "Assets/Scripts/Battle/Data/Skills/Sword_Lore", "Assets/Scripts/Battle/Data/Skills/Combat Arts" })
+                foreach (var g in UnityEditor.AssetDatabase.FindAssets("t:SkillData", new[] { dir }))
+                {
+                    var s = UnityEditor.AssetDatabase.LoadAssetAtPath<SkillData>(UnityEditor.AssetDatabase.GUIDToAssetPath(g));
+                    if (s != null && !_skillByName.ContainsKey(s.skillName)) _skillByName[s.skillName] = s;
+                }
+        }
+        SkillData r; return _skillByName.TryGetValue(name, out r) ? r : null;
+    }
+
+    /// <summary>SP 가 있으면 빌드 순서대로 배우고 빈 칸에 장착 (스킬 트리에서 배우는 것과 같은 결과).</summary>
+    private void LearnFromBuild(PlayerStats hero)
+    {
+        string[] order;
+        if (hero == null || hero.statData == null || !BuildOrders.TryGetValue(build, out order)) return;
+        while (hero.skillPoints > 0)
+        {
+            SkillData next = null;
+            foreach (var n in order)
+            {
+                var s = SkillNamed(n);
+                if (s != null && !hero.statData.learnedSkills.Contains(s)) { next = s; break; }
+            }
+            if (next == null) return;
+            hero.statData.learnedSkills.Add(next);
+            hero.statData.AutoEquipIfFree(next);
+            hero.skillPoints = hero.skillPoints - 1;
+            _stats.learned.Add(next.skillName + "@Lv" + hero.level);
+        }
+    }
+
+    private bool TrySkill(BattleManager bm, MethodInfo queue, PlayerStats actor, string name, EnemyStats target)
+    {
+        SkillData skill = null;
+        foreach (var s in actor.statData.equippedSkills) if (s != null && s.skillName == name) { skill = s; break; }
+        if (skill == null || skill.IsPassive) return false;
+        var limit = typeof(BattleManager).GetMethod("SkillLimitReason", NP);
+        if (limit != null && limit.Invoke(bm, new object[] { actor, skill }) != null) return false;
+        if (skill.weaponCategory != WeaponCategory.None)
+        {
+            var rh = actor.statData.rightHand;
+            if (rh == null || rh.weaponCategory != skill.weaponCategory) return false;
+        }
+        int hpCost = skill.hpCostPercent > 0 ? Mathf.Max(1, Mathf.RoundToInt(actor.maxHP * skill.hpCostPercent / 100f)) : 0;
+        if (actor.currentHP <= hpCost + 1) return false;
+        bool self = skill.targeting != null && skill.targeting.targetFaction == TargetFaction.Self;
+        queue.Invoke(bm, new object[] { actor, "skill", self ? null : target, skill, 0, false, null });
+        int c; _stats.skillUses.TryGetValue(name, out c); _stats.skillUses[name] = c + 1;
+        return true;
+    }
+
+    private static float ExpectedHit(PlayerStats hero, EnemyStats e)
+    {
+        return Mathf.Max(1f, (hero.Attack * 2f - e.defense) / 2f) * 0.85f;
+    }
+
+    private static EnemyStats PickTarget(PlayerStats hero, List<EnemyStats> alive)
+    {
+        EnemyStats best = null; float bestScore = float.MinValue;
+        foreach (var e in alive)
+        {
+            float score = (e.currentHP <= ExpectedHit(hero, e) ? 1000f : 0f) - e.currentHP + ((int)e.currentSlot <= 2 || e.currentSlot == BattleSlot.Center ? 20f : 0f);
+            if (score > bestScore) { bestScore = score; best = e; }
+        }
+        return best;
+    }
+
+    /// <summary>남은 적을 다 잡는 데 걸리는 턴 × 적의 턴당 예상 피해 > 남은 HP(+회복 여유) 의 90% 면 도망.</summary>
+    private static bool ShouldFlee(PlayerStats hero, List<EnemyStats> alive)
+    {
+        float turns = 0f, incoming = 0f;
+        foreach (var e in alive)
+        {
+            turns += e.currentHP / Mathf.Max(1f, ExpectedHit(hero, e) * 0.85f);
+            incoming += Mathf.Max(1f, (e.attack * 1.25f * 2f - hero.Defense) / 2f) * 0.85f;
+        }
+        bool heals = FindHealItem(battle: true, allowChalice: true) != null;
+        float budget = hero.currentHP + (heals ? hero.maxHP * 0.3f : 0f);
+        return incoming * turns > budget * 0.9f;
     }
 
     // ─────────────────────────────────────────
@@ -277,6 +426,15 @@ public class DungeonAutoPilot : MonoBehaviour
         }
         if (player.IsInputLocked) return;
         if (DungeonPanelGroup.Instance != null && DungeonPanelGroup.Instance.AnyOpen) DungeonPanelGroup.Instance.CloseAll();
+
+        // 빌드: SP 가 생기면 배움 / 옵션: 매 판 조잡한 검
+        LearnFromBuild(hero);
+        if (startWithSword && hero.statData != null && hero.statData.rightHand == null)
+        {
+            var sword = Resources.Load<EquipmentData>("Item_Equipments/Equipments/Crude/CrudeSword");
+            var em = hero.GetComponent<EquipmentManager>();
+            if (sword != null) { if (em != null) em.EquipItem(sword); else hero.statData.rightHand = sword; }
+        }
 
         // 던전 회복
         if (hero.currentHP < hero.maxHP * 0.5f)

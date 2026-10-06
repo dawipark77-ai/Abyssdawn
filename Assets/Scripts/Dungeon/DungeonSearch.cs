@@ -15,6 +15,7 @@ using UnityEngine.UI;
 public class DungeonSearch : MonoBehaviour
 {
     public const string DefaultButtonName = "Search_Button";
+    public const string HerbResource = "Item_Equipments/Items/Medicinal_Herb";
 
     [Header("탐색")]
     [Tooltip("탐색 반경 (칸)")]
@@ -86,13 +87,14 @@ public class DungeonSearch : MonoBehaviour
         _busy = true;
         _player.LockInput(this);
         Vector2Int pos = _player.gridPos;
-        _map.FindHiddenAround(pos, radius, _found);
+        int searchR = radius + (FieldSkills.Has(FieldSkills.TrapDetection) ? FieldSkills.TrapDetectSearchBonus : 0); // 함정 감지: 반경 +1
+        _map.FindHiddenAround(pos, searchR, _found);
 
         // 1) 탐색 물결 — 플레이어에서 반경 끝까지 퍼지며 옅어진다
         AutomapRenderer automap = _map.automapRenderer;
         Vector3 center = automap != null ? automap.CellCenter(pos) : _player.transform.position;
         float cell = automap != null ? Mathf.Min(automap.CellSize().x, automap.CellSize().y) : 1f;
-        float maxR = (radius + 0.5f) * cell;
+        float maxR = (searchR + 0.5f) * cell;
         float stagger = rippleSeconds * 0.25f;
         var rings = new List<LineRenderer>();
         for (int i = 0; i < Mathf.Max(1, rippleCount); i++) rings.Add(NewRing("SearchRipple", rippleColor, lineWidth * cell));
@@ -128,12 +130,21 @@ public class DungeonSearch : MonoBehaviour
             foreach (var m in marks) Destroy(m.gameObject);
         }
 
-        Toast(_found.Count == 0
+        // 생존 전문가: 10% 확률로 약초
+        string herb = "";
+        if (FieldSkills.Has(FieldSkills.Survivalist) && Random.value < FieldSkills.SurvivalistHerbChance)
+        {
+            var item = Resources.Load<AbyssdawnBattle.ConsumableItemSO>(HerbResource);
+            if (item != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(item, 1) > 0)
+                herb = $"\n<size=80%><color=#9FFF9F>You gather a {item.itemName}.</color></size>";
+        }
+
+        Toast((_found.Count == 0
             ? "<color=#AAAAAA>You search the area... nothing.</color>"
             : _found.Count == 1
-                ? $"<color=#FF8A70>You found a hidden {_map.TrapName(_found[0]).ToLower()} trap!</color>"
-                : $"<color=#FF8A70>You found {_found.Count} hidden traps!</color>");
-        Debug.Log($"[DungeonSearch] B{_map.FloorData.floorNumber} {pos} 반경 {radius} 탐색 → 숨은 함정 {_found.Count}개");
+                ? $"<color=#FF8A70>You found a hidden {MapManager.TrapLabel(_map.FloorData.GetCell(_found[0]).trap)}!</color>"
+                : $"<color=#FF8A70>You found {_found.Count} hidden traps!</color>") + herb);
+        Debug.Log($"[DungeonSearch] B{_map.FloorData.floorNumber} {pos} 반경 {searchR} 탐색 → 숨은 함정 {_found.Count}개");
 
         _player.UnlockInput(this);
         _busy = false;

@@ -16,8 +16,8 @@ MonoBehaviour:
   skillName: Tactical Awareness
   skillIcon: {fileID: -8400421116468495983, guid: 2664d9dbb95aa5349b08846d3eac75ec, type: 3}
   description: "[\uD328\uC2DC\uBE0C] \uBA85\uC911\uB960 +5%, \uD68C\uD53C\uC728 +5%.
-    \uC0B4\uC544 \uC788\uB294 \uC801\uC774 2\uB9C8\uB9AC \uC774\uC0C1\uC774\uBA74
-    \uCE58\uBA85\uD0C0 \uD655\uB960 +3%."
+    \uC0B4\uC544 \uC788\uB294 \uC801\uC774 3\uB9C8\uB9AC \uC774\uC0C1\uC774\uBA74
+    \uCE58\uBA85\uD0C0 \uD655\uB960 +5%."
   usageType: 1
   damageType: 0
   scalingStat: 4

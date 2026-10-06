@@ -15,10 +15,11 @@ MonoBehaviour:
   skillID: CombatArts_T2_Brace
   skillName: Brace
   skillIcon: {fileID: 9040223973580938310, guid: 4985a8268ae904544946ff1d15b75116, type: 3}
-  description: "[\uC561\uD2F0\uBE0C \xB7 \uC120\uC81C] \uC774\uBC88 \uD134 \uB204\uAD6C\uBCF4\uB2E4
-    \uBA3C\uC800 \uC790\uC138\uB97C \uC7A1\uC544 \uC774\uBC88 \uD134 \uBC1B\uB294
-    \uD53C\uD574 -50%. \uB2E4\uC74C \uD134 \uCCAB \uACF5\uACA9 \uD53C\uD574 +20%.
-    \uC774\uBC88 \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0 \uC54A\uB294\uB2E4."
+  description: "[\uC561\uD2F0\uBE0C \xB7 \uC120\uC81C \xB7 \uCFE8\uB2E4\uC6B4 2\uD134]
+    \uC774\uBC88 \uD134 \uB204\uAD6C\uBCF4\uB2E4 \uBA3C\uC800 \uC790\uC138\uB97C
+    \uC7A1\uC544 \uC774\uBC88 \uD134 \uBC1B\uB294 \uD53C\uD574 -50%. \uB2E4\uC74C
+    \uD134 \uCCAB \uACF5\uACA9 \uD53C\uD574 +20%. \uC774\uBC88 \uD134\uC5D0\uB294
+    \uACF5\uACA9\uD558\uC9C0 \uC54A\uB294\uB2E4."
   usageType: 0
   damageType: 0
   scalingStat: 2

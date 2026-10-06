@@ -21,11 +21,11 @@ public static class ConsumableEffectApplier
         public int mpHealed;
         public int mpLost;
         public List<StatusEffectType> curesApplied;
-        public bool buffsTodo;  // SO에 버프가 정의돼 있으나 PlayerStats 시스템 부재로 미적용
+        public string buffText;  // 건 버프 요약 (예: "ATK +15% (3 turns)"). 없으면 null
 
         public bool AnyApplied =>
             hpHealed > 0 || mpHealed > 0 || mpLost > 0
-            || (curesApplied != null && curesApplied.Count > 0);
+            || (curesApplied != null && curesApplied.Count > 0) || !string.IsNullOrEmpty(buffText);
     }
 
     /// <summary>
@@ -45,10 +45,13 @@ public static class ConsumableEffectApplier
             return result;
         }
 
+        // [2026-10-07] 탐험 스킬 '생존 전문가': 회복 아이템 효과 +20%
+        float potency = SurvivalistPotency(user);
+
         // 1) HP 회복 (hpRecoveryPercent × maxHP, 반올림)
         if (item.hpRecoveryPercent > 0f)
         {
-            int healAmount = Mathf.RoundToInt(item.hpRecoveryPercent * user.maxHP);
+            int healAmount = Mathf.RoundToInt(item.hpRecoveryPercent * potency * user.maxHP);
             if (healAmount > 0)
             {
                 int before = user.currentHP;
@@ -60,7 +63,7 @@ public static class ConsumableEffectApplier
         // 2) MP 회복 (mpRecoveryPercent × maxMP, 반올림)
         if (item.mpRecoveryPercent > 0f)
         {
-            int mpAmount = Mathf.RoundToInt(item.mpRecoveryPercent * user.maxMP);
+            int mpAmount = Mathf.RoundToInt(item.mpRecoveryPercent * potency * user.maxMP);
             if (mpAmount > 0)
             {
                 int before = user.currentMP;
@@ -75,11 +78,19 @@ public static class ConsumableEffectApplier
         {
             foreach (var type in item.cureTypes)
             {
+                // 전투 상태이상 + 던전 상태이상(함정, DungeonFieldStatus) 둘 다
+                bool cured = false;
                 if (user.HasStatusEffect(type))
                 {
                     user.RemoveStatusEffect(type);  // 내부에서 OnStatusChanged 발동
-                    result.curesApplied.Add(type);
+                    cured = true;
                 }
+                if (DungeonFieldStatus.Has(type))
+                {
+                    DungeonFieldStatus.Remove(type);
+                    cured = true;
+                }
+                if (cured) result.curesApplied.Add(type);
             }
         }
 
@@ -95,17 +106,44 @@ public static class ConsumableEffectApplier
             }
         }
 
-        // 5) TODO: 버프 적용 — PlayerStats에 일반 버프 시스템(attackBuff/agilityBuff/evasionBuff/
-        //    escapeChanceBuff + buffDuration 턴 카운팅)이 부재함. 현재는 SO에 정의돼 있어도 무시.
-        //    향후 PlayerStats에 buff 필드 + 매 턴 만료 처리 추가 시 여기에 적용 로직 추가.
-        if (item.buffDuration > 0
-            && (item.attackBuffPercent > 0f || item.agilityBuff != 0
-                || item.evasionBuff > 0f || item.escapeChanceBuff > 0f))
+        // 5) 버프 (전투 전용 아이템: 숫돌·각성제·연막탄). [2026-10-07] StatModifier 로 구현 — buffDuration 턴 동안.
+        //    같은 아이템을 다시 쓰면 갱신 (중첩 안 함). 도망 확률은 PlayerStats.escapeBonus.
+        if (item.buffDuration > 0)
         {
-            result.buffsTodo = true;
-            Debug.LogWarning($"[ConsumableEffectApplier] {item.itemName} 버프 효과 미구현 — PlayerStats에 일반 버프 시스템 부재 (TODO)");
+            var parts = new List<string>();
+            user.RemoveStatModifiersFromSource(item);
+            if (item.attackBuffPercent > 0f)
+            {
+                user.AddStatModifier(new StatModifier { statType = ModStatType.Attack, modType = StatModType.PercentMult, value = 1f + item.attackBuffPercent }, item, item.buffDuration);
+                parts.Add($"ATK +{item.attackBuffPercent * 100f:0}%");
+            }
+            if (item.agilityBuff != 0)
+            {
+                user.AddStatModifier(new StatModifier { statType = ModStatType.Speed, modType = StatModType.Flat, value = item.agilityBuff }, item, item.buffDuration);
+                parts.Add($"Speed +{item.agilityBuff}");
+            }
+            if (item.evasionBuff > 0f)
+            {
+                user.AddStatModifier(new StatModifier { statType = ModStatType.Evasion, modType = StatModType.Flat, value = item.evasionBuff }, item, item.buffDuration);
+                parts.Add($"Evasion +{item.evasionBuff * 100f:0}%");
+            }
+            if (item.escapeChanceBuff > 0f)
+            {
+                user.escapeBonus = item.escapeChanceBuff;
+                user.escapeBonusRounds = item.buffDuration;
+                parts.Add($"Escape +{item.escapeChanceBuff * 100f:0}%");
+            }
+            if (parts.Count > 0)
+                result.buffText = string.Join(", ", parts) + $" ({item.buffDuration} turn{(item.buffDuration == 1 ? "" : "s")})";
         }
 
         return result;
+    }
+
+    /// <summary>생존 전문가(탐험 스킬)를 배웠으면 회복 아이템 효과 ×1.2.</summary>
+    private static float SurvivalistPotency(PlayerStats user)
+    {
+        if (user == null || user.statData == null || user.IsRecruitedCompanion) return 1f;
+        return user.statData.HasFieldSkill(FieldSkills.Survivalist) ? 1.2f : 1f;
     }
 }

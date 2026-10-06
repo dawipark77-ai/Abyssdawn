@@ -70,8 +70,10 @@ public class DungeonEncounter : MonoBehaviour
 
         if (encounterChance <= 0f) return;
 
+        float before = Danger;
         float danger = Mathf.Clamp01(Danger + UnityEngine.Random.Range(0.5f, 1.5f) * encounterChance * dangerFillRate);
         SetDanger(danger);
+        WarnIfSensed(before, danger);
 
         float chance = danger >= 1f ? 1f : encounterChance * earlyEncounterFactor * danger;
         float roll = UnityEngine.Random.value;
@@ -92,6 +94,35 @@ public class DungeonEncounter : MonoBehaviour
     {
         DungeonPersistentData.danger = Mathf.Clamp01(value);
         OnDangerChanged?.Invoke(DungeonPersistentData.danger);
+    }
+
+    /// <summary>그물 함정 등: 위험도를 한 번에 올린다. 가득 차면 잠깐 뒤 전투.</summary>
+    public void AddDanger(float amount)
+    {
+        float before = Danger;
+        SetDanger(Danger + amount);
+        WarnIfSensed(before, Danger);
+        if (Danger >= 1f) StartCoroutine(EncounterAfter(0.8f));
+    }
+
+    private System.Collections.IEnumerator EncounterAfter(float seconds)
+    {
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.LockInput(this);
+        yield return new WaitForSeconds(seconds);
+        if (player != null) player.UnlockInput(this);
+        StartEncounter();
+    }
+
+    // [2026-10-07] 탐험 스킬 '위험 예지': 위험도가 80% 를 넘는 순간 경고. 전투에서는 첫 턴 회피 +20% (BattleManager)
+    public const float DangerSenseWarnAt = 0.8f;
+
+    private static void WarnIfSensed(float before, float after)
+    {
+        if (before >= DangerSenseWarnAt || after < DangerSenseWarnAt) return;
+        if (!FieldSkills.Has(FieldSkills.DangerSense)) return;
+        var hud = DungeonHud.Instance;
+        if (hud != null) hud.Toast("<color=#FFB060>You sense something stalking you...</color>");
     }
 
     void StartEncounter()

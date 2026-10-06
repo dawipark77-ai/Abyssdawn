@@ -10,24 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: T3_LastStand
+  m_Name: T3_CounterGuard
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: CombatArts_T3_LastStand
-  skillName: Last Stand
+  skillID: CombatArts_T3_CounterGuard
+  skillName: Counter Guard
   skillIcon: {fileID: -5816105751508217489, guid: 609d5d3bf3eed144e8b9b21aa45a3189, type: 3}
-  description: "[\uD328\uC2DC\uBE0C] \uC804\uD22C\uB2F9 1\uD68C, \uC8FD\uC744 \uB9CC\uD07C\uC758
-    \uD53C\uD574\uB97C \uBC1B\uC73C\uBA74 HP 1\uB85C \uBC84\uD2F0\uACE0, \uADF8 \uD134\uACFC
-    \uB2E4\uC74C \uD134 \uBC1B\uB294 \uD53C\uD574 -50%."
-  usageType: 1
+  description: "[\uC561\uD2F0\uBE0C \xB7 \uC120\uC81C \xB7 \uCFE8\uB2E4\uC6B4 3\uD134]
+    \uBC18\uACA9 \uC790\uC138\uB97C \uC7A1\uB294\uB2E4 (\uC774\uBC88 \uD134 + \uB2E4\uC74C
+    \uD134). \uACF5\uACA9\uC744 \uBC1B\uC744 \uB54C\uB9C8\uB2E4 50% \uD655\uB960\uB85C
+    \uBC1B\uB294 \uD53C\uD574 -50%, \uADF8 \uACF5\uACA9\uC790\uC5D0\uAC8C \uAE30\uBCF8
+    \uACF5\uACA9 50% \uC704\uB825\uC73C\uB85C \uBC18\uACA9 (\uD134\uB2F9 \uCD5C\uB300
+    2\uD68C). \uC790\uC138 \uB3D9\uC548 \uB2E4\uB978 \uC2A4\uD0AC\uC740 \uC4F8 \uC218
+    \uC5C6\uACE0 \uAE30\uBCF8 \uACF5\uACA9\uB9CC \uAC00\uB2A5. \uCD5C\uB300 HP\uC758
+    3% \uC18C\uBAA8."
+  usageType: 0
   damageType: 0
   scalingStat: 2
   weaponCategory: 0
   targeting:
-    targetFaction: 0
+    targetFaction: 2
     allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 0
+  hpCostPercent: 3
   mpCost: 0
   minMult: 0
   maxMult: 0
@@ -59,8 +64,8 @@ MonoBehaviour:
   armorBreakPercent: 0
   requiresPreviousSkillId: 
   requiresSameTarget: 0
-  preemptive: 0
-  cooldownTurns: 0
+  preemptive: 1
+  cooldownTurns: 3
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

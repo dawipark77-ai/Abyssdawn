@@ -19,26 +19,31 @@ MonoBehaviour:
   type: 0
   race: 5
   basicAttackOverride: {fileID: 0}
-  level: 4
-  hp: 60
+  level: 3
+  hp: 30
   mp: 0
-  atk: 14
-  def: 2
-  mag: 6
-  agi: 12
-  luk: 5
+  atk: 11
+  def: 5
+  mag: 2
+  agi: 10
+  luk: 6
   physResist: 1
   magResist: 1
   statusResist: 1
-  activeSkills: []
+  activeSkills:
+  - {fileID: 11400000, guid: 439ac44eba6eaee4cbcfaa97106ceca1, type: 2}
+  - {fileID: 11400000, guid: c316f46fa8569fc4dbe053ae5d40ef28, type: 2}
+  - {fileID: 11400000, guid: 7e443bae661e8ba4a8a92acc380b4597, type: 2}
   passiveSkills: []
-  aiPattern: 0
+  aiPattern: 3
+  desperatePhaseThreshold: 0.5
+  criticalPhaseThreshold: 0.2
   rowPreference: 0
   allowedSlots: 15
-  minFloor: 0
+  minFloor: 3
   maxFloor: 0
-  spawnWeight: 0
-  expReward: 12
-  goldReward: 0
+  spawnWeight: 1
+  expReward: 30
+  goldReward: 8
   dropTable: []
   companionChance: 0.0625

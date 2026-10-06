@@ -16,8 +16,8 @@ MonoBehaviour:
   skillName: Strong Slash
   skillIcon: {fileID: -1101750654258036731, guid: 3955b202bf839314a830086e1903dd93, type: 3}
   description: "[\uAC80 \uC804\uC6A9] \uC628 \uD798\uC744 \uC2E4\uC5B4 \uB0B4\uB824\uBCA0\uAE30.
-    \uACF5\uACA9\uB825\uC758 220~260% \uD53C\uD574, \uCE58\uBA85\uD0C0 \uD655\uB960
-    +10%. \uD06C\uAC8C \uD718\uB450\uB974\uB294 \uB9CC\uD07C \uBA85\uC911 80%. \uCD5C\uB300
+    \uACF5\uACA9\uB825\uC758 230~270% \uD53C\uD574, \uCE58\uBA85\uD0C0 \uD655\uB960
+    +20%. \uD06C\uAC8C \uD718\uB450\uB974\uB294 \uB9CC\uD07C \uBA85\uC911 80%. \uCD5C\uB300
     HP\uC758 10% \uC18C\uBAA8."
   usageType: 0
   damageType: 1
@@ -30,8 +30,8 @@ MonoBehaviour:
     specificSlots: 
   hpCostPercent: 10
   mpCost: 0
-  minMult: 2.2
-  maxMult: 2.6
+  minMult: 2.3
+  maxMult: 2.7
   hitCount: 1
   accuracy: 0.8
   selfDmgPercent: 0
@@ -66,8 +66,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
-  critBonusPercent: 10
+  critBonusPercent: 20
   partyPhysicalBuffPercent: 0
   partyPhysicalBuffTurns: 0
   selfAgilityPenalty: 0

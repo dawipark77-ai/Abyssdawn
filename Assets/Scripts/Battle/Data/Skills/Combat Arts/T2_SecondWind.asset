@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: CombatArts_T2_SecondWind
   skillName: Second Wind
   skillIcon: {fileID: -4115274655291430038, guid: bfa8fa2bb381ba34080fc3506d6ada0f, type: 3}
-  description: "[\uC561\uD2F0\uBE0C \xB7 \uC804\uD22C\uB2F9 1\uD68C] \uC228\uC744
+  description: "[\uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 5\uD134] \uC228\uC744
     \uACE8\uB77C \uCD5C\uB300 HP\uC758 20%\uB97C \uD68C\uBCF5\uD558\uACE0 \uCD9C\uD608\uC744
     \uBA48\uCD98\uB2E4. \uC774\uBC88 \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0
     \uC54A\uB294\uB2E4."
@@ -61,8 +61,8 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
-  cooldownTurns: 0
-  usesPerBattle: 1
+  cooldownTurns: 5
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0

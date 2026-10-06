@@ -168,7 +168,8 @@ public class SkillListManager : MonoBehaviour
         // 새 아이템 생성
         foreach (var skill in learnedSkills)
         {
-            if (skill != null)
+            // 탐험 스킬은 칸에 넣지 않으므로 Skill Set 목록에서 뺀다 (배우면 항상 적용)
+            if (skill != null && !skill.fieldSkill)
             {
                 CreateSkillItem(skill);
             }

@@ -25,7 +25,7 @@ MonoBehaviour:
   agilityBuff: 0
   evasionBuff: 0.2
   escapeChanceBuff: 0.4
-  buffDuration: 1
+  buffDuration: 2
   mpPenaltyPercent: 0
   maxStack: 5
   usableInBattle: 1
@@ -36,4 +36,5 @@ MonoBehaviour:
   isChargeable: 0
   maxCharges: 0
   currentCharges: 0
-  sellPrice: 0
+  buyPrice: 30
+  sellPrice: 15

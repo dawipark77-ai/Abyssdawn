@@ -22,8 +22,11 @@ public enum FloorFeature { None = 0, StairsDown = 1, TownGate = 2, StairsUp = 3,
 /// <summary>
 /// 숨겨진 함정 종류 (이상한 던전 / 위저드리).
 ///  Spike = 최대 HP 일부 피해 / Teleport = 층 안 랜덤 방으로 전송 / Alarm = 즉시 전투 / Pitfall = 아래층으로 추락
+///  [2026-10-07] PoisonDart = 피해 + 독 / Blade = 피해 + 출혈 / FlameVent = 피해 + 화상 / BlindingGas = 실명(시야↓)
+///               Rockfall = 큰 피해 + 충격(다음 전투 첫 턴 기절) / Net = 그물에 걸려 위험도 크게 상승
+///  ※ 저장 파일·층 기억에 숫자로 남으므로 새 종류는 맨 뒤에만 추가.
 /// </summary>
-public enum FloorTrapType { None = 0, Spike = 1, Teleport = 2, Alarm = 3, Pitfall = 4 }
+public enum FloorTrapType { None = 0, Spike = 1, Teleport = 2, Alarm = 3, Pitfall = 4, PoisonDart = 5, Blade = 6, FlameVent = 7, BlindingGas = 8, Rockfall = 9, Net = 10 }
 
 /// <summary>층 종류. Town = 마을 층(마을 구현 전까지는 일반 층 + 마을 입구 타일).</summary>
 public enum FloorType { Dungeon = 0, Town = 1 }

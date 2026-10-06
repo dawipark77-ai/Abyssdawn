@@ -15,9 +15,10 @@ MonoBehaviour:
   skillID: CombatArts_T3_CombatBreathing
   skillName: Combat Breathing
   skillIcon: {fileID: 5329708327426976617, guid: 540bef903ad51c04697635fbf8c0260d, type: 3}
-  description: "[\uD328\uC2DC\uBE0C] \uC2A4\uD0AC\uC744 \uC4F8 \uB54C\uB9C8\uB2E4
-    \uCD5C\uB300 HP\uC758 5% \uD68C\uBCF5. \uB4B7\uC5F4\uC5D0 \uC788\uC73C\uBA74
-    +2% \uCD94\uAC00."
+  description: "[\uD328\uC2DC\uBE0C] \uACF5\uACA9 \uC2A4\uD0AC\uC744 \uC4F8 \uB54C\uB9C8\uB2E4
+    \uCD5C\uB300 HP\uC758 3% \uD68C\uBCF5. \uB4B7\uC5F4\uC5D0 \uC788\uC73C\uBA74
+    +2% \uCD94\uAC00. (\uBC84\uD2F0\uAE30\xB7\uC228\uACE0\uB974\uAE30 \uAC19\uC740
+    \uBE44\uACF5\uACA9 \uC2A4\uD0AC\uC5D0\uB294 \uBC1C\uB3D9\uD558\uC9C0 \uC54A\uB294\uB2E4)"
   usageType: 1
   damageType: 0
   scalingStat: 0

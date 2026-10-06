@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Purification Water
   icon: {fileID: 0}
   description: Water drawn from the abyss. It washes away all darkness.
-  itemCategory: 1
+  itemCategory: 2
   itemIcon: {fileID: 8498154514395236658, guid: 74fe73734a5122b45aee5aaf9d58575f, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0
@@ -36,4 +36,5 @@ MonoBehaviour:
   isChargeable: 0
   maxCharges: 0
   currentCharges: 0
-  sellPrice: 0
+  buyPrice: 60
+  sellPrice: 30

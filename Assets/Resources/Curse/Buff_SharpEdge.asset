@@ -26,7 +26,7 @@ MonoBehaviour:
   statModifiers:
   - statType: 10
     modType: 100
-    value: 0.08
+    value: 0.2
   preventAction: 0
   preventSkillUse: 0
   statusVFX: {fileID: 0}

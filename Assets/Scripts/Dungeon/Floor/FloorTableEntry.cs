@@ -153,11 +153,12 @@ public static class FloorTableDefaults
         List<FloorTableEntry> list = new List<FloorTableEntry>();
         // 몬스터 수 가중치 (1·2·3·4마리) — [2026-10-04] 같은 몬스터 최대 4마리까지, 4마리면 2/2 대열
         list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 0, 1, 0.5f).WithShapes(0.3f, 0.2f, 0, 1).WithGroups(55, 30, 12, 3));
-        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.3f).WithShapes(0.4f, 0.3f, 0, 2).WithGroups(40, 35, 18, 7));
+        // [2026-10-07] 함정 개수 증가: 2~4층 1~2 → 2~4 / 6~8층 2~3 → 3~6 / 9~10층 2~4 → 4~7 / 11층~ 3~6 → 5~8
+        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 2, 4, 0.3f).WithShapes(0.4f, 0.3f, 0, 2).WithGroups(40, 35, 18, 7));
         list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 0, 1, 0.5f).WithShapes(0.4f, 0.3f, 0, 1).WithGroups(30, 35, 22, 13));
-        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 2, 3, 0.3f).WithShapes(0.5f, 0.35f, 1, 2).WithGroups(30, 35, 22, 13));
-        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 2, 4, 0.35f).WithShapes(0.55f, 0.4f, 1, 3).WithGroups(30, 35, 22, 13));
-        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 3, 6, 0.35f).WithShapes(0.6f, 0.4f, 2, 4).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 3, 6, 0.3f).WithShapes(0.5f, 0.35f, 1, 2).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 4, 7, 0.35f).WithShapes(0.55f, 0.4f, 1, 3).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 5, 8, 0.35f).WithShapes(0.6f, 0.4f, 2, 4).WithGroups(30, 35, 22, 13));
         for (int i = 0; i < list.Count; i++) list[i].encounterChance = BetaEncounterChance;
         return list;
     }

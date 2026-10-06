@@ -272,6 +272,33 @@ public class SwordSkillTreeManager : MonoBehaviour
         Debug.Log($"[Learn-DIAG] [SwordSkillTreeManager] LearnSkill 반환. 잔여 SP={GetAvailableSkillPoints()}");
     }
     
+    /// <summary>칸이 다 찬 상태에서 배운 스킬 — 어느 칸과 바꿀지 묻는다. 이미 장착됐거나 탐험 스킬이면 묻지 않음.</summary>
+    private void AskReplaceSlot(SkillData skill)
+    {
+        var list = playerStatData != null ? playerStatData.SlotListFor(skill) : null;
+        if (list == null || list.Contains(skill)) return;
+        var hud = DungeonHud.Instance;
+        if (hud == null) return;
+        var labels = new List<string>();
+        foreach (var s in list) labels.Add(s != null ? s.skillName : "<color=#888888>Empty</color>");
+        string kind = skill.IsPassive ? "passive" : "skill";
+        hud.ChooseSkillSlot(
+            $"<b>{skill.skillName}</b> learned!\n<size=80%>Your {kind} slots are full. Replace which one?\n<color=#AAAAAA>(Later: equip it any time from Skill Set)</color></size>",
+            labels,
+            index =>
+            {
+                if (index < 0) { hud.Toast($"{skill.skillName} learned — not equipped yet."); return; }
+                SkillData old = list[index];
+                playerStatData.EquipAt(skill, index);
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(playerStatData);
+#endif
+                hud.Toast(old != null ? $"{skill.skillName} equipped <color=#AAAAAA>(replaced {old.skillName})</color>" : $"{skill.skillName} equipped");
+                var ps = FindFirstObjectByType<PlayerStats>();
+                if (ps != null) ps.NotifyStatusChanged(); // 상태창 스킬 아이콘 갱신
+            });
+    }
+
     /// <summary>
     /// 스킬 배우기 (실제 처리)
     /// </summary>
@@ -296,8 +323,9 @@ public class SwordSkillTreeManager : MonoBehaviour
                 playerStatData.learnedSkills.Add(skill);
             }
 
-            // 빈 슬롯이 있으면 바로 장착 (전투는 장착된 스킬만 사용)
-            playerStatData.AutoEquipIfFree(skill);
+            // 빈 슬롯이 있으면 바로 장착 (전투는 장착된 스킬만 사용).
+            // [2026-10-07] 칸이 다 찼으면 교체할 칸을 고르는 창 (Later = 배우기만, 나중에 Skill Set 창에서 장착)
+            if (!playerStatData.AutoEquipIfFree(skill)) AskReplaceSlot(skill);
 
             // 스킬 포인트 차감
             SetSkillPoints(GetSkillPoints() - requiredPoints);

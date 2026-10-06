@@ -40,7 +40,7 @@ MonoBehaviour:
   rowPreference: 0
   allowedSlots: 0
   minFloor: 2
-  maxFloor: 0
+  maxFloor: 8
   spawnWeight: 1
   expReward: 12
   goldReward: 3

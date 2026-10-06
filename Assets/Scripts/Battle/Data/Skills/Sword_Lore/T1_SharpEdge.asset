@@ -17,7 +17,7 @@ MonoBehaviour:
   skillIcon: {fileID: 0}
   description: "[\uAC80 \uC804\uC6A9 \xB7 \uBC84\uD504] \uCE7C\uB0A0\uC744 \uBCBC\uB824
     \uBC29\uC5B4\uB97C \uAFF0\uB6AB\uB294\uB2E4. \uD55C \uD134\uC744 \uC368\uC11C,
-    \uB2E4\uC74C 3\uD134 \uB3D9\uC548 \uC801 \uBC29\uC5B4\uB825\uC758 8%\uB97C \uBB34\uC2DC\uD558\uACE0
+    \uB2E4\uC74C 3\uD134 \uB3D9\uC548 \uC801 \uBC29\uC5B4\uB825\uC758 20%\uB97C \uBB34\uC2DC\uD558\uACE0
     \uACF5\uACA9\uD55C\uB2E4. \uB2E4\uC2DC \uC4F0\uBA74 3\uD134\uC73C\uB85C \uAC31\uC2E0."
   usageType: 0
   damageType: 1
@@ -61,6 +61,8 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0

@@ -46,7 +46,8 @@ namespace Abyssdawn
     {
         Aggressive,
         Defensive,
-        Support
+        Support,
+        Cunning     // [2026-10-06] 교활 — 상황을 보고 도구를 쓰는 AI (고블린). 반드시 맨 뒤에 추가 (에셋은 숫자로 저장)
     }
 
     /// <summary>

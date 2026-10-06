@@ -40,6 +40,7 @@ public static class SaveSystem
     {
         public int floor, seed;
         public List<V2> revealed = new List<V2>(), openedChests = new List<V2>(), knownTraps = new List<V2>(), usedSprings = new List<V2>();
+        public List<V2> sprungTraps = new List<V2>(), disarmedTraps = new List<V2>(); // [2026-10-07]
         public bool clearRewarded;
         public List<int> enteredRooms = new List<int>();
     }
@@ -59,6 +60,7 @@ public static class SaveSystem
         public int facing;
         public float danger;
         public int lightSteps;
+        public List<DungeonFieldStatus.SaveEntry> fieldStatuses = new List<DungeonFieldStatus.SaveEntry>(); // 함정 상태이상 [2026-10-07]
         public List<FloorSave> floors = new List<FloorSave>();
         // 주인공
         public GameManager.PartyMemberData hero;
@@ -100,6 +102,7 @@ public static class SaveSystem
                 facing = (int)(player != null ? player.facing : DungeonPersistentData.lastPlayerFacing),
                 danger = DungeonPersistentData.danger,
                 lightSteps = DungeonPersistentData.playerLightSteps,
+                fieldStatuses = DungeonFieldStatus.ToSave(),
                 heroKey = hero.playerName,
                 heroLevel = hero.level,
                 heroSlotIndex = CompanionPartyPersistence.heroSlotIndex,
@@ -116,6 +119,8 @@ public static class SaveSystem
                 foreach (var p in s.openedChests) fs.openedChests.Add(new V2(p));
                 foreach (var p in s.knownTraps) fs.knownTraps.Add(new V2(p));
                 foreach (var p in s.usedSprings) fs.usedSprings.Add(new V2(p));
+                foreach (var p in s.sprungTraps) fs.sprungTraps.Add(new V2(p));
+                foreach (var p in s.disarmedTraps) fs.disarmedTraps.Add(new V2(p));
                 fs.enteredRooms.AddRange(s.enteredRooms);
                 d.floors.Add(fs);
             }
@@ -190,6 +195,9 @@ public static class SaveSystem
                 foreach (var p in fs.openedChests) s.openedChests.Add(p.ToV());
                 foreach (var p in fs.knownTraps) s.knownTraps.Add(p.ToV());
                 foreach (var p in fs.usedSprings) s.usedSprings.Add(p.ToV());
+                if (fs.sprungTraps != null) foreach (var p in fs.sprungTraps) s.sprungTraps.Add(p.ToV());
+                else foreach (var p in fs.knownTraps) s.sprungTraps.Add(p.ToV()); // 예전 저장: 아는 함정 = 밟은 함정으로 간주
+                if (fs.disarmedTraps != null) foreach (var p in fs.disarmedTraps) s.disarmedTraps.Add(p.ToV());
                 foreach (var r in fs.enteredRooms) s.enteredRooms.Add(r);
                 DungeonPersistentData.floors[fs.floor] = s;
             }
@@ -204,6 +212,7 @@ public static class SaveSystem
             DungeonPersistentData.lastPlayerFacing = (DungeonDirection)d.facing;
             DungeonPersistentData.danger = d.danger;
             DungeonPersistentData.playerLightSteps = d.lightSteps;
+            DungeonFieldStatus.FromSave(d.fieldStatuses);
 
             // 주인공 수치
             var gm = GameManager.EnsureInstance();

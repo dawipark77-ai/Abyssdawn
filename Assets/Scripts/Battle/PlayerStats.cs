@@ -202,10 +202,13 @@ public class PlayerStats : MonoBehaviour
     // ── 전투학(Combat Arts 페이지) 스킬 이름 — 효과는 이름으로 찾는다 (기존 Basic Swordsmanship 방식과 같음) ──
     public const string SkillHardenedBody = "Hardened Body";
     public const string SkillTacticalAwareness = "Tactical Awareness";
-    public const string SkillLastStand = "Last Stand";
-
-    /// <summary>최후의 저항(패시브)이 발동했을 때 — BattleManager 가 전투 메시지를 띄운다.</summary>
-    public static event Action<PlayerStats> OnLastStandPassive;
+    /// <summary>반격 태세(Counter Guard) 남은 라운드. 0보다 크면 자세 유지 중 (라운드 끝마다 1 감소).</summary>
+    // [2026-10-07] 도망 확률 보너스 (연막탄 등 아이템). escapeBonusRounds 라운드 동안 유지
+    [System.NonSerialized] public float escapeBonus = 0f;
+    [System.NonSerialized] public int escapeBonusRounds = 0;
+    [System.NonSerialized] public int counterGuardRounds = 0;
+    /// <summary>이번 라운드에 한 반격 횟수 (최대 2, 라운드 끝에 0).</summary>
+    [System.NonSerialized] public int counterGuardCountersThisRound = 0;
 
     /// <summary>버티기 자세 다음 턴 첫 공격 피해 보너스 (0.2 = +20%). 남은 라운드가 0이 되면 사라짐.</summary>
     [System.NonSerialized] public float nextAttackBonus = 0f;
@@ -1307,20 +1310,6 @@ public class PlayerStats : MonoBehaviour
         defenseBuffAmount = 0f;
 
         int newHP = currentHP - finalDamage;
-
-        // [2026-10-06] 전투학: 최후의 저항 — 전투당 1회, 죽을 피해를 받으면 HP 1 + 1턴간 받는 피해 -50% (확정)
-        if (newHP <= 0 && !_lastStandUsed && HasEquippedPassiveByName(SkillLastStand))
-        {
-            _lastStandUsed = true;
-            currentHP = 1;
-            // 이번 라운드 끝 + 다음 라운드 끝에 1씩 줄어 다음 라운드까지 유지
-            AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.DamageTaken, modType = StatModType.PercentMult, value = 0.5f }, SkillLastStand, 2);
-            Debug.Log($"[LastStand-Passive] {playerName} 최후의 저항 발동 — HP 1 로 버팀");
-            NotifyStatusChanged();
-            BattleFx.AllyHit(this, finalDamage);
-            OnLastStandPassive?.Invoke(this);
-            return finalDamage;
-        }
 
         // [LastStand] HP가 0 이하로 떨어질 때, Human 종의 특성 발동 체크
         if (newHP <= 0 && !_lastStandUsed && HasSpecialEffect("LastStand"))

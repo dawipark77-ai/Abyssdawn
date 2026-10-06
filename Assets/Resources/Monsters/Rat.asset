@@ -32,8 +32,6 @@ MonoBehaviour:
   statusResist: 0.5
   activeSkills:
   - {fileID: 11400000, guid: 7378c286a5934fb8bbbdecb07789d822, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
   passiveSkills:
   - {fileID: 0}
   - {fileID: 0}
@@ -44,7 +42,7 @@ MonoBehaviour:
   rowPreference: 0
   allowedSlots: 15
   minFloor: 1
-  maxFloor: 0
+  maxFloor: 5
   spawnWeight: 1
   expReward: 15
   goldReward: 4

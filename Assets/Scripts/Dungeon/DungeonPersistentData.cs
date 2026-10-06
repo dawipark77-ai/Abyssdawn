@@ -53,6 +53,7 @@ public static class DungeonPersistentData
         floors.Clear();
         danger = 0f;
         playerLightSteps = 0;
+        DungeonFieldStatus.Clear(); // 함정 상태이상
 
         hasPlayerStats = false;
         heroHP = 0;

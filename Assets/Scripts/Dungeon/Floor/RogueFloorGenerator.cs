@@ -446,9 +446,49 @@ public static class RogueFloorGenerator
         Shuffle(trapCells, rng);
         int trapMax = Math.Max(0, cfg.maxTraps);
         int traps = Math.Min(rng.Next(Clamp(cfg.minTraps, 0, trapMax), trapMax + 1), trapCells.Count);
-        for (int i = 0; i < traps; i++)
+
+        // [2026-10-07] 함정 배치 패턴 — 함정의 6할까지는 '노릴 만한 자리'에 먼저 둔다 (나머지는 무작위)
+        //  · 보물상자 지키기: 상자 상하좌우 한 칸 (상자마다 60%)
+        //  · 막다른 길 끝: 통로 끝 칸 (전부 후보)
+        //  · 길목: 문 바로 바깥 통로의 한 칸 더 바깥 (문마다 30%)
+        HashSet<Vector2Int> allowed = new HashSet<Vector2Int>(trapCells);
+        List<Vector2Int> pattern = new List<Vector2Int>();
+        for (int i = 0; i < data.chests.Count; i++)
         {
-            Vector2Int p = trapCells[i];
+            if (rng.NextDouble() >= 0.6) continue;
+            List<Vector2Int> around = new List<Vector2Int>();
+            for (int d = 0; d < 4; d++)
+            {
+                Vector2Int n = data.chests[i] + Dir4[d];
+                if (allowed.Contains(n)) around.Add(n);
+            }
+            if (around.Count > 0) pattern.Add(around[rng.Next(around.Count)]);
+        }
+        foreach (Vector2Int p in trapCells)
+        {
+            if (data.cells[p.x, p.y].terrain != FloorTerrain.Corridor) continue;
+            int open = 0;
+            for (int d = 0; d < 4; d++) if (data.IsWalkable(p + Dir4[d])) open++;
+            if (open == 1) pattern.Add(p);
+        }
+        for (int i = 0; i < data.doors.Count; i++)
+        {
+            if (rng.NextDouble() >= 0.3) continue;
+            Vector2Int outward = data.doors[i].corridorCell + (data.doors[i].corridorCell - data.doors[i].roomCell);
+            if (allowed.Contains(outward)) pattern.Add(outward);
+        }
+        Shuffle(pattern, rng);
+        int patternMax = (traps * 6 + 9) / 10; // 올림
+        List<Vector2Int> order = new List<Vector2Int>();
+        HashSet<Vector2Int> picked = new HashSet<Vector2Int>();
+        for (int i = 0; i < pattern.Count && order.Count < patternMax; i++)
+            if (picked.Add(pattern[i])) order.Add(pattern[i]);
+        for (int i = 0; i < trapCells.Count && order.Count < traps; i++)
+            if (picked.Add(trapCells[i])) order.Add(trapCells[i]);
+
+        for (int i = 0; i < order.Count; i++)
+        {
+            Vector2Int p = order[i];
             data.cells[p.x, p.y].feature = FloorFeature.Trap;
             data.cells[p.x, p.y].trap = PickTrapType(rng, data.floorNumber);
             data.traps.Add(p);
@@ -456,17 +496,24 @@ public static class RogueFloorGenerator
     }
 
     /// <summary>
-    /// 층이 깊을수록 함정 종류가 늘어난다.
-    ///  1층~ 가시(4) / 2층~ 전송(2) / 3층~ 경보(2) / 4층~ 구멍(1)   (괄호 = 가중치)
+    /// 층이 깊을수록 함정 종류가 늘어난다 (괄호 = 가중치). [2026-10-07] 상태이상 함정 추가
+    ///  1층~ 가시(4)·독침(3) / 2층~ 전송(2)·그물(2) / 3층~ 경보(2)·칼날(3) / 4층~ 구멍(1)·실명 가스(2) / 6층~ 화염(2)·낙석(2)
     /// </summary>
     private static FloorTrapType PickTrapType(System.Random rng, int floor)
     {
         List<FloorTrapType> pool = new List<FloorTrapType>();
-        for (int i = 0; i < 4; i++) pool.Add(FloorTrapType.Spike);
-        if (floor >= 2) { pool.Add(FloorTrapType.Teleport); pool.Add(FloorTrapType.Teleport); }
-        if (floor >= 3) { pool.Add(FloorTrapType.Alarm); pool.Add(FloorTrapType.Alarm); }
-        if (floor >= 4) pool.Add(FloorTrapType.Pitfall);
+        AddWeight(pool, FloorTrapType.Spike, 4);
+        AddWeight(pool, FloorTrapType.PoisonDart, 3);
+        if (floor >= 2) { AddWeight(pool, FloorTrapType.Teleport, 2); AddWeight(pool, FloorTrapType.Net, 2); }
+        if (floor >= 3) { AddWeight(pool, FloorTrapType.Alarm, 2); AddWeight(pool, FloorTrapType.Blade, 3); }
+        if (floor >= 4) { AddWeight(pool, FloorTrapType.Pitfall, 1); AddWeight(pool, FloorTrapType.BlindingGas, 2); }
+        if (floor >= 6) { AddWeight(pool, FloorTrapType.FlameVent, 2); AddWeight(pool, FloorTrapType.Rockfall, 2); }
         return pool[rng.Next(pool.Count)];
+    }
+
+    private static void AddWeight(List<FloorTrapType> pool, FloorTrapType type, int weight)
+    {
+        for (int i = 0; i < weight; i++) pool.Add(type);
     }
 
 

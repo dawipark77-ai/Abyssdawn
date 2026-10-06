@@ -375,8 +375,11 @@ namespace AbyssdawnBattle
         [Tooltip("선제 행동 여부 — 켜면 이번 라운드 누구보다 먼저 발동 (예: Brace 버티기 자세)")]
         public bool preemptive = false;
 
-        [Tooltip("쿨다운(턴). 0 = 없음. BattleManager.UseCooldowns 가 꺼져 있으면 적용 안 됨 (2026-10-06 기본 꺼짐)")]
+        [Tooltip("쿨다운(턴). 0 = 없음. BattleManager.UseCooldowns 가 꺼져 있으면 적용 안 됨 (2026-10-07 켬)")]
         [Min(0)] public int cooldownTurns = 0;
+
+        [Tooltip("탐험 스킬 (함정·생존·자원). 전투 스킬 칸(액티브 6·패시브 3)을 쓰지 않고, 배우기만 하면 항상 적용된다")]
+        public bool fieldSkill = false;
 
         [Tooltip("한 전투에서 쓸 수 있는 횟수. 0 = 무제한 (쿨다운과 별개로 항상 적용)")]
         [Min(0)] public int usesPerBattle = 0;

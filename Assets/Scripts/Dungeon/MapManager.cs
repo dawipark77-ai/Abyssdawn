@@ -143,10 +143,11 @@ public class MapManager : MonoBehaviour
         bool restoring = DungeonPersistentData.hasSavedState;
         if (!restoring)
         {
-            // 새 탐험: 층 기억·위험도·빛 초기화
+            // 새 탐험: 층 기억·위험도·빛·함정 상태이상 초기화
             DungeonPersistentData.floors.Clear();
             DungeonPersistentData.danger = 0f;
             DungeonPersistentData.playerLightSteps = 0;
+            DungeonFieldStatus.Clear();
         }
 
         _player = FindFirstObjectByType<DungeonGridPlayer>();
@@ -237,7 +238,9 @@ public class MapManager : MonoBehaviour
 
         TickWalkRegen();
         TickPlayerLight();
+        TickFieldStatus();
         RevealAt(pos);
+        PassiveTrapSense(pos); // 탐험 스킬: 함정 감지
         FloorRoom room = FloorData.GetRoomAt(pos);
         if (room != null && !room.isGone && FloorState.enteredRooms.Add(room.id))
         {
@@ -283,14 +286,17 @@ public class MapManager : MonoBehaviour
         bool litRoom = room != null && room.lit;
         bool carryingLight = DungeonPersistentData.playerLightSteps > 0;
         if (litRoom || carryingLight) r += lightSightBonus;
+        if (DungeonFieldStatus.Has(AbyssdawnBattle.StatusEffectType.Blind)) r -= DungeonFieldStatus.BlindSightPenalty; // 실명 가스
         return Mathf.Max(1, r);
     }
 
     /// <summary>
     /// 플레이어가 steps 걸음 동안 빛을 든다 (시야 +2). 횃불·새벽불 등 빛 아이템이 정해지면 여기에 연결.
+    /// 탐험 스킬 '생존 전문가'가 있으면 ×1.5.
     /// </summary>
     public void AddPlayerLight(int steps)
     {
+        if (steps > 0 && FieldSkills.Has(FieldSkills.Survivalist)) steps = Mathf.RoundToInt(steps * FieldSkills.SurvivalistLightMult);
         DungeonPersistentData.playerLightSteps = Mathf.Max(0, DungeonPersistentData.playerLightSteps + steps);
         if (_player != null) RevealAt(_player.gridPos);
         Debug.Log($"[MapManager] 빛 {DungeonPersistentData.playerLightSteps}걸음 (시야 {SightRadiusAt(_player != null ? _player.gridPos : Vector2Int.zero)}칸)");
@@ -370,7 +376,105 @@ public class MapManager : MonoBehaviour
     {
         TickWalkRegen();
         TickPlayerLight();
+        TickFieldStatus();
     }
+
+    /// <summary>함정 상태이상(독·출혈·화상 등) 한 걸음 진행. 피해가 있으면 화면이 살짝 붉어지고 알림.</summary>
+    private void TickFieldStatus()
+    {
+        if (!DungeonFieldStatus.Any) return;
+        string msg = DungeonFieldStatus.TickStep(GetHeroStats());
+        if (string.IsNullOrEmpty(msg)) return;
+        if (msg.Contains(" -")) _hud.Flash(new Color(0.6f, 0.1f, 0.4f, 0.3f), 0.25f);
+        Toast(msg);
+    }
+
+    /// <summary>탐험 스킬 '함정 감지': 걸을 때 상하좌우·대각 1칸의 숨은 함정을 25% 확률로 알아챈다 (함정마다 따로).</summary>
+    private void PassiveTrapSense(Vector2Int pos)
+    {
+        if (FloorData == null || FloorState == null || !FieldSkills.Has(FieldSkills.TrapDetection)) return;
+        var found = new List<Vector2Int>();
+        foreach (Vector2Int p in FloorData.traps)
+        {
+            if (FloorState.knownTraps.Contains(p) || p == pos) continue;
+            if (Mathf.Abs(p.x - pos.x) > 1 || Mathf.Abs(p.y - pos.y) > 1) continue;
+            if (Random.value < FieldSkills.TrapDetectPassiveChance) found.Add(p);
+        }
+        if (found.Count == 0) return;
+        RevealFound(found);
+        if (_player != null) _player.InterruptHold();
+        Toast(found.Count == 1
+            ? $"<color=#FF8A70>You sense a {TrapLabel(FloorData.GetCell(found[0]).trap)} nearby!</color>"
+            : $"<color=#FF8A70>You sense {found.Count} traps nearby!</color>");
+    }
+
+    // ─────────────────────────────────────────
+    // 걸음 직전 — 함정 감지(멈춤) · 함정 해제 (DungeonGridPlayer 가 이동 직전에 묻는다)
+    // ─────────────────────────────────────────
+
+    /// <summary>
+    /// 플레이어가 next 칸으로 들어가려 할 때. 이동을 막았으면 true.
+    ///  - 숨은 함정 + '함정 감지': 50% 확률로 직전에 알아채고 멈춘다 (함정이 지도에 드러남)
+    ///  - 아는(작동 중인) 함정 + '함정 해제': 해제 / 그냥 지나가기 / 물러서기 를 묻는다. 지나가기를 고르면 step() 으로 이동
+    /// </summary>
+    public bool BeforeStep(Vector2Int next, System.Action step)
+    {
+        if (FloorData == null || FloorState == null) return false;
+        FloorCell cell = FloorData.GetCell(next);
+        if (cell.feature != FloorFeature.Trap || !FloorState.IsTrapArmed(next, cell.trap)) return false;
+
+        bool known = FloorState.knownTraps.Contains(next);
+        if (!known)
+        {
+            if (!FieldSkills.Has(FieldSkills.TrapDetection) || Random.value >= FieldSkills.TrapDetectStopChance) return false;
+            FloorState.knownTraps.Add(next);
+            if (automapRenderer != null) automapRenderer.Rebuild();
+            Toast($"<color=#FF8A70>You stop short — a hidden {TrapLabel(cell.trap)}!</color>");
+            return true;
+        }
+
+        if (!FieldSkills.Has(FieldSkills.TrapDisarm)) return false;
+        int chance = Mathf.RoundToInt(DisarmChance() * 100f);
+        _hud.Choose($"A <b>{TrapLabel(cell.trap)}</b> lies ahead.\n<size=80%><color=#AAAAAA>If disarming fails, it goes off (half damage).</color></size>",
+            new[] { $"Disarm <color=#9FC8FF>({chance}%)</color>", "Walk over it" }, "Back", false, choice =>
+            {
+                if (choice == 0) TryDisarm(next);
+                else if (choice == 1 && step != null) step();
+            });
+        return true;
+    }
+
+    private float DisarmChance()
+    {
+        PlayerStats hero = GetHeroStats();
+        float agi = hero != null ? hero.Agility : 0f;
+        return Mathf.Clamp(FieldSkills.DisarmBaseChance + agi * FieldSkills.DisarmPerAgi, 0f, FieldSkills.DisarmMaxChance);
+    }
+
+    /// <summary>함정 해제 시도. 성공: 함정 제거 + 함정 부품 1개. 실패: 그 자리에서 발동 (피해 절반).</summary>
+    private void TryDisarm(Vector2Int pos)
+    {
+        FloorCell cell = FloorData.GetCell(pos);
+        if (Random.value < DisarmChance())
+        {
+            FloorState.disarmedTraps.Add(pos);
+            if (automapRenderer != null) automapRenderer.Rebuild();
+            string loot = "";
+            var parts = Resources.Load<ConsumableItemSO>(TrapPartsResource);
+            if (parts != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(parts, 1) > 0)
+                loot = $"\n<size=80%>Salvaged <color=#FFD24A>{parts.itemName}</color>.</size>";
+            Toast($"<color=#9FFF9F>You disarm the {TrapLabel(cell.trap)}.</color>{loot}");
+            Debug.Log($"[MapManager] 함정 해제 성공 {pos}: {cell.trap}");
+        }
+        else
+        {
+            Toast("<color=#FF6B6B>Your hand slips!</color>");
+            Debug.Log($"[MapManager] 함정 해제 실패 {pos}: {cell.trap}");
+            TriggerTrap(pos, cell.trap, FieldSkills.DisarmFailDamageMult, true);
+        }
+    }
+
+    public const string TrapPartsResource = "Item_Equipments/Items/Trap_Parts";
 
     public string TrapName(Vector2Int pos)
     {
@@ -476,6 +580,7 @@ public class MapManager : MonoBehaviour
     private void RestAtInn()
     {
         PlayerStats hero = GetHeroStats();
+        DungeonFieldStatus.Clear(); // 함정 상태이상도 낫는다
         if (hero != null)
         {
             hero.RemoveAllStatusEffects();
@@ -657,21 +762,106 @@ public class MapManager : MonoBehaviour
     // 함정
     // ─────────────────────────────────────────
 
-    /// <summary>함정 발동. 다 쓴 함정(가시 외)은 아무 일도 없다. 무슨 일이 있었으면 true.</summary>
+    /// <summary>화면 표시용 함정 이름.</summary>
+    public static string TrapLabel(FloorTrapType type)
+    {
+        switch (type)
+        {
+            case FloorTrapType.Spike: return "spike trap";
+            case FloorTrapType.Teleport: return "teleport trap";
+            case FloorTrapType.Alarm: return "alarm trap";
+            case FloorTrapType.Pitfall: return "pitfall";
+            case FloorTrapType.PoisonDart: return "poison dart trap";
+            case FloorTrapType.Blade: return "blade trap";
+            case FloorTrapType.FlameVent: return "flame vent";
+            case FloorTrapType.BlindingGas: return "gas trap";
+            case FloorTrapType.Rockfall: return "rockfall trap";
+            case FloorTrapType.Net: return "net trap";
+            default: return "trap";
+        }
+    }
+
+    // [2026-10-07] 함정 피해 (최대 HP 비율). 가시는 층마다 +1% (최대 25%)
+    [Header("Traps (2026-10-07)")]
+    [Range(0f, 1f)] public float poisonDartDamagePercent = 0.05f;
+    [Range(0f, 1f)] public float bladeDamagePercent = 0.10f;
+    [Range(0f, 1f)] public float flameDamagePercent = 0.08f;
+    [Range(0f, 1f)] public float rockfallDamagePercent = 0.18f;
+    [Tooltip("그물 함정: 위험도 게이지 상승량 (0~1). 가득 차면 즉시 전투")]
+    [Range(0f, 1f)] public float netDangerAdd = 0.35f;
+
+    private float SpikePercent => Mathf.Min(0.25f, spikeDamagePercent + 0.01f * Mathf.Max(0, FloorData.floorNumber - 1));
+
+    /// <summary>함정 발동. 해제됐거나 다 쓴 함정은 아무 일도 없다. 무슨 일이 있었으면 true.</summary>
     private bool TriggerTrap(Vector2Int pos, FloorTrapType type)
     {
-        bool known = FloorState.knownTraps.Contains(pos);
-        if (known && AutomapRenderer.IsTrapSpent(type)) return false;
+        return TriggerTrap(pos, type, 1f, false);
+    }
+
+    /// <summary>damageMult: 피해 배율 (해제 실패 = 0.5). fromDisarm: 해제 실패로 발동 (제자리에서 — 이동 없음).</summary>
+    private bool TriggerTrap(Vector2Int pos, FloorTrapType type, float damageMult, bool fromDisarm)
+    {
+        if (!FloorState.IsTrapArmed(pos, type)) return false;
 
         if (_player != null) _player.InterruptHold();
         FloorState.knownTraps.Add(pos);
+        FloorState.sprungTraps.Add(pos);
         if (automapRenderer != null) automapRenderer.Rebuild();
-        Debug.Log($"[MapManager] B{FloorData.floorNumber} 함정 발동 {pos}: {type}");
+        Debug.Log($"[MapManager] B{FloorData.floorNumber} 함정 발동 {pos}: {type}{(fromDisarm ? " (해제 실패)" : "")}");
 
         switch (type)
         {
+            case FloorTrapType.PoisonDart:
+            {
+                int dmg = DamageHero(poisonDartDamagePercent * damageMult);
+                DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Poison);
+                _hud.Flash(new Color(0.3f, 0.9f, 0.2f, 0.45f));
+                Toast($"<color=#7CFC7C>A poison dart!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#7CFC7C>poisoned</color>. (Antidote cures it)</size>");
+                return true;
+            }
+            case FloorTrapType.Blade:
+            {
+                int dmg = DamageHero(bladeDamagePercent * damageMult);
+                DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Bleed);
+                _hud.Flash(new Color(1f, 0.05f, 0.05f, 0.55f));
+                Toast($"<color=#FF5A5A>Hidden blades!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#FF5A5A>bleeding</color>. (Bandage stops it)</size>");
+                return true;
+            }
+            case FloorTrapType.FlameVent:
+            {
+                int dmg = DamageHero(flameDamagePercent * damageMult);
+                DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Ignite);
+                _hud.Flash(new Color(1f, 0.45f, 0f, 0.55f));
+                Toast($"<color=#FF9A3C>A jet of flame!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#FF9A3C>burning</color>. (Coolant puts it out)</size>");
+                return true;
+            }
+            case FloorTrapType.BlindingGas:
+            {
+                DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Blind);
+                if (_player != null) RevealAt(_player.gridPos); // 시야가 바로 좁아진다
+                _hud.Flash(new Color(0.55f, 0.55f, 0.75f, 0.6f), 0.6f);
+                Toast("<color=#B0B0FF>Choking gas!</color>\n<size=80%>Your eyes sting — you can barely see. (Purification Water clears it)</size>");
+                return true;
+            }
+            case FloorTrapType.Rockfall:
+            {
+                int dmg = DamageHero(rockfallDamagePercent * damageMult);
+                DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Stun);
+                _hud.Flash(new Color(0.5f, 0.4f, 0.3f, 0.7f), 0.5f);
+                Toast($"<color=#D9C2A0>Rocks crash down!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#FFD700>concussed</color> — you'll be stunned when the next fight starts.</size>");
+                return true;
+            }
+            case FloorTrapType.Net:
+            {
+                float add = netDangerAdd * damageMult;
+                _hud.Flash(new Color(0.9f, 0.85f, 0.5f, 0.45f));
+                Toast("<color=#E6D98C>A net drops on you!</color>\n<size=80%>You struggle free... something heard that.</size>");
+                if (DungeonEncounter.Instance != null) DungeonEncounter.Instance.AddDanger(add);
+                return true;
+            }
             case FloorTrapType.Teleport:
             {
+                if (fromDisarm) { Toast("<color=#D19BFF>The rune flares and fizzles out.</color>"); return true; }
                 _hud.Flash(new Color(0.75f, 0.4f, 1f, 0.5f));
                 FloorRoom here = FloorData.GetRoomAt(pos);
                 Vector2Int target = RandomRoomCell(here != null ? here.id : -1);
@@ -688,6 +878,7 @@ public class MapManager : MonoBehaviour
                 return true;
             case FloorTrapType.Pitfall:
             {
+                if (fromDisarm) { Toast("<color=#FF5A8C>The floor gives way — you leap back just in time.</color>"); return true; }
                 int next = FloorData.floorNumber + 1;
                 int dmg = DamageHero(pitfallDamagePercent);
                 _hud.Flash(new Color(0f, 0f, 0f, 0.8f), 0.6f);
@@ -697,7 +888,7 @@ public class MapManager : MonoBehaviour
             }
             default: // Spike
             {
-                int dmg = DamageHero(spikeDamagePercent);
+                int dmg = DamageHero(SpikePercent * damageMult);
                 _hud.Flash(new Color(1f, 0.15f, 0.1f, 0.5f));
                 Toast($"<color=#FF6B6B>Spike trap! -{dmg} HP</color>");
                 return true;

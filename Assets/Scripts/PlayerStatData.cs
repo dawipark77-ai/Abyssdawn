@@ -117,7 +117,7 @@ public class PlayerStatData : ScriptableObject
     /// </summary>
     public bool AutoEquipIfFree(AbyssdawnBattle.SkillData skill)
     {
-        if (skill == null) return false;
+        if (skill == null || skill.fieldSkill) return false; // 탐험 스킬은 칸을 쓰지 않는다
         bool passive = skill.IsPassive;
         if (passive) { if (equippedPassives == null) equippedPassives = new List<AbyssdawnBattle.SkillData>(); }
         else if (equippedSkills == null) equippedSkills = new List<AbyssdawnBattle.SkillData>();
@@ -135,6 +135,41 @@ public class PlayerStatData : ScriptableObject
             Debug.Log($"[PlayerStatData] '{skill.skillName}' 자동 장착 → {(passive ? "패시브" : "액티브")} 슬롯 {i + 1}");
             return true;
         }
+        return false;
+    }
+
+    /// <summary>skill 이 들어갈 칸 목록 (액티브 6 / 패시브 3, 빈 칸은 null). 탐험 스킬이면 null.</summary>
+    public List<AbyssdawnBattle.SkillData> SlotListFor(AbyssdawnBattle.SkillData skill)
+    {
+        if (skill == null || skill.fieldSkill) return null;
+        bool passive = skill.IsPassive;
+        if (passive) { if (equippedPassives == null) equippedPassives = new List<AbyssdawnBattle.SkillData>(); }
+        else if (equippedSkills == null) equippedSkills = new List<AbyssdawnBattle.SkillData>();
+        var list = passive ? equippedPassives : equippedSkills;
+        int slots = passive ? 3 : 6;
+        while (list.Count < slots) list.Add(null);
+        return list;
+    }
+
+    /// <summary>index 칸에 skill 장착 (원래 있던 스킬은 칸에서 빠지고 배운 목록에는 남는다).</summary>
+    public void EquipAt(AbyssdawnBattle.SkillData skill, int index)
+    {
+        var list = SlotListFor(skill);
+        if (list == null || index < 0 || index >= list.Count) return;
+        int already = list.IndexOf(skill);
+        if (already >= 0) list[already] = null;
+        list[index] = skill;
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        Debug.Log($"[PlayerStatData] '{skill.skillName}' → {(skill.IsPassive ? "패시브" : "액티브")} 슬롯 {index + 1} 교체 장착");
+    }
+
+    /// <summary>탐험 스킬(fieldSkill)을 배웠는지 — 이름으로.</summary>
+    public bool HasFieldSkill(string skillName)
+    {
+        if (learnedSkills == null) return false;
+        foreach (var s in learnedSkills) if (s != null && s.fieldSkill && s.skillName == skillName) return true;
         return false;
     }
 

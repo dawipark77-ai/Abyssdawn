@@ -51,6 +51,9 @@ public class DungeonHud : MonoBehaviour
     private RectTransform _floorBg;
     private Image _dangerBg, _dangerFill;
     private float _danger;
+    private TextMeshProUGUI _dangerPercent;   // 위험 예지(탐험 스킬)가 있을 때만
+    private TextMeshProUGUI _fieldStatusText; // 함정 상태이상 (독 21 · 실명 30 …)
+    private float _nextSkillCheck;
 
     private CanvasGroup _toastGroup;
     private TextMeshProUGUI _toastText;
@@ -64,7 +67,14 @@ public class DungeonHud : MonoBehaviour
     private TextMeshProUGUI _dialogText, _yesText, _noText;
     private Action<bool> _dialogCallback;
 
-    public bool IsDialogOpen => (_dialog != null && _dialog.activeSelf) || IsLevelUpOpen;
+    public bool IsDialogOpen => (_dialog != null && _dialog.activeSelf) || IsLevelUpOpen || IsSlotPickOpen;
+
+    // ── 스킬 칸 선택 (칸이 다 찼을 때 교체) ──
+    private GameObject _slotPick;
+    private TextMeshProUGUI _slotPickTitle;
+    private readonly List<GameObject> _slotPickButtons = new List<GameObject>();
+    private Action<int> _slotPickCallback;
+    public bool IsSlotPickOpen => _slotPick != null && _slotPick.activeSelf;
 
     // ── 레벨업 선택 화면 ──
     private GameObject _levelUp;
@@ -98,11 +108,14 @@ public class DungeonHud : MonoBehaviour
         Build();
         DungeonEncounter.OnDangerChanged += SetDanger;
         SetDanger(DungeonEncounter.Danger);
+        DungeonFieldStatus.OnChanged += RefreshFieldStatus;
+        RefreshFieldStatus();
     }
 
     private void OnDestroy()
     {
         DungeonEncounter.OnDangerChanged -= SetDanger;
+        DungeonFieldStatus.OnChanged -= RefreshFieldStatus;
         if (_instance == this) _instance = null;
     }
 
@@ -117,6 +130,9 @@ public class DungeonHud : MonoBehaviour
         }
 
         CheckLevelUp();
+
+        // 위험 예지를 배웠는지 가끔 확인 (배운 직후 % 표시가 켜지게)
+        if (Time.unscaledTime >= _nextSkillCheck) { _nextSkillCheck = Time.unscaledTime + 1f; RefreshDangerPercent(); }
 
         if (IsShopOpen && (_dialog == null || !_dialog.activeSelf) && Input.GetKeyDown(KeyCode.Escape)) { CloseShop(); return; }
         if (IsTownOpen && (_dialog == null || !_dialog.activeSelf) && Input.GetKeyDown(KeyCode.Escape)) { CloseTown(); return; }
@@ -303,9 +319,27 @@ public class DungeonHud : MonoBehaviour
         if (_dangerBg != null) _dangerBg.gameObject.SetActive(visible);
     }
 
+    /// <summary>함정 상태이상 표시 갱신 (위험도 게이지 아래 한 줄).</summary>
+    public void RefreshFieldStatus()
+    {
+        if (_fieldStatusText == null) return;
+        string s = DungeonFieldStatus.Summary();
+        _fieldStatusText.text = s;
+        _fieldStatusText.gameObject.SetActive(!string.IsNullOrEmpty(s));
+    }
+
+    private void RefreshDangerPercent()
+    {
+        if (_dangerPercent == null) return;
+        bool show = _dangerBg != null && _dangerBg.gameObject.activeSelf && FieldSkills.Has(FieldSkills.DangerSense);
+        _dangerPercent.gameObject.SetActive(show);
+        if (show) _dangerPercent.text = Mathf.RoundToInt(_danger * 100f) + "%";
+    }
+
     public void SetDanger(float danger)
     {
         _danger = Mathf.Clamp01(danger);
+        RefreshDangerPercent();
         if (_dangerFill == null) return;
         _dangerFill.rectTransform.anchorMax = new Vector2(_danger, 1f);
         _dangerFill.color = _danger < 0.5f ? DangerSafe : _danger < 0.8f ? DangerWarn : DangerHigh;
@@ -352,6 +386,85 @@ public class DungeonHud : MonoBehaviour
         Action<bool> cb = _dialogCallback;
         _dialogCallback = null;
         if (cb != null) cb(result);
+    }
+
+    /// <summary>
+    /// 스킬 칸 선택창. 칸마다 버튼(지금 들어 있는 스킬 이름, 빈 칸은 "Empty") + "Later".
+    /// 고른 칸 번호(0부터)로 onPick 호출, Later/Esc 는 -1. 열려 있는 동안 플레이어 이동 잠금.
+    /// </summary>
+    public void ChooseSkillSlot(string title, IList<string> slotLabels, Action<int> onPick)
+    {
+        Choose(title, slotLabels, "Later", true, onPick);
+    }
+
+    /// <summary>여러 선택지 창 (2열 버튼 + 맨 아래 취소). numbered 면 버튼 앞에 번호. 취소 = -1.</summary>
+    public void Choose(string title, IList<string> slotLabels, string cancelLabel, bool numbered, Action<int> onPick)
+    {
+        if (_slotPick == null) BuildSlotPick();
+        CloseDialog(false);
+        foreach (var b in _slotPickButtons) { b.SetActive(false); Destroy(b); } // Destroy 는 프레임 끝 — 그 전에 바로 숨김
+        _slotPickButtons.Clear();
+
+        _slotPickTitle.text = title;
+        RectTransform panel = (RectTransform)_slotPick.transform.Find("Panel");
+        int count = slotLabels != null ? slotLabels.Count : 0;
+        int rows = (count + 1) / 2;
+        // 위: 제목 영역 / 가운데: 2열 버튼 / 아래: 취소 버튼
+        const float topArea = 250f, btnH = 92f, gapY = 14f, bottomArea = 170f;
+        float panelH = topArea + rows * btnH + Mathf.Max(0, rows - 1) * gapY + bottomArea;
+        panel.sizeDelta = new Vector2(1000f, panelH);
+
+        for (int i = 0; i < count; i++)
+        {
+            int index = i;
+            int col = i % 2, row = i / 2;
+            float x = col == 0 ? -225f : 225f;
+            float y = panelH - topArea - btnH - row * (btnH + gapY); // 버튼 아래 끝 (아래 기준 좌표)
+            TextMeshProUGUI label = CreateButton(panel, $"Slot{i + 1}", new Vector2(x, y), new Color(0.16f, 0.16f, 0.2f, 0.95f), Color.white, () => CloseSlotPick(index));
+            ((RectTransform)label.transform.parent).sizeDelta = new Vector2(430f, 92f);
+            label.fontSize = 32;
+            label.fontStyle = FontStyles.Normal;
+            label.text = numbered ? $"<color=#C9A44C>{i + 1}</color>  {slotLabels[i]}" : slotLabels[i];
+            _slotPickButtons.Add(label.transform.parent.gameObject);
+        }
+        TextMeshProUGUI later = CreateButton(panel, "Cancel", new Vector2(0f, 40f), new Color(0.1f, 0.1f, 0.1f, 0.85f), new Color(0.85f, 0.85f, 0.85f), () => CloseSlotPick(-1));
+        later.text = cancelLabel;
+        _slotPickButtons.Add(later.transform.parent.gameObject);
+
+        _slotPickCallback = onPick;
+        _slotPick.SetActive(true);
+        _slotPick.transform.SetAsLastSibling();
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.LockInput(this);
+    }
+
+    private void CloseSlotPick(int index)
+    {
+        if (_slotPick == null || !_slotPick.activeSelf) return;
+        _slotPick.SetActive(false);
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.UnlockInput(this);
+        Action<int> cb = _slotPickCallback;
+        _slotPickCallback = null;
+        if (cb != null) cb(index);
+    }
+
+    private void BuildSlotPick()
+    {
+        Image blocker = CreateImage(_overlayRoot, "SkillSlotPick", new Color(0f, 0f, 0f, 0.55f), true);
+        Stretch(blocker.rectTransform);
+        _slotPick = blocker.gameObject;
+        Image panel = CreatePopupPanel(blocker.rectTransform, "Panel", true);
+        SetAnchor(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 600f));
+        panel.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        _slotPickTitle = CreateText(panel.rectTransform, "Title", 38, FontStyles.Normal, TextAlignmentOptions.Center);
+        RectTransform t = _slotPickTitle.rectTransform;
+        t.anchorMin = new Vector2(0f, 1f);
+        t.anchorMax = new Vector2(1f, 1f);
+        t.pivot = new Vector2(0.5f, 1f);
+        t.anchoredPosition = new Vector2(0f, -50f);
+        t.sizeDelta = new Vector2(-100f, 185f);
+        _slotPick.SetActive(false);
     }
 
     // ─────────────────────────────────────────
@@ -425,6 +538,23 @@ public class DungeonHud : MonoBehaviour
         fill.anchorMax = new Vector2(0f, 1f);
         fill.offsetMin = new Vector2(2f, 2f);
         fill.offsetMax = new Vector2(-2f, -2f);
+
+        // 위험도 % (위험 예지) — 게이지 오른쪽
+        _dangerPercent = CreateText(_dangerBg.rectTransform, "Percent", 26, FontStyles.Bold, TextAlignmentOptions.Left);
+        RectTransform pr = _dangerPercent.rectTransform;
+        pr.anchorMin = new Vector2(1f, 0.5f);
+        pr.anchorMax = new Vector2(1f, 0.5f);
+        pr.pivot = new Vector2(0f, 0.5f);
+        pr.anchoredPosition = new Vector2(10f, 0f);
+        pr.sizeDelta = new Vector2(90f, 36f);
+        _dangerPercent.textWrappingMode = TextWrappingModes.NoWrap;
+        _dangerPercent.gameObject.SetActive(false);
+
+        // 함정 상태이상 한 줄 — 게이지 아래
+        _fieldStatusText = CreateText(_infoRoot, "FieldStatus", 30, FontStyles.Bold, TextAlignmentOptions.Center);
+        SetAnchor(_fieldStatusText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -152f), new Vector2(900f, 44f));
+        _fieldStatusText.textWrappingMode = TextWrappingModes.NoWrap;
+        _fieldStatusText.gameObject.SetActive(false);
 
         // 화면 번쩍임
         _flash = CreateImage(_overlayRoot, "Flash", Color.clear, false);

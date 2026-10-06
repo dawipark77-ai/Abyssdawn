@@ -168,6 +168,20 @@ public class DungeonGridPlayer : MonoBehaviour
             return;
         }
 
+        // 함정 직전 (탐험 스킬 — 함정 감지 멈춤 / 함정 해제 선택창). 막혔으면 제자리
+        if (mapManager != null && mapManager.BeforeStep(nextPos, () => CompleteStep(nextPos)))
+        {
+            InterruptHold();
+            UpdateView();
+            return;
+        }
+
+        CompleteStep(nextPos);
+    }
+
+    /// <summary>실제로 한 칸 들어간다 (함정 해제 창에서 "그냥 지나가기"를 골랐을 때도 여기로).</summary>
+    private void CompleteStep(Vector2Int nextPos)
+    {
         gridPos = nextPos;
         StartSlide();
         UpdateView();

@@ -10,16 +10,31 @@ using UnityEngine;
 /// </summary>
 public static class TownShop
 {
-    /// <summary>상점 진열 (Resources 경로). 2026-10-04: 포션·마나 포션·해독약·붕대·쿨런트 + 조잡한 검.</summary>
+    /// <summary>상점 진열 (Resources 경로). 2026-10-04: 포션·마나 포션·해독약·붕대·쿨런트 + 조잡한 검.
+    /// 2026-10-07: 약초·정화수·숫돌·각성제·연막탄 추가 (함정 상태이상 대비·전투 보조 — 골드 소모처).</summary>
     public static readonly string[] Catalog =
     {
         "Item_Equipments/Items/HP_Potion",
+        "Item_Equipments/Items/Medicinal_Herb",
         "Item_Equipments/Items/Mana_Potion",
         "Item_Equipments/Items/Antidote",
         "Item_Equipments/Items/Bandage",
         "Item_Equipments/Items/Coolant",
+        "Item_Equipments/Items/Purification_Water",
+        "Item_Equipments/Items/Whetstone",
+        "Item_Equipments/Items/Stimulant",
+        "Item_Equipments/Items/Smoke_Bomb",
         "Item_Equipments/Equipments/Crude/CrudeSword",
     };
+
+    /// <summary>탐험 스킬 '자원 관리': 사는 값 -10%, 파는 값 +10%.</summary>
+    public const float ResourceBuyMult = 0.9f, ResourceSellMult = 1.1f;
+
+    public static bool HasResourceManagement()
+    {
+        var d = HeroData();
+        return d != null && d.HasFieldSkill(FieldSkills.ResourceManagement);
+    }
 
     public class Entry
     {
@@ -27,8 +42,10 @@ public static class TownShop
         public ConsumableItemSO consumable;
         public EquipmentData equipment;
         public string Name { get { return consumable != null ? consumable.itemName : equipment != null ? equipment.equipmentName : asset.name; } }
-        public int BuyPrice { get { return consumable != null ? consumable.buyPrice : equipment != null ? equipment.buyPrice : 0; } }
-        public int SellPrice { get { return consumable != null ? consumable.sellPrice : equipment != null ? equipment.sellPrice : 0; } }
+        public int BaseBuyPrice { get { return consumable != null ? consumable.buyPrice : equipment != null ? equipment.buyPrice : 0; } }
+        public int BaseSellPrice { get { return consumable != null ? consumable.sellPrice : equipment != null ? equipment.sellPrice : 0; } }
+        public int BuyPrice { get { int p = BaseBuyPrice; return p > 0 && HasResourceManagement() ? Mathf.Max(1, Mathf.FloorToInt(p * ResourceBuyMult)) : p; } }
+        public int SellPrice { get { int p = BaseSellPrice; return p > 0 && HasResourceManagement() ? Mathf.CeilToInt(p * ResourceSellMult) : p; } }
         public Sprite Icon { get { return consumable != null ? consumable.icon : equipment != null ? (equipment.flatIcon != null ? equipment.flatIcon : equipment.equipmentIcon) : null; } }
     }
 
@@ -40,7 +57,7 @@ public static class TownShop
             var so = Resources.Load<ScriptableObject>(path);
             if (so == null) { Debug.LogWarning($"[TownShop] 진열 품목 'Resources/{path}' 을(를) 찾지 못했습니다."); continue; }
             var e = new Entry { asset = so, consumable = so as ConsumableItemSO, equipment = so as EquipmentData };
-            if (e.BuyPrice > 0) list.Add(e);
+            if (e.BaseBuyPrice > 0) list.Add(e);
         }
         return list;
     }
@@ -72,8 +89,18 @@ public static class TownShop
             {
                 var cures = new List<string>();
                 foreach (var t in c.cureTypes) cures.Add(t.ToString());
-                parts.Add("Cures " + string.Join(", ", cures.ToArray()));
+                parts.Add(cures.Count >= 5 ? "Cures all ailments" : "Cures " + string.Join(", ", cures.ToArray()));
             }
+            if (c.buffDuration > 0)
+            {
+                if (c.attackBuffPercent > 0f) parts.Add("ATK +" + Mathf.RoundToInt(c.attackBuffPercent * 100f) + "%");
+                if (c.agilityBuff != 0) parts.Add("Speed +" + c.agilityBuff);
+                if (c.evasionBuff > 0f) parts.Add("Evasion +" + Mathf.RoundToInt(c.evasionBuff * 100f) + "%");
+                if (c.escapeChanceBuff > 0f) parts.Add("Escape +" + Mathf.RoundToInt(c.escapeChanceBuff * 100f) + "%");
+                parts.Add(c.buffDuration + " turns");
+            }
+            if (c.mpPenaltyPercent > 0f) parts.Add("MP -" + Mathf.RoundToInt(c.mpPenaltyPercent * 100f) + "%");
+            if (!c.usableOnMap) parts.Add("Battle only");
         }
         else if (e.equipment != null)
         {

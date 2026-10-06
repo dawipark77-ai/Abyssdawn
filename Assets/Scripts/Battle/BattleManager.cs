@@ -1572,18 +1572,6 @@ public class BattleManager : MonoBehaviour
     void OnEnable()
     {
         ForceDisableUIPanels();
-        PlayerStats.OnLastStandPassive += HandleLastStandPassive;
-    }
-
-    void OnDisable()
-    {
-        PlayerStats.OnLastStandPassive -= HandleLastStandPassive;
-    }
-
-    private void HandleLastStandPassive(PlayerStats who)
-    {
-        if (who == null) return;
-        AddMessage($"<color=#FFD24A>{who.playerName} refuses to fall!</color> (Last Stand — 1 HP, damage taken -50% this turn)");
     }
 
     void Start()
@@ -2722,12 +2710,39 @@ public class BattleManager : MonoBehaviour
         // 슬롯 초기화 (BattleLine 기반)
         InitializeBattleLines();
 
+        // 던전에서 이어지는 것 (함정 상태이상 · 위험 예지)
+        ApplyDungeonCarryOver();
+
         // 턴 순서 구성
         BuildTurnOrder();
 
         // 커맨드 페이즈 시작
         StartCommandPhase();
     }
+
+    /// <summary>
+    /// [2026-10-07] 전투 시작 때 던전 쪽 상태를 주인공에게 건다.
+    ///  - 함정 상태이상(독·출혈·화상·실명·충격) → 전투 상태이상 (DungeonFieldStatus)
+    ///  - 탐험 스킬 '위험 예지' → 첫 턴 회피 +20%
+    /// </summary>
+    private void ApplyDungeonCarryOver()
+    {
+        PlayerStats hero = null;
+        foreach (var m in activePartyMembers) if (m != null && !m.IsRecruitedCompanion) { hero = m; break; }
+        if (hero == null) return;
+
+        var carried = DungeonFieldStatus.ApplyToBattle(hero);
+        if (carried.Count > 0)
+            AddMessage($"<color=#FF9F6B>{hero.playerName} is still suffering: {string.Join(", ", carried)}.</color>");
+
+        if (hero.statData != null && hero.statData.HasFieldSkill(FieldSkills.DangerSense))
+        {
+            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = FieldSkills.DangerSenseEvasion }, DangerSenseSource, 1);
+            AddMessage($"<color=#9FC8FF>{hero.playerName} sensed them coming! Evasion +{FieldSkills.DangerSenseEvasion * 100f:0}% this turn.</color>");
+        }
+    }
+
+    private static readonly object DangerSenseSource = new object();
 
     /// <summary>
     /// 플레이어 파티와 적을 BattleLine에 슬롯 순서대로 배치합니다.
@@ -2951,7 +2966,8 @@ public class BattleManager : MonoBehaviour
     /// 전투 시작 시 그 몬스터를 쓴다 (전환 연출 실루엣과 실제 전투가 같게). static — 전투 씬 밖에서도 호출 가능.
     /// </summary>
     /// <summary>지금 등장시키는 몬스터 (EXP·골드를 정한 것만). 새 몬스터 수치가 정해지면 여기에 이름을 추가.</summary>
-    public static readonly string[] BetaSpawnPool = { "Rat", "Bat" };
+    // 쥐 B1~5 · 박쥐 B2~8 · 고블린 B3~ (2026-10-06) · 슬라임 B4~ · 해골 B6~ (2026-10-07)
+    public static readonly string[] BetaSpawnPool = { "Rat", "Bat", "Goblin", "Slime", "Skeleton" };
 
     public static MonsterSO[] LoadMonsterSOsForFloor(int floor)
     {
@@ -3546,6 +3562,7 @@ public class BattleManager : MonoBehaviour
         // 드퀘·진여신전생식: 적·아군 모두 행동을 정한 뒤 동시에 시작, 순서는 AGI × 랜덤(0.8~1.2).
         // AGI 차이가 크면(10 vs 3) 항상 높은 쪽이 먼저, 작으면(10 vs 8) 낮은 쪽이 먼저 움직일 수도 있다.
         BuildTurnOrder();
+        _enemiesActedThisRound.Clear();
 
         // [2026-10-06] 선제 스킬(SkillData.preemptive, 예: 버티기 자세)은 순서와 상관없이 라운드 맨 처음에 발동
         var preemptiveDone = new HashSet<AllyCommand>();
@@ -3579,7 +3596,8 @@ public class BattleManager : MonoBehaviour
             else
             {
                 Debug.Log($"[BattleManager] Executing enemy turn: {actor.enemy?.enemyName}");
-                // 적 액션 실행
+                // 적 액션 실행 (스턴에 걸려 넘어간 것도 '행동한 것'으로 기록)
+                if (actor.enemy != null) _enemiesActedThisRound.Add(actor.enemy);
                 yield return StartCoroutine(ExecuteEnemyTurn(actor.enemy));
             }
 
@@ -3660,6 +3678,8 @@ public class BattleManager : MonoBehaviour
                         if (fx.mpLost   > 0) msg += $" — lost {fx.mpLost} MP";
                         if (fx.curesApplied != null && fx.curesApplied.Count > 0)
                             msg += $" — cured {string.Join(", ", fx.curesApplied)}";
+                        if (!string.IsNullOrEmpty(fx.buffText))
+                            msg += $" — <color=#9FC8FF>{fx.buffText}</color>";
                         AddMessage(msg + "!");
                     }
                 }
@@ -3684,6 +3704,9 @@ public class BattleManager : MonoBehaviour
                     Debug.Log($"[ExecuteAllyResolution] Not a warrior, role is {role}");
                     AddMessage($"{cmd.actor.playerName} is defending!");
                 }
+                break;
+            case "none":
+                // 도망 실패 등으로 이번 턴 행동 없음
                 break;
             default:
                 Debug.LogWarning($"[ExecuteAllyResolution] Unknown action type: {cmd.actionType}");
@@ -3799,6 +3822,7 @@ public class BattleManager : MonoBehaviour
         public EnemyActionType type;
         public SkillData skill;   // type == Skill일 때만 유효
         public PlayerStats target;   // 타겟 지능이 선택한 공격 대상 (null이면 랜덤)
+        public string note;          // [2026-10-06] 행동 전 보여줄 '생각' 문구 (교활 AI)
     }
 
     /// <summary>AIPattern별 타겟 선택. null 반환 시 ExecuteEnemyTurn이 랜덤으로 폴백.</summary>
@@ -3867,6 +3891,10 @@ public class BattleManager : MonoBehaviour
         // fallback 반환에도 타겟 지능 적용 (pattern 확정 후 설정)
         fallback.target = SelectEnemyTarget(enemy, pattern);
 
+        // [2026-10-06] 교활(고블린): 상황 판단 + 도구
+        if (pattern == Abyssdawn.AIPattern.Cunning)
+            return SelectCunningAction(enemy);
+
         float hpRatio = (enemy.maxHP > 0) ? (float)enemy.currentHP / enemy.maxHP : 1f;
 
         // [Phase] MonsterSO 전환점 기준으로 페이즈 판정
@@ -3913,10 +3941,8 @@ public class BattleManager : MonoBehaviour
             candidates.Add((EnemyActionType.Defend, null, DefendBaseWeight(pattern) * 2f));
 
         // [Phase] 도망 — Critical 페이즈에서 후보 추가 (가중치 ×3)
-        // [2026-10-06] 위협의 함성에 걸린 적은 HP 30% 이하부터 도망을 고려하고, 도망 가중치 ×2
-        bool intimidated = IsIntimidated(enemy);
-        if (isCriticalPhase || (intimidated && hpRatio <= 0.3f))
-            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f * (intimidated ? 2f : 1f)));
+        if (isCriticalPhase)
+            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f));
 
         // [Zeta] 역전 시나리오 — Critical 페이즈에서 15% 확률로 최강 스킬 강제 선택
         if (isCriticalPhase && strongestCastable != null && Random.value < 0.15f)
@@ -3948,10 +3974,122 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>적이 지금 이 스킬을 시전할 수 있는지 — 시전 슬롯 조건 + MP 충족.</summary>
+    // ─────────────────────────────────────────
+    // 교활(Cunning) AI — 고블린 (2026-10-06)
+    //   상황을 보고 판단한다: 죽기 전에 연막탄으로 도주, 다치면 약초, 상대가 방어·반격 자세면 정면으로 때리지 않음,
+    //   뒷열이면 단검을 던지고, 가끔 모래로 눈을 노린다. 목표는 HP 비율이 가장 낮은 아군.
+    // ─────────────────────────────────────────
+    private const string ToolHealingHerb = "Healing Herb";
+    private const string ToolThrowingKnife = "Throwing Knife";
+    private const string ToolSandThrow = "Sand Throw";
+    private const string ToolSmokeBomb = "Smoke Bomb";
+
+    private readonly Dictionary<EnemyStats, Dictionary<SkillData, int>> _enemySkillUses = new Dictionary<EnemyStats, Dictionary<SkillData, int>>();
+
+    private int EnemySkillUses(EnemyStats e, SkillData s)
+    {
+        Dictionary<SkillData, int> d; int v;
+        return e != null && s != null && _enemySkillUses.TryGetValue(e, out d) && d.TryGetValue(s, out v) ? v : 0;
+    }
+
+    private void RecordEnemySkillUse(EnemyStats e, SkillData s)
+    {
+        if (e == null || s == null) return;
+        Dictionary<SkillData, int> d;
+        if (!_enemySkillUses.TryGetValue(e, out d)) { d = new Dictionary<SkillData, int>(); _enemySkillUses[e] = d; }
+        int v; d.TryGetValue(s, out v); d[s] = v + 1;
+    }
+
+    /// <summary>이 적이 지금 쓸 수 있는 도구(스킬)를 이름으로 찾는다. 없거나 다 썼으면 null.</summary>
+    private SkillData FindUsableTool(EnemyStats enemy, string toolName)
+    {
+        if (enemy == null || enemy.sourceMonster == null || enemy.sourceMonster.ActiveSkills == null) return null;
+        foreach (var s in enemy.sourceMonster.ActiveSkills)
+            if (s != null && s.skillName == toolName && CanEnemyCastSkill(enemy, s)) return s;
+        return null;
+    }
+
+    // [2026-10-07] 투척 단검은 고블린의 스킬 칸(0~3개 규칙)이 아니라 '무기' — 영리한(Cunning) 몬스터가 뒷열·반격 회피 때 꺼내 던진다
+    private const string CunningKnifeResource = "Monsters/MonsterSkills/Monster_ThrowingKnife";
+    private static SkillData _cunningKnife;
+
+    private SkillData CunningKnife(EnemyStats enemy)
+    {
+        SkillData listed = FindUsableTool(enemy, ToolThrowingKnife);
+        if (listed != null) return listed;
+        if (_cunningKnife == null) _cunningKnife = Resources.Load<SkillData>(CunningKnifeResource);
+        return _cunningKnife != null && CanEnemyCastSkill(enemy, _cunningKnife) ? _cunningKnife : null;
+    }
+
+    private static bool HasAccuracyDebuff(PlayerStats p)
+    {
+        if (p == null || p.activeStatModifiers == null) return false;
+        foreach (var m in p.activeStatModifiers)
+            if (m != null && m.modifier != null && m.modifier.statType == AbyssdawnBattle.ModStatType.Accuracy && m.modifier.value < 0f) return true;
+        return false;
+    }
+
+    private EnemyActionDecision SelectCunningAction(EnemyStats enemy)
+    {
+        // 목표: HP 비율이 가장 낮은 아군 (약한 쪽을 노린다)
+        PlayerStats target = null; float best = 2f;
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null || m.currentHP <= 0) continue;
+            float r = m.maxHP > 0 ? (float)m.currentHP / m.maxHP : 1f;
+            if (r < best) { best = r; target = m; }
+        }
+        if (target == null) target = GetRandomAlivePartyMember();
+        var attack = new EnemyActionDecision { type = EnemyActionType.Attack, target = target };
+        if (target == null) return attack;
+
+        float hp = enemy.maxHP > 0 ? (float)enemy.currentHP / enemy.maxHP : 1f;
+        string n = enemy.enemyName;
+        SkillData smoke = FindUsableTool(enemy, ToolSmokeBomb);
+        SkillData herb = FindUsableTool(enemy, ToolHealingHerb);
+        SkillData knife = CunningKnife(enemy);
+        SkillData sand = FindUsableTool(enemy, ToolSandThrow);
+
+        // 1) 죽기 전에 빠진다
+        if (smoke != null && hp <= 0.25f)
+            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = smoke, target = target, note = $"<color=#AAAAAA>{n} glances at the exit...</color>" };
+
+        // 2) 다치면 약초부터
+        if (herb != null && hp <= 0.4f)
+            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = herb, note = $"<color=#AAAAAA>{n} backs off, fumbling in its pouch.</color>" };
+
+        // 3) 상대가 방어·버티기·반격 자세면 정면으로 때리지 않는다
+        bool guarded = target.isDefending || target.counterGuardRounds > 0
+                       || target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.DamageTaken, 1f) < 1f;
+        if (guarded)
+        {
+            if (target.counterGuardRounds > 0 && knife != null)   // 반격을 피해 멀리서 던진다
+                return new EnemyActionDecision { type = EnemyActionType.Skill, skill = knife, target = target, note = $"<color=#AAAAAA>{n} won't step into your guard — it draws a knife.</color>" };
+            if (sand != null && !HasAccuracyDebuff(target))
+                return new EnemyActionDecision { type = EnemyActionType.Skill, skill = sand, target = target, note = $"<color=#AAAAAA>{n} sees your guard and scoops up a handful of sand.</color>" };
+            return new EnemyActionDecision { type = EnemyActionType.Defend, target = target, note = $"<color=#AAAAAA>{n} circles warily, waiting for an opening.</color>" };
+        }
+
+        // 4) 뒷열이면 단검을 던진다
+        if (knife != null && (int)enemy.currentSlot >= 5)
+            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = knife, target = target };
+
+        // 5) 아직 멀쩡한 상대에게는 가끔 모래로 눈부터
+        if (sand != null && !HasAccuracyDebuff(target) && UnityEngine.Random.value < 0.3f)
+            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = sand, target = target };
+
+        // 6) 그 외 공격 (가끔 단검)
+        if (knife != null && UnityEngine.Random.value < 0.2f)
+            return new EnemyActionDecision { type = EnemyActionType.Skill, skill = knife, target = target };
+        return attack;
+    }
+
     private bool CanEnemyCastSkill(EnemyStats enemy, SkillData skill)
     {
         if (skill == null || skill.targeting == null) return false;
         if (enemy.currentMP < skill.mpCost) return false;
+        // [2026-10-06] 도구 등 전투당 사용 횟수
+        if (skill.usesPerBattle > 0 && EnemySkillUses(enemy, skill) >= skill.usesPerBattle) return false;
 
         // 회복 스킬: HP가 이미 최대치면 사용 불가
         if (skill is MonsterSkillData msd && msd.Category == MonsterSkillCategory.Heal)
@@ -4079,6 +4217,18 @@ public class BattleManager : MonoBehaviour
 
         // [Enemy AI] 행동 선택 레이어 — 이번 단계는 선택만. Skill/Defend/Flee 실행 경로 미구현 → 평타 fallback.
         EnemyActionDecision decision = SelectEnemyAction(enemy);
+        if (!string.IsNullOrEmpty(decision.note)) AddMessage(decision.note);   // 교활 AI 의 '생각'
+        if (decision.type == EnemyActionType.Skill && decision.skill != null)
+        {
+            RecordEnemySkillUse(enemy, decision.skill);
+            if (decision.skill.skillName == ToolSmokeBomb)
+            {
+                // 연막탄: 확실한 도주 (보상 없음)
+                AddMessage($"<color=#AAAAAA>{enemy.enemyName} throws a smoke bomb!</color>");
+                yield return StartCoroutine(HandleFlee(enemy));
+                yield break;
+            }
+        }
         Debug.Log($"[EnemyAI] {enemy.enemyName} (AI={(enemy.sourceMonster != null ? enemy.sourceMonster.AIPattern.ToString() : "?")}) → 선택: {decision.type}{(decision.skill != null ? $" ('{decision.skill.skillName}')" : "")}");
         if (decision.type == EnemyActionType.Defend)
         {
@@ -4191,9 +4341,11 @@ public class BattleManager : MonoBehaviour
 
                 int hpBefore = target.currentHP;
                 if (critical) BattleFx.MarkAllyCritical();
+                bool guardProc = RollCounterGuard(target, ref damage); // 반격 태세: 50% 확률로 피해 -50%
                 damage = target.TakeDamage(damage); // [2026-10-06] 메시지에 실제로 받은 피해 (방어·패시브·버티기 감소 후)
                 AddMessage(critical ? $"{enemy.enemyName} critical hit! {target.playerName} took {damage} damage!" :
                                       $"{enemy.enemyName} attacked {target.playerName} and dealt {damage} damage!");
+                if (guardProc) CounterAttack(target, enemy); // 반격 (공격 메시지 다음)
                 // [LastStand] HP가 0이 아닌 1로 유지됐다면 불굴 발동
                 if (hpBefore > 1 && target.currentHP == 1 && target.HasSpecialEffect("LastStand"))
                 {
@@ -4716,12 +4868,58 @@ public class BattleManager : MonoBehaviour
         }
 
         turnInProgress = true;
-          AddMessage("You ran away!");
-          HideCommandPanels();
-          battleEnded = true;
-          HideBackButton();
-          ReturnToDungeon(1.5f);
-      }
+
+        // [2026-10-06] DQ식 도망
+        //   주인공 레벨 ≥ 지역 레벨 → 100%.
+        //   낮으면 25% → 50% → 75% → 100% (실패할 때마다 +25%p 누적, 4번째 확정) + 주인공 민첩 1당 +1%p.
+        //   실패하면 파티 전원 이번 턴 행동 없이 적만 행동.
+        int areaLevel = GetAreaLevel();
+        float fleeChance = currentControlledMember.level >= areaLevel
+            ? 1f
+            : Mathf.Clamp01(fleeBaseChance + fleeStepChance * _fleeFailCount + currentControlledMember.Agility * fleeChancePerAgi
+                            + currentControlledMember.escapeBonus); // 연막탄 등
+        if (UnityEngine.Random.value < fleeChance)
+        {
+            AddMessage("You ran away!");
+            HideCommandPanels();
+            battleEnded = true;
+            HideBackButton();
+            ReturnToDungeon(1.5f);
+            return;
+        }
+
+        _fleeFailCount++;
+        AddMessage($"<color=#FF6B6B>Couldn't escape!</color> <size=80%>({fleeChance:P0} — next try is easier)</size>");
+        HideCommandPanels();
+        HideBackButton();
+        pendingCommands.Clear();
+        foreach (var m in activePartyMembers)
+            if (m != null && m.currentHP > 0)
+                pendingCommands.Add(new AllyCommand { actor = m, actionType = "none" });
+        commandIndex = activePartyMembers.Count;
+        BeginResolutionPhase();
+    }
+
+    [Header("도망 (DQ식)")]
+    [Tooltip("주인공 레벨이 지역 레벨보다 낮을 때, 첫 시도 기본 확률 (0.15 = 15%)")]
+    [Range(0f, 1f)] public float fleeBaseChance = 0.15f;
+    [Tooltip("도망 실패 1회마다 더해지는 확률 (0.25 → 15%, 40%, 65%, 90%, 100%)")]
+    [Range(0f, 1f)] public float fleeStepChance = 0.25f;
+    [Tooltip("주인공 민첩 1당 더해지는 확률 (0.002 = 민첩 1당 +0.2%p, 민첩 99 → +19.8%p)")]
+    public float fleeChancePerAgi = 0.002f;
+    [Tooltip("지역 레벨 = 층 × 이 값 + Area Level Offset (기본: B3 = Lv3)")]
+    public float areaLevelPerFloor = 1f;
+    [Tooltip("지역 레벨에 더하는 보정")]
+    public int areaLevelOffset = 0;
+
+    private int _fleeFailCount = 0; // 이번 전투에서 도망 실패한 횟수 (전투마다 새 BattleManager 라 자동 초기화)
+
+    /// <summary>현재 층의 지역 레벨 (도망 판정용).</summary>
+    private int GetAreaLevel()
+    {
+        int floor = Mathf.Max(1, DungeonPersistentData.currentFloor);
+        return Mathf.Max(1, Mathf.RoundToInt(floor * areaLevelPerFloor) + areaLevelOffset);
+    }
 
     public void OnDefendButton()
     {
@@ -5747,9 +5945,10 @@ public class BattleManager : MonoBehaviour
     // 쿨다운 · 전투당 사용 횟수 (2026-10-06)
     // ─────────────────────────────────────────
 
-    /// <summary>쿨다운 전체 스위치. 꺼져 있으면 SkillData.cooldownTurns 는 무시 (DQ식 전투 — 투입 여부는 디자이너 결정, 기본 꺼짐).
+    /// <summary>쿨다운 전체 스위치. 꺼져 있으면 SkillData.cooldownTurns 는 무시.
+    /// [2026-10-07] 켬 — 숨고르기(5턴)·버티기(2)·위협의 함성(4)·반격 태세(3).
     /// 전투당 사용 횟수(usesPerBattle)는 이 스위치와 상관없이 항상 적용.</summary>
-    public static bool UseCooldowns = false;
+    public static bool UseCooldowns = true;
 
     private readonly Dictionary<PlayerStats, Dictionary<SkillData, int>> _skillCooldowns = new Dictionary<PlayerStats, Dictionary<SkillData, int>>();
     private readonly Dictionary<PlayerStats, Dictionary<SkillData, int>> _skillUses = new Dictionary<PlayerStats, Dictionary<SkillData, int>>();
@@ -5771,6 +5970,8 @@ public class BattleManager : MonoBehaviour
     private string SkillLimitReason(PlayerStats who, SkillData skill)
     {
         if (who == null || skill == null) return null;
+        // 반격 태세 중에는 기본 공격만 (스킬 전부 잠김)
+        if (who.counterGuardRounds > 0) return "Counter stance (attacks only)";
         if (skill.usesPerBattle > 0 && GetCount(_skillUses, who, skill) >= skill.usesPerBattle)
             return skill.usesPerBattle == 1 ? "Used this battle" : $"Used {skill.usesPerBattle}/{skill.usesPerBattle}";
         if (UseCooldowns && skill.cooldownTurns > 0)
@@ -5793,6 +5994,14 @@ public class BattleManager : MonoBehaviour
     /// <summary>라운드 끝: 쿨다운 1 감소, 버티기 자세 다음 공격 보너스 만료 처리.</summary>
     private void TickRoundEndSkillState()
     {
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null) continue;
+            m.counterGuardCountersThisRound = 0;
+            if (m.counterGuardRounds > 0) m.counterGuardRounds--;
+            if (m.escapeBonusRounds > 0 && --m.escapeBonusRounds <= 0) m.escapeBonus = 0f;
+        }
+
         foreach (var kv in _skillCooldowns)
         {
             var keys = new List<SkillData>(kv.Value.Keys);
@@ -5811,14 +6020,55 @@ public class BattleManager : MonoBehaviour
     private const string SkillBrace = "Brace";
     private const string SkillSecondWind = "Second Wind";
     private const string SkillIntimidatingShout = "Intimidating Shout";
+    private const string SkillCounterGuard = "Counter Guard";
 
-    /// <summary>전장의 직감: 살아 있는 적이 2마리 이상이면 치명타 +3%.</summary>
+    /// <summary>
+    /// 반격 태세 판정 (맞기 직전). 자세 중이면 50% 확률로 이번 피해 -50% 하고 true (그다음 반격).
+    /// 반격은 라운드당 최대 2회 — 횟수를 다 썼으면 피해 감소도 없음.
+    /// </summary>
+    private bool RollCounterGuard(PlayerStats target, ref int damage)
+    {
+        if (target == null || target.counterGuardRounds <= 0) return false;
+        if (target.counterGuardCountersThisRound >= 2) return false;
+        if (UnityEngine.Random.value >= 0.5f) return false;
+        damage = Mathf.Max(1, Mathf.FloorToInt(damage * 0.5f));
+        return true;
+    }
+
+    /// <summary>반격: 기본 공격 50% 위력 1회 (명중·치명타 판정은 기본 공격과 같음).</summary>
+    private void CounterAttack(PlayerStats hero, EnemyStats enemy)
+    {
+        if (hero == null || enemy == null || hero.currentHP <= 0 || enemy.currentHP <= 0 || battleEnded) return;
+        hero.counterGuardCountersThisRound++;
+        if (!RollPhysicalHit_PlayerVsEnemy(hero, enemy, null))
+        {
+            AddMessage($"{hero.playerName} counters, but {enemy.enemyName} evades!");
+            BattleFx.EnemyMiss(enemy);
+            return;
+        }
+        bool crit = CheckCritical(hero.luck, PlayerCritBonus(hero) + hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+        int atk = Mathf.FloorToInt(hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, hero.Attack));
+        int def = Mathf.FloorToInt(PenetratedDefense(hero, enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, enemy.defense)));
+        int dmg = CalculateDQDamage(atk, def, crit);
+        dmg = Mathf.Max(1, Mathf.FloorToInt(dmg * 0.5f));
+        dmg = ApplySlotDamageToTarget(dmg, enemy.currentSlot, enemy.enemyName);
+        dmg = ApplyPhysResist(dmg, enemy);
+        if (enemy.isDefending)
+        {
+            dmg = Mathf.Max(1, Mathf.FloorToInt(dmg * (1f - enemy.defenceReduction)));
+            enemy.isDefending = false;
+        }
+        int applied = enemy.TakeDamage(dmg, crit);
+        AddMessage($"<color=#9FC8FF>{hero.playerName} counters!</color> {applied} damage{(crit ? " (Critical!)" : "")}.");
+    }
+
+    /// <summary>전장의 직감: 살아 있는 적이 3마리 이상이면 치명타 +5%. [2026-10-07] 2마리 +3% → 3마리 +5%</summary>
     private float PlayerCritBonus(PlayerStats attacker)
     {
         if (attacker == null || !attacker.HasEquippedPassiveByName(PlayerStats.SkillTacticalAwareness)) return 0f;
         int alive = 0;
         foreach (var e in activeEnemies) if (e != null && e.currentHP > 0) alive++;
-        return alive >= 2 ? 3f : 0f;
+        return alive >= 3 ? 5f : 0f;
     }
 
     /// <summary>버티기 자세 다음 첫 공격 피해 보너스를 적용하고 소모.</summary>
@@ -5846,6 +6096,14 @@ public class BattleManager : MonoBehaviour
                 AddMessage($"{attacker.playerName} braces! <color=#9FC8FF>Damage taken -50%</color> this turn, next attack +20%.");
                 return true;
             }
+            case SkillCounterGuard:
+            {
+                // 선제 발동: 이번 라운드 + 다음 라운드. 그동안 다른 스킬 사용 불가(기본 공격만) — SkillLimitReason
+                attacker.counterGuardRounds = 2;
+                attacker.counterGuardCountersThisRound = 0;
+                AddMessage($"{attacker.playerName} takes a counter stance! <color=#9FC8FF>50% chance to halve damage and strike back</color> for 2 turns.");
+                return true;
+            }
             case SkillSecondWind:
             {
                 int heal = Mathf.Max(1, Mathf.FloorToInt(attacker.maxHP * 0.2f));
@@ -5853,34 +6111,52 @@ public class BattleManager : MonoBehaviour
                 attacker.Heal(heal);
                 bool hadBleed = attacker.activeStatusEffects.Exists(se => se.data != null && se.data.effectType == StatusEffectType.Bleed);
                 if (hadBleed) attacker.RemoveStatusEffect(StatusEffectType.Bleed);
+                if (!attacker.IsRecruitedCompanion && DungeonFieldStatus.Has(StatusEffectType.Bleed))
+                {
+                    DungeonFieldStatus.Remove(StatusEffectType.Bleed); // 함정 출혈도 멈춘다
+                    hadBleed = true;
+                }
                 AddMessage($"{attacker.playerName} catches a second wind! Recovered {attacker.currentHP - before} HP" + (hadBleed ? ", bleeding stopped." : "."));
                 return true;
             }
             case SkillIntimidatingShout:
             {
-                // 적 전체 공격력 -15% (2라운드). HP 30% 이하인 적은 도망칠 확률 증가 (SelectEnemyAction)
+                // 적 전체 공격력 -15% (2라운드) + 적마다 스턴 판정 (스킬 에셋 curseEffect = Curse_Stun, curseApplyChance = 0.3)
+                // [2026-10-07] '겁먹음' 상태가 없어 도망 가중치 대신 스턴 1턴으로 교체
                 int count = 0;
+                var stunned = new List<string>();
                 foreach (var e in activeEnemies)
                 {
                     if (e == null || e.currentHP <= 0) continue;
                     e.RemoveStatModifiersFromSource(skill);
                     e.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 0.85f }, skill, 3);
                     count++;
+                    if (TryStunOneAction(e, skill.curseEffect, skill.curseApplyChance)) stunned.Add(e.enemyName);
                 }
                 AddMessage($"{attacker.playerName} lets out an intimidating shout! <color=#FF9F6B>{count} enem{(count == 1 ? "y's" : "ies'")} attack -15%</color> for 2 turns.");
+                if (stunned.Count > 0) AddMessage($"<color=#FFD700>{string.Join(", ", stunned)} {(stunned.Count == 1 ? "is" : "are")} stunned by the shout!</color>");
                 return true;
             }
         }
         return false;
     }
 
-    /// <summary>위협의 함성에 걸린 적인지 (도망 확률 증가 판정용).</summary>
-    private static bool IsIntimidated(EnemyStats e)
+    /// <summary>이번 라운드에 이미 행동한 적 (스턴을 정확히 '행동 1번'만 막기 위해).</summary>
+    private readonly HashSet<EnemyStats> _enemiesActedThisRound = new HashSet<EnemyStats>();
+
+    /// <summary>
+    /// chance × 적 상태이상 저항으로 스턴. 걸리면 적의 '다음 행동 1번'만 막는다:
+    /// 이번 라운드에 아직 안 움직였으면 이번 행동을, 이미 움직였으면 다음 라운드 행동을.
+    /// </summary>
+    private bool TryStunOneAction(EnemyStats e, StatusEffectSO stun, float chance)
     {
-        if (e == null || e.activeStatModifiers == null) return false;
-        foreach (var m in e.activeStatModifiers)
-            if (m != null && m.source is SkillData sd && sd.skillName == SkillIntimidatingShout) return true;
-        return false;
+        if (e == null || stun == null || chance <= 0f) return false;
+        if (UnityEngine.Random.value >= chance * Mathf.Max(0f, e.statusResist)) return false;
+        if (!e.ApplyStatusEffectDirect(stun, 1)) return false;
+        var inst = e.activeStatusEffects.Find(se => se.data != null && se.data.effectType == stun.effectType);
+        // 아직 행동 전 → 이번 라운드 끝에 풀리도록 (appliedThisTurn=false). 행동 후 → 기본값(다음 라운드까지)
+        if (inst != null) inst.appliedThisTurn = _enemiesActedThisRound.Contains(e);
+        return true;
     }
 
     private void ApplySelfEffects(PlayerStats attacker, SkillData skill)
@@ -6317,9 +6593,12 @@ public class BattleManager : MonoBehaviour
 
             // 9. 데미지 적용
             if (critical) BattleFx.MarkAllyCritical();
+            // 반격 태세: 50% 확률로 피해 -50% + 반격. 던진 단검(원거리)에는 반격할 수 없음
+            bool guardProc = skill.skillName != ToolThrowingKnife && RollCounterGuard(target, ref damage);
             damage = target.TakeDamage(damage); // [2026-10-06] 실제로 받은 피해로 표시
             totalDamage += damage;
             AddMessage($"{enemy.enemyName} uses {skill.skillName}! {target.playerName} takes {damage} damage{(critical ? " (Critical!)" : "")}.");
+            if (guardProc) CounterAttack(target, enemy); // 반격 (공격 메시지 다음)
 
             // 10. 상태이상 (타격마다)
             ApplyCurseEffectsToPlayer(target, skill);
@@ -6904,10 +7183,12 @@ public class BattleManager : MonoBehaviour
             if (passive == null || !passive.IsPassive) continue;
             if (!attacker.IsPassiveWeaponOk(passive)) continue;
 
-            // Combat Breathing: 스킬 사용 시 HP 5% 회복, 후열이면 +2% 추가
+            // Combat Breathing: 공격 스킬 사용 시 HP 3% 회복, 후열이면 +2% 추가
+            // [2026-10-07] 공격 스킬에만 (버티기 연타 회복 루프 방지 · 무기 스킬 HP 비용을 갚아 트리 교차 투자 유도), 2% → 3%
             if (passive.skillName == "Combat Breathing")
             {
-                float healPercent = 5f;
+                if (usedSkill == null || !usedSkill.IsDamaging || IsSelfTargetSkill(usedSkill)) continue;
+                float healPercent = 3f; // 최소 1 회복
 
                 // [슬롯 표준화] 아군 후열 판정(SlotHelper 모델 B). 슬롯 3,4에서 후열 보너스(+2%) 발동.
                 if (attacker.IsBackRow)
@@ -6915,8 +7196,8 @@ public class BattleManager : MonoBehaviour
                     healPercent += 2f;
                 }
 
-                int healAmount = Mathf.FloorToInt(attacker.maxHP * (healPercent / 100f));
-                if (healAmount > 0)
+                int healAmount = Mathf.Max(1, Mathf.FloorToInt(attacker.maxHP * (healPercent / 100f)));
+                if (attacker.currentHP < attacker.maxHP)
                 {
                     attacker.Heal(healAmount);
                     AddMessage($"{attacker.playerName}'s Combat Breathing restores {healAmount} HP!");
@@ -9085,6 +9366,9 @@ private void CacheHeroSkills()
                 if (e == null || e.goldReward <= 0) continue;
                 totalGold += Mathf.Max(1, Mathf.RoundToInt(e.goldReward * UnityEngine.Random.Range(0.8f, 1.2f)));
             }
+            // 탐험 스킬 '자원 관리': 골드 +15%
+            if (totalGold > 0 && FieldSkills.Has(FieldSkills.ResourceManagement))
+                totalGold = Mathf.CeilToInt(totalGold * FieldSkills.ResourceGoldMult);
             if (totalGold > 0)
             {
                 PlayerWallet.Add(totalGold);
