@@ -79,6 +79,8 @@ public class InventoryUIManager : MonoBehaviour
     public Button          primaryButton;
     public TextMeshProUGUI primaryButtonText;
     public Button          discardButton;
+    [Tooltip("[2026-10-08] 닫기(CANCEL) — 상세 창만 닫는다 (팝업 모드면 팝업을 닫음)")]
+    public Button          cancelButton;
 
     // ─── 닫기 버튼 ────────────────────────────────────────────
     [Header("닫기 버튼")]
@@ -167,6 +169,7 @@ public class InventoryUIManager : MonoBehaviour
 
         if (closeButton   != null) closeButton  .onClick.AddListener(OnCloseButtonClicked);
         if (discardButton != null) discardButton.onClick.AddListener(OnDiscardClicked);
+        if (cancelButton  != null) cancelButton .onClick.AddListener(OnCancelClicked);
 
         if (consumableInventory != null)
             consumableInventory.OnInventoryChanged += RefreshGrid;
@@ -200,6 +203,97 @@ public class InventoryUIManager : MonoBehaviour
     {
         ForceHideDetail();
         inventoryRoot.SetActive(false);
+    }
+
+    // ═════════════════════════════════════════════════════════
+    //  [2026-10-08] 상세 팝업 모드 — 새 아이템 창(ItemListPanel)에서 카드를 누르면
+    //  이 창의 DetailPanel 만 띄운다 (목록·탭·닫기 버튼은 숨기고, 뒤를 어둡게).
+    //  어두운 바깥을 누르거나 버리기를 하면 닫히고 onClosed 를 부른다.
+    // ═════════════════════════════════════════════════════════
+
+    private bool _popupMode;
+    private System.Action _popupClosed;
+    private readonly List<GameObject> _hiddenForPopup = new List<GameObject>();
+    private GameObject _popupBlocker;
+    private Image _rootImage;
+    private bool _rootImageWasEnabled;
+
+    public bool IsDetailPopupOpen => _popupMode;
+
+    public void ShowDetailPopup(EquipmentData item, System.Action onClosed)
+    {
+        if (item == null) return;
+        BeginPopup(onClosed);
+        OnItemClicked(item);
+    }
+
+    public void ShowDetailPopup(ConsumableItemSO item, System.Action onClosed)
+    {
+        if (item == null) return;
+        BeginPopup(onClosed);
+        OnConsumableClicked(item);
+    }
+
+    public void CloseDetailPopup()
+    {
+        if (!_popupMode) return;
+        AnimateDetail(false); // 애니메이션이 끝나면 EndPopup
+    }
+
+    private void BeginPopup(System.Action onClosed)
+    {
+        if (_popupMode) EndPopup(false);
+        _popupMode = true;
+        _popupClosed = onClosed;
+        ResolveConsumableInventoryReference();
+
+        inventoryRoot.SetActive(true);
+        inventoryRoot.transform.SetAsLastSibling();
+
+        // 상세 패널 말고는 전부 숨김
+        _hiddenForPopup.Clear();
+        foreach (Transform child in inventoryRoot.transform)
+        {
+            if (child.gameObject == detailPanel || child.gameObject == _popupBlocker) continue;
+            if (!child.gameObject.activeSelf) continue;
+            child.gameObject.SetActive(false);
+            _hiddenForPopup.Add(child.gameObject);
+        }
+        _rootImage = inventoryRoot.GetComponent<Image>();
+        if (_rootImage != null) { _rootImageWasEnabled = _rootImage.enabled; _rootImage.enabled = false; }
+
+        // 뒤를 어둡게 + 바깥 누르면 닫기
+        if (_popupBlocker == null)
+        {
+            _popupBlocker = new GameObject("DetailPopupBlocker", typeof(RectTransform), typeof(Image), typeof(Button));
+            var rt = (RectTransform)_popupBlocker.transform;
+            rt.SetParent(inventoryRoot.transform, false);
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
+            _popupBlocker.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.85f); // 상세 패널이 반투명이라 뒤 목록이 비치지 않게 진하게
+            var b = _popupBlocker.GetComponent<Button>();
+            b.transition = Selectable.Transition.None;
+            b.onClick.AddListener(CloseDetailPopup);
+        }
+        _popupBlocker.SetActive(true);
+        _popupBlocker.transform.SetAsFirstSibling();
+        detailPanel.transform.SetAsLastSibling();
+        ForceHideDetail();
+    }
+
+    private void EndPopup(bool notify)
+    {
+        if (!_popupMode) return;
+        _popupMode = false;
+        foreach (var go in _hiddenForPopup) if (go != null) go.SetActive(true);
+        _hiddenForPopup.Clear();
+        if (_rootImage != null) _rootImage.enabled = _rootImageWasEnabled;
+        if (_popupBlocker != null) _popupBlocker.SetActive(false);
+        selectedItem = null;
+        selectedConsumable = null;
+        inventoryRoot.SetActive(false);
+        var cb = _popupClosed;
+        _popupClosed = null;
+        if (notify) cb?.Invoke();
     }
 
     public void AddItem(EquipmentData item)
@@ -568,13 +662,16 @@ public class InventoryUIManager : MonoBehaviour
         else
             hasCharge = !item.isChargeable || item.currentCharges > 0;
         // usableInBattle = false이면 비활성 (맵 전용) / 충전형은 충전 0이면 비활성
-        primaryButton.interactable = hasItem && item.usableInBattle && hasCharge;
+        // [2026-10-08] 전투 중이면 usableInBattle, 던전(맵)에서는 usableOnMap
+        bool inBattle = FindFirstObjectByType<BattleManager>() != null;
+        bool usableHere = inBattle ? item.usableInBattle : item.usableOnMap;
+        primaryButton.interactable = hasItem && usableHere && hasCharge;
         primaryButton.onClick.RemoveAllListeners();
         primaryButton.onClick.AddListener(() => OnUseConsumableClicked(item));
 
-        // 버리기 버튼: isPermanent면 비활성
+        // 버리기 버튼: isPermanent·새벽의 잔이면 비활성 (새벽의 잔은 버릴 수 없음 — RemoveItem 이 충전을 깎아버린다)
         if (discardButton != null)
-            discardButton.interactable = !item.isPermanent;
+            discardButton.interactable = !item.isPermanent && !item.isDawnChalice;
     }
 
     private void PopulateDetailPanel(EquipmentData item)
@@ -1034,10 +1131,23 @@ public class InventoryUIManager : MonoBehaviour
             Debug.Log($"[Inventory] 상태이상 해제: {string.Join(", ", fx.curesApplied)}");
     }
 
+    /// <summary>CANCEL: 상세 창을 닫는다 (아이템은 그대로).</summary>
+    private void OnCancelClicked()
+    {
+        if (_popupMode) CloseDetailPopup();
+        else AnimateDetail(false);
+    }
+
     private void OnDiscardClicked()
     {
         if (selectedConsumable != null)
         {
+            // [2026-10-08] 새벽의 잔·영구 아이템은 버릴 수 없음 (버튼이 꺼져 있어도 한 번 더 막음)
+            if (selectedConsumable.isDawnChalice || selectedConsumable.isPermanent)
+            {
+                Debug.Log($"[Inventory] {selectedConsumable.itemName} 은(는) 버릴 수 없습니다.");
+                return;
+            }
             consumableInventory?.RemoveItem(selectedConsumable);
             selectedConsumable = null;
             AnimateDetail(false);
@@ -1074,6 +1184,16 @@ public class InventoryUIManager : MonoBehaviour
     private void AnimateDetail(bool show)
     {
         if (animCoroutine != null) StopCoroutine(animCoroutine);
+        // [2026-10-08] 팝업 모드: 아래에서 올라오지 않고 바로 켜고 끈다
+        if (_popupMode)
+        {
+            animCoroutine = null;
+            detailPanelVisible = show;
+            detailPanelRT.anchoredPosition = new Vector2(0f, 0f);
+            detailPanel.SetActive(show);
+            if (!show) EndPopup(true);
+            return;
+        }
         animCoroutine = StartCoroutine(DetailPanelAnim(show));
     }
 
@@ -1107,6 +1227,7 @@ public class InventoryUIManager : MonoBehaviour
 
         detailPanelRT.anchoredPosition = new Vector2(0f, toY);
         if (!show) detailPanel.SetActive(false);
+        if (!show && _popupMode) EndPopup(true);
     }
 
     // ═════════════════════════════════════════════════════════

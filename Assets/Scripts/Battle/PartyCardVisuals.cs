@@ -96,6 +96,14 @@ public static class PartyCardVisuals
                 if (s != null) sprites.Add(s);
             }
         }
+        // [2026-10-08] 던전(걷는 중) 상태이상 — 함정이 건 출혈·독 등은 주인공에게만. 전투 중이면 이미 위에 들어 있으므로 같은 종류는 건너뜀
+        if (member != null && !member.IsRecruitedCompanion)
+            foreach (var kv in DungeonFieldStatus.ActiveIcons())
+            {
+                bool shown = member.activeStatusEffects != null &&
+                             member.activeStatusEffects.Exists(se => se != null && se.data != null && se.data.effectType == kv.Key);
+                if (!shown && kv.Value != null) sprites.Add(kv.Value);
+            }
 
         Transform host = null;
         foreach (var img in icons) if (img != null) { host = img.transform.parent; break; }

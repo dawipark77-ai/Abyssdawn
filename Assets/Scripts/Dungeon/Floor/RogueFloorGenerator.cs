@@ -496,18 +496,21 @@ public static class RogueFloorGenerator
     }
 
     /// <summary>
-    /// 층이 깊을수록 함정 종류가 늘어난다 (괄호 = 가중치). [2026-10-07] 상태이상 함정 추가
-    ///  1층~ 가시(4)·독침(3) / 2층~ 전송(2)·그물(2) / 3층~ 경보(2)·칼날(3) / 4층~ 구멍(1)·실명 가스(2) / 6층~ 화염(2)·낙석(2)
+    /// 층이 깊을수록 함정 종류가 늘어난다 (괄호 = 가중치). [2026-10-07 개편] 초반부터 다양하게 + 새 함정 2종
+    ///  1층~ 가시(3)·독침(3)·칼날(3)·그물(2)·석궁(2) / 2층~ 전송(2)·경보(2)·실명 가스(2)·마나 흡수(2)
+    ///  3층~ 화염(2)·낙석(2) / 4층~ 구멍(1)
     /// </summary>
     private static FloorTrapType PickTrapType(System.Random rng, int floor)
     {
         List<FloorTrapType> pool = new List<FloorTrapType>();
-        AddWeight(pool, FloorTrapType.Spike, 4);
+        AddWeight(pool, FloorTrapType.Spike, 3);
         AddWeight(pool, FloorTrapType.PoisonDart, 3);
-        if (floor >= 2) { AddWeight(pool, FloorTrapType.Teleport, 2); AddWeight(pool, FloorTrapType.Net, 2); }
-        if (floor >= 3) { AddWeight(pool, FloorTrapType.Alarm, 2); AddWeight(pool, FloorTrapType.Blade, 3); }
-        if (floor >= 4) { AddWeight(pool, FloorTrapType.Pitfall, 1); AddWeight(pool, FloorTrapType.BlindingGas, 2); }
-        if (floor >= 6) { AddWeight(pool, FloorTrapType.FlameVent, 2); AddWeight(pool, FloorTrapType.Rockfall, 2); }
+        AddWeight(pool, FloorTrapType.Blade, 3);
+        AddWeight(pool, FloorTrapType.Net, 2);
+        AddWeight(pool, FloorTrapType.Crossbow, 2);
+        if (floor >= 2) { AddWeight(pool, FloorTrapType.Teleport, 2); AddWeight(pool, FloorTrapType.Alarm, 2); AddWeight(pool, FloorTrapType.BlindingGas, 2); AddWeight(pool, FloorTrapType.ManaDrain, 2); }
+        if (floor >= 3) { AddWeight(pool, FloorTrapType.FlameVent, 2); AddWeight(pool, FloorTrapType.Rockfall, 2); }
+        if (floor >= 4) { AddWeight(pool, FloorTrapType.Pitfall, 1); }
         return pool[rng.Next(pool.Count)];
     }
 

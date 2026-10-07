@@ -96,6 +96,7 @@ public class DungeonHud : MonoBehaviour
     // ── 상점 (마을 위에 뜸) ──
     private GameObject _shop, _shopRowTemplate;
     private RectTransform _shopRows;
+    private ScrollRect _shopScroll;
     private TextMeshProUGUI _shopGold, _shopEmpty;
     private Image _shopBuyTab, _shopSellTab;
     private bool _shopSelling;
@@ -596,6 +597,7 @@ public class DungeonHud : MonoBehaviour
         var player = FindFirstObjectByType<DungeonGridPlayer>();
         if (player != null) player.LockInput(_shop);
         RefreshShop();
+        ShopScrollToTop();
     }
 
     public void CloseShop()
@@ -624,14 +626,99 @@ public class DungeonHud : MonoBehaviour
         {
             switch (b.name)
             {
-                case "BuyTab": _shopBuyTab = b.targetGraphic as Image; b.onClick.AddListener(() => { _shopSelling = false; RefreshShop(); }); break;
-                case "SellTab": _shopSellTab = b.targetGraphic as Image; b.onClick.AddListener(() => { _shopSelling = true; RefreshShop(); }); break;
+                case "BuyTab": _shopBuyTab = b.targetGraphic as Image; b.onClick.AddListener(() => { _shopSelling = false; RefreshShop(); ShopScrollToTop(); }); break;
+                case "SellTab": _shopSellTab = b.targetGraphic as Image; b.onClick.AddListener(() => { _shopSelling = true; RefreshShop(); ShopScrollToTop(); }); break;
                 case "Close": b.onClick.AddListener(CloseShop); break;
             }
         }
         if (_shopRows == null || _shopRowTemplate == null)
             Debug.LogWarning("[DungeonHud] 상점 창에 Rows / RowTemplate 이 없습니다. 목록을 표시할 수 없습니다.");
+        else
+            _shopScroll = WrapShopRowsInScroll(_shopRows);
         _shop.SetActive(false);
+    }
+
+    private void ShopScrollToTop()
+    {
+        if (_shopScroll == null) return;
+        Canvas.ForceUpdateCanvases();
+        _shopScroll.verticalNormalizedPosition = 1f;
+    }
+
+    /// <summary>
+    /// [2026-10-07] 상점 목록 스크롤. Rows 가 차지하던 자리에 Viewport(잘라내기)를 만들고 Rows 를 그 안의 Content 로 옮긴다.
+    /// 오른쪽에 세로 스크롤바 — 목록이 칸에 다 들어가면 자동으로 숨는다. 마우스 휠·드래그로도 움직인다.
+    /// 프리팹에 이미 ScrollRect 가 있으면 그것을 쓴다.
+    /// </summary>
+    private static ScrollRect WrapShopRowsInScroll(RectTransform rows)
+    {
+        ScrollRect existing = rows.GetComponentInParent<ScrollRect>(true);
+        if (existing != null) return existing;
+
+        var parent = (RectTransform)rows.parent;
+        int sibling = rows.GetSiblingIndex();
+
+        // Viewport — Rows 의 원래 자리·크기 그대로
+        var viewportGo = new GameObject("RowsViewport", typeof(RectTransform));
+        var viewport = (RectTransform)viewportGo.transform;
+        viewport.SetParent(parent, false);
+        viewport.SetSiblingIndex(sibling);
+        viewport.anchorMin = rows.anchorMin;
+        viewport.anchorMax = rows.anchorMax;
+        viewport.pivot = rows.pivot;
+        viewport.anchoredPosition = rows.anchoredPosition;
+        viewport.sizeDelta = rows.sizeDelta;
+        viewportGo.AddComponent<RectMask2D>();
+        // 줄 사이 빈틈에서도 휠·드래그가 먹도록 투명한 판정 그림
+        var hit = viewportGo.AddComponent<Image>();
+        hit.color = new Color(0f, 0f, 0f, 0f);
+
+        // Rows → Content: 위에 붙고 줄 수만큼 길어짐
+        rows.SetParent(viewport, false);
+        rows.anchorMin = new Vector2(0f, 1f);
+        rows.anchorMax = new Vector2(1f, 1f);
+        rows.pivot = new Vector2(0.5f, 1f);
+        rows.anchoredPosition = Vector2.zero;
+        rows.sizeDelta = Vector2.zero;
+        var fitter = rows.GetComponent<ContentSizeFitter>();
+        if (fitter == null) fitter = rows.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        // 세로 스크롤바 — Viewport 오른쪽 바깥
+        const float barW = 20f, barGap = 12f;
+        Image barBg = CreateImage(parent, "RowsScrollbar", new Color(0.1f, 0.08f, 0.05f, 0.85f), true);
+        RectTransform bar = barBg.rectTransform;
+        bar.SetSiblingIndex(sibling + 1);
+        bar.anchorMin = viewport.anchorMin;
+        bar.anchorMax = viewport.anchorMax;
+        bar.pivot = new Vector2(0f, viewport.pivot.y);
+        bar.anchoredPosition = new Vector2(viewport.anchoredPosition.x + viewport.sizeDelta.x * (1f - viewport.pivot.x) + barGap,
+                                           viewport.anchoredPosition.y);
+        bar.sizeDelta = new Vector2(barW, viewport.sizeDelta.y);
+
+        var area = new GameObject("Sliding Area", typeof(RectTransform));
+        var areaRt = (RectTransform)area.transform;
+        areaRt.SetParent(bar, false);
+        Stretch(areaRt);
+        Image handle = CreateImage(areaRt, "Handle", new Color(0.85f, 0.68f, 0.3f, 0.9f), true);
+        Stretch(handle.rectTransform);
+
+        var scrollbar = barBg.gameObject.AddComponent<Scrollbar>();
+        scrollbar.handleRect = handle.rectTransform;
+        scrollbar.targetGraphic = handle;
+        scrollbar.direction = Scrollbar.Direction.BottomToTop;
+
+        var scroll = viewportGo.AddComponent<ScrollRect>();
+        scroll.viewport = viewport;
+        scroll.content = rows;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 40f;
+        scroll.verticalScrollbar = scrollbar;
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+        return scroll;
     }
 
     private void RefreshShop()

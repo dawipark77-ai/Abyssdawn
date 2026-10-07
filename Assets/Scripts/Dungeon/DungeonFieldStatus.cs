@@ -10,7 +10,7 @@ using UnityEngine;
 ///  - 화상    : 16걸음, 2걸음마다 3%   (전투의 점화 Ignite)
 ///  - 실명    : 40걸음, 시야 -2칸
 ///  - 충격(Stun) : 다음 전투 시작 때 1턴 기절하고 사라짐
-/// 걷는 중 피해로는 쓰러지지 않는다 (HP 최소 1) — 대신 HP 1 로 다음 전투에 들어가게 된다.
+/// [2026-10-08] 걷는 중 피해로도 쓰러진다 (HP 0 → 게임 오버, MapManager.CheckHeroDeath).
 /// 전투가 시작되면 걸려 있는 것을 전투 상태이상으로도 건다 (BattleManager.ApplyDungeonCarryOver).
 /// 해제: 해독제·붕대·냉각제·정화수 (ConsumableEffectApplier), 숨고르기(출혈), 여관.
 /// </summary>
@@ -44,11 +44,30 @@ public static class DungeonFieldStatus
     // 남은 걸음 (UntilNextBattle = 다음 전투까지)
     private static readonly Dictionary<StatusEffectType, int> _left = new Dictionary<StatusEffectType, int>();
     private static readonly Dictionary<StatusEffectType, int> _walked = new Dictionary<StatusEffectType, int>();
+    // [2026-10-07] 함정이 건 짧은 상태이상: 몇 걸음마다 피해를 줄지 (기본 규칙 대신). 예: 함정 출혈 = 3턴, 매 턴 피해
+    private static readonly Dictionary<StatusEffectType, int> _everyOverride = new Dictionary<StatusEffectType, int>();
 
     public static event Action OnChanged;
 
     public static bool Has(StatusEffectType type) => _left.ContainsKey(type);
     public static bool Any => _left.Count > 0;
+
+    /// <summary>[2026-10-08] 지금 걸린 던전 상태이상의 아이콘 (전투용 상태이상 에셋의 아이콘을 그대로 씀). 상태 창·파티 바 표시용.</summary>
+    public static List<KeyValuePair<StatusEffectType, Sprite>> ActiveIcons()
+    {
+        var list = new List<KeyValuePair<StatusEffectType, Sprite>>();
+        foreach (var type in _left.Keys)
+        {
+            Sprite s = null;
+            if (BattleAssets.TryGetValue(type, out string path))
+            {
+                var so = Resources.Load<StatusEffectSO>(path);
+                if (so != null) s = so.flatIcon != null ? so.flatIcon : so.itemIcon;
+            }
+            list.Add(new KeyValuePair<StatusEffectType, Sprite>(type, s));
+        }
+        return list;
+    }
 
     public static string NameOf(StatusEffectType type) => Rules.TryGetValue(type, out Rule r) ? r.name : type.ToString();
 
@@ -64,12 +83,29 @@ public static class DungeonFieldStatus
             _left[type] = r.steps;
             _walked[type] = 0;
         }
+        _everyOverride.Remove(type);
+        OnChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// [2026-10-07] 걸음 수·피해 간격을 직접 정해 걸기 (함정 출혈 3턴 등). 한 걸음(제자리 한 턴) = 1턴.
+    /// 이미 더 긴 일반 상태이상이 걸려 있으면 그것을 유지한다.
+    /// </summary>
+    public static void Add(StatusEffectType type, int turns, int damageEvery)
+    {
+        if (!Rules.ContainsKey(type) || turns <= 0) return;
+        int cur;
+        if (_left.TryGetValue(type, out cur) && !_everyOverride.ContainsKey(type) && (cur == UntilNextBattle || cur > turns))
+            return;
+        _left[type] = turns;
+        _walked[type] = 0;
+        _everyOverride[type] = Mathf.Max(1, damageEvery);
         OnChanged?.Invoke();
     }
 
     public static void Remove(StatusEffectType type)
     {
-        if (_left.Remove(type)) { _walked.Remove(type); OnChanged?.Invoke(); }
+        if (_left.Remove(type)) { _walked.Remove(type); _everyOverride.Remove(type); OnChanged?.Invoke(); }
     }
 
     public static void Clear()
@@ -77,6 +113,7 @@ public static class DungeonFieldStatus
         if (_left.Count == 0) return;
         _left.Clear();
         _walked.Clear();
+        _everyOverride.Clear();
         OnChanged?.Invoke();
     }
 
@@ -94,11 +131,13 @@ public static class DungeonFieldStatus
             Rule r = Rules[type];
             if (_left[type] == UntilNextBattle) continue;
             _walked[type] = (_walked.TryGetValue(type, out int w) ? w : 0) + 1;
-            if (r.every > 0 && r.percent > 0f && _walked[type] % r.every == 0 && hero.currentHP > 1)
+            int every = _everyOverride.TryGetValue(type, out int ov) ? ov : r.every;
+            if (every > 0 && r.percent > 0f && _walked[type] % every == 0 && hero.currentHP > 0)
             {
+                // [2026-10-08] 함정 상태이상으로도 죽는다 (HP 0 → MapManager.CheckHeroDeath 가 게임 오버)
                 int dmg = Mathf.Max(1, Mathf.RoundToInt(hero.maxHP * r.percent));
                 int before = hero.currentHP;
-                hero.currentHP = Mathf.Max(1, before - dmg);
+                hero.currentHP = Mathf.Max(0, before - dmg);
                 int lost = before - hero.currentHP;
                 if (lost > 0) { total += lost; msg = (msg == null ? "" : msg + "  ") + $"<color={r.color}>{r.name} -{lost}</color>"; }
             }
@@ -106,6 +145,7 @@ public static class DungeonFieldStatus
             {
                 _left.Remove(type);
                 _walked.Remove(type);
+                _everyOverride.Remove(type);
                 msg = (msg == null ? "" : msg + "  ") + $"<color=#AAAAAA>{r.name} wears off.</color>";
             }
         }
@@ -139,7 +179,11 @@ public static class DungeonFieldStatus
             if (!BattleAssets.TryGetValue(type, out string path)) continue;
             var so = Resources.Load<StatusEffectSO>(path);
             if (so == null) { Debug.LogWarning($"[DungeonFieldStatus] 'Resources/{path}' 없음"); continue; }
-            bool ok = hero.ApplyStatusEffect(so, type == StatusEffectType.Stun ? 1 : Mathf.Max(1, so.physicalDuration));
+            // 함정이 건 짧은 상태이상(출혈 3턴 등)은 남은 턴 그대로 전투에도
+            int turns = type == StatusEffectType.Stun ? 1
+                      : _everyOverride.ContainsKey(type) ? Mathf.Max(1, _left[type])
+                      : Mathf.Max(1, so.physicalDuration);
+            bool ok = hero.ApplyStatusEffect(so, turns);
             if (type == StatusEffectType.Stun)
             {
                 // 첫 라운드만 기절 (기본은 '걸린 라운드는 안 줄어듦'이라 2라운드가 되므로 바로 줄어들게)
@@ -153,13 +197,14 @@ public static class DungeonFieldStatus
     }
 
     // ── 저장 ──
-    [Serializable] public class SaveEntry { public int type, left, walked; }
+    [Serializable] public class SaveEntry { public int type, left, walked, every; } // every 0 = 기본 규칙
 
     public static List<SaveEntry> ToSave()
     {
         var list = new List<SaveEntry>();
         foreach (var kv in _left)
-            list.Add(new SaveEntry { type = (int)kv.Key, left = kv.Value, walked = _walked.TryGetValue(kv.Key, out int w) ? w : 0 });
+            list.Add(new SaveEntry { type = (int)kv.Key, left = kv.Value, walked = _walked.TryGetValue(kv.Key, out int w) ? w : 0,
+                                     every = _everyOverride.TryGetValue(kv.Key, out int ev) ? ev : 0 });
         return list;
     }
 
@@ -167,6 +212,7 @@ public static class DungeonFieldStatus
     {
         _left.Clear();
         _walked.Clear();
+        _everyOverride.Clear();
         if (list != null)
             foreach (var e in list)
             {
@@ -174,6 +220,7 @@ public static class DungeonFieldStatus
                 if (!Rules.ContainsKey(t)) continue;
                 _left[t] = e.left;
                 _walked[t] = e.walked;
+                if (e.every > 0) _everyOverride[t] = e.every;
             }
         OnChanged?.Invoke();
     }

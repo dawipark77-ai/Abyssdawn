@@ -52,6 +52,8 @@ public class AutomapRenderer : MonoBehaviour
     public Color gasTrapColor = new Color(0.65f, 0.7f, 1f, 1f);
     public Color rockfallTrapColor = new Color(0.75f, 0.65f, 0.5f, 1f);
     public Color netTrapColor = new Color(0.9f, 0.85f, 0.55f, 1f);
+    public Color manaDrainTrapColor = new Color(0.45f, 0.6f, 1f, 1f);
+    public Color crossbowTrapColor = new Color(1f, 0.45f, 0.35f, 1f);
     [Tooltip("벽 화로(불 있는 방) — 바깥 불꽃 / 안쪽 불꽃")]
     public Color brazierColor = new Color(1f, 0.55f, 0.15f, 1f);
     public Color brazierCoreColor = new Color(1f, 0.92f, 0.55f, 1f);
@@ -334,7 +336,8 @@ public class AutomapRenderer : MonoBehaviour
     /// </summary>
     public static bool IsTrapSpent(FloorTrapType type)
     {
-        return type != FloorTrapType.Spike && type != FloorTrapType.Blade && type != FloorTrapType.FlameVent;
+        return type != FloorTrapType.Spike && type != FloorTrapType.Blade && type != FloorTrapType.FlameVent
+            && type != FloorTrapType.Crossbow;
     }
 
     private Color TrapColor(FloorTrapType type)
@@ -350,6 +353,8 @@ public class AutomapRenderer : MonoBehaviour
             case FloorTrapType.BlindingGas: return gasTrapColor;
             case FloorTrapType.Rockfall: return rockfallTrapColor;
             case FloorTrapType.Net: return netTrapColor;
+            case FloorTrapType.ManaDrain: return manaDrainTrapColor;
+            case FloorTrapType.Crossbow: return crossbowTrapColor;
             default: return spikeTrapColor;
         }
     }

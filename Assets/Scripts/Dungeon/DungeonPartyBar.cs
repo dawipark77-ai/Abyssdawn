@@ -43,12 +43,14 @@ public class DungeonPartyBar : MonoBehaviour
     private void OnEnable()
     {
         PlayerStats.OnStatusChanged += Refresh;
+        DungeonFieldStatus.OnChanged += Refresh; // [2026-10-08] 함정 상태이상(출혈 등) 아이콘
         _nextRefresh = 0f;
     }
 
     private void OnDisable()
     {
         PlayerStats.OnStatusChanged -= Refresh;
+        DungeonFieldStatus.OnChanged -= Refresh;
     }
 
     private void Update()

@@ -1956,16 +1956,7 @@ public class BattleManager : MonoBehaviour
 
         // [2026-10-05] 게임 오버 창 — "Start Over"(처음부터) / "Last Save"(마지막 저장). 저장이 없으면 Last Save 는 잠김.
         //   나중에 타이틀 화면이 생기면 Start Over 를 타이틀로 보내면 된다.
-        bool hasSave = SaveSystem.HasSave;
-        string saveInfo = null;
-        if (hasSave)
-        {
-            SaveSystem.SaveData d = SaveSystem.Peek();
-            if (d != null) saveInfo = $"<color=#9FC8FF>B{d.currentFloor}  ·  Lv {d.heroLevel}\n{d.savedAt}</color>";
-        }
-        GameOverScreen.Show(hasSave, saveInfo,
-            () => GameOverRestart(false),
-            () => GameOverRestart(true));
+        GameOverFlow.ShowScreen(() => GameOverRestart(false), () => GameOverRestart(true));
     }
 
     /// <summary>게임 오버 창에서 고른 대로 다시 시작. loadSave=true 면 마지막 저장, 실패하거나 false 면 B1 새 탐험.</summary>
@@ -1974,54 +1965,8 @@ public class BattleManager : MonoBehaviour
         // [2026-10-01] 게임 오버 후에는 들어왔던 던전 씬으로 (층·상태는 아래에서 1층으로 초기화).
         //   고정 씬 이름(startDungeonScene)은 들어온 씬을 모를 때만 — 전엔 항상 07 로 가서 08 에서 죽으면 다른 씬이 열렸다.
         string restartScene = !string.IsNullOrEmpty(DungeonEncounter.lastDungeonScene) ? DungeonEncounter.lastDungeonScene : startDungeonScene;
-
-        // HP/MP 최대값으로 리셋 (SO에 직접 기록)
-        foreach (var member in activePartyMembers)
-        {
-            if (member != null)
-            {
-                member.currentHP = member.maxHP;
-                member.currentMP = member.maxMP;
-            }
-        }
-
-        // 던전 영속 데이터 전체 초기화 (층수, 안개, 위치, 상태이상)
-        DungeonPersistentData.ClearState();
-
-        GameManager.EnsureInstance().ClearAllData();
-        CompanionPartyPersistence.Clear();
-        DestroyAllCompanionInstances();
-        PlayerStats.PendingLevelUpNotes.Clear();
-        DungeonEncounter.justReturnedFromBattle = false;
-
-        // [2026-10-03] Last Save: 마지막으로 저장한 곳(마을)에서 다시 시작 — 층·지도·주인공·동료·소지품 모두 저장 당시로.
-        //   Start Over 이거나 불러오기에 실패하면 아래처럼 1층부터 새 탐험 (저장 파일은 지우지 않음).
-        if (loadSave && SaveSystem.HasSave)
-        {
-            SaveSystem.PendingNotice = "<color=#FF6B6B>Your party has fallen...</color>\n<size=80%>You awaken at your last save.</size>";
-            if (SaveSystem.Load(out string loadError))
-            {
-                Debug.Log("[BattleManager] Game Over — 마지막 저장에서 다시 시작");
-                return;
-            }
-            SaveSystem.PendingNotice = null;
-            Debug.LogWarning($"[BattleManager] Game Over — 저장 불러오기 실패({loadError}), 1층부터 새로 시작");
-            DungeonPersistentData.ClearState();
-            GameManager.EnsureInstance().ClearAllData();
-            CompanionPartyPersistence.Clear();
-        }
-
-        // [2026-09-30] 아이템·장비도 새 탐험 상태로 (새벽의 잔 최대 충전, 주운 아이템·장비 초기화, 장착 장비 = 시작 장비)
-        ConsumableInventory.ResetForNewRun();
-        EquipmentBag.ResetForNewRun(playerStatData);
-        PlayerWallet.ResetForNewRun();
-        // [2026-10-04] 저장 없이 죽으면 스킬도 처음부터 (배운 스킬·장착 슬롯 비움, SP 는 새 주인공 생성 시 1)
-        if (playerStatData != null) playerStatData.ResetSkillsForNewRun();
-        PlayerStats.PendingLevelUpNotes.Clear();
-
-        Debug.Log($"[BattleManager] Game Over — resetting to floor 1 in '{restartScene}'.");
-        DungeonEncounter.justReturnedFromBattle = false; // 게임오버는 새 시작이므로 쿨다운 없음
-        EncounterTransition.LoadSceneWithFade(restartScene);
+        // [2026-10-08] 재시작 절차는 GameOverFlow 로 옮김 (던전 함정 사망도 같은 절차를 쓴다)
+        GameOverFlow.Restart(loadSave, restartScene, activePartyMembers, playerStatData, DestroyAllCompanionInstances);
     }
 
     private void ForceDisableUIPanels()
@@ -3564,6 +3509,13 @@ public class BattleManager : MonoBehaviour
         BuildTurnOrder();
         _enemiesActedThisRound.Clear();
 
+        // [2026-10-07] 압도(레벨 차이 30↑): 첫 라운드는 적이 겁먹어 행동하지 못함 → 아군 선공
+        bool enemiesCowed = _resolutionRound == 0 && player != null
+                            && player.level - GetAreaLevel() >= overwhelmLevelGap;
+        _resolutionRound++;
+        if (enemiesCowed)
+            AddMessage("<color=#FFD700>The enemies cower before you and dare not strike first!</color>");
+
         // [2026-10-06] 선제 스킬(SkillData.preemptive, 예: 버티기 자세)은 순서와 상관없이 라운드 맨 처음에 발동
         var preemptiveDone = new HashSet<AllyCommand>();
         foreach (var pc in pendingCommands)
@@ -3595,6 +3547,7 @@ public class BattleManager : MonoBehaviour
             }
             else
             {
+                if (enemiesCowed) continue; // 압도: 첫 라운드 적 행동 생략
                 Debug.Log($"[BattleManager] Executing enemy turn: {actor.enemy?.enemyName}");
                 // 적 액션 실행 (스턴에 걸려 넘어간 것도 '행동한 것'으로 기록)
                 if (actor.enemy != null) _enemiesActedThisRound.Add(actor.enemy);
@@ -4869,15 +4822,21 @@ public class BattleManager : MonoBehaviour
 
         turnInProgress = true;
 
-        // [2026-10-06] DQ식 도망
-        //   주인공 레벨 ≥ 지역 레벨 → 100%.
-        //   낮으면 25% → 50% → 75% → 100% (실패할 때마다 +25%p 누적, 4번째 확정) + 주인공 민첩 1당 +1%p.
+        // [2026-10-07] DQ식 도망 — 레벨 차이 단계
+        //   차이 = 주인공 레벨 − 지역 레벨.
+        //   차이 30↑ 120% · 20↑ 100% · 10↑ 90% · 5↑ 70% (기본 공식보다 낮아지지 않음).
+        //   5 미만이면 기본 공식: 15% + 실패 1회당 +25%p + 민첩 보정 + 연막탄 등.
         //   실패하면 파티 전원 이번 턴 행동 없이 적만 행동.
-        int areaLevel = GetAreaLevel();
-        float fleeChance = currentControlledMember.level >= areaLevel
-            ? 1f
-            : Mathf.Clamp01(fleeBaseChance + fleeStepChance * _fleeFailCount + currentControlledMember.Agility * fleeChancePerAgi
-                            + currentControlledMember.escapeBonus); // 연막탄 등
+        int levelGap = currentControlledMember.level - GetAreaLevel();
+        float formulaChance = Mathf.Clamp01(fleeBaseChance + fleeStepChance * _fleeFailCount
+                                            + currentControlledMember.Agility * fleeChancePerAgi
+                                            + currentControlledMember.escapeBonus); // 연막탄 등
+        float tierChance = levelGap >= overwhelmLevelGap ? 1.2f
+                         : levelGap >= 20 ? 1f
+                         : levelGap >= 10 ? 0.9f
+                         : levelGap >= 5  ? 0.7f
+                         : 0f;
+        float fleeChance = Mathf.Max(tierChance, formulaChance);
         if (UnityEngine.Random.value < fleeChance)
         {
             AddMessage("You ran away!");
@@ -4901,7 +4860,7 @@ public class BattleManager : MonoBehaviour
     }
 
     [Header("도망 (DQ식)")]
-    [Tooltip("주인공 레벨이 지역 레벨보다 낮을 때, 첫 시도 기본 확률 (0.15 = 15%)")]
+    [Tooltip("레벨 차이 5 미만일 때 첫 시도 기본 확률 (0.15 = 15%)")]
     [Range(0f, 1f)] public float fleeBaseChance = 0.15f;
     [Tooltip("도망 실패 1회마다 더해지는 확률 (0.25 → 15%, 40%, 65%, 90%, 100%)")]
     [Range(0f, 1f)] public float fleeStepChance = 0.25f;
@@ -4912,6 +4871,10 @@ public class BattleManager : MonoBehaviour
     [Tooltip("지역 레벨에 더하는 보정")]
     public int areaLevelOffset = 0;
 
+    [Tooltip("이 레벨 차이 이상이면 '압도': 첫 라운드 적이 행동하지 못함 (아군 선공)")]
+    public int overwhelmLevelGap = 30;
+
+    private int _resolutionRound = 0; // 이번 전투에서 진행된 해결 라운드 수
     private int _fleeFailCount = 0; // 이번 전투에서 도망 실패한 횟수 (전투마다 새 BattleManager 라 자동 초기화)
 
     /// <summary>현재 층의 지역 레벨 (도망 판정용).</summary>

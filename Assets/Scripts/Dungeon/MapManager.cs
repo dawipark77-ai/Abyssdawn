@@ -83,10 +83,6 @@ public class MapManager : MonoBehaviour
     public string townSceneName = "Town";
 
     [Header("Exploration")]
-    [Tooltip("가시 함정 피해 (최대 HP 비율). HP 는 1 아래로 내려가지 않는다")]
-    [Range(0f, 1f)] public float spikeDamagePercent = 0.1f;
-    [Tooltip("구멍 함정으로 떨어질 때 피해 (최대 HP 비율)")]
-    [Range(0f, 1f)] public float pitfallDamagePercent = 0.05f;
     [Tooltip("회복의 샘 회복량 (최대 HP·MP 비율)")]
     [Range(0f, 1f)] public float springHealPercent = 0.5f;
     [Tooltip("경보 함정 문구를 보여준 뒤 전투가 시작되기까지 (초)")]
@@ -387,6 +383,39 @@ public class MapManager : MonoBehaviour
         if (string.IsNullOrEmpty(msg)) return;
         if (msg.Contains(" -")) _hud.Flash(new Color(0.6f, 0.1f, 0.4f, 0.3f), 0.25f);
         Toast(msg);
+        CheckHeroDeath();
+    }
+
+    // ─────────────────────────────────────────
+    // 던전 사망 (함정·함정 상태이상) → 게임 오버 [2026-10-08]
+    // ─────────────────────────────────────────
+
+    [Tooltip("던전에서 쓰러진 뒤 게임 오버 창이 뜨기까지 (초)")]
+    public float dungeonDeathDelay = 2f;
+    private bool _heroDead;
+
+    /// <summary>주인공 HP 가 0 이면 이동을 막고 게임 오버 창을 띄운다 (한 번만).</summary>
+    private void CheckHeroDeath()
+    {
+        if (_heroDead) return;
+        PlayerStats hero = GetHeroStats();
+        if (hero == null || hero.currentHP > 0) return;
+        _heroDead = true;
+        if (_player != null) _player.LockInput(this);
+        _hud.Flash(new Color(0.5f, 0f, 0f, 0.8f), 1.2f);
+        Toast("<color=#FF4A4A>You have fallen...</color>");
+        Debug.Log($"[MapManager] B{(FloorData != null ? FloorData.floorNumber : 0)} 주인공 사망 (던전) → 게임 오버");
+        StartCoroutine(DungeonGameOverRoutine(hero));
+    }
+
+    private IEnumerator DungeonGameOverRoutine(PlayerStats hero)
+    {
+        yield return new WaitForSeconds(dungeonDeathDelay);
+        string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        var party = new List<PlayerStats> { hero };
+        GameOverFlow.ShowScreen(
+            () => GameOverFlow.Restart(false, scene, party, hero.statData, null),
+            () => GameOverFlow.Restart(true, scene, party, hero.statData, null));
     }
 
     /// <summary>탐험 스킬 '함정 감지': 걸을 때 상하좌우·대각 1칸의 숨은 함정을 25% 확률로 알아챈다 (함정마다 따로).</summary>
@@ -471,6 +500,7 @@ public class MapManager : MonoBehaviour
             Toast("<color=#FF6B6B>Your hand slips!</color>");
             Debug.Log($"[MapManager] 함정 해제 실패 {pos}: {cell.trap}");
             TriggerTrap(pos, cell.trap, FieldSkills.DisarmFailDamageMult, true);
+            CheckHeroDeath();
         }
     }
 
@@ -777,25 +807,51 @@ public class MapManager : MonoBehaviour
             case FloorTrapType.BlindingGas: return "gas trap";
             case FloorTrapType.Rockfall: return "rockfall trap";
             case FloorTrapType.Net: return "net trap";
+            case FloorTrapType.ManaDrain: return "mana-drain rune";
+            case FloorTrapType.Crossbow: return "crossbow trap";
             default: return "trap";
         }
     }
 
-    // [2026-10-07] 함정 피해 (최대 HP 비율). 가시는 층마다 +1% (최대 25%)
-    [Header("Traps (2026-10-07)")]
-    [Range(0f, 1f)] public float poisonDartDamagePercent = 0.05f;
-    [Range(0f, 1f)] public float bladeDamagePercent = 0.10f;
-    [Range(0f, 1f)] public float flameDamagePercent = 0.08f;
-    [Range(0f, 1f)] public float rockfallDamagePercent = 0.18f;
+    // [2026-10-08] 함정 피해 20~30% + 출혈 3턴 (한 걸음 = 1턴, 매 턴 4%). 함정·함정 상태이상으로도 죽는다 → 게임 오버.
+    //   기본 20%, 칼날·화염 25%, 낙석·석궁 30%, 가시는 층마다 +1% (최대 30%). 해제 실패는 피해 절반.
+    [Header("Traps (2026-10-07 개편)")]
+    [Tooltip("모든 함정의 기본 피해 (최대 HP 비율)")]
+    [Range(0f, 1f)] public float trapBaseDamagePercent = 0.20f;
+    [Tooltip("모든 함정이 거는 출혈 지속 턴 (한 걸음 = 1턴, 매 턴 최대 HP 4%)")]
+    public int trapBleedTurns = 3;
+    [Tooltip("무거운 함정(칼날·화염)의 추가 피해")]
+    [Range(0f, 1f)] public float trapHeavyBonusPercent = 0.05f;
+    [Tooltip("가장 무거운 함정(낙석·석궁)의 추가 피해")]
+    [Range(0f, 1f)] public float trapCrushBonusPercent = 0.10f;
+    [Tooltip("가시 함정: 층마다 더해지는 피해 (최대 = 가장 무거운 함정 추가 피해만큼)")]
+    [Range(0f, 0.05f)] public float spikePerFloorPercent = 0.01f;
+    [Tooltip("마나 흡수 룬: 잃는 MP (최대 MP 비율)")]
+    [Range(0f, 1f)] public float manaDrainPercent = 0.5f;
     [Tooltip("그물 함정: 위험도 게이지 상승량 (0~1). 가득 차면 즉시 전투")]
     [Range(0f, 1f)] public float netDangerAdd = 0.35f;
 
-    private float SpikePercent => Mathf.Min(0.25f, spikeDamagePercent + 0.01f * Mathf.Max(0, FloorData.floorNumber - 1));
+    /// <summary>종류별 피해 비율 (기본 40% + 추가).</summary>
+    private float TrapDamagePercent(FloorTrapType type)
+    {
+        float p = trapBaseDamagePercent;
+        switch (type)
+        {
+            case FloorTrapType.Spike: p += Mathf.Min(trapCrushBonusPercent, spikePerFloorPercent * Mathf.Max(0, FloorData.floorNumber - 1)); break;
+            case FloorTrapType.Blade:
+            case FloorTrapType.FlameVent: p += trapHeavyBonusPercent; break;
+            case FloorTrapType.Rockfall:
+            case FloorTrapType.Crossbow: p += trapCrushBonusPercent; break;
+        }
+        return Mathf.Clamp01(p);
+    }
 
     /// <summary>함정 발동. 해제됐거나 다 쓴 함정은 아무 일도 없다. 무슨 일이 있었으면 true.</summary>
     private bool TriggerTrap(Vector2Int pos, FloorTrapType type)
     {
-        return TriggerTrap(pos, type, 1f, false);
+        bool hit = TriggerTrap(pos, type, 1f, false);
+        CheckHeroDeath();
+        return hit;
     }
 
     /// <summary>damageMult: 피해 배율 (해제 실패 = 0.5). fromDisarm: 해제 실패로 발동 (제자리에서 — 이동 없음).</summary>
@@ -807,92 +863,97 @@ public class MapManager : MonoBehaviour
         FloorState.knownTraps.Add(pos);
         FloorState.sprungTraps.Add(pos);
         if (automapRenderer != null) automapRenderer.Rebuild();
-        Debug.Log($"[MapManager] B{FloorData.floorNumber} 함정 발동 {pos}: {type}{(fromDisarm ? " (해제 실패)" : "")}");
+
+        // 공통: 기본 피해 + 출혈 3턴
+        float percent = TrapDamagePercent(type) * damageMult;
+        int dmg = DamageHero(percent);
+        DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Bleed, trapBleedTurns, 1);
+        string hit = $"<color=#FF6B6B>-{dmg} HP</color>  <color=#FF5A5A>Bleeding {trapBleedTurns}</color>";
+        Debug.Log($"[MapManager] B{FloorData.floorNumber} 함정 발동 {pos}: {type}{(fromDisarm ? " (해제 실패)" : "")} 피해 {dmg} ({percent:P0}) + 출혈 {trapBleedTurns}턴");
 
         switch (type)
         {
             case FloorTrapType.PoisonDart:
-            {
-                int dmg = DamageHero(poisonDartDamagePercent * damageMult);
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Poison);
                 _hud.Flash(new Color(0.3f, 0.9f, 0.2f, 0.45f));
-                Toast($"<color=#7CFC7C>A poison dart!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#7CFC7C>poisoned</color>. (Antidote cures it)</size>");
+                Toast($"<color=#7CFC7C>A poison dart!</color> {hit}\n<size=80%>You are <color=#7CFC7C>poisoned</color>. (Antidote cures it)</size>");
                 return true;
-            }
             case FloorTrapType.Blade:
-            {
-                int dmg = DamageHero(bladeDamagePercent * damageMult);
-                DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Bleed);
                 _hud.Flash(new Color(1f, 0.05f, 0.05f, 0.55f));
-                Toast($"<color=#FF5A5A>Hidden blades!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#FF5A5A>bleeding</color>. (Bandage stops it)</size>");
+                Toast($"<color=#FF5A5A>Hidden blades!</color> {hit}\n<size=80%>(Bandage stops the bleeding)</size>");
                 return true;
-            }
             case FloorTrapType.FlameVent:
-            {
-                int dmg = DamageHero(flameDamagePercent * damageMult);
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Ignite);
                 _hud.Flash(new Color(1f, 0.45f, 0f, 0.55f));
-                Toast($"<color=#FF9A3C>A jet of flame!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#FF9A3C>burning</color>. (Coolant puts it out)</size>");
+                Toast($"<color=#FF9A3C>A jet of flame!</color> {hit}\n<size=80%>You are <color=#FF9A3C>burning</color>. (Coolant puts it out)</size>");
                 return true;
-            }
             case FloorTrapType.BlindingGas:
-            {
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Blind);
                 if (_player != null) RevealAt(_player.gridPos); // 시야가 바로 좁아진다
                 _hud.Flash(new Color(0.55f, 0.55f, 0.75f, 0.6f), 0.6f);
-                Toast("<color=#B0B0FF>Choking gas!</color>\n<size=80%>Your eyes sting — you can barely see. (Purification Water clears it)</size>");
+                Toast($"<color=#B0B0FF>Choking gas!</color> {hit}\n<size=80%>Your eyes sting — you can barely see. (Purification Water clears it)</size>");
                 return true;
-            }
             case FloorTrapType.Rockfall:
-            {
-                int dmg = DamageHero(rockfallDamagePercent * damageMult);
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Stun);
                 _hud.Flash(new Color(0.5f, 0.4f, 0.3f, 0.7f), 0.5f);
-                Toast($"<color=#D9C2A0>Rocks crash down!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#FFD700>concussed</color> — you'll be stunned when the next fight starts.</size>");
+                Toast($"<color=#D9C2A0>Rocks crash down!</color> {hit}\n<size=80%>You are <color=#FFD700>concussed</color> — you'll be stunned when the next fight starts.</size>");
+                return true;
+            case FloorTrapType.Crossbow:
+                _hud.Flash(new Color(1f, 0.1f, 0.1f, 0.6f), 0.4f);
+                Toast($"<color=#FF7A5A>Crossbow bolts fly from the walls!</color> {hit}");
+                return true;
+            case FloorTrapType.ManaDrain:
+            {
+                PlayerStats stats = GetHeroStats();
+                int lostMp = 0;
+                if (stats != null)
+                {
+                    int before = stats.currentMP;
+                    stats.currentMP = Mathf.Max(0, before - Mathf.RoundToInt(stats.maxMP * manaDrainPercent * damageMult));
+                    lostMp = before - stats.currentMP;
+                }
+                _hud.Flash(new Color(0.3f, 0.5f, 1f, 0.55f));
+                Toast($"<color=#7FA8FF>A mana-drain rune!</color> {hit}  <color=#7FA8FF>-{lostMp} MP</color>");
                 return true;
             }
             case FloorTrapType.Net:
             {
                 float add = netDangerAdd * damageMult;
                 _hud.Flash(new Color(0.9f, 0.85f, 0.5f, 0.45f));
-                Toast("<color=#E6D98C>A net drops on you!</color>\n<size=80%>You struggle free... something heard that.</size>");
+                Toast($"<color=#E6D98C>A barbed net drops on you!</color> {hit}\n<size=80%>You struggle free... something heard that.</size>");
                 if (DungeonEncounter.Instance != null) DungeonEncounter.Instance.AddDanger(add);
                 return true;
             }
             case FloorTrapType.Teleport:
             {
-                if (fromDisarm) { Toast("<color=#D19BFF>The rune flares and fizzles out.</color>"); return true; }
+                if (fromDisarm) { Toast($"<color=#D19BFF>The rune flares and burns you!</color> {hit}"); return true; }
                 _hud.Flash(new Color(0.75f, 0.4f, 1f, 0.5f));
                 FloorRoom here = FloorData.GetRoomAt(pos);
                 Vector2Int target = RandomRoomCell(here != null ? here.id : -1);
                 if (_player != null) _player.Teleport(target);
                 RevealAt(target);
                 SnapCamera();
-                Toast("<color=#D19BFF>A teleport trap!</color> You are whisked away...");
+                Toast($"<color=#D19BFF>A teleport trap!</color> {hit}\n<size=80%>You are torn away...</size>");
                 return true;
             }
             case FloorTrapType.Alarm:
                 _hud.Flash(new Color(1f, 0.55f, 0.15f, 0.5f));
-                Toast("<color=#FFA040>An alarm trap!</color> Monsters close in!");
+                Toast($"<color=#FFA040>An alarm trap!</color> {hit}\n<size=80%>Monsters close in!</size>");
                 StartCoroutine(AlarmRoutine());
                 return true;
             case FloorTrapType.Pitfall:
             {
-                if (fromDisarm) { Toast("<color=#FF5A8C>The floor gives way — you leap back just in time.</color>"); return true; }
+                if (fromDisarm) { Toast($"<color=#FF5A8C>The floor gives way — you scramble back, cut and bruised.</color> {hit}"); return true; }
                 int next = FloorData.floorNumber + 1;
-                int dmg = DamageHero(pitfallDamagePercent);
                 _hud.Flash(new Color(0f, 0f, 0f, 0.8f), 0.6f);
                 ChangeFloor(next, Arrival.RandomRoom);
-                Toast($"<color=#FF5A8C>A pitfall!</color> You fall to B{next}. <color=#FF6B6B>-{dmg} HP</color>");
+                Toast($"<color=#FF5A8C>A pitfall!</color> You fall to B{next}. {hit}");
                 return true;
             }
             default: // Spike
-            {
-                int dmg = DamageHero(SpikePercent * damageMult);
                 _hud.Flash(new Color(1f, 0.15f, 0.1f, 0.5f));
-                Toast($"<color=#FF6B6B>Spike trap! -{dmg} HP</color>");
+                Toast($"<color=#FF6B6B>Spike trap!</color> {hit}");
                 return true;
-            }
         }
     }
 
@@ -904,14 +965,14 @@ public class MapManager : MonoBehaviour
         if (DungeonEncounter.Instance != null) DungeonEncounter.Instance.ForceEncounter();
     }
 
-    /// <summary>최대 HP × percent 피해. 함정으로는 쓰러지지 않는다 (HP 최소 1). 실제 피해량 반환.</summary>
+    /// <summary>최대 HP × percent 피해. [2026-10-08] 함정으로도 쓰러진다 (HP 0 → CheckHeroDeath). 실제 피해량 반환.</summary>
     private int DamageHero(float percent)
     {
         PlayerStats stats = GetHeroStats();
         if (stats == null || percent <= 0f) return 0;
         int dmg = Mathf.Max(1, Mathf.RoundToInt(stats.maxHP * percent));
         int before = stats.currentHP;
-        stats.currentHP = Mathf.Max(1, before - dmg);
+        stats.currentHP = Mathf.Max(0, before - dmg);
         return before - stats.currentHP;
     }
 
