@@ -73,6 +73,7 @@ public class DungeonFullMap : MonoBehaviour
         AutomapRenderer automap = _map != null ? _map.automapRenderer : null;
         // 축소 비율의 제곱근만큼 굵게 — 그대로 곱하면 큰 층에서 선이 칸을 덮을 만큼 두꺼워진다.
         if (automap != null) automap.SetLineScale(open ? Mathf.Sqrt(follow.ZoomRatio) : 1f);
+        if (automap != null) automap.SetOverview(open); // [2026-10-08] 전체 지도는 어둠 없이 (가 본 곳 밝게)
 
         DungeonGridPlayer player = FindFirstObjectByType<DungeonGridPlayer>();
         if (player != null)

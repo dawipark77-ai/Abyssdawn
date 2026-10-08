@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Dawn_Chalice
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Dawn Chalice
-  icon: {fileID: 0}
+  icon: {fileID: -5063216152701466143, guid: 9193eccd8dc30974a8da62eba23f0727, type: 3}
   description: Even in the abyss, dawn will come. At least, that is what we must
     believe.
   itemCategory: 3
@@ -27,6 +27,7 @@ MonoBehaviour:
   evasionBuff: 0
   escapeChanceBuff: 0
   buffDuration: 0
+  skillPointGain: 0
   mpPenaltyPercent: 0
   maxStack: 3
   usableInBattle: 1
@@ -37,4 +38,5 @@ MonoBehaviour:
   isChargeable: 1
   maxCharges: 3
   currentCharges: 3
+  buyPrice: 0
   sellPrice: 0

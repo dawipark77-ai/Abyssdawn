@@ -41,7 +41,10 @@ public class NewSkillTreeNode : MonoBehaviour
         SkillData = data;
 
         if (iconImage != null)
+        {
             iconImage.sprite = data.skillIcon;
+            SkillIconFrame.Apply(iconImage); // [2026-10-09] 황금 테두리
+        }
 
         if (nameLabel != null)
             nameLabel.text = data.skillName;

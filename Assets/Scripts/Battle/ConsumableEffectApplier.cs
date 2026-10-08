@@ -22,6 +22,7 @@ public static class ConsumableEffectApplier
         public int mpLost;
         public List<StatusEffectType> curesApplied;
         public string buffText;  // 건 버프 요약 (예: "ATK +15% (3 turns)"). 없으면 null
+        public StatusEffectType? sideEffect; // [2026-10-08] 부작용으로 걸린 상태이상 (없으면 null)
 
         public bool AnyApplied =>
             hpHealed > 0 || mpHealed > 0 || mpLost > 0
@@ -135,6 +136,31 @@ public static class ConsumableEffectApplier
             }
             if (parts.Count > 0)
                 result.buffText = string.Join(", ", parts) + $" ({item.buffDuration} turn{(item.buffDuration == 1 ? "" : "s")})";
+        }
+
+        // 6) [2026-10-08] 부작용: 확률로 상태이상 (예: 약초 20% 독 3턴)
+        //    전투 중 = 전투 상태이상, 던전 = 던전 상태이상 (한 걸음 = 1턴, 매 턴 피해)
+        if (item.sideEffectChance > 0f && item.sideEffectTurns > 0 && Random.value < item.sideEffectChance)
+        {
+            bool inBattle = Object.FindFirstObjectByType<BattleManager>() != null;
+            bool applied = false;
+            if (inBattle)
+            {
+                var so = DungeonFieldStatus.BattleAssetFor(item.sideEffectType);
+                if (so != null) applied = user.ApplyStatusEffect(so, item.sideEffectTurns);
+            }
+            else if (!user.IsRecruitedCompanion)
+            {
+                DungeonFieldStatus.Add(item.sideEffectType, item.sideEffectTurns, 1);
+                applied = true;
+            }
+            if (applied)
+            {
+                result.sideEffect = item.sideEffectType;
+                string se = $"{DungeonFieldStatus.NameOf(item.sideEffectType)} ({item.sideEffectTurns} turns)";
+                result.buffText = string.IsNullOrEmpty(result.buffText) ? se : result.buffText + ", " + se;
+                Debug.Log($"[ConsumableEffectApplier] {item.itemName} 부작용 → {item.sideEffectType} {item.sideEffectTurns}턴 ({(inBattle ? "전투" : "던전")})");
+            }
         }
 
         return result;

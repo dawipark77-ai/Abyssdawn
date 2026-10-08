@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bandage
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Bandage
-  icon: {fileID: 0}
+  icon: {fileID: 6851228247741294694, guid: 19ddce721897761468576bea0364c23d, type: 3}
   description: Tied rough, but the bleeding stops.
   itemCategory: 2
   itemIcon: {fileID: 6851228247741294694, guid: 19ddce721897761468576bea0364c23d, type: 3}
@@ -26,8 +26,9 @@ MonoBehaviour:
   evasionBuff: 0
   escapeChanceBuff: 0
   buffDuration: 0
+  skillPointGain: 0
   mpPenaltyPercent: 0
-  maxStack: 5
+  maxStack: 50
   usableInBattle: 1
   usableOnMap: 1
   isPermanent: 0

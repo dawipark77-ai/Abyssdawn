@@ -22,6 +22,7 @@ public static class FieldSkills
     public const int TrapDetectSearchBonus = 1;            // 서치 반경 +1
     public const float TrapDetectStopChance = 0.5f;       // 숨은 함정 직전 멈춤
     public const float DisarmBaseChance = 0.55f;
+    public const float DisarmNoSkillChance = 0.30f;      // [2026-10-08] 스킬 없이 함정을 눌러 해제할 때
     public const float DisarmPerAgi = 0.005f;
     public const float DisarmMaxChance = 0.95f;
     public const float DisarmFailDamageMult = 0.5f;

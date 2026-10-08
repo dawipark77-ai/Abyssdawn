@@ -146,6 +146,7 @@ public class CompanionSlotView : MonoBehaviour
             {
                 slot.instinctIcon.sprite = instinct.skillIcon;
                 slot.instinctIcon.gameObject.SetActive(true);
+                SkillIconFrame.Apply(slot.instinctIcon); // [2026-10-09] 황금 테두리
             }
             else
             {
@@ -171,6 +172,7 @@ public class CompanionSlotView : MonoBehaviour
             {
                 img.sprite = skills[i].skillIcon;
                 img.gameObject.SetActive(true);
+                SkillIconFrame.Apply(img);
             }
             else
             {
@@ -193,6 +195,7 @@ public class CompanionSlotView : MonoBehaviour
             {
                 img.sprite = passives[i].passiveIcon;
                 img.gameObject.SetActive(true);
+                SkillIconFrame.Apply(img);
             }
             else
             {

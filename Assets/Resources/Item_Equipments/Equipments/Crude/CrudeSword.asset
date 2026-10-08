@@ -44,3 +44,7 @@ MonoBehaviour:
   backflowSuppression: 0
   buyPrice: 200
   sellPrice: 100
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

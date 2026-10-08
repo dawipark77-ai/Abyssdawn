@@ -20,10 +20,16 @@ using UnityEngine.Tilemaps;
 public class AutomapRenderer : MonoBehaviour
 {
     [Header("Colors")]
-    [Tooltip("드러난 통로 바닥 채움 — 배경이 20% 비쳐 보이는 반투명 검정")]
-    public Color floorColor = new Color(0f, 0f, 0f, 0.8f);
+    [Tooltip("드러난 통로 바닥 채움 — [2026-10-08] 0.8 → 0.3: 배경 그림(바닥·그림자)이 70% 비쳐 보이게 (밝기는 어둠 막이 정함)")]
+    public Color floorColor = new Color(0f, 0f, 0f, 0.3f);
     [Tooltip("드러난 방 바닥 채움 — 통로와 같은 반투명 검정 (격자는 그 위에 보임)")]
-    public Color roomFloorColor = new Color(0f, 0f, 0f, 0.8f);
+    public Color roomFloorColor = new Color(0f, 0f, 0f, 0.3f);
+    [Tooltip("[2026-10-08] 바닥 막 짙기를 칸 밝기(주인공 거리)로 정한다: 1칸 이내(밝기 1) = floorColor 의 a, 2칸(밝기 0.5) = 이 값. 어둠 막과 겹쳐 최종 2칸 = 50% 검게 (실측)")]
+    [Range(0f, 1f)] public float floorAlphaMid = 0.4f;
+    [Tooltip("3칸 이상(밝기 0.2 이하)·지금 안 보이는 가 본 곳의 바닥 막 짙기 — [2026-10-09] 0.6 → 0.9: 최종 3칸 = 약 90% 검게 (실측)")]
+    [Range(0f, 1f)] public float floorAlphaFar = 0.9f;
+    [Tooltip("[2026-10-09] 벽 너머(바위)·아직 모르는 칸을 덮는 색 — 배경 그림이 비치지 않게 (a=0 이면 끔)")]
+    public Color hiddenBackingColor = Color.black;
     public Color wallColor = Color.white;
     [Tooltip("닫힌 문 (칸 경계 전체를 막는 막대)")]
     public Color doorColor = new Color(0.35f, 0.65f, 1f, 1f);
@@ -77,6 +83,30 @@ public class AutomapRenderer : MonoBehaviour
     private DungeonFloorState _state;
     private HashSet<Vector2Int> _revealed;
     private HashSet<Vector2Int> _visible; // 지금 시야 안의 칸 (null 이면 흐림 처리 안 함)
+    private Dictionary<Vector2Int, float> _light; // [2026-10-08] 칸마다 밝기 (null 이면 예전 방식)
+    private bool _overview;                        // 전체 지도 화면 — 어둠 없이
+
+    [Header("Darkness (2026-10-08)")]
+    [Tooltip("어둠 색 — 밝기 0 인 칸을 이 색으로 완전히 덮는다")]
+    public Color darknessColor = Color.black;
+    [Tooltip("가 본 곳이지만 지금 안 보이는 칸의 밝기 (0.2 = 80% 어둡게). 비교안(sharpSightEdge)일 때는 rememberedBrightnessSharp 사용")]
+    [Range(0f, 1f)] public float rememberedBrightness = 0.2f;
+    [Tooltip("[2026-10-08 비교안] 켜면: 칸 모서리 = 둘레 4칸 중 가장 어두운 값 + 칸 가운데 점 (시야 경계가 날카롭고 3칸 너머가 더 검다). 끄면: 모서리 = 둘레 4칸 평균 (부드러운 기본안)")]
+    public bool sharpSightEdge = false;
+    [Tooltip("비교안(sharpSightEdge)일 때 기억한 칸의 밝기")]
+    [Range(0f, 1f)] public float rememberedBrightnessSharp = 0.1f;
+    [Tooltip("지도 바깥도 어둡게 덮는 여백 (칸)")]
+    public int darknessMargin = 40;
+
+    [Header("Torch (2026-10-08) — 바닥에 둥글게 퍼지는 간접 조명")]
+    public Color torchGlowColor = new Color(1f, 0.66f, 0.3f, 0.32f);
+    [Tooltip("빛 번짐 반지름 (칸) — 횃불 빛이 닿는 바닥 칸 안에서만 그림 (벽 너머 X)")]
+    [Range(0.5f, 4f)] public float torchGlowRadius = 2.2f;
+    [Tooltip("벽(바위) 칸은 옆 바닥 밝기의 이 비율만 받는다 — 어두운 밤 건물 벽처럼")]
+    [Range(0f, 1f)] public float wallLightFactor = 0.2f;
+    [Tooltip("벽 횃불은 벽 쪽으로 이만큼 붙여 그린다 (칸)")]
+    [Range(0f, 0.5f)] public float wallTorchOffset = 0.38f;
+    public Color torchPoleColor = new Color(0.35f, 0.25f, 0.16f, 1f);
     private Tilemap _reference;
     private Mesh _mesh;
     private float _lineScale = 1f;
@@ -127,6 +157,20 @@ public class AutomapRenderer : MonoBehaviour
         _visible = visible;
     }
 
+    /// <summary>[2026-10-08] 칸마다 밝기 (MapManager). null 이면 예전처럼 안개만.</summary>
+    public void SetLighting(Dictionary<Vector2Int, float> light)
+    {
+        _light = light;
+    }
+
+    /// <summary>전체 지도 화면에서는 어둠을 덮지 않고 가 본 곳을 밝게 보여준다.</summary>
+    public void SetOverview(bool on)
+    {
+        if (_overview == on) return;
+        _overview = on;
+        Rebuild();
+    }
+
     /// <summary>벽선·문 굵기 배율. 전체 지도처럼 축소해 볼 때 선이 너무 가늘어지지 않게 키운다 (평소 1).</summary>
     public void SetLineScale(float scale)
     {
@@ -152,11 +196,22 @@ public class AutomapRenderer : MonoBehaviour
             // 0) 층 전체 격자 (지도 방안) — 가장 아래
             if (gridColor.a > 0f) AddFloorGrid(cs);
 
+            // 1-0) [2026-10-09] 벽 너머(바위)·아직 모르는 칸은 배경 그림이 비치지 않게 완전히 검게 (벽선은 이 위에 그려짐)
+            if (_light != null && !_overview && hiddenBackingColor.a > 0f)
+                for (int x = 0; x < _data.width; x++)
+                    for (int y = 0; y < _data.height; y++)
+                    {
+                        Vector2Int q = new Vector2Int(x, y);
+                        if (_data.IsWalkable(q) && _revealed.Contains(q)) continue;
+                        AddRect(CellCenter(q), cs.x * 0.5f, cs.y * 0.5f, hiddenBackingColor);
+                    }
+
             // 1) 바닥 채움 — 먼저 그려야 선이 위에 올라간다. 방은 불투명 검정, 통로는 반투명
             foreach (var p in _revealed)
             {
                 if (!_data.IsWalkable(p)) continue;
                 Color fill = _data.GetCell(p).terrain == FloorTerrain.Room ? roomFloorColor : floorColor;
+                if (_light != null && !_overview) fill.a = FloorFillAlpha(p, fill.a);
                 if (fill.a <= 0f) continue;
                 AddRect(CellCenter(p), cs.x * 0.5f, cs.y * 0.5f, fill);
             }
@@ -173,6 +228,13 @@ public class AutomapRenderer : MonoBehaviour
                     if (_data.IsWalkable(p + Dirs[1])) AddRect(new Vector3(c.x + cs.x * 0.5f, c.y, c.z), gt * 0.5f, cs.y * 0.5f, revealedGridColor);
                     if (_data.IsWalkable(p + Dirs[2])) AddRect(new Vector3(c.x, c.y - cs.y * 0.5f, c.z), cs.x * 0.5f, gt * 0.5f, revealedGridColor);
                 }
+            }
+
+            // 1-c) [2026-10-08] 횃불 빛 — 바닥에 둥글게 퍼지는 따뜻한 빛 (가운데 진하고 바깥으로 0)
+            foreach (FloorTorch torch in _data.torches)
+            {
+                if (!_revealed.Contains(torch.cell)) continue;
+                AddTorchGlow(torch, cs);
             }
 
             // 2) 벽선 — 드러난 칸과 암반 사이 경계. 모서리가 끊기지 않게 두께만큼 길게.
@@ -206,8 +268,14 @@ public class AutomapRenderer : MonoBehaviour
             if (_data.hasStairsUp && _revealed.Contains(_data.stairsUpPos)) AddStairsIcon(CellCenter(_data.stairsUpPos), cs, true, stairsUpColor);
             if (_data.hasTownGate && _revealed.Contains(_data.townGatePos)) AddDiamond(CellCenter(_data.townGatePos), cs, townGateColor);
 
-            foreach (var room in _data.rooms)
-                if (room.lit && _revealed.Contains(room.brazierCell)) AddFlameIcon(CellCenter(room.brazierCell), cs);
+            // [2026-10-08] 벽 화로 아이콘 → 횃불 (벽 횃불은 벽에 붙여, 바닥 횃불은 기둥 + 불꽃)
+            foreach (FloorTorch torch in _data.torches)
+            {
+                if (!_revealed.Contains(torch.cell)) continue;
+                Vector3 tc = TorchLightCenter(torch, cs);
+                if (!torch.onWall) AddRect(new Vector3(tc.x, tc.y - cs.y * 0.18f, tc.z), cs.x * 0.05f, cs.y * 0.2f, torchPoleColor);
+                AddFlameIcon(new Vector3(tc.x, tc.y + (torch.onWall ? 0f : cs.y * 0.12f), tc.z), cs * 0.55f);
+            }
             foreach (var p in _data.chests)
                 if (_revealed.Contains(p)) AddChestIcon(CellCenter(p), cs, _state.openedChests.Contains(p));
             foreach (var p in _data.springs)
@@ -223,7 +291,9 @@ public class AutomapRenderer : MonoBehaviour
 
             // 5) 안개 — 가 본 곳이지만 지금 시야 밖인 칸을 어둡게 덮는다 (벽선·아이콘까지 흐리게, 맨 위에 그림).
             //    벽이 있는 쪽으로만 벽선 두께 절반만큼 넓혀, 이웃한 밝은 칸은 건드리지 않는다.
-            if (_visible != null && rememberedFogColor.a > 0f)
+            if (_light != null && !_overview) AddDarkness(cs);
+            else if (_overview) AddOverviewDarkness(cs);
+            else if (_visible != null && rememberedFogColor.a > 0f)
             {
                 float half = t * 0.5f + 0.001f;
                 foreach (var p in _revealed)
@@ -246,6 +316,223 @@ public class AutomapRenderer : MonoBehaviour
         _mesh.SetColors(_colors);
         _mesh.SetTriangles(_tris, 0);
         _mesh.RecalculateBounds();
+    }
+
+    // ─────────────────────────────────────────
+    // [2026-10-08] 어둠 · 횃불 빛
+    // ─────────────────────────────────────────
+
+    /// <summary>칸의 밝기 (0~1). 바위(벽 너머) 칸은 이웃한 바닥 칸 중 가장 밝은 값 — 벽선이 잘리지 않게.</summary>
+    private float CellBrightness(Vector2Int p)
+    {
+        if (_data.InBounds(p) && _data.IsWalkable(p)) return WalkableBrightness(p);
+        float best = 0f;
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                if (dx == 0 && dy == 0) continue;
+                Vector2Int n = new Vector2Int(p.x + dx, p.y + dy);
+                if (!_data.InBounds(n) || !_data.IsWalkable(n)) continue;
+                float b = WalkableBrightness(n);
+                if (b > best) best = b;
+            }
+        return best * wallLightFactor;
+    }
+
+    /// <summary>[2026-10-08] 바닥 막 짙기 — 밝기 1 → near, 0.5 → floorAlphaMid, 0.2 이하·안 보임 → floorAlphaFar (사이는 직선 보간).</summary>
+    private float FloorFillAlpha(Vector2Int p, float near)
+    {
+        float b;
+        if (!_light.TryGetValue(p, out b)) return floorAlphaFar;
+        if (b >= 0.5f) return Mathf.Lerp(floorAlphaMid, near, (b - 0.5f) / 0.5f);
+        return Mathf.Lerp(floorAlphaFar, floorAlphaMid, Mathf.Clamp01((b - 0.2f) / 0.3f));
+    }
+
+    private float WalkableBrightness(Vector2Int p)
+    {
+        float b;
+        if (_light.TryGetValue(p, out b)) return b;
+        return _revealed.Contains(p) ? (sharpSightEdge ? rememberedBrightnessSharp : rememberedBrightness) : 0f;
+    }
+
+    /// <summary>
+    /// 층 전체를 칸 단위 어둠으로 덮는다. 칸 가운데 = 그 칸의 밝기, 꼭짓점 = 둘레 4칸 중 가장 어두운 값.
+    /// [2026-10-08] 평균을 쓰면 3칸째 가장자리가 정한 밝기보다 밝아져 시야 밖이 비쳐 보였다 → 어두운 쪽을 따라 부드럽게 흐린다.
+    /// 지도 바깥은 완전히 검게.
+    /// </summary>
+    private void AddDarkness(Vector2 cs)
+    {
+        int w = _data.width, h = _data.height;
+        // 꼭짓점 (x, y) = 칸 (x-1..x, y-1..y) 의 모서리. 밝기 = 둘레 4칸 평균
+        float[,] corner = new float[w + 1, h + 1];
+        float[,] cell = new float[w, h];
+        for (int x = 0; x < w; x++)
+            for (int y = 0; y < h; y++) cell[x, y] = CellBrightness(new Vector2Int(x, y));
+        for (int x = 0; x <= w; x++)
+            for (int y = 0; y <= h; y++)
+            {
+                float min = 1f, sum = 0f;
+                for (int ix = x - 1; ix <= x; ix++)
+                    for (int iy = y - 1; iy <= y; iy++)
+                    {
+                        float v = (ix < 0 || iy < 0 || ix >= w || iy >= h) ? 0f : cell[ix, iy]; // 지도 밖 = 0
+                        if (v < min) min = v;
+                        sum += v;
+                    }
+                corner[x, y] = sharpSightEdge ? min : sum * 0.25f;
+            }
+
+        for (int x = 0; x < w; x++)
+            for (int y = 0; y < h; y++)
+            {
+                float a00 = corner[x, y], a10 = corner[x + 1, y], a01 = corner[x, y + 1], a11 = corner[x + 1, y + 1];
+                if (cell[x, y] >= 0.999f && a00 >= 0.999f && a10 >= 0.999f && a01 >= 0.999f && a11 >= 0.999f) continue; // 완전히 밝음
+                Vector3 c = CellCenter(new Vector2Int(x, y));
+                float hx = cs.x * 0.5f, hy = cs.y * 0.5f;
+                // 격자 y 아래로 증가 → 월드 아래(-y). (x,y) 꼭짓점 = 칸의 왼쪽 위. 가운데 점 = 칸 밝기 (삼각형 4개)
+                if (sharpSightEdge)
+                    AddCellFan(c, Dark(cell[x, y]),
+                               new Vector3(c.x - hx, c.y + hy, c.z), Dark(a00),
+                               new Vector3(c.x + hx, c.y + hy, c.z), Dark(a10),
+                               new Vector3(c.x + hx, c.y - hy, c.z), Dark(a11),
+                               new Vector3(c.x - hx, c.y - hy, c.z), Dark(a01));
+                else
+                    AddQuad4(new Vector3(c.x - hx, c.y + hy, c.z), Dark(a00),
+                             new Vector3(c.x + hx, c.y + hy, c.z), Dark(a10),
+                             new Vector3(c.x + hx, c.y - hy, c.z), Dark(a11),
+                             new Vector3(c.x - hx, c.y - hy, c.z), Dark(a01));
+            }
+        AddOutsideDarkness(cs);
+    }
+
+    /// <summary>전체 지도: 가 본 곳은 그대로, 안 본 곳과 지도 바깥만 검게.</summary>
+    private void AddOverviewDarkness(Vector2 cs)
+    {
+        for (int x = 0; x < _data.width; x++)
+            for (int y = 0; y < _data.height; y++)
+            {
+                Vector2Int p = new Vector2Int(x, y);
+                bool known = _revealed.Contains(p);
+                if (!known && !_data.IsWalkable(p))
+                    for (int dx = -1; dx <= 1 && !known; dx++)
+                        for (int dy = -1; dy <= 1 && !known; dy++)
+                        {
+                            Vector2Int n = new Vector2Int(x + dx, y + dy);
+                            if (_data.InBounds(n) && _data.IsWalkable(n) && _revealed.Contains(n)) known = true;
+                        }
+                if (known) continue;
+                AddRect(CellCenter(p), cs.x * 0.5f, cs.y * 0.5f, darknessColor);
+            }
+        AddOutsideDarkness(cs);
+    }
+
+    private void AddOutsideDarkness(Vector2 cs)
+    {
+        Rect r = FloorWorldRect();
+        float mx = darknessMargin * cs.x, my = darknessMargin * cs.y;
+        float z = CellCenter(Vector2Int.zero).z;
+        AddRect(new Vector3(r.center.x, r.yMax + my * 0.5f, z), r.width * 0.5f + mx, my * 0.5f, darknessColor); // 위
+        AddRect(new Vector3(r.center.x, r.yMin - my * 0.5f, z), r.width * 0.5f + mx, my * 0.5f, darknessColor); // 아래
+        AddRect(new Vector3(r.xMin - mx * 0.5f, r.center.y, z), mx * 0.5f, r.height * 0.5f, darknessColor);     // 왼쪽
+        AddRect(new Vector3(r.xMax + mx * 0.5f, r.center.y, z), mx * 0.5f, r.height * 0.5f, darknessColor);     // 오른쪽
+    }
+
+    private Color Dark(float brightness)
+    {
+        Color c = darknessColor;
+        c.a = Mathf.Clamp01(1f - brightness) * darknessColor.a;
+        return c;
+    }
+
+    /// <summary>가운데 점 + 네 꼭짓점 (삼각형 4개) — 칸 가운데 밝기는 그대로, 가장자리로 갈수록 이웃에 맞춰 흐려짐.</summary>
+    private void AddCellFan(Vector3 center, Color cc, Vector3 a, Color ca, Vector3 b, Color cb, Vector3 c, Color cColor, Vector3 d, Color cd)
+    {
+        int i = _verts.Count;
+        _verts.Add(center); _verts.Add(a); _verts.Add(b); _verts.Add(c); _verts.Add(d);
+        _colors.Add(cc); _colors.Add(ca); _colors.Add(cb); _colors.Add(cColor); _colors.Add(cd);
+        _tris.Add(i); _tris.Add(i + 1); _tris.Add(i + 2);
+        _tris.Add(i); _tris.Add(i + 2); _tris.Add(i + 3);
+        _tris.Add(i); _tris.Add(i + 3); _tris.Add(i + 4);
+        _tris.Add(i); _tris.Add(i + 4); _tris.Add(i + 1);
+    }
+
+    private void AddQuad4(Vector3 a, Color ca, Vector3 b, Color cb, Vector3 c, Color cc, Vector3 d, Color cd)
+    {
+        int i = _verts.Count;
+        _verts.Add(a); _verts.Add(b); _verts.Add(c); _verts.Add(d);
+        _colors.Add(ca); _colors.Add(cb); _colors.Add(cc); _colors.Add(cd);
+        _tris.Add(i); _tris.Add(i + 1); _tris.Add(i + 2);
+        _tris.Add(i); _tris.Add(i + 2); _tris.Add(i + 3);
+    }
+
+    /// <summary>벽 횃불은 벽 쪽으로 붙인 위치, 바닥 횃불은 칸 가운데.</summary>
+    private Vector3 TorchLightCenter(FloorTorch t, Vector2 cs)
+    {
+        Vector3 c = CellCenter(t.cell);
+        if (!t.onWall) return c;
+        // 격자 방향 → 월드 (격자 y 아래 = 월드 -y)
+        return new Vector3(c.x + t.wallDir.x * cs.x * wallTorchOffset, c.y - t.wallDir.y * cs.y * wallTorchOffset, c.z);
+    }
+
+    private readonly HashSet<Vector2Int> _glowArea = new HashSet<Vector2Int>();
+
+    /// <summary>
+    /// 횃불 빛 번짐 — 횃불에서 보이는(벽에 막히지 않은) 바닥 칸에만 그린다. 칸 꼭짓점마다 횃불까지 거리로 투명도를 정해
+    /// 바닥에 둥글게 퍼지는 간접 조명처럼 보인다. 벽 너머로는 새지 않는다.
+    /// </summary>
+    private void AddTorchGlow(FloorTorch torch, Vector2 cs)
+    {
+        int reach = Mathf.CeilToInt(torchGlowRadius);
+        FloorVisibility.ComputeVisible(_data, torch.cell, reach, _glowArea);
+        Vector3 center = TorchLightCenter(torch, cs);
+        float rx = torchGlowRadius * cs.x, ry = torchGlowRadius * cs.y;
+        foreach (Vector2Int p in _glowArea)
+        {
+            if (!_revealed.Contains(p)) continue;
+            Vector3 c = CellCenter(p);
+            float hx = cs.x * 0.5f, hy = cs.y * 0.5f;
+            Vector3 a = new Vector3(c.x - hx, c.y + hy, c.z), b = new Vector3(c.x + hx, c.y + hy, c.z);
+            Vector3 d = new Vector3(c.x + hx, c.y - hy, c.z), e = new Vector3(c.x - hx, c.y - hy, c.z);
+            AddQuad4(a, GlowAt(a, center, rx, ry), b, GlowAt(b, center, rx, ry), d, GlowAt(d, center, rx, ry), e, GlowAt(e, center, rx, ry));
+        }
+    }
+
+    private Color GlowAt(Vector3 v, Vector3 center, float rx, float ry)
+    {
+        float dx = (v.x - center.x) / rx, dy = (v.y - center.y) / ry;
+        float t = Mathf.Clamp01(Mathf.Sqrt(dx * dx + dy * dy));
+        Color c = torchGlowColor;
+        c.a *= (1f - t) * (1f - t); // 가운데 진하고 바깥으로 부드럽게 0
+        return c;
+    }
+
+    /// <summary>둥근 빛 번짐 — 가운데는 color, 바깥 둘레는 투명 (부채꼴 삼각형 묶음).</summary>
+    private void AddGlow(Vector3 center, float rx, float ry, Color color)
+    {
+        const int seg = 32;
+        Color edge = color; edge.a = 0f;
+        Color mid = color; mid.a = color.a * 0.45f;
+        int ci = _verts.Count;
+        _verts.Add(center); _colors.Add(color);
+        // 안쪽 고리(반지름 45%) + 바깥 고리 — 가운데가 더 오래 밝게 유지되도록
+        for (int k = 0; k < seg; k++)
+        {
+            float ang = k * Mathf.PI * 2f / seg;
+            _verts.Add(new Vector3(center.x + Mathf.Cos(ang) * rx * 0.45f, center.y + Mathf.Sin(ang) * ry * 0.45f, center.z)); _colors.Add(mid);
+        }
+        for (int k = 0; k < seg; k++)
+        {
+            float ang = k * Mathf.PI * 2f / seg;
+            _verts.Add(new Vector3(center.x + Mathf.Cos(ang) * rx, center.y + Mathf.Sin(ang) * ry, center.z)); _colors.Add(edge);
+        }
+        for (int k = 0; k < seg; k++)
+        {
+            int k2 = (k + 1) % seg;
+            int i0 = ci + 1 + k, i1 = ci + 1 + k2, o0 = ci + 1 + seg + k, o1 = ci + 1 + seg + k2;
+            _tris.Add(ci); _tris.Add(i1); _tris.Add(i0);
+            _tris.Add(i0); _tris.Add(i1); _tris.Add(o1);
+            _tris.Add(i0); _tris.Add(o1); _tris.Add(o0);
+        }
     }
 
     // ─────────────────────────────────────────
@@ -331,13 +618,12 @@ public class AutomapRenderer : MonoBehaviour
     }
 
     /// <summary>
-    /// 발견한 함정 중 다 써서 더는 작동하지 않는 것. 장치가 다시 감기는 가시·칼날·화염은 계속 작동한다
-    /// (밟을 때마다 다시 발동 — 함정 해제로 없앨 수 있다).
+    /// 발동한 함정이 다 써서 더는 작동하지 않는지.
+    /// [2026-10-09] 모든 함정은 한 번 발동(또는 해제)하면 완전히 끝 — 재사용 함정 없음 (예전: 가시·칼날·화염·석궁은 계속 작동).
     /// </summary>
     public static bool IsTrapSpent(FloorTrapType type)
     {
-        return type != FloorTrapType.Spike && type != FloorTrapType.Blade && type != FloorTrapType.FlameVent
-            && type != FloorTrapType.Crossbow;
+        return true;
     }
 
     private Color TrapColor(FloorTrapType type)

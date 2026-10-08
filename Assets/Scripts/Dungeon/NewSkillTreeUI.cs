@@ -377,6 +377,7 @@ public class NewSkillTreeUI : MonoBehaviour
         var iconImg = iconGO.GetComponent<Image>();
         iconImg.preserveAspect = true;
         if (data.skillIcon != null) iconImg.sprite = data.skillIcon;
+        SkillIconFrame.Apply(iconImg); // [2026-10-09] 황금 테두리
 
         // Learned badge (small green dot, top-right)
         var badgeGO  = MakeChildImage(btnGO.transform, "Badge", 20f, 20f);

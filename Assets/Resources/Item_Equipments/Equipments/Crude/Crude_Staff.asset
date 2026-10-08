@@ -12,15 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Crude_Staff
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: 
+  icon: {fileID: 0}
+  description: An unbalanced two-handed staff. MAG +2, Max MP +8%.
   equipmentName: Crude Staff
   equipmentIcon: {fileID: 0}
-  description: An unbalanced two-handed staff. MAG +2, Max MP +8%.
+  flatIcon: {fileID: 0}
   equipmentType: 1
   isTwoHanded: 1
+  weaponCategory: 0
   armourCategory: 0
   armourType: 0
   attackBonus: 0
   defenseBonus: 0
+  magicDefenseBonus: 0
   magicBonus: 2
   hpBonus: 0
   mpBonus: 0
@@ -28,6 +33,17 @@ MonoBehaviour:
   agiBonus: 0
   luckBonus: 0
   accuracyBonus: 0
+  armorBreakData: {fileID: 0}
   armorBreakCoefficient: 0
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
+  weaponCurses: []
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 100
+  sellPrice: 50
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

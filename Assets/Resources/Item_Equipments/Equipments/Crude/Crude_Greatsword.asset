@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Crude_Greatsword
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: 
+  icon: {fileID: 0}
+  description: Heavy and rough. ATK +2.
   equipmentName: Crude Greatsword
   equipmentIcon: {fileID: -5310964954979329048, guid: 7a47fb9a442c1ff41865e5007785d6d7, type: 3}
   flatIcon: {fileID: 0}
-  description: Heavy and rough. ATK +2.
   equipmentType: 1
   isTwoHanded: 1
   weaponCategory: 1
@@ -23,6 +25,7 @@ MonoBehaviour:
   armourType: 0
   attackBonus: 2
   defenseBonus: 0
+  magicDefenseBonus: 0
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
@@ -36,4 +39,11 @@ MonoBehaviour:
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
   weaponCurses: []
-  sellPrice: 0
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 75
+  sellPrice: 35
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

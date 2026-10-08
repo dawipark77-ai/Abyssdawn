@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Coolant
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Coolant
-  icon: {fileID: 0}
+  icon: {fileID: -7324355551065766614, guid: 1cdfdc1aff8dee34fb7735b0ed24c961, type: 3}
   description: Fire can be put out. The scars remain, though.
   itemCategory: 2
   itemIcon: {fileID: -7324355551065766614, guid: 1cdfdc1aff8dee34fb7735b0ed24c961, type: 3}
@@ -26,8 +26,9 @@ MonoBehaviour:
   evasionBuff: 0
   escapeChanceBuff: 0
   buffDuration: 0
+  skillPointGain: 0
   mpPenaltyPercent: 0
-  maxStack: 5
+  maxStack: 50
   usableInBattle: 1
   usableOnMap: 1
   isPermanent: 0

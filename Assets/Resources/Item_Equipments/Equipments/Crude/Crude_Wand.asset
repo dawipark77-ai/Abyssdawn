@@ -12,15 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Crude_Wand
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: 
+  icon: {fileID: 0}
+  description: A roughly carved magic rod. MAG +1, Max MP +5%.
   equipmentName: Crude Wand
   equipmentIcon: {fileID: 0}
-  description: A roughly carved magic rod. MAG +1, Max MP +5%.
+  flatIcon: {fileID: 0}
   equipmentType: 0
   isTwoHanded: 0
+  weaponCategory: 0
   armourCategory: 0
   armourType: 0
   attackBonus: 0
   defenseBonus: 0
+  magicDefenseBonus: 0
   magicBonus: 1
   hpBonus: 0
   mpBonus: 0
@@ -28,6 +33,17 @@ MonoBehaviour:
   agiBonus: 0
   luckBonus: 0
   accuracyBonus: 0
+  armorBreakData: {fileID: 0}
   armorBreakCoefficient: 0
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
+  weaponCurses: []
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 75
+  sellPrice: 35
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

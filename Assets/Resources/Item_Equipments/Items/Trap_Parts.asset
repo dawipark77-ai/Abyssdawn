@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Trap_Parts
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Trap Parts
-  icon: {fileID: 0}
+  icon: {fileID: -2185028427614365439, guid: c14c0502dd717ba409d37cb24a06abc6, type: 3}
   description: Springs, wire and a sharp edge. Someone in town will pay for these.
   itemCategory: 4
   itemIcon: {fileID: -2185028427614365439, guid: c14c0502dd717ba409d37cb24a06abc6, type: 3}
@@ -26,8 +26,9 @@ MonoBehaviour:
   evasionBuff: 0
   escapeChanceBuff: 0
   buffDuration: 0
+  skillPointGain: 0
   mpPenaltyPercent: 0
-  maxStack: 9
+  maxStack: 50
   usableInBattle: 0
   usableOnMap: 0
   isPermanent: 0

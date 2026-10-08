@@ -100,6 +100,8 @@ public class DungeonHud : MonoBehaviour
     private TextMeshProUGUI _shopGold, _shopEmpty;
     private Image _shopBuyTab, _shopSellTab;
     private bool _shopSelling;
+    private TownShop.Kind _shopKind = TownShop.Kind.General; // [2026-10-08] 잡화점 / 무기점
+    private TextMeshProUGUI _shopTitle;
     public bool IsShopOpen => _shop != null && _shop.activeSelf;
 
     private void Awake()
@@ -587,7 +589,18 @@ public class DungeonHud : MonoBehaviour
 
     public const string ShopPanelResource = "UI/ShopPanel";
 
-    public void ShowShop()
+    /// <summary>잡화점 (소비 아이템).</summary>
+    public void ShowShop() { ShowShop(TownShop.Kind.General); }
+
+    /// <summary>[2026-10-08] 잡화점 또는 무기점을 연다 (같은 상점 창 — 제목과 목록만 바뀜).</summary>
+    public void ShowShop(TownShop.Kind kind)
+    {
+        _shopKind = kind;
+        if (_shopTitle != null) _shopTitle.text = kind == TownShop.Kind.Arms ? "<color=#FFD24A>ARMS</color>" : "<color=#FFD24A>GENERAL STORE</color>";
+        OpenShopPanel();
+    }
+
+    private void OpenShopPanel()
     {
         if (_shop == null) return;
         _shopSelling = false;
@@ -620,6 +633,7 @@ public class DungeonHud : MonoBehaviour
         _shopRowTemplate = tmpl != null ? tmpl.gameObject : null;
         if (_shopRowTemplate != null) _shopRowTemplate.SetActive(false);
         _shopGold = FindText(_shop.transform, "Gold");
+        _shopTitle = FindText(_shop.transform, "Title");
         _shopEmpty = FindText(_shop.transform, "Empty");
 
         foreach (Button b in _shop.GetComponentsInChildren<Button>(true))
@@ -735,7 +749,7 @@ public class DungeonHud : MonoBehaviour
             if (c.gameObject != _shopRowTemplate) Destroy(c.gameObject);
         }
 
-        List<TownShop.Entry> list = _shopSelling ? TownShop.SellList() : TownShop.BuyList();
+        List<TownShop.Entry> list = _shopSelling ? TownShop.SellList(_shopKind) : TownShop.BuyList(_shopKind);
         if (_shopEmpty != null)
         {
             _shopEmpty.gameObject.SetActive(list.Count == 0);
@@ -760,9 +774,10 @@ public class DungeonHud : MonoBehaviour
             Button btn = act != null ? act.GetComponent<Button>() : null;
             if (btn != null)
             {
-                bool alreadyOwned = !_shopSelling && e.equipment != null && EquipmentBag.Contains(e.equipment); // 장비는 하나씩만
-                SetText(act, "Label", _shopSelling ? "Sell" : alreadyOwned ? "Owned" : "Buy");
-                bool canBuy = _shopSelling || (!alreadyOwned && PlayerWallet.Gold >= price);
+                // [2026-10-09] 같은 장비도 다시 살 수 있음 (쌍수) — 30개까지
+                bool full = !_shopSelling && e.equipment != null && !EquipmentBag.CanAdd(e.equipment);
+                SetText(act, "Label", _shopSelling ? "Sell" : full ? "Full" : "Buy");
+                bool canBuy = _shopSelling || (!full && PlayerWallet.Gold >= price);
                 btn.interactable = canBuy;
                 TownShop.Entry captured = e;
                 bool selling = _shopSelling;
@@ -772,6 +787,16 @@ public class DungeonHud : MonoBehaviour
                     string msg = selling ? TownShop.Sell(captured) : TownShop.Buy(captured);
                     if (!string.IsNullOrEmpty(msg)) Toast(msg);
                     RefreshShop();
+                    // [2026-10-09] 장비를 샀으면 바로 장착할지 묻는다 (자동 장착 없음)
+                    if (!selling && captured.equipment != null && msg != null && msg.StartsWith("Bought"))
+                    {
+                        AbyssdawnBattle.EquipmentData bought = captured.equipment;
+                        Confirm($"Equip <b>{captured.Name}</b> now?", "Equip", "Later", yes =>
+                        {
+                            if (yes && TownShop.Equip(bought)) Toast($"<color=#9FFF9F>Equipped {captured.Name}.</color>");
+                            RefreshShop();
+                        });
+                    }
                 });
             }
         }
@@ -962,6 +987,7 @@ public class DungeonHud : MonoBehaviour
             {
                 case "Inn": b.onClick.AddListener(() => OnTownCommand(0)); bound++; break;
                 case "Shop": b.onClick.AddListener(() => OnTownCommand(1)); bound++; break;
+                case "Arms": b.onClick.AddListener(() => OnTownCommand(3)); bound++; break; // [2026-10-08] 무기점
                 case "Save": b.onClick.AddListener(() => OnTownCommand(2)); bound++; break;
                 case "Leave": b.onClick.AddListener(CloseTown); bound++; break;
             }
@@ -1029,6 +1055,7 @@ public class DungeonHud : MonoBehaviour
     private void OnTownCommand(int index)
     {
         if (_dialog != null && _dialog.activeSelf) return; // 확인창이 떠 있으면 무시
+        if (index == 3) { ShowShop(TownShop.Kind.Arms); return; } // 무기점
         Action a = index == 0 ? _townInn : index == 1 ? _townShop : _townSave;
         if (a != null) a();
     }

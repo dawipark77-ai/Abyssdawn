@@ -9,7 +9,8 @@ using AbyssdawnBattle;
 ///
 /// [2026-09-29] 이전에는 인벤토리가 Resources 의 모든 장비 에셋을 그대로 보여줘서,
 ///   얻지 않은 장비가 처음부터 전부 있는 것처럼 보였다. 획득 경로: 던전 보물상자 (MapManager).
-/// 같은 장비 에셋은 하나만 가진다 (장착 여부를 에셋 참조로 판별하므로 중복이면 구분이 안 됨).
+/// [2026-10-09] 같은 장비도 여러 개 가질 수 있다 (같은 무기 둘로 쌍수 등). 한 종류당 최대 MaxPerItem 개.
+///   목록에는 같은 에셋이 개수만큼 들어 있다. 장착 중인 것도 이 목록에 포함 (장착 칸 수 = 그중 장착된 개수).
 /// </summary>
 public static class EquipmentBag
 {
@@ -20,17 +21,66 @@ public static class EquipmentBag
 
     public static IReadOnlyList<EquipmentData> Items => _items;
 
+    /// <summary>같은 장비를 최대 몇 개까지 가질 수 있는지.</summary>
+    public const int MaxPerItem = 30;
+
     public static bool Contains(EquipmentData item) => item != null && _items.Contains(item);
 
-    /// <summary>추가. 이미 가진 장비면 false.</summary>
+    /// <summary>이 장비를 몇 개 가졌는지 (장착 중인 것 포함).</summary>
+    public static int Count(EquipmentData item)
+    {
+        if (item == null) return 0;
+        int n = 0;
+        foreach (var e in _items) if (e == item) n++;
+        return n;
+    }
+
+    /// <summary>하나 더 가질 수 있는지 (MaxPerItem 미만).</summary>
+    public static bool CanAdd(EquipmentData item) => item != null && Count(item) < MaxPerItem;
+
+    /// <summary>하나 추가. 이미 MaxPerItem 개면 false.</summary>
     public static bool Add(EquipmentData item)
     {
-        if (item == null || _items.Contains(item)) return false;
+        if (!CanAdd(item)) return false;
         _items.Add(item);
         OnChanged?.Invoke();
         return true;
     }
 
+    /// <summary>적어도 count 개는 가진 상태로 맞춤 (장착 중인 장비가 목록에서 빠지지 않게). 추가했으면 true.</summary>
+    public static bool EnsureCount(EquipmentData item, int count)
+    {
+        if (item == null) return false;
+        bool added = false;
+        while (Count(item) < Mathf.Min(count, MaxPerItem)) { _items.Add(item); added = true; }
+        if (added) OnChanged?.Invoke();
+        return added;
+    }
+
+    /// <summary>이 장비가 장착 칸 몇 곳에 끼워져 있는지 (같은 무기 둘을 양손에 들면 2).</summary>
+    public static int EquippedCount(EquipmentManager mgr, EquipmentData item)
+    {
+        if (mgr == null || item == null) return 0;
+        int n = 0;
+        if (mgr.rightHand == item) n++;
+        if (mgr.leftHand == item) n++;
+        if (mgr.body == item) n++;
+        if (mgr.accessory1 == item) n++;
+        if (mgr.accessory2 == item) n++;
+        return n;
+    }
+
+    /// <summary>장착 중인 장비는 적어도 장착 개수만큼 목록에 있게 맞춤.</summary>
+    public static void EnsureEquipped(EquipmentManager mgr)
+    {
+        if (mgr == null) return;
+        foreach (var e in mgr.GetEquippedItems()) EnsureCount(e, EquippedCount(mgr, e));
+    }
+
+    /// <summary>장착하지 않은 여분이 있는지 (하나 더 장착할 수 있는지).</summary>
+    public static bool HasSpare(EquipmentManager mgr, EquipmentData item) => Count(item) > EquippedCount(mgr, item);
+
+    /// <summary>하나 뺌.</summary>
     public static bool Remove(EquipmentData item)
     {
         if (item == null || !_items.Remove(item)) return false;
@@ -80,7 +130,7 @@ public static class EquipmentBag
     {
         int added = 0;
         foreach (var e in Resources.LoadAll<EquipmentData>("Item_Equipments/Equipments"))
-            if (e != null && !_items.Contains(e)) { _items.Add(e); added++; }
+            if (e != null && !_items.Contains(e)) { _items.Add(e); added++; } // 테스트 지급은 종류마다 1개
         if (added > 0) OnChanged?.Invoke();
         Debug.Log($"[EquipmentBag] 테스트 지급: 장비 {added}개");
         return added;

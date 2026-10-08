@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Whetstone
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Whetstone
-  icon: {fileID: 0}
+  icon: {fileID: -8563153612813847178, guid: 33868d5d6a6205f4f941fcc8831bd0d1, type: 3}
   description: A sharper edge means less effort.
   itemCategory: 3
   itemIcon: {fileID: -8563153612813847178, guid: 33868d5d6a6205f4f941fcc8831bd0d1, type: 3}
@@ -26,8 +26,9 @@ MonoBehaviour:
   evasionBuff: 0
   escapeChanceBuff: 0
   buffDuration: 3
+  skillPointGain: 0
   mpPenaltyPercent: 0
-  maxStack: 5
+  maxStack: 50
   usableInBattle: 1
   usableOnMap: 0
   isPermanent: 0

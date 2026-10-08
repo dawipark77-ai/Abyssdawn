@@ -82,6 +82,7 @@ public class SkillListItem : MonoBehaviour
                 iconImage.sprite = null;
                 iconImage.color = new Color(1, 1, 1, 0.3f); // 반투명
             }
+            SkillIconFrame.Apply(iconImage); // [2026-10-09] 황금 테두리
         }
         
         // 이름 설정

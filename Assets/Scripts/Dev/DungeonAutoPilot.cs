@@ -88,9 +88,26 @@ public class DungeonAutoPilot : MonoBehaviour
         try { System.IO.File.AppendAllText(ResultPath, text + "\n"); } catch { }
     }
 
+    // [2026-10-08] 실험이 바꾼 게임 속도(Time.timeScale)·백그라운드 실행이 프로젝트 설정(TimeManager·ProjectSettings)에
+    //   저장돼 남는 일이 있었다 → 플레이 모드를 벗어나면 항상 원래대로 되돌린다.
+    [UnityEditor.InitializeOnLoadMethod]
+    private static void RegisterRestoreOnExit()
+    {
+        UnityEditor.EditorApplication.playModeStateChanged -= RestoreOnExit;
+        UnityEditor.EditorApplication.playModeStateChanged += RestoreOnExit;
+    }
+
+    private static void RestoreOnExit(UnityEditor.PlayModeStateChange s)
+    {
+        if (s != UnityEditor.PlayModeStateChange.EnteredEditMode) return;
+        if (!Mathf.Approximately(Time.timeScale, 1f)) Time.timeScale = 1f;
+        if (UnityEditor.PlayerSettings.runInBackground) UnityEditor.PlayerSettings.runInBackground = false;
+    }
+
     public static string Begin(int runs, float speed, int stopAtFloor = 11, string build = "none", bool startWithSword = false)
     {
         if (!Application.isPlaying) return "플레이 모드가 아닙니다.";
+        Application.runInBackground = true; // 창이 뒤에 있어도 진행 (끝나면 RestoreOnExit 이 끔)
         if (Instance == null)
         {
             var go = new GameObject("[AutoPilot]");
@@ -128,7 +145,7 @@ public class DungeonAutoPilot : MonoBehaviour
     [Tooltip("실험용: 판 시작 때 빌드 스킬을 전부 배운 상태로 (SP 무시) — 스킬 조합의 힘만 비교")]
     public bool preloadSkills = false;
     [Tooltip("도망은 성공 확률이 이 값 이상일 때만 시도 (실패하면 적만 행동하므로)")]
-    public float minFleeChance = 0.4f;
+    public float minFleeChance = 0.2f; // [2026-10-09] 0.4 → 0.2: 기본 도주 20% 에서도 위험한 무리는 도망 시도
     [Tooltip("smart: 다음 층(N)으로 내려가려면 레벨이 N + levelMargin 이상")]
     public int levelMargin = 0;
     [Tooltip("smart: 한 층에서 레벨업 사냥을 최대 몇 걸음까지 (넘으면 그냥 내려감)")]
@@ -215,6 +232,16 @@ public class DungeonAutoPilot : MonoBehaviour
     {
         var inv = ConsumableInventory.Instance;
         if (inv == null) return;
+        // [2026-10-08] 맨손이면 무기점에서 나무 막대기 먼저 (검 스킬을 쓰려면 검 종류 무기가 필요)
+        var hero = FindHero();
+        if (hero != null && hero.statData != null && hero.statData.rightHand == null)
+            foreach (var entry in TownShop.BuyList(TownShop.Kind.Arms))
+                if (entry.equipment != null && entry.equipment.name == "Junk_WoodenStick" && PlayerWallet.Gold >= entry.BuyPrice)
+                {
+                    int price = entry.BuyPrice;
+                    if (TownShop.Buy(entry).StartsWith("Bought")) { _stats.bought++; _stats.goldSpent += price; }
+                    break;
+                }
         string[] wants = { "Item_Equipments/Items/HP_Potion", "Item_Equipments/Items/Antidote", "Item_Equipments/Items/Bandage" };
         int[] caps = { 6, 1, 1 };
         foreach (var entry in TownShop.BuyList())
@@ -627,6 +654,12 @@ public class DungeonAutoPilot : MonoBehaviour
             hud.CloseTown();
             return;
         }
+        // [2026-10-08] 선택창(함정 해제: 해제 / 그냥 지나가기 / 돌아가기 · 스킬 칸 고르기) → 첫 번째(해제·첫 칸)
+        if (hud != null && hud.IsSlotPickOpen)
+        {
+            typeof(DungeonHud).GetMethod("CloseSlotPick", NP)?.Invoke(hud, new object[] { 0 });
+            return;
+        }
         if (hud != null && hud.IsDialogOpen)
         {
             bool yes = true;
@@ -673,6 +706,13 @@ public class DungeonAutoPilot : MonoBehaviour
         _grindingNow = false;
         Vector2Int? next = NextStep(map, player.gridPos, hero);
         if (next == null) { if (_grindingNow) _grindTarget = null; return; }
+        // [2026-10-09] 돌아갈 길이 없어 아는 함정을 밟아야 하면, 사람처럼 바로 앞 함정을 눌러 해제를 시도한다
+        //   (선택창은 다음 틱에 '해제'로 답함. 스킬이 없어도 30% + 민첩, 실패하면 절반 피해로 발동하고 끝남)
+        if (IsKnownArmedTrap(map, next.Value))
+        {
+            typeof(MapManager).GetMethod("AskDisarm", NP)?.Invoke(map, new object[] { next.Value, null });
+            return;
+        }
         if (_grindingNow) { _stats.grindSteps++; _grindStepsThisFloor++; }
         Vector2Int d = next.Value - player.gridPos;
         if (d == new Vector2Int(0, -1)) player.MoveNorth();
@@ -850,7 +890,7 @@ public class DungeonAutoPilot : MonoBehaviour
         var cells = new List<Vector2Int>();
         foreach (var p in map.FloorState.revealed)
         {
-            if (p == from || !data.IsWalkable(p) || map.FloorState.knownTraps.Contains(p)) continue;
+            if (p == from || !data.IsWalkable(p) || IsKnownArmedTrap(map, p)) continue;
             if (data.GetCell(p).feature != FloorFeature.None) continue;
             if (Mathf.Abs(p.x - from.x) + Mathf.Abs(p.y - from.y) < 4) continue;
             cells.Add(p);
@@ -866,10 +906,17 @@ public class DungeonAutoPilot : MonoBehaviour
         return false;
     }
 
+    /// <summary>[2026-10-09] 아는 함정 중 아직 작동하는 것 (발동·해제된 함정은 끝났으므로 지나가도 됨).</summary>
+    private static bool IsKnownArmedTrap(MapManager map, Vector2Int p)
+    {
+        if (!map.FloorState.knownTraps.Contains(p)) return false;
+        return map.FloorState.IsTrapArmed(p, map.FloorData.GetCell(p).trap);
+    }
+
     private static bool Avoid(MapManager map, Vector2Int p, bool wantSpring, bool avoidTraps)
     {
         var data = map.FloorData;
-        if (avoidTraps && map.FloorState.knownTraps.Contains(p)) return true;
+        if (avoidTraps && IsKnownArmedTrap(map, p)) return true;
         if (data.hasStairsUp && p == data.stairsUpPos) return true;
         if (data.hasTownGate && p == data.townGatePos) return true;
         if (p == data.stairsPos) return true; // 목표일 때만 들어감

@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Crude_Axe
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: 
+  icon: {fileID: 0}
+  description: A roughly ground axe. ATK +2.
   equipmentName: Crude Axe
   equipmentIcon: {fileID: -4334295281319230558, guid: 2d6c95118dbd7fa4597221f54ea8743d, type: 3}
   flatIcon: {fileID: 0}
-  description: A roughly ground axe. ATK +2.
   equipmentType: 0
   isTwoHanded: 0
   weaponCategory: 8
@@ -23,6 +25,7 @@ MonoBehaviour:
   armourType: 0
   attackBonus: 2
   defenseBonus: 0
+  magicDefenseBonus: 0
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
@@ -36,4 +39,11 @@ MonoBehaviour:
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
   weaponCurses: []
-  sellPrice: 10
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 100
+  sellPrice: 50
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

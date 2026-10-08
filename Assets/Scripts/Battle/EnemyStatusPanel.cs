@@ -421,6 +421,7 @@ public class EnemyStatusPanel : MonoBehaviour
         if (img == null) return;
         img.sprite = sprite;
         img.gameObject.SetActive(sprite != null);
+        SkillIconFrame.Apply(img); // [2026-10-09] 스킬(본능·액티브·패시브) 아이콘 황금 테두리
     }
 
     private void SetCompared(TMP_Text t, float final, float baseValue)

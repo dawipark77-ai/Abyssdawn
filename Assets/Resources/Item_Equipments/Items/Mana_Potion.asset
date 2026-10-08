@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mana_Potion
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Mana Potion
-  icon: {fileID: 0}
+  icon: {fileID: 6276969351316911035, guid: a1d45d86f88e8f04ebe1ea81ee6b2d6f, type: 3}
   description: The power returns. Briefly, but it does.
   itemCategory: 3
   itemIcon: {fileID: 6276969351316911035, guid: a1d45d86f88e8f04ebe1ea81ee6b2d6f, type: 3}
@@ -26,8 +26,9 @@ MonoBehaviour:
   evasionBuff: 0
   escapeChanceBuff: 0
   buffDuration: 0
+  skillPointGain: 0
   mpPenaltyPercent: 0
-  maxStack: 5
+  maxStack: 50
   usableInBattle: 1
   usableOnMap: 1
   isPermanent: 0

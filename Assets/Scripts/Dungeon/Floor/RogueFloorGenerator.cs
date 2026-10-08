@@ -244,7 +244,64 @@ public static class RogueFloorGenerator
         // ── 9. 불 있는 방 (벽 화로) — 난수를 맨 뒤에 써서 방·통로·요소 배치는 바뀌지 않는다 ──
         PlaceBraziers(data, rng, cfg, realRooms);
 
+        // ── 10. [2026-10-08] 횃불 — 화로 자리는 벽 횃불로, 그 밖에 무작위 벽·바닥 횃불. 별도 난수라 위 배치는 그대로 ──
+        PlaceTorches(data, new System.Random(unchecked(attemptSeed * 31 + 7)), realRooms);
+
         return data;
+    }
+
+    // 횃불 배치 규칙 (2026-10-08)
+    private const double RoomFloorTorchChance = 0.25;   // 방마다 바닥(가운데) 횃불
+    private const double CorridorWallTorchChance = 0.04; // 벽에 붙은 통로 칸마다 벽 횃불
+    private const int TorchMinSpacing = 4;              // 횃불끼리 최소 거리 (칸)
+
+    private static void PlaceTorches(DungeonFloorData data, System.Random rng, List<FloorRoom> realRooms)
+    {
+        // 1) 화로가 있던 방 → 그 자리에 벽 횃불
+        foreach (FloorRoom room in realRooms)
+            if (room.lit) TryAddTorch(data, room.brazierCell, true);
+
+        // 2) 방 가운데 바닥 횃불
+        foreach (FloorRoom room in realRooms)
+        {
+            if (rng.NextDouble() >= RoomFloorTorchChance) continue;
+            List<Vector2Int> inner = new List<Vector2Int>();
+            for (int x = room.bounds.x; x < room.bounds.xMax; x++)
+                for (int y = room.bounds.y; y < room.bounds.yMax; y++)
+                {
+                    Vector2Int p = new Vector2Int(x, y);
+                    FloorCell c = data.cells[x, y];
+                    if (c.roomId != room.id || c.feature != FloorFeature.None) continue;
+                    bool nearWall = false;
+                    for (int d = 0; d < 4; d++) if (!data.IsWalkable(p + Dir4[d])) nearWall = true;
+                    if (!nearWall) inner.Add(p);
+                }
+            if (inner.Count > 0) TryAddTorch(data, inner[rng.Next(inner.Count)], false);
+        }
+
+        // 3) 통로 벽 횃불
+        for (int x = 0; x < data.width; x++)
+            for (int y = 0; y < data.height; y++)
+            {
+                FloorCell c = data.cells[x, y];
+                if (!c.IsWalkable || c.terrain != FloorTerrain.Corridor || c.feature != FloorFeature.None) continue;
+                if (rng.NextDouble() >= CorridorWallTorchChance) continue;
+                TryAddTorch(data, new Vector2Int(x, y), true);
+            }
+    }
+
+    private static void TryAddTorch(DungeonFloorData data, Vector2Int p, bool onWall)
+    {
+        if (!data.IsWalkable(p)) return;
+        foreach (FloorTorch t in data.torches)
+            if (Math.Max(Math.Abs(t.cell.x - p.x), Math.Abs(t.cell.y - p.y)) < TorchMinSpacing) return;
+        Vector2Int wall = Vector2Int.zero;
+        if (onWall)
+        {
+            for (int d = 0; d < 4; d++) if (!data.IsWalkable(p + Dir4[d])) { wall = Dir4[d]; break; }
+            if (wall == Vector2Int.zero) onWall = false;
+        }
+        data.torches.Add(new FloorTorch { cell = p, onWall = onWall, wallDir = wall });
     }
 
     /// <summary>방마다 litRoomChance 확률로 벽에 불을 건다. 불은 벽에 붙은 방 칸(요소 없는 칸) 하나에 표시.</summary>

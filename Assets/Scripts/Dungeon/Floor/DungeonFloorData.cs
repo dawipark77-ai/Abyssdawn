@@ -67,6 +67,14 @@ public class FloorRoom
     public Vector2Int brazierCell;
 }
 
+/// <summary>[2026-10-08] 횃불 — 벽 횃불(onWall: 벽 쪽 방향 wallDir) 또는 바닥 횃불. 주변 2칸을 밝힌다 (MapManager 밝기 계산).</summary>
+public class FloorTorch
+{
+    public Vector2Int cell;
+    public bool onWall;
+    public Vector2Int wallDir; // 벽이 있는 쪽 (격자 방향, 바닥 횃불은 0)
+}
+
 public class DungeonFloorData
 {
     public readonly int floorNumber;
@@ -90,6 +98,7 @@ public class DungeonFloorData
     public readonly List<Vector2Int> chests = new List<Vector2Int>();
     public readonly List<Vector2Int> traps = new List<Vector2Int>();
     public readonly List<Vector2Int> springs = new List<Vector2Int>();
+    public readonly List<FloorTorch> torches = new List<FloorTorch>(); // [2026-10-08]
 
     /// <summary>검증 실패로 재시도했을 때 실제로 쓰인 시드 (디버그용).</summary>
     public int generatedSeed;

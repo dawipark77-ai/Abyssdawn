@@ -80,6 +80,7 @@ public class ItemListPanel : MonoBehaviour
         public ConsumableItemSO consumable;
         public EquipmentData equipment;
         public int quantity;
+        public bool equippedCopy; // [2026-10-09] 같은 장비 여러 개 — 카드 한 장 = 한 개. 이 카드가 장착 중인 쪽인지
     }
 
     private Filter _filter = Filter.All;
@@ -228,7 +229,7 @@ public class ItemListPanel : MonoBehaviour
                 card.gameObject.name = "Card_" + ItemName(e);
                 card.gameObject.SetActive(true);
                 Entry captured = e;
-                card.Setup(Icon(e), ItemName(e), SubLine(e), QtyLine(e), e.equipment != null && IsEquipped(e.equipment),
+                card.Setup(Icon(e), ItemName(e), SubLine(e), QtyLine(e), e.equipment != null && e.equippedCopy,
                            e.consumable != null && e.consumable.isDawnChalice, () => Select(captured));
                 card.SetSelected(e == _selected);
                 _cards.Add(new KeyValuePair<Entry, ItemListCard>(e, card));
@@ -270,7 +271,14 @@ public class ItemListPanel : MonoBehaviour
         EquipmentManager mgr = Manager();
         if (mgr != null) foreach (var e in mgr.GetEquippedItems()) if (e != null && !equips.Contains(e)) equips.Add(e);
         foreach (var e in EquipmentBag.Items) if (e != null && !equips.Contains(e)) equips.Add(e);
-        foreach (var e in equips) if (Matches(e)) list.Add(new Entry { equipment = e, quantity = 1 });
+        // [2026-10-09] 같은 장비는 가진 개수만큼 카드 (장착 중인 것 먼저)
+        foreach (var e in equips)
+        {
+            if (!Matches(e)) continue;
+            int worn = EquipmentBag.EquippedCount(mgr, e);
+            int total = Mathf.Max(EquipmentBag.Count(e), worn);
+            for (int i = 0; i < total; i++) list.Add(new Entry { equipment = e, quantity = 1, equippedCopy = i < worn });
+        }
         return list;
     }
 
@@ -308,7 +316,7 @@ public class ItemListPanel : MonoBehaviour
         // [2026-10-08] 기존 인벤토리의 상세 팝업 (정보가 더 많음: 장비 비교·저주·가격 등)
         InventoryUIManager popup = openDetailPopupOnClick ? Popup() : null;
         if (popup == null) return;
-        if (e.equipment != null) popup.ShowDetailPopup(e.equipment, Refresh);
+        if (e.equipment != null) popup.ShowDetailPopup(e.equipment, e.equippedCopy, Refresh);
         else if (e.consumable != null) popup.ShowDetailPopup(e.consumable, Refresh);
     }
 
@@ -357,7 +365,7 @@ public class ItemListPanel : MonoBehaviour
         }
         else
         {
-            bool equipped = IsEquipped(e.equipment);
+            bool equipped = e.equippedCopy;
             SetUse(equipped ? "해제 · UNEQUIP" : "장착 · EQUIP", Manager() != null);
             if (discardButton != null) discardButton.interactable = true;
         }
@@ -432,8 +440,8 @@ public class ItemListPanel : MonoBehaviour
         {
             EquipmentManager mgr = Manager();
             if (mgr == null) return;
-            if (IsEquipped(e.equipment)) Unequip(mgr, e.equipment);
-            else mgr.EquipItem(e.equipment);
+            if (e.equippedCopy) Unequip(mgr, e.equipment);
+            else if (EquipmentBag.HasSpare(mgr, e.equipment)) mgr.EquipItem(e.equipment);
             Refresh();
             return;
         }
@@ -462,8 +470,8 @@ public class ItemListPanel : MonoBehaviour
         else
         {
             EquipmentManager mgr = Manager();
-            if (mgr != null && IsEquipped(e.equipment)) Unequip(mgr, e.equipment);
-            EquipmentBag.Remove(e.equipment);
+            if (mgr != null && e.equippedCopy) Unequip(mgr, e.equipment);
+            EquipmentBag.Remove(e.equipment); // 한 개만
         }
         _selected = null;
         Refresh();
@@ -476,7 +484,7 @@ public class ItemListPanel : MonoBehaviour
         else if (mgr.body == item) mgr.UnequipItem("Body");
         else if (mgr.accessory1 == item) mgr.UnequipItem("Accessory1");
         else if (mgr.accessory2 == item) mgr.UnequipItem("Accessory2");
-        EquipmentBag.Add(item); // 해제한 장비는 가방에 남는다
+        // 해제한 장비는 가방에 그대로 남는다 (가방 목록에 장착 중인 것도 들어 있음 — 다시 넣으면 개수가 늘어남)
     }
 
     // ─────────────────────────────────────────
@@ -537,7 +545,7 @@ public class ItemListPanel : MonoBehaviour
             }
             return "×" + e.quantity;
         }
-        return IsEquipped(e.equipment) ? "장착" : "";
+        return e.equippedCopy ? "장착" : "";
     }
 
     private string TagLine(Entry e)
@@ -549,7 +557,7 @@ public class ItemListPanel : MonoBehaviour
             if (!c.usableOnMap) tag += "  <color=#FF8A70>전투 전용</color>";
             return tag;
         }
-        return "<color=#C9A86A>" + EquipTypeName(e.equipment) + " · 장비</color>" + (IsEquipped(e.equipment) ? "  <color=#FFD24A>장착 중</color>" : "");
+        return "<color=#C9A86A>" + EquipTypeName(e.equipment) + " · 장비</color>" + (e.equippedCopy ? "  <color=#FFD24A>장착 중</color>" : "");
     }
 
     private static string CategoryName(ConsumableItemSO c)

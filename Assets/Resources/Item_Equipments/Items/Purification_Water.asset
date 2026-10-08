@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Purification_Water
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: Purification Water
-  icon: {fileID: 0}
+  icon: {fileID: 8498154514395236658, guid: 74fe73734a5122b45aee5aaf9d58575f, type: 3}
   description: Water drawn from the abyss. It washes away all darkness.
   itemCategory: 2
   itemIcon: {fileID: 8498154514395236658, guid: 74fe73734a5122b45aee5aaf9d58575f, type: 3}
@@ -26,8 +26,13 @@ MonoBehaviour:
   evasionBuff: 0
   escapeChanceBuff: 0
   buffDuration: 0
+  skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 1
   mpPenaltyPercent: 0
-  maxStack: 1
+  maxStack: 50
   usableInBattle: 1
   usableOnMap: 1
   isPermanent: 0

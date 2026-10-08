@@ -69,6 +69,12 @@ public static class DungeonFieldStatus
         return list;
     }
 
+    /// <summary>[2026-10-08] 이 종류를 전투에서 걸 때 쓰는 상태이상 에셋 (없으면 null).</summary>
+    public static StatusEffectSO BattleAssetFor(StatusEffectType type)
+    {
+        return BattleAssets.TryGetValue(type, out string path) ? Resources.Load<StatusEffectSO>(path) : null;
+    }
+
     public static string NameOf(StatusEffectType type) => Rules.TryGetValue(type, out Rule r) ? r.name : type.ToString();
 
     /// <summary>걸기 (이미 있으면 남은 걸음을 더 긴 쪽으로).</summary>

@@ -29,7 +29,7 @@ MonoBehaviour:
   buffDuration: 0
   skillPointGain: 1
   mpPenaltyPercent: 0
-  maxStack: 5
+  maxStack: 50
   usableInBattle: 0
   usableOnMap: 1
   isPermanent: 0

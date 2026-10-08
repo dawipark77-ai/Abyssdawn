@@ -12,16 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: CrudeArmor
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: 
+  icon: {fileID: 0}
+  description: Offers some protection, but movement feels rather stiff.
   equipmentName: Crude Armour
   equipmentIcon: {fileID: -2757887451555568444, guid: 84a52d7aedf72e84fa02350546f96582, type: 3}
   flatIcon: {fileID: 0}
-  description: Offers some protection, but movement feels rather stiff.
   equipmentType: 2
   isTwoHanded: 0
+  weaponCategory: 0
   armourCategory: 2
   armourType: 3
   attackBonus: 0
   defenseBonus: 3
+  magicDefenseBonus: 0
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
@@ -35,4 +39,11 @@ MonoBehaviour:
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
   weaponCurses: []
-  sellPrice: 0
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 130
+  sellPrice: 65
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

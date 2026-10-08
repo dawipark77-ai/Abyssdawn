@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Crude_Bow
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: 
+  icon: {fileID: 0}
+  description: A warped bow. ATK +1, AGI +1.
   equipmentName: Crude Bow
   equipmentIcon: {fileID: -7856493677412862020, guid: 93ea913936abfb44fa7b4bacc1c6725b, type: 3}
   flatIcon: {fileID: -8776072426445690183, guid: 36744b15529cb184bbfbd0481d05c6ef, type: 3}
-  description: A warped bow. ATK +1, AGI +1.
   equipmentType: 1
   isTwoHanded: 1
   weaponCategory: 7
@@ -23,6 +25,7 @@ MonoBehaviour:
   armourType: 0
   attackBonus: 1
   defenseBonus: 0
+  magicDefenseBonus: 0
   magicBonus: 0
   hpBonus: 0
   mpBonus: 0
@@ -37,4 +40,11 @@ MonoBehaviour:
   skill: {fileID: 0}
   weaponCurses:
   - {fileID: 11400000, guid: 9593ae741d964bd4ea6870fe916eb3d4, type: 2}
-  sellPrice: 0
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 90
+  sellPrice: 45
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

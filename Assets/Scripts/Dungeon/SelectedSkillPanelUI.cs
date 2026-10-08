@@ -174,6 +174,7 @@ public class SelectedSkillPanelUI : MonoBehaviour
             slotImage.sprite = null;
             slotImage.color = emptyIconColor;
         }
+        SkillIconFrame.Apply(slotImage); // [2026-10-09] 황금 테두리 (빈 칸이면 숨김)
     }
 
     private void ResetSlotColors()

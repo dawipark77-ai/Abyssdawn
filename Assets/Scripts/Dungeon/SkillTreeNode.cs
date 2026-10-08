@@ -45,6 +45,10 @@ public class SkillTreeNode : MonoBehaviour
     public bool useLearnedBorder = false;
     [Tooltip("배운 스킬 테두리 색")]
     public Color learnedBorderColor = new Color(0.96f, 0.87f, 0.58f, 1f);
+    [Tooltip("[2026-10-09] 배운 스킬 바깥 테두리가 아이콘 밖으로 나오는 정도 (픽셀) — 안쪽 황금 테두리(2px)와 겹치게")]
+    public float learnedBorderOutset = 4f;
+    [Tooltip("[2026-10-09] 배운 스킬 테두리를 흰빛 쪽으로 얼마나 밝힐지 (0 = 색 그대로)")]
+    [Range(0f, 1f)] public float learnedBorderBrighten = 0.45f;
     private Image _learnedBorder;
 
     [Header("시각적 설정")]
@@ -277,6 +281,7 @@ public class SkillTreeNode : MonoBehaviour
                 // 🔥 중요: 스프라이트를 확실히 설정하기 전에 현재 스프라이트 확인
                 string beforeSprite = skillIcon.sprite != null ? skillIcon.sprite.name : "null";
                 skillIcon.sprite = skillData.skillIcon;
+                SkillIconFrame.Apply(skillIcon); // [2026-10-09] 모든 스킬 아이콘 황금 테두리
                 string afterSprite = skillIcon.sprite != null ? skillIcon.sprite.name : "null";
                 
                 Debug.Log($"[SkillTreeNode] ✅ 아이콘 설정 완료: {skillData.skillName}");
@@ -594,6 +599,8 @@ public class SkillTreeNode : MonoBehaviour
         }
 
         SetLearnedBorder(currentState == SkillState.Learned);
+        // [2026-10-09] 모든 스킬 아이콘 황금 테두리. 배운 스킬은 더 밝게 — 바깥 배운 스킬 테두리와 겹쳐 환하게 빛남
+        SkillIconFrame.Apply(skillIcon, 2f, currentState == SkillState.Learned);
     }
 
     /// <summary>현재 상태 그대로 모양만 다시 그린다 (테두리 설정이 바뀐 뒤 등).</summary>
@@ -628,7 +635,10 @@ public class SkillTreeNode : MonoBehaviour
             _learnedBorder.fillCenter = false;
             _learnedBorder.raycastTarget = false;
         }
-        _learnedBorder.color = learnedBorderColor;
+        // [2026-10-09] 배운 스킬: 바깥 테두리를 안쪽 황금 테두리에 겹치도록 붙이고 더 밝게
+        _learnedBorder.rectTransform.offsetMin = new Vector2(-learnedBorderOutset, -learnedBorderOutset);
+        _learnedBorder.rectTransform.offsetMax = new Vector2(learnedBorderOutset, learnedBorderOutset);
+        _learnedBorder.color = Color.Lerp(learnedBorderColor, Color.white, learnedBorderBrighten);
         _learnedBorder.gameObject.SetActive(on);
     }
     

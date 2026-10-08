@@ -281,9 +281,9 @@ public class MapManager : MonoBehaviour
         bool dark = forceDarkFloor || (CurrentFloorSettings != null && CurrentFloorSettings.darkFloor);
         int r = dark ? darkSightRadius : baseSightRadius;
         FloorRoom room = FloorData != null ? FloorData.GetRoomAt(pos) : null;
-        bool litRoom = room != null && room.lit;
+        // [2026-10-08] 불 있는 방(벽 화로)의 시야 확대는 횃불(주변 2칸 밝힘)로 바뀜 — 빛을 들고 있을 때만 +2
         bool carryingLight = DungeonPersistentData.playerLightSteps > 0;
-        if (litRoom || carryingLight) r += lightSightBonus;
+        if (carryingLight) r += lightSightBonus;
         if (DungeonFieldStatus.Has(AbyssdawnBattle.StatusEffectType.Blind)) r -= DungeonFieldStatus.BlindSightPenalty; // 실명 가스
         return Mathf.Max(1, r);
     }
@@ -307,9 +307,40 @@ public class MapManager : MonoBehaviour
         if (DungeonPersistentData.playerLightSteps == 0) Toast("<color=#AAAAAA>Your light fades...</color>");
     }
 
+    private void Update()
+    {
+        HandleTrapClick();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DebugKeys();
+#endif
+    }
+
+    // ─────────────────────────────────────────
+    // [2026-10-08] 함정 클릭 — 바로 앞(상하좌우 1칸)의 아는 함정을 누르면 해제할지 묻는다. 성공하면 소량의 EXP.
+    // ─────────────────────────────────────────
+    [Header("Trap Click (2026-10-08)")]
+    [Tooltip("함정 해제 성공 EXP = 기본 + 층 × 층당")]
+    public int disarmExpBase = 3;
+    public int disarmExpPerFloor = 2;
+
+    private void HandleTrapClick()
+    {
+        if (!Input.GetMouseButtonDown(0) || _player == null || FloorData == null || FloorState == null) return;
+        if (_player.IsInputLocked) return; // 창이 떠 있거나 이동 중 잠김
+        if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return; // UI 를 누름
+        Camera cam = Camera.main;
+        if (cam == null || floorTilemap == null) return;
+        Vector3 world = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int c = floorTilemap.WorldToCell(world);
+        Vector2Int p = new Vector2Int(c.x, -c.y); // 격자 y 는 아래로 증가 (AutomapRenderer.CellCenter 와 반대 변환)
+        Vector2Int d = p - _player.gridPos;
+        if (Mathf.Abs(d.x) + Mathf.Abs(d.y) != 1) return; // 바로 앞 칸만
+        AskDisarm(p, null);
+    }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     // 테스트용: Ctrl+L = 빛 30걸음, Ctrl+K = 어두운 층 켜고 끄기
-    private void Update()
+    private void DebugKeys()
     {
         bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         if (!ctrl || _player == null) return;
@@ -325,6 +356,61 @@ public class MapManager : MonoBehaviour
     // 지금 보이는 칸 (매 걸음 새로 계산). 자동 지도가 이 밖의 기억된 칸을 흐리게 그린다
     private readonly HashSet<Vector2Int> _visible = new HashSet<Vector2Int>();
 
+    // ─────────────────────────────────────────
+    // [2026-10-08] 밝기 — 주인공 주변은 거리에 따라 흐려지고, 횃불은 주변 2칸을 밝힌다. 나머지는 어둠.
+    //   [2026-10-08 2차 — 어두운 밤의 간접 조명 느낌으로 더 어둡게]
+    //   주인공: 자기 칸·1칸 100% · 2칸 50% · 3칸 20% (빛을 들어 시야가 넓으면 그 밖은 15%)
+    //   횃불: 횃불 칸 100% · 1칸 70% · 2칸 40% — 벽 너머는 밝히지 않음. 같은 방/통로 안에서 벽에 막히지 않으면 멀리서도 보인다
+    //   가 본 곳(지금 안 보임) 20% · 안 본 곳 0% — AutomapRenderer 가 어둠을 덮는다
+    // ─────────────────────────────────────────
+    [Header("Light (2026-10-08)")]
+    [Tooltip("주인공에서 거리 0·1·2·3칸의 밝기 (그 밖은 마지막 값 다음 Far 값)")]
+    public float[] heroLightByDistance = { 1f, 1f, 0.5f, 0.2f };
+    [Tooltip("시야가 넓을 때(빛을 들었을 때) 3칸 너머의 밝기")]
+    [Range(0f, 1f)] public float heroLightFar = 0.15f;
+    [Tooltip("횃불에서 거리 0·1·2칸의 밝기 (길이 = 밝히는 범위)")]
+    public float[] torchLightByDistance = { 1f, 0.7f, 0.4f };
+    [Tooltip("멀리 있는 횃불이 보이는 최대 거리 (같은 방/통로 안)")]
+    public int torchViewRange = 14;
+
+    private readonly Dictionary<Vector2Int, float> _light = new Dictionary<Vector2Int, float>();
+    private readonly HashSet<Vector2Int> _farView = new HashSet<Vector2Int>();
+    private readonly HashSet<Vector2Int> _torchArea = new HashSet<Vector2Int>();
+
+    /// <summary>칸마다 밝기를 계산해 _light 에 넣는다. 횃불로 밝혀진 먼 칸도 보이는 칸·기억에 더함. 새로 기억된 칸이 있으면 true.</summary>
+    private bool ComputeLighting(Vector2Int pos)
+    {
+        _light.Clear();
+        bool changed = false;
+        foreach (Vector2Int p in _visible)
+        {
+            int d = Mathf.Max(Mathf.Abs(p.x - pos.x), Mathf.Abs(p.y - pos.y));
+            float b = d < heroLightByDistance.Length ? heroLightByDistance[d] : heroLightFar;
+            if (b > 0f) _light[p] = b;
+        }
+        if (FloorData.torches.Count == 0) return false;
+
+        FloorVisibility.ComputeVisible(FloorData, pos, torchViewRange, _farView);
+        int range = torchLightByDistance.Length - 1;
+        foreach (FloorTorch t in FloorData.torches)
+        {
+            // 횃불 빛이 닿는 칸 (횃불 기준 시야 — 벽 너머는 안 밝힘)
+            FloorVisibility.ComputeVisible(FloorData, t.cell, range, _torchArea);
+            foreach (Vector2Int p in _torchArea)
+            {
+                if (!_farView.Contains(p)) continue; // 주인공 쪽에서 보이지 않으면 모름
+                int d = Mathf.Max(Mathf.Abs(p.x - t.cell.x), Mathf.Abs(p.y - t.cell.y));
+                if (d > range) continue;
+                float b = torchLightByDistance[d];
+                float cur;
+                if (!_light.TryGetValue(p, out cur) || cur < b) _light[p] = b;
+                _visible.Add(p);
+                if (FloorState.revealed.Add(p)) changed = true;
+            }
+        }
+        return changed;
+    }
+
     /// <summary>
     /// pos 기준으로 시야를 계산해 지도를 공개하고, 보이는 칸이 바뀌었으니 자동 지도를 다시 그린다.
     /// 새로 기억된 칸이 있으면 true.
@@ -333,9 +419,11 @@ public class MapManager : MonoBehaviour
     {
         if (FloorData == null || FloorState == null) return false;
         bool changed = FloorVisibility.RevealAround(FloorData, pos, FloorState.revealed, SightRadiusAt(pos), _visible);
+        changed |= ComputeLighting(pos);
         if (automapRenderer != null)
         {
             automapRenderer.SetVisible(_visible);
+            automapRenderer.SetLighting(_light);
             automapRenderer.Rebuild();
         }
         // 지도 완성(100%)은 알림 없이 전체 지도의 탐험률로만 보여준다 (DungeonFullMap)
@@ -499,21 +587,38 @@ public class MapManager : MonoBehaviour
         }
 
         if (!FieldSkills.Has(FieldSkills.TrapDisarm)) return false;
+        return AskDisarm(next, step);
+    }
+
+    /// <summary>
+    /// [2026-10-08] 아는 함정의 해제 여부를 묻는다 (걸어 들어가려 할 때 = 탐험 스킬 '함정 해제', 또는 바로 앞 함정을 눌렀을 때 = 누구나).
+    /// step 이 있으면 "그냥 밟고 지나가기" 도 고를 수 있다. 물었으면 true.
+    /// </summary>
+    private bool AskDisarm(Vector2Int pos, System.Action step)
+    {
+        if (!FloorData.InBounds(pos)) return false;
+        FloorCell cell = FloorData.GetCell(pos);
+        if (cell.feature != FloorFeature.Trap || !FloorState.IsTrapArmed(pos, cell.trap) || !FloorState.knownTraps.Contains(pos)) return false;
         int chance = Mathf.RoundToInt(DisarmChance() * 100f);
+        string[] options = step != null
+            ? new[] { $"Disarm <color=#9FC8FF>({chance}%)</color>", "Walk over it" }
+            : new[] { $"Disarm <color=#9FC8FF>({chance}%)</color>" };
         _hud.Choose($"A <b>{TrapLabel(cell.trap)}</b> lies ahead.\n<size=80%><color=#AAAAAA>If disarming fails, it goes off (half damage).</color></size>",
-            new[] { $"Disarm <color=#9FC8FF>({chance}%)</color>", "Walk over it" }, "Back", false, choice =>
+            options, step != null ? "Back" : "Leave it", false, choice =>
             {
-                if (choice == 0) TryDisarm(next);
+                if (choice == 0) TryDisarm(pos);
                 else if (choice == 1 && step != null) step();
             });
         return true;
     }
 
+    /// <summary>해제 확률: 탐험 스킬 '함정 해제'가 있으면 55% + 민첩, 없으면 30% + 민첩 (민첩 1당 0.5%p, 최대 95%).</summary>
     private float DisarmChance()
     {
         PlayerStats hero = GetHeroStats();
         float agi = hero != null ? hero.Agility : 0f;
-        return Mathf.Clamp(FieldSkills.DisarmBaseChance + agi * FieldSkills.DisarmPerAgi, 0f, FieldSkills.DisarmMaxChance);
+        float baseChance = FieldSkills.Has(FieldSkills.TrapDisarm) ? FieldSkills.DisarmBaseChance : FieldSkills.DisarmNoSkillChance;
+        return Mathf.Clamp(baseChance + agi * FieldSkills.DisarmPerAgi, 0f, FieldSkills.DisarmMaxChance);
     }
 
     /// <summary>함정 해제 시도. 성공: 함정 제거 + 함정 부품 1개. 실패: 그 자리에서 발동 (피해 절반).</summary>
@@ -528,8 +633,11 @@ public class MapManager : MonoBehaviour
             var parts = Resources.Load<ConsumableItemSO>(TrapPartsResource);
             if (parts != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(parts, 1) > 0)
                 loot = $"\n<size=80%>Salvaged <color=#FFD24A>{parts.itemName}</color>.</size>";
-            Toast($"<color=#9FFF9F>You disarm the {TrapLabel(cell.trap)}.</color>{loot}");
-            Debug.Log($"[MapManager] 함정 해제 성공 {pos}: {cell.trap}");
+            int exp = Mathf.Max(0, disarmExpBase + disarmExpPerFloor * FloorData.floorNumber);
+            PlayerStats hero = GetHeroStats();
+            if (hero != null && exp > 0) hero.AddExp(exp);
+            Toast($"<color=#9FFF9F>You disarm the {TrapLabel(cell.trap)}.</color> <color=#FFD24A>+{exp} EXP</color>{loot}");
+            Debug.Log($"[MapManager] 함정 해제 성공 {pos}: {cell.trap} (EXP +{exp})");
         }
         else
         {
@@ -714,17 +822,17 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // [2026-10-08] 초반 층: 허접 무기 (스킬을 쓰기 위한 무기 — 아직 없는 것 중에서)
+        // [2026-10-08] 초반 층: 허접 무기 (스킬을 쓰기 위한 무기). [2026-10-09] 같은 장비도 다시 나옴 (30개까지 — 쌍수용)
         EquipmentData junk = Random.value < chestJunkWeaponChance ? RollEquipment(true) : null;
-        // 장비 (아직 없는 것 중에서) — 장비를 얻는 유일한 경로
+        // 장비
         if (junk != null || Random.value < chestEquipmentChance)
         {
             EquipmentData gear = junk != null ? junk : RollEquipment(false);
             if (gear != null && EquipmentBag.Add(gear))
             {
                 FloorState.openedChests.Add(pos);
-                bool equipped = EquipWeaponIfHandEmpty(gear);
-                Toast($"Opened a chest: <color=#FFB347>{gear.equipmentName}</color>!\n<size=75%>" + (equipped ? "Equipped — you can now use its skills." : "New equipment added to your pack.") + "</size>");
+                // [2026-10-09] 자동 장착 없음 — 가방에만 넣는다 (장착은 아이템 창에서)
+                Toast($"Opened a chest: <color=#FFB347>{gear.equipmentName}</color>!\n<size=75%>Added to your pack.</size>");
                 Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → 장비 {gear.equipmentName}");
                 if (automapRenderer != null) automapRenderer.Rebuild();
                 return;
@@ -763,7 +871,7 @@ public class MapManager : MonoBehaviour
         {
             _loot = new List<ConsumableItemSO>();
             foreach (var so in Resources.LoadAll<ConsumableItemSO>("Item_Equipments/Items"))
-                if (so != null && !so.isDawnChalice && so.maxStack > 0) _loot.Add(so);
+                if (so != null && !so.isDawnChalice && so.maxStack > 0 && !so.excludeFromChests) _loot.Add(so);
         }
         if (_loot.Count == 0) return null;
 
@@ -789,20 +897,8 @@ public class MapManager : MonoBehaviour
         if (_gearPool == null)
             _gearPool = new List<EquipmentData>(Resources.LoadAll<EquipmentData>("Item_Equipments/Equipments"));
         int floor = FloorData != null ? FloorData.floorNumber : 1;
-        var candidates = _gearPool.FindAll(e => e != null && !EquipmentBag.Contains(e) && e.isJunkWeapon == junkOnly && e.DropsOnFloor(floor));
+        var candidates = _gearPool.FindAll(e => e != null && EquipmentBag.CanAdd(e) && e.isJunkWeapon == junkOnly && e.DropsOnFloor(floor));
         return candidates.Count > 0 ? candidates[Random.Range(0, candidates.Count)] : null;
-    }
-
-    /// <summary>[2026-10-08] 무기를 주웠는데 오른손이 비어 있으면 바로 장착 (상점에서 살 때와 같은 규칙).</summary>
-    private bool EquipWeaponIfHandEmpty(EquipmentData gear)
-    {
-        if (gear == null || (gear.equipmentType != EquipmentType.Hand && gear.equipmentType != EquipmentType.TwoHanded)) return false;
-        PlayerStats hero = GetHeroStats();
-        if (hero == null || hero.statData == null || hero.statData.rightHand != null) return false;
-        var mgr = FindFirstObjectByType<EquipmentManager>(FindObjectsInactive.Include);
-        if (mgr != null) return mgr.EquipItem(gear);
-        hero.statData.rightHand = gear;
-        return true;
     }
 
     private static float LootWeight(ConsumableItemSO so)

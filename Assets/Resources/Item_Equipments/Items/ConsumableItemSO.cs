@@ -51,11 +51,23 @@ namespace AbyssdawnBattle
         [Tooltip("쓰면 얻는 스킬 포인트 (예: 기억의 서 1). 아직 ConsumableEffectApplier 에 연결하지 않음")]
         public int skillPointGain = 0;
 
+        [Header("Side Effect (2026-10-08) — 확률로 상태이상 (예: 약초 20% 독 3턴)")]
+        [Tooltip("부작용이 생길 확률 (0 = 없음)")]
+        [Range(0f, 1f)] public float sideEffectChance = 0f;
+        [Tooltip("부작용 상태이상 종류")]
+        public StatusEffectType sideEffectType = StatusEffectType.Poison;
+        [Tooltip("부작용 지속 턴 (던전에서는 한 걸음 = 1턴)")]
+        public int sideEffectTurns = 3;
+
+        [Header("Loot (2026-10-08)")]
+        [Tooltip("켜면 보물상자에서 나오지 않음 (예: 정화수 — 너무 강해 일단 뺌)")]
+        public bool excludeFromChests = false;
+
         [Header("Penalty")]
         [Range(0f, 1f)] public float mpPenaltyPercent;
 
         [Header("Inventory")]
-        public int  maxStack      = 5;
+        public int  maxStack      = 50; // [2026-10-09] 소비 아이템은 종류당 50개까지
         public bool usableInBattle = true;
         public bool usableOnMap    = true;
 

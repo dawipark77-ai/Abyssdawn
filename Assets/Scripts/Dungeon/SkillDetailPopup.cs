@@ -295,6 +295,7 @@ public class SkillDetailPopup : MonoBehaviour
                 iconImage.color = new Color(1, 1, 1, 0);
                 Debug.LogWarning($"[SkillDetailPopup] {currentSkillData.skillName}: 아이콘이 없습니다!");
             }
+            SkillIconFrame.Apply(iconImage, 4f); // [2026-10-09] 황금 테두리
         }
         
         // 이름 설정

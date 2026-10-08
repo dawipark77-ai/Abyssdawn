@@ -105,6 +105,7 @@ public class NewSkillDetailPopup : MonoBehaviour
         {
             skillIconImage.sprite = data.skillIcon;
             skillIconImage.enabled = data.skillIcon != null;
+            SkillIconFrame.Apply(skillIconImage, 4f); // [2026-10-09] 황금 테두리
         }
 
         if (skillNameText != null)  skillNameText.text  = data.skillName;

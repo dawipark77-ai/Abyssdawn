@@ -222,10 +222,19 @@ public class InventoryUIManager : MonoBehaviour
 
     public void ShowDetailPopup(EquipmentData item, System.Action onClosed)
     {
+        ShowDetailPopup(item, null, onClosed);
+    }
+
+    /// <summary>[2026-10-09] 같은 장비 여러 개: equippedCopy = 누른 카드가 장착 중인 쪽인지 (null = 예전처럼 장착 여부로 판단).</summary>
+    public void ShowDetailPopup(EquipmentData item, bool? equippedCopy, System.Action onClosed)
+    {
         if (item == null) return;
         BeginPopup(onClosed);
+        _copyEquipped = equippedCopy;
         OnItemClicked(item);
     }
+
+    private bool? _copyEquipped;
 
     public void ShowDetailPopup(ConsumableItemSO item, System.Action onClosed)
     {
@@ -518,9 +527,8 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     private List<EquipmentData> GetFilteredEquipment()
     {
-        foreach (var e in equipmentItems) EquipmentBag.Add(e);
-        if (equipmentManager != null)
-            foreach (var e in equipmentManager.GetEquippedItems()) EquipmentBag.Add(e);
+        foreach (var e in equipmentItems) EquipmentBag.EnsureCount(e, 1);
+        EquipmentBag.EnsureEquipped(equipmentManager); // [2026-10-09] 같은 장비 여러 개 — 있는 만큼만 맞추고 더 늘리지 않음
 
         var owned = new List<EquipmentData>();
         foreach (var e in EquipmentBag.Items) if (e != null) owned.Add(e);
@@ -669,9 +677,12 @@ public class InventoryUIManager : MonoBehaviour
         primaryButton.onClick.RemoveAllListeners();
         primaryButton.onClick.AddListener(() => OnUseConsumableClicked(item));
 
-        // 버리기 버튼: isPermanent·새벽의 잔이면 비활성 (새벽의 잔은 버릴 수 없음 — RemoveItem 이 충전을 깎아버린다)
+        // 버리기 버튼: isPermanent 면 비활성. [2026-10-09] 새벽의 잔은 버튼 자체를 숨김 (버릴 수 없음 — RemoveItem 이 충전을 깎아버린다)
         if (discardButton != null)
+        {
+            discardButton.gameObject.SetActive(!item.isDawnChalice);
             discardButton.interactable = !item.isPermanent && !item.isDawnChalice;
+        }
     }
 
     private void PopulateDetailPanel(EquipmentData item)
@@ -680,6 +691,8 @@ public class InventoryUIManager : MonoBehaviour
         if (detailNameText != null) detailNameText.text = item.equipmentName;
         if (detailTypeText != null) detailTypeText.text = LocalizeType(item.equipmentType);
         if (detailDescText != null) detailDescText.text = item.description;
+        // [2026-10-09] 수량 칸은 소비 아이템용 — 장비를 열 때 이전에 본 아이템 값(예: 새벽의 잔 3/3)이 남지 않게 비움
+        if (qtyText != null) qtyText.text = "";
 
         // MainStatText — 무기면 ATK, 방어구면 DEF 큰 글씨
         if (mainStatText != null)
@@ -1041,7 +1054,7 @@ public class InventoryUIManager : MonoBehaviour
     private void RefreshPrimaryButton(EquipmentData item)
     {
         if (primaryButton == null) return;
-        bool equipped = IsEquipped(item);
+        bool equipped = _copyEquipped ?? IsEquipped(item);
         if (primaryButtonText != null)
             primaryButtonText.text = equipped ? "Unequip" : "Equip";
 
@@ -1054,7 +1067,10 @@ public class InventoryUIManager : MonoBehaviour
 
         // 장비는 항상 버리기 가능
         if (discardButton != null)
+        {
+            discardButton.gameObject.SetActive(true);
             discardButton.interactable = true;
+        }
     }
 
     private bool IsEquipped(EquipmentData item)
@@ -1069,7 +1085,13 @@ public class InventoryUIManager : MonoBehaviour
 
     private void OnEquipClicked(EquipmentData item)
     {
-        if (equipmentManager != null) equipmentManager.EquipItem(item);
+        if (equipmentManager != null)
+        {
+            EquipmentBag.EnsureEquipped(equipmentManager);
+            // [2026-10-09] 같은 장비를 하나 더 끼우려면 장착하지 않은 여분이 있어야 함
+            bool ok = (EquipmentBag.Count(item) == 0 || EquipmentBag.HasSpare(equipmentManager, item)) && equipmentManager.EquipItem(item);
+            if (ok && _copyEquipped.HasValue) _copyEquipped = true;
+        }
         PopulateDetailPanel(item);
     }
 
@@ -1082,6 +1104,7 @@ public class InventoryUIManager : MonoBehaviour
             else if (equipmentManager.body       == item) equipmentManager.UnequipItem("Body");
             else if (equipmentManager.accessory1 == item) equipmentManager.UnequipItem("Accessory1");
             else if (equipmentManager.accessory2 == item) equipmentManager.UnequipItem("Accessory2");
+            if (_copyEquipped.HasValue) _copyEquipped = false;
         }
         PopulateDetailPanel(item);
     }
@@ -1157,7 +1180,8 @@ public class InventoryUIManager : MonoBehaviour
 
         if (selectedItem == null) return;
         // 장착 중이면 먼저 해제한 뒤 버린다 (이전에는 인스펙터 목록에서만 빠지고 화면·장착 상태는 그대로였다)
-        if (IsEquipped(selectedItem)) OnUnequipClicked(selectedItem);
+        // [2026-10-09] 같은 장비 여러 개: 누른 카드가 장착 중인 쪽일 때만 해제, 가방에서는 한 개만 뺀다
+        if (_copyEquipped ?? IsEquipped(selectedItem)) OnUnequipClicked(selectedItem);
         equipmentItems.Remove(selectedItem);
         EquipmentBag.Remove(selectedItem);
         selectedItem = null;

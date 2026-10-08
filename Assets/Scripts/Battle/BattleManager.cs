@@ -506,6 +506,7 @@ public class BattleManager : MonoBehaviour
                 iconImage.sprite = skill.skillIcon;
                 iconImage.preserveAspect = true;
                 if (!usable) iconImage.color = new Color(1f, 1f, 1f, 0.35f);
+                SkillIconFrame.Apply(iconImage); // [2026-10-09] 아비스던 황금 테두리
             }
 
             // 텍스트 추가 (아이콘 오른쪽에 배치)
@@ -3591,7 +3592,7 @@ public class BattleManager : MonoBehaviour
             case "attack":
                 if (cmd.targetEnemy != null && cmd.targetEnemy.currentHP > 0)
                 {
-                    ExecuteAttack(cmd.actor, cmd.targetEnemy);
+                    yield return StartCoroutine(ExecuteAttack(cmd.actor, cmd.targetEnemy));
                 }
                 break;
             case "skill":
@@ -4825,7 +4826,7 @@ public class BattleManager : MonoBehaviour
         // [2026-10-07] DQ식 도망 — 레벨 차이 단계
         //   차이 = 주인공 레벨 − 지역 레벨.
         //   차이 30↑ 120% · 20↑ 100% · 10↑ 90% · 5↑ 70% (기본 공식보다 낮아지지 않음).
-        //   5 미만이면 기본 공식: 15% + 실패 1회당 +25%p + 민첩 보정 + 연막탄 등.
+        //   5 미만이면 기본 공식: 20% + 실패 1회당 +25%p + 민첩 보정 + 연막탄 등.
         //   실패하면 파티 전원 이번 턴 행동 없이 적만 행동.
         int levelGap = currentControlledMember.level - GetAreaLevel();
         float formulaChance = Mathf.Clamp01(fleeBaseChance + fleeStepChance * _fleeFailCount
@@ -4848,7 +4849,7 @@ public class BattleManager : MonoBehaviour
         }
 
         _fleeFailCount++;
-        AddMessage($"<color=#FF6B6B>Couldn't escape!</color> <size=80%>({fleeChance:P0} — next try is easier)</size>");
+        AddMessage("<color=#FF6B6B>Couldn't escape!</color>"); // [2026-10-08] 드퀘식 — 확률·이유 설명 없음
         HideCommandPanels();
         HideBackButton();
         pendingCommands.Clear();
@@ -4860,9 +4861,9 @@ public class BattleManager : MonoBehaviour
     }
 
     [Header("도망 (DQ식)")]
-    [Tooltip("레벨 차이 5 미만일 때 첫 시도 기본 확률 (0.15 = 15%)")]
-    [Range(0f, 1f)] public float fleeBaseChance = 0.15f;
-    [Tooltip("도망 실패 1회마다 더해지는 확률 (0.25 → 15%, 40%, 65%, 90%, 100%)")]
+    [Tooltip("레벨 차이 5 미만일 때 첫 시도 기본 확률 (0.20 = 20%) — [2026-10-09] 15% → 20%")]
+    [Range(0f, 1f)] public float fleeBaseChance = 0.20f;
+    [Tooltip("도망 실패 1회마다 더해지는 확률 (0.25 → 20%, 45%, 70%, 95%, 100%)")]
     [Range(0f, 1f)] public float fleeStepChance = 0.25f;
     [Tooltip("주인공 민첩 1당 더해지는 확률 (0.002 = 민첩 1당 +0.2%p, 민첩 99 → +19.8%p)")]
     public float fleeChancePerAgi = 0.002f;
@@ -5519,9 +5520,12 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[BattleManager] ========== Back Button Visibility Check Complete ==========");
     }
     
-    private void ExecuteAttack(PlayerStats attacker, EnemyStats target)
+    [Tooltip("[2026-10-09] 쌍수 기본 공격: 오른손 타격 후 왼손 타격까지의 시간차 (초)")]
+    public float dualHitDelay = 0.2f;
+
+    private IEnumerator ExecuteAttack(PlayerStats attacker, EnemyStats target)
     {
-        if (attacker == null || target == null) return;
+        if (attacker == null || target == null) yield break;
 
         // [Bite] 동료의 원본 MonsterSO에 기본공격 override가 있으면 평타 대체.
         //   Hero는 companionSource == null → biteOverride = null → 아래 4곳 전부 기존과 동일 동작.
@@ -5620,17 +5624,20 @@ public class BattleManager : MonoBehaviour
                 }
                 hit1Slot = ApplyPhysResist(hit1Slot, target);
                 hit2Slot = ApplyPhysResist(hit2Slot, target);
+                // [2026-10-09] 오른손 → (살짝 쉬고) 왼손 순으로 한 대씩 — 피해 숫자도 따로 (합산해서 보여주지 않음)
                 int applied1 = target.TakeDamage(hit1Slot, critical);
                 int applied2 = 0;
                 if (!target.IsDead())
                 {
-                    applied2 = target.TakeDamage(hit2Slot, critical);
+                    yield return new WaitForSeconds(dualHitDelay);
+                    if (!target.IsDead()) applied2 = target.TakeDamage(hit2Slot, critical);
                 }
 
                 shownTotal = applied1 + applied2;
+                string hits = applied2 > 0 ? $"{applied1}, {applied2}" : $"{applied1}";
                 AddMessage(critical
-                    ? $"Critical! {attacker.playerName} struck twice for {shownTotal}!"
-                    : $"{attacker.playerName} struck twice for {shownTotal} damage!");
+                    ? $"Critical! {attacker.playerName} struck twice — {hits}!"
+                    : $"{attacker.playerName} struck twice — {hits} damage!");
             }
             else
             {
