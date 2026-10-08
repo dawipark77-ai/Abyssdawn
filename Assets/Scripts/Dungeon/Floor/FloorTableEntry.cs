@@ -152,7 +152,8 @@ public static class FloorTableDefaults
     {
         List<FloorTableEntry> list = new List<FloorTableEntry>();
         // 몬스터 수 가중치 (1·2·3·4마리) — [2026-10-04] 같은 몬스터 최대 4마리까지, 4마리면 2/2 대열
-        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 6, 9, 0.5f).WithShapes(0.3f, 0.2f, 0, 1).WithGroups(55, 30, 12, 3));
+        // [2026-10-08] 1층은 튜토리얼 — 거의 1대1 (1마리 70% · 2마리 22% · 3마리 7% · 4마리 1%)
+        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 6, 9, 0.5f).WithShapes(0.3f, 0.2f, 0, 1).WithGroups(70, 22, 7, 1));
         // [2026-10-07 2차] 함정 밀도 약 3% → 약 8% (걸을 수 있는 칸 기준. 1·2~4·5층 약 100칸, 6~8층 156, 9~10층 239, 11층~ 318)
         //   1층 0~1 → 6~9 / 2~4층 2~4 → 7~10 / 5층 0~1 → 5~7 / 6~8층 3~6 → 11~15 / 9~10층 4~7 → 17~22 / 11층~ 5~8 → 23~29
         list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 7, 10, 0.3f).WithShapes(0.4f, 0.3f, 0, 2).WithGroups(40, 35, 18, 7));

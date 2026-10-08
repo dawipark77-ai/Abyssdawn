@@ -89,6 +89,8 @@ public class MapManager : MonoBehaviour
     public float alarmDelay = 0.8f;
     [Tooltip("보물상자에서 장비가 나올 확률 (아직 없는 장비 중에서). 나머지는 소비 아이템")]
     [Range(0f, 1f)] public float chestEquipmentChance = 0.3f;
+    [Tooltip("[2026-10-08] 허접 무기가 나오는 층(장비마다 dropMaxFloor)에서 보물상자가 허접 무기를 줄 확률 (아직 없는 것 중에서)")]
+    [Range(0f, 1f)] public float chestJunkWeaponChance = 0.4f;
     [Tooltip("보물상자에서 '지식의 서'(스킬 포인트 LP +1)가 나올 확률 — 스톤샤드식 전투 외 성장 수단")]
     [Range(0f, 1f)] public float chestTomeChance = 0.12f;
 
@@ -418,16 +420,50 @@ public class MapManager : MonoBehaviour
             () => GameOverFlow.Restart(true, scene, party, hero.statData, null));
     }
 
-    /// <summary>탐험 스킬 '함정 감지': 걸을 때 상하좌우·대각 1칸의 숨은 함정을 25% 확률로 알아챈다 (함정마다 따로).</summary>
+    // [2026-10-08] 함정 자동 감지 — 누구나, 걸을 때마다 1~3칸 안(벽 너머 제외)의 숨은 함정을 확률로 알아챈다. 민첩 기반.
+    //   1칸 확률 = 기본 10% + 민첩 1당 0.25%p (+ 탐험 스킬 '함정 감지' 25%p), 최대 50%
+    //   2칸 = 1칸 × 0.5,  3칸 = 1칸 × 0.25   (함정마다 따로, 걸음마다 다시 굴림)
+    //   예) 민첩 5: 11.3% / 5.6% / 2.8%  ·  민첩 50: 22.5% / 11.3% / 5.6%  ·  민첩 99: 34.8% / 17.4% / 8.7%
+    [Header("Trap Sense (함정 자동 감지)")]
+    [Tooltip("1칸 거리 기본 감지 확률")]
+    [Range(0f, 1f)] public float trapSenseBaseChance = 0.10f;
+    [Tooltip("민첩 1당 1칸 거리 감지 확률 증가 (0.0025 = 0.25%p, 민첩 99 → +24.75%p)")]
+    [Range(0f, 0.02f)] public float trapSensePerAgi = 0.0025f;
+    [Tooltip("1칸 거리 감지 확률 상한")]
+    [Range(0f, 1f)] public float trapSenseMaxChance = 0.50f;
+    [Tooltip("거리별 배율 — [0] = 1칸, [1] = 2칸, [2] = 3칸. 길이가 감지 범위")]
+    public float[] trapSenseDistanceMult = { 1f, 0.5f, 0.25f };
+
+    /// <summary>지금 주인공의 1칸 거리 감지 확률 (거리 배율 적용 전).</summary>
+    public float TrapSenseChance()
+    {
+        PlayerStats hero = GetHeroStats();
+        float agi = hero != null ? hero.Agility : 0f;
+        float c = trapSenseBaseChance + agi * trapSensePerAgi;
+        if (FieldSkills.Has(FieldSkills.TrapDetection)) c += FieldSkills.TrapDetectPassiveChance;
+        return Mathf.Clamp(c, 0f, trapSenseMaxChance);
+    }
+
+    private readonly HashSet<Vector2Int> _senseArea = new HashSet<Vector2Int>();
+
     private void PassiveTrapSense(Vector2Int pos)
     {
-        if (FloorData == null || FloorState == null || !FieldSkills.Has(FieldSkills.TrapDetection)) return;
+        if (FloorData == null || FloorState == null || trapSenseDistanceMult == null || trapSenseDistanceMult.Length == 0) return;
+        int range = trapSenseDistanceMult.Length;
+        FloorVisibility.ComputeVisible(FloorData, pos, range, _senseArea); // 시야와 같은 규칙: 벽·문 너머는 못 느낌
+        float near = TrapSenseChance();
         var found = new List<Vector2Int>();
         foreach (Vector2Int p in FloorData.traps)
         {
-            if (FloorState.knownTraps.Contains(p) || p == pos) continue;
-            if (Mathf.Abs(p.x - pos.x) > 1 || Mathf.Abs(p.y - pos.y) > 1) continue;
-            if (Random.value < FieldSkills.TrapDetectPassiveChance) found.Add(p);
+            if (FloorState.knownTraps.Contains(p) || p == pos || !_senseArea.Contains(p)) continue;
+            int d = Mathf.Max(Mathf.Abs(p.x - pos.x), Mathf.Abs(p.y - pos.y));
+            if (d < 1 || d > range) continue;
+            float chance = near * trapSenseDistanceMult[d - 1];
+            if (Random.value < chance)
+            {
+                found.Add(p);
+                Debug.Log($"[MapManager] 함정 감지 {p} ({d}칸, {chance:P1}): {FloorData.GetCell(p).trap}");
+            }
         }
         if (found.Count == 0) return;
         RevealFound(found);
@@ -678,14 +714,17 @@ public class MapManager : MonoBehaviour
             }
         }
 
+        // [2026-10-08] 초반 층: 허접 무기 (스킬을 쓰기 위한 무기 — 아직 없는 것 중에서)
+        EquipmentData junk = Random.value < chestJunkWeaponChance ? RollEquipment(true) : null;
         // 장비 (아직 없는 것 중에서) — 장비를 얻는 유일한 경로
-        if (Random.value < chestEquipmentChance)
+        if (junk != null || Random.value < chestEquipmentChance)
         {
-            EquipmentData gear = RollEquipment();
+            EquipmentData gear = junk != null ? junk : RollEquipment(false);
             if (gear != null && EquipmentBag.Add(gear))
             {
                 FloorState.openedChests.Add(pos);
-                Toast($"Opened a chest: <color=#FFB347>{gear.equipmentName}</color>!\n<size=75%>New equipment added to your pack.</size>");
+                bool equipped = EquipWeaponIfHandEmpty(gear);
+                Toast($"Opened a chest: <color=#FFB347>{gear.equipmentName}</color>!\n<size=75%>" + (equipped ? "Equipped — you can now use its skills." : "New equipment added to your pack.") + "</size>");
                 Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → 장비 {gear.equipmentName}");
                 if (automapRenderer != null) automapRenderer.Rebuild();
                 return;
@@ -741,13 +780,29 @@ public class MapManager : MonoBehaviour
 
     private List<EquipmentData> _gearPool;
 
-    /// <summary>Resources/Item_Equipments/Equipments 중 아직 가지지 않은 장비 하나. 다 가졌으면 null.</summary>
-    private EquipmentData RollEquipment()
+    /// <summary>
+    /// Resources/Item_Equipments/Equipments 중 아직 가지지 않은 장비 하나 (이 층에서 나올 수 있는 것만). 없으면 null.
+    /// junkOnly = 허접 무기만, false = 허접 무기를 뺀 나머지.
+    /// </summary>
+    private EquipmentData RollEquipment(bool junkOnly)
     {
         if (_gearPool == null)
             _gearPool = new List<EquipmentData>(Resources.LoadAll<EquipmentData>("Item_Equipments/Equipments"));
-        var candidates = _gearPool.FindAll(e => e != null && !EquipmentBag.Contains(e));
+        int floor = FloorData != null ? FloorData.floorNumber : 1;
+        var candidates = _gearPool.FindAll(e => e != null && !EquipmentBag.Contains(e) && e.isJunkWeapon == junkOnly && e.DropsOnFloor(floor));
         return candidates.Count > 0 ? candidates[Random.Range(0, candidates.Count)] : null;
+    }
+
+    /// <summary>[2026-10-08] 무기를 주웠는데 오른손이 비어 있으면 바로 장착 (상점에서 살 때와 같은 규칙).</summary>
+    private bool EquipWeaponIfHandEmpty(EquipmentData gear)
+    {
+        if (gear == null || (gear.equipmentType != EquipmentType.Hand && gear.equipmentType != EquipmentType.TwoHanded)) return false;
+        PlayerStats hero = GetHeroStats();
+        if (hero == null || hero.statData == null || hero.statData.rightHand != null) return false;
+        var mgr = FindFirstObjectByType<EquipmentManager>(FindObjectsInactive.Include);
+        if (mgr != null) return mgr.EquipItem(gear);
+        hero.statData.rightHand = gear;
+        return true;
     }
 
     private static float LootWeight(ConsumableItemSO so)
@@ -831,7 +886,26 @@ public class MapManager : MonoBehaviour
     [Tooltip("그물 함정: 위험도 게이지 상승량 (0~1). 가득 차면 즉시 전투")]
     [Range(0f, 1f)] public float netDangerAdd = 0.35f;
 
-    /// <summary>종류별 피해 비율 (기본 40% + 추가).</summary>
+    // [2026-10-08] 함정 회피 — 밟아도 확률로 피한다 (민첩 기반, 감지와 같은 틀).
+    //   회피 확률 = 기본 10% + 민첩 1당 0.25%p, 최대 50%.  예) 민첩 5: 11.3% · 50: 22.5% · 99: 34.8%
+    //   피하면 피해·효과 없이 함정이 드러난다 (함정은 그대로 남아 다시 밟으면 또 굴림). 해제 실패로 터진 함정은 못 피함.
+    [Header("Trap Dodge (함정 회피)")]
+    [Tooltip("함정을 밟았을 때 기본 회피 확률")]
+    [Range(0f, 1f)] public float trapDodgeBaseChance = 0.10f;
+    [Tooltip("민첩 1당 회피 확률 증가 (0.0025 = 0.25%p, 민첩 99 → +24.75%p)")]
+    [Range(0f, 0.02f)] public float trapDodgePerAgi = 0.0025f;
+    [Tooltip("회피 확률 상한")]
+    [Range(0f, 1f)] public float trapDodgeMaxChance = 0.50f;
+
+    /// <summary>지금 주인공의 함정 회피 확률.</summary>
+    public float TrapDodgeChance()
+    {
+        PlayerStats hero = GetHeroStats();
+        float agi = hero != null ? hero.Agility : 0f;
+        return Mathf.Clamp(trapDodgeBaseChance + agi * trapDodgePerAgi, 0f, trapDodgeMaxChance);
+    }
+
+    /// <summary>종류별 피해 비율 (기본 20% + 추가).</summary>
     private float TrapDamagePercent(FloorTrapType type)
     {
         float p = trapBaseDamagePercent;
@@ -849,6 +923,20 @@ public class MapManager : MonoBehaviour
     /// <summary>함정 발동. 해제됐거나 다 쓴 함정은 아무 일도 없다. 무슨 일이 있었으면 true.</summary>
     private bool TriggerTrap(Vector2Int pos, FloorTrapType type)
     {
+        // 회피 판정 (작동하는 함정일 때만)
+        if (FloorState.IsTrapArmed(pos, type))
+        {
+            float dodge = TrapDodgeChance();
+            if (Random.value < dodge)
+            {
+                if (_player != null) _player.InterruptHold();
+                FloorState.knownTraps.Add(pos); // 드러나기만 하고 발동하지 않음
+                if (automapRenderer != null) automapRenderer.Rebuild();
+                Debug.Log($"[MapManager] B{FloorData.floorNumber} 함정 회피 {pos}: {type} ({dodge:P1})");
+                Toast($"<color=#9FFF9F>You leap aside!</color>\n<size=80%>You felt a {TrapLabel(type)} click under your foot just in time.</size>");
+                return true;
+            }
+        }
         bool hit = TriggerTrap(pos, type, 1f, false);
         CheckHeroDeath();
         return hit;
@@ -1013,11 +1101,15 @@ public class MapManager : MonoBehaviour
     // 층 만들기
     // ─────────────────────────────────────────
 
+    /// <summary>[2026-10-08] 실험용(에디터 자동 플레이) 층 설정표 덮어쓰기. null 이면 평소대로. 게임 중에는 쓰지 않음.</summary>
+    public static FloorTable DevFloorTableOverride;
+
     private void BuildCurrentFloor(Arrival arrival)
     {
         int floor = DungeonPersistentData.currentFloor;
-        CurrentFloorSettings = floorTable != null && floorTable.entries != null && floorTable.entries.Count > 0
-            ? floorTable.GetEntry(floor)
+        FloorTable table = DevFloorTableOverride != null ? DevFloorTableOverride : floorTable;
+        CurrentFloorSettings = table != null && table.entries != null && table.entries.Count > 0
+            ? table.GetEntry(floor)
             : FloorTableDefaults.Find(null, floor);
 
         // 층 기억: 가 본 층이면 같은 시드·지도·상자·함정 상태 그대로

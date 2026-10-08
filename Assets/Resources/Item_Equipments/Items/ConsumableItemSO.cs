@@ -47,6 +47,10 @@ namespace AbyssdawnBattle
         [Range(0f, 1f)] public float escapeChanceBuff;
         public int     buffDuration;
 
+        [Header("Growth (2026-10-08 — 데이터만, 사용 효과는 아직 연결 안 됨)")]
+        [Tooltip("쓰면 얻는 스킬 포인트 (예: 기억의 서 1). 아직 ConsumableEffectApplier 에 연결하지 않음")]
+        public int skillPointGain = 0;
+
         [Header("Penalty")]
         [Range(0f, 1f)] public float mpPenaltyPercent;
 

@@ -64,7 +64,7 @@ public static class GameOverFlow
         ConsumableInventory.ResetForNewRun();
         EquipmentBag.ResetForNewRun(playerStatData);
         PlayerWallet.ResetForNewRun();
-        // [2026-10-04] 저장 없이 죽으면 스킬도 처음부터 (배운 스킬·장착 슬롯 비움, SP 는 새 주인공 생성 시 1)
+        // [2026-10-04] 저장 없이 죽으면 스킬도 처음부터 (배운 스킬·장착 슬롯 비움, SP 는 새 주인공 생성 시 PlayerStats.StartingSkillPoints)
         if (playerStatData != null) playerStatData.ResetSkillsForNewRun();
         PlayerStats.PendingLevelUpNotes.Clear();
 

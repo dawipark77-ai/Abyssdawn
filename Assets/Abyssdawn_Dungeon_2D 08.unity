@@ -31693,14 +31693,14 @@ MonoBehaviour:
   _fallbackExp: 0
   _fallbackFreeStatPoints: 0
   _fallbackSkillPoints: 0
-  _fallbackBaseHP: 0
+  _fallbackBaseHP: 20
   _fallbackBaseMP: 0
-  _fallbackBaseAttack: 0
-  _fallbackBaseDefense: 0
+  _fallbackBaseAttack: 5
+  _fallbackBaseDefense: 5
   _fallbackBaseMagicDefense: 0
-  _fallbackBaseMagic: 0
-  _fallbackBaseAgility: 0
-  _fallbackBaseLuck: 0
+  _fallbackBaseMagic: 5
+  _fallbackBaseAgility: 5
+  _fallbackBaseLuck: 3
   playerName: hero
   companionSource: {fileID: 0}
   companionId: 0
@@ -55114,7 +55114,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 228.9615, y: -50}
+  m_AnchoredPosition: {x: 383.1115, y: -50}
   m_SizeDelta: {x: 146.15, y: 140.39}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &810395965
@@ -55181,8 +55181,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 4993468765095421087, guid: f5f35aeec2113074b8686631a27aa6b2, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -91589,6 +91589,13 @@ MonoBehaviour:
   width: 20
   height: 20
   dungeonDeathDelay: 2
+  trapSenseBaseChance: 0.1
+  trapSensePerAgi: 0.0025
+  trapSenseMaxChance: 0.5
+  trapSenseDistanceMult:
+  - 1
+  - 0.5
+  - 0.25
   trapBaseDamagePercent: 0.2
   trapBleedTurns: 3
   trapHeavyBonusPercent: 0.05
@@ -91596,6 +91603,9 @@ MonoBehaviour:
   spikePerFloorPercent: 0.01
   manaDrainPercent: 0.5
   netDangerAdd: 0.35
+  trapDodgeBaseChance: 0.1
+  trapDodgePerAgi: 0.0025
+  trapDodgeMaxChance: 0.5
 --- !u!1 &1358098508
 GameObject:
   m_ObjectHideFlags: 0
@@ -114667,7 +114677,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: -0.30004883, y: 0}
-  m_SizeDelta: {x: 302.0365, y: 100}
+  m_SizeDelta: {x: 456.1865, y: 100}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1694596202
 MonoBehaviour:

@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
+  m_Name: Junk_BoneShiv
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
+  itemName: Bone Shiv
+  icon: {fileID: 0}
+  description: A sharpened sliver of rat bone. It breaks skin, not much else. ATK
+    +0.
+  equipmentName: Bone Shiv
+  equipmentIcon: {fileID: 3545242504023248292, guid: 11f0ac674db4a0d45a1e3dc9fadc7389, type: 3}
+  flatIcon: {fileID: 0}
+  equipmentType: 0
+  isTwoHanded: 0
+  weaponCategory: 2
+  armourCategory: 0
+  armourType: 0
+  attackBonus: 0
+  defenseBonus: 0
+  magicDefenseBonus: 0
+  magicBonus: 0
+  hpBonus: 0
+  mpBonus: 0
+  mpBonusPercent: 0
+  agiBonus: 0
+  luckBonus: 0
+  accuracyBonus: 0
+  armorBreakData: {fileID: 0}
+  armorBreakCoefficient: 0
+  blockData: {fileID: 0}
+  weaponEffect: {fileID: 0}
+  skill: {fileID: 0}
+  weaponCurses: []
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 0
+  sellPrice: 1
+  dropMinFloor: 1
+  dropMaxFloor: 3
+  isJunkWeapon: 1
+  canDropFromChest: 0

@@ -31,7 +31,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private int _fallbackSkillPoints = 0;
 
     /// <summary>새 게임 시작 시 주는 스킬 포인트 (LP).</summary>
-    public const int StartingSkillPoints = 1;
+    public const int StartingSkillPoints = 2; // [2026-10-08] 1 → 2 (초반에 스킬 2개)
 
     // [2026-05-24] Base 스탯 7종을 SO에서 분리. SO(PlayerStatData)는 초기 시드값
     // 템플릿으로만 사용. 런타임 변동은 모두 _fallbackBase*에만 기록되어

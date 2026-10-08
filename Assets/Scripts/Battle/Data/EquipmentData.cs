@@ -151,6 +151,25 @@ namespace AbyssdawnBattle
         public int buyPrice = 0;
         [Tooltip("Sell price at shop (gold)")]
         public int sellPrice = 0;
+
+        // [2026-10-08] 보물상자에서 나오는 층 범위 (0 = 제한 없음)
+        [Space(10)]
+        [Header("━━━━━━━━━━ Drop ━━━━━━━━━━")]
+        [Tooltip("이 층부터 보물상자에서 나옴 (0 = 제한 없음)")]
+        public int dropMinFloor = 0;
+        [Tooltip("이 층까지 보물상자에서 나옴 (0 = 제한 없음)")]
+        public int dropMaxFloor = 0;
+        [Tooltip("허접 무기 (조잡한 등급 아래) — 초반 층 보물상자에서 따로 잘 나온다. 스킬을 쓰기 위한 무기")]
+        public bool isJunkWeapon = false;
+        [Tooltip("끄면 보물상자에서 나오지 않음 (데이터만 만들어 둔 장비)")]
+        public bool canDropFromChest = true;
+
+        /// <summary>이 층의 보물상자에서 나올 수 있는지.</summary>
+        public bool DropsOnFloor(int floor)
+        {
+            if (!canDropFromChest) return false;
+            return (dropMinFloor <= 0 || floor >= dropMinFloor) && (dropMaxFloor <= 0 || floor <= dropMaxFloor);
+        }
     }
 }
 

@@ -20,9 +20,9 @@ MonoBehaviour:
   race: 1
   basicAttackOverride: {fileID: 11400000, guid: c8f5d1a3b96e4827bc1a0d4e6f819203, type: 2}
   level: 2
-  hp: 19
+  hp: 15
   mp: 0
-  atk: 7
+  atk: 5
   def: 2
   mag: 0
   agi: 12
