@@ -1089,8 +1089,16 @@ public class InventoryUIManager : MonoBehaviour
         {
             EquipmentBag.EnsureEquipped(equipmentManager);
             // [2026-10-09] 같은 장비를 하나 더 끼우려면 장착하지 않은 여분이 있어야 함
-            bool ok = (EquipmentBag.Count(item) == 0 || EquipmentBag.HasSpare(equipmentManager, item)) && equipmentManager.EquipItem(item);
-            if (ok && _copyEquipped.HasValue) _copyEquipped = true;
+            if (EquipmentBag.Count(item) == 0 || EquipmentBag.HasSpare(equipmentManager, item))
+            {
+                // [2026-10-09] 한손 장비는 어느 손에 들지 먼저 고른다 (던전 선택창)
+                EquipHandPicker.Equip(equipmentManager, item, ok =>
+                {
+                    if (ok && _copyEquipped.HasValue) _copyEquipped = true;
+                    PopulateDetailPanel(item);
+                });
+                return;
+            }
         }
         PopulateDetailPanel(item);
     }

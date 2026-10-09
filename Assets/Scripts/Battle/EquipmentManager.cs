@@ -300,6 +300,36 @@ public class EquipmentManager : MonoBehaviour
     }
 
     /// <summary>
+    /// [2026-10-09] 한손 장비를 고른 손에 장착 (EquipHandPicker). 한손 장비가 아니면 EquipItem 규칙.
+    /// 왼손을 고르면 오른손의 양손 무기는 내려놓는다. 같은 장비가 하나뿐이고 반대 손에 들려 있으면 손만 옮긴다.
+    /// </summary>
+    public bool EquipToHand(EquipmentData equipment, bool toRight)
+    {
+        if (equipment == null) return false;
+        if (equipment.equipmentType != EquipmentType.Hand) return EquipItem(equipment);
+
+        // 여분이 없는데 반대 손에 들고 있으면 → 옮기기
+        EquipmentBag.EnsureEquipped(this);
+        if (EquipmentBag.Count(equipment) > 0 && !EquipmentBag.HasSpare(this, equipment))
+        {
+            if (toRight && leftHand == equipment) leftHand = null;
+            else if (!toRight && rightHand == equipment) rightHand = null;
+            else if (!(toRight ? rightHand == equipment : leftHand == equipment)) return false;
+        }
+
+        if (toRight) rightHand = equipment;
+        else
+        {
+            if (rightHand != null && rightHand.equipmentType == EquipmentType.TwoHanded) rightHand = null;
+            leftHand = equipment;
+        }
+        RefreshStats();
+        SaveEquipmentToData();
+        Debug.Log($"[EquipmentManager] {equipment.equipmentName} → {(toRight ? "오른손" : "왼손")} 장착");
+        return true;
+    }
+
+    /// <summary>
     /// 장비를 해제합니다.
     /// </summary>
     /// <param name="slot">해제할 슬롯 ("RightHand", "LeftHand", "Body", "Accessory1", "Accessory2")</param>

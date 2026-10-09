@@ -659,9 +659,87 @@ public class MapManager : MonoBehaviour
     // 계단 · 마을 입구
     // ─────────────────────────────────────────
 
+    // ─────────────────────────────────────────
+    // [2026-10-09] 야영 (탐험 스킬 Make Camp, 1~5등급) — 던전 메뉴의 Camp 버튼
+    // ─────────────────────────────────────────
+
+    /// <summary>야영을 지금 할 수 없는 이유 (할 수 있으면 null).</summary>
+    public string CampBlockReason()
+    {
+        if (FieldSkills.Rank(FieldSkills.MakeCamp) <= 0) return "You don't know how to make camp.";
+        if (FloorData == null || FloorState == null) return "Not here.";
+        if (CurrentFloorSettings != null && CurrentFloorSettings.floorType == FloorType.Town) return "You can't make camp on a town floor.";
+        if (FloorState.campUsed) return "You have already camped on this floor.";
+        return null;
+    }
+
+    public void TryMakeCamp()
+    {
+        if (_hud == null) return;
+        string why = CampBlockReason();
+        if (why != null) { Toast($"<color=#AAAAAA>{why}</color>"); return; }
+        int rank = Mathf.Clamp(FieldSkills.Rank(FieldSkills.MakeCamp), 1, FieldSkills.MakeCampMaxRank);
+        float restore = FieldSkills.CampRestore[rank - 1];
+        float ambush = Mathf.Min(DungeonPersistentData.danger, FieldSkills.CampAmbushMax) * FieldSkills.CampAmbushMult[rank - 1];
+        var cures = FieldSkills.CampCures(rank);
+        var cureNames = new List<string>();
+        foreach (var c in cures) cureNames.Add(DungeonFieldStatus.NameOf(c));
+        string info = $"Rest here to recover <b>{Mathf.RoundToInt(restore * 100f)}%</b> HP·MP." +
+                      (cureNames.Count > 0 ? $"\nCures: {string.Join(", ", cureNames)}." : "") +
+                      (rank >= FieldSkills.CampLightFromRank ? $"\nRekindle your light (+{FieldSkills.CampLightSteps} steps)." : "") +
+                      $"\n<size=80%><color=#FF8A70>Ambush risk {Mathf.RoundToInt(ambush * 100f)}%. Danger +{Mathf.RoundToInt(FieldSkills.CampDangerAfter[rank - 1] * 100f)}% afterwards.</color></size>";
+        _hud.Confirm($"<b>Make Camp</b> <size=80%>(Lv {rank})</size>\n{info}", "Rest", "Not now", ok =>
+        {
+            if (!ok) return;
+            MakeCamp(rank, restore, ambush, cures);
+        });
+    }
+
+    private void MakeCamp(int rank, float restore, float ambushChance, AbyssdawnBattle.StatusEffectType[] cures)
+    {
+        FloorState.campUsed = true;
+        PlayerStats hero = GetHeroStats();
+        if (hero != null)
+        {
+            hero.currentHP = Mathf.Min(hero.maxHP, hero.currentHP + Mathf.Max(1, Mathf.RoundToInt(hero.maxHP * restore)));
+            if (hero.maxMP > 0) hero.currentMP = Mathf.Min(hero.maxMP, hero.currentMP + Mathf.RoundToInt(hero.maxMP * restore));
+            hero.NotifyStatusChanged();
+        }
+        foreach (var c in cures) if (DungeonFieldStatus.Has(c)) DungeonFieldStatus.Remove(c);
+        if (rank >= FieldSkills.CampLightFromRank) AddPlayerLight(FieldSkills.CampLightSteps);
+        DungeonEncounter.SetDanger(DungeonPersistentData.danger + FieldSkills.CampDangerAfter[rank - 1]);
+        Debug.Log($"[MapManager] B{FloorData.floorNumber} 야영 Lv{rank}: 회복 {restore:P0}, 습격 확률 {ambushChance:P0}");
+
+        if (Random.value < ambushChance)
+        {
+            Toast("<color=#FF6B6B>Something was watching your fire... Ambush!</color>");
+            Debug.Log($"[MapManager] 야영 중 습격");
+            EncounterPlan.ambush = true;
+            var enc = DungeonEncounter.Instance != null ? DungeonEncounter.Instance : FindFirstObjectByType<DungeonEncounter>();
+            if (enc != null) enc.ForceEncounter();
+            else EncounterPlan.ambush = false;
+            return;
+        }
+        Toast($"<color=#9FFF9F>You rest by the fire.</color> <size=80%>HP·MP +{Mathf.RoundToInt(restore * 100f)}%</size>");
+    }
+
     private void AskDescend()
     {
         int next = FloorData.floorNumber + 1;
+        // [2026-10-09] B10 마지막 계단: 스켈레톤 나이트가 지키고 있다 (이기기 전에는 내려갈 수 없음)
+        if (BossEncounter.HasBoss(FloorData.floorNumber))
+        {
+            _hud.Confirm("A cold presence bars the stairs.\n<b>The Skeleton Knight</b> rises to face you.\n<size=80%><color=#FF8A70>You cannot flee from this fight.</color></size>",
+                "Fight", "Back away", ok =>
+                {
+                    if (!ok) return;
+                    var boss = BossEncounter.LoadBoss();
+                    var enc = DungeonEncounter.Instance != null ? DungeonEncounter.Instance : FindFirstObjectByType<DungeonEncounter>();
+                    if (boss == null || enc == null) { Debug.LogError("[MapManager] 보스전을 시작할 수 없습니다 (보스 SO 또는 DungeonEncounter 없음)."); return; }
+                    enc.StartPresetEncounter(new[] { boss });
+                });
+            return;
+        }
         _hud.Confirm($"Stairs lead down.\nDescend to <b>B{next}</b>?", "Descend", "Stay", ok =>
         {
             if (!ok) return;

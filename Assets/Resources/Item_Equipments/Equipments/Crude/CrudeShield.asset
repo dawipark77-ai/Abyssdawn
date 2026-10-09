@@ -36,7 +36,7 @@ MonoBehaviour:
   accuracyBonus: 0
   armorBreakData: {fileID: 0}
   armorBreakCoefficient: 0
-  blockData: {fileID: 0}
+  blockData: {fileID: 11400000, guid: 3c288b808a4e7de41aa0baac2904282b, type: 2}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
   weaponCurses: []

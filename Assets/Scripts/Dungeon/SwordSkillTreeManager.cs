@@ -241,8 +241,8 @@ public class SwordSkillTreeManager : MonoBehaviour
 
         SkillData skill = node.GetSkillData();
 
-        // 이미 배운 스킬인지 확인
-        if (learnedSkillIDs.Contains(skill.skillID))
+        // 이미 배운 스킬인지 확인 ([2026-10-09] 등급 스킬은 최대 등급 전까지 다시 찍을 수 있음)
+        if (learnedSkillIDs.Contains(skill.skillID) && !CanRankUp(skill))
         {
             Debug.LogWarning($"[Learn-DIAG] [SwordSkillTreeManager] ✗ '{skill.skillName}' 이미 배운 스킬 → early return. learnedSkillIDs.Count={learnedSkillIDs.Count}");
             return;
@@ -318,9 +318,9 @@ public class SwordSkillTreeManager : MonoBehaviour
                 playerStatData.learnedSkills = new List<SkillData>();
             }
             
-            if (!playerStatData.learnedSkills.Contains(skill))
+            if (!playerStatData.learnedSkills.Contains(skill) || CanRankUp(skill))
             {
-                playerStatData.learnedSkills.Add(skill);
+                playerStatData.learnedSkills.Add(skill); // [2026-10-09] 등급 스킬은 한 번 더 들어가면 등급 +1
             }
 
             // 빈 슬롯이 있으면 바로 장착 (전투는 장착된 스킬만 사용).
@@ -422,8 +422,8 @@ public class SwordSkillTreeManager : MonoBehaviour
     [Tooltip("켜면 선행 스킬 → 다음 스킬 연결선을 긋고, 배운 스킬에 옅은 황금 테두리를 두름")]
     public bool drawLinks = false;
 
-    // [2026-10-06] 우선 검 트리만. 다른 트리도 켜려면 이 목록에 이름을 넣거나 인스펙터에서 drawLinks 체크.
-    private static readonly HashSet<string> DefaultLinkedTrees = new HashSet<string> { "SwordLore" };
+    // [2026-10-06] 우선 검 트리만. [2026-10-09] 방패 트리 추가. 다른 트리도 켜려면 이 목록에 이름을 넣거나 인스펙터에서 drawLinks 체크.
+    private static readonly HashSet<string> DefaultLinkedTrees = new HashSet<string> { "SwordLore", "ShieldLore" };
 
     private SkillTreeLinks _links;
 
@@ -449,6 +449,20 @@ public class SwordSkillTreeManager : MonoBehaviour
     /// <summary>
     /// 사용 가능한 스킬 포인트 가져오기
     /// </summary>
+    /// <summary>[2026-10-09] 스킬 등급 (안 배움 0). 등급 스킬(maxRank 2 이상)은 같은 칸에서 여러 번 찍는다.</summary>
+    public int GetSkillRank(SkillData skill)
+    {
+        return playerStatData != null ? playerStatData.SkillRank(skill) : (learnedSkillIDs.Contains(skill != null ? skill.skillID : null) ? 1 : 0);
+    }
+
+    /// <summary>[2026-10-09] 이미 배운 등급 스킬을 한 등급 더 올릴 수 있는지 (최대 등급 미만).</summary>
+    public bool CanRankUp(SkillData skill)
+    {
+        if (skill == null || skill.maxRank <= 1) return false;
+        int rank = GetSkillRank(skill);
+        return rank >= 1 && rank < skill.maxRank;
+    }
+
     public int GetAvailableSkillPoints()
     {
         // [2026-05-07] skillPoints는 PlayerStats(컴포넌트)가 보유 — PlayerStatData(SO)에서 분리됨

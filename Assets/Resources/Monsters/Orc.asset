@@ -31,14 +31,15 @@ MonoBehaviour:
   statusResist: 1
   activeSkills:
   - {fileID: 11400000, guid: 296faba3aebc453880e9276e512fb480, type: 2}
+  - {fileID: 11400000, guid: 8289dfe16bc944d39a8bc6193e1c9ef3, type: 2}
   passiveSkills: []
   aiPattern: 0
   rowPreference: 1
   allowedSlots: 0
-  minFloor: 0
-  maxFloor: 0
-  spawnWeight: 0
-  expReward: 60
+  minFloor: 7
+  maxFloor: 9
+  spawnWeight: 0.4
+  expReward: 150
   goldReward: 0
   dropTable: []
   companionChance: 0.125

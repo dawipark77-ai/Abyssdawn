@@ -635,7 +635,20 @@ public class PlayerStats : MonoBehaviour
     }
 
     /// <summary>
-    /// 패시브의 무기 조건(weaponCategory)을 현재 오른손 무기가 만족하는지.
+    /// [2026-10-09] 오른손이든 왼손이든 이 종류의 무기를 들고 있는지 (None = 조건 없음 → true).
+    /// 장비 스탯 보너스와 같은 출처: EquipmentManager 우선, 없으면 statData.
+    /// </summary>
+    public bool HasWeaponCategory(WeaponCategory category)
+    {
+        if (category == WeaponCategory.None) return true;
+        var em = GetComponent<EquipmentManager>();
+        var rh = em != null ? em.rightHand : (statData != null ? statData.rightHand : null);
+        var lh = em != null ? em.leftHand : (statData != null ? statData.leftHand : null);
+        return (rh != null && rh.weaponCategory == category) || (lh != null && lh.weaponCategory == category);
+    }
+
+    /// <summary>
+    /// 패시브의 무기 조건(weaponCategory)을 지금 든 무기(오른손 또는 왼손)가 만족하는지.
     /// None 이면 조건 없음. 예: 검 Lore 패시브는 검(Sword)을 들고 있어야 발동.
     /// </summary>
     public bool IsPassiveWeaponOk(SkillData passive)
@@ -643,9 +656,7 @@ public class PlayerStats : MonoBehaviour
         if (passive == null) return false;
         if (passive.weaponCategory == WeaponCategory.None) return true;
         // 장비 스탯 보너스(GetEquippedItemsList)와 같은 출처: EquipmentManager 우선, 없으면 statData
-        var em = GetComponent<EquipmentManager>();
-        var rh = em != null ? em.rightHand : (statData != null ? statData.rightHand : null);
-        return rh != null && rh.weaponCategory == passive.weaponCategory;
+        return HasWeaponCategory(passive.weaponCategory); // [2026-10-09] 왼손만 들어도 발동
     }
 
     /// <summary>

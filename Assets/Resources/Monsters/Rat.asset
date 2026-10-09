@@ -32,6 +32,7 @@ MonoBehaviour:
   statusResist: 0.5
   activeSkills:
   - {fileID: 11400000, guid: 7378c286a5934fb8bbbdecb07789d822, type: 2}
+  - {fileID: 11400000, guid: ea4830e2bf2f4a7fa457971cf549315f, type: 2}
   passiveSkills:
   - {fileID: 0}
   - {fileID: 0}

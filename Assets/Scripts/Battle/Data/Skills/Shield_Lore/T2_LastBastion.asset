@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: T2_LastBastion
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Shield_T2_LastBastion
+  skillName: Last Bastion
+  skillIcon: {fileID: 0}
+  description: "[\uBC29\uD328 \xB7 \uD328\uC2DC\uBE0C] \uC0B4\uC544 \uC788\uB294
+    \uC801 1\uB9C8\uB9AC\uB2F9 \uB9C9\uAE30 \uD655\uB960 +3%p (\uCD5C\uB300 +12%p)."
+  usageType: 1
+  damageType: 0
+  scalingStat: 2
+  weaponCategory: 10
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 1
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 1dabe14d2e95b8d4798eb454b32000d6, type: 2}
+  - {fileID: 11400000, guid: 63f54a9ce43e0d743b71cbee8e7e6bbd, type: 2}
+  requiredLorePoints: 1

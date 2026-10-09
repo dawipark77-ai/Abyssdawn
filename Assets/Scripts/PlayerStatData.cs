@@ -165,6 +165,26 @@ public class PlayerStatData : ScriptableObject
         Debug.Log($"[PlayerStatData] '{skill.skillName}' → {(skill.IsPassive ? "패시브" : "액티브")} 슬롯 {index + 1} 교체 장착");
     }
 
+    /// <summary>
+    /// [2026-10-09] 스킬 등급 = learnedSkills 에 같은 스킬이 들어 있는 개수 (안 배움 0). maxRank 가 2 이상인 스킬만 여러 번 들어간다.
+    /// </summary>
+    public int SkillRank(AbyssdawnBattle.SkillData skill)
+    {
+        if (skill == null || learnedSkills == null) return 0;
+        int n = 0;
+        foreach (var s in learnedSkills) if (s == skill) n++;
+        return n;
+    }
+
+    /// <summary>[2026-10-09] 탐험 스킬 등급 — 이름으로 (안 배움 0).</summary>
+    public int FieldSkillRank(string skillName)
+    {
+        if (learnedSkills == null) return 0;
+        int n = 0;
+        foreach (var s in learnedSkills) if (s != null && s.fieldSkill && s.skillName == skillName) n++;
+        return n;
+    }
+
     /// <summary>탐험 스킬(fieldSkill)을 배웠는지 — 이름으로.</summary>
     public bool HasFieldSkill(string skillName)
     {

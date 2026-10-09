@@ -15,11 +15,7 @@ MonoBehaviour:
   skillID: CombatArts_T3_IntimidatingShout
   skillName: Intimidating Shout
   skillIcon: {fileID: -7881139419853764829, guid: d84ebf3262e43504aaeb9c974718cc48, type: 3}
-  description: "[\uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 4\uD134] \uC801 \uC804\uCCB4
-    \uACF5\uACA9\uB825 -15% (2\uD134). \uC801\uB9C8\uB2E4 30% \uD655\uB960\uB85C
-    \uC2A4\uD134 \u2014 \uB2E4\uC74C \uD589\uB3D9 1\uBC88\uC744 \uBABB \uD55C\uB2E4.
-    \uCD5C\uB300 HP\uC758 3% \uC18C\uBAA8, \uC774\uBC88 \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0
-    \uC54A\uB294\uB2E4."
+  description: "[\uc561\ud2f0\ube0c \u00b7 \ucfe8\ub2e4\uc6b4 4\ud134] \uc801 \uc804\uccb4 \uacf5\uaca9\ub825 -20% (2\ud134). \uc801\ub9c8\ub2e4 40% \ud655\ub960\ub85c \uc2a4\ud134 \u2014 \ub2e4\uc74c \ud589\ub3d9 1\ubc88\uc744 \ubabb \ud55c\ub2e4. \ucd5c\ub300 HP\uc758 3% \uc18c\ubaa8, \uc774\ubc88 \ud134\uc5d0\ub294 \uacf5\uaca9\ud558\uc9c0 \uc54a\ub294\ub2e4."
   usageType: 0
   damageType: 0
   scalingStat: 2
@@ -48,7 +44,7 @@ MonoBehaviour:
   dunbreakChance: 0
   dunbreakDescription: This turn, critical hits cannot reduce HP below 1
   curseEffect: {fileID: 11400000, guid: aaf361967934aec439aed47cefaef31e, type: 2}
-  curseApplyChance: 0.3
+  curseApplyChance: 0.4
   backflowChance: 0
   backflowType: 0
   backflowStatusEffect: {fileID: 0}

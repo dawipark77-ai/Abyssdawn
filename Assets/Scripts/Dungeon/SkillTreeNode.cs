@@ -369,8 +369,8 @@ public class SkillTreeNode : MonoBehaviour
     {
         string skillName = skillData != null ? skillData.skillName : gameObject.name;
         
-        // 이미 배웠으면 불가
-        if (currentState == SkillState.Learned)
+        // 이미 배웠으면 불가 ([2026-10-09] 등급 스킬은 최대 등급 전까지 가능)
+        if (currentState == SkillState.Learned && !(treeManager != null && treeManager.CanRankUp(skillData)))
         {
             Debug.Log($"[SkillTreeNode] {skillName}: 이미 배움 → CanLearn = false");
             return false;
@@ -493,7 +493,7 @@ public class SkillTreeNode : MonoBehaviour
     {
         if (currentState == SkillState.Learned)
         {
-            Debug.LogWarning($"[SkillTreeNode] {skillData.skillName}은(는) 이미 배운 스킬입니다.");
+            UpdateVisualState(); // [2026-10-09] 등급 스킬: 등급 표시만 갱신
             return;
         }
         
@@ -599,8 +599,42 @@ public class SkillTreeNode : MonoBehaviour
         }
 
         SetLearnedBorder(currentState == SkillState.Learned);
+        RefreshRankLabel(); // [2026-10-09] 등급 스킬 Lv 표시
         // [2026-10-09] 모든 스킬 아이콘 황금 테두리. 배운 스킬은 더 밝게 — 바깥 배운 스킬 테두리와 겹쳐 환하게 빛남
         SkillIconFrame.Apply(skillIcon, 2f, currentState == SkillState.Learned);
+    }
+
+    private TextMeshProUGUI _rankLabel;
+
+    /// <summary>[2026-10-09] 등급 스킬(maxRank 2 이상): 아이콘 아래 오른쪽에 "Lv 2/5".</summary>
+    private void RefreshRankLabel()
+    {
+        if (skillData == null || skillData.maxRank <= 1 || IsDuplicateNode())
+        {
+            if (_rankLabel != null) _rankLabel.gameObject.SetActive(false);
+            return;
+        }
+        if (_rankLabel == null)
+        {
+            var go = new GameObject("RankLabel", typeof(RectTransform));
+            go.transform.SetParent(transform, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = new Vector2(0f, 0f); rt.anchorMax = new Vector2(1f, 0f); rt.pivot = new Vector2(0.5f, 0f);
+            rt.anchoredPosition = new Vector2(0f, 6f); rt.sizeDelta = new Vector2(-12f, 44f);
+            _rankLabel = go.AddComponent<TextMeshProUGUI>();
+            _rankLabel.alignment = TextAlignmentOptions.BottomRight;
+            _rankLabel.fontSize = 30f;
+            _rankLabel.fontStyle = FontStyles.Bold;
+            _rankLabel.raycastTarget = false;
+            _rankLabel.outlineWidth = 0.25f;
+            _rankLabel.outlineColor = new Color32(0, 0, 0, 255);
+            if (skillNameText != null) _rankLabel.font = skillNameText.font;
+        }
+        int rank = treeManager != null ? treeManager.GetSkillRank(skillData) : (currentState == SkillState.Learned ? 1 : 0);
+        _rankLabel.gameObject.SetActive(true);
+        _rankLabel.transform.SetAsLastSibling();
+        _rankLabel.color = rank >= skillData.maxRank ? new Color(1f, 0.85f, 0.4f) : Color.white;
+        _rankLabel.text = $"Lv {rank}/{skillData.maxRank}";
     }
 
     /// <summary>현재 상태 그대로 모양만 다시 그린다 (테두리 설정이 바뀐 뒤 등).</summary>

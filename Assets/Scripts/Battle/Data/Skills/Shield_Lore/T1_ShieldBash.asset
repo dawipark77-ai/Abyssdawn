@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: T1_ShieldBash
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Shield_T1_ShieldBash
+  skillName: Shield Bash
+  skillIcon: {fileID: 0}
+  description: "[\uBC29\uD328 \xB7 \uACF5\uACA9 \xB7 \uCFE8\uB2E4\uC6B4 2\uD134 \xB7
+    1\xB72\uC5F4] \uBC29\uD328\uB85C \uD6C4\uB824\uCE5C\uB2E4. \uACF5\uACA9\uB825\uC758
+    70% \uD53C\uD574, \uBA85\uC911 100%. 35% \uD655\uB960\uB85C \uAE30\uC808 (\uC0C1\uD0DC\uC774\uC0C1
+    \uC800\uD56D \uBC18\uC601, \uB2E4\uC74C \uD589\uB3D9 1\uBC88 \uBD09\uC1C4). \uCD5C\uB300
+    HP\uC758 4% \uC18C\uBAA8."
+  usageType: 0
+  damageType: 1
+  scalingStat: 1
+  weaponCategory: 10
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 3
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 4
+  mpCost: 0
+  minMult: 0.7
+  maxMult: 0.7
+  hitCount: 1
+  accuracy: 1
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 11400000, guid: aaf361967934aec439aed47cefaef31e, type: 2}
+  curseApplyChance: 0.35
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 2
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

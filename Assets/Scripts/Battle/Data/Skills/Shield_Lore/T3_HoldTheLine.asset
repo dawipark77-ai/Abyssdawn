@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: T3_HoldTheLine
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Shield_T3_HoldTheLine
+  skillName: Hold the Line!
+  skillIcon: {fileID: 0}
+  description: "[\uBC29\uD328 \xB7 \uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 5\uD134]
+    3\uD134 \uB3D9\uC548 \uC544\uAD70 \uC804\uC6D0 \uBC1B\uB294 \uD53C\uD574 -10%,
+    \uB0B4 \uB9C9\uAE30 \uD655\uB960 +5%p. \uB0B4\uAC00 \uB9C9\uC744 \uB54C\uB9C8\uB2E4
+    \uC9C0\uC18D +1\uD134 (\uCD5C\uB300 5\uD134)."
+  usageType: 0
+  damageType: 0
+  scalingStat: 2
+  weaponCategory: 10
+  targeting:
+    targetFaction: 1
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 1
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 5
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 1964e76b5ca72fa49bfb3aa96de2f18e, type: 2}
+  requiredLorePoints: 1

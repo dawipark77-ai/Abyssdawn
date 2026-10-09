@@ -125,7 +125,13 @@ public class DungeonEncounter : MonoBehaviour
         if (hud != null) hud.Toast("<color=#FFB060>You sense something stalking you...</color>");
     }
 
-    void StartEncounter()
+    /// <summary>[2026-10-09] 정해진 몬스터와 전투 (층 보스 등). 평소 인카운터와 같은 흐름 — 위치 저장 → 전환 연출 → 전투 씬.</summary>
+    public void StartPresetEncounter(Abyssdawn.MonsterSO[] monsters)
+    {
+        StartEncounter(monsters);
+    }
+
+    void StartEncounter(Abyssdawn.MonsterSO[] preset = null)
     {
         if (EncounterTransition.IsPlaying) return; // 전환 연출 중 중복 발동 방지
         Debug.Log("[DungeonEncounter] >>> STARTING ENCOUNTER! <<<");
@@ -151,7 +157,9 @@ public class DungeonEncounter : MonoBehaviour
         }
 
         // 이번에 나올 몬스터를 미리 정해 둔다 (전환 연출의 실루엣 = 실제로 나올 몬스터, 전투 씬이 같은 몬스터로 시작)
-        Abyssdawn.MonsterSO[] monsters = BattleManager.LoadMonsterSOsForFloor(DungeonPersistentData.currentFloor);
+        Abyssdawn.MonsterSO[] monsters = preset != null && preset.Length > 0
+            ? preset
+            : BattleManager.LoadMonsterSOsForFloor(DungeonPersistentData.currentFloor);
         EncounterPlan.Set(monsters);
 
         Debug.Log("[DungeonEncounter] Loading battle scene with transition: " + battleSceneName);

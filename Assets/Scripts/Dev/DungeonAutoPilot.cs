@@ -549,11 +549,7 @@ public class DungeonAutoPilot : MonoBehaviour
         if (skill == null || skill.IsPassive) return false;
         var limit = typeof(BattleManager).GetMethod("SkillLimitReason", NP);
         if (limit != null && limit.Invoke(bm, new object[] { actor, skill }) != null) return false;
-        if (skill.weaponCategory != WeaponCategory.None)
-        {
-            var rh = actor.statData.rightHand;
-            if (rh == null || rh.weaponCategory != skill.weaponCategory) return false;
-        }
+        if (!actor.HasWeaponCategory(skill.weaponCategory)) return false; // [2026-10-09] 어느 손이든
         int hpCost = skill.hpCostPercent > 0 ? Mathf.Max(1, Mathf.RoundToInt(actor.maxHP * skill.hpCostPercent / 100f)) : 0;
         if (actor.currentHP <= hpCost + 1) return false;
         bool self = skill.targeting != null && skill.targeting.targetFaction == TargetFaction.Self;

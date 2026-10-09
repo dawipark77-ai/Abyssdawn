@@ -433,13 +433,7 @@ public class BattleManager : MonoBehaviour
         float startX = -panelWidth / 2f + paddingX + (cellWidth / 2f);
         float startY = panelHeight / 2f - paddingY - (cellHeight / 2f);
 
-        // Determine current actor's equipped weapon category for skill restriction
-        AbyssdawnBattle.WeaponCategory equippedCategory = AbyssdawnBattle.WeaponCategory.None;
-        if (currentControlledMember != null && currentControlledMember.statData != null)
-        {
-            var rh = currentControlledMember.statData.rightHand;
-            if (rh != null) equippedCategory = rh.weaponCategory;
-        }
+        // [2026-10-09] 스킬 무기 조건: 오른손이든 왼손이든 그 종류 무기를 들고 있으면 사용 가능 (PlayerStats.HasWeaponCategory)
 
         // 1. 스킬 버튼 배치 (최대 7개)
         for (int i = 0; i < skills.Count; i++)
@@ -450,7 +444,7 @@ public class BattleManager : MonoBehaviour
             // None on skill = universal (any weapon allowed)
             // Otherwise equipped weapon must match skill requirement
             bool weaponCompatible = skill.weaponCategory == AbyssdawnBattle.WeaponCategory.None
-                                    || skill.weaponCategory == equippedCategory;
+                                    || (currentControlledMember != null && currentControlledMember.HasWeaponCategory(skill.weaponCategory));
             // [2026-10-06] 전투당 사용 횟수 / 쿨다운 — 다 쓴 스킬은 회색 + 사유 표시
             string limitReason = weaponCompatible ? SkillLimitReason(currentControlledMember, skill) : null;
             bool usable = weaponCompatible && limitReason == null;
@@ -2662,6 +2656,19 @@ public class BattleManager : MonoBehaviour
         // 턴 순서 구성
         BuildTurnOrder();
 
+        // [2026-10-09] 습격 (야영 중 등): 첫 라운드는 아군이 행동하지 못하고 적만 공격 — 도망 실패와 같은 흐름
+        if (EncounterPlan.TakeAmbush())
+        {
+            AddMessage("<color=#FF6B6B>Ambushed! The enemies strike first!</color>");
+            pendingCommands.Clear();
+            foreach (var m in activePartyMembers)
+                if (m != null && m.currentHP > 0)
+                    pendingCommands.Add(new AllyCommand { actor = m, actionType = "none" });
+            commandIndex = activePartyMembers.Count;
+            BeginResolutionPhase();
+            return;
+        }
+
         // 커맨드 페이즈 시작
         StartCommandPhase();
     }
@@ -2913,7 +2920,8 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     /// <summary>지금 등장시키는 몬스터 (EXP·골드를 정한 것만). 새 몬스터 수치가 정해지면 여기에 이름을 추가.</summary>
     // 쥐 B1~5 · 박쥐 B2~8 · 고블린 B3~ (2026-10-06) · 슬라임 B4~ · 해골 B6~ (2026-10-07)
-    public static readonly string[] BetaSpawnPool = { "Rat", "Bat", "Goblin", "Slime", "Skeleton" };
+    // [2026-10-09] 마법사·오크 추가 (스켈레톤 나이트는 B10 보스로만 — BossEncounter)
+    public static readonly string[] BetaSpawnPool = { "Rat", "Bat", "Goblin", "Slime", "Skeleton", "Wizard", "Orc" };
 
     public static MonsterSO[] LoadMonsterSOsForFloor(int floor)
     {
@@ -3895,7 +3903,7 @@ public class BattleManager : MonoBehaviour
             candidates.Add((EnemyActionType.Defend, null, DefendBaseWeight(pattern) * 2f));
 
         // [Phase] 도망 — Critical 페이즈에서 후보 추가 (가중치 ×3)
-        if (isCriticalPhase)
+        if (isCriticalPhase && !BossEncounter.IsBoss(enemy)) // [2026-10-09] 보스는 도망치지 않음
             candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f));
 
         // [Zeta] 역전 시나리오 — Critical 페이즈에서 15% 확률로 최강 스킬 강제 선택
@@ -4708,10 +4716,7 @@ public class BattleManager : MonoBehaviour
         // Weapon category check (safety guard — button should already be disabled)
         if (skill.weaponCategory != AbyssdawnBattle.WeaponCategory.None)
         {
-            AbyssdawnBattle.WeaponCategory equipped = AbyssdawnBattle.WeaponCategory.None;
-            if (currentControlledMember.statData != null && currentControlledMember.statData.rightHand != null)
-                equipped = currentControlledMember.statData.rightHand.weaponCategory;
-            if (equipped != skill.weaponCategory)
+            if (!currentControlledMember.HasWeaponCategory(skill.weaponCategory)) // [2026-10-09] 어느 손이든
             {
                 AddMessage($"Requires {skill.weaponCategory} equipped!");
                 return;
@@ -4820,6 +4825,14 @@ public class BattleManager : MonoBehaviour
             AddMessage("Only the Hero can run.");
             return;
         }
+
+        // [2026-10-09] 층 보스에게서는 도망칠 수 없다
+        foreach (var e in activeEnemies)
+            if (e != null && e.currentHP > 0 && BossEncounter.IsBoss(e))
+            {
+                AddMessage("<color=#FF6B6B>There is no escape!</color>");
+                return;
+            }
 
         turnInProgress = true;
 
@@ -5768,9 +5781,10 @@ public class BattleManager : MonoBehaviour
             rightHand = defender.statData.rightHand;
         }
 
-        // 왼손(방패 슬롯) 또는 오른손에서 blockData 확인
-        EquipmentData shield = leftHand ?? rightHand;
-        if (shield == null || shield.blockData == null) return false;
+        // [2026-10-09] 양손 중 막기 데이터가 있는 쪽 (예전: leftHand ?? rightHand → 왼손에 무기, 오른손에 방패면 막지 못했음)
+        EquipmentData shield = leftHand != null && leftHand.blockData != null ? leftHand
+                             : rightHand != null && rightHand.blockData != null ? rightHand : null;
+        if (shield == null) return false;
 
         bool blocked = shield.blockData.RollBlock(defender.Defense);
         if (blocked)
@@ -5991,21 +6005,26 @@ public class BattleManager : MonoBehaviour
     private const string SkillSecondWind = "Second Wind";
     private const string SkillIntimidatingShout = "Intimidating Shout";
     private const string SkillCounterGuard = "Counter Guard";
+    // [2026-10-09] 반격 태세: 반격 확률 50% → 70%, 반격 위력 50% → 80%
+    private const float CounterGuardChance = 0.7f;
+    private const float CounterGuardPower = 0.8f;
+    // [2026-10-09] 위협의 함성: 적 공격력 -15% → -20% (스턴 확률은 스킬 에셋 curseApplyChance 0.4)
+    private const float ShoutAttackMult = 0.8f;
 
     /// <summary>
-    /// 반격 태세 판정 (맞기 직전). 자세 중이면 50% 확률로 이번 피해 -50% 하고 true (그다음 반격).
+    /// 반격 태세 판정 (맞기 직전). 자세 중이면 70% 확률로 이번 피해 -50% 하고 true (그다음 반격).
     /// 반격은 라운드당 최대 2회 — 횟수를 다 썼으면 피해 감소도 없음.
     /// </summary>
     private bool RollCounterGuard(PlayerStats target, ref int damage)
     {
         if (target == null || target.counterGuardRounds <= 0) return false;
         if (target.counterGuardCountersThisRound >= 2) return false;
-        if (UnityEngine.Random.value >= 0.5f) return false;
+        if (UnityEngine.Random.value >= CounterGuardChance) return false;
         damage = Mathf.Max(1, Mathf.FloorToInt(damage * 0.5f));
         return true;
     }
 
-    /// <summary>반격: 기본 공격 50% 위력 1회 (명중·치명타 판정은 기본 공격과 같음).</summary>
+    /// <summary>반격: 기본 공격 80% 위력 1회 (명중·치명타 판정은 기본 공격과 같음).</summary>
     private void CounterAttack(PlayerStats hero, EnemyStats enemy)
     {
         if (hero == null || enemy == null || hero.currentHP <= 0 || enemy.currentHP <= 0 || battleEnded) return;
@@ -6020,7 +6039,7 @@ public class BattleManager : MonoBehaviour
         int atk = Mathf.FloorToInt(hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, hero.Attack));
         int def = Mathf.FloorToInt(PenetratedDefense(hero, enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, enemy.defense)));
         int dmg = CalculateDQDamage(atk, def, crit);
-        dmg = Mathf.Max(1, Mathf.FloorToInt(dmg * 0.5f));
+        dmg = Mathf.Max(1, Mathf.FloorToInt(dmg * CounterGuardPower));
         dmg = ApplySlotDamageToTarget(dmg, enemy.currentSlot, enemy.enemyName);
         dmg = ApplyPhysResist(dmg, enemy);
         if (enemy.isDefending)
@@ -6071,7 +6090,7 @@ public class BattleManager : MonoBehaviour
                 // 선제 발동: 이번 라운드 + 다음 라운드. 그동안 다른 스킬 사용 불가(기본 공격만) — SkillLimitReason
                 attacker.counterGuardRounds = 2;
                 attacker.counterGuardCountersThisRound = 0;
-                AddMessage($"{attacker.playerName} takes a counter stance! <color=#9FC8FF>50% chance to halve damage and strike back</color> for 2 turns.");
+                AddMessage($"{attacker.playerName} takes a counter stance! <color=#9FC8FF>70% chance to halve damage and strike back</color> for 2 turns.");
                 return true;
             }
             case SkillSecondWind:
@@ -6091,7 +6110,7 @@ public class BattleManager : MonoBehaviour
             }
             case SkillIntimidatingShout:
             {
-                // 적 전체 공격력 -15% (2라운드) + 적마다 스턴 판정 (스킬 에셋 curseEffect = Curse_Stun, curseApplyChance = 0.3)
+                // 적 전체 공격력 -20% (2라운드) + 적마다 스턴 판정 (스킬 에셋 curseEffect = Curse_Stun, curseApplyChance = 0.4)
                 // [2026-10-07] '겁먹음' 상태가 없어 도망 가중치 대신 스턴 1턴으로 교체
                 int count = 0;
                 var stunned = new List<string>();
@@ -6099,11 +6118,11 @@ public class BattleManager : MonoBehaviour
                 {
                     if (e == null || e.currentHP <= 0) continue;
                     e.RemoveStatModifiersFromSource(skill);
-                    e.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 0.85f }, skill, 3);
+                    e.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = ShoutAttackMult }, skill, 3);
                     count++;
                     if (TryStunOneAction(e, skill.curseEffect, skill.curseApplyChance)) stunned.Add(e.enemyName);
                 }
-                AddMessage($"{attacker.playerName} lets out an intimidating shout! <color=#FF9F6B>{count} enem{(count == 1 ? "y's" : "ies'")} attack -15%</color> for 2 turns.");
+                AddMessage($"{attacker.playerName} lets out an intimidating shout! <color=#FF9F6B>{count} enem{(count == 1 ? "y's" : "ies'")} attack -20%</color> for 2 turns.");
                 if (stunned.Count > 0) AddMessage($"<color=#FFD700>{string.Join(", ", stunned)} {(stunned.Count == 1 ? "is" : "are")} stunned by the shout!</color>");
                 return true;
             }
@@ -9295,6 +9314,14 @@ private void CacheHeroSkills()
 
             UpdateStatusUI();
             AddMessage("All enemies defeated!");
+            // [2026-10-09] 층 보스를 쓰러뜨렸으면 기록 (그 층 계단으로 내려갈 수 있게)
+            foreach (var e in activeEnemies)
+                if (BossEncounter.IsBoss(e))
+                {
+                    BossEncounter.defeatedFloors.Add(BossEncounter.BossFloor);
+                    AddMessage($"<color=#FFD24A>The {BossEncounter.BossName} crumbles. The way down is open.</color>");
+                    break;
+                }
 
             // [2026-05-24] 영입 굴림은 ReturnToDungeonRoutine으로 이동.
             // 사용자 YES/NO 다이얼로그 + 메시지 시퀀스가 맵 복귀 전 단계에 통합됨.

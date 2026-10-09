@@ -16,6 +16,16 @@ public static class EncounterPlan
         _pending = monsters;
     }
 
+    /// <summary>[2026-10-09] 습격 (야영 중 등): 다음 전투 첫 라운드는 적만 행동한다. 전투 시작 때 한 번 꺼내 쓰고 지운다.</summary>
+    public static bool ambush;
+
+    public static bool TakeAmbush()
+    {
+        bool a = ambush;
+        ambush = false;
+        return a;
+    }
+
     /// <summary>미리 정한 몬스터를 꺼낸다 (한 번만). 없으면 null → 전투 씬이 평소처럼 직접 뽑는다.</summary>
     public static MonsterSO[] Take()
     {

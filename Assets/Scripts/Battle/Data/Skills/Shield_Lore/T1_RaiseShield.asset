@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: T1_RaiseShield
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Shield_T1_RaiseShield
+  skillName: Raise Shield
+  skillIcon: {fileID: 0}
+  description: "[\uBC29\uD328 \xB7 \uC561\uD2F0\uBE0C \xB7 \uC120\uC81C \xB7 \uCFE8\uB2E4\uC6B4
+    3\uD134 \xB7 \uC804\uC5F4] \uBC29\uD328\uB97C \uB4E0\uB2E4. 3\uD134 \uB3D9\uC548
+    \uB9C9\uAE30 \uD655\uB960 +15%p, \uB9C9\uC740 \uD53C\uD574 \uAC10\uC18C +2. \uC774\uBC88
+    \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0 \uC54A\uB294\uB2E4."
+  usageType: 0
+  damageType: 0
+  scalingStat: 2
+  weaponCategory: 10
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: 3
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 1
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 1
+  cooldownTurns: 3
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

@@ -16,8 +16,8 @@ MonoBehaviour:
   variantId: SharpEdge
   itemIcon: {fileID: 0}
   flatIcon: {fileID: 0}
-  physicalDuration: 3
-  magicalDuration: 3
+  physicalDuration: 2
+  magicalDuration: 2
   physicalDamagePerTurn: 0
   physicalApplyChance: 1
   magicalDamagePerTurn: 0
@@ -26,7 +26,7 @@ MonoBehaviour:
   statModifiers:
   - statType: 10
     modType: 100
-    value: 0.2
+    value: 0.6
   preventAction: 0
   preventSkillUse: 0
   statusVFX: {fileID: 0}

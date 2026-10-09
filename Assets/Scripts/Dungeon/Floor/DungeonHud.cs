@@ -793,7 +793,18 @@ public class DungeonHud : MonoBehaviour
                         AbyssdawnBattle.EquipmentData bought = captured.equipment;
                         Confirm($"Equip <b>{captured.Name}</b> now?", "Equip", "Later", yes =>
                         {
-                            if (yes && TownShop.Equip(bought)) Toast($"<color=#9FFF9F>Equipped {captured.Name}.</color>");
+                            var mgr = FindFirstObjectByType<EquipmentManager>(FindObjectsInactive.Include);
+                            if (yes && mgr != null && EquipmentBag.HasSpare(mgr, bought))
+                            {
+                                // [2026-10-09] 한손 장비는 어느 손에 들지 고른 뒤 장착
+                                EquipHandPicker.Equip(mgr, bought, ok =>
+                                {
+                                    if (ok) Toast($"<color=#9FFF9F>Equipped {captured.Name}.</color>");
+                                    RefreshShop();
+                                });
+                                return;
+                            }
+                            if (yes && mgr == null && TownShop.Equip(bought)) Toast($"<color=#9FFF9F>Equipped {captured.Name}.</color>");
                             RefreshShop();
                         });
                     }

@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: EX_T3_MakeCamp
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: EX_T3_MakeCamp
+  skillName: Make Camp
+  skillIcon: {fileID: 0}
+  description: "[\uD0D0\uD5D8 \xB7 \uB358\uC804 \uC9C0\uB3C4\uC5D0\uC11C \uC0AC\uC6A9
+    \xB7 \uC2A4\uD0AC \uCE78 \uC548 \uC500 \xB7 1~5\uB4F1\uAE09] \uB358\uC804 \uBA54\uB274\uC758
+    Camp \uBC84\uD2BC\uC73C\uB85C \uC270\uB2E4. \uCE35\uB9C8\uB2E4 1\uBC88, \uB9C8\uC744
+    \uCE35(B1\xB7B5)\uC5D0\uC11C\uB294 \uBD88\uAC00.\n\uC704\uD5D8: \uADF8\uB54C\uC758
+    \uC704\uD5D8\uB3C4\uB9CC\uD07C \uC2B5\uACA9 \uD655\uB960 (\uCD5C\uB300 40%) \u2014
+    \uC2B5\uACA9\uB2F9\uD558\uBA74 \uC801\uC774 \uBA3C\uC800 \uACF5\uACA9. \uC57C\uC601
+    \uD6C4 \uC704\uD5D8\uB3C4 +30%.\nLv1 HP\xB7MP 30%\nLv2 40% \xB7 \uCD9C\uD608
+    \uD574\uC81C\nLv3 50% \xB7 \uCD9C\uD608\xB7\uB3C5 \uD574\uC81C \xB7 \uBE5B +30\uAC78\uC74C\nLv4
+    60% \xB7 \uCD9C\uD608\xB7\uB3C5\xB7\uD654\uC0C1\xB7\uC2E4\uBA85 \uD574\uC81C
+    \xB7 \uBE5B \xB7 \uC2B5\uACA9 \uD655\uB960 \xD70.75\nLv5 70% \xB7 \uBAA8\uB4E0
+    \uB358\uC804 \uC0C1\uD0DC\uC774\uC0C1 \uD574\uC81C \xB7 \uBE5B \xB7 \uC2B5\uACA9
+    \uD655\uB960 \xD70.5 \xB7 \uC704\uD5D8\uB3C4 +15%\uB9CC"
+  usageType: 0
+  damageType: 0
+  scalingStat: 1
+  weaponCategory: 0
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 1
+  maxMult: 1
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 5
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 1
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 0c3c6ed0606c0c14e8ddd7b31cb3a384, type: 2}
+  requiredLorePoints: 1

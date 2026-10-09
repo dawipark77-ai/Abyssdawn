@@ -430,10 +430,24 @@ public class SkillDetailPopup : MonoBehaviour
                 break;
                 
             case SkillTreeNode.SkillState.Learned:
+                // [2026-10-09] 등급 스킬: 최대 등급 전까지 같은 칸에서 한 등급 더
+                if (manager != null && manager.CanRankUp(currentSkillData))
+                {
+                    int rank = manager.GetSkillRank(currentSkillData);
+                    bool canRank = availableLP >= currentNode.requiredSkillPoints;
+                    learnButton.interactable = canRank;
+                    if (learnButtonText != null) learnButtonText.text = canRank ? $"Rank Up (Lv {rank + 1})" : "Insufficient LP";
+                    if (statusText != null)
+                    {
+                        statusText.text = $"Lv {rank}/{currentSkillData.maxRank}";
+                        statusText.color = Color.yellow;
+                    }
+                    break;
+                }
                 learnButton.interactable = false;
                 if (learnButtonText != null)
                 {
-                    learnButtonText.text = "Learned";
+                    learnButtonText.text = currentSkillData != null && currentSkillData.maxRank > 1 ? $"Max (Lv {currentSkillData.maxRank})" : "Learned";
                 }
                 if (statusText != null)
                 {

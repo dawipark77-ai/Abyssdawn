@@ -75,6 +75,7 @@ public static class SaveSystem
         public int chaliceCharges;
         public List<string> equipmentBag = new List<string>();
         public int gold = PlayerWallet.StartingGold;
+        public List<int> bossesDefeated = new List<int>(); // [2026-10-09] 보스를 쓰러뜨린 층
         // 이어서 하기 창에 보여줄 요약
         public int heroLevel;
     }
@@ -151,6 +152,7 @@ public static class SaveSystem
             }
             foreach (var e in EquipmentBag.Items) if (e != null) d.equipmentBag.Add(e.name);
             d.gold = PlayerWallet.Gold;
+            d.bossesDefeated.AddRange(BossEncounter.defeatedFloors);
 
             File.WriteAllText(FilePath, JsonUtility.ToJson(d, true));
             Debug.Log($"[SaveSystem] 저장 완료 — B{d.currentFloor} Lv{d.heroLevel} → {FilePath}");
@@ -262,6 +264,8 @@ public static class SaveSystem
             EquipmentBag.Clear();
             foreach (var n in d.equipmentBag) { var e = Find<EquipmentData>(n); if (e != null) EquipmentBag.Add(e); }
             PlayerWallet.Set(d.gold);
+            BossEncounter.defeatedFloors.Clear();
+            if (d.bossesDefeated != null) foreach (int f in d.bossesDefeated) BossEncounter.defeatedFloors.Add(f);
             PlayerStats.PendingLevelUpNotes.Clear();
 
             Debug.Log($"[SaveSystem] 불러오기 — B{d.currentFloor} Lv{d.heroLevel} ({d.savedAt}), 씬 '{d.sceneName}'");

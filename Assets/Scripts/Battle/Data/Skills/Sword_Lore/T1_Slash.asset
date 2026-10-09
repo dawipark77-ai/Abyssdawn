@@ -15,9 +15,7 @@ MonoBehaviour:
   skillID: Swords_T1_02
   skillName: Slash
   skillIcon: {fileID: -376088948105539100, guid: 00a6bf59c2d7f184ca967ed5b77e6022, type: 3}
-  description: "[\uAC80 \uC804\uC6A9] \uBE60\uB974\uACE0 \uC815\uD655\uD55C \uBCA0\uAE30.
-    \uACF5\uACA9\uB825\uC758 140~160% \uD53C\uD574. \uBA85\uC911 95%. \uCD5C\uB300
-    HP\uC758 4% \uC18C\uBAA8."
+  description: "[\uac80 \uc804\uc6a9] \ube60\ub974\uace0 \uc815\ud655\ud55c \ubca0\uae30. \uacf5\uaca9\ub825\uc758 110~120% \ud53c\ud574. \uba85\uc911 95%. \ucd5c\ub300 HP\uc758 8% \uc18c\ubaa8."
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -27,10 +25,10 @@ MonoBehaviour:
     allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 4
+  hpCostPercent: 8
   mpCost: 0
-  minMult: 1.4
-  maxMult: 1.6
+  minMult: 1.1
+  maxMult: 1.2
   hitCount: 1
   accuracy: 0.95
   selfDmgPercent: 0

@@ -81,6 +81,7 @@ public class ItemListPanel : MonoBehaviour
         public EquipmentData equipment;
         public int quantity;
         public bool equippedCopy; // [2026-10-09] 같은 장비 여러 개 — 카드 한 장 = 한 개. 이 카드가 장착 중인 쪽인지
+        public string hand;       // [2026-10-09] 장착 중인 한손 장비: "R" / "L" (이름 옆에 표시)
     }
 
     private Filter _filter = Filter.All;
@@ -229,7 +230,7 @@ public class ItemListPanel : MonoBehaviour
                 card.gameObject.name = "Card_" + ItemName(e);
                 card.gameObject.SetActive(true);
                 Entry captured = e;
-                card.Setup(Icon(e), ItemName(e), SubLine(e), QtyLine(e), e.equipment != null && e.equippedCopy,
+                card.Setup(Icon(e), ItemName(e) + HandTag(e), SubLine(e), QtyLine(e), e.equipment != null && e.equippedCopy,
                            e.consumable != null && e.consumable.isDawnChalice, () => Select(captured));
                 card.SetSelected(e == _selected);
                 _cards.Add(new KeyValuePair<Entry, ItemListCard>(e, card));
@@ -277,7 +278,11 @@ public class ItemListPanel : MonoBehaviour
             if (!Matches(e)) continue;
             int worn = EquipmentBag.EquippedCount(mgr, e);
             int total = Mathf.Max(EquipmentBag.Count(e), worn);
-            for (int i = 0; i < total; i++) list.Add(new Entry { equipment = e, quantity = 1, equippedCopy = i < worn });
+            var hands = new List<string>();
+            if (mgr != null && mgr.rightHand == e) hands.Add("R");
+            if (mgr != null && mgr.leftHand == e) hands.Add("L");
+            for (int i = 0; i < total; i++)
+                list.Add(new Entry { equipment = e, quantity = 1, equippedCopy = i < worn, hand = i < worn && i < hands.Count ? hands[i] : null });
         }
         return list;
     }
@@ -440,9 +445,8 @@ public class ItemListPanel : MonoBehaviour
         {
             EquipmentManager mgr = Manager();
             if (mgr == null) return;
-            if (e.equippedCopy) Unequip(mgr, e.equipment);
-            else if (EquipmentBag.HasSpare(mgr, e.equipment)) mgr.EquipItem(e.equipment);
-            Refresh();
+            if (e.equippedCopy) { Unequip(mgr, e.equipment); Refresh(); }
+            else if (EquipmentBag.HasSpare(mgr, e.equipment)) EquipHandPicker.Equip(mgr, e.equipment, ok => Refresh()); // [2026-10-09] 손 고르기
             return;
         }
 
@@ -508,6 +512,12 @@ public class ItemListPanel : MonoBehaviour
     // ─────────────────────────────────────────
     // 표시 문구
     // ─────────────────────────────────────────
+
+    /// <summary>[2026-10-09] 장착 중인 한손 장비 이름 옆 손 표시: [R] 오른손 / [L] 왼손.</summary>
+    private static string HandTag(Entry e)
+    {
+        return string.IsNullOrEmpty(e.hand) ? "" : $"  <color=#FFD24A>[{e.hand}]</color>";
+    }
 
     private static string ItemName(Entry e)
     {

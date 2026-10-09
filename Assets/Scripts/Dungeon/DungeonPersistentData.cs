@@ -54,6 +54,7 @@ public static class DungeonPersistentData
         danger = 0f;
         playerLightSteps = 0;
         DungeonFieldStatus.Clear(); // 함정 상태이상
+        BossEncounter.defeatedFloors.Clear(); // [2026-10-09] 층 보스
 
         hasPlayerStats = false;
         heroHP = 0;
