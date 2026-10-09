@@ -3571,6 +3571,7 @@ public class BattleManager : MonoBehaviour
 
         // 라운드 끝: 쿨다운 감소, 버티기 자세 보너스 만료
         TickRoundEndSkillState();
+        TickShieldRoundEnd(); // [2026-10-09] 방패 스킬
 
         // 모든 액션 완료 후 상태 체크
         CheckBattleEnd();
@@ -3790,6 +3791,10 @@ public class BattleManager : MonoBehaviour
     /// <summary>AIPattern별 타겟 선택. null 반환 시 ExecuteEnemyTurn이 랜덤으로 폴백.</summary>
     private PlayerStats SelectEnemyTarget(EnemyStats enemy, Abyssdawn.AIPattern pattern)
     {
+        // [2026-10-09] 도발 중인 아군이 있으면 그 아군을 고른다
+        PlayerStats taunter = ActiveTaunter();
+        if (taunter != null) return taunter;
+
         List<PlayerStats> alive = activePartyMembers
             .Where(p => p != null && p.currentHP > 0)
             .ToList();
@@ -4002,6 +4007,8 @@ public class BattleManager : MonoBehaviour
             if (r < best) { best = r; target = m; }
         }
         if (target == null) target = GetRandomAlivePartyMember();
+        PlayerStats taunter = ActiveTaunter(); // [2026-10-09] 도발에는 교활한 적도 끌려온다
+        if (taunter != null) target = taunter;
         var attack = new EnemyActionDecision { type = EnemyActionType.Attack, target = target };
         if (target == null) return attack;
 
@@ -4239,6 +4246,7 @@ public class BattleManager : MonoBehaviour
 
         // 적은 랜덤 파티 멤버 공격 (타겟 지능이 고른 대상 우선, 없으면 랜덤)
         PlayerStats target = decision.target ?? GetRandomAlivePartyMember();
+        target = RedirectToWarden(target); // [2026-10-09] 새벽 수문장: 동료를 노린 기본 공격을 대신 맞음
 
         // [Bite] 기본공격 override는 MonsterSO.basicAttackOverride로 직접 지정 (Race 자동 분기·Resources.Load 폐기).
         MonsterSkillData biteOverride = (enemy != null && enemy.sourceMonster != null)
@@ -4290,6 +4298,7 @@ public class BattleManager : MonoBehaviour
                 {
                     damage = Mathf.Max(0, Mathf.FloorToInt(damage - blockReduction));
                     AddMessage($"{target.playerName} blocked the attack! (DR {blockReduction:F0})");
+                    OnBlockSuccess(target); // [2026-10-09] 방패 패시브 (굳건함·응징)
                     if (damage == 0)
                     {
                         AddMessage($"Fully blocked!");
@@ -5786,11 +5795,14 @@ public class BattleManager : MonoBehaviour
                              : rightHand != null && rightHand.blockData != null ? rightHand : null;
         if (shield == null) return false;
 
-        bool blocked = shield.blockData.RollBlock(defender.Defense);
+        // [2026-10-09] 막기 확률·피해 감소 = 방패 데이터 + 방패 스킬 보너스 (BlockChanceBonus / BlockReductionBonus)
+        float chance = Mathf.Clamp01(shield.blockData.GetBlockChance(defender.Defense) + BlockChanceBonus(defender));
+        bool blocked = UnityEngine.Random.value <= chance;
         if (blocked)
         {
-            damageReduction = shield.blockData.GetDamageReduction(defender.Defense);
-            Debug.Log($"[Block] {defender.playerName} blocked! DR={damageReduction:F1} (chance={shield.blockData.GetBlockChance(defender.Defense)*100f:F1}%)");
+            damageReduction = shield.blockData.GetDamageReduction(defender.Defense) + BlockReductionBonus(defender);
+            Debug.Log($"[Block] {defender.playerName} blocked! DR={damageReduction:F1} (chance={chance * 100f:F1}%)");
+            // 막기 성공 처리(OnBlockSuccess)는 호출한 쪽이 '막았다' 메시지 뒤에 부른다
         }
         return blocked;
     }
@@ -5972,7 +5984,13 @@ public class BattleManager : MonoBehaviour
         if (who == null || skill == null) return;
         SetCount(_skillUses, who, skill, GetCount(_skillUses, who, skill) + 1);
         // 라운드 끝마다 1씩 줄고, 쓴 라운드 끝에도 한 번 줄므로 +1 → 다음 라운드부터 cooldownTurns 라운드 동안 못 씀
-        if (UseCooldowns && skill.cooldownTurns > 0) SetCount(_skillCooldowns, who, skill, skill.cooldownTurns + 1);
+        if (UseCooldowns && skill.cooldownTurns > 0)
+        {
+            int cd = skill.cooldownTurns;
+            // [2026-10-09] 굳건함: 방패 스킬 쿨다운 1 감소
+            if (skill.weaponCategory == AbyssdawnBattle.WeaponCategory.Shield && who.HasEquippedPassiveByName(SkillShieldResilience)) cd = Mathf.Max(0, cd - 1);
+            if (cd > 0) SetCount(_skillCooldowns, who, skill, cd + 1);
+        }
     }
 
     /// <summary>라운드 끝: 쿨다운 1 감소, 버티기 자세 다음 공격 보너스 만료 처리.</summary>
@@ -6005,6 +6023,223 @@ public class BattleManager : MonoBehaviour
     private const string SkillSecondWind = "Second Wind";
     private const string SkillIntimidatingShout = "Intimidating Shout";
     private const string SkillCounterGuard = "Counter Guard";
+
+    // ─────────────────────────────────────────
+    // [2026-10-09] 방패 (Shield Lore) — 막기 성공 신호와 패시브
+    //   굳건함 (Embodiment of Resilience): 막을 때마다 2턴 동안 받는 피해 -8% (최대 2중첩) + 방패 스킬 쿨다운 1 감소
+    //   응징 (Moment of Retribution): 막으면 다음 공격 피해 +25% (1회 — 버티기 자세 보너스와 겹치면 큰 쪽)
+    // ─────────────────────────────────────────
+    private const string SkillShieldResilience = "Embodiment of Resilience";
+    private const string SkillShieldRetribution = "Moment of Retribution";
+    private const float ResilienceDamageMult = 0.92f;
+    private const int ResilienceMaxStacks = 2;
+    private const int ResilienceRounds = 3; // 막은 라운드 끝에도 1 줄어듦 → 남은 이번 라운드 + 다음 2라운드
+    private const float RetributionBonus = 0.25f;
+    // 굳건함 중첩마다 따로 지우고 갱신할 수 있게 출처를 둘로 나눔
+    private static readonly object ResilienceStackA = new object(), ResilienceStackB = new object();
+
+    // [2026-10-09] 방패 액티브
+    private const string SkillRaiseShield = "Raise Shield";
+    private const string SkillShieldBash = "Shield Bash";
+    private const string SkillShieldDash = "Shield Dash";
+    private const string SkillLastBastion = "Last Bastion";
+    private const string SkillTaunt = "Taunt";
+    private const string SkillHoldTheLine = "Hold the Line!";
+    private const string SkillDawnwarden = "Dawnwarden";
+    private const float RaiseShieldBlockBonus = 0.15f, RaiseShieldReductionBonus = 2f;
+    private const int RaiseShieldRounds = 3;            // 선제 발동 — 쓴 라운드 포함 3라운드
+    private const float LastBastionPerEnemy = 0.03f, LastBastionMax = 0.12f;
+    private const float ShieldBashStunChance = 0.35f;
+    private const float ShieldDashPushChance = 0.6f;
+    private const int ShieldDashStunTurns = 2;
+    private const float TauntDefenseMult = 1.3f;
+    private const float HoldLineDamageMult = 0.9f, HoldLineBlockBonus = 0.05f;
+    private const int HoldLineRounds = 3, HoldLineMaxRounds = 5;
+    private static readonly object TauntDefenseToken = new object(), HoldLineToken = new object();
+    private static StatusEffectSO _stunSO;
+    private static StatusEffectSO StunSO { get { if (_stunSO == null) _stunSO = Resources.Load<StatusEffectSO>("Curse/Curse_Stun"); return _stunSO; } }
+
+    /// <summary>방패 스킬로 늘어나는 막기 확률 (0~1): 방패 들기 +15%p · 최후의 보루 적 1마리당 +3%p (최대 12) · 전열 유지(시전자) +5%p.</summary>
+    private float BlockChanceBonus(PlayerStats defender)
+    {
+        if (defender == null) return 0f;
+        float bonus = 0f;
+        if (defender.shieldRaiseRounds > 0) bonus += RaiseShieldBlockBonus;
+        if (defender.HasEquippedPassiveByName(SkillLastBastion))
+        {
+            int alive = 0;
+            foreach (var e in activeEnemies) if (e != null && e.currentHP > 0) alive++;
+            bonus += Mathf.Min(LastBastionMax, alive * LastBastionPerEnemy);
+        }
+        if (defender.holdLineRounds > 0) bonus += HoldLineBlockBonus;
+        return bonus;
+    }
+
+    /// <summary>방패 스킬로 늘어나는 막은 피해 감소량 (고정값): 방패 들기 +2.</summary>
+    private float BlockReductionBonus(PlayerStats defender)
+    {
+        return defender != null && defender.shieldRaiseRounds > 0 ? RaiseShieldReductionBonus : 0f;
+    }
+
+    /// <summary>방패 액티브 (자기·아군 대상). 처리했으면 true.</summary>
+    private bool ApplyShieldActive(PlayerStats attacker, SkillData skill)
+    {
+        switch (skill.skillName)
+        {
+            case SkillRaiseShield:
+                attacker.shieldRaiseRounds = RaiseShieldRounds;
+                AddMessage($"{attacker.playerName} raises the shield! <color=#9FC8FF>Block +{Mathf.RoundToInt(RaiseShieldBlockBonus * 100f)}%, blocked damage -{RaiseShieldReductionBonus:F0}</color> for {RaiseShieldRounds} turns.");
+                return true;
+            case SkillTaunt:
+                attacker.tauntPending = true;
+                AddMessage($"{attacker.playerName} bangs the shield and takes a taunting stance. <color=#AAAAAA>(Next turn: enemies target {attacker.playerName}, DEF +{Mathf.RoundToInt((TauntDefenseMult - 1f) * 100f)}%)</color>");
+                return true;
+            case SkillDawnwarden:
+                attacker.wardenPending = true;
+                AddMessage($"{attacker.playerName} plants the shield before the party. <color=#AAAAAA>(Next turn: takes every attack meant for allies)</color>");
+                return true;
+            case SkillHoldTheLine:
+                attacker.holdLineRounds = HoldLineRounds;
+                foreach (var m in activePartyMembers)
+                {
+                    if (m == null || m.currentHP <= 0) continue;
+                    m.RemoveStatModifiersFromSource(HoldLineToken);
+                    m.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.DamageTaken, modType = StatModType.PercentMult, value = HoldLineDamageMult }, HoldLineToken, HoldLineRounds);
+                }
+                AddMessage($"{attacker.playerName}: <color=#FFD24A>Hold the line!</color> <color=#9FC8FF>Party damage taken -{Mathf.RoundToInt((1f - HoldLineDamageMult) * 100f)}%</color> for {HoldLineRounds} turns.");
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>전열 유지 중 막을 때마다 지속 +1턴 (최대 5).</summary>
+    private void ExtendHoldTheLine(PlayerStats caster)
+    {
+        if (caster == null || caster.holdLineRounds <= 0 || caster.holdLineRounds >= HoldLineMaxRounds) return;
+        caster.holdLineRounds++;
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null || m.activeStatModifiers == null) continue;
+            foreach (var am in m.activeStatModifiers) if (am.source == HoldLineToken) am.remainingTurns = caster.holdLineRounds;
+        }
+        AddMessage($"<color=#FFD24A>The line holds!</color> ({caster.holdLineRounds} turns)");
+    }
+
+    /// <summary>방패 강타·방패돌진: 맞힌 뒤 기절·밀치기·전진.</summary>
+    private void ApplyShieldAttackAfterHit(PlayerStats attacker, SkillData skill, EnemyStats target)
+    {
+        if (attacker == null || skill == null || target == null || target.IsDead()) return;
+        if (skill.skillName == SkillShieldBash)
+        {
+            if (TryStunOneAction(target, StunSO, ShieldBashStunChance))
+                AddMessage($"<color=#FFD700>{target.enemyName} is stunned!</color>");
+            return;
+        }
+        if (skill.skillName != SkillShieldDash) return;
+
+        // 기절 2턴 (상태이상 저항 반영) — 다음 행동 2번을 막는다
+        if (StunSO != null && UnityEngine.Random.value < Mathf.Max(0f, target.statusResist) && target.ApplyStatusEffectDirect(StunSO, ShieldDashStunTurns))
+        {
+            var inst = target.activeStatusEffects.Find(se => se.data != null && se.data.effectType == StunSO.effectType);
+            if (inst != null) inst.appliedThisTurn = _enemiesActedThisRound.Contains(target);
+            AddMessage($"<color=#FFD700>{target.enemyName} is stunned for {ShieldDashStunTurns} turns!</color>");
+        }
+        else AddMessage($"{target.enemyName} shrugs off the stun.");
+
+        // 60% 밀치기: 적을 1칸 뒤로 (자리에 다른 적이 있으면 자리 바꿈), 시전자는 앞으로 1칸
+        if (UnityEngine.Random.value < ShieldDashPushChance)
+        {
+            BattleSlot back = GetHorizontalNeighbor4(target.currentSlot, 1);
+            if (back != BattleSlot.None && MoveToSlot(target, back, true) is var mr && (mr == MoveResult.Success_Moved || mr == MoveResult.Success_Swapped))
+                AddMessage($"{target.enemyName} is driven back!");
+        }
+        BattleSlot forward = GetHorizontalNeighbor4(attacker.currentSlot, -1);
+        if (forward != BattleSlot.None && MovePlayerToSlot(attacker, forward))
+            AddMessage($"{attacker.playerName} advances.");
+    }
+
+    /// <summary>도발 중인 아군 (살아 있으면). 적이 공격 대상을 고를 때 이 아군을 고른다.</summary>
+    private PlayerStats ActiveTaunter()
+    {
+        foreach (var m in activePartyMembers) if (m != null && m.currentHP > 0 && m.tauntRounds > 0) return m;
+        return null;
+    }
+
+    /// <summary>새벽 수문장: 동료에게 가는 공격을 수문장이 대신 맞는다 (수문장이 쓰러져 있으면 원래 대상).</summary>
+    private PlayerStats RedirectToWarden(PlayerStats target)
+    {
+        if (target == null) return null;
+        foreach (var m in activePartyMembers)
+            if (m != null && m != target && m.currentHP > 0 && m.wardenRounds > 0)
+            {
+                AddMessage($"<color=#FFD24A>{m.playerName} steps in front of {target.playerName}!</color>");
+                return m;
+            }
+        return target;
+    }
+
+    /// <summary>라운드 끝: 방패 스킬 지속 감소, '다음 턴 적용' 스킬 발동.</summary>
+    private void TickShieldRoundEnd()
+    {
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null) continue;
+            if (m.shieldRaiseRounds > 0) m.shieldRaiseRounds--;
+            if (m.holdLineRounds > 0) m.holdLineRounds--;
+            if (m.tauntRounds > 0) m.tauntRounds--;
+            if (m.wardenRounds > 0) m.wardenRounds--;
+            if (m.currentHP <= 0) { m.tauntPending = false; m.wardenPending = false; continue; }
+            if (m.tauntPending)
+            {
+                m.tauntPending = false;
+                m.tauntRounds = 1;
+                m.RemoveStatModifiersFromSource(TauntDefenseToken);
+                m.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Defense, modType = StatModType.PercentMult, value = TauntDefenseMult }, TauntDefenseToken, 1);
+                AddMessage($"<color=#FF9F6B>{m.playerName} taunts the enemies!</color>");
+            }
+            if (m.wardenPending)
+            {
+                m.wardenPending = false;
+                m.wardenRounds = 1;
+                AddMessage($"<color=#FFD24A>{m.playerName} stands as the Dawnwarden.</color>");
+            }
+        }
+    }
+
+    /// <summary>막기 성공 (TryBlock 에서 한 번). 막기 성공에 반응하는 방패 패시브를 처리한다.</summary>
+    private void OnBlockSuccess(PlayerStats defender)
+    {
+        if (defender == null) return;
+        defender.blocksThisBattle++;
+        if (defender.holdLineRounds > 0) ExtendHoldTheLine(defender);
+
+        if (defender.HasEquippedPassiveByName(SkillShieldResilience))
+        {
+            bool hasA = defender.activeStatModifiers.Exists(m => m.source == ResilienceStackA);
+            bool hasB = defender.activeStatModifiers.Exists(m => m.source == ResilienceStackB);
+            object slot;
+            if (!hasA) slot = ResilienceStackA;
+            else if (!hasB) slot = ResilienceStackB;
+            else
+            {
+                // 둘 다 있으면 남은 턴이 적은 쪽을 새로 (지속 갱신)
+                var a = defender.activeStatModifiers.Find(m => m.source == ResilienceStackA);
+                var b = defender.activeStatModifiers.Find(m => m.source == ResilienceStackB);
+                slot = (a != null && b != null && a.remainingTurns <= b.remainingTurns) ? ResilienceStackA : ResilienceStackB;
+            }
+            defender.RemoveStatModifiersFromSource(slot);
+            defender.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.DamageTaken, modType = StatModType.PercentMult, value = ResilienceDamageMult }, slot, ResilienceRounds);
+            int stacks = (defender.activeStatModifiers.Exists(m => m.source == ResilienceStackA) ? 1 : 0) + (defender.activeStatModifiers.Exists(m => m.source == ResilienceStackB) ? 1 : 0);
+            AddMessage($"<color=#9FC8FF>{defender.playerName} stands firm!</color> Damage taken -{Mathf.RoundToInt((1f - Mathf.Pow(ResilienceDamageMult, stacks)) * 100f)}% ({stacks}/{ResilienceMaxStacks}).");
+        }
+
+        if (defender.HasEquippedPassiveByName(SkillShieldRetribution))
+        {
+            defender.nextAttackBonus = Mathf.Max(defender.nextAttackBonus, RetributionBonus);
+            defender.nextAttackBonusRounds = Mathf.Max(defender.nextAttackBonusRounds, 99); // 다음에 공격할 때까지 (전투가 끝나면 사라짐)
+            AddMessage($"<color=#FFB060>{defender.playerName} readies a retort!</color> Next attack +{Mathf.RoundToInt(RetributionBonus * 100f)}%.");
+        }
+    }
     // [2026-10-09] 반격 태세: 반격 확률 50% → 70%, 반격 위력 50% → 80%
     private const float CounterGuardChance = 0.7f;
     private const float CounterGuardPower = 0.8f;
@@ -6150,7 +6385,9 @@ public class BattleManager : MonoBehaviour
 
     private void ApplySelfEffects(PlayerStats attacker, SkillData skill)
     {
-        if (attacker == null || skill == null || skill.Effects == null) return;
+        if (attacker == null || skill == null) return;
+        if (ApplyShieldActive(attacker, skill)) return; // [2026-10-09] 방패
+        if (skill.Effects == null) return;
         if (ApplyCombatArtsActive(attacker, skill)) return;
 
         foreach (var effect in skill.Effects)
@@ -6416,6 +6653,9 @@ public class BattleManager : MonoBehaviour
     /// <summary>적이 SkillData 기반 스킬을 플레이어에게 시전. (평타와 별개 경로)</summary>
     private IEnumerator ExecuteEnemySkill(EnemyStats enemy, PlayerStats target, SkillData skill)
     {
+        // [2026-10-09] 새벽 수문장: 동료를 노린 공격 스킬은 수문장이 대신 맞는다
+        if (target != null && skill != null && !(skill is MonsterSkillData h && (h.Category == MonsterSkillCategory.Heal || h.Category == MonsterSkillCategory.Buff)))
+            target = RedirectToWarden(target);
         // 1. MP 차감
         enemy.currentMP = Mathf.Max(0, enemy.currentMP - skill.mpCost);
 
@@ -6575,9 +6815,11 @@ public class BattleManager : MonoBehaviour
                 if (damage <= 0)
                 {
                     AddMessage($"{target.playerName} blocked {skill.skillName} completely!");
+                    OnBlockSuccess(target); // [2026-10-09] 방패 패시브
                     continue;
                 }
                 AddMessage($"{target.playerName} blocked part of {skill.skillName}! (DR {blockReduction:F0})");
+                OnBlockSuccess(target); // [2026-10-09] 방패 패시브
             }
 
             // 9. 데미지 적용
@@ -6939,6 +7181,9 @@ public class BattleManager : MonoBehaviour
         {
             AddMessage($"Total: {totalDamage} damage ({successfulHits}/{hits} hits)");
         }
+
+        // [2026-10-09] 방패 강타·방패돌진: 맞혔으면 기절·밀치기·전진
+        if (successfulHits > 0) ApplyShieldAttackAfterHit(attacker, skill, target);
 
         // 본인 피해 (Magic Bolt, Fireball) - 스킬 사용 자체에 대한 확률이므로 타격 성공 여부와 무관
         if (skill.selfDmgChance > 0 && UnityEngine.Random.Range(0f, 100f) < skill.selfDmgChance)

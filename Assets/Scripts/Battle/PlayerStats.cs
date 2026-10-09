@@ -213,6 +213,15 @@ public class PlayerStats : MonoBehaviour
     /// <summary>버티기 자세 다음 턴 첫 공격 피해 보너스 (0.2 = +20%). 남은 라운드가 0이 되면 사라짐.</summary>
     [System.NonSerialized] public float nextAttackBonus = 0f;
     [System.NonSerialized] public int nextAttackBonusRounds = 0;
+    /// <summary>[2026-10-09] 이번 전투에서 막기에 성공한 횟수 (로그·시뮬레이션용).</summary>
+    [System.NonSerialized] public int blocksThisBattle = 0;
+    // [2026-10-09] 방패 스킬 상태 (전투마다 새로 — 전투 씬의 주인공은 새 오브젝트)
+    [System.NonSerialized] public int shieldRaiseRounds = 0;   // 방패 들기: 막기 +15%p · 막은 피해 감소 +2
+    [System.NonSerialized] public bool tauntPending = false;   // 도발: 이번 턴 자세 → 다음 턴 발동
+    [System.NonSerialized] public int tauntRounds = 0;         // 도발 발동 중 (적이 나를 고름 · 방어 +30%)
+    [System.NonSerialized] public bool wardenPending = false;  // 새벽 수문장: 이번 턴 자세 → 다음 턴 발동
+    [System.NonSerialized] public int wardenRounds = 0;        // 새벽 수문장 발동 중 (동료에게 가는 공격을 대신 맞음)
+    [System.NonSerialized] public int holdLineRounds = 0;      // 전열 유지 (시전자): 남은 턴
 
     /// <summary>패시브 회피 보너스 (0.05 = 적 명중 5% 감소). 전장의 직감.</summary>
     public float GetPassiveEvasionBonus()

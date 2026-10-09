@@ -24,7 +24,7 @@ MonoBehaviour:
   scalingStat: 2
   weaponCategory: 10
   targeting:
-    targetFaction: 1
+    targetFaction: 2
     allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 

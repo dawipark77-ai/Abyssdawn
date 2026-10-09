@@ -47,8 +47,8 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
-  curseEffect: {fileID: 11400000, guid: aaf361967934aec439aed47cefaef31e, type: 2}
-  curseApplyChance: 1
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
   backflowChance: 0
   backflowType: 0
   backflowStatusEffect: {fileID: 0}
