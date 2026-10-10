@@ -195,6 +195,8 @@ public class PlayerStats : MonoBehaviour
             int total = baseValue + classBonus + memoryFlatHp + memoryHpFromPercent + passiveBonus + equipmentBonus + traitBonus;
             // [2026-10-06] 전투학: 단련된 육체 — 최대 HP +8%
             if (HasEquippedPassiveByName(SkillHardenedBody)) total += Mathf.RoundToInt(total * 0.08f);
+            // [2026-10-11] 보급술 '단골 손님': 여관 뒤 첫 3번 전투 동안 최대 HP +% (최소 +1, 주인공만)
+            if (InnVigorPercent > 0f && !IsRecruitedCompanion) total += Mathf.Max(1, Mathf.RoundToInt(total * InnVigorPercent));
             return total;
         }
     }
@@ -202,6 +204,10 @@ public class PlayerStats : MonoBehaviour
     // ── 전투학(Combat Arts 페이지) 스킬 이름 — 효과는 이름으로 찾는다 (기존 Basic Swordsmanship 방식과 같음) ──
     public const string SkillHardenedBody = "Hardened Body";
     public const string SkillTacticalAwareness = "Tactical Awareness";
+    // [2026-10-11] 전투학 추가: 포커스(액티브) · 퀵 스타터 · 슬로우 스타터(패시브, 둘은 동시 장착 불가)
+    public const string SkillFocus = "Focus";
+    public const string SkillQuickStarter = "Quick Starter";
+    public const string SkillSlowStarter = "Slow Starter";
     /// <summary>반격 태세(Counter Guard) 남은 라운드. 0보다 크면 자세 유지 중 (라운드 끝마다 1 감소).</summary>
     // [2026-10-07] 도망 확률 보너스 (연막탄 등 아이템). escapeBonusRounds 라운드 동안 유지
     [System.NonSerialized] public float escapeBonus = 0f;
@@ -247,9 +253,15 @@ public class PlayerStats : MonoBehaviour
             int equipmentBonus = GetEquipmentMPBonus(baseValue + classBonus + passiveBonus);
             int traitBonus = GetTraitBonus(PassiveBonusStat.MP);
 
-            return baseValue + classBonus + memoryMpFromPercent + passiveBonus + equipmentBonus + traitBonus;
+            int totalMP = baseValue + classBonus + memoryMpFromPercent + passiveBonus + equipmentBonus + traitBonus;
+            // [2026-10-11] 보급술 '단골 손님': 최대 MP 도 같은 비율 (MP 가 있을 때만, 최소 +1)
+            if (InnVigorPercent > 0f && !IsRecruitedCompanion && totalMP > 0) totalMP += Mathf.Max(1, Mathf.RoundToInt(totalMP * InnVigorPercent));
+            return totalMP;
         }
     }
+
+    /// <summary>[2026-10-11] 이번 전투에 적용 중인 '단골 손님' 최대 HP·MP 보너스 비율 (전투 중에만 0보다 큼).</summary>
+    public static float InnVigorPercent = 0f;
 
     // 대문자 버전 (BattleManager 등 최신 스크립트용)
     public int Attack
@@ -653,6 +665,8 @@ public class PlayerStats : MonoBehaviour
         var em = GetComponent<EquipmentManager>();
         var rh = em != null ? em.rightHand : (statData != null ? statData.rightHand : null);
         var lh = em != null ? em.leftHand : (statData != null ? statData.leftHand : null);
+        // [2026-10-11] 격투술(Fist): 오른손·왼손 중 적어도 한 손이 비어 있어야 한다 (양손에 무엇이든 들고 있으면 불가 — 방패 포함)
+        if (category == WeaponCategory.Fist) return rh == null || lh == null;
         return (rh != null && rh.weaponCategory == category) || (lh != null && lh.weaponCategory == category);
     }
 

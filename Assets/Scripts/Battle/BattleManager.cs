@@ -383,9 +383,19 @@ public class BattleManager : MonoBehaviour
     // ... (중략) ...
 
     // 스킬 버튼 생성 (버튼이 없을 때)
+    /// <summary>[2026-10-11] 스킬 창 스크롤 목록의 Content (아이템 창과 같은 구조: SkillScrollView/Viewport/Content). 없으면 null.</summary>
+    private RectTransform SkillListContent()
+    {
+        if (skillPanel == null) return null;
+        Transform t = skillPanel.transform.Find("SkillScrollView/Viewport/Content");
+        return t as RectTransform;
+    }
+
     private void CreateSkillButtons(List<SkillData> skills)
     {
         if (skillPanel == null) return;
+        RectTransform listContent = SkillListContent();
+        if (listContent != null) { CreateSkillListButtons(skills, listContent); return; } // [2026-10-11] 아이템 창 같은 2열 스크롤 목록
         
         // 기존 버튼 모두 제거 (SkillBackButton, Pagination 제외)
         foreach (Transform child in skillPanel.transform)
@@ -585,6 +595,143 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    /// <summary>스킬·아이템 창이 들어 있는 SubPanels 가 다른 캔버스(전투 기록·파티 바, 정렬 10)보다 앞에 그려지도록.</summary>
+    public const int SubPanelsSortingOrder = 30;
+
+    /// <summary>[2026-10-11] 전투 씬의 Back 버튼(글자가 Back 인 버튼) 배경을 가로형 금테 패널(팝업 테두리)로 통일.</summary>
+    private void StyleBackButtons()
+    {
+        Sprite frame = DungeonHud.PopupSprite;
+        if (frame == null) return;
+        foreach (var b in Resources.FindObjectsOfTypeAll<Button>())
+        {
+            if (b == null || b.gameObject.scene != gameObject.scene) continue;
+            var label = b.GetComponentInChildren<TMPro.TMP_Text>(true);
+            if (label == null || label.text.Trim() != "Back") continue;
+            var img = b.GetComponent<Image>();
+            if (img == null) continue;
+            img.sprite = frame;
+            img.type = Image.Type.Sliced;
+            img.fillCenter = true;
+            img.color = Color.white;
+            img.pixelsPerUnitMultiplier = 3f; // 작은 버튼에서 테두리가 너무 두껍지 않게
+            label.color = new Color(0.96f, 0.87f, 0.58f, 1f);
+        }
+    }
+
+    private void EnsureSubPanelsOnTop()
+    {
+        if (skillPanel == null || skillPanel.transform.parent == null) return;
+        GameObject sub = skillPanel.transform.parent.gameObject; // Canvas/BattleUI/SubPanels
+        Canvas cv = sub.GetComponent<Canvas>();
+        if (cv == null) cv = sub.AddComponent<Canvas>();
+        cv.overrideSorting = true;
+        cv.sortingOrder = SubPanelsSortingOrder;
+        if (sub.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) sub.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+    }
+
+    /// <summary>
+    /// [2026-10-11] 스킬 창: 아이템 창과 똑같은 카드(ConsumableItemSlot 프리팹 — 배경 테두리·아이콘·이름·오른쪽 아래 비용)로,
+    /// 위 왼쪽부터 왼쪽 → 오른쪽 순으로 2열로 채운다. 넘치면 스크롤. 자리 계산도 아이템 창(BattleItemPanel)과 같은 공식.
+    /// </summary>
+    private void CreateSkillListButtons(List<SkillData> skills, RectTransform content)
+    {
+        for (int i = content.childCount - 1; i >= 0; i--) Destroy(content.GetChild(i).gameObject);
+
+        BattleItemPanel itemPanel = skillPanel.transform.parent != null ? skillPanel.transform.parent.GetComponentInChildren<BattleItemPanel>(true) : null;
+        GameObject cardPrefab = itemPanel != null ? itemPanel.itemSlotPrefab : null;
+        int cols = itemPanel != null ? Mathf.Max(1, itemPanel.columnCount) : 2;
+        float hGap = itemPanel != null ? itemPanel.horizontalSpacing : 20f, vGap = itemPanel != null ? itemPanel.verticalSpacing : 10f;
+        float x0 = itemPanel != null ? itemPanel.startXOffset : 50f, y0 = itemPanel != null ? itemPanel.startYOffset : 50f;
+        Vector2 cell = cardPrefab != null ? ((RectTransform)cardPrefab.transform).sizeDelta : new Vector2(430f, 95f);
+
+        for (int i = 0; i < skills.Count; i++)
+        {
+            SkillData skill = skills[i];
+            bool weaponCompatible = skill.weaponCategory == AbyssdawnBattle.WeaponCategory.None
+                                    || (currentControlledMember != null && currentControlledMember.HasWeaponCategory(skill.weaponCategory));
+            string limitReason = weaponCompatible ? SkillLimitReason(currentControlledMember, skill) : null;
+            // [2026-10-11] 비용이 모자라면 못 씀 — 카드 어둡게 · 클릭 불가 · 비용 글자 붉게
+            bool mpShort = currentControlledMember != null && skill.mpCost > 0 && currentControlledMember.currentMP < skill.mpCost;
+            int hpCostNow = skill.hpCostPercent > 0 && currentControlledMember != null ? Mathf.Max(1, Mathf.RoundToInt(currentControlledMember.maxHP * skill.hpCostPercent / 100f)) : 0;
+            bool hpShort = currentControlledMember != null && hpCostNow > 0 && currentControlledMember.currentHP <= hpCostNow;
+            bool costShort = mpShort || hpShort;
+            bool usable = weaponCompatible && limitReason == null && !costShort;
+
+            GameObject card;
+            if (cardPrefab != null)
+            {
+                card = Instantiate(cardPrefab, content, false);
+                var itemSlot = card.GetComponent<BattleItemSlot>();
+                if (itemSlot != null) DestroyImmediate(itemSlot); // 아이템 동작은 빼고 모양만
+            }
+            else card = new GameObject("Card", typeof(RectTransform), typeof(Image), typeof(Button));
+            card.name = $"SkillButton_{i}";
+            card.SetActive(true);
+            RectTransform rt = (RectTransform)card.transform;
+            int row = i / cols, col = i % cols;
+            rt.anchoredPosition = new Vector2(x0 + col * (cell.x + hGap), -(y0 + row * (cell.y + vGap))); // BattleItemPanel.ArrangeSlots 와 같은 공식
+
+            Button btn = card.GetComponent<Button>();
+            btn.onClick.RemoveAllListeners();
+            btn.interactable = usable;
+            if (!usable)
+            {
+                // 카드 전체를 어둡게 (배경 테두리 포함)
+                foreach (var g in card.GetComponentsInChildren<Image>(true))
+                    if (g.transform.parent == card.transform || g.transform == card.transform)
+                        g.color = new Color(g.color.r * 0.45f, g.color.g * 0.45f, g.color.b * 0.45f, g.color.a);
+            }
+
+            // 아이콘 (FlatIcon 자리) — 없으면 숨김
+            Transform iconT = card.transform.Find("FlatIcon");
+            if (iconT != null)
+            {
+                Image icon = iconT.GetComponent<Image>();
+                icon.sprite = skill.skillIcon;
+                icon.preserveAspect = true;
+                icon.enabled = skill.skillIcon != null;
+                icon.color = usable ? Color.white : new Color(1f, 1f, 1f, 0.35f);
+                if (skill.skillIcon != null) SkillIconFrame.Apply(icon);
+            }
+
+            // 이름 (NameText) · 비용/사유 (Quantity 자리, 오른쪽 아래)
+            string costText = skill.hpCostPercent > 0 ? $"HP {skill.hpCostPercent}%" : skill.mpCost > 0 ? $"MP {skill.mpCost}" : "";
+            if (skill.usesPerBattle > 0)
+                costText += (costText.Length > 0 ? " · " : "") + $"{Mathf.Max(0, skill.usesPerBattle - GetCount(_skillUses, currentControlledMember, skill))}/{skill.usesPerBattle}";
+            var nameT = card.transform.Find("NameText") != null ? card.transform.Find("NameText").GetComponent<TMPro.TMP_Text>() : null;
+            var qtyT = card.transform.Find("Quantity") != null ? card.transform.Find("Quantity").GetComponent<TMPro.TMP_Text>() : null;
+            if (nameT != null)
+            {
+                nameT.enableAutoSizing = true; nameT.fontSizeMin = 14f; nameT.fontSizeMax = 25f;
+                if (usable) { nameT.text = skill.skillName; nameT.color = Color.white; }
+                else if (costShort && weaponCompatible && limitReason == null) { nameT.text = $"{skill.skillName}\n<size=70%><color=#FF6666>Not enough {(mpShort ? "MP" : "HP")}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
+                else if (weaponCompatible) { nameT.text = $"{skill.skillName}\n<size=70%><color=#888888>{limitReason}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
+                else { nameT.text = $"{skill.skillName}\n<size=70%><color=#FF6666>Requires: {skill.weaponCategory}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
+            }
+            if (qtyT != null)
+            {
+                qtyT.text = costText;
+                qtyT.enableAutoSizing = true; qtyT.fontSizeMin = 12f; qtyT.fontSizeMax = 22f;
+                qtyT.color = costShort ? new Color(1f, 0.35f, 0.3f, 1f) : usable ? new Color(0.75f, 0.75f, 0.75f, 1f) : new Color(0.45f, 0.45f, 0.45f, 1f);
+            }
+
+            if (usable)
+            {
+                SkillData captured = skill;
+                btn.onClick.AddListener(() => UsePlayerSkill(captured));
+            }
+        }
+
+        int rows = Mathf.CeilToInt(skills.Count / (float)cols);
+        content.sizeDelta = new Vector2(content.sizeDelta.x, y0 + rows * cell.y + Mathf.Max(0, rows - 1) * vGap);
+        var scroll = content.GetComponentInParent<ScrollRect>();
+        if (scroll != null) scroll.verticalNormalizedPosition = 1f; // 맨 위부터
+
+        // Back 버튼은 씬에 놓인 자리 그대로 (아이템 창과 같은 오른쪽 아래)
+        if (skillBackButton != null) skillBackButton.gameObject.SetActive(true);
+    }
+
     void Awake()
     {
         Debug.Log("[PERSISTENCE_DEBUG] BattleManager.Awake RUNNING");
@@ -602,6 +749,8 @@ public class BattleManager : MonoBehaviour
         }
         startWithFullParty = false; // [Anti-Gravity] 강제 Solo 모드 설정 (인스펙터 값 무시)
         ForceDisableUIPanels();
+        EnsureSubPanelsOnTop(); // [2026-10-11] 스킬·아이템 창을 전투 기록 창보다 앞에
+        StyleBackButtons();     // [2026-10-11] Back 버튼 배경 = 가로형 금테 패널
 
         AutoAssignSlotPoints();
 
@@ -1826,6 +1975,7 @@ public class BattleManager : MonoBehaviour
 
     private IEnumerator ReturnToDungeonRoutine(float delay)
     {
+        EndInnVigor(); // [2026-10-11] 단골 손님 최대 HP·MP 보너스는 전투 동안만
         var gm = GameManager.EnsureInstance();
         Debug.Log($"[BM:DIAG] ReturnToDungeonRoutine START | activePartyMembers.Count={activePartyMembers.Count} | GM={(gm != null ? "exists" : "NULL")} | delay={delay}, IsPlayingMessageSequence={IsPlayingMessageSequence}");
         foreach (var member in activePartyMembers)
@@ -2688,6 +2838,25 @@ public class BattleManager : MonoBehaviour
         if (carried.Count > 0)
             AddMessage($"<color=#FF9F6B>{hero.playerName} is still suffering: {string.Join(", ", carried)}.</color>");
 
+        // [2026-10-11] 보급술 '단골 손님': 여관 뒤 첫 3번 전투 동안 최대 HP·MP +% (늘어난 만큼 현재 HP·MP 도)
+        if (DungeonPersistentData.innVigorBattlesLeft > 0 && DungeonPersistentData.innVigorPercent > 0f)
+        {
+            int hp0 = hero.maxHP, mp0 = hero.maxMP;
+            PlayerStats.InnVigorPercent = DungeonPersistentData.innVigorPercent;
+            hero.currentHP += hero.maxHP - hp0;
+            hero.currentMP += hero.maxMP - mp0;
+            DungeonPersistentData.innVigorBattlesLeft--;
+            AddMessage($"<color=#9FFF9F>Well rested: Max HP·MP +{Mathf.RoundToInt(PlayerStats.InnVigorPercent * 100f)}%.</color> <size=80%>({DungeonPersistentData.innVigorBattlesLeft} more)</size>");
+        }
+
+        // [2026-10-11] 전투학 '퀵 스타터': 전투 시작 후 2턴까지 모든 스탯 +10%
+        foreach (var m in activePartyMembers)
+            if (m != null && m.HasEquippedPassiveByName(PlayerStats.SkillQuickStarter))
+            {
+                AddAllStatsMult(m, QuickStarterMult, QuickStarterRounds, QuickStarterToken);
+                AddMessage($"<color=#9FC8FF>{m.playerName} starts fast!</color> All stats +{Mathf.RoundToInt((QuickStarterMult - 1f) * 100f)}% for {QuickStarterRounds} turns.");
+            }
+
         if (hero.statData != null && hero.statData.HasFieldSkill(FieldSkills.DangerSense))
         {
             hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = FieldSkills.DangerSenseEvasion }, DangerSenseSource, 1);
@@ -2696,6 +2865,34 @@ public class BattleManager : MonoBehaviour
     }
 
     private static readonly object DangerSenseSource = new object();
+
+    // [2026-10-11] 전투학 퀵·슬로우 스타터 / 포커스
+    private const float QuickStarterMult = 1.1f, SlowStarterMult = 1.2f;
+    private const int QuickStarterRounds = 2, SlowStarterFromRound = 5;
+    private const float FocusBonus = 0.2f;
+    private const int FocusRounds = 3;
+    private static readonly object QuickStarterToken = new object(), SlowStarterToken = new object();
+
+    /// <summary>공격·방어·마법·속도에 같은 배율 (모든 스탯 — 행운은 배율 수정치가 없어 제외).</summary>
+    private static void AddAllStatsMult(PlayerStats m, float mult, int rounds, object source)
+    {
+        m.RemoveStatModifiersFromSource(source);
+        foreach (var t in new[] { AbyssdawnBattle.ModStatType.Attack, AbyssdawnBattle.ModStatType.Defense, AbyssdawnBattle.ModStatType.Magic, AbyssdawnBattle.ModStatType.Speed })
+            m.AddStatModifier(new StatModifier { statType = t, modType = StatModType.PercentMult, value = mult }, source, rounds);
+    }
+
+    /// <summary>전투가 끝날 때 '단골 손님' 최대 HP·MP 보너스를 거둔다 (현재 HP·MP 는 원래 최대치 안으로).</summary>
+    private void EndInnVigor()
+    {
+        if (PlayerStats.InnVigorPercent <= 0f) return;
+        PlayerStats.InnVigorPercent = 0f;
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null) continue;
+            m.currentHP = Mathf.Min(m.currentHP, m.maxHP);
+            m.currentMP = Mathf.Min(m.currentMP, m.maxMP);
+        }
+    }
 
     /// <summary>
     /// 플레이어 파티와 적을 BattleLine에 슬롯 순서대로 배치합니다.
@@ -3522,6 +3719,14 @@ public class BattleManager : MonoBehaviour
         bool enemiesCowed = _resolutionRound == 0 && player != null
                             && player.level - GetAreaLevel() >= overwhelmLevelGap;
         _resolutionRound++;
+        // [2026-10-11] 전투학 '슬로우 스타터': 전투 시작 후 5턴부터 모든 스탯 +20% (전투 끝까지)
+        if (_resolutionRound == SlowStarterFromRound)
+            foreach (var m in activePartyMembers)
+                if (m != null && m.currentHP > 0 && m.HasEquippedPassiveByName(PlayerStats.SkillSlowStarter))
+                {
+                    AddAllStatsMult(m, SlowStarterMult, -1, SlowStarterToken);
+                    AddMessage($"<color=#FFB060>{m.playerName} has warmed up!</color> All stats +{Mathf.RoundToInt((SlowStarterMult - 1f) * 100f)}%.");
+                }
         if (enemiesCowed)
             AddMessage("<color=#FFD700>The enemies cower before you and dare not strike first!</color>");
 
@@ -3572,6 +3777,7 @@ public class BattleManager : MonoBehaviour
         // 라운드 끝: 쿨다운 감소, 버티기 자세 보너스 만료
         TickRoundEndSkillState();
         TickShieldRoundEnd(); // [2026-10-09] 방패 스킬
+        TickInnerCirculation(); // [2026-10-11] 격투술 내공 순환
 
         // 모든 액션 완료 후 상태 체크
         CheckBattleEnd();
@@ -4851,9 +5057,12 @@ public class BattleManager : MonoBehaviour
         //   5 미만이면 기본 공식: 20% + 실패 1회당 +25%p + 민첩 보정 + 연막탄 등.
         //   실패하면 파티 전원 이번 턴 행동 없이 적만 행동.
         int levelGap = currentControlledMember.level - GetAreaLevel();
+        // [2026-10-11] 야전술 '퇴로 확보': 이 층의 계단을 찾았으면 도주 첫 시도 +15%p
+        bool secureRetreat = EncounterPlan.stairsKnown && FieldSkills.Has(FieldSkills.SecureRetreat);
         float formulaChance = Mathf.Clamp01(fleeBaseChance + fleeStepChance * _fleeFailCount
                                             + currentControlledMember.Agility * fleeChancePerAgi
-                                            + currentControlledMember.escapeBonus); // 연막탄 등
+                                            + currentControlledMember.escapeBonus  // 연막탄 등
+                                            + (secureRetreat && _fleeFailCount == 0 ? FieldSkills.SecureRetreatFleeBonus : 0f));
         float tierChance = levelGap >= overwhelmLevelGap ? 1.2f
                          : levelGap >= 20 ? 1f
                          : levelGap >= 10 ? 0.9f
@@ -4872,6 +5081,11 @@ public class BattleManager : MonoBehaviour
 
         _fleeFailCount++;
         AddMessage("<color=#FF6B6B>Couldn't escape!</color>"); // [2026-10-08] 드퀘식 — 확률·이유 설명 없음
+        // [2026-10-11] 퇴로 확보: 계단을 아는 층이면 도주에 실패한 라운드에 받는 피해 -30%
+        if (secureRetreat)
+            foreach (var m in activePartyMembers)
+                if (m != null && m.currentHP > 0)
+                    m.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.DamageTaken, modType = StatModType.PercentMult, value = FieldSkills.SecureRetreatFailDamageMult }, SecureRetreatToken, 1);
         HideCommandPanels();
         HideBackButton();
         pendingCommands.Clear();
@@ -4881,6 +5095,8 @@ public class BattleManager : MonoBehaviour
         commandIndex = activePartyMembers.Count;
         BeginResolutionPhase();
     }
+
+    private static readonly object SecureRetreatToken = new object();
 
     [Header("도망 (DQ식)")]
     [Tooltip("레벨 차이 5 미만일 때 첫 시도 기본 확률 (0.20 = 20%) — [2026-10-09] 15% → 20%")]
@@ -4991,6 +5207,7 @@ public class BattleManager : MonoBehaviour
             
             // 스킬 패널 활성화
             skillPanel.SetActive(true);
+            EnsureSubPanelsOnTop(); // [2026-10-11]
             Debug.Log($"[BattleManager] skillPanel activated. New state: activeSelf={skillPanel.activeSelf}, activeInHierarchy={skillPanel.activeInHierarchy}");
             
             // Back 버튼 찾기 및 연결
@@ -5056,6 +5273,15 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"[BattleManager] Available skill buttons (excluding back): {availableSkillButtons.Count}");
         
         // 1. 스킬 정렬 제거: 획득 순서 유지
+
+        // [2026-10-11] 스크롤 목록이면 페이지 없이 전부 (넘치면 스크롤)
+        if (SkillListContent() != null)
+        {
+            CreateSkillButtons(skills);
+            if (prevPageButton != null) prevPageButton.gameObject.SetActive(false);
+            if (nextPageButton != null) nextPageButton.gameObject.SetActive(false);
+            return;
+        }
 
         // 2. 페이지 계산
         int totalPages = Mathf.CeilToInt((float)skills.Count / SKILLS_PER_PAGE);
@@ -5968,6 +6194,7 @@ public class BattleManager : MonoBehaviour
         if (who == null || skill == null) return null;
         // 반격 태세 중에는 기본 공격만 (스킬 전부 잠김)
         if (who.counterGuardRounds > 0) return "Counter stance (attacks only)";
+        if (skill.skillName == SkillShareKi && ShareKiTarget(who) == null) return "No wounded ally"; // [2026-10-11]
         if (skill.usesPerBattle > 0 && GetCount(_skillUses, who, skill) >= skill.usesPerBattle)
             return skill.usesPerBattle == 1 ? "Used this battle" : $"Used {skill.usesPerBattle}/{skill.usesPerBattle}";
         if (UseCooldowns && skill.cooldownTurns > 0)
@@ -6056,6 +6283,17 @@ public class BattleManager : MonoBehaviour
     private const float HoldLineDamageMult = 0.9f, HoldLineBlockBonus = 0.05f;
     private const int HoldLineRounds = 3, HoldLineMaxRounds = 5;
     private static readonly object TauntDefenseToken = new object(), HoldLineToken = new object();
+    // [2026-10-11] 격투술 (Martial Arts) — 맨손 전용, 물리 스킬도 MP 를 쓴다
+    private const string SkillGatherKi = "Gather Ki";
+    private const string SkillUppercut = "Uppercut";
+    private const string SkillRoundhouse = "Roundhouse Kick";
+    private const string SkillShareKi = "Share Ki";
+    private const string SkillInnerCirculation = "Inner Circulation";
+    private const float GatherKiBonus = 1.0f;         // 다음 공격 위력 ×2
+    private const int UppercutStunTurns = 2;
+    private const float ShareKiHealPercent = 0.2f;    // 동료 최대 HP 의 20%
+    private static readonly float[] InnerCirculationMp = { 0.03f, 0.04f, 0.05f };
+
     private static StatusEffectSO _stunSO;
     private static StatusEffectSO StunSO { get { if (_stunSO == null) _stunSO = Resources.Load<StatusEffectSO>("Curse/Curse_Stun"); return _stunSO; } }
 
@@ -6098,6 +6336,20 @@ public class BattleManager : MonoBehaviour
                 attacker.wardenPending = true;
                 AddMessage($"{attacker.playerName} plants the shield before the party. <color=#AAAAAA>(Next turn: takes every attack meant for allies)</color>");
                 return true;
+            case SkillGatherKi:
+                attacker.nextAttackBonus = Mathf.Max(attacker.nextAttackBonus, GatherKiBonus);
+                attacker.nextAttackBonusRounds = Mathf.Max(attacker.nextAttackBonusRounds, 2); // 다음 라운드 끝까지
+                AddMessage($"{attacker.playerName} gathers ki. <color=#FFB060>Next attack ×2!</color>");
+                return true;
+            case SkillShareKi:
+            {
+                PlayerStats ally = ShareKiTarget(attacker);
+                if (ally == null) { AddMessage($"{attacker.playerName} has no one to share ki with."); return true; }
+                int before = ally.currentHP;
+                ally.Heal(Mathf.Max(1, Mathf.RoundToInt(ally.maxHP * ShareKiHealPercent)));
+                AddMessage($"{attacker.playerName} shares ki with {ally.playerName}! <color=#9FFF9F>+{ally.currentHP - before} HP</color>");
+                return true;
+            }
             case SkillHoldTheLine:
                 attacker.holdLineRounds = HoldLineRounds;
                 foreach (var m in activePartyMembers)
@@ -6110,6 +6362,34 @@ public class BattleManager : MonoBehaviour
                 return true;
         }
         return false;
+    }
+
+    /// <summary>[2026-10-11] 기 나눠주기 대상: HP 비율이 가장 낮은 살아 있는 동료 (자신 제외). 없으면 null.</summary>
+    private PlayerStats ShareKiTarget(PlayerStats caster)
+    {
+        PlayerStats best = null; float bestRatio = 2f;
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null || m == caster || m.currentHP <= 0 || m.currentHP >= m.maxHP) continue;
+            float r = (float)m.currentHP / Mathf.Max(1, m.maxHP);
+            if (r < bestRatio) { bestRatio = r; best = m; }
+        }
+        return best;
+    }
+
+    /// <summary>[2026-10-11] 내공 순환 (패시브 1~3등급): 라운드 끝마다 최대 MP 의 3/4/5% 회복 (최소 1).</summary>
+    private void TickInnerCirculation()
+    {
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null || m.currentHP <= 0 || m.maxMP <= 0 || m.currentMP >= m.maxMP || m.statData == null) continue;
+            if (!m.HasEquippedPassiveByName(SkillInnerCirculation)) continue;
+            AbyssdawnBattle.SkillData skill = null;
+            foreach (var p in m.statData.equippedPassives) if (p != null && p.skillName == SkillInnerCirculation) { skill = p; break; }
+            int rank = Mathf.Clamp(m.statData.SkillRank(skill), 1, InnerCirculationMp.Length);
+            int gain = Mathf.Max(1, Mathf.RoundToInt(m.maxMP * InnerCirculationMp[rank - 1]));
+            m.currentMP = Mathf.Min(m.maxMP, m.currentMP + gain);
+        }
     }
 
     /// <summary>전열 유지 중 막을 때마다 지속 +1턴 (최대 5).</summary>
@@ -6129,6 +6409,17 @@ public class BattleManager : MonoBehaviour
     private void ApplyShieldAttackAfterHit(PlayerStats attacker, SkillData skill, EnemyStats target)
     {
         if (attacker == null || skill == null || target == null || target.IsDead()) return;
+        if (skill.skillName == SkillUppercut)
+        {
+            // [2026-10-11] 어퍼컷: 기절 2턴 (상태이상 저항 반영)
+            if (StunSO != null && UnityEngine.Random.value < Mathf.Max(0f, target.statusResist) && target.ApplyStatusEffectDirect(StunSO, UppercutStunTurns))
+            {
+                var inst = target.activeStatusEffects.Find(se => se.data != null && se.data.effectType == StunSO.effectType);
+                if (inst != null) inst.appliedThisTurn = _enemiesActedThisRound.Contains(target);
+                AddMessage($"<color=#FFD700>{target.enemyName} is knocked senseless for {UppercutStunTurns} turns!</color>");
+            }
+            return;
+        }
         if (skill.skillName == SkillShieldBash)
         {
             if (TryStunOneAction(target, StunSO, ShieldBashStunChance))
@@ -6326,6 +6617,15 @@ public class BattleManager : MonoBehaviour
                 attacker.counterGuardRounds = 2;
                 attacker.counterGuardCountersThisRound = 0;
                 AddMessage($"{attacker.playerName} takes a counter stance! <color=#9FC8FF>70% chance to halve damage and strike back</color> for 2 turns.");
+                return true;
+            }
+            case PlayerStats.SkillFocus:
+            {
+                // [2026-10-11] 포커스: 3턴 동안 회피·명중 +20% (쓴 라운드 끝에도 1 줄어 +1)
+                attacker.RemoveStatModifiersFromSource(skill);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = FocusBonus }, skill, FocusRounds + 1);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Accuracy, modType = StatModType.Flat, value = FocusBonus }, skill, FocusRounds + 1);
+                AddMessage($"{attacker.playerName} focuses. <color=#9FC8FF>Evasion and accuracy +{Mathf.RoundToInt(FocusBonus * 100f)}%</color> for {FocusRounds} turns.");
                 return true;
             }
             case SkillSecondWind:
@@ -6927,6 +7227,20 @@ public class BattleManager : MonoBehaviour
             if (skill.skillName == "Mandritto")
             {
                 yield return StartCoroutine(ExecuteMandritto(attacker, skill, target));
+            }
+            else if (skill.skillName == SkillRoundhouse)
+            {
+                // [2026-10-11] 돌려차기: 전열(1~4번 칸, 단독이면 그 적)의 살아 있는 적 모두
+                var front = new List<EnemyStats>();
+                foreach (var e in activeEnemies)
+                    if (e != null && e.currentHP > 0 && (e.currentSlot == BattleSlot.Center || (int)e.currentSlot <= 4)) front.Add(e);
+                if (front.Count == 0) front.Add(target);
+                foreach (var e in front)
+                {
+                    if (battleEnded) break;
+                    if (e == null || e.currentHP <= 0) continue;
+                    yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, e));
+                }
             }
             else
             {
@@ -9616,6 +9930,13 @@ private void CacheHeroSkills()
                 PlayerWallet.Add(totalGold);
                 AddMessage($"Found <color=#FFD24A>{totalGold} Gold</color>!");
                 Debug.Log($"[BattleManager] 골드 +{totalGold} → {PlayerWallet.Gold}G");
+            }
+            // [2026-10-11] 보급술 '전리품 수습': 승리 시 5% 확률로 HP 포션
+            if (FieldSkills.Has(FieldSkills.LootSalvage) && UnityEngine.Random.value < FieldSkills.LootVictoryPotionChance)
+            {
+                var potion = Resources.Load<ConsumableItemSO>("Item_Equipments/Items/HP_Potion");
+                if (potion != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(potion, 1) > 0)
+                    AddMessage($"<color=#9FFF9F>Salvaged a {potion.itemName}!</color>");
             }
 
             if (actionPanel != null) actionPanel.SetActive(false);

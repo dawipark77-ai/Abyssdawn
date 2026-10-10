@@ -77,6 +77,9 @@ public class MemoryOfSpeciesUI : MonoBehaviour
     private void UpdateSlot(Image slotImage, MemoryOfSpeciesData memoryData)
     {
         if (slotImage == null) return;
+        // [2026-10-11] 아이콘을 누르면 종의 기억 상세 팝업
+        MemoryOfSpeciesData captured = memoryData;
+        DetailClickTarget.Attach(slotImage, () => DetailClickTarget.ForMemory(captured));
 
         if (memoryData != null && memoryData.memoryIcon != null)
         {
@@ -97,6 +100,9 @@ public class MemoryOfSpeciesUI : MonoBehaviour
     /// </summary>
     private void UpdateTrait(TraitsOfSpeciesData traitData)
     {
+        // [2026-10-11] 종의 특성 아이콘도 누르면 상세 팝업
+        TraitsOfSpeciesData capturedTrait = traitData;
+        if (traitsImage != null) DetailClickTarget.Attach(traitsImage, () => DetailClickTarget.ForTrait(capturedTrait));
         if (traitsText == null) return;
 
         if (traitData != null)

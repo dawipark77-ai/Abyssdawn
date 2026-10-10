@@ -230,6 +230,10 @@ public class LoreCategoryController : MonoBehaviour
                 mapping.lorePagePanel.SetActive(false);
             }
         }
+        // [2026-10-11] 버튼에 직접 연결되지 않은 페이지(원정술의 보급술처럼 페이지 안 전환 버튼으로 여는 쪽)도 닫는다
+        if (lorePageParent != null)
+            foreach (Transform page in lorePageParent)
+                if (page.GetComponent<SwordSkillTreeManager>() != null) page.gameObject.SetActive(false); // 스킬 상세 팝업 등은 그대로
         currentOpenPage = null;
     }
 

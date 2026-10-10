@@ -294,7 +294,7 @@ public class MapManager : MonoBehaviour
     /// </summary>
     public void AddPlayerLight(int steps)
     {
-        if (steps > 0 && FieldSkills.Has(FieldSkills.Survivalist)) steps = Mathf.RoundToInt(steps * FieldSkills.SurvivalistLightMult);
+        // [2026-10-11] 생존 전문가의 빛 +50% 는 보급술 문서에 없어 뺐다
         DungeonPersistentData.playerLightSteps = Mathf.Max(0, DungeonPersistentData.playerLightSteps + steps);
         if (_player != null) RevealAt(_player.gridPos);
         Debug.Log($"[MapManager] 빛 {DungeonPersistentData.playerLightSteps}걸음 (시야 {SightRadiusAt(_player != null ? _player.gridPos : Vector2Int.zero)}칸)");
@@ -663,6 +663,14 @@ public class MapManager : MonoBehaviour
     // [2026-10-09] 야영 (탐험 스킬 Make Camp, 1~5등급) — 던전 메뉴의 Camp 버튼
     // ─────────────────────────────────────────
 
+    /// <summary>[2026-10-11] 이번 층에서 계단(내려가는 쪽 또는 올라가는 쪽)을 이미 발견했는지 — 야전술 '퇴로 확보'.</summary>
+    public bool StairsKnown()
+    {
+        if (FloorData == null || FloorState == null) return false;
+        if (FloorState.revealed.Contains(FloorData.stairsPos)) return true;
+        return FloorData.hasStairsUp && FloorState.revealed.Contains(FloorData.stairsUpPos);
+    }
+
     /// <summary>야영을 지금 할 수 없는 이유 (할 수 있으면 null).</summary>
     public string CampBlockReason()
     {
@@ -745,6 +753,12 @@ public class MapManager : MonoBehaviour
             if (!ok) return;
             string reward = GrantFloorClearExp();
             ChangeFloor(next, Arrival.Start);
+            // [2026-10-11] 단골 손님: 여관에서 쉬고 내려온 층의 첫 3번 전투
+            if (DungeonPersistentData.innVigorPending)
+            {
+                DungeonPersistentData.innVigorPending = false;
+                DungeonPersistentData.innVigorBattlesLeft = FieldSkills.RegularInnVigorBattles;
+            }
             Toast($"You descend to B{next}." + reward);
         });
     }
@@ -815,7 +829,21 @@ public class MapManager : MonoBehaviour
     }
 
     /// <summary>여관 요금: 첫 마을(B1~4) / 두 번째 마을(B5~).</summary>
-    private int InnPrice => FloorData != null && FloorData.floorNumber >= 5 ? innPriceSecondTown : innPriceFirstTown;
+    private int InnPrice
+    {
+        get
+        {
+            int p = FloorData != null && FloorData.floorNumber >= 5 ? innPriceSecondTown : innPriceFirstTown;
+            // [2026-10-11] 보급술 '단골 손님' 1~5등급: 10/15/25/35/50% 할인 (최소 1G 할인)
+            int rank = FieldSkills.Rank(FieldSkills.RegularCustomer);
+            if (rank > 0 && p > 0)
+            {
+                int off = Mathf.Max(1, Mathf.RoundToInt(p * FieldSkills.RegularInnDiscount[Mathf.Clamp(rank, 1, 5) - 1]));
+                p = Mathf.Max(0, p - off);
+            }
+            return p;
+        }
+    }
 
     private void AskInn()
     {
@@ -831,6 +859,14 @@ public class MapManager : MonoBehaviour
     /// <summary>여관: 주인공·참전 동료 전원 HP/MP 완전 회복 + 주인공 상태이상 해제.</summary>
     private void RestAtInn()
     {
+        // [2026-10-11] 단골 손님: 다음 층 첫 3번의 전투 동안 최대 HP·MP 증가 (다음 층으로 내려갈 때 시작)
+        int regular = FieldSkills.Rank(FieldSkills.RegularCustomer);
+        if (regular > 0)
+        {
+            DungeonPersistentData.innVigorPercent = FieldSkills.RegularInnVigor[Mathf.Clamp(regular, 1, 5) - 1];
+            DungeonPersistentData.innVigorPending = true;
+            DungeonPersistentData.innVigorBattlesLeft = 0;
+        }
         PlayerStats hero = GetHeroStats();
         DungeonFieldStatus.Clear(); // 함정 상태이상도 낫는다
         if (hero != null)
@@ -933,6 +969,13 @@ public class MapManager : MonoBehaviour
                 return;
             }
             FloorState.openedChests.Add(pos);
+            // [2026-10-11] 보급술 '전리품 수습': 25% 확률로 소비 아이템 1개 더
+            if (FieldSkills.Has(FieldSkills.LootSalvage) && Random.value < FieldSkills.LootChestExtraChance)
+            {
+                ConsumableItemSO extra = RollLoot();
+                if (extra != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(extra, 1) > 0)
+                    Toast($"<color=#9FFF9F>Salvaged an extra {extra.itemName}.</color>");
+            }
             Toast($"Opened a chest: <color=#FFD24A>{item.itemName}</color>!");
             Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → {item.itemName}");
         }

@@ -14,24 +14,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 02
   skillName: Strong Slash
-  skillIcon: {fileID: -1101750654258036731, guid: 3955b202bf839314a830086e1903dd93, type: 3}
+  skillIcon: {fileID: 21300000, guid: db7f26ed18b6b6242875e6283afda248, type: 3}
   description: Powerful physical attack with higher damage but greater HP cost.
   usageType: 0
   damageType: 0
-  scaleStat: 0
+  scalingStat: 0
   weaponCategory: 1
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 10
   mpCost: 0
   minMult: 2
   maxMult: 2.5
   hitCount: 1
+  accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurse: 0
-  selfCurseChance: 0
-  targetCurse: 0
-  targetCurseChance: 0
-  effectType: 0
-  recoveryTarget: 0
-  effectAmount: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

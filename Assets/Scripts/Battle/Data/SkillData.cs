@@ -429,6 +429,8 @@ namespace AbyssdawnBattle
         // Helper properties
         public bool IsActive => usageType == UsageType.Active;
         public bool IsPassive => usageType == UsageType.Passive;
+        /// <summary>[2026-10-11] 상시 스킬 (스킬 칸 안 씀, 배우면 계속 적용). 예전 fieldSkill 플래그도 상시로 본다.</summary>
+        public bool IsPermanent => usageType == UsageType.Permanent || fieldSkill;
         public bool HasCost => hpCostPercent > 0 || mpCost > 0;
         public bool IsDamaging => HasEffectType(EffectType.Damage) || minMult > 0;
 

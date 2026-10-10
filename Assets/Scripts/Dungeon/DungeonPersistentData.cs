@@ -18,6 +18,10 @@ public static class DungeonPersistentData
 
     // 위험도 게이지 (0~1, 세계수의 미궁식). 가득 차면 반드시 전투. 전투가 시작되면 0.
     public static float danger;
+    // [2026-10-11] 보급술 '단골 손님': 여관 → 다음 층 첫 3번 전투 최대 HP·MP +%
+    public static bool innVigorPending;
+    public static int innVigorBattlesLeft;
+    public static float innVigorPercent;
 
     // 플레이어가 들고 있는 빛이 남은 걸음 수 (0 이면 빛 없음). 시야 +2 (MapManager.SightRadiusAt)
     public static int playerLightSteps;
@@ -55,6 +59,7 @@ public static class DungeonPersistentData
         playerLightSteps = 0;
         DungeonFieldStatus.Clear(); // 함정 상태이상
         BossEncounter.defeatedFloors.Clear(); // [2026-10-09] 층 보스
+        innVigorPending = false; innVigorBattlesLeft = 0; innVigorPercent = 0f; PlayerStats.InnVigorPercent = 0f;
 
         hasPlayerStats = false;
         heroHP = 0;

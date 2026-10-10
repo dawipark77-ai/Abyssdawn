@@ -203,6 +203,7 @@ public class SkillDetailPopup : MonoBehaviour
     /// </summary>
     public void ShowSkillDetail(SkillData skillData)
     {
+        transform.SetAsLastSibling(); // [2026-10-11] 트리 페이지보다 위에
         Debug.Log($"[SkillDetailPopup] 🔘 ShowSkillDetail(SkillData) 호출됨!");
         
         if (skillData == null)
@@ -228,6 +229,7 @@ public class SkillDetailPopup : MonoBehaviour
     /// </summary>
     public void ShowSkillDetail(SkillData skillData, SkillTreeNode node)
     {
+        transform.SetAsLastSibling(); // [2026-10-11] 나중에 추가한 트리 페이지보다 위에 그려지게
         Debug.Log($"[SkillDetailPopup] 🔘 ShowSkillDetail(SkillData, SkillTreeNode) 호출됨!");
         
         if (skillData == null)

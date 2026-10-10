@@ -14,24 +14,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 01
   skillName: Slash
-  skillIcon: {fileID: -376088948105539100, guid: 00a6bf59c2d7f184ca967ed5b77e6022, type: 3}
+  skillIcon: {fileID: 21300000, guid: 04fee78d79557154799d8384f1f8547c, type: 3}
   description: Quick physical attack dealing moderate damage.
   usageType: 0
   damageType: 0
-  scaleStat: 0
+  scalingStat: 0
   weaponCategory: 1
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 5
   mpCost: 0
   minMult: 1.5
   maxMult: 1.8
   hitCount: 1
+  accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurse: 0
-  selfCurseChance: 0
-  targetCurse: 0
-  targetCurseChance: 0
-  effectType: 0
-  recoveryTarget: 0
-  effectAmount: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

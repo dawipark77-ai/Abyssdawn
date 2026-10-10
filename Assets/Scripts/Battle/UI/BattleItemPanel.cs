@@ -310,6 +310,15 @@ public class BattleItemPanel : MonoBehaviour
     public void Open()
     {
         ActivateWithParents(gameObject);
+        // [2026-10-11] 아이템 창이 전투 기록 창(다른 캔버스, 정렬 10)보다 앞에 그려지도록 — 스킬 창과 같은 SubPanels 캔버스
+        if (transform.parent != null)
+        {
+            var cv = transform.parent.GetComponent<Canvas>();
+            if (cv == null) cv = transform.parent.gameObject.AddComponent<Canvas>();
+            cv.overrideSorting = true;
+            cv.sortingOrder = BattleManager.SubPanelsSortingOrder;
+            if (transform.parent.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null) transform.parent.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        }
     }
 
     public void Close()

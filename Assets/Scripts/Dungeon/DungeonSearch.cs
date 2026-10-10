@@ -130,7 +130,7 @@ public class DungeonSearch : MonoBehaviour
             foreach (var m in marks) Destroy(m.gameObject);
         }
 
-        // 생존 전문가: 10% 확률로 약초
+        // 생존 전문가: 5% 확률로 약초 (등급 무관)
         string herb = "";
         if (FieldSkills.Has(FieldSkills.Survivalist) && Random.value < FieldSkills.SurvivalistHerbChance)
         {

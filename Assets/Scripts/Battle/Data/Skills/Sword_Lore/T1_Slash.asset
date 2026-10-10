@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Swords_T1_02
   skillName: Slash
-  skillIcon: {fileID: -376088948105539100, guid: 00a6bf59c2d7f184ca967ed5b77e6022, type: 3}
-  description: "[\uac80 \uc804\uc6a9] \ube60\ub974\uace0 \uc815\ud655\ud55c \ubca0\uae30. \uacf5\uaca9\ub825\uc758 110~120% \ud53c\ud574. \uba85\uc911 95%. \ucd5c\ub300 HP\uc758 8% \uc18c\ubaa8."
+  skillIcon: {fileID: 21300000, guid: 04fee78d79557154799d8384f1f8547c, type: 3}
+  description: "[\uAC80 \uC804\uC6A9] \uBE60\uB974\uACE0 \uC815\uD655\uD55C \uBCA0\uAE30.
+    \uACF5\uACA9\uB825\uC758 110~120% \uD53C\uD574. \uBA85\uC911 95%. \uCD5C\uB300
+    HP\uC758 8% \uC18C\uBAA8."
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -63,6 +65,9 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0

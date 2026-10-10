@@ -20,7 +20,7 @@ MonoBehaviour:
     %\uAC00 \uD45C\uC2DC\uB418\uACE0, 80%\uB97C \uB118\uC73C\uBA74 \uBB34\uC5B8\uAC00
     \uB2E4\uAC00\uC628\uB2E4\uACE0 \uACBD\uACE0\uD55C\uB2E4. \uC804\uD22C\uAC00 \uC2DC\uC791\uB418\uBA74
     \uCCAB \uD134 \uD68C\uD53C\uC728 +20%."
-  usageType: 1
+  usageType: 2
   damageType: 0
   scalingStat: 4
   weaponCategory: 0

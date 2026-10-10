@@ -16,6 +16,12 @@ public static class FieldSkills
     public const string Survivalist = "Survivalist";
     public const string DangerSense = "Danger Sense";
     public const string ResourceManagement = "Resource Management";
+    // [2026-10-11] 원정술 = 야전술(Fieldcraft) + 보급술(Quartermastery). 모두 상시 스킬
+    public const string SecureRetreat = "Secure Retreat";
+    public const string AmplePack = "Ample Pack";
+    public const string LootSalvage = "Loot Salvage";
+    public const string FrugalUse = "Frugal Use";
+    public const string RegularCustomer = "Regular Customer";
 
     // 수치 (한 곳에서 조정)
     public const float TrapDetectPassiveChance = 0.15f;   // [2026-10-09] 함정 자동 감지 확률 +25%p → +15%p
@@ -26,8 +32,21 @@ public static class FieldSkills
     public const float DisarmPerAgi = 0.005f;
     public const float DisarmMaxChance = 0.95f;
     public const float DisarmFailDamageMult = 0.5f;
-    public const float SurvivalistLightMult = 1.5f;
-    public const float SurvivalistHerbChance = 0.10f;
+    public const float SurvivalistLightMult = 1.5f;      // [2026-10-11] 보급술 문서에 없어 사용하지 않음 (빛 보너스 제거)
+    public const float SurvivalistHerbChance = 0.05f;     // [2026-10-11] 10% → 5% (등급 무관)
+    /// <summary>[2026-10-11] 생존 전문가 1~5등급: 회복 아이템 효과 +5/9/13/16/20%.</summary>
+    public static readonly float[] SurvivalistPotency = { 0.05f, 0.09f, 0.13f, 0.16f, 0.20f };
+    public const int AmplePackBonus = 1;                  // 넉넉한 배낭: 소비 아이템 최대 보유 +1 (새벽의 잔 제외)
+    public const float LootChestExtraChance = 0.25f;      // 전리품 수습: 상자에서 소비 아이템 1개 더
+    public const float LootVictoryPotionChance = 0.05f;   // 전리품 수습: 전투 승리 시 HP 포션
+    public const float FrugalChance = 0.15f;              // 아껴 쓰기: 회복·해독 아이템이 소모되지 않을 확률
+    /// <summary>단골 손님 1~5등급: 여관 할인율.</summary>
+    public static readonly float[] RegularInnDiscount = { 0.10f, 0.15f, 0.25f, 0.35f, 0.50f };
+    /// <summary>단골 손님 1~5등급: 여관에서 쉬고 나가면 다음 층 첫 3번의 전투 동안 최대 HP·MP +%.</summary>
+    public static readonly float[] RegularInnVigor = { 0.03f, 0.05f, 0.06f, 0.08f, 0.10f };
+    public const int RegularInnVigorBattles = 3;
+    public const float SecureRetreatFleeBonus = 0.15f;    // 퇴로 확보: 계단을 찾은 층에서 도주 첫 시도 +15%p
+    public const float SecureRetreatFailDamageMult = 0.7f; // 퇴로 확보: 도주에 실패한 라운드에 받는 피해 -30%
     public const float DangerSenseEvasion = 0.20f;
     public const float ResourceGoldMult = 1.15f;
 

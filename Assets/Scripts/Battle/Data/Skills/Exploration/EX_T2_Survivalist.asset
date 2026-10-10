@@ -15,11 +15,11 @@ MonoBehaviour:
   skillID: Explore_Survivalist
   skillName: Survivalist
   skillIcon: {fileID: 21300000, guid: 0e1049a81a857794992e3667d8c62656, type: 3}
-  description: "[\uD0D0\uD5D8 \xB7 \uBC30\uC6B0\uBA74 \uD56D\uC0C1 \uC801\uC6A9 \xB7
-    \uC2A4\uD0AC \uCE78 \uC548 \uC500] \uBE5B \uC9C0\uC18D +50%, \uD68C\uBCF5 \uC544\uC774\uD15C(\uD3EC\uC158\xB7\uC57D\uCD08
-    \uB4F1) \uD6A8\uACFC +20%. \uC11C\uCE58\uD560 \uB54C 10% \uD655\uB960\uB85C \uC57D\uCD08\uB97C
-    \uC90D\uB294\uB2E4."
-  usageType: 1
+  description: "[\uBCF4\uAE09\uC220 \xB7 \uC0C1\uC2DC \xB7 1~5\uB4F1\uAE09] \uD68C\uBCF5
+    \uC544\uC774\uD15C \uD6A8\uACFC Lv1 +5% \xB7 Lv2 +9% \xB7 Lv3 +13% \xB7 Lv4 +16%
+    \xB7 Lv5 +20%. \uC11C\uCE58\uD560 \uB54C 5% \uD655\uB960\uB85C \uC57D\uCD08 (\uB4F1\uAE09
+    \uBB34\uAD00)."
+  usageType: 2
   damageType: 0
   scalingStat: 4
   weaponCategory: 0
@@ -52,7 +52,7 @@ MonoBehaviour:
   backflowType: 0
   backflowStatusEffect: {fileID: 0}
   backflowSuppression: 0
-  maxRank: 0
+  maxRank: 5
   bonusPerRank: []
   backflowPerRank: []
   requireTargetIgnited: 0

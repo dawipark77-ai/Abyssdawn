@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: EX_T3_SecureRetreat
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: EX_T3_SecureRetreat
+  skillName: Secure Retreat
+  skillIcon: {fileID: 0}
+  description: "[\uC57C\uC804\uC220 \xB7 \uC0C1\uC2DC] \uC774\uBC88 \uCE35\uC758
+    \uACC4\uB2E8(\uC62C\uB77C\uAC00\uB294 \uCABD \uB610\uB294 \uB0B4\uB824\uAC00\uB294
+    \uCABD)\uC744 \uC774\uBBF8 \uBC1C\uACAC\uD588\uC73C\uBA74 \uB3C4\uC8FC \uCCAB
+    \uC2DC\uB3C4 +15%p. \uB3C4\uC8FC\uC5D0 \uC2E4\uD328\uD55C \uB77C\uC6B4\uB4DC\uC5D0
+    \uBC1B\uB294 \uD53C\uD574 -30%. \uACC4\uB2E8\uC744 \uBABB \uCC3E\uC740 \uCE35\uC5D0\uC11C\uB294
+    \uD6A8\uACFC \uC5C6\uC74C."
+  usageType: 2
+  damageType: 0
+  scalingStat: 1
+  weaponCategory: 0
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 1
+  maxMult: 1
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 1
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 1
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: a5b5fb3d97a4af040b995461013d6f96, type: 2}
+  requiredLorePoints: 1

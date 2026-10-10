@@ -19,6 +19,9 @@ public static class EncounterPlan
     /// <summary>[2026-10-09] 습격 (야영 중 등): 다음 전투 첫 라운드는 적만 행동한다. 전투 시작 때 한 번 꺼내 쓰고 지운다.</summary>
     public static bool ambush;
 
+    /// <summary>[2026-10-11] 이번 전투가 일어난 층에서 계단을 이미 찾았는지 (야전술 '퇴로 확보'). 던전이 전투 직전에 정한다.</summary>
+    public static bool stairsKnown;
+
     public static bool TakeAmbush()
     {
         bool a = ambush;

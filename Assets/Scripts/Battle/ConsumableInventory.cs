@@ -252,6 +252,16 @@ public class ConsumableInventory : MonoBehaviour
     {
         if (item == null) return false;
         if (!HasItem(item)) return false;
+        // [2026-10-11] 보급술 '아껴 쓰기': 회복·해독 아이템 15% 확률로 소모되지 않음 (새벽의 잔 제외)
+        if (!item.isDawnChalice && FieldSkills.Has(FieldSkills.FrugalUse)
+            && (item.itemCategory == ItemCategory.HpRecovery || item.itemCategory == ItemCategory.MpRecovery || item.itemCategory == ItemCategory.StatusCure)
+            && Random.value < FieldSkills.FrugalChance)
+        {
+            Debug.Log($"[ConsumableInventory] 아껴 쓰기: {item.itemName} 소모되지 않음");
+            var hud = DungeonHud.Instance;
+            if (hud != null) hud.Toast($"<color=#9FFF9F>Frugal use — the {item.itemName} was not used up.</color>");
+            return true;
+        }
         return RemoveItem(item, 1);
     }
 
@@ -334,6 +344,8 @@ public class ConsumableInventory : MonoBehaviour
             currentQty = GetSlot(item)?.quantity ?? 0;
             cap        = item.maxStack;
         }
+        // [2026-10-11] 보급술 '넉넉한 배낭': 최대 보유 +1 (새벽의 잔 제외)
+        if (!item.isDawnChalice && FieldSkills.Has(FieldSkills.AmplePack)) cap += FieldSkills.AmplePackBonus;
 
         return Mathf.Max(0, Mathf.Min(wantToAdd, cap - currentQty));
     }

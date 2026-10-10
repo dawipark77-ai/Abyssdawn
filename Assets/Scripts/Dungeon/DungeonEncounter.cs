@@ -161,6 +161,8 @@ public class DungeonEncounter : MonoBehaviour
             ? preset
             : BattleManager.LoadMonsterSOsForFloor(DungeonPersistentData.currentFloor);
         EncounterPlan.Set(monsters);
+        var map = FindFirstObjectByType<MapManager>();
+        EncounterPlan.stairsKnown = map != null && map.StairsKnown(); // [2026-10-11] 퇴로 확보
 
         Debug.Log("[DungeonEncounter] Loading battle scene with transition: " + battleSceneName);
         EncounterTransition.EnterBattle(battleSceneName, monsters);

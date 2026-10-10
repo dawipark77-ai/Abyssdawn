@@ -166,10 +166,12 @@ public static class ConsumableEffectApplier
         return result;
     }
 
-    /// <summary>생존 전문가(탐험 스킬)를 배웠으면 회복 아이템 효과 ×1.2.</summary>
+    /// <summary>생존 전문가(보급술, 1~5등급): 회복 아이템 효과 +5/9/13/16/20%.</summary>
     private static float SurvivalistPotency(PlayerStats user)
     {
         if (user == null || user.statData == null || user.IsRecruitedCompanion) return 1f;
-        return user.statData.HasFieldSkill(FieldSkills.Survivalist) ? 1.2f : 1f;
+        int rank = user.statData.FieldSkillRank(FieldSkills.Survivalist);
+        if (rank <= 0) return 1f;
+        return 1f + FieldSkills.SurvivalistPotency[Mathf.Clamp(rank, 1, FieldSkills.SurvivalistPotency.Length) - 1];
     }
 }

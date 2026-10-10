@@ -124,6 +124,7 @@ public class PlayerStatData : ScriptableObject
         var list = passive ? equippedPassives : equippedSkills;
         int slots = passive ? 3 : 6;
         if (list.Contains(skill)) return false;
+        if (ConflictsWithEquipped(skill, list)) return false; // [2026-10-11] 퀵·슬로우 스타터 동시 장착 불가
         while (list.Count < slots) list.Add(null);
         for (int i = 0; i < slots; i++)
         {
@@ -135,6 +136,23 @@ public class PlayerStatData : ScriptableObject
             Debug.Log($"[PlayerStatData] '{skill.skillName}' 자동 장착 → {(passive ? "패시브" : "액티브")} 슬롯 {i + 1}");
             return true;
         }
+        return false;
+    }
+
+    /// <summary>[2026-10-11] 같이 장착할 수 없는 짝 (퀵 스타터 ↔ 슬로우 스타터). 없으면 null.</summary>
+    public static string RivalOf(AbyssdawnBattle.SkillData skill)
+    {
+        if (skill == null) return null;
+        if (skill.skillName == PlayerStats.SkillQuickStarter) return PlayerStats.SkillSlowStarter;
+        if (skill.skillName == PlayerStats.SkillSlowStarter) return PlayerStats.SkillQuickStarter;
+        return null;
+    }
+
+    private static bool ConflictsWithEquipped(AbyssdawnBattle.SkillData skill, List<AbyssdawnBattle.SkillData> list)
+    {
+        string rival = RivalOf(skill);
+        if (rival == null || list == null) return false;
+        foreach (var s in list) if (s != null && s.skillName == rival) return true;
         return false;
     }
 
@@ -158,6 +176,9 @@ public class PlayerStatData : ScriptableObject
         if (list == null || index < 0 || index >= list.Count) return;
         int already = list.IndexOf(skill);
         if (already >= 0) list[already] = null;
+        // [2026-10-11] 퀵 스타터 ↔ 슬로우 스타터: 하나를 끼우면 다른 하나는 칸에서 빠진다
+        string rival = RivalOf(skill);
+        if (rival != null) for (int i = 0; i < list.Count; i++) if (list[i] != null && list[i].skillName == rival) list[i] = null;
         list[index] = skill;
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);

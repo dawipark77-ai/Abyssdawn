@@ -1,6 +1,7 @@
 namespace AbyssdawnBattle
 {
-    public enum UsageType { Active, Passive }
+    // [2026-10-11] Permanent = 상시 스킬: 스킬 칸을 쓰지 않고 배우면 계속 적용 (원정술 — 야전술·보급술). fieldSkill 과 같은 뜻
+    public enum UsageType { Active, Passive, Permanent }
     public enum DamageType { None = 0, Physical, Magic }
     public enum ScaleStat { None = 0, Attack, Defense, Magic, Agility, Luck, CurrentHPPercent, CurrentMPPercent }
     public enum StatusEffect { None, Ignite, Poison, Stun, Slow, Buff }

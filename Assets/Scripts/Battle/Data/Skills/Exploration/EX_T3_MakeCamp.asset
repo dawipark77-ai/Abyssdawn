@@ -27,7 +27,7 @@ MonoBehaviour:
     \xB7 \uBE5B \xB7 \uC2B5\uACA9 \uD655\uB960 \xD70.75\nLv5 70% \xB7 \uBAA8\uB4E0
     \uB358\uC804 \uC0C1\uD0DC\uC774\uC0C1 \uD574\uC81C \xB7 \uBE5B \xB7 \uC2B5\uACA9
     \uD655\uB960 \xD70.5 \xB7 \uC704\uD5D8\uB3C4 +15%\uB9CC"
-  usageType: 0
+  usageType: 2
   damageType: 0
   scalingStat: 1
   weaponCategory: 0
@@ -80,5 +80,5 @@ MonoBehaviour:
   selfAgilityPenaltyTurns: 0
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
-  - {fileID: 11400000, guid: 0c3c6ed0606c0c14e8ddd7b31cb3a384, type: 2}
+  - {fileID: 11400000, guid: a5b5fb3d97a4af040b995461013d6f96, type: 2}
   requiredLorePoints: 1

@@ -423,7 +423,7 @@ public class SwordSkillTreeManager : MonoBehaviour
     public bool drawLinks = false;
 
     // [2026-10-06] 우선 검 트리만. [2026-10-09] 방패 트리 추가. 다른 트리도 켜려면 이 목록에 이름을 넣거나 인스펙터에서 drawLinks 체크.
-    private static readonly HashSet<string> DefaultLinkedTrees = new HashSet<string> { "SwordLore", "ShieldLore" };
+    private static readonly HashSet<string> DefaultLinkedTrees = new HashSet<string> { "SwordLore", "ShieldLore", "MartialLore" }; // [2026-10-11] 격투술 추가
 
     private SkillTreeLinks _links;
 

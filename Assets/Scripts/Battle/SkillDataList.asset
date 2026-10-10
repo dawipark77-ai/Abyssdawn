@@ -20,7 +20,7 @@ MonoBehaviour:
     mpCost: 0
     minMultiplier: 2
     maxMultiplier: 2.5
-    icon: {fileID: -1101750654258036731, guid: 3955b202bf839314a830086e1903dd93, type: 3}
+    icon: {fileID: 21300000, guid: db7f26ed18b6b6242875e6283afda248, type: 3}
     hitCount: 1
     scalingStat: Attack
     selfDamageChance: 0
