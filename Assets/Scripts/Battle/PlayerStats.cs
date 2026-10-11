@@ -211,7 +211,7 @@ public class PlayerStats : MonoBehaviour
     // [2026-10-12] 격투술 패시브: 인파이터(앞열 공격 +20%) · 아웃파이터(뒷열 민첩 +20%) — 둘 중 하나만 장착 / 근육의 기억(같은 대상 연타 중첩)
     public const string SkillInfighter = "Infighter";
     public const string SkillOutfighter = "Outfighter";
-    public const string SkillMuscleMemory = "Muscle Memory";
+    public const string SkillMuscleMemory = "Combat Instinct"; // 근육의 기억 (영어 이름 Combat Instinct)
     public const float FighterStancePercent = 0.2f;
     /// <summary>[2026-10-12] 근육의 기억: 지금 노리는 대상과 쌓인 중첩 (0~5). 빗나가거나 다른 적을 치면 0.</summary>
     [System.NonSerialized] public EnemyStats muscleMemoryTarget;

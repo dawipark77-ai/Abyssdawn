@@ -18,7 +18,7 @@ MonoBehaviour:
   description: Launches a ball of fire at the target. Has a chance to ignite.
   usageType: 0
   damageType: 2
-  scalingStat: 2
+  scalingStat: 3
   weaponCategory: 0
   targeting:
     targetFaction: 0

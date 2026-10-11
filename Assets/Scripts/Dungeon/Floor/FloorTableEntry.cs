@@ -153,16 +153,17 @@ public static class FloorTableDefaults
         List<FloorTableEntry> list = new List<FloorTableEntry>();
         // 몬스터 수 가중치 (1·2·3·4마리) — [2026-10-04] 같은 몬스터 최대 4마리까지, 4마리면 2/2 대열
         // [2026-10-08] 1층은 튜토리얼 — 거의 1대1 (1마리 78% · 2마리 18% · 3마리 3% · 4마리 1%)
-        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 2, 3, 0.5f).WithShapes(0.3f, 0.2f, 0, 1).WithGroups(78, 18, 3, 1));
+        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 1, 1, 2, 0.5f).WithShapes(0.3f, 0.2f, 0, 1).WithGroups(78, 18, 3, 1));
         // [2026-10-07 2차] 함정 밀도 약 3% → 약 8% (걸을 수 있는 칸 기준. 1·2~4·5층 약 100칸, 6~8층 156, 9~10층 239, 11층~ 318)
         //   1층 0~1 → 6~9 / 2~4층 2~4 → 7~10 / 5층 0~1 → 5~7 / 6~8층 3~6 → 11~15 / 9~10층 4~7 → 17~22 / 11층~ 5~8 → 23~29
         // [2026-10-09] 5층까지 함정 대폭 감소 (시뮬: B1 사망의 56%가 함정) — 1층 6~9 → 2~3 / 2~4층 7~10 → 3~5 / 5층 5~7 → 3~4
         // [2026-10-11] 1~10층 전부 1층 수준(2~3개)으로 — 2~4층 3~5 / 5층 3~4 / 6~8층 11~15 / 9~10층 17~22 → 모두 2~3
-        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 2, 3, 0.3f).WithShapes(0.4f, 0.3f, 0, 2).WithGroups(40, 35, 18, 7));
-        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 2, 3, 0.5f).WithShapes(0.4f, 0.3f, 0, 1).WithGroups(30, 35, 22, 13));
-        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 2, 3, 0.3f).WithShapes(0.5f, 0.35f, 1, 2).WithGroups(30, 35, 22, 13));
-        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 2, 3, 0.35f).WithShapes(0.55f, 0.4f, 1, 3).WithGroups(30, 35, 22, 13));
-        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 23, 29, 0.35f).WithShapes(0.6f, 0.4f, 2, 4).WithGroups(30, 35, 22, 13));
+        // [2026-10-12] 함정 사망이 여전히 많아 전 층 더 줄임 — 1~10층 2~3 → 1~2 / 11층~ 23~29 → 4~6
+        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.3f).WithShapes(0.4f, 0.3f, 0, 2).WithGroups(40, 35, 18, 7));
+        list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 2, 2, 8, 10, 0, 0, 0, 1).WithContents(1, 2, 1, 2, 0.5f).WithShapes(0.4f, 0.3f, 0, 1).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 2, 3, 8, 10, 0, 0, 1, 1).WithContents(1, 3, 1, 2, 0.3f).WithShapes(0.5f, 0.35f, 1, 2).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 3, 3, 8, 10, 0, 1, 1, 2).WithContents(2, 3, 1, 2, 0.35f).WithShapes(0.55f, 0.4f, 1, 3).WithGroups(30, 35, 22, 13));
+        list.Add(FloorTableEntry.Create(11, 9999, FloorType.Dungeon, 3, 4, 8, 10, 0, 2, 1, 3).WithContents(2, 4, 4, 6, 0.35f).WithShapes(0.6f, 0.4f, 2, 4).WithGroups(30, 35, 22, 13));
         for (int i = 0; i < list.Count; i++) list[i].encounterChance = BetaEncounterChance;
         return list;
     }

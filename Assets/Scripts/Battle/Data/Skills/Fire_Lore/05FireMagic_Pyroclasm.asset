@@ -19,7 +19,7 @@ MonoBehaviour:
     risk.
   usageType: 0
   damageType: 2
-  scalingStat: 2
+  scalingStat: 3
   weaponCategory: 0
   targeting:
     targetFaction: 0

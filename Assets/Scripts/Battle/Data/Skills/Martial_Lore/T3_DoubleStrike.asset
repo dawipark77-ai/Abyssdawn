@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T3_DoubleStrike
   skillName: Double Strike
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 391e2b19ed98c2248b834b5bfaa86d68, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uC804\uC5F4(1\xB72\uC5F4)\uC5D0\uC11C\uB9CC
     \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4 \uC788\uC5B4\uC57C \uD568] \uC774\uC911\uD0C0\uACA9.
     \uC801 1\uBA85\uC5D0\uAC8C \uACF5\uACA9\uB825 90%\uB85C \uB450 \uBC88 \uCE5C\uB2E4.
@@ -76,5 +76,5 @@ MonoBehaviour:
   selfAgilityPenaltyTurns: 0
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
-  - {fileID: 11400000, guid: b4f4c8477da5e4e429b4a61d89ed0b19, type: 2}
+  - {fileID: 11400000, guid: 96b0841920badbe47b835fd2c2f92224, type: 2}
   requiredLorePoints: 1

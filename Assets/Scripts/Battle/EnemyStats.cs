@@ -160,6 +160,7 @@ public class EnemyStats : MonoBehaviour
         luck         = so.LUK;
         allowedSlots = so.AllowedSlots;
         expReward    = so.ExpReward;
+        level        = so.level; // [2026-10-12] 레벨 차이 EXP 보정에 쓰임 (예전엔 SO 레벨이 안 옮겨져 항상 1)
         goldReward   = so.GoldReward;
         statusResist = so.StatusResist;
         magResist    = so.MagResist;

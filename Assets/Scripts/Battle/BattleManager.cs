@@ -4884,6 +4884,7 @@ public class BattleManager : MonoBehaviour
     public void OnAttackButton()
     {
         if (currentPhase != BattlePhase.Command || !playerTurn || battleEnded || waitingForTargetSelection || turnInProgress) return;
+        CloseCommandSubPanels(); // [2026-10-12] 스킬·아이템 창이 열린 채로 공격 대상 선택이 되지 않게
         
         // FightSubPanel 강제 종료
         if (battleUIManager != null && battleUIManager.fightSubPanel != null)
@@ -4910,9 +4911,28 @@ public class BattleManager : MonoBehaviour
         ShowBackButton();
     }
 
+    /// <summary>[2026-10-12] 고르고 있던 공격/스킬 대상 선택을 취소 (강조 표시도 끔).</summary>
+    private void CancelPendingTargetSelection()
+    {
+        if (!waitingForTargetSelection) return;
+        waitingForTargetSelection = false;
+        pendingAction = "";
+        pendingSkill = null;
+        if (hoveredEnemy != null) { hoveredEnemy.SetHighlight(false); hoveredEnemy = null; }
+    }
+
+    /// <summary>[2026-10-12] 스킬·아이템 창 닫기.</summary>
+    private void CloseCommandSubPanels()
+    {
+        if (skillPanel != null) skillPanel.SetActive(false);
+        var itemPanelGo = BattleItemPanel.FindItemPanelGameObjectInScene();
+        if (itemPanelGo != null) itemPanelGo.SetActive(false);
+    }
+
     public void UsePlayerSkill(SkillData skill)
     {
-        if (currentPhase != BattlePhase.Command || !playerTurn || battleEnded || waitingForTargetSelection || turnInProgress) return;
+        if (currentPhase != BattlePhase.Command || !playerTurn || battleEnded || turnInProgress) return;
+        CancelPendingTargetSelection(); // [2026-10-12] 다른 대상 선택이 걸려 있어도 이 스킬로 바꾼다
         
         // FightSubPanel 강제 종료
         if (battleUIManager != null && battleUIManager.fightSubPanel != null)
@@ -5162,6 +5182,11 @@ public class BattleManager : MonoBehaviour
             Debug.LogWarning($"[BattleManager] Cannot show skill panel. Phase: {currentPhase}, playerTurn: {playerTurn}, battleEnded: {battleEnded}");
             return;
         }
+        // [2026-10-12] Attack 을 눌러 대상 선택 중에 Skill 을 누르면: 예전에는 스킬 창만 열리고 카드 클릭이 무시돼
+        //   창이 떠 있는 채로 적을 누르면 일반 공격이 나갔다 → 공격 대상 선택을 취소하고 스킬 창으로 바꾼다
+        CancelPendingTargetSelection();
+        var itemPanelGo = BattleItemPanel.FindItemPanelGameObjectInScene();
+        if (itemPanelGo != null) itemPanelGo.SetActive(false);
         
         // 현재 캐릭터의 스킬 목록 가져오기
         List<SkillData> currentSkills = GetCurrentActorSkills();
@@ -7088,7 +7113,8 @@ public class BattleManager : MonoBehaviour
                     enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, baseStat));
             float mult = UnityEngine.Random.Range(skill.minMult, skill.maxMult);
             float defValue;
-            if (skill is MonsterSkillData msdDef && msdDef.Category == MonsterSkillCategory.MagicAttack)
+            // [2026-10-12] 몬스터 전용 마법 스킬뿐 아니라 플레이어용 마법 SO(마법사의 Fireball 등, damageType = Magic)도 마법 방어로 계산
+            if ((skill is MonsterSkillData msdDef && msdDef.Category == MonsterSkillCategory.MagicAttack) || skill.damageType == DamageType.Magic)
             {
                 // 마법 스킬: MagicDefense DQ 공식
                 float mdef = target.ApplyStatModifiers(
@@ -9996,8 +10022,14 @@ private void CacheHeroSkills()
                 {
                     if (member != null && member.currentHP > 0)
                     {
+                        // [2026-10-12] 스톤샤드식 레벨 차이 보정 — 몬스터마다 (몬스터 레벨 − 이 동료 레벨) 배율 (최소 1)
+                        int memberExp = 0;
+                        foreach (var e in activeEnemies)
+                            if (e != null && e.expReward > 0)
+                                memberExp += Mathf.Max(1, Mathf.RoundToInt(e.expReward * Abyssdawn.PlayerExpProgression.LevelDiffMultiplier(e.level, member.level)));
+                        if (memberExp != totalExp && member == player) AddMessage($"<color=#AAAAAA>{member.playerName}: {memberExp} EXP (level difference)</color>");
                         Debug.Log($"[BM:DIAG] AddExp ABOUT TO CALL | member='{member.playerName}', InstanceID={member.GetInstanceID()}, Before EXP={member.exp}");
-                        member.AddExp(totalExp);
+                        member.AddExp(memberExp);
                         Debug.Log($"[BM:DIAG] AddExp returned | member='{member.playerName}', After EXP={member.exp}, Lv={member.level}");
                     }
                     else

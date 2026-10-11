@@ -19,11 +19,11 @@ MonoBehaviour:
   type: 0
   race: 0
   level: 6
-  hp: 80
+  hp: 60
   mp: 25
   atk: 10
   def: 3
-  mag: 22
+  mag: 9
   agi: 8
   luk: 4
   physResist: 1
@@ -38,7 +38,7 @@ MonoBehaviour:
   minFloor: 5
   maxFloor: 10
   spawnWeight: 0.6
-  expReward: 70
+  expReward: 75
   goldReward: 0
   dropTable: []
   companionChance: 0.03125

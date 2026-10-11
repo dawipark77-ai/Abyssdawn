@@ -39,7 +39,7 @@ MonoBehaviour:
   minFloor: 7
   maxFloor: 9
   spawnWeight: 0.4
-  expReward: 150
+  expReward: 140
   goldReward: 0
   dropTable: []
   companionChance: 0.125
