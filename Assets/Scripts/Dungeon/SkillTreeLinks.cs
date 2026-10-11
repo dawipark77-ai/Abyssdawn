@@ -26,11 +26,13 @@ public class SkillTreeLinks : MonoBehaviour
     public Color lockedColor = new Color(0.35f, 0.35f, 0.35f, 0.6f);
 
     private RectTransform _root;
+    private Transform _nodeParent;
     private readonly List<Image> _pool = new List<Image>();
     private int _used;
 
     public void Refresh(SkillTreeNode[] nodes)
     {
+        if (_nodeParent == null && nodes != null) foreach (var n in nodes) if (n != null) { _nodeParent = n.transform.parent; break; }
         if (nodes == null) return;
         EnsureRoot();
         _used = 0;
@@ -74,7 +76,7 @@ public class SkillTreeLinks : MonoBehaviour
     {
         if (_root != null) return;
         var go = new GameObject("Links", typeof(RectTransform));
-        go.transform.SetParent(transform, false);
+        go.transform.SetParent(_nodeParent != null ? _nodeParent : transform, false); // [2026-10-12] 스크롤 페이지(격투술)는 노드와 같은 Content 안에
         _root = (RectTransform)go.transform;
         _root.anchorMin = _root.anchorMax = _root.pivot = new Vector2(0.5f, 0.5f);
         _root.anchoredPosition = Vector2.zero;

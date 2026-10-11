@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T2_Uppercut
   skillName: Uppercut
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 00d0a185a5e2e8f498d269a9c0f60346, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4
     \uC788\uC5B4\uC57C \uD568 \xB7 \uCFE8\uB2E4\uC6B4 3\uD134] \uD131\uC744 \uC62C\uB824\uCE5C\uB2E4.
     \uACF5\uACA9\uB825\uC758 90% \uD53C\uD574, \uB9DE\uC73C\uBA74 2\uD134 \uAE30\uC808
@@ -72,5 +72,5 @@ MonoBehaviour:
   selfAgilityPenaltyTurns: 0
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
-  - {fileID: 11400000, guid: 96b0841920badbe47b835fd2c2f92224, type: 2}
+  - {fileID: 11400000, guid: b4f4c8477da5e4e429b4a61d89ed0b19, type: 2}
   requiredLorePoints: 1

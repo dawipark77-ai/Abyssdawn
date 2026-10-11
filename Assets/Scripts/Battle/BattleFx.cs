@@ -51,6 +51,23 @@ public class BattleFx : MonoBehaviour
         if (crit) fx.CritImpact();
     }
 
+    /// <summary>[2026-10-12] 이중타격 2타 같은 '터지는' 한 방: 큰 글자 + 긴 히트 스톱 + 강한 화면 흔들림. strength 1 = 보통, 2 = 극점.</summary>
+    public static void Burst(EnemyStats e, string label, Color color, float strength = 1f)
+    {
+        var fx = Get();
+        if (fx == null || e == null) return;
+        var t = fx.CreateText(fx._root, "Burst", 64f + 22f * strength, FontStyles.Bold | FontStyles.Italic);
+        t.rectTransform.sizeDelta = new Vector2(900f, 160f);
+        t.text = label;
+        t.color = color;
+        t.outlineWidth = 0.22f; t.outlineColor = new Color(0.15f, 0.05f, 0f, 1f);
+        t.rectTransform.anchoredPosition = fx.EnemyAnchor(e) + new Vector2(0f, 110f);
+        fx.StartCoroutine(fx.PopupRoutine(t, true));
+        if (fx._hitStop == null && Time.timeScale > 0.5f) fx._hitStop = fx.StartCoroutine(fx.HitStopFor(0.1f + 0.06f * strength));
+        if (fx._shake != null) fx.StopCoroutine(fx._shake);
+        fx._shake = fx.StartCoroutine(fx.ShakeFor(0.25f + 0.12f * strength, 0.2f + 0.12f * strength));
+    }
+
     public static void EnemyMiss(EnemyStats e)
     {
         var fx = Get();
@@ -235,6 +252,23 @@ public class BattleFx : MonoBehaviour
             if (_shake != null) StopCoroutine(_shake);
             _shake = StartCoroutine(Shake());
         }
+    }
+
+    private IEnumerator HitStopFor(float seconds)
+    {
+        float prev = Time.timeScale;
+        Time.timeScale = 0.05f;
+        yield return new WaitForSecondsRealtime(seconds);
+        if (Mathf.Approximately(Time.timeScale, 0.05f)) Time.timeScale = prev;
+        _hitStop = null;
+    }
+
+    private IEnumerator ShakeFor(float seconds, float magnitude)
+    {
+        float s0 = shakeSeconds, m0 = shakeMagnitude;
+        shakeSeconds = seconds; shakeMagnitude = magnitude;
+        yield return Shake();
+        shakeSeconds = s0; shakeMagnitude = m0;
     }
 
     private IEnumerator HitStop()

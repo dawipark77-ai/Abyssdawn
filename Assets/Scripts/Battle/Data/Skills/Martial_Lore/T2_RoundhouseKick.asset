@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T2_RoundhouseKick
   skillName: Roundhouse Kick
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 32c8c697d6bbd8e44b307261a825f65b, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4
     \uC788\uC5B4\uC57C \uD568] \uB3CC\uB824\uCC28\uAE30. \uC804\uC5F4\uC758 \uC801
-    \uBAA8\uB450\uC5D0\uAC8C \uACF5\uACA9\uB825\uC758 70% \uD53C\uD574. MP 5."
+    \uBAA8\uB450\uC5D0\uAC8C \uBBFC\uCCA9\uC758 70% \uD53C\uD574. MP 3."
   usageType: 0
   damageType: 1
-  scalingStat: 1
+  scalingStat: 4
   weaponCategory: 11
   targeting:
     targetFaction: 0
@@ -28,7 +28,7 @@ MonoBehaviour:
     allowedTargetSlots: 1
     specificSlots: 
   hpCostPercent: 0
-  mpCost: 5
+  mpCost: 3
   minMult: 0.7
   maxMult: 0.7
   hitCount: 1

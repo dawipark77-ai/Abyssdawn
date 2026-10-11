@@ -6195,6 +6195,8 @@ public class BattleManager : MonoBehaviour
         // 반격 태세 중에는 기본 공격만 (스킬 전부 잠김)
         if (who.counterGuardRounds > 0) return "Counter stance (attacks only)";
         if (skill.skillName == SkillShareKi && ShareKiTarget(who) == null) return "No wounded ally"; // [2026-10-11]
+        if (skill.skillName == SkillDoubleStrike && !who.IsFrontRow) return "Front row only";  // [2026-10-12]
+        if (skill.skillName == SkillGaleKick && !who.IsBackRow) return "Back row only";
         if (skill.usesPerBattle > 0 && GetCount(_skillUses, who, skill) >= skill.usesPerBattle)
             return skill.usesPerBattle == 1 ? "Used this battle" : $"Used {skill.usesPerBattle}/{skill.usesPerBattle}";
         if (UseCooldowns && skill.cooldownTurns > 0)
@@ -6284,10 +6286,18 @@ public class BattleManager : MonoBehaviour
     private const int HoldLineRounds = 3, HoldLineMaxRounds = 5;
     private static readonly object TauntDefenseToken = new object(), HoldLineToken = new object();
     // [2026-10-11] 격투술 (Martial Arts) — 맨손 전용, 물리 스킬도 MP 를 쓴다
-    private const string SkillGatherKi = "Gather Ki";
+    private const string SkillGatherKi = "Focus Strength"; // [2026-10-12] 기 모으기 영어 이름 Gather Ki → Focus Strength (에셋 이름에 맞춤)
+    private const string SkillDoubleStrike = "Double Strike";  // [2026-10-12] 이중타격 (전열에서만)
+    private const string SkillGaleKick = "Gale Kick";          // [2026-10-12] 풍압차기 (후열에서만)
+    private const string SkillWhirlwindKick = "Whirlwind Kick"; // [2026-10-12] 선풍각 (고른 적의 줄에서 2명)
+    // 근육의 기억 (같은 대상 연타): 1 명중 +3% · 2 치명 +4%p · 3 피해 +6% · 4 방어 관통 +8% · 5 맞힐 때마다 MP +2 (누적)
+    private const float MuscleAcc = 0.03f, MuscleCrit = 4f, MuscleDmg = 0.06f, MusclePen = 0.08f;
+    private const int MuscleMaxStacks = 5, MuscleMpGain = 2;
+    // 이중타격 2타: 1타가 치명타면 '극점'(확정 치명 + 방어 완전 무시), 아니면 1타 피해 ÷ 대상 최대 HP 만큼 방어 무시 (최대 50%)
+    private const float DoubleStrikeMaxPen = 0.5f;
     private const string SkillUppercut = "Uppercut";
     private const string SkillRoundhouse = "Roundhouse Kick";
-    private const string SkillShareKi = "Share Ki";
+    private const string SkillShareKi = "Share Energy"; // [2026-10-12] 기 나누기 영어 이름 Share Ki → Share Energy (에셋 이름에 맞춤)
     private const string SkillInnerCirculation = "Inner Circulation";
     private const float GatherKiBonus = 1.0f;         // 다음 공격 위력 ×2
     private const int UppercutStunTurns = 2;
@@ -7239,7 +7249,17 @@ public class BattleManager : MonoBehaviour
                 {
                     if (battleEnded) break;
                     if (e == null || e.currentHP <= 0) continue;
-                    yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, e));
+                    yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, e, true));
+                }
+            }
+            else if (skill.skillName == SkillWhirlwindKick)
+            {
+                // [2026-10-12] 선풍각: 고른 적이 있는 줄(전열 1~4번 칸·단독 / 후열 5~7번 칸)에서 고른 적 + 가장 가까운 1명
+                foreach (var e in WhirlwindTargets(target))
+                {
+                    if (battleEnded) break;
+                    if (e == null || e.currentHP <= 0) continue;
+                    yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, e, true));
                 }
             }
             else
@@ -7332,9 +7352,41 @@ public class BattleManager : MonoBehaviour
     /// <summary>
     /// 일반 단일 타겟 공격 스킬 처리
     /// </summary>
-    private IEnumerator ExecuteSingleTargetSkill(PlayerStats attacker, SkillData skill, EnemyStats target)
+    /// <summary>[2026-10-12] 선풍각 대상: 고른 적과 같은 줄에서 고른 적 + 칸이 가장 가까운 살아 있는 적 1명.</summary>
+    private List<EnemyStats> WhirlwindTargets(EnemyStats picked)
+    {
+        var list = new List<EnemyStats>();
+        if (picked == null) return list;
+        bool front = IsEnemyFrontLine(picked);
+        list.Add(picked);
+        EnemyStats second = activeEnemies
+            .Where(e => e != null && e != picked && e.currentHP > 0 && IsEnemyFrontLine(e) == front)
+            .OrderBy(e => Mathf.Abs((int)e.currentSlot - (int)picked.currentSlot)).ThenBy(e => (int)e.currentSlot)
+            .FirstOrDefault();
+        if (second != null) list.Add(second);
+        return list;
+    }
+
+    /// <summary>적 전열 = 1~4번 칸 또는 단독(Center), 후열 = 5~7번 칸.</summary>
+    private static bool IsEnemyFrontLine(EnemyStats e)
+    {
+        return e.currentSlot == BattleSlot.Center || (int)e.currentSlot <= 4;
+    }
+
+    private IEnumerator ExecuteSingleTargetSkill(PlayerStats attacker, SkillData skill, EnemyStats target, bool multiTarget = false)
     {
         if (attacker == null || skill == null || target == null) yield break;
+
+        // [2026-10-12] 근육의 기억 — 격투 스킬로 한 명을 노릴 때만. 여러 명을 치는 스킬은 중첩을 쌓지 않고 처음부터.
+        bool muscle = skill.weaponCategory == AbyssdawnBattle.WeaponCategory.Fist && attacker.HasEquippedPassiveByName(PlayerStats.SkillMuscleMemory);
+        if (muscle && (multiTarget || attacker.muscleMemoryTarget != target))
+        {
+            attacker.muscleMemoryStacks = 0;
+            attacker.muscleMemoryTarget = multiTarget ? null : target;
+        }
+        if (multiTarget) muscle = false;
+        bool doubleStrike = skill.skillName == SkillDoubleStrike;
+        int firstHitDamage = -1; bool firstHitCrit = false;
 
         int hits = skill.hitCount > 0 ? skill.hitCount : 1;
         bool isDual = IsDualWielding(attacker);
@@ -7356,13 +7408,17 @@ public class BattleManager : MonoBehaviour
         {
             // 타격마다 명중률 체크 (스킬 accuracy × 슬롯 보정 × AGI 등)
             var (hitChance, logSkillAcc, logSlotAcc) = EvaluateHitChance(skill, attacker, target);
+            int stacks = muscle ? attacker.muscleMemoryStacks : 0;
+            if (stacks >= 1) hitChance = Mathf.Min(0.98f, hitChance + MuscleAcc);
+            bool detonation = doubleStrike && i == 1 && firstHitDamage > 0; // 이중타격 2타: 1타가 맞았으면 반드시 들어간다
             float roll = UnityEngine.Random.Range(0f, 1f);
-            bool missed = roll >= hitChance;
+            bool missed = !detonation && roll >= hitChance;
             Debug.Log($"[HIT] {attacker.playerName} → {target.enemyName}(슬롯{(int)target.currentSlot}): 스킬accuracy={logSkillAcc}, 슬롯보정={logSlotAcc}, 최종={hitChance}, 결과={(missed ? "miss" : "hit")}");
             if (missed)
             {
                 // 회피됨
                 evadedHits++;
+                if (muscle && attacker.muscleMemoryStacks > 0) { attacker.muscleMemoryStacks = 0; AddMessage("<color=#AAAAAA>Muscle Memory resets.</color>"); }
                 BattleFx.EnemyMiss(target);
                 if (hits > 1)
                 {
@@ -7380,7 +7436,16 @@ public class BattleManager : MonoBehaviour
 
             // 회피하지 않았으면 데미지 계산
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
-            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + PlayerCritBonus(attacker) + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+            bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + PlayerCritBonus(attacker) + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f)
+                                          + (stacks >= 2 ? MuscleCrit : 0f));
+            float extraPen = stacks >= 4 ? MusclePen : 0f;
+            bool kiwami = false;
+            if (detonation)
+            {
+                // 이중타격 2타 — 1타의 힘이 안에서 터진다
+                if (firstHitCrit) { kiwami = true; critical = true; extraPen = 1f; }
+                else extraPen += Mathf.Min(DoubleStrikeMaxPen, firstHitDamage / (float)Mathf.Max(1, target.maxHP));
+            }
             float multiplier = UnityEngine.Random.Range(skill.minMultiplier, skill.maxMultiplier);
 
             // 스탯 스케일링
@@ -7411,12 +7476,12 @@ public class BattleManager : MonoBehaviour
             // [DEBUG LOG] 스킬 데미지 계산 정보
             Debug.Log($"[BattleLog] Skill {skill.skillName} - Base Stat: {baseStat}, Multiplier: {multiplier:F2}, Critical: {critical}, Scale: {scaleMultiplier:F2}");
 
-            int baseDamage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier);
+            int baseDamage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier * (stacks >= 3 ? 1f + MuscleDmg : 1f));
             baseDamage = Mathf.Max(1, baseDamage);
 
             // Sharp Edge 등 공격 패시브로 인한 추가 보정 (깡뎀에만 적용)
             baseDamage = ApplyOffensivePassiveBonuses(attacker, skill, target, baseDamage);
-            baseDamage = ConsumeFollowUpBonus(attacker, baseDamage); // 버티기 자세 다음 첫 공격 +20% (첫 타만)
+            if (!detonation) baseDamage = ConsumeFollowUpBonus(attacker, baseDamage); // 버티기 자세 다음 첫 공격 +20% (첫 타만)
 
             // --- 방어구 파괴 계산 (타수 일반화) ---
             int armorBreakDamage = 0;
@@ -7435,7 +7500,7 @@ public class BattleManager : MonoBehaviour
             {
                 // 물리: DQ 공식 — (damage×2 - defense) / 2
                 float defValue = PenetratedDefense(attacker, target.ApplyStatModifiers(
-                    AbyssdawnBattle.ModStatType.Defense, target.defense));
+                    AbyssdawnBattle.ModStatType.Defense, target.defense)) * (1f - Mathf.Clamp01(extraPen)); // [2026-10-12] 근육의 기억·이중타격 관통
                 float reduced = (damage * 2f - defValue) / 2f;
                 damage = Mathf.Max(1, Mathf.FloorToInt(reduced));
                 damage = ApplyPhysResist(damage, target);
@@ -7467,9 +7532,27 @@ public class BattleManager : MonoBehaviour
             target.TakeDamage(damage, critical);
             totalDamage += damage;
             successfulHits++;
-            
+            if (doubleStrike && i == 0) { firstHitDamage = damage; firstHitCrit = critical; }
+
+            // [2026-10-12] 이중타격 2타 연출 — 크게 터진다
+            if (detonation)
+            {
+                if (kiwami)
+                {
+                    BattleFx.Burst(target, "ZENITH STRIKE!", new Color(1f, 0.55f, 0.15f), 2f);
+                    AddMessage($"<color=#FF8C26><b>Zenith Strike!</b></color> {damage} damage <color=#FFD24A>(DEF ignored)</color>");
+                }
+                else
+                {
+                    int penPct = Mathf.RoundToInt(Mathf.Min(DoubleStrikeMaxPen, firstHitDamage / (float)Mathf.Max(1, target.maxHP)) * 100f);
+                    BattleFx.Burst(target, "DOUBLE IMPACT!", new Color(1f, 0.85f, 0.4f), 1f);
+                    AddMessage($"<color=#FFC860><b>Double Impact!</b></color> {damage} damage <color=#AAAAAA>(DEF -{penPct}%)</color>");
+                }
+            }
+
             // 각 타격마다 개별 데미지 메시지 표시
-            if (hits > 1)
+            if (detonation) { }
+            else if (hits > 1)
             {
                 string critMsg = critical ? " Critical!" : "";
                 AddMessage($"Hit {i + 1}: {damage} damage{critMsg}");
@@ -7480,13 +7563,26 @@ public class BattleManager : MonoBehaviour
                 AddMessage($"{attacker.playerName} used {skill.skillName}! {damage} damage{critMsg}");
             }
             
+            // [2026-10-12] 근육의 기억: 맞힐 때마다 중첩 +1 (5중첩이면 MP +2)
+            if (muscle)
+            {
+                if (attacker.muscleMemoryStacks >= MuscleMaxStacks && attacker.maxMP > 0)
+                    attacker.currentMP = Mathf.Min(attacker.maxMP, attacker.currentMP + MuscleMpGain);
+                if (attacker.muscleMemoryStacks < MuscleMaxStacks)
+                {
+                    attacker.muscleMemoryStacks++;
+                    AddMessage($"<color=#C8A0FF>Muscle Memory {attacker.muscleMemoryStacks}/{MuscleMaxStacks}</color>");
+                }
+            }
+
             // 저주 적용 (각 타격마다 curseChance 확률로 적용)
             ApplyCurseEffects(target, skill);
             
             // 다음 타격 전 딜레이 (마지막 타격 후에는 딜레이 없음)
             if (i < hits - 1)
             {
-                yield return new WaitForSeconds(0.4f); // 타격 간 딜레이
+                if (target.currentHP <= 0) break; // [2026-10-12] 쓰러지면 남은 타격 없음
+                yield return new WaitForSeconds(doubleStrike ? 0.28f : 0.4f); // 이중타격은 짧게 — 바로 터지는 느낌
             }
         }
 

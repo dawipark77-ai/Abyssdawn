@@ -208,6 +208,14 @@ public class PlayerStats : MonoBehaviour
     public const string SkillFocus = "Focus";
     public const string SkillQuickStarter = "Quick Starter";
     public const string SkillSlowStarter = "Slow Starter";
+    // [2026-10-12] 격투술 패시브: 인파이터(앞열 공격 +20%) · 아웃파이터(뒷열 민첩 +20%) — 둘 중 하나만 장착 / 근육의 기억(같은 대상 연타 중첩)
+    public const string SkillInfighter = "Infighter";
+    public const string SkillOutfighter = "Outfighter";
+    public const string SkillMuscleMemory = "Muscle Memory";
+    public const float FighterStancePercent = 0.2f;
+    /// <summary>[2026-10-12] 근육의 기억: 지금 노리는 대상과 쌓인 중첩 (0~5). 빗나가거나 다른 적을 치면 0.</summary>
+    [System.NonSerialized] public EnemyStats muscleMemoryTarget;
+    [System.NonSerialized] public int muscleMemoryStacks;
     /// <summary>반격 태세(Counter Guard) 남은 라운드. 0보다 크면 자세 유지 중 (라운드 끝마다 1 감소).</summary>
     // [2026-10-07] 도망 확률 보너스 (연막탄 등 아이템). escapeBonusRounds 라운드 동안 유지
     [System.NonSerialized] public float escapeBonus = 0f;
@@ -277,7 +285,10 @@ public class PlayerStats : MonoBehaviour
             int classBonus = characterClass != null ? characterClass.attackBonus : 0;
 
             // 3. + 기타
-            return baseValue + classBonus + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetTraitBonus(PassiveBonusStat.Attack);
+            int total = baseValue + classBonus + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetTraitBonus(PassiveBonusStat.Attack);
+            // [2026-10-12] 인파이터: 앞열에 있으면 공격 +20%
+            if (IsFrontRow && HasEquippedPassiveByName(SkillInfighter)) total += Mathf.RoundToInt(total * FighterStancePercent);
+            return total;
         }
     }
 
@@ -342,7 +353,10 @@ public class PlayerStats : MonoBehaviour
             int classBonus = characterClass != null ? characterClass.agilityBonus : 0;
 
             // 3. + 기타
-            return baseValue + classBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility);
+            int total = baseValue + classBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility);
+            // [2026-10-12] 아웃파이터: 뒷열에 있으면 민첩 +20%
+            if (IsBackRow && HasEquippedPassiveByName(SkillOutfighter)) total += Mathf.RoundToInt(total * FighterStancePercent);
+            return total;
         }
     }
 

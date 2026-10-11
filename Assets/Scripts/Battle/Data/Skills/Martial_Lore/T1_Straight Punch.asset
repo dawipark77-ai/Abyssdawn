@@ -10,31 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: T2_ShareKi
+  m_Name: T1_Straight Punch
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Martial_T2_ShareKi
-  skillName: Share Ki
-  skillIcon: {fileID: 0}
-  description: "[\uACA9\uD22C\uC220 \xB7 \uC561\uD2F0\uBE0C] \uC790\uC2E0\uC758 \uAE30\uB97C
-    \uB098\uB208\uB2E4. \uCD5C\uB300 HP\uC758 10%\uB97C \uC18C\uBAA8\uD574, HP \uBE44\uC728\uC774
-    \uAC00\uC7A5 \uB0AE\uC740 \uB2E4\uCE5C \uB3D9\uB8CC\uC758 HP\uB97C \uADF8 \uB3D9\uB8CC
-    \uCD5C\uB300 HP\uC758 20%\uB9CC\uD07C \uD68C\uBCF5. MP 4. \uB2E4\uCE5C \uB3D9\uB8CC\uAC00
-    \uC5C6\uC73C\uBA74 \uC4F8 \uC218 \uC5C6\uB2E4."
+  skillID: Martial_T1_StraightPunch
+  skillName: Straight Punch
+  skillIcon: {fileID: 21300000, guid: 89e25a513bf5e1a4984a92e377f14ae2, type: 3}
+  description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4
+    \uC788\uC5B4\uC57C \uD568] \uC815\uAD8C \uCC0C\uB974\uAE30. \uACF5\uACA9\uB825\uC758
+    200% \uD53C\uD574, \uBA85\uC911 60%. MP 0."
   usageType: 0
-  damageType: 0
+  damageType: 1
   scalingStat: 1
-  weaponCategory: 0
+  weaponCategory: 11
   targeting:
-    targetFaction: 2
+    targetFaction: 0
     allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 10
-  mpCost: 4
-  minMult: 0
-  maxMult: 0
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 2
+  maxMult: 2
   hitCount: 1
-  accuracy: 1
+  accuracy: 0.6
   selfDmgPercent: 0
   selfDmgChance: 0
   selfStatusEffect: {fileID: 0}
@@ -73,5 +71,5 @@ MonoBehaviour:
   selfAgilityPenaltyTurns: 0
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
-  - {fileID: 11400000, guid: 078c62897bcd238469697e36d9d16c9c, type: 2}
+  - {fileID: 11400000, guid: 96b0841920badbe47b835fd2c2f92224, type: 2}
   requiredLorePoints: 1

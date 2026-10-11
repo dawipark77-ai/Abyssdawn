@@ -145,6 +145,8 @@ public class PlayerStatData : ScriptableObject
         if (skill == null) return null;
         if (skill.skillName == PlayerStats.SkillQuickStarter) return PlayerStats.SkillSlowStarter;
         if (skill.skillName == PlayerStats.SkillSlowStarter) return PlayerStats.SkillQuickStarter;
+        if (skill.skillName == PlayerStats.SkillInfighter) return PlayerStats.SkillOutfighter;   // [2026-10-12]
+        if (skill.skillName == PlayerStats.SkillOutfighter) return PlayerStats.SkillInfighter;
         return null;
     }
 

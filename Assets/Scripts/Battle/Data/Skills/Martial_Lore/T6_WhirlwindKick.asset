@@ -10,30 +10,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
-  m_Name: T1_GatherKi
+  m_Name: T6_WhirlwindKick
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
-  skillID: Martial_T1_GatherKi
-  skillName: Gather Ki
+  skillID: Martial_T6_WhirlwindKick
+  skillName: Whirlwind Kick
   skillIcon: {fileID: 0}
-  description: "[\uACA9\uD22C\uC220 \xB7 \uC561\uD2F0\uBE0C \xB7 \uD55C \uC190\uC774
-    \uBE44\uC5B4 \uC788\uC5B4\uC57C \uD568] \uD55C \uD134 \uB3D9\uC548 \uAE30\uB97C
-    \uBAA8\uC740\uB2E4. \uB2E4\uC74C \uD134 \uACF5\uACA9 \uC704\uB825 \xD72. \uC774\uBC88
-    \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0 \uC54A\uB294\uB2E4. MP 3."
+  description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4
+    \uC788\uC5B4\uC57C \uD568] \uC120\uD48D\uAC01. \uACE0\uB978 \uC801\uC774 \uC788\uB294
+    \uC904(\uC804\uC5F4 \uB610\uB294 \uD6C4\uC5F4)\uC5D0\uC11C \uADF8 \uC801\uACFC
+    \uAC00\uC7A5 \uAC00\uAE4C\uC6B4 \uC801\uAE4C\uC9C0 2\uBA85\uC5D0\uAC8C \uBBFC\uCCA9\uC758
+    75% \uD53C\uD574. MP 6."
   usageType: 0
-  damageType: 0
-  scalingStat: 1
+  damageType: 1
+  scalingStat: 4
   weaponCategory: 11
   targeting:
-    targetFaction: 2
+    targetFaction: 0
     allowedCasterSlots: 15
-    allowedTargetSlots: 1
+    allowedTargetSlots: 15
     specificSlots: 
   hpCostPercent: 0
-  mpCost: 3
-  minMult: 0
-  maxMult: 0
+  mpCost: 6
+  minMult: 0.75
+  maxMult: 0.75
   hitCount: 1
-  accuracy: 1
+  accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
   selfStatusEffect: {fileID: 0}
@@ -71,5 +72,7 @@ MonoBehaviour:
   selfAgilityPenalty: 0
   selfAgilityPenaltyTurns: 0
   bleedChanceByArmorBroken: []
-  prerequisiteSkills: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 4214e6b2ed7481a47bb310becc6d667a, type: 2}
+  - {fileID: 11400000, guid: 4d7d16c5f00f40347a0315e0c6500eeb, type: 2}
   requiredLorePoints: 1
