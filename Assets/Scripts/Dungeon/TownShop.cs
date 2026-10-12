@@ -36,34 +36,12 @@ public static class TownShop
     /// </summary>
     public static readonly string[] CatalogArms =
     {
-        // 허접 (조잡한 등급 아래 — 스킬을 쓰기 위한 무기)
+        // [2026-10-13] 무기점은 초반 기본 장비 4개만 — 나무 막대기 · 뼈 단검 · 녹슨 손도끼 · 나무 방패
+        //   (예전 진열: 허접 5종 + 조잡 무기 12종 · 방패 4종 · 방어구/장신구 3종 — 에셋은 그대로 두고 진열에서만 뺌)
         "Item_Equipments/Equipments/Junk/Junk_WoodenStick",
         "Item_Equipments/Equipments/Junk/Junk_BoneShiv",
-        "Item_Equipments/Equipments/Junk/Junk_BoneClub",
         "Item_Equipments/Equipments/Junk/Junk_RustyHatchet",
-        "Item_Equipments/Equipments/Junk/Junk_BrokenSpearShaft",
-        // 조잡 — 무기
-        "Item_Equipments/Equipments/Crude/CrudeSword",
-        "Item_Equipments/Equipments/Crude/Crude_Dagger",
-        "Item_Equipments/Equipments/Crude/Crude_Axe",
-        "Item_Equipments/Equipments/Crude/Crude_Hammer",
-        "Item_Equipments/Equipments/Crude/Crude_Spear",
-        "Item_Equipments/Equipments/Crude/Crude_Polearm",
-        "Item_Equipments/Equipments/Crude/Crude_Katana",
-        "Item_Equipments/Equipments/Crude/Crude_Greatsword",
-        "Item_Equipments/Equipments/Crude/Crude_Bow",
-        "Item_Equipments/Equipments/Crude/Crude_Crossbow",
-        "Item_Equipments/Equipments/Crude/Crude_Staff",
-        "Item_Equipments/Equipments/Crude/Crude_Wand",
-        // 조잡 — 방패
-        "Item_Equipments/Equipments/Crude/Crude_Buckler",
         "Item_Equipments/Equipments/Crude/Crude_Shield",
-        "Item_Equipments/Equipments/Crude/CrudeShield",
-        "Item_Equipments/Equipments/Crude/Crude_Greatshield",
-        // 조잡 — 방어구 · 장신구
-        "Item_Equipments/Equipments/Crude/CrudeArmor",
-        "Item_Equipments/Equipments/Crude/CrudeBoots",
-        "Item_Equipments/Equipments/Crude/CrudeBracelet",
     };
 
     /// <summary>탐험 스킬 '자원 관리': 사는 값 -10%, 파는 값 +10%.</summary>

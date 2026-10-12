@@ -69,6 +69,7 @@ public class LoreTreeStyle : MonoBehaviour
         StyleArrows();
         StyleCategoryIcons();
         StylePages();
+        StyleDetailPopup();
         _styled = true;
     }
 
@@ -320,6 +321,82 @@ public class LoreTreeStyle : MonoBehaviour
                 _nodes.Add(n);
             }
         }
+    }
+
+    /// <summary>
+    /// [2026-10-13] 스킬 상세 팝업 — 구성(배경 · 아이콘 · 이름 · 구분선 · 종류 · 설명 · 배우기 · 닫기)은 그대로,
+    /// 글꼴·색·버튼만 팝업창 톤으로. 종류(Passive 등) 아래에 구분선을 하나 더.
+    /// </summary>
+    private void StyleDetailPopup()
+    {
+        if (_pageRoot == null) return;
+        Transform pop = _pageRoot.Find("SkillDetail_Popup");
+        if (pop == null) return;
+
+        var name = FindText(pop, "Name_text");
+        if (name != null) { SetFont(name); name.fontSize = 40f; name.fontStyle = FontStyles.Bold; name.color = Gold; name.characterSpacing = 1f; name.enableAutoSizing = true; name.fontSizeMin = 26f; name.fontSizeMax = 40f; }
+
+        var cost = FindText(pop, "Cost_Text");
+        if (cost != null) { SetFont(cost); cost.fontSize = 28f; cost.fontStyle = FontStyles.Bold; cost.color = GoldDim; cost.characterSpacing = 3f; }
+
+        var desc = FindText(pop, "Description_Text");
+        if (desc != null)
+        {
+            SetFont(desc);
+            desc.fontSize = 30f; desc.fontStyle = FontStyles.Normal;
+            desc.color = new Color(0.92f, 0.90f, 0.85f, 1f);
+            desc.lineSpacing = 14f; desc.paragraphSpacing = 10f;
+            desc.margin = new Vector4(16f, 6f, 16f, 6f);
+        }
+
+        // 종류(Passive) 아래 구분선 — 이름 아래 구분선(Divider (1))을 복제
+        Transform div1 = pop.Find("Divider (1)");
+        if (div1 != null && cost != null && pop.Find("Divider (2)") == null)
+        {
+            var div2 = Instantiate(div1.gameObject, pop).transform;
+            div2.name = "Divider (2)";
+            var d1 = (RectTransform)div1; var d2 = (RectTransform)div2;
+            float costBottom = cost.rectTransform.anchoredPosition.y - 32f; // 한 줄 글자 바로 아래
+            d2.anchoredPosition = new Vector2(d1.anchoredPosition.x, costBottom - d1.rect.height * 0.5f);
+            div2.SetSiblingIndex(div1.GetSiblingIndex() + 1);
+        }
+
+        // 배우기 버튼: 가로형 금테 + 금색 글자
+        var learn = pop.Find("Learn_Button");
+        if (learn != null)
+        {
+            var img = learn.GetComponent<Image>();
+            Sprite frame = DungeonHud.PopupSprite;
+            if (img != null && frame != null) { img.sprite = frame; img.type = Image.Type.Sliced; img.pixelsPerUnitMultiplier = 3f; img.color = Color.white; }
+            var lrt = (RectTransform)learn; lrt.sizeDelta = new Vector2(Mathf.Max(lrt.sizeDelta.x, 240f), Mathf.Max(lrt.sizeDelta.y, 72f));
+            // 창 테두리에 걸치지 않게 창 안쪽 아래로
+            var pbg = pop.Find("Background_Image") as RectTransform;
+            if (pbg != null) lrt.anchoredPosition = new Vector2(pbg.anchoredPosition.x, pbg.anchoredPosition.y - pbg.rect.height * 0.5f + lrt.sizeDelta.y * 0.5f + 44f);
+            var lt = learn.GetComponentInChildren<TMP_Text>(true);
+            if (lt != null) { SetFont(lt); lt.fontSize = 30f; lt.fontStyle = FontStyles.Bold; lt.color = Gold; lt.characterSpacing = 3f; }
+        }
+
+        // 닫기 버튼: 창 바깥으로 삐져나온 빨간 X 대신, 창 안쪽 오른쪽 위의 금테 X
+        var close = pop.Find("Close_Button");
+        if (close != null)
+        {
+            var crt = (RectTransform)close;
+            var bg = pop.Find("Background_Image") as RectTransform;
+            if (bg != null) crt.anchoredPosition = bg.anchoredPosition + new Vector2(bg.rect.width * 0.5f - 52f, bg.rect.height * 0.5f - 52f);
+            crt.sizeDelta = new Vector2(56f, 56f);
+            var img = close.GetComponent<Image>();
+            Sprite frame = DungeonHud.PopupSprite;
+            if (img != null && frame != null) { img.sprite = frame; img.type = Image.Type.Sliced; img.pixelsPerUnitMultiplier = 4f; img.color = Color.white; }
+            var red = close.Find("Image"); if (red != null) red.gameObject.SetActive(false);
+            var x = close.GetComponentInChildren<TMP_Text>(true);
+            if (x != null) { SetFont(x); x.text = "X"; x.fontSize = 30f; x.fontStyle = FontStyles.Bold; x.color = Gold; x.alignment = TextAlignmentOptions.Center; }
+        }
+    }
+
+    private static TMP_Text FindText(Transform parent, string name)
+    {
+        var t = parent.Find(name);
+        return t != null ? t.GetComponent<TMP_Text>() : null;
     }
 
     private void StyleNode(SkillTreeNode n)

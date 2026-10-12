@@ -166,7 +166,9 @@ public class SkillDetailPopup : MonoBehaviour
         Debug.Log($"[SkillDetailPopup] Start 호출됨");
         
         // 초기 상태: 패널 닫기
-        if (popupPanel != null)
+        // [2026-10-13] 씬에 꺼진 채 저장돼 있어 첫 클릭 때 처음 켜지면, 그 다음 프레임의 Start 가 방금 연 팝업을 닫아
+        //   첫 스킬 클릭이 무시됐다 → 이미 Show 로 열린 경우는 닫지 않는다
+        if (popupPanel != null && !_shownBeforeStart)
         {
             popupPanel.SetActive(false);
             isPanelOpen = false;
@@ -201,8 +203,11 @@ public class SkillDetailPopup : MonoBehaviour
     /// <summary>
     /// 스킬 정보를 표시하며 팝업 열기 (SkillData만)
     /// </summary>
+    private bool _shownBeforeStart;
+
     public void ShowSkillDetail(SkillData skillData)
     {
+        _shownBeforeStart = true;
         transform.SetAsLastSibling(); // [2026-10-11] 트리 페이지보다 위에
         Debug.Log($"[SkillDetailPopup] 🔘 ShowSkillDetail(SkillData) 호출됨!");
         
@@ -229,6 +234,7 @@ public class SkillDetailPopup : MonoBehaviour
     /// </summary>
     public void ShowSkillDetail(SkillData skillData, SkillTreeNode node)
     {
+        _shownBeforeStart = true;
         transform.SetAsLastSibling(); // [2026-10-11] 나중에 추가한 트리 페이지보다 위에 그려지게
         Debug.Log($"[SkillDetailPopup] 🔘 ShowSkillDetail(SkillData, SkillTreeNode) 호출됨!");
         

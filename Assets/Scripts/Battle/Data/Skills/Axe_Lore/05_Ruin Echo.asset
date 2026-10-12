@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: 05_Ruin Echo
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_09
-  skillName: "\uD30C\uAD34\uC758 \uC6B8\uB9BC (Ruin Echo)"
-  skillIcon: {fileID: -8959231232942335855, guid: c4993093907b4aa48ac3078c7ea244f3, type: 3}
+  skillName: Ruin Echo
+  skillIcon: {fileID: 21300000, guid: 4d0031558ba592546a3f08b68b30593f, type: 3}
   description: "\uC804\uC5F4 1\uBC88/2\uBC88\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5.
     \uACF5\uACA9\uB825 x110% \uAE61\uB380. \uC801 \uD604\uC7AC \uBC29\uC5B4\uB825
     x10% \uBC29\uC5B4\uD30C\uAD34. HP 5% \uC18C\uBAA8. \uAC19\uC740 \uB300\uC0C1\uC5D0\uAC8C
@@ -62,6 +62,20 @@ MonoBehaviour:
   backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: a1e8c1d7b24f4b7696cf14a1e9c0d101, type: 2}
   requiredLorePoints: 1

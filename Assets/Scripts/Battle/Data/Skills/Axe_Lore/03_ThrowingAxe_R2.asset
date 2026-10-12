@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: 03_ThrowingAxe_R2
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_03
-  skillName: "\uD22C\uCC99\uB3C4\uB07C II (Throwing Axe)"
-  skillIcon: {fileID: -8959231232942335855, guid: c4993093907b4aa48ac3078c7ea244f3, type: 3}
+  skillName: Throwing Axe II
+  skillIcon: {fileID: 21300000, guid: f85194da31397974a8e565cbd12dbbd8, type: 3}
   description: "\uC9C4\uD615 1/2/3/4\uC5D0\uC11C \uC0AC\uC6A9 \uAC00\uB2A5. \uBBFC\uCCA9
     \uAE30\uBC18 \uC6D0\uAC70\uB9AC \uC120\uC81C \uACF5\uACA9. \uB7AD\uD06C 2: \uBBFC\uCCA9
     x75%, \uBC29\uC5B4\uD30C\uAD34 1%, HP 3% \uC18C\uBAA8. \uC0AC\uC6A9 \uD6C4 \uC774\uBC88
@@ -58,6 +58,20 @@ MonoBehaviour:
   backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: a1e8c1d7b24f4b7696cf14a1e9c0d102, type: 2}
   requiredLorePoints: 1

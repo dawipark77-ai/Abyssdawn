@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T6_WhirlwindKick
   skillName: Whirlwind Kick
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 8aa2cf4c032227a44999092314d1f470, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4
     \uC788\uC5B4\uC57C \uD568] \uC120\uD48D\uAC01. \uACE0\uB978 \uC801\uC774 \uC788\uB294
     \uC904(\uC804\uC5F4 \uB610\uB294 \uD6C4\uC5F4)\uC5D0\uC11C \uADF8 \uC801\uACFC

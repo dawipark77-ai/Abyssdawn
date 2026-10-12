@@ -6320,6 +6320,50 @@ public class BattleManager : MonoBehaviour
     private const int MuscleMaxStacks = 5, MuscleMpGain = 2;
     // 이중타격 2타: 1타가 치명타면 '극점'(확정 치명 + 방어 완전 무시), 아니면 1타 피해 ÷ 대상 최대 HP 만큼 방어 무시 (최대 50%)
     private const float DoubleStrikeMaxPen = 0.5f;
+
+    // [2026-10-13] 도끼술 — 투척도끼 연계
+    //   도끼 집기 (패시브): 투척도끼가 맞으면 20% 확률로 던진 도끼를 다시 집어 적 전열 1명에게 공격력 110~120% 추가타
+    //   (가칭) 회수의 일격 (패시브): 도끼 집기 추가타가 10% 확률로 치명타
+    public const string SkillPickUpAxe = "Pick up the Axe!";
+    public const string SkillKillingCatch = "Killing Catch";
+    private const float PickUpAxeChance = 0.2f, KillingCatchCritChance = 0.1f;
+    private bool _forceCritOnce;   // 다음 한 타격을 치명타로 (회수의 일격)
+    private int _lastSkillHits;    // 방금 ExecuteSingleTargetSkill 이 맞힌 횟수
+    private static SkillData _pickUpStrike;
+    private static SkillData PickUpStrike
+    {
+        get
+        {
+            if (_pickUpStrike != null) return _pickUpStrike;
+            _pickUpStrike = ScriptableObject.CreateInstance<SkillData>();
+            _pickUpStrike.name = "PickUpAxeStrike";
+            _pickUpStrike.skillName = "Pick up the Axe";
+            _pickUpStrike.damageType = DamageType.Physical;
+            _pickUpStrike.scalingStat = ScaleStat.Attack;
+            _pickUpStrike.minMult = 1.1f; _pickUpStrike.maxMult = 1.2f;
+            _pickUpStrike.hitCount = 1;
+            _pickUpStrike.accuracy = 0.95f;
+            return _pickUpStrike;
+        }
+    }
+
+    private static bool IsThrowingAxe(SkillData s) { return s != null && s.skillName != null && s.skillName.StartsWith("Throwing Axe"); }
+
+    /// <summary>[2026-10-13] 투척도끼가 맞았으면: 도끼 집기 20% → 적 전열 1명에게 추가타 (던진 대상이 전열이면 그 대상).</summary>
+    private IEnumerator TryPickUpAxe(PlayerStats attacker, EnemyStats thrownAt)
+    {
+        if (attacker == null || battleEnded || !attacker.HasEquippedPassiveByName(SkillPickUpAxe)) yield break;
+        if (UnityEngine.Random.value >= PickUpAxeChance) yield break;
+        EnemyStats t = (thrownAt != null && thrownAt.currentHP > 0 && IsEnemyFrontLine(thrownAt)) ? thrownAt
+            : activeEnemies.Where(e => e != null && e.currentHP > 0 && IsEnemyFrontLine(e)).OrderBy(e => (int)e.currentSlot).FirstOrDefault();
+        if (t == null) yield break;
+        yield return new WaitForSeconds(0.25f);
+        bool crit = attacker.HasEquippedPassiveByName(SkillKillingCatch) && UnityEngine.Random.value < KillingCatchCritChance;
+        AddMessage($"<color=#FFC860><b>Pick up the Axe!</b></color> {attacker.playerName} grabs the axe and strikes {t.enemyName}!" + (crit ? " <color=#FF8C26><b>Killing Catch!</b></color>" : ""));
+        _forceCritOnce = crit;
+        yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, PickUpStrike, t));
+        _forceCritOnce = false;
+    }
     private const string SkillUppercut = "Uppercut";
     private const string SkillRoundhouse = "Roundhouse Kick";
     private const string SkillShareKi = "Share Energy"; // [2026-10-12] 기 나누기 영어 이름 Share Ki → Share Energy (에셋 이름에 맞춤)
@@ -7291,6 +7335,7 @@ public class BattleManager : MonoBehaviour
             else
             {
                 yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, target));
+                if (IsThrowingAxe(skill) && _lastSkillHits > 0) yield return StartCoroutine(TryPickUpAxe(attacker, target)); // [2026-10-13]
             }
         }
 
@@ -7412,6 +7457,7 @@ public class BattleManager : MonoBehaviour
         }
         if (multiTarget) muscle = false;
         bool doubleStrike = skill.skillName == SkillDoubleStrike;
+        _lastSkillHits = 0;
         int firstHitDamage = -1; bool firstHitCrit = false;
 
         int hits = skill.hitCount > 0 ? skill.hitCount : 1;
@@ -7464,6 +7510,7 @@ public class BattleManager : MonoBehaviour
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
             bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + PlayerCritBonus(attacker) + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f)
                                           + (stacks >= 2 ? MuscleCrit : 0f));
+            if (_forceCritOnce) { critical = true; _forceCritOnce = false; } // [2026-10-13] 회수의 일격
             float extraPen = stacks >= 4 ? MusclePen : 0f;
             bool kiwami = false;
             if (detonation)
@@ -7619,6 +7666,7 @@ public class BattleManager : MonoBehaviour
         }
 
         // [2026-10-09] 방패 강타·방패돌진: 맞혔으면 기절·밀치기·전진
+        _lastSkillHits = successfulHits; // [2026-10-13] 도끼 집기 판정용
         if (successfulHits > 0) ApplyShieldAttackAfterHit(attacker, skill, target);
 
         // 본인 피해 (Magic Bolt, Fireball) - 스킬 사용 자체에 대한 확률이므로 타격 성공 여부와 무관

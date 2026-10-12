@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: 01_AxeMastery
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_01
-  skillName: "\uB3C4\uB07C \uC219\uB828 (Axe Mastery)"
-  skillIcon: {fileID: -8959231232942335855, guid: c4993093907b4aa48ac3078c7ea244f3, type: 3}
+  skillName: Axe Mastery
+  skillIcon: {fileID: 21300000, guid: 17238ffc55aa4044fb94e0b64a6fadd6, type: 3}
   description: "\uD328\uC2DC\uBE0C. \uACF5\uACA9\uB825 +3 \uACE0\uC815, \uACF5\uACA9\uB825
     +5%, \uC804\uC5F4 \uC801 \uACF5\uACA9 \uC2DC \uBC29\uC5B4\uD30C\uAD34 \uC790\uB3D9
     \uBD80\uC5EC. \uB808\uBCA8\uB2F9 \uACF5\uACA9\uB825 +1(\uCD5C\uB300 +5), \uBBFC\uCCA9
@@ -57,7 +57,7 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: ""
+  dunbreakDescription: 
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -69,5 +69,19 @@ MonoBehaviour:
   backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1
