@@ -4461,10 +4461,12 @@ public class BattleManager : MonoBehaviour
 
         if (target != null && target.currentHP > 0)
         {
-            if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, biteOverride))
+            if (TryPullCounter(target, enemy)) { } // [2026-10-14] 풀 카운터: 피하고 반격
+            else if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, biteOverride))
             {
                 AddMessage($"{target.playerName} evaded {enemy.enemyName}'s attack!");
                 BattleFx.AllyMiss(target);
+                ShadowStepCounter(target, enemy); // [2026-10-14]
             }
             else
             {
@@ -4519,10 +4521,12 @@ public class BattleManager : MonoBehaviour
                 int hpBefore = target.currentHP;
                 if (critical) BattleFx.MarkAllyCritical();
                 bool guardProc = RollCounterGuard(target, ref damage); // 반격 태세: 50% 확률로 피해 -50%
+                bool crossProc = CrossCounterGuard(target, ref damage); // [2026-10-14] 크로스 카운터: 90%로 받고 반격
                 damage = target.TakeDamage(damage); // [2026-10-06] 메시지에 실제로 받은 피해 (방어·패시브·버티기 감소 후)
                 AddMessage(critical ? $"{enemy.enemyName} critical hit! {target.playerName} took {damage} damage!" :
                                       $"{enemy.enemyName} attacked {target.playerName} and dealt {damage} damage!");
                 if (guardProc) CounterAttack(target, enemy); // 반격 (공격 메시지 다음)
+                if (crossProc) CrossCounterStrike(target, enemy);
                 // [LastStand] HP가 0이 아닌 1로 유지됐다면 불굴 발동
                 if (hpBefore > 1 && target.currentHP == 1 && target.HasSpecialEffect("LastStand"))
                 {
@@ -5814,13 +5818,17 @@ public class BattleManager : MonoBehaviour
         else
         {
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계 — baseValue=0f는 가산 전용 사용.
+            // [2026-10-14] 급소 파고들기 (기본 공격만): 후열 → 적 전열 치명 +10%, 전열 → 적 후열 피해 +15%
+            bool vital = attacker.HasEquippedPassiveByName(PlayerStats.SkillVitalStrike);
+            float vitalCrit = vital && attacker.IsBackRow && IsEnemyFrontLine(target) ? VitalStrikeCrit : 0f;
+            float vitalDmg = vital && attacker.IsFrontRow && !IsEnemyFrontLine(target) ? VitalStrikeDamage : 1f;
             bool critical = CheckCritical(attacker.luck, (biteOverride != null && biteOverride.isBasicAttackOverride ? biteOverride.critBonusPercent : 0f) + PlayerCritBonus(attacker)
-                + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+                + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f) + vitalCrit);
 
             // [Bite] ATK 보정용 로컬 (attacker.Attack은 읽기전용 computed라 로컬에 받아 곱함)
             // [StatMod 4단계] 상태이상/버프 배율 적용 후 Bite 배율 적용.
             int effectiveAttack = Mathf.FloorToInt(
-                attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, attacker.Attack));
+                attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, attacker.Attack) * vitalDmg);
             if (biteOverride != null && biteOverride.isBasicAttackOverride)
                 effectiveAttack = Mathf.RoundToInt(effectiveAttack * biteOverride.atkMultiplierOverride);
 
@@ -5898,12 +5906,17 @@ public class BattleManager : MonoBehaviour
                 hit1Slot = ApplyPhysResist(hit1Slot, target);
                 hit2Slot = ApplyPhysResist(hit2Slot, target);
                 // [2026-10-09] 오른손 → (살짝 쉬고) 왼손 순으로 한 대씩 — 피해 숫자도 따로 (합산해서 보여주지 않음)
-                int applied1 = target.TakeDamage(hit1Slot, critical);
+                // [2026-10-14] 손마다 일반 피해 숫자 + 방어구 파괴 숫자(작은 금 간 방패)를 따로
+                int break1 = hit1 > 0 && armorHit1 > 0 ? Mathf.Min(hit1Slot, Mathf.RoundToInt(hit1Slot * (armorHit1 / (float)(baseHit1 + armorHit1)))) : 0;
+                int break2 = hit2 > 0 && armorHit2 > 0 ? Mathf.Min(hit2Slot, Mathf.RoundToInt(hit2Slot * (armorHit2 / (float)(baseHit2 + armorHit2)))) : 0;
+                int applied1 = target.TakeDamage(hit1Slot - break1, critical);
+                if (break1 > 0 && !target.IsDead()) applied1 += target.TakeDamage(break1, false, true);
                 int applied2 = 0;
                 if (!target.IsDead())
                 {
                     yield return new WaitForSeconds(dualHitDelay);
-                    if (!target.IsDead()) applied2 = target.TakeDamage(hit2Slot, critical);
+                    if (!target.IsDead()) applied2 = target.TakeDamage(hit2Slot - break2, critical);
+                    if (break2 > 0 && !target.IsDead()) applied2 += target.TakeDamage(break2, false, true);
                 }
 
                 shownTotal = applied1 + applied2;
@@ -5959,7 +5972,7 @@ public class BattleManager : MonoBehaviour
                 int applied2 = 0;
                 if (singleArmor > 0 && !target.IsDead())
                 {
-                    applied2 = target.TakeDamage(singleArmorSlot, false);
+                    applied2 = target.TakeDamage(singleArmorSlot, false, true); // [2026-10-14] 파괴 팝업
                 }
 
                 shownTotal = applied1 + applied2;
@@ -6222,6 +6235,13 @@ public class BattleManager : MonoBehaviour
         if (skill.skillName == SkillShareKi && ShareKiTarget(who) == null) return "No wounded ally"; // [2026-10-11]
         if (skill.skillName == SkillDoubleStrike && !who.IsFrontRow) return "Front row only";  // [2026-10-12]
         if (skill.skillName == SkillGaleKick && !who.IsBackRow) return "Back row only";
+        if (skill.skillName == SkillCrossCounter && !who.IsFrontRow) return "Front row only"; // [2026-10-14]
+        // [2026-10-14] 도끼 숙련 규칙: 투척도끼를 뺀 모든 도끼 액티브는 전열(1·2번)에서만
+        if (skill.weaponCategory == AbyssdawnBattle.WeaponCategory.Axe && skill.IsActive && !IsThrowingAxe(skill) && !who.IsFrontRow) return "Front row only";
+        if (skill.skillName == SkillBackstepSlash && !who.IsFrontRow) return "Front row only";
+        if (skill.skillName == SkillLungeSlash && !who.IsBackRow) return "Back row only";
+        if (skill.skillName == SkillShadowSlash && FixDaggerTarget(skill, null) == null) return "No back-row enemy";
+        if (skill.skillName == SkillRendWound && FixDaggerTarget(skill, null) == null) return "No bleeding enemy";
         if (skill.usesPerBattle > 0 && GetCount(_skillUses, who, skill) >= skill.usesPerBattle)
             return skill.usesPerBattle == 1 ? "Used this battle" : $"Used {skill.usesPerBattle}/{skill.usesPerBattle}";
         if (UseCooldowns && skill.cooldownTurns > 0)
@@ -6255,6 +6275,9 @@ public class BattleManager : MonoBehaviour
             if (m == null) continue;
             m.counterGuardCountersThisRound = 0;
             if (m.counterGuardRounds > 0) m.counterGuardRounds--;
+            if (m.crossCounterRounds > 0) m.crossCounterRounds--; // [2026-10-14]
+            if (m.pullCounterRounds > 0) m.pullCounterRounds--;
+            if (m.shadowStepRounds > 0) m.shadowStepRounds--;
             if (m.escapeBonusRounds > 0 && --m.escapeBonusRounds <= 0) m.escapeBonus = 0f;
         }
 
@@ -6320,6 +6343,166 @@ public class BattleManager : MonoBehaviour
     private const int MuscleMaxStacks = 5, MuscleMpGain = 2;
     // 이중타격 2타: 1타가 치명타면 '극점'(확정 치명 + 방어 완전 무시), 아니면 1타 피해 ÷ 대상 최대 HP 만큼 방어 무시 (최대 50%)
     private const float DoubleStrikeMaxPen = 0.5f;
+
+    // [2026-10-14] 격투학 추가
+    //   크로스 카운터: 이번 턴 들어오는 모든 물리 공격을 90% 피해로 받고 공격력 150~180% 반격 (전열에서만, 선행 인파이터)
+    //   풀 카운터: 이번 턴 처음 들어오는 물리 공격 1번을 피하고 민첩 120~150% 반격 (선행 아웃파이터)
+    //   내면 강화: 걸린 상태이상 남은 턴 -1 + 3턴 상태이상 저항 +20% (MP 4)
+    //   내면 정화: 상태이상 1개 지우고 3턴 동안 새 상태이상 면역 (MP 6, 선행 내면 강화)
+    // [2026-10-14] 단검학
+    private const string SkillLacerate = "Lacerate";
+    private const string SkillRendWound = "Rend Wound";
+    private const string SkillShadowSlash = "Shadow Slash";
+    private const string SkillBackstepSlash = "Backstep Slash";
+    private const string SkillLungeSlash = "Lunge Slash";
+    private const string SkillShadowStep = "Shadow Step";
+    private const string SkillTendonSever = "Tendon Sever";
+    private const string SkillHamstring = "Hamstring";
+    private const float LacerateFirstChance = 0.8f;
+    private static readonly float[] LacerateStackChance = { 0.75f, 0.70f, 0.65f, 0.60f }; // 두 번째 중첩부터, 이후 60% 유지
+    private const float VitalStrikeCrit = 10f, VitalStrikeDamage = 1.15f;
+    private const float ShadowStepEvasion = 0.2f, ShadowStepCounterMult = 0.7f;
+    private static readonly object ShadowStepToken = new object(), TendonToken = new object();
+    private static StatusEffectSO _bleedSO;
+    private static StatusEffectSO BleedSO { get { if (_bleedSO == null) _bleedSO = Resources.Load<StatusEffectSO>("Curse/Bleed1_Dagger"); return _bleedSO; } }
+
+    private static bool IsBleeding(EnemyStats e) { return e != null && BleedSO != null && e.activeStatusEffects.Exists(s => s.data != null && s.data.effectType == BleedSO.effectType); }
+
+    /// <summary>상처내기 출혈: 처음 80% 3턴, 이미 출혈이면 중첩 — 남은 턴 +1 (75 → 70 → 65 → 60%).</summary>
+    private void ApplyLacerateBleed(EnemyStats target)
+    {
+        if (target == null || target.IsDead() || BleedSO == null) return;
+        float resist = Mathf.Max(0f, target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f));
+        var inst = target.activeStatusEffects.Find(s => s.data != null && s.data.effectType == BleedSO.effectType);
+        if (inst == null)
+        {
+            if (UnityEngine.Random.value >= LacerateFirstChance * resist) return;
+            target.ApplyStatusEffectDirect(BleedSO, 3);
+            inst = target.activeStatusEffects.Find(s => s.data != null && s.data.effectType == BleedSO.effectType);
+            if (inst != null) { inst.appliedThisTurn = _enemiesActedThisRound.Contains(target); inst.stacks = 1; }
+            AddMessage($"<color=#FF5A5A>{target.enemyName} is bleeding!</color> (3 turns)");
+            return;
+        }
+        float chance = LacerateStackChance[Mathf.Clamp(inst.stacks - 1, 0, LacerateStackChance.Length - 1)];
+        if (UnityEngine.Random.value >= chance * resist) return;
+        inst.stacks++;
+        inst.remainingTurns++;
+        AddMessage($"<color=#FF5A5A>The wound deepens!</color> Bleed x{inst.stacks} ({inst.remainingTurns} turns)");
+    }
+
+    /// <summary>단검 스킬 대상 보정: 그림자 베기는 적 후열만, 상처 벌리기는 출혈 중인 적만. 맞는 적이 없으면 null.</summary>
+    private EnemyStats FixDaggerTarget(SkillData skill, EnemyStats picked)
+    {
+        if (skill == null) return picked;
+        if (skill.skillName == SkillShadowSlash)
+        {
+            if (picked != null && picked.currentHP > 0 && !IsEnemyFrontLine(picked)) return picked;
+            return activeEnemies.Where(e => e != null && e.currentHP > 0 && !IsEnemyFrontLine(e)).OrderBy(e => (int)e.currentSlot).FirstOrDefault();
+        }
+        if (skill.skillName == SkillRendWound)
+        {
+            if (IsBleeding(picked) && picked.currentHP > 0) return picked;
+            return activeEnemies.Where(e => e != null && e.currentHP > 0 && IsBleeding(e)).OrderBy(e => (int)e.currentSlot).FirstOrDefault();
+        }
+        return picked;
+    }
+
+    /// <summary>단검 스킬이 맞은 뒤 효과.</summary>
+    private void DaggerAfterHit(PlayerStats attacker, SkillData skill, EnemyStats target)
+    {
+        if (skill == null || target == null || target.IsDead()) return;
+        switch (skill.skillName)
+        {
+            case SkillLacerate: ApplyLacerateBleed(target); break;
+            case SkillRendWound:
+            {
+                var inst = BleedSO != null ? target.activeStatusEffects.Find(s => s.data != null && s.data.effectType == BleedSO.effectType) : null;
+                if (inst == null) break;
+                inst.remainingTurns++;
+                inst.damageMult += 0.5f;
+                AddMessage($"<color=#FF5A5A>The wound is torn open!</color> Bleed +1 turn, damage x{inst.damageMult:0.#}");
+                break;
+            }
+            case SkillTendonSever:
+                target.RemoveStatModifiersFromSource(TendonToken);
+                target.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 0.8f }, TendonToken, 3);
+                AddMessage($"<color=#C8A0FF>{target.enemyName}'s tendon is cut!</color> STR -20% for 3 turns.");
+                break;
+            case SkillHamstring:
+                target.ApplyHamstring(3, 0.2f);
+                AddMessage($"<color=#C8A0FF>{target.enemyName}'s hamstring is cut!</color> AGI -20% for 3 turns.");
+                break;
+        }
+    }
+
+    /// <summary>뒤로 빠지며 베기 / 뛰쳐나오며 베기: 공격 뒤 한 칸 이동.</summary>
+    private void DaggerStep(PlayerStats attacker, SkillData skill)
+    {
+        if (attacker == null || skill == null || attacker.currentHP <= 0) return;
+        int slot = (int)attacker.currentSlot;
+        int to = skill.skillName == SkillBackstepSlash ? slot + 1 : skill.skillName == SkillLungeSlash ? slot - 1 : slot;
+        if (to == slot || to < 1 || to > 4) return;
+        if (MovePlayerToSlot(attacker, (BattleSlot)to))
+            AddMessage(skill.skillName == SkillBackstepSlash ? $"{attacker.playerName} slips back." : $"{attacker.playerName} lunges forward.");
+    }
+
+    /// <summary>섀도우 스텝 중 적 공격을 피하면 민첩 70% 반격.</summary>
+    private void ShadowStepCounter(PlayerStats hero, EnemyStats enemy)
+    {
+        if (hero == null || enemy == null || hero.shadowStepRounds <= 0 || hero.currentHP <= 0 || enemy.currentHP <= 0 || battleEnded) return;
+        bool crit = CheckCritical(hero.luck, PlayerCritBonus(hero) + hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+        int agi = Mathf.FloorToInt(hero.Agility * ShadowStepCounterMult);
+        int def = Mathf.FloorToInt(PenetratedDefense(hero, enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, enemy.defense)));
+        int dmg = ApplyPhysResist(ApplySlotDamageToTarget(CalculateDQDamage(agi, def, crit), enemy.currentSlot, enemy.enemyName), enemy);
+        int applied = enemy.TakeDamage(Mathf.Max(1, dmg), crit);
+        AddMessage($"<color=#9FC8FF>Shadow Step!</color> {hero.playerName} cuts back for {applied}{(crit ? " (Critical!)" : "")}.");
+    }
+
+    private const string SkillCrossCounter = "Cross Counter";
+    private const string SkillPullCounter = "Pull Counter";
+    private const string SkillInnerFortitude = "Inner Fortitude";
+    private const string SkillInnerCleanse = "Inner Cleanse";
+    private const float CrossCounterTaken = 0.9f, CrossCounterMin = 1.5f, CrossCounterMax = 1.8f;
+    private const float PullCounterMin = 1.2f, PullCounterMax = 1.5f;
+    private static readonly object InnerFortitudeToken = new object(), InnerCleanseToken = new object();
+
+    /// <summary>풀 카운터: 이번 턴 첫 물리 공격을 피하고 민첩으로 반격. 피했으면 true (그 공격은 끝).</summary>
+    private bool TryPullCounter(PlayerStats target, EnemyStats enemy)
+    {
+        if (target == null || enemy == null || target.pullCounterRounds <= 0 || target.currentHP <= 0) return false;
+        target.pullCounterRounds = 0; // 한 번만
+        BattleFx.AllyMiss(target);
+        AddMessage($"<color=#9FC8FF>{target.playerName} slips the blow — Pull Counter!</color>");
+        if (enemy.currentHP <= 0 || battleEnded) return true;
+        bool crit = CheckCritical(target.luck, PlayerCritBonus(target) + target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+        int agi = Mathf.FloorToInt(target.Agility * UnityEngine.Random.Range(PullCounterMin, PullCounterMax));
+        int def = Mathf.FloorToInt(PenetratedDefense(target, enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, enemy.defense)));
+        int dmg = CalculateDQDamage(agi, def, crit);
+        dmg = ApplyPhysResist(ApplySlotDamageToTarget(dmg, enemy.currentSlot, enemy.enemyName), enemy);
+        int applied = enemy.TakeDamage(Mathf.Max(1, dmg), crit);
+        AddMessage($"{target.playerName} strikes back! {applied} damage{(crit ? " (Critical!)" : "")}.");
+        return true;
+    }
+
+    /// <summary>크로스 카운터 자세면 받는 물리 피해 90%로. 자세였으면 true (맞은 뒤 CrossCounterStrike).</summary>
+    private bool CrossCounterGuard(PlayerStats target, ref int damage)
+    {
+        if (target == null || target.crossCounterRounds <= 0) return false;
+        damage = Mathf.Max(1, Mathf.FloorToInt(damage * CrossCounterTaken));
+        return true;
+    }
+
+    private void CrossCounterStrike(PlayerStats hero, EnemyStats enemy)
+    {
+        if (hero == null || enemy == null || hero.currentHP <= 0 || enemy.currentHP <= 0 || battleEnded) return;
+        bool crit = CheckCritical(hero.luck, PlayerCritBonus(hero) + hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+        int atk = Mathf.FloorToInt(hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, hero.Attack) * UnityEngine.Random.Range(CrossCounterMin, CrossCounterMax));
+        int def = Mathf.FloorToInt(PenetratedDefense(hero, enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, enemy.defense)));
+        int dmg = CalculateDQDamage(atk, def, crit);
+        dmg = ApplyPhysResist(ApplySlotDamageToTarget(dmg, enemy.currentSlot, enemy.enemyName), enemy);
+        int applied = enemy.TakeDamage(Mathf.Max(1, dmg), crit);
+        AddMessage($"<color=#FFC860>Cross Counter!</color> {hero.playerName} hits back for {applied}{(crit ? " (Critical!)" : "")}.");
+    }
 
     // [2026-10-13] 도끼술 — 투척도끼 연계
     //   도끼 집기 (패시브): 투척도끼가 맞으면 20% 확률로 던진 도끼를 다시 집어 적 전열 1명에게 공격력 110~120% 추가타
@@ -6415,6 +6598,44 @@ public class BattleManager : MonoBehaviour
                 attacker.wardenPending = true;
                 AddMessage($"{attacker.playerName} plants the shield before the party. <color=#AAAAAA>(Next turn: takes every attack meant for allies)</color>");
                 return true;
+            case SkillShadowStep:
+                attacker.shadowStepRounds = 3;
+                attacker.RemoveStatModifiersFromSource(ShadowStepToken);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = ShadowStepEvasion }, ShadowStepToken, 3);
+                AddMessage($"{attacker.playerName} melts into the shadows. <color=#9FC8FF>Evasion +20%</color> for 3 turns — dodges strike back.");
+                return true;
+            case SkillCrossCounter:
+                attacker.crossCounterRounds = 1;
+                AddMessage($"{attacker.playerName} squares up — <color=#FFC860>Cross Counter</color>! <color=#AAAAAA>(this turn: physical hits -10%, strike back each time)</color>");
+                return true;
+            case SkillPullCounter:
+                attacker.pullCounterRounds = 1;
+                AddMessage($"{attacker.playerName} loosens up — <color=#9FC8FF>Pull Counter</color>! <color=#AAAAAA>(this turn: dodge the first physical hit and strike back)</color>");
+                return true;
+            case SkillInnerFortitude:
+            {
+                int eased = 0;
+                foreach (var se in attacker.activeStatusEffects.ToArray())
+                {
+                    if (se == null || se.data == null) continue;
+                    se.remainingTurns--;
+                    eased++;
+                    if (se.remainingTurns <= 0) attacker.RemoveStatusEffect(se.data.effectType);
+                }
+                attacker.RemoveStatModifiersFromSource(InnerFortitudeToken);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.StatusResist, modType = StatModType.PercentMult, value = 0.8f }, InnerFortitudeToken, 3);
+                AddMessage($"{attacker.playerName} steadies the breath. " + (eased > 0 ? $"<color=#9FFF9F>Afflictions eased by 1 turn.</color> " : "") + "<color=#9FC8FF>Status resist +20%</color> for 3 turns.");
+                return true;
+            }
+            case SkillInnerCleanse:
+            {
+                var first = attacker.activeStatusEffects.Find(se => se != null && se.data != null);
+                if (first != null) { attacker.RemoveStatusEffect(first.data.effectType); AddMessage($"<color=#9FFF9F>{attacker.playerName} purges {first.data.effectType}!</color>"); }
+                attacker.RemoveStatModifiersFromSource(InnerCleanseToken);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.StatusResist, modType = StatModType.PercentMult, value = 0f }, InnerCleanseToken, 3);
+                AddMessage($"{attacker.playerName}'s spirit is clear. <color=#9FC8FF>Immune to afflictions</color> for 3 turns.");
+                return true;
+            }
             case SkillGatherKi:
                 attacker.nextAttackBonus = Mathf.Max(attacker.nextAttackBonus, GatherKiBonus);
                 attacker.nextAttackBonusRounds = Mathf.Max(attacker.nextAttackBonusRounds, 2); // 다음 라운드 끝까지
@@ -7134,10 +7355,13 @@ public class BattleManager : MonoBehaviour
         for (int i = 0; i < hits; i++)
         {
             // 3. 타격마다 독립 명중 판정
+            bool physicalHit = skill.damageType != DamageType.Magic && !(skill is MonsterSkillData mPhys && mPhys.Category == MonsterSkillCategory.MagicAttack);
+            if (physicalHit && TryPullCounter(target, enemy)) continue; // [2026-10-14] 풀 카운터
             if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, skill))
             {
                 AddMessage($"{enemy.enemyName}'s {skill.skillName} missed!");
                 BattleFx.AllyMiss(target);
+                if (physicalHit) ShadowStepCounter(target, enemy); // [2026-10-14]
                 continue;
             }
 
@@ -7206,10 +7430,12 @@ public class BattleManager : MonoBehaviour
             if (critical) BattleFx.MarkAllyCritical();
             // 반격 태세: 50% 확률로 피해 -50% + 반격. 던진 단검(원거리)에는 반격할 수 없음
             bool guardProc = skill.skillName != ToolThrowingKnife && RollCounterGuard(target, ref damage);
+            bool crossProc = physicalHit && skill.skillName != ToolThrowingKnife && CrossCounterGuard(target, ref damage); // [2026-10-14]
             damage = target.TakeDamage(damage); // [2026-10-06] 실제로 받은 피해로 표시
             totalDamage += damage;
             AddMessage($"{enemy.enemyName} uses {skill.skillName}! {target.playerName} takes {damage} damage{(critical ? " (Critical!)" : "")}.");
             if (guardProc) CounterAttack(target, enemy); // 반격 (공격 메시지 다음)
+            if (crossProc) CrossCounterStrike(target, enemy); // [2026-10-14]
 
             // 10. 상태이상 (타격마다)
             ApplyCurseEffectsToPlayer(target, skill);
@@ -7250,6 +7476,17 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteSkill(PlayerStats attacker, SkillData skill, EnemyStats target)
     {
         if (attacker == null || skill == null) yield break;
+        // [2026-10-14] 그림자 베기(적 후열만) · 상처 벌리기(출혈 중인 적만): 맞는 적으로 바꾸고, 없으면 비용 없이 실패
+        if (skill.skillName == SkillShadowSlash || skill.skillName == SkillRendWound)
+        {
+            var fixedTarget = FixDaggerTarget(skill, target);
+            if (fixedTarget == null)
+            {
+                AddMessage($"{skill.skillName}: {(skill.skillName == SkillShadowSlash ? "no enemy in the back row" : "no bleeding enemy")}.");
+                yield break;
+            }
+            target = fixedTarget;
+        }
         // 타겟이 필요한 스킬인데 타겟이 없으면 리턴 (회복/방어 스킬 제외)
         if (target == null && !IsSelfTargetSkill(skill)) yield break;
 
@@ -7336,6 +7573,8 @@ public class BattleManager : MonoBehaviour
             {
                 yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, target));
                 if (IsThrowingAxe(skill) && _lastSkillHits > 0) yield return StartCoroutine(TryPickUpAxe(attacker, target)); // [2026-10-13]
+                if (_lastSkillHits > 0) DaggerAfterHit(attacker, skill, target); // [2026-10-14] 단검 효과
+                DaggerStep(attacker, skill);
             }
         }
 
@@ -7602,7 +7841,10 @@ public class BattleManager : MonoBehaviour
                 AddMessage($"{target.enemyName} defended and reduced the damage!");
             }
             // 데미지 적용 (적이 흔들림) - 크리티컬 여부 전달
-            target.TakeDamage(damage, critical);
+            // [2026-10-14] 방어구 파괴 몫은 일반 숫자와 따로 (작은 금 간 방패 + 작은 숫자)
+            int breakPart = armorBreakDamage > 0 ? Mathf.Min(damage - 1, Mathf.RoundToInt(damage * (armorBreakDamage / (float)Mathf.Max(1, baseDamage + armorBreakDamage)))) : 0;
+            target.TakeDamage(damage - Mathf.Max(0, breakPart), critical);
+            if (breakPart > 0 && !target.IsDead()) target.TakeDamage(breakPart, false, true);
             totalDamage += damage;
             successfulHits++;
             if (doubleStrike && i == 0) { firstHitDamage = damage; firstHitCrit = critical; }

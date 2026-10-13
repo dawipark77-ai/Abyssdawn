@@ -17,7 +17,7 @@ MonoBehaviour:
   skillIcon: {fileID: 21300000, guid: a993e324aa365f44e9ad59e33564cd2d, type: 3}
   description: "\uC804\uC5F4 1\uBC88/2\uBC88\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5.
     \uACF5\uACA9\uB825 x130% \uAE61\uB380. \uC801 \uD604\uC7AC \uBC29\uC5B4\uB825
-    x8% \uBC29\uC5B4\uD30C\uAD34. HP 5% \uC18C\uBAA8. \uC0AC\uC6A9 \uD6C4 \uC790\uC2E0
+    x8% \uBC29\uC5B4\uD30C\uAD34. HP 12% \uC18C\uBAA8. \uC0AC\uC6A9 \uD6C4 \uC790\uC2E0
     \uBBFC\uCCA9 -5 (1\uD134)."
   usageType: 0
   damageType: 1
@@ -28,7 +28,7 @@ MonoBehaviour:
     allowedCasterSlots: 3
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 5
+  hpCostPercent: 12
   mpCost: 0
   minMult: 1.3
   maxMult: 1.3

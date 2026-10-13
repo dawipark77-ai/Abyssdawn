@@ -17,7 +17,7 @@ MonoBehaviour:
   skillIcon: {fileID: 21300000, guid: 4d0031558ba592546a3f08b68b30593f, type: 3}
   description: "\uC804\uC5F4 1\uBC88/2\uBC88\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5.
     \uACF5\uACA9\uB825 x110% \uAE61\uB380. \uC801 \uD604\uC7AC \uBC29\uC5B4\uB825
-    x10% \uBC29\uC5B4\uD30C\uAD34. HP 5% \uC18C\uBAA8. \uAC19\uC740 \uB300\uC0C1\uC5D0\uAC8C
+    x10% \uBC29\uC5B4\uD30C\uAD34. HP 10% \uC18C\uBAA8. \uAC19\uC740 \uB300\uC0C1\uC5D0\uAC8C
     \uC9C1\uC804 \uD134 \uCC0D\uC5B4 \uB0B4\uB9AC\uAE30 \uB610\uB294 \uAC11\uC637
     \uCC22\uAE30 \uC0AC\uC6A9 \uC2DC\uC5D0\uB9CC \uBC1C\uB3D9. \uD30C\uD2F0 \uC804\uCCB4
     \uBB3C\uB9AC \uACF5\uACA9 +5%(1\uD134), \uD06C\uB9AC\uD2F0\uCEEC +5%(2\uD134)
@@ -31,7 +31,7 @@ MonoBehaviour:
     allowedCasterSlots: 3
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 5
+  hpCostPercent: 10
   mpCost: 0
   minMult: 1.1
   maxMult: 1.1

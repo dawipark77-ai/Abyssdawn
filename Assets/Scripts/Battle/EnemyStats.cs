@@ -19,6 +19,9 @@ public class StatusEffectInstance
     /// 적용된 턴에는 DoT/차감을 건너뜁니다. 다음 턴부터 정상 처리합니다.
     /// </summary>
     public bool appliedThisTurn = true;
+    /// <summary>[2026-10-14] 단검: 중첩 수(상처내기) · 턴당 피해 배율(상처 벌리기 +0.5씩).</summary>
+    public int stacks = 1;
+    public float damageMult = 1f;
 
     public StatusEffectInstance(StatusEffectSO effectData)
     {
@@ -345,7 +348,7 @@ public class EnemyStats : MonoBehaviour
     public float defenceReduction = 0.4f;
 
     // 데미지 처리
-    public int TakeDamage(int damage, bool isCritical = false)
+    public int TakeDamage(int damage, bool isCritical = false, bool armorBreak = false)
     {
         if (isDead) return 0;
 
@@ -358,7 +361,9 @@ public class EnemyStats : MonoBehaviour
         Debug.Log($"{enemyName} took {damage} damage. HP: {currentHP}/{maxHP}");
 
         // 피해 숫자 팝업 (+ 크리티컬이면 순간 멈춤·화면 흔들림)
-        BattleFx.EnemyHit(this, damage, isCritical);
+        // [2026-10-14] 방어구 파괴 피해는 일반 숫자 대신 작은 금 간 방패 + 작은 숫자
+        if (armorBreak) BattleFx.ArmorBreak(this, damage);
+        else BattleFx.EnemyHit(this, damage, isCritical);
 
         if (currentHP <= 0)
         {
@@ -525,8 +530,29 @@ public class EnemyStats : MonoBehaviour
     /// <summary>
     /// 턴 종료 시 상태이상 DoT 처리 및 턴 감소
     /// </summary>
+    // [2026-10-14] 인대 끊기: 3턴 동안 민첩 -20% (중첩 없음 — 다시 걸면 턴만 갱신), 끝나면 되돌림
+    [System.NonSerialized] public int ligamentTurns;
+    [System.NonSerialized] private int _ligamentLoss;
+
+    public void ApplyHamstring(int turns, float percent)
+    {
+        if (ligamentTurns <= 0)
+        {
+            _ligamentLoss = Mathf.Max(1, Mathf.RoundToInt(Agility * percent));
+            Agility = Mathf.Max(0, Agility - _ligamentLoss);
+        }
+        ligamentTurns = turns;
+    }
+
+    private void TickLigament()
+    {
+        if (ligamentTurns <= 0) return;
+        if (--ligamentTurns <= 0) { Agility += _ligamentLoss; _ligamentLoss = 0; }
+    }
+
     public void ProcessStatusEffectsEndOfTurn()
     {
+        TickLigament();
         if (activeStatusEffects.Count == 0 || currentHP <= 0 || isDead) return;
 
         for (int i = activeStatusEffects.Count - 1; i >= 0; i--)
@@ -543,7 +569,7 @@ public class EnemyStats : MonoBehaviour
 
             if (se.data.physicalDamagePerTurn > 0f)
             {
-                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn));
+                int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn * Mathf.Max(0f, se.damageMult)));
                 currentHP = Mathf.Max(0, currentHP - dotDamage);
                 Debug.Log($"[StatusEffect] {enemyName} took {dotDamage} DoT damage from {se.data.effectType}. (HP: {currentHP})");
             }

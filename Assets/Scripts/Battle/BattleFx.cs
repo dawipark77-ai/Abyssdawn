@@ -68,6 +68,62 @@ public class BattleFx : MonoBehaviour
         fx._shake = fx.StartCoroutine(fx.ShakeFor(0.25f + 0.12f * strength, 0.2f + 0.12f * strength));
     }
 
+    /// <summary>[2026-10-14] 방어구 파괴 피해: 일반 피해 숫자 옆 아래에 작은 금 간 방패 아이콘 + 작은 숫자.</summary>
+    public static void ArmorBreak(EnemyStats e, int amount)
+    {
+        var fx = Get();
+        if (fx == null || e == null || amount <= 0) return;
+        fx.BreakPopup(fx.EnemyAnchor(e) + new Vector2(78f, -34f), amount);
+    }
+
+    private static Sprite _breakIcon;
+
+    private void BreakPopup(Vector2 pos, int amount)
+    {
+        if (_breakIcon == null) _breakIcon = Resources.Load<Sprite>("UI/ArmorBreak_Icon");
+        var go = new GameObject("ArmorBreakPopup", typeof(RectTransform), typeof(CanvasGroup));
+        go.transform.SetParent(_root, false);
+        var rt = (RectTransform)go.transform;
+        rt.sizeDelta = new Vector2(120f, 44f);
+        rt.anchoredPosition = pos;
+
+        if (_breakIcon != null)
+        {
+            var ig = new GameObject("Icon", typeof(RectTransform));
+            ig.transform.SetParent(go.transform, false);
+            var img = ig.AddComponent<Image>();
+            img.sprite = _breakIcon; img.preserveAspect = true; img.raycastTarget = false;
+            var irt = (RectTransform)ig.transform;
+            irt.anchorMin = irt.anchorMax = new Vector2(0f, 0.5f); irt.pivot = new Vector2(0f, 0.5f);
+            irt.sizeDelta = new Vector2(30f, 34f); irt.anchoredPosition = Vector2.zero;
+        }
+        var t = CreateText(rt, "Amount", 34f, FontStyles.Bold);
+        t.text = amount.ToString();
+        t.color = new Color(0.82f, 0.88f, 0.96f);
+        t.alignment = TextAlignmentOptions.MidlineLeft;
+        var trt = t.rectTransform;
+        trt.anchorMin = trt.anchorMax = new Vector2(0f, 0.5f); trt.pivot = new Vector2(0f, 0.5f);
+        trt.sizeDelta = new Vector2(80f, 44f); trt.anchoredPosition = new Vector2(34f, 0f);
+        StartCoroutine(BreakPopupRoutine(rt, go.GetComponent<CanvasGroup>()));
+    }
+
+    private IEnumerator BreakPopupRoutine(RectTransform rt, CanvasGroup cg)
+    {
+        const float dur = 0.85f;
+        Vector2 start = rt.anchoredPosition;
+        for (float e = 0f; e < dur; e += Time.unscaledDeltaTime)
+        {
+            if (rt == null) yield break;
+            float k = e / dur;
+            // 레트로 느낌: 부드럽게가 아니라 4px 단위로 끊어 오른다
+            float rise = Mathf.Floor(70f * (1f - (1f - k) * (1f - k)) / 4f) * 4f;
+            rt.anchoredPosition = start + new Vector2(0f, rise);
+            cg.alpha = k < 0.6f ? 1f : 1f - (k - 0.6f) / 0.4f;
+            yield return null;
+        }
+        if (rt != null) Destroy(rt.gameObject);
+    }
+
     public static void EnemyMiss(EnemyStats e)
     {
         var fx = Get();

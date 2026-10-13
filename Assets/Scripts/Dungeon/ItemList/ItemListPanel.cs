@@ -462,9 +462,23 @@ public class ItemListPanel : MonoBehaviour
         Refresh(); // 인벤토리 이벤트로도 불리지만, 새벽의 잔 충전처럼 이벤트가 없는 변화도 있어 한 번 더
     }
 
+    /// <summary>[2026-10-14] 버리기 전에 "정말 버릴까요?" Yes / No.</summary>
     private void OnDiscard()
     {
         Entry e = _selected;
+        if (e == null) return;
+        if (e.consumable != null && (e.consumable.isPermanent || e.consumable.isDawnChalice)) return;
+        string name = e.consumable != null ? e.consumable.itemName : e.equipment != null ? e.equipment.equipmentName : "";
+        var hud = DungeonHud.Instance;
+        if (hud == null) { DiscardNow(e); return; }
+        hud.Confirm($"Discard <b>{name}</b>?\n<size=80%><color=#AAAAAA>It will be gone for good.</color></size>", "Yes", "No", yes =>
+        {
+            if (yes) DiscardNow(e);
+        });
+    }
+
+    private void DiscardNow(Entry e)
+    {
         if (e == null) return;
         if (e.consumable != null)
         {

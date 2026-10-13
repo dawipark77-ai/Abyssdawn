@@ -22,6 +22,9 @@ public class LoreTreeStyle : MonoBehaviour
     private static readonly Color LockedText = new Color(0.66f, 0.66f, 0.68f, 1f);
     private static readonly Color EmptySlot = new Color(0.13f, 0.12f, 0.11f, 1f);
 
+    private const float CompactNodeScale = 0.6f;   // 이보다 작은 노드는 이름 한 줄
+    private const float CompactLabelWidth = 124f;  // 한 줄 이름 칸 너비 (트리 좌표 기준)
+    private const float CompactLabelMin = 12f;
     private const float NodeLabelSize = 19f;   // 화면에 보이는 크기 (노드 크기 배율과 상관없이 같게)
     private const float CategoryLabelSize = 18f;
 
@@ -430,6 +433,22 @@ public class LoreTreeStyle : MonoBehaviour
         prt.sizeDelta = new Vector2(10f / scale, 44f / scale);
         plate.transform.SetAsLastSibling();
         label.transform.SetAsLastSibling();
+
+        // [2026-10-14] 노드가 작은 빽빽한 트리(격투술 등): 이름을 한 줄로 — 두 줄이면 아래 줄 노드에 가려진다.
+        //   글자가 길면 칸 너비(CompactLabelWidth) 안에서 저절로 작아짐.
+        if (scale < CompactNodeScale)
+        {
+            float nodeW = ((RectTransform)n.transform).rect.width;
+            label.enableWordWrapping = false;
+            label.enableAutoSizing = true;
+            label.fontSizeMax = NodeLabelSize / scale;
+            label.fontSizeMin = CompactLabelMin / scale;
+            label.alignment = TextAlignmentOptions.Center;
+            rt.anchoredPosition = new Vector2(0f, -4f / scale);
+            rt.sizeDelta = new Vector2(CompactLabelWidth / scale - nodeW, 24f / scale);
+            prt.anchoredPosition = new Vector2(0f, -3f / scale);
+            prt.sizeDelta = new Vector2(CompactLabelWidth / scale - nodeW, 27f / scale);
+        }
     }
 
     // ───────────────────────────── 매 프레임 (선택 표시) ─────────────────────────────

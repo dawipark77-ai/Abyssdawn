@@ -90,41 +90,51 @@ public class DungeonSearch : MonoBehaviour
         int searchR = radius + (FieldSkills.Has(FieldSkills.TrapDetection) ? FieldSkills.TrapDetectSearchBonus : 0); // 함정 감지: 반경 +1
         _map.FindHiddenAround(pos, searchR, _found);
 
-        // 1) 탐색 물결 — 플레이어에서 반경 끝까지 퍼지며 옅어진다
+        // 1) 탐색 물결 — [2026-10-14] 레트로 느낌: 바닥 칸 크기의 사각 타일이 한 칸씩 사각 링으로 퍼진다.
+        //    칸마다 계단식으로(부드럽지 않게) 밝아졌다 사라진다. 벽(바위) 칸에는 그리지 않음.
         AutomapRenderer automap = _map.automapRenderer;
         Vector3 center = automap != null ? automap.CellCenter(pos) : _player.transform.position;
-        float cell = automap != null ? Mathf.Min(automap.CellSize().x, automap.CellSize().y) : 1f;
-        float maxR = (searchR + 0.5f) * cell;
-        float stagger = rippleSeconds * 0.25f;
-        var rings = new List<LineRenderer>();
-        for (int i = 0; i < Mathf.Max(1, rippleCount); i++) rings.Add(NewRing("SearchRipple", rippleColor, lineWidth * cell));
+        Vector2 cellSize = automap != null ? automap.CellSize() : Vector2.one;
+        float ringStep = rippleSeconds / Mathf.Max(1, searchR);
+        var tiles = new List<SpriteRenderer>();
+        var tileRing = new List<int>();
+        for (int dy = -searchR; dy <= searchR; dy++)
+            for (int dx = -searchR; dx <= searchR; dx++)
+            {
+                int d = Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy));
+                if (d == 0) continue;
+                var c = new Vector2Int(pos.x + dx, pos.y + dy);
+                if (!_map.FloorData.InBounds(c) || !_map.FloorData.IsWalkable(c)) continue;
+                Vector3 at = automap != null ? automap.CellCenter(c) : center + new Vector3(dx * cellSize.x, dy * cellSize.y, 0f);
+                tiles.Add(NewTile("SearchTile", at, cellSize * 0.86f, rippleColor));
+                tileRing.Add(d);
+            }
 
-        float total = rippleSeconds + stagger * (rings.Count - 1);
+        float total = ringStep * searchR + TileSteps.Length * TileStepSeconds;
         for (float t = 0f; t < total; t += Time.deltaTime)
         {
-            for (int i = 0; i < rings.Count; i++)
+            for (int i = 0; i < tiles.Count; i++)
             {
-                float k = Mathf.Clamp01((t - i * stagger) / rippleSeconds);
-                float ease = 1f - (1f - k) * (1f - k);
-                SetRing(rings[i], center, Mathf.Lerp(0.2f * cell, maxR, ease), Alpha(rippleColor, (k <= 0f ? 0f : 1f - k * k) * (i == 0 ? 1f : 0.55f)));
+                float local = t - (tileRing[i] - 1) * ringStep;
+                int step = local < 0f ? -1 : Mathf.FloorToInt(local / TileStepSeconds);
+                float a = step < 0 || step >= TileSteps.Length ? 0f : TileSteps[step] * (1f - 0.12f * (tileRing[i] - 1));
+                tiles[i].color = Alpha(rippleColor, a);
             }
             yield return null;
         }
-        foreach (var r in rings) Destroy(r.gameObject);
+        foreach (var r in tiles) Destroy(r.gameObject);
 
-        // 2) 찾은 것 드러내기 + 그 자리에서 번쩍
+        // 2) 찾은 것 드러내기 + 그 칸이 사각 타일로 두 번 깜빡
         _map.RevealFound(_found);
         if (_found.Count > 0)
         {
-            var marks = new List<LineRenderer>();
-            foreach (Vector2Int p in _found) marks.Add(NewRing("SearchFound", foundColor, lineWidth * 1.4f * cell));
+            var marks = new List<SpriteRenderer>();
+            foreach (Vector2Int f in _found)
+                marks.Add(NewTile("SearchFound", automap != null ? automap.CellCenter(f) : center, cellSize * 0.92f, foundColor));
             for (float t = 0f; t < 0.6f; t += Time.deltaTime)
             {
-                float k = t / 0.6f;
-                float pulse = Mathf.Repeat(k * 2f, 1f); // 두 번 퍼짐
-                for (int i = 0; i < marks.Count; i++)
-                    SetRing(marks[i], automap != null ? automap.CellCenter(_found[i]) : center,
-                            Mathf.Lerp(0.15f, 0.7f, pulse) * cell, Alpha(foundColor, 1f - pulse));
+                bool on = Mathf.FloorToInt(t / 0.1f) % 2 == 0; // 0.1초 간격 깜빡 (3번 켜짐)
+                foreach (var m in marks) m.color = Alpha(foundColor, on ? 0.75f : 0f);
                 yield return null;
             }
             foreach (var m in marks) Destroy(m.gameObject);
@@ -174,6 +184,30 @@ public class DungeonSearch : MonoBehaviour
     // ─────────────────────────────────────────
 
     private const int RingSegments = 48;
+
+    // 사각 타일 밝기 단계 (레트로 — 단계마다 뚝뚝 끊겨 변함)
+    private static readonly float[] TileSteps = { 0.55f, 0.4f, 0.25f, 0.12f };
+    private const float TileStepSeconds = 0.06f;
+    private static Sprite _tileSprite;
+
+    private SpriteRenderer NewTile(string name, Vector3 at, Vector2 size, Color color)
+    {
+        if (_tileSprite == null)
+        {
+            var tex = new Texture2D(4, 4) { filterMode = FilterMode.Point };
+            var px = new Color[16]; for (int i = 0; i < 16; i++) px[i] = Color.white;
+            tex.SetPixels(px); tex.Apply();
+            _tileSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
+        }
+        var go = new GameObject(name);
+        go.transform.position = new Vector3(at.x, at.y, 0f);
+        go.transform.localScale = new Vector3(size.x, size.y, 1f);
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = _tileSprite;
+        sr.color = Alpha(color, 0f);
+        sr.sortingOrder = sortingOrder;
+        return sr;
+    }
 
     private LineRenderer NewRing(string name, Color color, float width)
     {

@@ -726,11 +726,9 @@ public class InventoryUIManager : MonoBehaviour
         foreach (Transform child in statusEffectRow)
             Destroy(child.gameObject);
 
-        Debug.Log("armorBreakData: " + item.armorBreakData);
-        Debug.Log("weaponCurses count: " + (item.weaponCurses != null ? item.weaponCurses.Count : 0));
-
         bool hasCurses    = item.weaponCurses != null && item.weaponCurses.Count > 0;
-        bool hasArmorBreak = item.armorBreakData != null;
+        // [2026-10-14] 장비에 직접 적힌 수치(armorBreakCoefficient)도 표시 — 전에는 SO가 붙은 장비만 보여 줬다
+        bool hasArmorBreak = item.GetArmorBreakCoefficient() > 0f;
         statusEffectRow.gameObject.SetActive(hasCurses || hasArmorBreak);
 
         if (statusEffectPrefab == null)
@@ -797,24 +795,23 @@ public class InventoryUIManager : MonoBehaviour
         // ── armorBreakData ────────────────────────────────────
         if (hasArmorBreak)
         {
-            var ab = item.armorBreakData;
+            // SO가 없으면 공용 방어구 파괴 SO의 아이콘을 빌려 쓴다
+            var ab = item.armorBreakData != null ? item.armorBreakData : Resources.Load<ArmorBreakDataSO>("EquipmentsSkills/ArmorBreak");
             var go = Instantiate(statusEffectPrefab, statusEffectRow, false);
 
             var itemIconT = go.transform.Find("ItemIcon");
-            Debug.Log("ItemIcon found: " + itemIconT);
             if (itemIconT != null)
             {
                 var img = itemIconT.GetComponent<Image>();
-                if (img != null) img.sprite = ab.itemIcon;
+                if (img != null && ab != null) img.sprite = ab.itemIcon;
             }
             else Debug.LogWarning("[CurseRow] 'ItemIcon' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
             var flatIconT = go.transform.Find("FlatIcon");
-            Debug.Log("FlatIcon found: " + flatIconT);
             if (flatIconT != null)
             {
                 var img = flatIconT.GetComponent<Image>();
-                if (img != null) img.sprite = ab.flatIcon;
+                if (img != null && ab != null) img.sprite = ab.flatIcon;
             }
             else Debug.LogWarning("[CurseRow] 'FlatIcon' 자식을 찾을 수 없음 — 프리팹 자식 이름 확인 필요");
 
@@ -824,7 +821,7 @@ public class InventoryUIManager : MonoBehaviour
                 var tmp = statTextT.GetComponent<TextMeshProUGUI>();
                 if (tmp != null)
                 {
-                    float coef = ab.coefficient * 100f;
+                    float coef = item.GetArmorBreakCoefficient() * 100f;
                     tmp.text = $"<color=#EF9F27>◆</color> <color=#E24B4A>{coef:F1}%</color>/HIT";
                 }
             }
@@ -1169,7 +1166,24 @@ public class InventoryUIManager : MonoBehaviour
         else AnimateDetail(false);
     }
 
+    /// <summary>[2026-10-14] 버리기 전에 "정말 버릴까요?" Yes / No (던전 확인창이 없는 곳에서는 바로 버림).</summary>
     private void OnDiscardClicked()
+    {
+        if (selectedConsumable != null && (selectedConsumable.isDawnChalice || selectedConsumable.isPermanent)) return;
+        string name = selectedConsumable != null ? selectedConsumable.itemName : selectedItem != null ? selectedItem.equipmentName : null;
+        if (name == null) return;
+        var hud = DungeonHud.Instance;
+        if (hud == null) { DiscardNow(); return; }
+        var keepConsumable = selectedConsumable; var keepItem = selectedItem;
+        hud.Confirm($"Discard <b>{name}</b>?\n<size=80%><color=#AAAAAA>It will be gone for good.</color></size>", "Yes", "No", yes =>
+        {
+            if (!yes) return;
+            selectedConsumable = keepConsumable; selectedItem = keepItem;
+            DiscardNow();
+        });
+    }
+
+    private void DiscardNow()
     {
         if (selectedConsumable != null)
         {

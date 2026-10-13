@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: D1_VitalStrike
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: D1_VitalStrike
+  skillName: Vital Strike
+  skillIcon: {fileID: 21300000, guid: 04c3d9ec856ead242ab05f4555bebf09, type: 3}
+  description: "[\uB2E8\uAC80\uC220 \xB7 \uD328\uC2DC\uBE0C \xB7 \uB2E8\uAC80 \uC7A5\uCC29]
+    \uAE09\uC18C \uD30C\uACE0\uB4E4\uAE30. \uAE30\uBCF8 \uACF5\uACA9\uC774 \uD6C4\uC5F4\uC5D0\uC11C
+    \uC801 \uC804\uC5F4\uC744 \uCE60 \uB54C \uCE58\uBA85\uD0C0 +10%, \uC804\uC5F4\uC5D0\uC11C
+    \uC801 \uD6C4\uC5F4\uC744 \uCE60 \uB54C \uD53C\uD574 +15%."
+  usageType: 1
+  damageType: 0
+  scalingStat: 1
+  weaponCategory: 2
+  targeting:
+    targetFaction: 2
+    allowedCasterSlots: 15
+    allowedTargetSlots: 15
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0
+  maxMult: 0
+  hitCount: 1
+  accuracy: 1
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 1
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

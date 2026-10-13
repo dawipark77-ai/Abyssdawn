@@ -211,11 +211,29 @@ public class PlayerStats : MonoBehaviour
     // [2026-10-12] 격투술 패시브: 인파이터(앞열 공격 +20%) · 아웃파이터(뒷열 민첩 +20%) — 둘 중 하나만 장착 / 근육의 기억(같은 대상 연타 중첩)
     public const string SkillInfighter = "Infighter";
     public const string SkillOutfighter = "Outfighter";
-    public const string SkillMuscleMemory = "Combat Instinct"; // 근육의 기억 (영어 이름 Combat Instinct)
+    public const string SkillMuscleMemory = "Combat Instinct";
+    // [2026-10-14] 단검학
+    public const string SkillQuickHands = "Quick Hands";
+    public const string SkillVitalStrike = "Vital Strike";
+    [System.NonSerialized] public int shadowStepRounds;
+
+    /// <summary>오른손·왼손에 든 단검 수 (0~2).</summary>
+    public int DaggersHeld()
+    {
+        var em = GetComponent<EquipmentManager>();
+        var rh = em != null ? em.rightHand : (statData != null ? statData.rightHand : null);
+        var lh = em != null ? em.leftHand : (statData != null ? statData.leftHand : null);
+        int n = 0;
+        if (rh != null && rh.weaponCategory == WeaponCategory.Dagger) n++;
+        if (lh != null && lh.weaponCategory == WeaponCategory.Dagger) n++;
+        return n;
+    } // 근육의 기억 (영어 이름 Combat Instinct)
     public const float FighterStancePercent = 0.2f;
     /// <summary>[2026-10-12] 근육의 기억: 지금 노리는 대상과 쌓인 중첩 (0~5). 빗나가거나 다른 적을 치면 0.</summary>
     [System.NonSerialized] public EnemyStats muscleMemoryTarget;
     [System.NonSerialized] public int muscleMemoryStacks;
+    /// <summary>[2026-10-14] 크로스 카운터 / 풀 카운터 자세 남은 라운드 (선제 발동 — 쓴 라운드 동안).</summary>
+    [System.NonSerialized] public int crossCounterRounds, pullCounterRounds;
     /// <summary>반격 태세(Counter Guard) 남은 라운드. 0보다 크면 자세 유지 중 (라운드 끝마다 1 감소).</summary>
     // [2026-10-07] 도망 확률 보너스 (연막탄 등 아이템). escapeBonusRounds 라운드 동안 유지
     [System.NonSerialized] public float escapeBonus = 0f;
@@ -356,6 +374,8 @@ public class PlayerStats : MonoBehaviour
             int total = baseValue + classBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility);
             // [2026-10-12] 아웃파이터: 뒷열에 있으면 민첩 +20%
             if (IsBackRow && HasEquippedPassiveByName(SkillOutfighter)) total += Mathf.RoundToInt(total * FighterStancePercent);
+            // [2026-10-14] 신속한 손놀림: 든 단검 하나당 민첩 +5%
+            if (HasEquippedPassiveByName(SkillQuickHands)) total += Mathf.RoundToInt(total * 0.05f * DaggersHeld());
             return total;
         }
     }
