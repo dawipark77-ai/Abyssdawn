@@ -94,6 +94,11 @@ public class EquipmentUIController : MonoBehaviour
             Debug.LogWarning($"[EquipmentUIController] {slotObject.name}의 자식에 TextMeshProUGUI 컴포넌트가 없습니다.");
         }
 
+        // [2026-10-15] 칸을 누르면 아이템 상세 팝업 (소지품 목록과 같은 창)
+        var click = slotObject.GetComponent<EquipSlotDetailClick>() ?? slotObject.AddComponent<EquipSlotDetailClick>();
+        click.item = equipment;
+        slotImage.raycastTarget = true;
+
         // 장비 정보 업데이트
         if (equipment != null)
         {
@@ -161,20 +166,16 @@ public class EquipmentUIController : MonoBehaviour
     }
 }
 
+/// <summary>[2026-10-15] 상태창 장비 칸 클릭 → InventoryUIManager 상세 팝업 (장착 중인 장비로 표시).</summary>
+public class EquipSlotDetailClick : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler
+{
+    public EquipmentData item;
+    private static InventoryUIManager _popup;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public void OnPointerClick(UnityEngine.EventSystems.PointerEventData e)
+    {
+        if (item == null) return;
+        if (_popup == null) _popup = FindFirstObjectByType<InventoryUIManager>(FindObjectsInactive.Include);
+        if (_popup != null) _popup.ShowDetailPopup(item, true, null);
+    }
+}

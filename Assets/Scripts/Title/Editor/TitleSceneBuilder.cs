@@ -144,25 +144,79 @@ public static class TitleSceneBuilder
         pill.raycastTarget = false;
         var lang = NewText("LangText", root, 40f, 852f, 70.2f, 32f, "KR · <color=#D4A761><b>한국어</b></color>", cinzel, null, 10f, Parch300, 24f);
         lang.alignment = TextAlignmentOptions.Left;
+        lang.enableAutoSizing = true; lang.fontSizeMin = 7f; lang.fontSizeMax = 10f; // "EN · ENGLISH" 도 테 안에
         var version = NewText("Version", root, 272.8f, 861.5f, 128.4f, 13f, "v 0.7.2 · build 314", mono, null, 10f, VersionCol, 8f);
         version.alignment = TextAlignmentOptions.Right;
 
-        // 화면 아무 데나 누르기
-        var tapArea = NewImage("TapArea", canvasGo.transform, null);
-        Stretch(tapArea.rectTransform);
-        tapArea.color = new Color(0f, 0f, 0f, 0f);
-        var btn = tapArea.gameObject.AddComponent<Button>();
-        btn.transition = Selectable.Transition.None;
+        // [2026-10-14] 누르는 곳은 두 군데만 — "TAP TO BEGIN" 글자와 언어 버튼. 화면 다른 곳은 눌러도 아무 일 없음.
+        var tapBtn = HitButton("TapButton", root, 215f - 110f, 743f - 22f, 220f, 44f);
+        var langBtn = HitButton("LangButton", root, 28f, 852f, 94.2f, 32f);
 
         var ctl = canvasGo.AddComponent<TitleScreen>();
         ctl.tapText = tap;
         ctl.versionText = version;
-        UnityEventTools.AddPersistentListener(btn.onClick, ctl.OnTap);
+        ctl.langText = lang;
+        UnityEventTools.AddPersistentListener(tapBtn.onClick, ctl.OnTap);
+        UnityEventTools.AddPersistentListener(langBtn.onClick, ctl.OnLanguage);
 
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddToBuildSettings(ScenePath, false); // 맨 앞(0번)에 두면 BattleManager 의 LoadScene(0) 예비 경로가 타이틀로 가므로 일단 뒤에
         AddToBuildSettings("Assets/Abyssdawn_Dungeon_2D 08.unity", false);
         Debug.Log("[TitleSceneBuilder] 타이틀 씬 생성 완료: " + ScenePath);
+    }
+
+    // ───────────────────────── 모험의 서 · 새 게임 씬 ─────────────────────────
+    private const string ProloguePath = "Assets/Abyssdawn_Prologue.unity";
+
+    /// <summary>[2026-10-14] 타이틀 다음 화면 (드퀘식 모험의 서 + 캐릭터 만들기). 화면은 PrologueScreen 이 실행 때 만든다.</summary>
+    [MenuItem("Abyssdawn/Build Prologue Scene")]
+    public static void BuildPrologue()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+        var camGo = new GameObject("Main Camera", typeof(Camera));
+        camGo.tag = "MainCamera";
+        var cam = camGo.GetComponent<Camera>();
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.backgroundColor = Hex("#050403");
+        cam.orthographic = true;
+        new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
+
+        var go = new GameObject("Prologue");
+        var p = go.AddComponent<PrologueScreen>();
+        p.font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(KoreanFallback);
+        p.headingFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>($"{FontDir}/Cinzel-SemiBold SDF.asset");
+        p.background = Sprite("Title_BG");
+        p.frame = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/UI/PopupFrameDark.png"); // [2026-10-14] 드퀘처럼 안쪽은 거의 검정 (금테·모서리 장식만 남김)
+
+        // 종의 기억: 인간 · 엘프 · 오크 각 5가지 ([2026-10-14] 엘프·오크 추가 — 화면에서 종족 탭)
+        p.memoryChoices.Clear();
+        foreach (var sp in new[] { "Human", "Elf", "Orc" })
+            foreach (var g in AssetDatabase.FindAssets("t:MemoryOfSpeciesData", new[] { "Assets/Scripts/Battle/Data/MemoryofSpecies/" + sp }))
+            {
+                var m = AssetDatabase.LoadAssetAtPath<AbyssdawnBattle.MemoryOfSpeciesData>(AssetDatabase.GUIDToAssetPath(g));
+                if (m != null) p.memoryChoices.Add(m);
+            }
+        // 직업: 지금은 전사만
+        p.jobChoices.Clear();
+        // [2026-10-14] 전사 · 도적 · 몽크
+        foreach (var jn in new[] { "Class_Warrior", "Class_Thief", "Class_Monk" })
+        {
+            var job = AssetDatabase.LoadAssetAtPath<CharacterClass>($"Assets/Resources/Classes/{jn}.asset");
+            if (job != null) p.jobChoices.Add(job);
+        }
+        p.heroTemplate = AssetDatabase.LoadAssetAtPath<PlayerStatData>("Assets/HeroData.asset"); // 최종 상태창 계산용 (복사본만 씀)
+        // 성향: Resources/Dispositions 에 에셋이 생기면 자동으로 (지금은 없음 → "준비 중")
+        p.dispositionChoices.Clear();
+        foreach (var d in Resources.LoadAll<DispositionData>("Dispositions")) p.dispositionChoices.Add(d);
+        // [2026-10-14] 기획 순서대로 (탐험가 · 호기심 · 구두쇠 · 탐욕 · 완벽주의자 · 겁쟁이 · 무모함 · 신중함 · 냉혈 · 고독한 늑대)
+        string[] order = { "Explorer", "Curious", "Miser", "Greedy", "Perfectionist", "Coward", "Reckless", "Cautious", "ColdBlooded", "LoneWolf" };
+        p.dispositionChoices.Sort((x, y) => System.Array.IndexOf(order, x.name.Replace("Disposition_", "")).CompareTo(System.Array.IndexOf(order, y.name.Replace("Disposition_", ""))));
+
+        EditorSceneManager.SaveScene(scene, ProloguePath);
+        AddToBuildSettings(ProloguePath, false);
+        Debug.Log($"[TitleSceneBuilder] 모험의 서 씬 생성 완료: {ProloguePath} (기억 {p.memoryChoices.Count}, 직업 {p.jobChoices.Count}, 성향 {p.dispositionChoices.Count})");
     }
 
     // ───────────────────────── 도우미 ─────────────────────────
@@ -296,6 +350,18 @@ public static class TitleSceneBuilder
         t.fontFeatures.Clear(); // 커닝 끔 — Cinzel 의 커닝 값이 TMP 에서 너무 세게 먹어 글자 간격이 들쭉날쭉해짐
         t.text = text;
         return t;
+    }
+
+    /// <summary>보이지 않는 누름 칸 (투명 그림 + 버튼). 글자나 그림 위에 겹쳐 둔다.</summary>
+    private static Button HitButton(string name, Transform parent, float x, float y, float w, float h)
+    {
+        var img = NewImage(name, parent, null);
+        Place(img.rectTransform, x, y, w, h);
+        img.color = new Color(0f, 0f, 0f, 0f);
+        img.raycastTarget = true; // 투명해도 누름은 받는다
+        var btn = img.gameObject.AddComponent<Button>();
+        btn.transition = Selectable.Transition.None;
+        return btn;
     }
 
     private static void Diamond(Transform parent, string name, float cx, float cy, float size, float alpha)

@@ -50,6 +50,18 @@ namespace AbyssdawnBattle
         
         [Tooltip("HP 보정 (절대값)")]
         public int hpBonus = 0;
+
+        // [2026-10-14] 엘프·오크 설계 문서 수치용 새 칸
+        [Tooltip("최대 MP 고정 보정 (예: 엘프 귀 +5)")]
+        public int mpBonus = 0;
+        [Tooltip("공격(물리) % 보정 (예: 엘프 머리카락 −10 = −10%)")]
+        [Range(-50f, 50f)] public float attackPercent = 0f;
+        [Tooltip("방어 % 보정 (예: 엘프 홍채 −10 = −10%)")]
+        [Range(-50f, 50f)] public float defensePercent = 0f;
+        [Tooltip("마력(마법 피해) % 보정 (예: 엘프 머리카락 +10)")]
+        [Range(-50f, 50f)] public float magicPercent = 0f;
+        [Tooltip("치명타율 %p (예: 엘프 홍채 +5)")]
+        [Range(-20f, 20f)] public float critChanceBonus = 0f;
         
         [Tooltip("공격력 보정")]
         [Range(-10, 10)]
@@ -150,22 +162,32 @@ namespace AbyssdawnBattle
                 bonuses.Add($"MAG {(magicBonus > 0 ? "+" : "")}{magicBonus}");
             if (luckBonus != 0)
                 bonuses.Add($"LUK {(luckBonus > 0 ? "+" : "")}{luckBonus}");
+            if (mpBonus != 0)
+                bonuses.Add($"MP {(mpBonus > 0 ? "+" : "")}{mpBonus}");
+            if (attackPercent != 0)
+                bonuses.Add($"ATK {(attackPercent > 0 ? "+" : "")}{attackPercent:0.##}%");
+            if (defensePercent != 0)
+                bonuses.Add($"DEF {(defensePercent > 0 ? "+" : "")}{defensePercent:0.##}%");
+            if (magicPercent != 0)
+                bonuses.Add($"MAG {(magicPercent > 0 ? "+" : "")}{magicPercent:0.##}%");
+            if (critChanceBonus != 0)
+                bonuses.Add($"CRIT {(critChanceBonus > 0 ? "+" : "")}{critChanceBonus:0.##}%");
             
             // 레벨업 성장치 표시
             if (hpGrowthPerLevel != 0)
-                bonuses.Add($"HP +{hpGrowthPerLevel:F1}/레벨");
+                bonuses.Add($"HP +{hpGrowthPerLevel:0.##}/레벨");
             if (mpGrowthPerLevel != 0)
-                bonuses.Add($"MP +{mpGrowthPerLevel:F1}/레벨");
+                bonuses.Add($"MP +{mpGrowthPerLevel:0.##}/레벨");
             if (attackGrowthPerLevel != 0)
-                bonuses.Add($"ATK +{attackGrowthPerLevel:F1}/레벨");
+                bonuses.Add($"ATK +{attackGrowthPerLevel:0.##}/레벨");
             if (defenseGrowthPerLevel != 0)
-                bonuses.Add($"DEF +{defenseGrowthPerLevel:F1}/레벨");
+                bonuses.Add($"DEF +{defenseGrowthPerLevel:0.##}/레벨");
             if (magicGrowthPerLevel != 0)
-                bonuses.Add($"MAG +{magicGrowthPerLevel:F1}/레벨");
+                bonuses.Add($"MAG +{magicGrowthPerLevel:0.##}/레벨");
             if (agilityGrowthPerLevel != 0)
-                bonuses.Add($"AGI +{agilityGrowthPerLevel:F1}/레벨");
+                bonuses.Add($"AGI +{agilityGrowthPerLevel:0.##}/레벨");
             if (luckGrowthPerLevel != 0)
-                bonuses.Add($"LUK +{luckGrowthPerLevel:F1}/레벨");
+                bonuses.Add($"LUK +{luckGrowthPerLevel:0.##}/레벨");
             if (attackLevelUpChanceBonus != 0)
                 bonuses.Add($"Lv업 ATK확률 {(attackLevelUpChanceBonus > 0 ? "+" : "")}{attackLevelUpChanceBonus:F0}%p");
             if (defenseLevelUpChanceBonus != 0)

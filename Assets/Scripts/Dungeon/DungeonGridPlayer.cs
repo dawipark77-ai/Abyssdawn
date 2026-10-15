@@ -65,6 +65,7 @@ public class DungeonGridPlayer : MonoBehaviour
     void Start()
     {
         EnsureReferences();
+        if (GetComponent<DungeonTapToMove>() == null) gameObject.AddComponent<DungeonTapToMove>(); // [2026-10-15] 칸을 눌러 이동
 
         // [SO] PlayerStats가 스스로 statData를 로드하므로 GameManager 연동 제거
         PlayerStats stats = GetComponent<PlayerStats>();
@@ -112,6 +113,9 @@ public class DungeonGridPlayer : MonoBehaviour
     public void MoveSouth() => TryMoveTo(DungeonDirection.South, false);
     public void MoveWest()  => TryMoveTo(DungeonDirection.West, false);
     public void MoveEast()  => TryMoveTo(DungeonDirection.East, false);
+
+    /// <summary>[2026-10-15] 칸 누름 이동이 한 걸음씩 부른다 (벽이면 튕기지 않고 조용히 멈춤).</summary>
+    public void StepOnce(DungeonDirection dir) => TryMoveTo(dir, true);
 
     /// <summary>누르기 시작: 즉시 한 칸 + 계속 누르고 있으면 연속 이동.</summary>
     public void BeginHold(DungeonDirection dir)

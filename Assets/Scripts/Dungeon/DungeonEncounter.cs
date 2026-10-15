@@ -71,11 +71,12 @@ public class DungeonEncounter : MonoBehaviour
         if (encounterChance <= 0f) return;
 
         float before = Danger;
-        float danger = Mathf.Clamp01(Danger + UnityEngine.Random.Range(0.5f, 1.5f) * encounterChance * dangerFillRate);
+        // [2026-10-14] 성향: 탐험가 조우 +15% · 탐욕 위험도 상승 +20%
+        float danger = Mathf.Clamp01(Danger + UnityEngine.Random.Range(0.5f, 1.5f) * encounterChance * dangerFillRate * Disposition.EncounterMult * Disposition.DangerFillMult);
         SetDanger(danger);
         WarnIfSensed(before, danger);
 
-        float chance = danger >= 1f ? 1f : encounterChance * earlyEncounterFactor * danger;
+        float chance = danger >= 1f ? 1f : encounterChance * earlyEncounterFactor * danger * Disposition.EncounterMult;
         float roll = UnityEngine.Random.value;
         Debug.Log("[DungeonEncounter] Checking encounter at " + pos + ". Danger: " + danger.ToString("F2") + ", Roll: " + roll.ToString("F2") + ", Chance: " + chance.ToString("F3"));
         if (roll < chance)

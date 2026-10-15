@@ -20,8 +20,13 @@ MonoBehaviour:
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: -10
+  magicPercent: 5
+  critChanceBonus: 5
   attackBonus: 0
-  defenseBonus: -1
+  defenseBonus: 0
   agilityBonus: 2
   magicBonus: 0
   luckBonus: -1
@@ -37,13 +42,13 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 15
   agilityLevelUpChanceBonus: 10
   luckLevelUpChanceBonus: 0
-  description: "Magic damage +5%, Crit chance +5%, Agility +2\nDefense -10%, Luck -1\nLevel
-    up: Magic +0.3 per level"
-  flavorText: "Elven eyes see further into both light and shadow, but expose their
-    fragile bodies."
+  description: "\uBC29\uC5B4 -10%\n\uB9C8\uB825(\uB9C8\uBC95 \uD53C\uD574) +5%\n\uBBFC\uCCA9
+    +2 (\uCD08\uC815\uBC00 \uC2DC\uC57C)\n\uD589\uC6B4 -1 (\uB3D9\uB8CC\uC640 \uBE44\uC5B8\uC5B4\uC801
+    \uD611\uB3D9 \uBD88\uAC00)\n\uCE58\uBA85\uD0C0\uC728 +5%\n\n\uB808\uBCA8\uC5C5
+    \uB54C \uB9C8\uB825\uC774 \uC624\uB97C \uD655\uB960 +15%p\n\uB808\uBCA8\uC5C5
+    \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960 +10%p"
+  flavorText: These eyes see further into both light and shadow, but they expose
+    a fragile body.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

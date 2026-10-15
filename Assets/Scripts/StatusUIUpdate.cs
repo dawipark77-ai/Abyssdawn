@@ -175,6 +175,7 @@ public class StatusUIUpdate : MonoBehaviour
             SkillData skill = (i < count) ? skills[i] : null;
             Sprite icon = (skill != null) ? skill.skillIcon : null;
             SetSlotIcon(slot, icon);
+            SetFallbackName(slot, skill != null && icon == null ? skill.skillName : null);
         }
     }
 
@@ -187,6 +188,29 @@ public class StatusUIUpdate : MonoBehaviour
 
         // 아이콘을 넣은 후 명시적으로 활성화
         slot.gameObject.SetActive(true);
+    }
+
+    /// <summary>[2026-10-15] 아이콘이 없는 스킬은 칸이 비어 보이지 않게 이름 글자로 대신 보여 준다.</summary>
+    private static void SetFallbackName(Image slot, string name)
+    {
+        var t = slot.transform.Find("FallbackName");
+        if (string.IsNullOrEmpty(name)) { if (t != null) t.gameObject.SetActive(false); return; }
+        TMPro.TextMeshProUGUI tmp;
+        if (t == null)
+        {
+            var go = new GameObject("FallbackName", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+            go.transform.SetParent(slot.transform, false);
+            var rt = (RectTransform)go.transform; rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = new Vector2(2, 2); rt.offsetMax = new Vector2(-2, -2);
+            tmp = go.GetComponent<TMPro.TextMeshProUGUI>();
+            tmp.enableAutoSizing = true; tmp.fontSizeMin = 8; tmp.fontSizeMax = 18;
+            tmp.alignment = TMPro.TextAlignmentOptions.Center; tmp.raycastTarget = false;
+            tmp.color = new Color(0.83f, 0.65f, 0.38f);
+            var other = slot.GetComponentInParent<Canvas>() != null ? slot.transform.root.GetComponentInChildren<TMPro.TextMeshProUGUI>(true) : null;
+            if (other != null) tmp.font = other.font;
+        }
+        else tmp = t.GetComponent<TMPro.TextMeshProUGUI>();
+        tmp.gameObject.SetActive(true);
+        tmp.text = name;
     }
 
     private void ClearSlots(List<Image> slots)

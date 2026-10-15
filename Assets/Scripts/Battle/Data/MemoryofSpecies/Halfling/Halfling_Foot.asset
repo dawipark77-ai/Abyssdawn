@@ -37,11 +37,9 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 20
   luckLevelUpChanceBonus: 0
-  description: "Agility +2, Attack -1. Level up: Agility +0.3 per level."
-  flavorText: "Bare feet tough as leather let them run quietly over any ground."
+  description: "\uACF5\uACA9 -1\n\uBBFC\uCCA9 +2\n\n\uB808\uBCA8\uC5C5 \uB54C \uBBFC\uCCA9\uC774
+    \uC624\uB97C \uD655\uB960 +20%p"
+  flavorText: Bare feet tough as leather let them run quietly over any ground.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

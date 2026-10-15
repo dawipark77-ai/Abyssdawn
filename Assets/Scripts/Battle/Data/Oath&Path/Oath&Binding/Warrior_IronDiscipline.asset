@@ -15,9 +15,9 @@ MonoBehaviour:
   oathID: Warrior_IronDiscipline
   oathName: Iron Discipline
   jobClass: 0
-  oathDescription: "\uBAA8\uB4E0 \uBB34\uAE30 \uACF5\uACA9\uB825 \uBCF4\uC815, \uC804\uCCB4
-    \uBB34\uAE30 \uBA85\uC911 +3%.\n\uC804\uD22C \uC2DC\uC791 \uC2DC \uC7A5\uCC29
-    \uBB34\uAE30\uC5D0 \uB530\uB77C STR \uB610\uB294 DEF +7."
+  oathDescription: "\uBB34\uAE30 \uBA85\uC911 +3%.\n\uC804\uD22C \uC2DC\uC791 \uC2DC
+    \uBB34\uAE30\uB97C \uB4E4\uBA74 \uACF5\uACA9 +7, \uBC29\uD328\uB97C \uB4E4\uBA74
+    \uBC29\uC5B4 +7."
   bindingStrength: 1
   bindingDescription: "\uB9C8\uBC95 \uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC \uC774 \uC11C\uC57D
     \uD6A8\uACFC 50% \uAC10\uC18C (2\uD134)."

@@ -352,6 +352,48 @@ namespace AbyssdawnBattle
         [Range(0f, 1f)]
         public float backflowSuppression;
 
+        // ── [2026-10-15] 단계 스킬 (예: Throwing Axe I~V 처럼 이름 끝 로마 숫자로 나뉜 스킬) ──
+        private static readonly string[] Romans = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
+
+        /// <summary>"Throwing Axe II" → 기본 이름 "Throwing Axe", 단계 2. 로마 숫자로 끝나지 않으면 false.</summary>
+        public static bool TrySplitTier(string name, out string baseName, out int tier)
+        {
+            baseName = name; tier = 0;
+            if (string.IsNullOrEmpty(name)) return false;
+            int sp = name.LastIndexOf(' ');
+            if (sp <= 0) return false;
+            int idx = System.Array.IndexOf(Romans, name.Substring(sp + 1));
+            if (idx < 0) return false;
+            baseName = name.Substring(0, sp); tier = idx + 1;
+            return true;
+        }
+
+        /// <summary>같은 기본 이름의 단계 스킬이 몇 단계까지 있는지 (불러온 SkillData 기준).</summary>
+        private static readonly System.Collections.Generic.Dictionary<string, int> _maxTierCache = new System.Collections.Generic.Dictionary<string, int>();
+
+        public static int MaxTier(string baseName)
+        {
+            int cached;
+            if (_maxTierCache.TryGetValue(baseName, out cached)) return cached;
+            int max = 0;
+            foreach (var s in Resources.FindObjectsOfTypeAll<SkillData>())
+            {
+                string b; int t;
+                if (s != null && TrySplitTier(s.skillName, out b, out t) && b == baseName && t > max) max = t;
+            }
+            if (max > 1) _maxTierCache[baseName] = max; // 다 불러오기 전엔 저장하지 않음
+            return max;
+        }
+
+        /// <summary>"Lv 2/5" (단계 스킬이 아니면 null).</summary>
+        public string TierLabel()
+        {
+            string b; int t;
+            if (!TrySplitTier(skillName, out b, out t)) return null;
+            int max = MaxTier(b);
+            return max > 1 ? $"Lv {t}/{max}" : null;
+        }
+
         [Header("━━━━━━━━━━ 패시브 랭크 ━━━━━━━━━━")]
         public int maxRank;
         public float[] bonusPerRank;
@@ -380,6 +422,9 @@ namespace AbyssdawnBattle
 
         [Tooltip("탐험 스킬 (함정·생존·자원). 전투 스킬 칸(액티브 6·패시브 3)을 쓰지 않고, 배우기만 하면 항상 적용된다")]
         public bool fieldSkill = false;
+
+        [Tooltip("[2026-10-15] 던전(전투 밖)의 SKILLS 메뉴에서 쓸 수 있는 스킬 (회복 마법 등 — 드퀘식)")]
+        public bool usableInField = false;
 
         [Tooltip("한 전투에서 쓸 수 있는 횟수. 0 = 무제한 (쿨다운과 별개로 항상 적용)")]
         [Min(0)] public int usesPerBattle = 0;

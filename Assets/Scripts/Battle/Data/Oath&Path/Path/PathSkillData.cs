@@ -54,6 +54,13 @@ namespace AbyssdawnBattle
         [Tooltip("대가 / 패널티 설명 (선택)")]
         [TextArea(2, 6)]
         public string drawbackDescription;
+
+        [Header("[2026-10-14] 배우기 / 전투")]
+        [Tooltip("배우는 데 드는 LP")]
+        public int lpCost = 1;
+
+        [Tooltip("액티브면 전투 스킬 목록에 들어가는 SkillData (패시브는 비움)")]
+        public SkillData battleSkill;
     }
 }
 

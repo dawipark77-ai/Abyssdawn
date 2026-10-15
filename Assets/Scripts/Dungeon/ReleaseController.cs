@@ -73,6 +73,9 @@ public class ReleaseController : MonoBehaviour
     /// <summary>Release 버튼 클릭 → YesorNo 확인 후 방출.</summary>
     /// <param name="isActive">true=활성 슬롯, false=대기 슬롯</param>
     /// <param name="slotIndex">0/1/2</param>
+    /// <summary>[2026-10-15] 새 동료 카드(CompanionCardView)의 Release 버튼이 부른다.</summary>
+    public void RequestRelease(bool isActive, int slotIndex) => OnReleaseClicked(isActive, slotIndex);
+
     private void OnReleaseClicked(bool isActive, int slotIndex)
     {
         Debug.Log($"[Release] Release 버튼 클릭 — {(isActive ? "활성" : "대기")} slot={slotIndex}");
@@ -115,6 +118,7 @@ public class ReleaseController : MonoBehaviour
 
             // 화면 갱신 — 빈 슬롯으로 보이게
             if (companionSlotView != null) companionSlotView.Refresh();
+            var cardView = GetComponent<CompanionCardView>(); if (cardView != null) cardView.Refresh(); // [2026-10-15]
             if (reservesView != null) reservesView.Refresh();
         }
         else

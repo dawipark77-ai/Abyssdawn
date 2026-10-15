@@ -20,6 +20,11 @@ MonoBehaviour:
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: -1
   defenseBonus: 0
   agilityBonus: 0
@@ -37,12 +42,12 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 15
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Magic +1\nAttack -1\nLevel up: MP +0.2 per level"
-  flavorText: "Their bodies accept little food but much mana, reshaping what sustains
-    them."
+  description: "\uACF5\uACA9 -1 (\uBB3C\uB9AC\uC801 \uADFC\uB825 \uC800\uD558)\n\uB9C8\uB825
+    +1  \u2192 \uCD5C\uB300 MP +3\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4 \uCD5C\uB300
+    MP +0.25 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5 \uB54C \uB9C8\uB825\uC774
+    \uC624\uB97C \uD655\uB960 +15%p"
+  flavorText: Their bodies accept little food but much mana, reshaping what sustains
+    them.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

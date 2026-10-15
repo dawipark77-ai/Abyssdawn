@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df4443b293f06ee47939875ab0dfa057, type: 3}
+  m_Name: Orc_Trait
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.TraitsOfSpeciesData
+  traitID: Orc_Trait
+  traitName: "\uC804\uD22C \uD3ED\uC8FC"
+  traitNameEnglish: Battle Frenzy
+  species: 2
+  traitIcon: {fileID: 0}
+  requiredMemoryCount: 3
+  requireSameSpecies: 1
+  hpBonusPercent: 0
+  hpBonus: 0
+  attackBonus: 0
+  defenseBonus: 0
+  agilityBonus: 0
+  magicBonus: 0
+  luckBonus: 0
+  description: "HP 50% \uC774\uD558\uC77C \uB54C \uACF5\uACA9 +15%.\n\uC801\uC744
+    \uC4F0\uB7EC\uB728\uB9B4 \uB54C\uB9C8\uB2E4 \uACF5\uACA9 +5% (\uCD5C\uB300 3\uD68C,
+    \uC804\uD22C \uB3D9\uC548).\n\uBC1B\uB294 \uD68C\uBCF5 \u221230% (\uD3ED\uC8FC
+    \uC911\uC5D4 \uD68C\uBCF5\uC744 \uAC70\uBD80)."
+  flavorText: "\uD53C\uB97C \uBCF4\uBA74 \uAC15\uD574\uC9C4\uB2E4."
+  specialEffectTags:
+  - BattleFrenzy

@@ -18,8 +18,13 @@ MonoBehaviour:
   species: 2
   memoryIcon: {fileID: 0}
   hpBonusPercent: -10
-  mpBonusPercent: 5
+  mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 0
   agilityBonus: 1
@@ -37,11 +42,11 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 15
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Agility +1, Max HP -10%. Level up: Agility +0.2 per level."
-  flavorText: "Their green skin drinks in light and violence alike."
+  description: "\uCD5C\uB300 HP -10% (\uCCB4\uC628 \uC870\uC808 \uC2E4\uD328\uB85C
+    \uC7A5\uAE30\uC804 \uBD88\uB9AC)\n\uBBFC\uCCA9 +1 (\uC740\uC2E0\xB7\uAE30\uC2B5)\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
+    \uCD5C\uB300 MP +0.15 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
+    \uB54C \uB9C8\uB825\uC774 \uC624\uB97C \uD655\uB960 +15%p"
+  flavorText: Their green skin drinks in light and violence alike.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

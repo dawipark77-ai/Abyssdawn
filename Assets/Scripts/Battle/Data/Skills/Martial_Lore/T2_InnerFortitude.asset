@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: T2_InnerFortitude
   skillName: Inner Fortitude
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 9fa7999416c16a04c8430e6ac32b99f5, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uC790\uAE30 \uAC15\uD654] \uB0B4\uBA74
     \uAC15\uD654. \uAC78\uB9B0 \uC0C1\uD0DC\uC774\uC0C1(\uCD9C\uD608\xB7\uB3C5 \uB4F1)\uC758
     \uB0A8\uC740 \uD134\uC744 1\uC529 \uC904\uC774\uACE0, 3\uD134 \uB3D9\uC548 \uC0C1\uD0DC\uC774\uC0C1

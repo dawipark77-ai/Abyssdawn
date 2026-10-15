@@ -48,6 +48,7 @@ public static class ConsumableEffectApplier
 
         // [2026-10-07] 탐험 스킬 '생존 전문가': 회복 아이템 효과 +20%
         float potency = SurvivalistPotency(user);
+        if (Disposition.IsHero(user)) potency *= Disposition.HealItemMult; // [2026-10-14] 성향 구두쇠: 회복 아이템 −20%
 
         // 1) HP 회복 (hpRecoveryPercent × maxHP, 반올림)
         if (item.hpRecoveryPercent > 0f)
@@ -163,6 +164,7 @@ public static class ConsumableEffectApplier
             }
         }
 
+        CardFx.ItemUsed(user, result); // [2026-10-15] 카드 반짝임 + 회복 숫자
         return result;
     }
 

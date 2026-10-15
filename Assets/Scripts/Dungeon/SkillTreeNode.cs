@@ -609,7 +609,8 @@ public class SkillTreeNode : MonoBehaviour
     /// <summary>[2026-10-09] 등급 스킬(maxRank 2 이상): 아이콘 아래 오른쪽에 "Lv 2/5".</summary>
     private void RefreshRankLabel()
     {
-        if (skillData == null || skillData.maxRank <= 1 || IsDuplicateNode())
+        string tierLabel = skillData != null && skillData.maxRank <= 1 ? skillData.TierLabel() : null; // [2026-10-15] Throwing Axe I~V 같은 단계 스킬
+        if (skillData == null || (skillData.maxRank <= 1 && tierLabel == null) || IsDuplicateNode())
         {
             if (_rankLabel != null) _rankLabel.gameObject.SetActive(false);
             return;
@@ -630,8 +631,15 @@ public class SkillTreeNode : MonoBehaviour
             _rankLabel.outlineColor = new Color32(0, 0, 0, 255);
             if (skillNameText != null) _rankLabel.font = skillNameText.font;
         }
-        int rank = treeManager != null ? treeManager.GetSkillRank(skillData) : (currentState == SkillState.Learned ? 1 : 0);
         _rankLabel.gameObject.SetActive(true);
+        if (tierLabel != null)
+        {
+            _rankLabel.transform.SetAsLastSibling();
+            _rankLabel.color = currentState == SkillState.Learned ? new Color(1f, 0.85f, 0.4f) : Color.white;
+            _rankLabel.text = tierLabel;
+            return;
+        }
+        int rank = treeManager != null ? treeManager.GetSkillRank(skillData) : (currentState == SkillState.Learned ? 1 : 0);
         _rankLabel.transform.SetAsLastSibling();
         _rankLabel.color = rank >= skillData.maxRank ? new Color(1f, 0.85f, 0.4f) : Color.white;
         _rankLabel.text = $"Lv {rank}/{skillData.maxRank}";

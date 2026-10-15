@@ -122,7 +122,31 @@ public static class EquipmentBag
         data.body = _startGear[2];
         data.accessory1 = _startGear[3];
         data.accessory2 = _startGear[4];
+        EquipStartingGear(data); // [2026-10-14] 직업 기초 장비
         Debug.Log("[EquipmentBag] 새 탐험 — 주운 장비 초기화, 장착 장비를 시작 장비로 되돌림");
+    }
+
+    /// <summary>[2026-10-14] 직업의 기초 장비를 빈 칸에 장착 (무기 → 오른손, 갑옷 → 몸통, 장신구 → 장신구1·2).</summary>
+    public static void EquipStartingGear(PlayerStatData data)
+    {
+        if (data == null || data.currentJob == null || data.currentJob.startingEquipment == null) return;
+        foreach (var e in data.currentJob.startingEquipment)
+        {
+            if (e == null) continue;
+            switch (e.equipmentType)
+            {
+                case EquipmentType.Hand:
+                case EquipmentType.TwoHanded:
+                    if (data.rightHand == null) data.rightHand = e; else if (data.leftHand == null && !e.isTwoHanded) data.leftHand = e;
+                    break;
+                case EquipmentType.Armour:
+                    if (data.body == null) data.body = e;
+                    break;
+                case EquipmentType.Accessory:
+                    if (data.accessory1 == null) data.accessory1 = e; else if (data.accessory2 == null) data.accessory2 = e;
+                    break;
+            }
+        }
     }
 
     /// <summary>테스트용: Resources 의 모든 장비 지급 (ConsumableInventory 의 F12 테스트 지급과 함께).</summary>

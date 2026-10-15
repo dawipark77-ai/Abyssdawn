@@ -20,6 +20,11 @@ MonoBehaviour:
   hpBonusPercent: 10
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 1
   defenseBonus: 0
   agilityBonus: 0
@@ -37,11 +42,11 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Attack +1, Max HP +10%, Luck -1. Level up: Attack +0.2 per level."
-  flavorText: "Blood thick with power keeps them fighting long after others fall."
+  description: "\uCD5C\uB300 HP +10%\n\uACF5\uACA9 +1 (\uD3ED\uBC1C\uC801\uC778 \uD798)\n\uD589\uC6B4
+    -1 (\uD608\uC555 \uC0C1\uC2B9\uC73C\uB85C \uB2E4\uD608\uC9C8)\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
+    \uCD5C\uB300 HP +0.3 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
+    \uB54C \uACF5\uACA9\uC774 \uC624\uB97C \uD655\uB960 +15%p"
+  flavorText: Blood thick with power keeps them fighting long after others fall.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

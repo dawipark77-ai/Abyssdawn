@@ -37,11 +37,10 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Defense +2, Agility -2. Level up: Defense +0.3 per level."
-  flavorText: "Their bones are like stone, and just as slow to move."
+  description: "\uBC29\uC5B4 +2\n\uBBFC\uCCA9 -2\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
+    \uCD5C\uB300 HP +0.2 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
+    \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +20%p"
+  flavorText: Their bones are like stone, and just as slow to move.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

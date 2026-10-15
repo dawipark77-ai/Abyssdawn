@@ -104,6 +104,7 @@ public class MemoryOfSpeciesUI : MonoBehaviour
         TraitsOfSpeciesData capturedTrait = traitData;
         if (traitsImage != null) DetailClickTarget.Attach(traitsImage, () => DetailClickTarget.ForTrait(capturedTrait));
         if (traitsText == null) return;
+        DetailClickTarget.Attach(traitsText, () => DetailClickTarget.ForTrait(capturedTrait)); // [2026-10-15] 이름 글자를 눌러도 (아이콘이 없을 때 대비)
 
         if (traitData != null)
         {

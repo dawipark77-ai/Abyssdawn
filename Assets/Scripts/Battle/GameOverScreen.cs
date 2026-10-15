@@ -74,8 +74,45 @@ public class GameOverScreen : MonoBehaviour
             Debug.LogWarning($"[GameOverScreen] 버튼 {bound}/2개만 찾았습니다. 이름이 RestartButton / LoadButton 인 Button 이 있어야 합니다.");
 
         foreach (TMP_Text t in panel.GetComponentsInChildren<TMP_Text>(true))
+        {
             if (t.name == "SaveInfo")
                 t.text = hasSave ? (saveInfo ?? "") : "<color=#888888>No save yet</color>";
+            else if (t.name == "Desc" && t.transform.parent != null && t.transform.parent.name == "RestartButton")
+                t.text = "<color=#BBBBBB>Same hero, a new journey\nfrom B1</color>"; // [2026-10-15] 같은 프로필로 1층부터
+        }
+        AddTitleButton(panel);
+    }
+
+    /// <summary>[2026-10-15] "타이틀로" — 창 아래에 작은 버튼. 던전 상태를 비우고 타이틀 화면으로.</summary>
+    private void AddTitleButton(GameObject panel)
+    {
+        if (panel.GetComponentsInChildren<Button>(true).Length > 0)
+            foreach (Button b in panel.GetComponentsInChildren<Button>(true)) if (b.name == "TitleButton") return;
+        Transform box = panel.transform.Find("Panel") ?? panel.transform;
+        Image bg = CreateImage((RectTransform)box, "TitleButton", new Color(0.12f, 0.1f, 0.06f, 0.95f), true);
+        var rt = bg.rectTransform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f); rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0f, -24f); rt.sizeDelta = new Vector2(360f, 90f);
+        var o = bg.gameObject.AddComponent<Outline>(); o.effectColor = new Color(0.85f, 0.68f, 0.3f, 0.9f); o.effectDistance = new Vector2(3f, -3f);
+        var btn = bg.gameObject.AddComponent<Button>(); btn.targetGraphic = bg;
+        TextMeshProUGUI l = CreateText(rt, "Label", 40, FontStyles.Bold);
+        l.text = "To Title"; l.color = new Color(1f, 0.92f, 0.65f);
+        var lrt = l.rectTransform; lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one; lrt.offsetMin = lrt.offsetMax = Vector2.zero;
+        btn.onClick.AddListener(() => Choose(GoToTitle));
+    }
+
+    public const string TitleScene = "Abyssdawn_Title";
+
+    private static void GoToTitle()
+    {
+        Time.timeScale = 1f;
+        DungeonPersistentData.ClearState();
+        DungeonTravelLog.Clear();
+        GameManager.EnsureInstance().ClearAllData();
+        CompanionPartyPersistence.Clear();
+        PlayerStats.PendingLevelUpNotes.Clear();
+        DungeonEncounter.justReturnedFromBattle = false;
+        EncounterTransition.LoadSceneWithFade(TitleScene);
     }
 
     private void Choose(Action action)

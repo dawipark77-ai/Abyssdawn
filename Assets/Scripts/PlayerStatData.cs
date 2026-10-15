@@ -72,6 +72,20 @@ public class PlayerStatData : ScriptableObject
     [Tooltip("장신구 2")]
     public AbyssdawnBattle.EquipmentData accessory2;
 
+    [Header("서약 (Oath & Binding)")]
+    [Tooltip("[2026-10-14] 새 게임에서 고른 서약 (직업마다 2개 중 1개)")]
+    public AbyssdawnBattle.OathBindingData currentOath;
+
+    [Tooltip("[2026-10-14] LP 로 배운 직업 패스 스킬")]
+    public List<AbyssdawnBattle.PathSkillData> learnedPathSkills = new List<AbyssdawnBattle.PathSkillData>();
+
+    public bool HasPathSkill(string skillID)
+    {
+        if (learnedPathSkills == null) return false;
+        foreach (var p in learnedPathSkills) if (p != null && p.skillID == skillID) return true;
+        return false;
+    }
+
     [Header("종의 기억 (Memory of Species)")]
     [Tooltip("종의 기억 슬롯 1 - 3개 장착 시 특성 발동")]
     public MemoryOfSpeciesData memorySlot1;
@@ -103,6 +117,8 @@ public class PlayerStatData : ScriptableObject
     {
         if (learnedSkills == null) learnedSkills = new List<AbyssdawnBattle.SkillData>();
         learnedSkills.Clear();
+        if (learnedPathSkills == null) learnedPathSkills = new List<AbyssdawnBattle.PathSkillData>();
+        learnedPathSkills.Clear(); // [2026-10-14] 직업 패스도 새로
         ClearSlots(ref equippedSkills, 6);
         ClearSlots(ref equippedPassives, 3);
 #if UNITY_EDITOR

@@ -352,6 +352,7 @@ public class DungeonHud : MonoBehaviour
     public void Toast(string message)
     {
         if (string.IsNullOrEmpty(message)) return;
+        DungeonTravelLog.Add(message); // [2026-10-15] 여행 로그에도 한 줄
         _toasts.Enqueue(message);
         if (_toastRoutine == null) _toastRoutine = StartCoroutine(ToastLoop());
     }
@@ -522,6 +523,10 @@ public class DungeonHud : MonoBehaviour
     {
         _infoRoot = CreateCanvas("Info", InfoSortingOrder, false);
         _overlayRoot = CreateCanvas("Overlay", OverlaySortingOrder, true);
+        // [2026-10-15] 여행 로그 (메뉴 줄 바로 위 최근 4줄)
+        TMP_FontAsset logFont = null;
+        foreach (var f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>()) if (f != null && f.name == "NotoSansKR SDF") { logFont = f; break; }
+        DungeonTravelLog.Create(transform, logFont);
 
         // 화면 테두리 (금색 이중선 + 모서리 장식). [2026-10-05] 기본 끔 — 다시 쓰려면 ShowScreenFrame = true
         if (ShowScreenFrame) BuildScreenFrame();

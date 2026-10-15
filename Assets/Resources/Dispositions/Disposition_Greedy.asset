@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 523e041d6a0b75246a7b0fb12dd43373, type: 3}
+  m_Name: Disposition_Greedy
+  m_EditorClassIdentifier: Assembly-CSharp::DispositionData
+  dispositionName: Greedy
+  dispositionNameKR: "\uD0D0\uC695"
+  icon: {fileID: 21300000, guid: 7d922dae4bc9f2441986aa7cb32a0fee, type: 3}
+  description: 'Gold from monsters +25%.
+
+    ENTROPY rises 20% faster.'
+  descriptionKR: "\uBAAC\uC2A4\uD130 \uACE8\uB4DC +25%.\n\uC704\uD5D8\uB3C4(ENTROPY)
+    \uC0C1\uC2B9 +20%."

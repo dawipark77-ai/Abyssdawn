@@ -13,8 +13,27 @@ MonoBehaviour:
   m_Name: Class_Thief
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: Thief
-  description: "A thief specialized in Agility and Luck."
+  description: A thief specialized in Agility and Luck.
   classIcon: {fileID: 0}
+  traitName: Light Fingers
+  traitNameKR: "\uADF8\uB9BC\uC790 \uC190\uB180\uB9BC"
+  traitDescription: 'Crit chance +5%. First turn Agility +15%.
+
+    Cost: Evasion
+    -10% in heavy armour.'
+  traitDescriptionKR: "\uCE58\uBA85\uD0C0 \uD655\uB960 +5%. \uCCAB \uD134 \uBBFC\uCCA9
+    +15%.\n\uB300\uAC00: \uC911\uAC11\uC744 \uC785\uC73C\uBA74 \uD68C\uD53C -10%."
+  weaponAccuracyBonus: 0
+  critChanceBonus: 5
+  firstTurnSpeedBonus: 0.15
+  heavyArmourEvasionPenalty: 0.1
+  unarmedDamageBonus: 0
+  twoHandedAccuracyPenalty: 0
+  physicalCostUsesMP: 0
+  startingEquipment:
+  - {fileID: 11400000, guid: 84566c3098573fe49b51c518557767dd, type: 2}
+  oaths: []
+  pathSkills: []
   hpMultiplier: 0.85
   mpMultiplier: 1.03
   attackMultiplier: 1

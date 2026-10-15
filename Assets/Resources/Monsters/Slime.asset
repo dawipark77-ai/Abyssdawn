@@ -15,7 +15,7 @@ MonoBehaviour:
   monsterName: Slime
   sprite: {fileID: -691275006349873449, guid: a291bd318076d264eb6c7547cfa65db5, type: 3}
   scaleMultiplier: 0.8
-  hoverOffsetY: -0.5
+  hoverOffsetY: 0
   type: 0
   race: 0
   basicAttackOverride: {fileID: 0}

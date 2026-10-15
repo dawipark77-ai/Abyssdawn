@@ -20,6 +20,11 @@ MonoBehaviour:
   hpBonusPercent: 5
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 0
   agilityBonus: 0
@@ -37,14 +42,14 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "HP +5% (\uC9C0\uAD6C\uB825 \uC99D\uAC00)\n\uBC29\uC5B4 -1 (\uD138\uC774\uB098
-    \uAC00\uC8FD \uAC19\uC740 \uCC9C\uC5F0 \uBCF4\uD638\uB9C9 \uBD80\uC7AC)\n\uB9C8\uBC95
-    -1 (\uACFC\uC5F4 \uC5C6\uC774 \uC9C0\uC18D\uC801\uC778 \uC6C0\uC9C1\uC784)"
-  flavorText: "\uC778\uAC04\uC740 \uAC00\uC7A5 \uC587\uC740 \uAC00\uC8FD\uC744 \uAC00\uC84C\uC9C0\uB9CC,
-    \uAC00\uC7A5 \uC624\uB7AB\uB3D9\uC548 \uB728\uAC70\uC6B4 \uC804\uC7A5\uC744 \uB2EC\uB9B4
-    \uC218 \uC788\uB2E4."
+  description: "\uCD5C\uB300 HP +5% (\uC9C0\uAD6C\uB825 \uC99D\uAC00)\n\uB9C8\uB825
+    -1 (\uACFC\uC5F4 \uC5C6\uC774 \uC9C0\uC18D\uC801\uC778 \uC6C0\uC9C1\uC784)  \u2192
+    \uCD5C\uB300 MP -3\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4 \uCD5C\uB300 HP +0.2 (\uC18C\uC218\uC810\uC740
+    \uC313\uC784)\n\uB808\uBCA8\uC5C5 \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960
+    +10%p"
+  flavorText: "\uAC00\uC7A5 \uC587\uC740 \uAC00\uC8FD\uC774\uC9C0\uB9CC, \uAC00\uC7A5
+    \uC624\uB7AB\uB3D9\uC548 \uB728\uAC70\uC6B4 \uC804\uC7A5\uC744 \uB2EC\uB9B4 \uC218
+    \uC788\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-

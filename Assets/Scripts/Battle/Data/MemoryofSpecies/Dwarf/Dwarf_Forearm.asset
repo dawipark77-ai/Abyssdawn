@@ -37,11 +37,10 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Attack +2, Magic -1. Level up: Attack +0.3 per level."
-  flavorText: "Arms forged by a lifetime of hammer blows swing weapons with brutal force."
+  description: "\uACF5\uACA9 +2\n\uB9C8\uB825 -1  \u2192 \uCD5C\uB300 MP -3\n\n\uB808\uBCA8\uC5C5
+    \uB54C \uACF5\uACA9\uC774 \uC624\uB97C \uD655\uB960 +20%p"
+  flavorText: Arms forged by a lifetime of hammer blows swing weapons with brutal
+    force.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

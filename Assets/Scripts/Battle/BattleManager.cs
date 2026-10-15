@@ -280,6 +280,8 @@ public class BattleManager : MonoBehaviour
         public int itemHealAmount;
         public bool consumesPotion;
         public ConsumableItemSO usedItem;
+        public PlayerStats moveActor;   // [2026-10-15] "move": 주인공이 옮기는 아군 (자신 포함)
+        public BattleSlot moveTo;       //   그 아군이 갈 칸 (옆 1칸)
     }
 
     private List<AllyCommand> pendingCommands = new List<AllyCommand>();
@@ -525,7 +527,7 @@ public class BattleManager : MonoBehaviour
             textRT.offsetMax = new Vector2(-10, 0);
 
             TMPro.TextMeshProUGUI btnText = textObj.GetComponent<TMPro.TextMeshProUGUI>();
-            string costText = skill.hpCostPercent > 0 ? $"HP {skill.hpCostPercent}%" : skill.mpCost > 0 ? $"MP {skill.mpCost}" : "No cost";
+            string costText = skill.hpCostPercent > 0 ? $"{CostLabel(currentControlledMember)} {skill.hpCostPercent}%" : skill.mpCost > 0 ? $"MP {skill.mpCost}" : "No cost";
             if (skill.usesPerBattle > 0)
                 costText += $" · {Mathf.Max(0, skill.usesPerBattle - GetCount(_skillUses, currentControlledMember, skill))}/{skill.usesPerBattle} per battle";
             if (usable)
@@ -653,8 +655,9 @@ public class BattleManager : MonoBehaviour
             string limitReason = weaponCompatible ? SkillLimitReason(currentControlledMember, skill) : null;
             // [2026-10-11] 비용이 모자라면 못 씀 — 카드 어둡게 · 클릭 불가 · 비용 글자 붉게
             bool mpShort = currentControlledMember != null && skill.mpCost > 0 && currentControlledMember.currentMP < skill.mpCost;
-            int hpCostNow = skill.hpCostPercent > 0 && currentControlledMember != null ? Mathf.Max(1, Mathf.RoundToInt(currentControlledMember.maxHP * skill.hpCostPercent / 100f)) : 0;
-            bool hpShort = currentControlledMember != null && hpCostNow > 0 && currentControlledMember.currentHP <= hpCostNow;
+            int hpCostNow = skill.hpCostPercent > 0 && currentControlledMember != null ? HpCost(currentControlledMember, skill) : 0;
+            bool hpShort = currentControlledMember != null && hpCostNow > 0
+                && (currentControlledMember.PaysPhysicalWithMP() ? currentControlledMember.currentMP < hpCostNow : currentControlledMember.currentHP <= hpCostNow);
             bool costShort = mpShort || hpShort;
             bool usable = weaponCompatible && limitReason == null && !costShort;
 
@@ -690,13 +693,19 @@ public class BattleManager : MonoBehaviour
                 Image icon = iconT.GetComponent<Image>();
                 icon.sprite = skill.skillIcon;
                 icon.preserveAspect = true;
+                // [2026-10-15] 스킬 아이콘 크게 (45×52 → 카드 높이 가까이 80×80), 이름은 그만큼 오른쪽으로
+                var irt = (RectTransform)iconT;
+                irt.sizeDelta = new Vector2(80f, 80f);
+                irt.anchoredPosition = new Vector2(-cell.x * 0.5f + 12f + 40f, 0f);
+                var nameRt = card.transform.Find("NameText") as RectTransform;
+                if (nameRt != null) nameRt.offsetMin = new Vector2(-cell.x * 0.5f + 12f + 80f + 10f, nameRt.offsetMin.y);
                 icon.enabled = skill.skillIcon != null;
                 icon.color = usable ? Color.white : new Color(1f, 1f, 1f, 0.35f);
                 if (skill.skillIcon != null) SkillIconFrame.Apply(icon);
             }
 
             // 이름 (NameText) · 비용/사유 (Quantity 자리, 오른쪽 아래)
-            string costText = skill.hpCostPercent > 0 ? $"HP {skill.hpCostPercent}%" : skill.mpCost > 0 ? $"MP {skill.mpCost}" : "";
+            string costText = skill.hpCostPercent > 0 ? $"{CostLabel(currentControlledMember)} {skill.hpCostPercent}%" : skill.mpCost > 0 ? $"MP {skill.mpCost}" : "";
             if (skill.usesPerBattle > 0)
                 costText += (costText.Length > 0 ? " · " : "") + $"{Mathf.Max(0, skill.usesPerBattle - GetCount(_skillUses, currentControlledMember, skill))}/{skill.usesPerBattle}";
             var nameT = card.transform.Find("NameText") != null ? card.transform.Find("NameText").GetComponent<TMPro.TMP_Text>() : null;
@@ -704,10 +713,12 @@ public class BattleManager : MonoBehaviour
             if (nameT != null)
             {
                 nameT.enableAutoSizing = true; nameT.fontSizeMin = 14f; nameT.fontSizeMax = 25f;
-                if (usable) { nameT.text = skill.skillName; nameT.color = Color.white; }
-                else if (costShort && weaponCompatible && limitReason == null) { nameT.text = $"{skill.skillName}\n<size=70%><color=#FF6666>Not enough {(mpShort ? "MP" : "HP")}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
-                else if (weaponCompatible) { nameT.text = $"{skill.skillName}\n<size=70%><color=#888888>{limitReason}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
-                else { nameT.text = $"{skill.skillName}\n<size=70%><color=#FF6666>Requires: {skill.weaponCategory}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
+                string tierTag = skill.TierLabel(); // [2026-10-15] 단계 스킬 "Lv 2/5" — 못 쓰는 카드에도
+                string shown = tierTag != null ? $"{skill.skillName} <size=70%><color=#D4A761>{tierTag}</color></size>" : skill.skillName;
+                if (usable) { nameT.text = shown; nameT.color = Color.white; }
+                else if (costShort && weaponCompatible && limitReason == null) { nameT.text = $"{shown}\n<size=70%><color=#FF6666>Not enough {(mpShort ? "MP" : "HP")}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
+                else if (weaponCompatible) { nameT.text = $"{shown}\n<size=70%><color=#888888>{limitReason}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
+                else { nameT.text = $"{shown}\n<size=70%><color=#FF6666>Requires: {skill.weaponCategory}</color></size>"; nameT.color = new Color(0.55f, 0.55f, 0.55f, 1f); }
             }
             if (qtyT != null)
             {
@@ -1400,6 +1411,11 @@ public class BattleManager : MonoBehaviour
         }
 
         BattleSlot fromSlot = mover.currentSlot;
+        // [2026-10-15] 카드 미끄러짐 연출용: 옮기기 전 카드 자리
+        int moverOldIdx = activePartyMembers.IndexOf(mover);
+        int occOldIdx = occupant != null ? activePartyMembers.IndexOf(occupant) : -1;
+        var oldCardPos = new List<Vector3>();
+        for (int i = 0; i < activePartyMembers.Count; i++) { var c = GetPlayerCardRect(activePartyMembers[i]); oldCardPos.Add(c != null ? c.position : Vector3.zero); }
 
         if (occupant == null)
         {
@@ -1422,6 +1438,9 @@ public class BattleManager : MonoBehaviour
         });
         PositionPartyMembers();
         UpdateStatusUI();
+        // [2026-10-15] 밀리고 당겨진 카드가 예전 자리에서 새 자리로 미끄러져 온다 (순간이동처럼 보이지 않게)
+        if (moverOldIdx >= 0 && moverOldIdx < oldCardPos.Count) CardFx.SlideFrom(GetPlayerCardRect(mover), oldCardPos[moverOldIdx]);
+        if (occupant != null && occOldIdx >= 0 && occOldIdx < oldCardPos.Count) CardFx.SlideFrom(GetPlayerCardRect(occupant), oldCardPos[occOldIdx]);
 
         Debug.Log($"[PlayerMove] {mover.playerName} {fromSlot} → {targetSlot}" +
                   (occupant != null ? $" (swap with {occupant.playerName})" : ""));
@@ -1436,6 +1455,12 @@ public class BattleManager : MonoBehaviour
     private void ApplySlotAssignment(EnemyStats es, BattleSlot newSlot, Transform newSlotTransform)
     {
         if (es == null || newSlotTransform == null) return;
+
+        // [2026-10-15] 적 카드도 예전 칸 카드 자리에서 새 칸으로 미끄러져 온다 (전열 1~4번 칸만 카드가 있음)
+        int oldCard = (int)es.currentSlot - 1, newCard = (int)newSlot - 1;
+        if (oldCard >= 0 && oldCard < enemyStatusSlots.Count && newCard >= 0 && newCard < enemyStatusSlots.Count && oldCard != newCard
+            && enemyStatusSlots[oldCard] != null && enemyStatusSlots[newCard] != null)
+            CardFx.SlideFrom(enemyStatusSlots[newCard], enemyStatusSlots[oldCard].position);
 
         float hoverY = 0f;
         Transform prevSlot = SlotTransformByIndex((int)es.currentSlot);
@@ -1848,6 +1873,7 @@ public class BattleManager : MonoBehaviour
                 hoveredEnemy.SetHighlight(false);
                 hoveredEnemy = null;
             }
+            if (_hoverGroup.Count > 0) SyncHoverGroup();
         }
     }
 
@@ -1941,14 +1967,199 @@ public class BattleManager : MonoBehaviour
                 battleUIManager.ForceCloseMenus();
                 battleUIManager.ShowMainMenu();
             }
-            else
+            else if (UndoPreviousCommand())
             {
-                // 이전 캐릭터로 돌아가기 (구현 복잡도에 따라 선택)
-                // 현재는 그냥 메뉴 닫기만 수행하거나 아무것도 안함
-                // 여기서는 일단 아무것도 안함 (Fight 메뉴 유지)
+                return; // [2026-10-15] 이전 동료의 명령을 취소하고 그 동료 차례로
             }
             battleUIManager.ShowBackButton(false);
         }
+    }
+
+    // ── [2026-10-15] 위치 이동 명령 (주인공 전용, 행동 소모) ──
+    private Button _moveButton;
+    private GameObject _movePicker;
+
+    /// <summary>Flee 버튼을 복제해 Move 버튼을 만들고, 명령 줄의 버튼들을 같은 간격으로 다시 놓는다.</summary>
+    private void EnsureMoveButton()
+    {
+        if (_moveButton != null) return;
+        // 명령 버튼 줄 (씬의 Canvas/BattleUI/FightPanel — Attack·Skill·Item·Defend·Flee) 에서 Flee 를 찾는다
+        Button flee = null;
+        var row = new List<RectTransform>();
+        foreach (var b in Resources.FindObjectsOfTypeAll<Button>())
+        {
+            if (b == null || b.gameObject.scene != gameObject.scene) continue;
+            var t = b.GetComponentInChildren<TMPro.TMP_Text>(true);
+            string label = t != null ? t.text.Trim() : b.name;
+            if (label == "Flee" || b.name == "Flee") { flee = b; break; }
+        }
+        if (flee == null) return;
+        var parent = flee.transform.parent;
+        var go = Instantiate(flee.gameObject, parent);
+        go.name = "Move";
+        _moveButton = go.GetComponent<Button>();
+        _moveButton.onClick.RemoveAllListeners();
+        for (int i = _moveButton.onClick.GetPersistentEventCount() - 1; i >= 0; i--) _moveButton.onClick.SetPersistentListenerState(i, UnityEngine.Events.UnityEventCallState.Off);
+        _moveButton.onClick.AddListener(OnMoveButton);
+        var mt = go.GetComponentInChildren<TMPro.TMP_Text>(true); if (mt != null) mt.text = "Move";
+        // 같은 줄(같은 부모, 비슷한 높이)의 버튼들을 화면 위치 기준으로 같은 간격 배치 (레이아웃 그룹이 없을 때만)
+        if (parent.GetComponent<LayoutGroup>() == null)
+        {
+            var fleeRt = (RectTransform)flee.transform;
+            float rowY = parent.InverseTransformPoint(fleeRt.TransformPoint(fleeRt.rect.center)).y;
+            foreach (Transform c in parent)
+            {
+                if (c.GetComponent<Button>() == null || c.gameObject == go || !c.gameObject.activeSelf) continue;
+                var crt = (RectTransform)c;
+                float cy = parent.InverseTransformPoint(crt.TransformPoint(crt.rect.center)).y;
+                if (Mathf.Abs(cy - rowY) < fleeRt.rect.height) row.Add(crt);
+            }
+            System.Func<RectTransform, float> leftOf = r => parent.InverseTransformPoint(r.TransformPoint(new Vector3(r.rect.xMin, 0f))).x;
+            System.Func<RectTransform, float> rightOf = r => parent.InverseTransformPoint(r.TransformPoint(new Vector3(r.rect.xMax, 0f))).x;
+            row.Sort((a, b) => leftOf(a).CompareTo(leftOf(b)));
+            if (row.Count >= 2)
+            {
+                float left = leftOf(row[0]), right = rightOf(row[row.Count - 1]);
+                row.Add((RectTransform)go.transform);
+                float gap = 8f;
+                float w = (right - left - gap * (row.Count - 1)) / row.Count;
+                for (int i = 0; i < row.Count; i++)
+                {
+                    var r = row[i];
+                    r.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w);
+                    float cx = left + w * 0.5f + i * (w + gap);
+                    // 가운데 점을 (cx, rowY) 로 — 피벗이 어디든 맞도록 차이만큼 옮김
+                    Vector3 center = parent.InverseTransformPoint(r.TransformPoint(r.rect.center));
+                    r.localPosition += new Vector3(cx - center.x, rowY - center.y, 0f);
+                }
+                // [2026-10-15] Move 와 Flee 자리를 맞바꿈 (도망이 맨 끝)
+                var fleeR = (RectTransform)flee.transform; var moveR = (RectTransform)go.transform;
+                Vector3 fp = fleeR.localPosition; fleeR.localPosition = moveR.localPosition; moveR.localPosition = fp;
+            }
+        }
+    }
+
+    public void OnMoveButton()
+    {
+        if (currentPhase != BattlePhase.Command || currentControlledMember == null || currentControlledMember.IsRecruitedCompanion) return;
+        OpenMovePicker(null);
+    }
+
+    /// <summary>1단계: 누가 움직일지 (who == null) → 2단계: 어느 쪽으로.</summary>
+    private void OpenMovePicker(PlayerStats who)
+    {
+        CloseMovePicker();
+        // [2026-10-15] 전투 씬 Canvas 는 화면과 크기가 달라 창이 왼쪽 위로 밀렸다 → 화면 기준 전용 Canvas 에 그린다
+        _movePicker = new GameObject("MovePicker", typeof(RectTransform));
+        var cv = _movePicker.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
+        var sc = _movePicker.AddComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1080f, 1920f); sc.matchWidthOrHeight = 0f;
+        _movePicker.AddComponent<GraphicRaycaster>();
+        var dimGo = new GameObject("Dim", typeof(RectTransform), typeof(Image), typeof(Button));
+        dimGo.transform.SetParent(_movePicker.transform, false);
+        var rt = (RectTransform)dimGo.transform; rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
+        dimGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+        dimGo.GetComponent<Button>().onClick.AddListener(CloseMovePicker);
+
+        var box = MoveUiPanel((RectTransform)_movePicker.transform, 640f); // 창 안을 눌러도 닫히지 않게 바탕과 형제로
+        var options = new List<(string label, System.Action act)>();
+        string title;
+        if (who == null)
+        {
+            title = "Who moves?";
+            foreach (var m in activePartyMembers)
+            {
+                if (m == null || m.currentHP <= 0) continue;
+                var cap = m;
+                options.Add(($"{m.playerName}  <size=70%><color=#BBBBBB>position {(int)m.currentSlot}</color></size>", () => OpenMovePicker(cap)));
+            }
+        }
+        else
+        {
+            title = $"{who.playerName} — which way?";
+            foreach (int dir in new[] { -1, 1 })
+            {
+                BattleSlot to = GetHorizontalNeighbor4(who.currentSlot, dir);
+                if (to == BattleSlot.None) continue;
+                PlayerStats occ = activePartyMembers.Find(p => p != null && p != who && p.currentSlot == to);
+                string arrow = dir < 0 ? "◀" : "▶";
+                string what = occ != null ? $"swap with {occ.playerName}" : "empty";
+                var capTo = to; var capWho = who;
+                options.Add(($"{arrow}  position {(int)to}  <size=70%><color=#BBBBBB>{what}</color></size>", () =>
+                {
+                    CloseMovePicker();
+                    var hero = currentControlledMember;
+                    QueueAllyCommand(hero, "move");
+                    var cmd = pendingCommands.FindLast(c => c.actor == hero && c.actionType == "move");
+                    if (cmd != null) { cmd.moveActor = capWho; cmd.moveTo = capTo; }
+                    AddMessage(capWho == hero ? $"<color=#AAAAAA>{hero.playerName} will move to position {(int)capTo}.</color>" : $"<color=#AAAAAA>{hero.playerName} will move {capWho.playerName} to position {(int)capTo}.</color>");
+                }));
+            }
+        }
+        MoveUiText(box, title, 24f, 60f, 44f, new Color(0.86f, 0.74f, 0.47f));
+        float y = 110f;
+        foreach (var o in options) { MoveUiButton(box, o.label, y, o.act); y += 100f; }
+        MoveUiButton(box, "Cancel", 640f - 120f, CloseMovePicker);
+    }
+
+    private void CloseMovePicker()
+    {
+        if (_movePicker != null) Destroy(_movePicker);
+        _movePicker = null;
+    }
+
+    private RectTransform MoveUiPanel(RectTransform parent, float h)
+    {
+        var frame = new GameObject("Box", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+        frame.SetParent(parent, false);
+        frame.anchorMin = frame.anchorMax = frame.pivot = new Vector2(0.5f, 0.5f); frame.sizeDelta = new Vector2(760f, h); frame.anchoredPosition = new Vector2(0f, 120f);
+        frame.GetComponent<Image>().color = new Color(0.86f, 0.74f, 0.47f, 0.85f);
+        var bg = new GameObject("Bg", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+        bg.SetParent(frame, false); bg.anchorMin = Vector2.zero; bg.anchorMax = Vector2.one; bg.offsetMin = new Vector2(3f, 3f); bg.offsetMax = new Vector2(-3f, -3f);
+        bg.GetComponent<Image>().color = new Color(0.05f, 0.04f, 0.03f, 0.97f);
+        return frame;
+    }
+
+    private TMPro.TextMeshProUGUI MoveUiText(RectTransform parent, string text, float y, float h, float size, Color color)
+    {
+        var go = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+        go.transform.SetParent(parent, false);
+        var rt = (RectTransform)go.transform; rt.anchorMin = new Vector2(0f, 1f); rt.anchorMax = new Vector2(1f, 1f); rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0f, -y); rt.sizeDelta = new Vector2(-40f, h);
+        var t = go.GetComponent<TMPro.TextMeshProUGUI>(); t.text = text; t.fontSize = size; t.color = color;
+        t.alignment = TMPro.TextAlignmentOptions.Center; t.raycastTarget = false; t.richText = true;
+        return t;
+    }
+
+    private void MoveUiButton(RectTransform parent, string label, float y, System.Action act)
+    {
+        var go = new GameObject("Option", typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(parent, false);
+        var rt = (RectTransform)go.transform; rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f); rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0f, -y); rt.sizeDelta = new Vector2(640f, 86f);
+        go.GetComponent<Image>().color = new Color(0.14f, 0.11f, 0.07f, 1f);
+        var o = go.AddComponent<Outline>(); o.effectColor = new Color(0.86f, 0.74f, 0.47f, 0.9f); o.effectDistance = new Vector2(2f, -2f);
+        go.GetComponent<Button>().onClick.AddListener(() => act());
+        var t = MoveUiText(rt, label, 0f, 86f, 34f, new Color(0.93f, 0.90f, 0.82f));
+        t.rectTransform.anchorMin = Vector2.zero; t.rectTransform.anchorMax = Vector2.one; t.rectTransform.offsetMin = t.rectTransform.offsetMax = Vector2.zero;
+    }
+
+    /// <summary>[2026-10-15] 행동 취소 — 바로 앞 동료의 명령을 지우고 그 동료가 다시 고르게 한다 (아이템은 실행 때 쓰므로 돌려줄 것 없음).</summary>
+    private bool UndoPreviousCommand()
+    {
+        if (currentPhase != BattlePhase.Command) return false;
+        for (int i = Mathf.Min(commandIndex, activePartyMembers.Count) - 1; i >= 0; i--)
+        {
+            var m = activePartyMembers[i];
+            if (m == null || m.currentHP <= 0) continue;
+            int ci = pendingCommands.FindLastIndex(c => c.actor == m);
+            if (ci < 0) return false;
+            pendingCommands.RemoveAt(ci);
+            commandIndex = i;
+            AddMessage($"<color=#AAAAAA>{m.playerName}'s order is withdrawn.</color>");
+            PrepareNextCommand();
+            return true;
+        }
+        return false;
     }
 
     // 타겟 선택 시작 시 Back 버튼 표시
@@ -2857,6 +3068,10 @@ public class BattleManager : MonoBehaviour
                 AddMessage($"<color=#9FC8FF>{m.playerName} starts fast!</color> All stats +{Mathf.RoundToInt((QuickStarterMult - 1f) * 100f)}% for {QuickStarterRounds} turns.");
             }
 
+        ApplyDispositionAtBattleStart(hero);
+        ApplySpeciesTraitAtBattleStart(hero);
+        ApplyOathAtBattleStart(hero);
+
         if (hero.statData != null && hero.statData.HasFieldSkill(FieldSkills.DangerSense))
         {
             hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = FieldSkills.DangerSenseEvasion }, DangerSenseSource, 1);
@@ -2874,6 +3089,202 @@ public class BattleManager : MonoBehaviour
     private static readonly object QuickStarterToken = new object(), SlowStarterToken = new object();
 
     /// <summary>공격·방어·마법·속도에 같은 배율 (모든 스탯 — 행운은 배율 수정치가 없어 제외).</summary>
+    private static readonly object DispositionToken = new object(), PerfectionistMissToken = new object(), SpeciesToken = new object();
+
+    // ── [2026-10-14] 종의 특성 (엘프 · 오크) ──
+    private const string SkillEtherSense = "Ether Sense";
+
+    // ── [2026-10-14] 서약 · 직업 패스 (전사) ──
+    private const string SkillWarCry = "War Cry", SkillWeaponOath = "Weapon Oath";
+    private const int PathBuffRounds = 2;
+    private static readonly object OathToken = new object(), WarCryToken = new object(), WeaponOathToken = new object(), MomentumToken = new object();
+    private int _knownDeadAllies;
+
+    /// <summary>HP 비용 — 전사의 의지는 15% 덜 든다.</summary>
+    private int HpCost(PlayerStats p, SkillData skill)
+    {
+        float pct = skill.hpCostPercent * (p != null && p.HasOath(PlayerStats.OathWarriorsWill) ? 0.85f : 1f);
+        int pool = p.PaysPhysicalWithMP() ? p.maxMP : p.maxHP; // 몽크는 최대 MP 기준
+        return Mathf.Max(1, Mathf.RoundToInt(pool * pct / 100f));
+    }
+
+    private static readonly object ClassTraitToken = new object();
+    private static string CostLabel(PlayerStats p) => p != null && p.PaysPhysicalWithMP() ? "MP" : "HP";
+
+    private void ApplyOathAtBattleStart(PlayerStats hero)
+    {
+        if (hero == null) return;
+        hero.oathHalfRounds = 0; hero.allyDeathStacks = 0; hero.bloodPricePercent = 0; hero.momentumTarget = null; hero.momentumStacks = 0;
+        hero.RemoveStatModifiersFromSource(OathToken);
+        hero.RemoveStatModifiersFromSource(MomentumToken);
+        _oathWasHalf.Remove(hero);
+        _knownDeadAllies = 0;
+        foreach (var m in activePartyMembers) if (m != null && m != hero && m.currentHP <= 0) _knownDeadAllies++;
+
+        // [2026-10-14] 도적 직업 특성: 첫 턴 민첩 +15%
+        var job = hero.statData != null ? hero.statData.currentJob : null;
+        hero.RemoveStatModifiersFromSource(ClassTraitToken);
+        if (job != null && job.firstTurnSpeedBonus > 0f)
+            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Speed, modType = StatModType.PercentMult, value = 1f + job.firstTurnSpeedBonus }, ClassTraitToken, 1);
+
+        if (hero.HasOath(PlayerStats.OathIronDiscipline))
+        {
+            SetIronDiscipline(hero, false);
+            AddMessage(hero.HoldsShield()
+                ? $"<color=#D4A761>Iron Discipline</color> — {hero.playerName} sets the shield. DEF +7"
+                : $"<color=#D4A761>Iron Discipline</color> — {hero.playerName} grips the weapon. ATK +7");
+        }
+        else if (hero.HasOath(PlayerStats.OathWarriorsWill))
+        {
+            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.Flat, value = 5f }, OathToken, 999);
+            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Defense, modType = StatModType.Flat, value = 5f }, OathToken, 999);
+            AddMessage($"<color=#D4A761>Warrior's Will</color> — ATK +5, DEF +5");
+        }
+    }
+
+    /// <summary>철의 규율: 무기면 공격 +7, 방패면 방어 +7 (half = 마법을 쓴 뒤 2턴은 절반).</summary>
+    private void SetIronDiscipline(PlayerStats hero, bool half)
+    {
+        if (hero == null || !hero.HasOath(PlayerStats.OathIronDiscipline)) return;
+        hero.RemoveStatModifiersFromSource(OathToken);
+        var stat = hero.HoldsShield() ? AbyssdawnBattle.ModStatType.Defense : AbyssdawnBattle.ModStatType.Attack;
+        hero.AddStatModifier(new StatModifier { statType = stat, modType = StatModType.Flat, value = half ? 3.5f : 7f }, OathToken, 999);
+        if (!half && hero.oathHalfRounds == 0 && _oathWasHalf.Remove(hero))
+            AddMessage($"<color=#D4A761>Iron Discipline</color> holds firm again.");
+    }
+    private readonly HashSet<PlayerStats> _oathWasHalf = new HashSet<PlayerStats>();
+
+    /// <summary>철의 규율 제약: 마법 스킬을 쓰면 2턴 동안 서약 효과 절반.</summary>
+    private void IronDisciplineBroken(PlayerStats a)
+    {
+        if (a == null || !a.HasOath(PlayerStats.OathIronDiscipline)) return;
+        bool already = a.oathHalfRounds > 0;
+        a.oathHalfRounds = PathBuffRounds + 1;
+        if (already) return;
+        _oathWasHalf.Add(a);
+        SetIronDiscipline(a, true);
+        AddMessage($"<color=#AAAAAA>Magic strains {a.playerName}'s discipline. (Oath halved, {PathBuffRounds} turns)</color>");
+    }
+
+    /// <summary>전사의 의지: 이번 전투에서 새로 쓰러진 아군마다 공격 +4% (최대 3).</summary>
+    private void CheckAllyDeaths()
+    {
+        int dead = 0;
+        PlayerStats hero = null;
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null) continue;
+            if (Disposition.IsHero(m)) hero = m;
+            else if (m.currentHP <= 0) dead++;
+        }
+        if (dead <= _knownDeadAllies) { _knownDeadAllies = dead; return; }
+        int fresh = dead - _knownDeadAllies;
+        _knownDeadAllies = dead;
+        if (hero == null || hero.currentHP <= 0 || !hero.HasOath(PlayerStats.OathWarriorsWill) || hero.allyDeathStacks >= 3) return;
+        hero.allyDeathStacks = Mathf.Min(3, hero.allyDeathStacks + fresh);
+        AddMessage($"<color=#FF6B4A>{hero.playerName} swears vengeance!</color> ATK +{hero.allyDeathStacks * 4}%");
+    }
+
+    /// <summary>피의 대가: 쓴 HP (최대 HP 대비 %) 만큼 피해 +1%씩 (최대 15%, 전투 끝나면 사라짐).</summary>
+    private void BloodPricePaid(PlayerStats a, int hpCost)
+    {
+        if (a == null || hpCost <= 0 || !a.HasPath(PlayerStats.PathBloodPrice) || a.bloodPricePercent >= 15) return;
+        int add = Mathf.Max(1, Mathf.RoundToInt(hpCost * 100f / Mathf.Max(1, a.maxHP)));
+        a.bloodPricePercent = Mathf.Min(15, a.bloodPricePercent + add);
+        AddMessage($"<color=#C0392B>Blood Price</color> — damage +{a.bloodPricePercent}%");
+    }
+
+    /// <summary>강철의 기세: 같은 대상을 연달아 치면 +8%씩 (최대 +24%). 대상이 바뀌면 처음부터.</summary>
+    private void IronMomentum(PlayerStats a, object target)
+    {
+        if (a == null || target == null || !a.HasPath(PlayerStats.PathIronMomentum)) return;
+        if (a.momentumTarget == target) a.momentumStacks = Mathf.Min(3, a.momentumStacks + 1);
+        else { a.momentumTarget = target; a.momentumStacks = 0; }
+        a.RemoveStatModifiersFromSource(MomentumToken);
+        if (a.momentumStacks > 0)
+        {
+            a.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 1f + 0.08f * a.momentumStacks }, MomentumToken, 999);
+            AddMessage($"<color=#AAAAAA>Iron Momentum +{a.momentumStacks * 8}%</color>");
+        }
+    }
+    private const float EtherMagicRatio = 0.50f;   // 마력의 50% 추가 마법 피해
+    private const float EtherMpPercent = 0.05f;    // 맞힐 때마다 현재 MP 5%
+    private const float EtherFollowDamage = 0.5f, EtherFollowMp = 1.5f; // 2타부터: 피해 절반 · MP 1.5배
+
+    private void ApplySpeciesTraitAtBattleStart(PlayerStats hero)
+    {
+        if (hero == null) return;
+        hero.frenzyStacks = 0; hero.echoMagicStacks = 0; hero.echoEvasionStacks = 0; hero.etherSenseOn = false;
+        hero.RemoveStatModifiersFromSource(SpeciesToken);
+        // 오크 전투 폭주: 회복 받는 양 −30% (폭주 중엔 회복을 거부)
+        if (hero.HasSpecialEffect(PlayerStats.TraitBattleFrenzy))
+            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.HealingReceived, modType = StatModType.PercentMult, value = 0.7f }, SpeciesToken, 999);
+    }
+
+    /// <summary>엘프 '감각의 잔상': 물리를 쓰면 마법 +10%, 마법을 쓰면 회피 +10% (각각 최대 3).</summary>
+    private void SensoryEcho(PlayerStats a, bool magic)
+    {
+        if (a == null || !a.HasSpecialEffect(PlayerStats.TraitSensoryEcho)) return;
+        if (magic) { if (a.echoEvasionStacks < 3) a.echoEvasionStacks++; }
+        else { if (a.echoMagicStacks < 3) a.echoMagicStacks++; }
+    }
+
+    /// <summary>엘프 '에테르 감응' (켜져 있을 때): 맞힐 때마다 현재 MP 를 태워 마력 비례 추가 마법 피해. 2타부터 약해지고 MP 를 더 쓴다.</summary>
+    private void EtherHit(PlayerStats a, EnemyStats e, int hitIndex)
+    {
+        if (a == null || e == null || !a.etherSenseOn || e.currentHP <= 0) return;
+        if (!a.HasSpecialEffect(PlayerStats.TraitEtherResonance)) { a.etherSenseOn = false; return; }
+        int cost = Mathf.Max(1, Mathf.CeilToInt(a.currentMP * EtherMpPercent * (hitIndex > 0 ? EtherFollowMp : 1f)));
+        if (a.currentMP < cost)
+        {
+            a.etherSenseOn = false;
+            AddMessage($"<color=#AAAAAA>{a.playerName}'s ether runs dry. (Ether Sense off)</color>");
+            return;
+        }
+        a.currentMP -= cost;
+        int dmg = Mathf.Max(1, Mathf.RoundToInt(a.Magic * EtherMagicRatio * (hitIndex > 0 ? EtherFollowDamage : 1f) * e.magResist));
+        int applied = e.TakeDamage(dmg);
+        AddMessage($"<color=#7CE0FF>Ether</color> +{applied} <size=80%><color=#AAAAAA>(MP -{cost})</color></size>");
+    }
+
+    /// <summary>[2026-10-14] 성향 — 전투 시작 때 거는 것 (겁쟁이 첫 턴 공격 −15%, 신중함 첫 턴 민첩 −20%, 고독한 늑대).</summary>
+    private void ApplyDispositionAtBattleStart(PlayerStats hero)
+    {
+        string d = Disposition.Current;
+        if (hero == null || string.IsNullOrEmpty(d)) return;
+        hero.RemoveStatModifiersFromSource(DispositionToken);
+        switch (d)
+        {
+            case Disposition.Coward:
+                hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = Disposition.CowardFirstTurnAttack }, DispositionToken, 1);
+                AddMessage($"<color=#AAAAAA>{hero.playerName}'s hands tremble. (first turn ATK -15%)</color>");
+                break;
+            case Disposition.Cautious:
+                hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Speed, modType = StatModType.PercentMult, value = Disposition.CautiousFirstTurnSpeed }, DispositionToken, 1);
+                break;
+            case Disposition.LoneWolf:
+                bool allies = false;
+                foreach (var m in activePartyMembers) if (m != null && m != hero && m.currentHP > 0) allies = true;
+                if (!allies)
+                {
+                    AddAllStatsMult(hero, Disposition.LoneWolfAloneMult, 999, DispositionToken);
+                    AddMessage($"<color=#9FC8FF>{hero.playerName} fights alone.</color> All stats +10%.");
+                }
+                else
+                    hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.HealingReceived, modType = StatModType.PercentMult, value = Disposition.LoneWolfHealWithAllies }, DispositionToken, 999);
+                break;
+        }
+    }
+
+    /// <summary>[2026-10-14] 성향 완벽주의자: 주인공이 빗나가면 다음 턴 공격 −10%.</summary>
+    private void PerfectionistMissed(PlayerStats attacker)
+    {
+        if (!Disposition.Is(Disposition.Perfectionist) || !Disposition.IsHero(attacker)) return;
+        attacker.RemoveStatModifiersFromSource(PerfectionistMissToken);
+        attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = Disposition.PerfectionistMissAttack }, PerfectionistMissToken, 2);
+        AddMessage($"<color=#AAAAAA>{attacker.playerName} curses the miss. (next turn ATK -10%)</color>");
+    }
+
     private static void AddAllStatsMult(PlayerStats m, float mult, int rounds, object source)
     {
         m.RemoveStatModifiersFromSource(source);
@@ -3343,6 +3754,10 @@ public class BattleManager : MonoBehaviour
         currentControlledRole = GetPartyRole(currentControlledMember);
         playerTurn = true;
         turnInProgress = false;
+        CardFx.SetTurnGlow(GetPlayerCardRect(currentControlledMember)); // [2026-10-15] 차례인 카드 테두리 반짝
+        bool canUndo = false; // [2026-10-15] 앞 동료의 명령이 있으면 Back 으로 되돌릴 수 있다
+        for (int i = 0; i < commandIndex && i < activePartyMembers.Count; i++)
+            if (activePartyMembers[i] != null && pendingCommands.Exists(c => c.actor == activePartyMembers[i])) canUndo = true;
 
         if (skillPanel != null) skillPanel.SetActive(false);
         ConfigureActionUIForActor(currentControlledMember);
@@ -3353,7 +3768,12 @@ public class BattleManager : MonoBehaviour
 
         // 매 커맨드 턴마다 FightSubPanel을 동일하게 연다 (첫 파티원 포함)
         if (battleUIManager != null)
+        {
             battleUIManager.ShowFightSubPanel();
+            battleUIManager.ShowBackButton(canUndo);
+        }
+        EnsureMoveButton(); // [2026-10-15] 위치 이동 — 주인공만 명령할 수 있다
+        if (_moveButton != null) _moveButton.gameObject.SetActive(!currentControlledMember.IsRecruitedCompanion);
 
         AddMessage($"{currentControlledMember.playerName} is preparing an action.");
         UpdateStatusUI();
@@ -3779,6 +4199,7 @@ public class BattleManager : MonoBehaviour
         TickShieldRoundEnd(); // [2026-10-09] 방패 스킬
         TickInnerCirculation(); // [2026-10-11] 격투술 내공 순환
 
+        CardFx.SetTurnGlow(null);
         // 모든 액션 완료 후 상태 체크
         CheckBattleEnd();
 
@@ -3792,6 +4213,7 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteAllyResolution(AllyCommand cmd)
     {
         if (cmd.actor == null || cmd.actor.currentHP <= 0) yield break;
+        CardFx.SetTurnGlow(GetPlayerCardRect(cmd.actor)); // [2026-10-15] 행동하는 카드 테두리
         if (cmd.actor.IsStunned())
         {
             AddMessage($"{cmd.actor.playerName} is <color=#FFD700>stunned</color> and cannot act!");
@@ -3804,6 +4226,16 @@ public class BattleManager : MonoBehaviour
 
         switch (cmd.actionType)
         {
+            case "move": // [2026-10-15] 주인공의 위치 이동 명령 (옆 1칸 — 빈 칸이면 이동, 있으면 자리 교환)
+                if (cmd.moveActor != null && cmd.moveActor.currentHP > 0 && cmd.moveTo != BattleSlot.None)
+                {
+                    string who = cmd.moveActor == cmd.actor ? cmd.actor.playerName : $"{cmd.actor.playerName} orders {cmd.moveActor.playerName}";
+                    if (MovePlayerToSlot(cmd.moveActor, cmd.moveTo))
+                        AddMessage($"{who} — <color=#9FC8FF>moves to position {(int)cmd.moveTo}</color>.");
+                    else
+                        AddMessage($"<color=#AAAAAA>{cmd.moveActor.playerName} could not move.</color>");
+                }
+                break;
             case "attack":
                 if (cmd.targetEnemy != null && cmd.targetEnemy.currentHP > 0)
                 {
@@ -4357,6 +4789,7 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteEnemyTurn(EnemyStats enemy)
     {
         if (enemy == null || enemy.currentHP <= 0 || enemy.IsDead()) yield break;
+        CardFx.SetTurnGlow(GetEnemyCardRect(enemy)); // [2026-10-15] 행동하는 적 카드 테두리
         if (enemy.IsStunned())
         {
             AddMessage($"{enemy.enemyName} is <color=#FFD700>stunned</color> and cannot act!");
@@ -4573,6 +5006,7 @@ public class BattleManager : MonoBehaviour
                     }
                 }
                 member.TickStatModifiers();   // ← 조건 밖으로 이동 (activeStatusEffects가 없어도 항상 호출)
+                if (member.oathHalfRounds > 0 && --member.oathHalfRounds == 0) SetIronDiscipline(member, false); // [2026-10-14]
             }
         }
 
@@ -4616,6 +5050,15 @@ public class BattleManager : MonoBehaviour
     
     // 아군 UI 흔들림 효과
     /// <summary>아군 상태 카드(배경)의 RectTransform — 피해 숫자 팝업 위치용 (BattleFx).</summary>
+    /// <summary>[2026-10-15] 적 상태 카드 (위쪽 EnemyBar, 칸 번호 순).</summary>
+    public RectTransform GetEnemyCardRect(EnemyStats enemy)
+    {
+        if (enemy == null || enemyLine == null) return null;
+        for (int i = 0; i < enemyStatusSlots.Count; i++)
+            if (enemyLine.GetAt(i + 1) as EnemyStats == enemy) return enemyStatusSlots[i];
+        return null;
+    }
+
     public RectTransform GetPlayerCardRect(PlayerStats player)
     {
         int i = activePartyMembers.IndexOf(player);
@@ -4980,10 +5423,10 @@ public class BattleManager : MonoBehaviour
         // HP 체크 (HP 코스트가 있을 경우)
         if (skill.hpCostPercent > 0)
         {
-            int hpCost = Mathf.FloorToInt(currentControlledMember.maxHP * (skill.hpCostPercent / 100f));
-            if (currentControlledMember.currentHP <= hpCost)
+            int hpCost = HpCost(currentControlledMember, skill);
+            if (currentControlledMember.PaysPhysicalWithMP() ? currentControlledMember.currentMP < hpCost : currentControlledMember.currentHP <= hpCost)
             {
-                AddMessage("Not enough HP!");
+                AddMessage(currentControlledMember.PaysPhysicalWithMP() ? "Not enough MP!" : "Not enough HP!");
                 return;
             }
         }
@@ -5092,7 +5535,7 @@ public class BattleManager : MonoBehaviour
                          : levelGap >= 10 ? 0.9f
                          : levelGap >= 5  ? 0.7f
                          : 0f;
-        float fleeChance = Mathf.Max(tierChance, formulaChance);
+        float fleeChance = Mathf.Max(tierChance, formulaChance) + Disposition.FleeBonus; // [2026-10-14] 성향 겁쟁이 +25%
         if (UnityEngine.Random.value < fleeChance)
         {
             AddMessage("You ran away!");
@@ -5803,6 +6246,9 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteAttack(PlayerStats attacker, EnemyStats target)
     {
         if (attacker == null || target == null) yield break;
+        SensoryEcho(attacker, false); // [2026-10-14] 엘프: 물리 사용 → 마법 +10%
+        CheckAllyDeaths();
+        IronMomentum(attacker, target);
 
         // [Bite] 동료의 원본 MonsterSO에 기본공격 override가 있으면 평타 대체.
         //   Hero는 companionSource == null → biteOverride = null → 아래 4곳 전부 기존과 동일 동작.
@@ -5814,6 +6260,7 @@ public class BattleManager : MonoBehaviour
         {
             AddMessage($"{target.enemyName} evaded {attacker.playerName}!");
             BattleFx.EnemyMiss(target);
+            PerfectionistMissed(attacker);
         }
         else
         {
@@ -5910,12 +6357,13 @@ public class BattleManager : MonoBehaviour
                 int break1 = hit1 > 0 && armorHit1 > 0 ? Mathf.Min(hit1Slot, Mathf.RoundToInt(hit1Slot * (armorHit1 / (float)(baseHit1 + armorHit1)))) : 0;
                 int break2 = hit2 > 0 && armorHit2 > 0 ? Mathf.Min(hit2Slot, Mathf.RoundToInt(hit2Slot * (armorHit2 / (float)(baseHit2 + armorHit2)))) : 0;
                 int applied1 = target.TakeDamage(hit1Slot - break1, critical);
+                EtherHit(attacker, target, 0);
                 if (break1 > 0 && !target.IsDead()) applied1 += target.TakeDamage(break1, false, true);
                 int applied2 = 0;
                 if (!target.IsDead())
                 {
                     yield return new WaitForSeconds(dualHitDelay);
-                    if (!target.IsDead()) applied2 = target.TakeDamage(hit2Slot - break2, critical);
+                    if (!target.IsDead()) { applied2 = target.TakeDamage(hit2Slot - break2, critical); EtherHit(attacker, target, 1); }
                     if (break2 > 0 && !target.IsDead()) applied2 += target.TakeDamage(break2, false, true);
                 }
 
@@ -5969,6 +6417,7 @@ public class BattleManager : MonoBehaviour
                 singleBaseSlot = ApplyPhysResist(singleBaseSlot, target);
                 if (singleArmorSlot > 0) singleArmorSlot = ApplyPhysResist(singleArmorSlot, target);
                 int applied1 = target.TakeDamage(singleBaseSlot, critical);
+                EtherHit(attacker, target, 0);
                 int applied2 = 0;
                 if (singleArmor > 0 && !target.IsDead())
                 {
@@ -6604,6 +7053,28 @@ public class BattleManager : MonoBehaviour
                 attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = ShadowStepEvasion }, ShadowStepToken, 3);
                 AddMessage($"{attacker.playerName} melts into the shadows. <color=#9FC8FF>Evasion +20%</color> for 3 turns — dodges strike back.");
                 return true;
+            case SkillWarCry: // [2026-10-14] 전사 패스: 파티 공격 +8% · 상태이상 저항 +20% (2턴)
+                foreach (var m in activePartyMembers)
+                {
+                    if (m == null || m.currentHP <= 0) continue;
+                    m.RemoveStatModifiersFromSource(WarCryToken);
+                    m.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 1.08f }, WarCryToken, PathBuffRounds + 1);
+                    m.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.StatusResist, modType = StatModType.PercentMult, value = 0.8f }, WarCryToken, PathBuffRounds + 1);
+                }
+                AddMessage($"<color=#FFB24A>{attacker.playerName} lets out a War Cry!</color> Party ATK +8%, status resist +20% ({PathBuffRounds} turns)");
+                return true;
+            case SkillWeaponOath: // [2026-10-14] 전사 패스: 공격 +20% · 치명타 +10%p (2턴)
+                attacker.RemoveStatModifiersFromSource(WeaponOathToken);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 1.2f }, WeaponOathToken, PathBuffRounds + 1);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.CritChance, modType = StatModType.Flat, value = 10f }, WeaponOathToken, PathBuffRounds + 1);
+                AddMessage($"<color=#FFB24A>{attacker.playerName} swears upon the blade!</color> ATK +20%, crit +10% ({PathBuffRounds} turns)");
+                return true;
+            case SkillEtherSense:
+                attacker.etherSenseOn = !attacker.etherSenseOn;
+                AddMessage(attacker.etherSenseOn
+                    ? $"<color=#7CE0FF>{attacker.playerName}'s eyes blaze — Ether Sense!</color> <color=#AAAAAA>(every hit burns MP for extra magic damage)</color>"
+                    : $"<color=#AAAAAA>{attacker.playerName} lets the ether settle. (Ether Sense off)</color>");
+                return true;
             case SkillCrossCounter:
                 attacker.crossCounterRounds = 1;
                 AddMessage($"{attacker.playerName} squares up — <color=#FFC860>Cross Counter</color>! <color=#AAAAAA>(this turn: physical hits -10%, strike back each time)</color>");
@@ -6880,10 +7351,12 @@ public class BattleManager : MonoBehaviour
     /// <summary>전장의 직감: 살아 있는 적이 3마리 이상이면 치명타 +5%. [2026-10-07] 2마리 +3% → 3마리 +5%</summary>
     private float PlayerCritBonus(PlayerStats attacker)
     {
-        if (attacker == null || !attacker.HasEquippedPassiveByName(PlayerStats.SkillTacticalAwareness)) return 0f;
+        float disp = (Disposition.IsHero(attacker) ? Disposition.CritBonus : 0f) // [2026-10-14] 성향 무모함 +8%p
+                   + (attacker != null ? attacker.GetMemoryCritBonus() + attacker.GetClassCritBonus() : 0f);  // 종의 기억 치명타 (엘프 홍채 +5) · 도적 +5
+        if (attacker == null || !attacker.HasEquippedPassiveByName(PlayerStats.SkillTacticalAwareness)) return disp;
         int alive = 0;
         foreach (var e in activeEnemies) if (e != null && e.currentHP > 0) alive++;
-        return alive >= 3 ? 5f : 0f;
+        return (alive >= 3 ? 5f : 0f) + disp;
     }
 
     /// <summary>버티기 자세 다음 첫 공격 피해 보너스를 적용하고 소모.</summary>
@@ -7476,6 +7949,10 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteSkill(PlayerStats attacker, SkillData skill, EnemyStats target)
     {
         if (attacker == null || skill == null) yield break;
+        if (skill.damageType != DamageType.None) SensoryEcho(attacker, skill.damageType == DamageType.Magic); // [2026-10-14] 엘프
+        CheckAllyDeaths();
+        if (skill.damageType == DamageType.Magic) IronDisciplineBroken(attacker);   // 철의 규율 제약
+        if (skill.damageType != DamageType.None && target != null) IronMomentum(attacker, target);
         // [2026-10-14] 그림자 베기(적 후열만) · 상처 벌리기(출혈 중인 적만): 맞는 적으로 바꾸고, 없으면 비용 없이 실패
         if (skill.skillName == SkillShadowSlash || skill.skillName == SkillRendWound)
         {
@@ -7510,9 +7987,15 @@ public class BattleManager : MonoBehaviour
         // HP 소모
         if (skill.hpCostPercent > 0)
         {
-            int hpCost = Mathf.Max(1, Mathf.RoundToInt(attacker.maxHP * (skill.hpCostPercent / 100f)));
+            int hpCost = HpCost(attacker, skill);
+            if (attacker.PaysPhysicalWithMP()) // [2026-10-14] 몽크: HP 대신 같은 % 의 MP
+            {
+                attacker.currentMP = Mathf.Max(0, attacker.currentMP - hpCost);
+                hpCost = 0;
+            }
             attacker.currentHP -= hpCost;
             attacker.currentHP = Mathf.Max(0, attacker.currentHP);
+            BloodPricePaid(attacker, hpCost);
             Debug.Log($"[BattleManager] {attacker.playerName} used {skill.skillName} and lost {hpCost} HP. Current HP: {attacker.currentHP}/{attacker.maxHP}");
             ShakePlayerStatusUI(attacker);
             
@@ -7729,6 +8212,7 @@ public class BattleManager : MonoBehaviour
             {
                 // 회피됨
                 evadedHits++;
+                PerfectionistMissed(attacker);
                 if (muscle && attacker.muscleMemoryStacks > 0) { attacker.muscleMemoryStacks = 0; AddMessage("<color=#AAAAAA>Muscle Memory resets.</color>"); }
                 BattleFx.EnemyMiss(target);
                 if (hits > 1)
@@ -7788,6 +8272,8 @@ public class BattleManager : MonoBehaviour
             // [DEBUG LOG] 스킬 데미지 계산 정보
             Debug.Log($"[BattleLog] Skill {skill.skillName} - Base Stat: {baseStat}, Multiplier: {multiplier:F2}, Critical: {critical}, Scale: {scaleMultiplier:F2}");
 
+            // [2026-10-15] 쌍수: 타수 ×2 이므로 타격마다 ×0.35~0.45 (기본 공격과 같은 규칙 — 전엔 피해가 그대로라 스킬이 두 배로 셌음). 방어 적용 뒤에 곱한다
+            float dualFn = isDual ? UnityEngine.Random.Range(0.35f, 0.45f) : 1f;
             int baseDamage = Mathf.FloorToInt(baseStat * multiplier * scaleMultiplier * (stacks >= 3 ? 1f + MuscleDmg : 1f));
             baseDamage = Mathf.Max(1, baseDamage);
 
@@ -7799,8 +8285,7 @@ public class BattleManager : MonoBehaviour
             int armorBreakDamage = 0;
             if (armorCoeff > 0f && remainingDefense > 0f && skill.damageType == DamageType.Physical)
             {
-                float fn = isDual ? UnityEngine.Random.Range(0.35f, 0.45f) : 1f;
-                float rawArmor = remainingDefense * armorCoeff * fn;
+                float rawArmor = remainingDefense * armorCoeff * dualFn;
                 remainingDefense = Mathf.Max(0f, remainingDefense - rawArmor);
                 armorBreakDamage = Mathf.RoundToInt(rawArmor);
             }
@@ -7822,6 +8307,7 @@ public class BattleManager : MonoBehaviour
                 // 마법: magResist 배율 곱셈
                 damage = Mathf.Max(1, Mathf.FloorToInt(damage * target.magResist));
             }
+            if (isDual) damage = Mathf.Max(1, Mathf.FloorToInt(damage * dualFn)); // 쌍수 타격당 배율
 
             // 크리티컬은 깡뎀 + 방어 파괴 합산에 배율 적용
             if (critical)
@@ -7845,6 +8331,7 @@ public class BattleManager : MonoBehaviour
             int breakPart = armorBreakDamage > 0 ? Mathf.Min(damage - 1, Mathf.RoundToInt(damage * (armorBreakDamage / (float)Mathf.Max(1, baseDamage + armorBreakDamage)))) : 0;
             target.TakeDamage(damage - Mathf.Max(0, breakPart), critical);
             if (breakPart > 0 && !target.IsDead()) target.TakeDamage(breakPart, false, true);
+            EtherHit(attacker, target, successfulHits); // [2026-10-14] 엘프 에테르 감응 (2타부터 약해지고 MP 더 듦)
             totalDamage += damage;
             successfulHits++;
             if (doubleStrike && i == 0) { firstHitDamage = damage; firstHitCrit = critical; }
@@ -8220,7 +8707,10 @@ public class BattleManager : MonoBehaviour
             attacker.Agility,
             defender.Agility,
             attacker.Luck,
-            attacker.GetPassiveAccuracyBonus(),
+            attacker.GetPassiveAccuracyBonus() + attacker.GetClassWeaponAccuracyBonus(usedSkill) // [2026-10-14] 직업 특성 (전사 무기 명중 +10%p)
+                + attacker.GetOathAccuracyBonus(usedSkill) // 서약 철의 규율 +3%p
+                - attacker.GetClassAccuracyPenalty()       // 몽크 양손 무기 −10%p
+                + (Disposition.IsHero(attacker) ? Disposition.AccuracyBonus - Disposition.TrapAccuracyPenalty : 0f), // 성향 완벽주의자
             attacker.GetEquipmentAccuracyBonus(),
             defender.currentSlot,
             attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Accuracy, 1f),
@@ -8247,7 +8737,10 @@ public class BattleManager : MonoBehaviour
             return (0.2f, 1f, SlotBalanceTable.GetHitChanceMultiplier(BattleSlot.Slot1));
         // 패시브 회피(전장의 직감 +5%) 포함
         float evasionMod = Mathf.Clamp(
-            defender.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion, 0f) + defender.GetPassiveEvasionBonus(), 0f, 0.8f);
+            defender.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Evasion, 0f) + defender.GetPassiveEvasionBonus()
+            + (Disposition.IsHero(defender) ? Disposition.EvasionBonus : 0f) // [2026-10-14] 성향 완벽주의자 회피 +5%
+            + (defender.HasSpecialEffect(PlayerStats.TraitSensoryEcho) ? 0.10f * Mathf.Clamp(defender.echoEvasionStacks, 0, 3) : 0f) // 엘프 감각의 잔상
+            - defender.GetClassEvasionPenalty(), 0f, 0.8f); // 도적 중갑 −10%p
         return ComputeHitChanceCore(
             usedSkill,
             attacker.Agility,
@@ -8288,6 +8781,21 @@ public class BattleManager : MonoBehaviour
     public void NotifyEnemyDied(EnemyStats enemy)
     {
         _lastDefeatedEnemy = enemy;
+        // [2026-10-14] 오크 종특 '전투 폭주': 처치마다 공격 +5% (최대 3)
+        foreach (var m in activePartyMembers)
+            if (Disposition.IsHero(m) && m.currentHP > 0 && m.HasSpecialEffect(PlayerStats.TraitBattleFrenzy) && m.frenzyStacks < 3)
+            {
+                m.frenzyStacks++;
+                AddMessage($"<color=#FF6B4A>{m.playerName}'s blood boils!</color> ATK +{m.frenzyStacks * 5}%");
+            }
+        // [2026-10-14] 성향 냉혈: 적을 쓰러뜨리면 주인공의 다음 공격 +10%
+        if (Disposition.Is(Disposition.ColdBlooded))
+            foreach (var m in activePartyMembers)
+                if (Disposition.IsHero(m) && m.currentHP > 0)
+                {
+                    m.nextAttackBonus = Mathf.Max(m.nextAttackBonus, Disposition.ColdBloodedKillBonus);
+                    m.nextAttackBonusRounds = Mathf.Max(m.nextAttackBonusRounds, 2);
+                }
         Debug.Log($"[Recruit] 마지막 사망 적 갱신: '{(enemy != null ? enemy.enemyName : "NULL")}' (sourceMonster={(enemy != null && enemy.sourceMonster != null ? enemy.sourceMonster.MonsterName : "NULL")})");
     }
 
@@ -8324,9 +8832,18 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        // [2026-10-14] 주인공 레벨이 그 몬스터 레벨과 같거나 높아야 동료가 될 수 있다 (몬스터가 더 높으면 영입 자체가 없음)
+        int heroLevel = 0;
+        foreach (var m in activePartyMembers) if (m != null && !m.IsRecruitedCompanion) { heroLevel = m.level; break; }
+        if (heroLevel < _lastDefeatedEnemy.level)
+        {
+            Debug.Log($"[Recruit] '{so.MonsterName}' 영입 불가 — 몬스터 Lv{_lastDefeatedEnemy.level} > 주인공 Lv{heroLevel}");
+            return false;
+        }
+
         // [2026-09-30] 드퀘5식: 같은 종을 이미 데리고 있으면 2마리째부터 확률 1/4 (같은 종으로 파티가 채워지는 것 방지)
         int owned = CompanionPartyPersistence.CountOwned(so);
-        float chance = so.CompanionChance * (owned > 0 ? DuplicateCompanionChanceMultiplier : 1f);
+        float chance = so.CompanionChance * (owned > 0 ? DuplicateCompanionChanceMultiplier : 1f) * Disposition.RecruitMult; // [2026-10-14] 성향 냉혈 −50%
 
         float roll = Random.value;
         bool rollSuccess = roll <= chance;
@@ -9039,6 +9556,52 @@ public class BattleManager : MonoBehaviour
                 hoveredEnemy.SetHighlight(true);
             }
         }
+        SyncHoverGroup();
+    }
+
+    // ── [2026-10-15] 여러 명을 치는 스킬(횡베기·돌려차기·선풍각): 커서가 간 적과 함께 맞을 적도 모두 반짝 ──
+    private readonly List<EnemyStats> _hoverGroup = new List<EnemyStats>();
+
+    private void SyncHoverGroup()
+    {
+        var want = (waitingForTargetSelection && hoveredEnemy != null && hoveredEnemy.currentHP > 0)
+            ? PreviewTargets(pendingAction == "skill" ? pendingSkill : null, hoveredEnemy)
+            : new List<EnemyStats>();
+        foreach (var e in _hoverGroup)
+            if (e != null && e != hoveredEnemy && !want.Contains(e)) e.SetHighlight(false);
+        foreach (var e in want)
+            if (e != null && !_hoverGroup.Contains(e)) e.SetHighlight(true);
+        _hoverGroup.Clear();
+        _hoverGroup.AddRange(want);
+    }
+
+    /// <summary>이 스킬로 picked 를 고르면 실제로 맞는 적들 (실행 코드와 같은 규칙).</summary>
+    private List<EnemyStats> PreviewTargets(SkillData skill, EnemyStats picked)
+    {
+        var list = new List<EnemyStats>();
+        if (picked == null) return list;
+        if (skill == null) { list.Add(picked); return list; }
+        if (skill.skillName == "Mandritto")
+        {
+            var front = activeEnemies.Where(e => e != null && e.currentHP > 0 && IsEnemyFrontLine(e)).ToList();
+            EnemyStats anchor = front.Contains(picked) ? picked : front.OrderBy(e => (int)e.currentSlot).FirstOrDefault();
+            if (anchor != null)
+            {
+                list.Add(anchor);
+                var second = front.Where(e => e != anchor).OrderBy(e => Mathf.Abs((int)e.currentSlot - (int)anchor.currentSlot)).ThenBy(e => (int)e.currentSlot).FirstOrDefault();
+                if (second != null) list.Add(second);
+            }
+            return list;
+        }
+        if (skill.skillName == SkillRoundhouse)
+        {
+            foreach (var e in activeEnemies) if (e != null && e.currentHP > 0 && IsEnemyFrontLine(e)) list.Add(e);
+            if (list.Count == 0) list.Add(picked);
+            return list;
+        }
+        if (skill.skillName == SkillWhirlwindKick) return WhirlwindTargets(picked);
+        list.Add(picked);
+        return list;
     }
 
     // ========== 파티 상태 UI ==========
@@ -9731,6 +10294,17 @@ private void CacheHeroSkills()
         }
 
         // 역할별 스킬 캐시 설정
+        // [2026-10-14] 엘프 종특: '에테르 센스' 켜고 끄기를 스킬 목록에
+        if (playerStatData.activeTrait != null && playerStatData.activeTrait.specialEffectTags != null
+            && System.Array.IndexOf(playerStatData.activeTrait.specialEffectTags, PlayerStats.TraitEtherResonance) >= 0)
+        {
+            var ether = Resources.Load<SkillData>("SpeciesSkills/Elf_EtherSense");
+            if (ether != null && !heroSkillCache.Contains(ether)) heroSkillCache.Add(ether);
+        }
+        // [2026-10-14] 배운 직업 패스 액티브 (함성 · 무기의 맹세 등)
+        if (playerStatData.learnedPathSkills != null)
+            foreach (var p in playerStatData.learnedPathSkills)
+                if (p != null && p.battleSkill != null && !heroSkillCache.Contains(p.battleSkill)) heroSkillCache.Add(p.battleSkill);
         roleSkillCache[PartyRole.Hero] = new List<SkillData>(heroSkillCache);
     }
     else
@@ -9977,7 +10551,7 @@ private void CacheHeroSkills()
                 {
                     bool isDead = es.currentHP <= 0;
                     bool isCurrentTarget = enemy == es && !isDead;
-                    bool shouldPulse = !isDead && waitingForTargetSelection && hoveredEnemy == es;
+                    bool shouldPulse = !isDead && waitingForTargetSelection && (hoveredEnemy == es || _hoverGroup.Contains(es)); // [2026-10-15] 함께 맞을 적 카드도
 
                     if (lastEnemyDisplayedHP.TryGetValue(es, out int previousHP))
                     {
@@ -10310,7 +10884,8 @@ private void CacheHeroSkills()
                 Debug.Log($"[BM:DIAG] Victory EXP distribution | totalExp={totalExp} | activePartyMembers.Count={activePartyMembers.Count}");
                 foreach (var member in activePartyMembers)
                 {
-                    if (member != null && member.currentHP > 0)
+                    // [2026-10-15] 레벨업은 주인공만 — 동료(몬스터)는 EXP 를 받지 않는다
+                    if (member != null && member.currentHP > 0 && !member.IsRecruitedCompanion)
                     {
                         // [2026-10-12] 스톤샤드식 레벨 차이 보정 — 몬스터마다 (몬스터 레벨 − 이 동료 레벨) 배율 (최소 1)
                         int memberExp = 0;
@@ -10343,6 +10918,7 @@ private void CacheHeroSkills()
             // 탐험 스킬 '자원 관리': 골드 +15%
             if (totalGold > 0 && FieldSkills.Has(FieldSkills.ResourceManagement))
                 totalGold = Mathf.CeilToInt(totalGold * FieldSkills.ResourceGoldMult);
+            if (totalGold > 0 && Disposition.GoldMult != 1f) totalGold = Mathf.CeilToInt(totalGold * Disposition.GoldMult); // [2026-10-14] 성향 탐욕: +25%
             if (totalGold > 0)
             {
                 PlayerWallet.Add(totalGold);

@@ -27,8 +27,73 @@ public static class PlayerStatDataPlayModeGuard
 
     private static void OnPlayModeChanged(PlayModeStateChange state)
     {
-        if (state == PlayModeStateChange.ExitingEditMode) TakeSnapshot();
-        else if (state == PlayModeStateChange.EnteredEditMode) RestoreSnapshot();
+        if (state == PlayModeStateChange.ExitingEditMode) { TakeSnapshot(); TakeIdentitySnapshot(); }
+        else if (state == PlayModeStateChange.EnteredEditMode) { RestoreSnapshot(); RestoreIdentitySnapshot(); }
+    }
+
+    // ── [2026-10-14] 직업 · 종의 기억 3칸도 같은 방식으로 (새 게임 화면·불러오기가 에셋에 직접 쓰므로) ──
+    // 한 줄 = 에셋 GUID | 직업 | 기억1 | 기억2 | 기억3
+    private const string IdentityKey = "Abyssdawn.PlayerStatDataIdentitySnapshot";
+
+    private static void TakeIdentitySnapshot()
+    {
+        var sb = new StringBuilder();
+        foreach (string guid in AssetDatabase.FindAssets("t:PlayerStatData"))
+        {
+            var data = AssetDatabase.LoadAssetAtPath<PlayerStatData>(AssetDatabase.GUIDToAssetPath(guid));
+            if (data == null) continue;
+            sb.Append(guid).Append('|').Append(GuidOfAny(data.currentJob)).Append('|').Append(GuidOfAny(data.memorySlot1))
+              .Append('|').Append(GuidOfAny(data.memorySlot2)).Append('|').Append(GuidOfAny(data.memorySlot3))
+              .Append('|').Append(GuidOfAny(data.currentOath)).Append('|').Append(PathGuids(data)).Append('\n'); // [2026-10-14] 서약 · 패스
+        }
+        SessionState.SetString(IdentityKey, sb.ToString());
+    }
+
+    private static void RestoreIdentitySnapshot()
+    {
+        string snapshot = SessionState.GetString(IdentityKey, "");
+        SessionState.EraseString(IdentityKey);
+        if (string.IsNullOrEmpty(snapshot)) return;
+        foreach (string line in snapshot.Split('\n'))
+        {
+            string[] p = line.Split('|');
+            if (p.Length != 7) continue;
+            var data = AssetDatabase.LoadAssetAtPath<PlayerStatData>(AssetDatabase.GUIDToAssetPath(p[0]));
+            if (data == null) continue;
+            var job = LoadAny<CharacterClass>(p[1]);
+            var m1 = LoadAny<MemoryOfSpeciesData>(p[2]); var m2 = LoadAny<MemoryOfSpeciesData>(p[3]); var m3 = LoadAny<MemoryOfSpeciesData>(p[4]);
+            var oath = LoadAny<AbyssdawnBattle.OathBindingData>(p[5]);
+            if (data.currentJob == job && data.memorySlot1 == m1 && data.memorySlot2 == m2 && data.memorySlot3 == m3
+                && data.currentOath == oath && PathGuids(data) == p[6]) continue;
+            data.currentJob = job; data.memorySlot1 = m1; data.memorySlot2 = m2; data.memorySlot3 = m3;
+            data.currentOath = oath;
+            data.learnedPathSkills = new System.Collections.Generic.List<AbyssdawnBattle.PathSkillData>();
+            foreach (var g in p[6].Split(',')) { var ps = LoadAny<AbyssdawnBattle.PathSkillData>(g); if (ps != null) data.learnedPathSkills.Add(ps); }
+            data.CheckAndActivateTrait();
+            EditorUtility.SetDirty(data);
+            AssetDatabase.SaveAssetIfDirty(data);
+            Debug.Log($"[PlayerStatDataPlayModeGuard] '{data.name}' 직업·종의 기억을 플레이 전 상태로 되돌렸습니다.");
+        }
+    }
+
+    private static string PathGuids(PlayerStatData data)
+    {
+        if (data.learnedPathSkills == null) return "";
+        var ids = new System.Collections.Generic.List<string>();
+        foreach (var ps in data.learnedPathSkills) if (ps != null) ids.Add(GuidOfAny(ps));
+        return string.Join(",", ids);
+    }
+
+    private static string GuidOfAny(Object o)
+    {
+        if (o == null) return "";
+        return AssetDatabase.TryGetGUIDAndLocalFileIdentifier(o, out string guid, out long _) ? guid : "";
+    }
+
+    private static T LoadAny<T>(string guid) where T : Object
+    {
+        if (string.IsNullOrEmpty(guid)) return null;
+        return AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid));
     }
 
     // 한 줄 = 에셋 GUID | 오른손 | 왼손 | 몸통 | 장신구1 | 장신구2 (장비 에셋 GUID, 없으면 빈칸)

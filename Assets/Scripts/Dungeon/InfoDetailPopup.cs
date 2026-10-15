@@ -223,6 +223,7 @@ public class DetailClickTarget : MonoBehaviour, IPointerClickHandler
         if (s.weaponCategory != AbyssdawnBattle.WeaponCategory.None) tag += $" · {s.weaponCategory}";
         var hero = FieldSkills.HeroData();
         if (s.maxRank > 1 && hero != null) tag += $" · Lv {hero.SkillRank(s)}/{s.maxRank}";
+        else { string tier = s.TierLabel(); if (tier != null) tag += $" · {tier}"; } // [2026-10-15] 단계 스킬
         return (s.skillName, tag, s.skillIcon, s.description);
     }
 

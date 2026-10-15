@@ -37,11 +37,10 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Max HP +20%, Agility -1. Level up: HP +0.2 per level."
-  flavorText: "Broad chests hold deep lungs and stubborn hearts."
+  description: "\uCD5C\uB300 HP +20%\n\uBBFC\uCCA9 -1\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
+    \uCD5C\uB300 HP +0.3 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
+    \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +10%p"
+  flavorText: Broad chests hold deep lungs and stubborn hearts.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

@@ -20,6 +20,11 @@ MonoBehaviour:
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 1
   agilityBonus: -1
@@ -38,12 +43,10 @@ MonoBehaviour:
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
   description: "\uBC29\uC5B4 +1 (\uD558\uC545 \uAD6C\uC870 \uAC15\uD654)\n\uBBFC\uCCA9
-    -1"
-  flavorText: "\uBAA8\uB4E0 \uC885\uC871 \uC911 \uC720\uC77C\uD558\uAC8C \uD131\uC774
-    \uD280\uC5B4\uB098\uC628 \uC778\uAC04\uC740 \uBB3C\uB9AC\uC801 \uCDA9\uACA9\uC5D0
-    \uC758\uC678\uC758 \uB0B4\uC131\uC744 \uAC00\uC9D1\uB2C8\uB2E4."
+    -1\n\n\uB808\uBCA8\uC5C5 \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960
+    +20%p"
+  flavorText: "\uC720\uB09C\uD788 \uD280\uC5B4\uB098\uC628 \uC774 \uD131\uC740 \uBB3C\uB9AC\uC801
+    \uCDA9\uACA9\uC5D0 \uC758\uC678\uC758 \uB0B4\uC131\uC744 \uAC00\uC9C4\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-

@@ -20,6 +20,11 @@ MonoBehaviour:
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: -10
+  defensePercent: 0
+  magicPercent: 10
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: -1
   agilityBonus: 1
@@ -37,13 +42,14 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 10
   agilityLevelUpChanceBonus: 10
   luckLevelUpChanceBonus: 10
-  description: "Magic attack +10%, Luck +1, Agility +1\nDefense -1, Physical attack
-    -10%\nLevel up: Magic +0.2 per level"
-  flavorText: "Hair that remembers the sun holds traces of ancient blessings, but
-    the body beneath remains fragile."
+  description: "\uACF5\uACA9 -10%\n\uBC29\uC5B4 -1 (\uB9C8\uBC95 \uC790\uADF9\uC5D0
+    \uC608\uBBFC)\n\uB9C8\uB825(\uB9C8\uBC95 \uD53C\uD574) +10%\n\uBBFC\uCCA9 +1\n\uD589\uC6B4
+    +1\n\n\uB808\uBCA8\uC5C5 \uB54C \uB9C8\uB825\uC774 \uC624\uB97C \uD655\uB960
+    +10%p\n\uB808\uBCA8\uC5C5 \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960
+    +10%p\n\uB808\uBCA8\uC5C5 \uB54C \uD589\uC6B4\uC774 \uC624\uB97C \uD655\uB960
+    +10%p"
+  flavorText: Hair that remembers the sun holds traces of ancient blessings, but
+    the body beneath remains fragile.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

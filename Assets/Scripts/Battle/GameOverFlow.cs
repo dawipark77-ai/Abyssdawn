@@ -36,6 +36,7 @@ public static class GameOverFlow
 
         // 던전 영속 데이터 전체 초기화 (층수, 안개, 위치, 상태이상)
         DungeonPersistentData.ClearState();
+        DungeonTravelLog.Clear(); // [2026-10-15]
 
         GameManager.EnsureInstance().ClearAllData();
         CompanionPartyPersistence.Clear();

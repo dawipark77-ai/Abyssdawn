@@ -37,11 +37,10 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 15
   luckLevelUpChanceBonus: 0
-  description: "Agility +1, Defense +1, Attack -1. Level up: Agility +0.2 per level."
-  flavorText: "Short legs and a low stance make it hard to knock them off balance."
+  description: "\uACF5\uACA9 -1\n\uBC29\uC5B4 +1\n\uBBFC\uCCA9 +1\n\n\uB808\uBCA8\uC5C5
+    \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +10%p\n\uB808\uBCA8\uC5C5
+    \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960 +15%p"
+  flavorText: Short legs and a low stance make it hard to knock them off balance.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

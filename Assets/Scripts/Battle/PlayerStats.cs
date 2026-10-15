@@ -279,7 +279,12 @@ public class PlayerStats : MonoBehaviour
             int equipmentBonus = GetEquipmentMPBonus(baseValue + classBonus + passiveBonus);
             int traitBonus = GetTraitBonus(PassiveBonusStat.MP);
 
-            int totalMP = baseValue + classBonus + memoryMpFromPercent + passiveBonus + equipmentBonus + traitBonus;
+            // [2026-10-14] 종의 기억·장비로 붙은 마력도 1당 최대 MP +3 (레벨업으로 오른 마력과 같은 규칙 — 마법전사 빌드 허용)
+            int gearMagic = GetMemoryStatBonus(PassiveBonusStat.Magic) + GetEquipmentMagicBonus();
+            int magicMp = gearMagic * CharacterClass.MpBonusPerMagicPointGained;
+            int memoryFlatMp = 0; // [2026-10-14] 종의 기억 고정 MP (엘프 귀 +5)
+            if (statData != null) { var ml = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>(3); AppendMemoriesToList(ml); foreach (var m in ml) if (m != null) memoryFlatMp += m.mpBonus; }
+            int totalMP = Mathf.Max(0, baseValue + classBonus + memoryMpFromPercent + passiveBonus + equipmentBonus + traitBonus + magicMp + memoryFlatMp);
             // [2026-10-11] 보급술 '단골 손님': 최대 MP 도 같은 비율 (MP 가 있을 때만, 최소 +1)
             if (InnVigorPercent > 0f && !IsRecruitedCompanion && totalMP > 0) totalMP += Mathf.Max(1, Mathf.RoundToInt(totalMP * InnVigorPercent));
             return totalMP;
@@ -303,11 +308,116 @@ public class PlayerStats : MonoBehaviour
             int classBonus = characterClass != null ? characterClass.attackBonus : 0;
 
             // 3. + 기타
-            int total = baseValue + classBonus + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetTraitBonus(PassiveBonusStat.Attack);
+            int total = baseValue + classBonus + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetTraitBonus(PassiveBonusStat.Attack) + GetMemoryStatBonus(PassiveBonusStat.Attack);
             // [2026-10-12] 인파이터: 앞열에 있으면 공격 +20%
             if (IsFrontRow && HasEquippedPassiveByName(SkillInfighter)) total += Mathf.RoundToInt(total * FighterStancePercent);
+            // [2026-10-14] 종의 기억 공격 % + 오크 종특 '전투 폭주' (HP 50% 이하 +15%, 처치마다 +5% 최대 3)
+            float pct = GetMemoryPercent(0) / 100f;
+            if (HasSpecialEffect(TraitBattleFrenzy))
+            {
+                if (_fallbackCurrentHP > 0 && _fallbackCurrentHP * 2 <= maxHP) pct += 0.15f;
+                pct += 0.05f * Mathf.Clamp(frenzyStacks, 0, 3);
+            }
+            pct += GetOathPathAttackPercent(); // [2026-10-14] 전사 서약 · 패스
+            if (Job != null && Job.unarmedDamageBonus > 0f && Disposition.IsHero(this) && IsUnarmed()) pct += Job.unarmedDamageBonus; // 몽크 맨손
+            if (pct != 0f) total = Mathf.Max(0, total + Mathf.RoundToInt(total * pct));
             return total;
         }
+    }
+
+    // [2026-10-14] 종의 특성 효과 태그 / 전투 중 상태
+    public const string TraitBattleFrenzy = "BattleFrenzy", TraitEtherResonance = "EtherResonance", TraitSensoryEcho = "SensoryEcho";
+    [System.NonSerialized] public int frenzyStacks;        // 오크: 이번 전투 처치 수 (최대 3)
+    [System.NonSerialized] public int echoMagicStacks;     // 엘프 감각의 잔상: 물리 사용 → 마법 +10% (최대 3)
+    [System.NonSerialized] public int echoEvasionStacks;   // 엘프 감각의 잔상: 마법 사용 → 회피 +10% (최대 3)
+    [System.NonSerialized] public bool etherSenseOn;       // 엘프 에테르 감응 켜짐
+
+    // ── [2026-10-14] 서약 · 직업 패스 (전사) ──
+    public const string OathIronDiscipline = "Warrior_IronDiscipline", OathWarriorsWill = "Warrior_WarriorsWill";
+    public const string PathIronMomentum = "Warrior_T1_IronMomentum", PathBerserkersEdge = "Warrior_T1_BerserkersEdge",
+                        PathBloodPrice = "Warrior_T1_BloodPrice", PathWarCry = "Warrior_T1_WarCry", PathWeaponOath = "Warrior_T1_WeaponOath";
+    [System.NonSerialized] public int oathHalfRounds;      // 철의 규율 제약: 마법을 쓰면 서약 효과 절반 (2턴)
+    [System.NonSerialized] public int allyDeathStacks;     // 전사의 의지: 아군이 쓰러질 때마다 공격 +4% (최대 3)
+    [System.NonSerialized] public int bloodPricePercent;   // 피의 대가: HP 를 쓴 만큼 피해 +1% (최대 15)
+    [System.NonSerialized] public object momentumTarget;   // 강철의 기세: 같은 대상
+    [System.NonSerialized] public int momentumStacks;      //   연속 공격 횟수 (최대 3 → +24%)
+
+    public bool HasOath(string oathID)
+        => Disposition.IsHero(this) && statData != null && statData.currentOath != null && statData.currentOath.oathID == oathID;
+    public bool HasPath(string skillID)
+        => Disposition.IsHero(this) && statData != null && statData.HasPathSkill(skillID);
+
+    private bool HpAtOrBelow(float ratio) => _fallbackCurrentHP > 0 && _fallbackCurrentHP <= maxHP * ratio;
+
+    /// <summary>서약 · 패스가 주는 공격 % (전투 중 상태에 따라).</summary>
+    public float GetOathPathAttackPercent()
+    {
+        float p = 0f;
+        if (HasOath(OathWarriorsWill))
+        {
+            p += 0.04f * Mathf.Clamp(allyDeathStacks, 0, 3);
+            if (HpAtOrBelow(0.30f)) p += 0.10f;
+        }
+        if (HasPath(PathBerserkersEdge) && HpAtOrBelow(0.40f)) p += 0.15f;
+        if (HasPath(PathBloodPrice)) p += Mathf.Clamp(bloodPricePercent, 0, 15) / 100f;
+        return p;
+    }
+
+    /// <summary>서약 · 패스가 주는 받는 피해 배율.</summary>
+    public float GetOathPathDamageTakenMult()
+    {
+        float m = 1f;
+        if (HasOath(OathWarriorsWill) && HpAtOrBelow(0.30f)) m *= 0.95f;
+        if (HasPath(PathBerserkersEdge) && HpAtOrBelow(0.40f)) m *= 1.10f;
+        return m;
+    }
+
+    /// <summary>철의 규율: 무기 명중 +3%p (마법 사용 후 2턴은 절반).</summary>
+    public float GetOathAccuracyBonus(AbyssdawnBattle.SkillData skillOrNull)
+    {
+        if (!HasOath(OathIronDiscipline)) return 0f;
+        if (skillOrNull != null && skillOrNull.damageType == AbyssdawnBattle.DamageType.Magic) return 0f;
+        var em = GetComponent<EquipmentManager>();
+        var rh = em != null ? em.rightHand : statData.rightHand;
+        var lh = em != null ? em.leftHand : statData.leftHand;
+        if (!IsWeapon(rh) && !IsWeapon(lh)) return 0f;
+        return 0.03f * (oathHalfRounds > 0 ? 0.5f : 1f);
+    }
+
+    /// <summary>방패를 들고 있나 (철의 규율: 방패면 방어, 무기면 공격).</summary>
+    public bool HoldsShield()
+    {
+        var em = GetComponent<EquipmentManager>();
+        var rh = em != null ? em.rightHand : (statData != null ? statData.rightHand : null);
+        var lh = em != null ? em.leftHand : (statData != null ? statData.leftHand : null);
+        return (rh != null && rh.weaponCategory == AbyssdawnBattle.WeaponCategory.Shield)
+            || (lh != null && lh.weaponCategory == AbyssdawnBattle.WeaponCategory.Shield);
+    }
+
+    /// <summary>종의 기억 % 합: 0 = 공격, 1 = 방어, 2 = 마력</summary>
+    public float GetMemoryPercent(int kind)
+    {
+        if (statData == null) return 0f;
+        var list = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>(3);
+        AppendMemoriesToList(list);
+        float sum = 0f;
+        foreach (var m in list)
+        {
+            if (m == null) continue;
+            sum += kind == 0 ? m.attackPercent : kind == 1 ? m.defensePercent : m.magicPercent;
+        }
+        return sum;
+    }
+
+    /// <summary>종의 기억 치명타율 %p 합.</summary>
+    public float GetMemoryCritBonus()
+    {
+        if (statData == null) return 0f;
+        var list = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>(3);
+        AppendMemoriesToList(list);
+        float sum = 0f;
+        foreach (var m in list) if (m != null) sum += m.critChanceBonus;
+        return sum;
     }
 
     public int Defense
@@ -323,7 +433,9 @@ public class PlayerStats : MonoBehaviour
             int classBonus = characterClass != null ? characterClass.defenseBonus : 0;
 
             // 3. + 기타
-            return baseValue + classBonus + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus() + GetTraitBonus(PassiveBonusStat.Defense);
+            int def = baseValue + classBonus + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus() + GetTraitBonus(PassiveBonusStat.Defense) + GetMemoryStatBonus(PassiveBonusStat.Defense);
+            float dp = GetMemoryPercent(1) / 100f; // [2026-10-14] 종의 기억 방어 %
+            return dp != 0f ? Mathf.Max(0, def + Mathf.RoundToInt(def * dp)) : def;
         }
     }
 
@@ -354,7 +466,10 @@ public class PlayerStats : MonoBehaviour
             int classBonus = characterClass != null ? characterClass.magicBonus : 0;
 
             // 3. + 기타
-            return baseValue + classBonus + GetPassiveMagicBonus() + GetEquipmentMagicBonus() + GetTraitBonus(PassiveBonusStat.Magic);
+            int mag = baseValue + classBonus + GetPassiveMagicBonus() + GetEquipmentMagicBonus() + GetTraitBonus(PassiveBonusStat.Magic) + GetMemoryStatBonus(PassiveBonusStat.Magic);
+            // [2026-10-14] 종의 기억 마력 % + 엘프 '감각의 잔상' (물리 사용마다 +10%, 최대 3)
+            float mp = GetMemoryPercent(2) / 100f + (HasSpecialEffect(TraitSensoryEcho) ? 0.10f * Mathf.Clamp(echoMagicStacks, 0, 3) : 0f);
+            return mp != 0f ? Mathf.Max(0, mag + Mathf.RoundToInt(mag * mp)) : mag;
         }
     }
 
@@ -371,7 +486,7 @@ public class PlayerStats : MonoBehaviour
             int classBonus = characterClass != null ? characterClass.agilityBonus : 0;
 
             // 3. + 기타
-            int total = baseValue + classBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility);
+            int total = baseValue + classBonus + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetTraitBonus(PassiveBonusStat.Agility) + GetMemoryStatBonus(PassiveBonusStat.Agility);
             // [2026-10-12] 아웃파이터: 뒷열에 있으면 민첩 +20%
             if (IsBackRow && HasEquippedPassiveByName(SkillOutfighter)) total += Mathf.RoundToInt(total * FighterStancePercent);
             // [2026-10-14] 신속한 손놀림: 든 단검 하나당 민첩 +5%
@@ -393,7 +508,7 @@ public class PlayerStats : MonoBehaviour
             int classBonus = characterClass != null ? characterClass.luckBonus : 0;
 
             // 3. + 기타
-            return baseValue + classBonus + GetPassiveLuckBonus() + GetEquipmentLuckBonus() + GetTraitBonus(PassiveBonusStat.Luck);
+            return baseValue + classBonus + GetPassiveLuckBonus() + GetEquipmentLuckBonus() + GetTraitBonus(PassiveBonusStat.Luck) + GetMemoryStatBonus(PassiveBonusStat.Luck);
         }
     }
 
@@ -634,6 +749,70 @@ public class PlayerStats : MonoBehaviour
     /// <summary>
     /// 패시브 스킬로부터 명중률 보정치를 가져옵니다 (0.0 ~ 1.0 범위).
     /// </summary>
+    /// <summary>
+    /// [2026-10-14] 직업 특성의 무기 명중 보정 (전사: 모든 무기 +10%p).
+    /// 무기(한손·양손)를 하나라도 들고 있을 때, 물리 공격(기본 공격 = skill null, 물리 스킬)에만.
+    /// </summary>
+    public float GetClassWeaponAccuracyBonus(AbyssdawnBattle.SkillData skillOrNull)
+    {
+        CharacterClass job = statData != null ? statData.currentJob : null;
+        if (job == null || job.weaponAccuracyBonus <= 0f) return 0f;
+        if (skillOrNull != null && skillOrNull.damageType == AbyssdawnBattle.DamageType.Magic) return 0f;
+        var em = GetComponent<EquipmentManager>();
+        var rh = em != null ? em.rightHand : statData.rightHand;
+        var lh = em != null ? em.leftHand : statData.leftHand;
+        bool armed = IsWeapon(rh) || IsWeapon(lh);
+        return armed ? job.weaponAccuracyBonus : 0f;
+    }
+
+    // ── [2026-10-14] 직업 특성 (도적 · 몽크) ──
+    private CharacterClass Job => statData != null ? statData.currentJob : null;
+    private AbyssdawnBattle.EquipmentData Hand(bool right)
+    {
+        var em = GetComponent<EquipmentManager>();
+        if (em != null) return right ? em.rightHand : em.leftHand;
+        return statData == null ? null : right ? statData.rightHand : statData.leftHand;
+    }
+    private AbyssdawnBattle.EquipmentData BodyArmour()
+    {
+        var em = GetComponent<EquipmentManager>();
+        return em != null ? em.body : statData != null ? statData.body : null;
+    }
+
+    /// <summary>맨손인가 (무기를 하나도 안 듦 — 방패는 무기가 아님).</summary>
+    public bool IsUnarmed() => !IsWeapon(Hand(true)) && !IsWeapon(Hand(false));
+
+    public float GetClassCritBonus() => Disposition.IsHero(this) && Job != null ? Job.critChanceBonus : 0f;
+
+    /// <summary>직업 명중 감소 (몽크: 양손 무기 −10%p).</summary>
+    public float GetClassAccuracyPenalty()
+    {
+        var job = Job;
+        if (!Disposition.IsHero(this) || job == null || job.twoHandedAccuracyPenalty <= 0f) return 0f;
+        var rh = Hand(true); var lh = Hand(false);
+        bool twoHanded = (rh != null && rh.equipmentType == AbyssdawnBattle.EquipmentType.TwoHanded)
+                      || (lh != null && lh.equipmentType == AbyssdawnBattle.EquipmentType.TwoHanded);
+        return twoHanded ? job.twoHandedAccuracyPenalty : 0f;
+    }
+
+    /// <summary>직업 회피 감소 (도적: 중갑 −10%p).</summary>
+    public float GetClassEvasionPenalty()
+    {
+        var job = Job;
+        if (!Disposition.IsHero(this) || job == null || job.heavyArmourEvasionPenalty <= 0f) return 0f;
+        var b = BodyArmour();
+        return b != null && b.armourCategory == AbyssdawnBattle.ArmourCategory.HeavyArmour ? job.heavyArmourEvasionPenalty : 0f;
+    }
+
+    /// <summary>몽크: HP 를 쓰는 물리 스킬을 MP 로 낸다.</summary>
+    public bool PaysPhysicalWithMP() => Disposition.IsHero(this) && Job != null && Job.physicalCostUsesMP;
+
+    private static bool IsWeapon(AbyssdawnBattle.EquipmentData e)
+    {
+        return e != null && (e.equipmentType == AbyssdawnBattle.EquipmentType.Hand || e.equipmentType == AbyssdawnBattle.EquipmentType.TwoHanded)
+            && e.weaponCategory != AbyssdawnBattle.WeaponCategory.Shield; // 방패만 든 건 무기가 아님
+    }
+
     public float GetPassiveAccuracyBonus()
     {
         if (statData == null || statData.equippedPassives == null) return 0f;
@@ -866,6 +1045,31 @@ public class PlayerStats : MonoBehaviour
         return total;
     }
 
+    /// <summary>
+    /// [2026-10-14] 종의 기억 3칸의 고정 능력치 보정 합 (공격·방어·마력·민첩·행운).
+    /// 전에는 이 값이 능력치에 더해지지 않았다 (HP·MP%·레벨업 확률·성장만 적용되고 있었음).
+    /// </summary>
+    private int GetMemoryStatBonus(PassiveBonusStat stat)
+    {
+        if (statData == null) return 0;
+        var list = new System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData>(3);
+        AppendMemoriesToList(list);
+        int sum = 0;
+        foreach (var m in list)
+        {
+            if (m == null) continue;
+            switch (stat)
+            {
+                case PassiveBonusStat.Attack:  sum += m.attackBonus; break;
+                case PassiveBonusStat.Defense: sum += m.defenseBonus; break;
+                case PassiveBonusStat.Magic:   sum += m.magicBonus; break;
+                case PassiveBonusStat.Agility: sum += m.agilityBonus; break;
+                case PassiveBonusStat.Luck:    sum += m.luckBonus; break;
+            }
+        }
+        return sum;
+    }
+
     private void AppendMemoriesToList(System.Collections.Generic.List<AbyssdawnBattle.MemoryOfSpeciesData> list)
     {
         if (statData == null || list == null) return;
@@ -990,31 +1194,31 @@ public class PlayerStats : MonoBehaviour
     public int GetAttackBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.attackBonus : 0;
-        return jobBonus + AllocatedAttack + GetPassiveAttackBonus() + GetEquipmentAttackBonus();
+        return jobBonus + AllocatedAttack + GetPassiveAttackBonus() + GetEquipmentAttackBonus() + GetMemoryStatBonus(PassiveBonusStat.Attack);
     }
 
     public int GetDefenseBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.defenseBonus : 0;
-        return jobBonus + AllocatedDefense + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus();
+        return jobBonus + AllocatedDefense + GetPassiveDefenseBonus() + GetEquipmentDefenseBonus() + GetMemoryStatBonus(PassiveBonusStat.Defense);
     }
 
     public int GetMagicBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.magicBonus : 0;
-        return jobBonus + AllocatedMagic + GetPassiveMagicBonus() + GetEquipmentMagicBonus();
+        return jobBonus + AllocatedMagic + GetPassiveMagicBonus() + GetEquipmentMagicBonus() + GetMemoryStatBonus(PassiveBonusStat.Magic);
     }
 
     public int GetAgilityBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.agilityBonus : 0;
-        return jobBonus + AllocatedAgility + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus();
+        return jobBonus + AllocatedAgility + GetPassiveAgilityBonus() + GetEquipmentAgilityBonus() + GetMemoryStatBonus(PassiveBonusStat.Agility);
     }
 
     public int GetLuckBonus()
     {
         int jobBonus = (characterClass != null) ? characterClass.luckBonus : 0;
-        return jobBonus + AllocatedLuck + GetPassiveLuckBonus() + GetEquipmentLuckBonus();
+        return jobBonus + AllocatedLuck + GetPassiveLuckBonus() + GetEquipmentLuckBonus() + GetMemoryStatBonus(PassiveBonusStat.Luck);
     }
 
     [Header("5. 레벨 시스템")]
@@ -1351,6 +1555,12 @@ public class PlayerStats : MonoBehaviour
 
     public int TakeDamage(int damage)
     {
+        // [2026-10-14] 성향 무모함: 주인공이 받는 피해 +10%
+        if (Disposition.IsHero(this) && Disposition.DamageTakenMult != 1f && damage > 0)
+            damage = Mathf.CeilToInt(damage * Disposition.DamageTakenMult);
+        // [2026-10-14] 전사의 의지 (HP 30% 이하 −5%) · 광전사의 칼날 (HP 40% 이하 +10%)
+        float oathMult = damage > 0 ? GetOathPathDamageTakenMult() : 1f;
+        if (oathMult != 1f) damage = Mathf.Max(1, Mathf.RoundToInt(damage * oathMult));
         float totalReduction = 0f;
 
         // 방어 커맨드 / 방어 버프
@@ -1454,6 +1664,12 @@ public class PlayerStats : MonoBehaviour
         amount = Mathf.RoundToInt(ApplyStatModifiers(AbyssdawnBattle.ModStatType.HealingReceived, amount));
         int before = currentHP;
         currentHP = Mathf.Min(currentHP + amount, maxHP);
+        // [2026-10-14] 전사의 의지 제약: HP 를 회복하면 아군 사망 누적이 사라진다
+        if (currentHP > before && allyDeathStacks > 0 && HasOath(OathWarriorsWill))
+        {
+            allyDeathStacks = 0;
+            Debug.Log($"[Oath] {playerName}: 회복 → 전사의 의지 누적 초기화");
+        }
         BattleFx.AllyHeal(this, currentHP - before); // 전투 중이면 카드 위에 초록 숫자 (실제 회복량)
     }
     public void UseMP(int amount) { currentMP = Mathf.Clamp(currentMP - amount, 0, maxMP); }
@@ -1896,14 +2112,26 @@ public class PlayerStats : MonoBehaviour
             }
         }
 
-        int finalHpGain = Mathf.Max(0, Mathf.RoundToInt(classHpGain + memoryHpGrowth));
-        int finalMpGain = Mathf.Max(0, Mathf.RoundToInt(classMpGain + memoryMpGrowth));
+        // [2026-10-14] 종의 기억 성장(0.15~0.3/레벨)은 소수점이 레벨마다 쌓이게 — 전에는 직업 성장과 더해 반올림해서 사라졌다.
+        //   이번 레벨에 받는 양 = ⌊성장 × 지금 레벨⌋ − ⌊성장 × 지난 레벨⌋ (따로 저장할 값 없이 누적과 같음)
+        int memHp = StepGrowth(memoryHpGrowth, level);
+        int memMp = StepGrowth(memoryMpGrowth, level);
+        int finalHpGain = Mathf.Max(0, classHpGain + memHp);
+        int finalMpGain = Mathf.Max(0, classMpGain + memMp);
 
         baseHP += finalHpGain;
         baseMP += finalMpGain;
 
         _lvUpHpGain += finalHpGain;
         _lvUpMpGain += finalMpGain;
+    }
+
+    /// <summary>레벨당 소수 성장의 이번 레벨 몫 (음수 성장도 같은 방식).</summary>
+    private static int StepGrowth(float perLevel, int newLevel)
+    {
+        if (Mathf.Approximately(perLevel, 0f) || newLevel <= 1) return 0;
+        const float eps = 0.0001f;
+        return Mathf.FloorToInt(perLevel * newLevel + eps) - Mathf.FloorToInt(perLevel * (newLevel - 1) + eps);
     }
 
     /// <summary>이번 레벨업에서 자동으로 오른 DEF/MAG 1당 MaxHP·MaxMP +3.</summary>

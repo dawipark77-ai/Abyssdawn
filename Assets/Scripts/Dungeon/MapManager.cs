@@ -177,6 +177,9 @@ public class MapManager : MonoBehaviour
         if (canvas != null) DungeonPanelGroup.Setup(canvas);
         else Debug.LogWarning($"[MapManager] 창들이 들어 있는 '{uiCanvasName}' 을(를) 찾지 못해 창 겹침 방지를 켜지 못했습니다.");
 
+        // [2026-10-14] 타이틀 → 모험의 서에서 새 게임/이어서 하기를 골라 들어왔으면 그대로 처리 (묻지 않음)
+        if (GameStartRequest.ApplyInDungeon(this)) SaveSystem.LaunchChecked = true;
+
         // 게임을 켜고 처음 들어왔으면: 저장이 있으면 이어서 할지 묻는다 (게임 오버·전투 복귀 때는 묻지 않음)
         if (!SaveSystem.LaunchChecked)
         {
@@ -260,7 +263,7 @@ public class MapManager : MonoBehaviour
                 return true;
             case FloorFeature.Chest:
                 if (FloorState.openedChests.Contains(pos)) return false;
-                OpenChest(pos);
+                AskChest(pos); // [2026-10-15] 열기 전에 확인 (함정 상자가 있다)
                 return true;
             case FloorFeature.Spring:
                 if (FloorState.usedSprings.Contains(pos)) return false;
@@ -285,6 +288,7 @@ public class MapManager : MonoBehaviour
         bool carryingLight = DungeonPersistentData.playerLightSteps > 0;
         if (carryingLight) r += lightSightBonus;
         if (DungeonFieldStatus.Has(AbyssdawnBattle.StatusEffectType.Blind)) r -= DungeonFieldStatus.BlindSightPenalty; // 실명 가스
+        r += Disposition.SightBonus; // [2026-10-14] 성향 탐험가: 시야 +1
         return Mathf.Max(1, r);
     }
 
@@ -529,6 +533,7 @@ public class MapManager : MonoBehaviour
         float agi = hero != null ? hero.Agility : 0f;
         float c = trapSenseBaseChance + agi * trapSensePerAgi;
         if (FieldSkills.Has(FieldSkills.TrapDetection)) c += FieldSkills.TrapDetectPassiveChance;
+        c += Disposition.TrapSenseBonus; // [2026-10-14] 성향 신중함: +25%
         return Mathf.Clamp(c, 0f, trapSenseMaxChance);
     }
 
@@ -780,10 +785,13 @@ public class MapManager : MonoBehaviour
     /// 층을 계단으로 처음 내려갈 때 탐험 EXP (+ 지도를 다 채웠으면 추가). 알림에 붙일 문구를 돌려준다.
     /// 같은 층은 한 번만 (위층에서 다시 내려와도 없음).
     /// </summary>
+    private const bool FloorExpEnabled = false;
+
     private string GrantFloorClearExp()
     {
         if (FloorState == null || FloorState.clearRewarded) return "";
         FloorState.clearRewarded = true;
+        if (!FloorExpEnabled) return ""; // [2026-10-15] 층을 내려가는 것만으로는 EXP 없음 (계단·지도 완성 모두) — EXP 는 전투·함정 해제로만
 
         int floor = FloorData.floorNumber;
         int exp = Mathf.Max(0, floorClearExpPerFloor) * floor;
@@ -917,12 +925,78 @@ public class MapManager : MonoBehaviour
     // 보물상자 · 샘
     // ─────────────────────────────────────────
 
+    // ── [2026-10-15] 상자 열기 전 확인 · 함정 상자 · 미믹 자리 ──
+    [Header("함정 상자 (2026-10-15)")]
+    [Tooltip("함정 상자 확률 = base + perFloor × 층 (최대 max)")]
+    public float chestTrapBase = 0.10f, chestTrapPerFloor = 0.015f, chestTrapMax = 0.25f;
+    [Tooltip("미믹(상자 몬스터) 확률 — 미믹 몬스터가 생기면 값을 넣고 mimicMonster 를 연결")]
+    [Range(0f, 1f)] public float chestMimicChance = 0f;
+    public Abyssdawn.MonsterSO mimicMonster;
+    private readonly Dictionary<Vector2Int, int> _chestFate = new Dictionary<Vector2Int, int>(); // 0 보통 · 1 함정 · 2 미믹 (한 번 정하면 그대로)
+
+    private int ChestFate(Vector2Int pos)
+    {
+        if (_chestFate.TryGetValue(pos, out int f)) return f;
+        float r = Random.value;
+        float mimic = mimicMonster != null ? chestMimicChance : 0f;
+        float trap = Mathf.Min(chestTrapMax, chestTrapBase + chestTrapPerFloor * (FloorData != null ? FloorData.floorNumber : 1));
+        f = r < mimic ? 2 : r < mimic + trap ? 1 : 0;
+        _chestFate[pos] = f;
+        return f;
+    }
+
+    private void AskChest(Vector2Int pos)
+    {
+        if (_player != null) _player.InterruptHold();
+        int fate = ChestFate(pos);
+        // 함정 감지 스킬: 함정·미믹 상자는 열기 전에 수상함을 알아챈다
+        bool sensed = fate != 0 && FieldSkills.Has(FieldSkills.TrapDetection);
+        string msg = sensed
+            ? "A treasure chest.\n<size=75%><color=#FF9F6B>Something about it feels wrong...</color></size>\nOpen it?"
+            : "A treasure chest.\nOpen it?";
+        _hud.Confirm(msg, "Open", "Leave", ok =>
+        {
+            if (!ok) return;
+            if (fate == 2 && mimicMonster != null)
+            {
+                FloorState.openedChests.Add(pos);
+                if (automapRenderer != null) automapRenderer.Rebuild();
+                Toast("<color=#FF5A5A>The chest bares its teeth — a Mimic!</color>");
+                DungeonEncounter.Instance?.StartPresetEncounter(new[] { mimicMonster });
+                return;
+            }
+            if (fate == 1) SpringChestTrap();
+            OpenChest(pos);
+        });
+    }
+
+    /// <summary>함정 상자: 독침(피해 + 독) 또는 폭발(더 큰 피해). 그래도 안의 물건은 얻는다.</summary>
+    private void SpringChestTrap()
+    {
+        int floor = FloorData != null ? FloorData.floorNumber : 1;
+        if (Random.value < 0.5f)
+        {
+            int dmg = DamageHero(0.08f * Disposition.TrapDamageMult);
+            DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Poison);
+            _hud.Flash(new Color(0.3f, 0.9f, 0.2f, 0.45f));
+            Toast($"<color=#7CFC7C>A poison needle in the lock!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#7CFC7C>poisoned</color>.</size>");
+        }
+        else
+        {
+            int dmg = DamageHero((0.12f + 0.005f * floor) * Disposition.TrapDamageMult);
+            _hud.Flash(new Color(1f, 0.55f, 0.1f, 0.6f), 0.5f);
+            Toast($"<color=#FF9A3C>The chest explodes!</color> <color=#FF6B6B>-{dmg} HP</color>");
+        }
+        Debug.Log($"[MapManager] B{floor} 함정 상자 발동");
+        CheckHeroDeath();
+    }
+
     private void OpenChest(Vector2Int pos)
     {
         if (_player != null) _player.InterruptHold();
 
         // 지식의 서: 스킬 포인트(LP) +1 — 전투 외 성장 수단
-        if (Random.value < chestTomeChance)
+        if (Random.value < chestTomeChance * Disposition.ChestGoodMult) // [2026-10-14] 성향 호기심: 좋은 물건 +20%
         {
             PlayerStats hero = GetHeroStats();
             if (hero != null)
@@ -939,7 +1013,7 @@ public class MapManager : MonoBehaviour
         // [2026-10-08] 초반 층: 허접 무기 (스킬을 쓰기 위한 무기). [2026-10-09] 같은 장비도 다시 나옴 (30개까지 — 쌍수용)
         EquipmentData junk = Random.value < chestJunkWeaponChance ? RollEquipment(true) : null;
         // 장비
-        if (junk != null || Random.value < chestEquipmentChance)
+        if (junk != null || Random.value < chestEquipmentChance * Disposition.ChestGoodMult)
         {
             EquipmentData gear = junk != null ? junk : RollEquipment(false);
             if (gear != null && EquipmentBag.Add(gear))
@@ -1170,7 +1244,12 @@ public class MapManager : MonoBehaviour
         if (automapRenderer != null) automapRenderer.Rebuild();
 
         // 공통: 기본 피해 + 출혈 3턴
-        float percent = TrapDamagePercent(type) * damageMult;
+        float percent = TrapDamagePercent(type) * damageMult * Disposition.TrapDamageMult; // [2026-10-14] 성향: 호기심 +30% · 신중함 −50%
+        if (Disposition.Is(Disposition.Perfectionist) && Disposition.PerfectionistTrapFloor != FloorData.floorNumber)
+        {
+            Disposition.PerfectionistTrapFloor = FloorData.floorNumber; // 완벽주의자: 이 층에 있는 동안 명중 −10%
+            Toast("<color=#FF9F6B>A perfectionist's pride is wounded.</color>\n<size=75%>Hit chance -10% on this floor.</size>");
+        }
         int dmg = DamageHero(percent);
         DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Bleed, trapBleedTurns, 1);
         string hit = $"<color=#FF6B6B>-{dmg} HP</color>  <color=#FF5A5A>Bleeding {trapBleedTurns}</color>";

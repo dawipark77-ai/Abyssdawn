@@ -37,11 +37,9 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Attack +1, Luck -1. Level up: Attack +0.2 per level."
-  flavorText: "They see heat where others see only darkness, but miss subtler fortunes."
+  description: "\uACF5\uACA9 +1\n\uD589\uC6B4 -1\n\n\uB808\uBCA8\uC5C5 \uB54C \uACF5\uACA9\uC774
+    \uC624\uB97C \uD655\uB960 +15%p"
+  flavorText: They see heat where others see only darkness, but miss subtler fortunes.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

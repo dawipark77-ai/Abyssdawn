@@ -37,11 +37,9 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 0
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 15
-  description: "Luck +1, Defense -1. Level up: Luck +0.2 per level."
-  flavorText: "Their eyes pick out small details, but miss the heavy blows coming."
+  description: "\uBC29\uC5B4 -1\n\uD589\uC6B4 +1\n\n\uB808\uBCA8\uC5C5 \uB54C \uD589\uC6B4\uC774
+    \uC624\uB97C \uD655\uB960 +15%p"
+  flavorText: Their eyes pick out small details, but miss the heavy blows coming.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

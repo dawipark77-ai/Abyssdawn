@@ -20,6 +20,11 @@ MonoBehaviour:
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 1
   defenseBonus: 0
   agilityBonus: -1
@@ -37,11 +42,11 @@ MonoBehaviour:
   magicLevelUpChanceBonus: 10
   agilityLevelUpChanceBonus: 0
   luckLevelUpChanceBonus: 0
-  description: "Attack +1, Agility -1. Level up: Attack +0.2 per level."
-  flavorText: "Their legs drive them forward in brutal charges, not graceful steps."
+  description: "\uACF5\uACA9 +1 (\uB3CC\uACA9 \uC704\uB825)\n\uBBFC\uCCA9 -1 (\uBC29\uD5A5
+    \uC804\uD658\uC774 \uC5B4\uB824\uC6C0)\n\n\uB808\uBCA8\uC5C5 \uB54C \uACF5\uACA9\uC774
+    \uC624\uB97C \uD655\uB960 +15%p\n\uB808\uBCA8\uC5C5 \uB54C \uB9C8\uB825\uC774
+    \uC624\uB97C \uD655\uB960 +10%p"
+  flavorText: Their legs drive them forward in brutal charges, not graceful steps.
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 
-
-
-

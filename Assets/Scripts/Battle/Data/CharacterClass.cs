@@ -13,6 +13,42 @@ public class CharacterClass : ScriptableObject
     public string description = "";
     public Sprite classIcon;
 
+    // [2026-10-14] 직업 특성 (Class Trait) — 그 직업이면 늘 켜져 있는 고유 효과
+    [Header("직업 특성 (Class Trait)")]
+    public string traitName = "";
+    public string traitNameKR = "";
+    [TextArea(2, 4)] public string traitDescription = "";
+    [TextArea(2, 4)] public string traitDescriptionKR = "";
+    [Tooltip("무기를 들고 하는 물리 공격(기본 공격·물리 스킬) 명중률에 더함. 0.10 = +10%p")]
+    [Range(0f, 0.5f)] public float weaponAccuracyBonus = 0f;
+
+    // [2026-10-14] 직업 특성 숫자 (도적 · 몽크)
+    [Header("직업 특성 — 도적 · 몽크")]
+    [Tooltip("치명타 확률 %p (도적 +5)")]
+    public float critChanceBonus = 0f;
+    [Tooltip("첫 턴 민첩 배율 보너스 (도적 0.15 = +15%)")]
+    public float firstTurnSpeedBonus = 0f;
+    [Tooltip("중갑을 입으면 회피 감소 (도적 0.10 = −10%p)")]
+    public float heavyArmourEvasionPenalty = 0f;
+    [Tooltip("맨손일 때 공격 % (몽크 0.10 = +10%)")]
+    public float unarmedDamageBonus = 0f;
+    [Tooltip("양손 무기를 들면 명중 감소 (몽크 0.10 = −10%p)")]
+    public float twoHandedAccuracyPenalty = 0f;
+    [Tooltip("HP 를 쓰는 물리 스킬을 같은 % 의 MP 로 낸다 (몽크)")]
+    public bool physicalCostUsesMP = false;
+
+    // [2026-10-14] 새 게임에서 이 직업을 고르면 처음부터 가지고 시작하는 장비 (무기 → 오른손, 갑옷 → 몸통, 장신구 → 장신구1)
+    [Header("기초 장비 (Starting Equipment)")]
+    public System.Collections.Generic.List<AbyssdawnBattle.EquipmentData> startingEquipment = new System.Collections.Generic.List<AbyssdawnBattle.EquipmentData>();
+
+    // [2026-10-14] 서약 후보 — 새 게임에서 이 중 1개를 고른다 (서약마다 제약이 붙음)
+    [Header("서약 (Oath & Binding)")]
+    public System.Collections.Generic.List<AbyssdawnBattle.OathBindingData> oaths = new System.Collections.Generic.List<AbyssdawnBattle.OathBindingData>();
+
+    // [2026-10-14] 직업 패스 — LP 로 배우는 직업 전용 스킬 (Class 패널 PATH 탭)
+    [Header("직업 패스 (Path)")]
+    public System.Collections.Generic.List<AbyssdawnBattle.PathSkillData> pathSkills = new System.Collections.Generic.List<AbyssdawnBattle.PathSkillData>();
+
     [Header("=== 스탯 배율 (Multiplier, 1.0 = 100%) ===")]
     [Tooltip("HP 배율 - 예: 1.30 = 130% (30% 증가)")]
     [Range(0.1f, 3.0f)]

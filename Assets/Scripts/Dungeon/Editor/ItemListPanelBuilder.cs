@@ -56,6 +56,7 @@ public static class ItemListPanelBuilder
         // ── 루트: 화면 전체를 어둡게 + 뒤 클릭 막기 ──
         RectTransform root = Rect(canvas.transform, PanelName);
         Stretch(root);
+        root.offsetMin = new Vector2(0f, 345f); // [2026-10-15] 아래 파티 상태 카드는 가리지 않음 (회복·선택 대상이 보이게)
         Image dim = root.gameObject.AddComponent<Image>();
         dim.color = new Color(0f, 0f, 0f, 0.72f);
         ItemListPanel panel = root.gameObject.AddComponent<ItemListPanel>();
@@ -63,7 +64,7 @@ public static class ItemListPanelBuilder
 
         // ── 금테 배경 ──
         RectTransform frame = Rect(root, "Frame");
-        Place(frame, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 1720f));
+        Place(frame, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -25f), new Vector2(1000f, 1460f)); // [2026-10-15] 아래 상태 카드 위까지만
         Image frameImg = frame.gameObject.AddComponent<Image>();
         frameImg.sprite = LoadSprite(FramePath);
         frameImg.color = Color.white;
@@ -95,7 +96,7 @@ public static class ItemListPanelBuilder
 
         // ── 목록 (스크롤) ──
         // [2026-10-08] 상세는 팝업(InventoryOverlay 의 DetailPanel)으로 보므로 목록을 아래 줄 바로 위까지 늘림
-        RectTransform scrollRt = Top(frame, "ItemScroll", 0f, -332f, 920f, 1254f);
+        RectTransform scrollRt = Top(frame, "ItemScroll", 0f, -332f, 920f, 994f);
         Image scrollHit = scrollRt.gameObject.AddComponent<Image>();
         scrollHit.color = new Color(0f, 0f, 0f, 0f);
         ScrollRect scroll = scrollRt.gameObject.AddComponent<ScrollRect>();
@@ -164,7 +165,7 @@ public static class ItemListPanelBuilder
         panel.emptyText = empty;
 
         // ── 상세 칸 ──
-        RectTransform detail = Top(frame, "DetailSection", 0f, -1110f, 920f, 470f);
+        RectTransform detail = Top(frame, "DetailSection", 0f, -850f, 920f, 470f);
         Box(detail.gameObject);
 
         TextMeshProUGUI hint = Text(Rect(detail, "DetailHint"), "아이템을 선택하세요", 30f, TextSub, FontStyles.Italic, TextAlignmentOptions.Center);
@@ -237,8 +238,8 @@ public static class ItemListPanelBuilder
         detail.gameObject.SetActive(false); // [2026-10-08] 상세 팝업을 쓰므로 숨김 (필요하면 하이라키에서 켜면 됨)
 
         // ── 아래 줄 ── (위 구분선과 대칭인 금줄: 목록 아래끝에서 15px)
-        Line(Top(frame, "BottomDivider", 0f, -1601f, 900f, 3f));
-        RectTransform footer = Top(frame, "Footer", 0f, -1606f, 920f, 70f);
+        Line(Top(frame, "BottomDivider", 0f, -1341f, 900f, 3f));
+        RectTransform footer = Top(frame, "Footer", 0f, -1346f, 920f, 70f);
         RectTransform bag = Rect(footer, "BagText");
         Place(bag, new Vector2(0f, 0f), new Vector2(0.62f, 1f), Vector2.zero, Vector2.zero);
         bag.offsetMin = new Vector2(20f, 0f); bag.offsetMax = Vector2.zero;

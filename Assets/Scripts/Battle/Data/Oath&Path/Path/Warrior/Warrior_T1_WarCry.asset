@@ -22,3 +22,5 @@ MonoBehaviour:
   effectDescription: "2\uD134 \uB3D9\uC548 \uD30C\uD2F0 \uC804\uCCB4 \uACF5\uACA9\uB825
     +8%.\n\uACF5\uD3EC/\uC815\uC2E0 \uACC4\uC5F4 \uC800\uC8FC \uC800\uD56D +20%."
   drawbackDescription: "\uC2DC\uC804\uC790 HP 5%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
+  lpCost: 1
+  battleSkill: {fileID: 11400000, guid: 3248d29ed2051234ca05c9546cd4949a, type: 2}

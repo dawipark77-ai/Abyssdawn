@@ -61,7 +61,16 @@ public static class TownShop
         public string Name { get { return consumable != null ? consumable.itemName : equipment != null ? equipment.equipmentName : asset.name; } }
         public int BaseBuyPrice { get { return consumable != null ? consumable.buyPrice : equipment != null ? equipment.buyPrice : 0; } }
         public int BaseSellPrice { get { return consumable != null ? consumable.sellPrice : equipment != null ? equipment.sellPrice : 0; } }
-        public int BuyPrice { get { int p = BaseBuyPrice; return p > 0 && HasResourceManagement() ? Mathf.Max(1, Mathf.FloorToInt(p * ResourceBuyMult)) : p; } }
+        public int BuyPrice
+        {
+            get
+            {
+                int p = BaseBuyPrice;
+                if (p > 0 && HasResourceManagement()) p = Mathf.Max(1, Mathf.FloorToInt(p * ResourceBuyMult));
+                if (p > 0 && Disposition.ShopBuyMult != 1f) p = Mathf.Max(1, Mathf.FloorToInt(p * Disposition.ShopBuyMult)); // [2026-10-14] 성향 구두쇠: −15%
+                return p;
+            }
+        }
         public int SellPrice { get { int p = BaseSellPrice; return p > 0 && HasResourceManagement() ? Mathf.CeilToInt(p * ResourceSellMult) : p; } }
         // [2026-10-08] 소비 아이템 그림은 itemIcon 칸에 있다 (icon 칸은 비어 있어 상점에 그림이 안 나왔음)
         public Sprite Icon { get { return consumable != null ? (consumable.itemIcon != null ? consumable.itemIcon : consumable.icon != null ? consumable.icon : consumable.flatIcon)

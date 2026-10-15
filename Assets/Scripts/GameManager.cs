@@ -269,6 +269,9 @@ public class GameManager : MonoBehaviour
                 data.allocatedAgility,
                 data.allocatedLuck,
                 data.skillPoints);
+            // [2026-10-14] 분배·기억까지 반영된 최대치로 한 번 더 (최대 MP 0 인데 현재 MP 3 처럼 넘치지 않게)
+            player.currentHP = Mathf.Min(player.currentHP, player.maxHP);
+            player.currentMP = Mathf.Min(player.currentMP, player.maxMP);
 
             if (data.isIgnited && data.igniteTurnsRemaining > 0)
             {

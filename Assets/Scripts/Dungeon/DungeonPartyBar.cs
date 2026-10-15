@@ -40,8 +40,30 @@ public class DungeonPartyBar : MonoBehaviour
     private bool _warned;
     private int _lastSignature;
 
+    /// <summary>[2026-10-15] 카드 연출(CardFx)이 주인공 카드를 찾을 때 쓴다.</summary>
+    public static DungeonPartyBar Instance { get; private set; }
+
+    /// <summary>주인공 카드 (지금 주인공이 서 있는 칸).</summary>
+    public RectTransform HeroCardRect()
+    {
+        if (!EnsureBound()) return null;
+        var occupancy = CompanionPartyPersistence.BuildMainLineOccupancy();
+        for (int i = 0; i < _cards.Count && i < occupancy.Length; i++)
+            if (_cards[i] != null && occupancy[i].IsHero) return _cards[i].slot as RectTransform;
+        return null;
+    }
+
+    /// <summary>[2026-10-15] 동료 카드 (ActiveRoster 순번 → 그 동료가 서 있는 칸).</summary>
+    public RectTransform CompanionCardRect(int rosterIndex)
+    {
+        if (!EnsureBound()) return null;
+        int slot = CompanionPartyPersistence.RosterIndexToMainLineSlot(rosterIndex);
+        return slot >= 0 && slot < _cards.Count && _cards[slot] != null ? _cards[slot].slot as RectTransform : null;
+    }
+
     private void OnEnable()
     {
+        Instance = this;
         PlayerStats.OnStatusChanged += Refresh;
         DungeonFieldStatus.OnChanged += Refresh; // [2026-10-08] 함정 상태이상(출혈 등) 아이콘
         _nextRefresh = 0f;
@@ -49,6 +71,7 @@ public class DungeonPartyBar : MonoBehaviour
 
     private void OnDisable()
     {
+        if (Instance == this) Instance = null;
         PlayerStats.OnStatusChanged -= Refresh;
         DungeonFieldStatus.OnChanged -= Refresh;
     }

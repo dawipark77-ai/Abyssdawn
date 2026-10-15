@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 523e041d6a0b75246a7b0fb12dd43373, type: 3}
+  m_Name: Disposition_LoneWolf
+  m_EditorClassIdentifier: Assembly-CSharp::DispositionData
+  dispositionName: Lone Wolf
+  dispositionNameKR: "\uACE0\uB3C5\uD55C \uB291\uB300"
+  icon: {fileID: 21300000, guid: 881b06ad76929264b93e1c3e0d64de42, type: 3}
+  description: 'Fighting alone: all stats +10%.
+
+    With allies: healing received
+    -15%.'
+  descriptionKR: "\uB3D9\uB8CC \uC5C6\uC774 \uC2F8\uC6B0\uBA74 \uBAA8\uB4E0 \uB2A5\uB825
+    +10%.\n\uB3D9\uB8CC\uAC00 \uC788\uC73C\uBA74 \uBC1B\uB294 \uD68C\uBCF5 \u221215%."

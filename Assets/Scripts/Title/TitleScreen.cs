@@ -13,7 +13,8 @@ public class TitleScreen : MonoBehaviour
 {
     public TMP_Text tapText;
     public TMP_Text versionText;
-    public string nextScene = "Abyssdawn_Dungeon_2D 08";
+    public TMP_Text langText;
+    public string nextScene = "Abyssdawn_Prologue"; // [2026-10-14] 모험의 서 · 새 게임 화면
 
     [Header("TAP TO BEGIN 깜빡임")]
     public float pulsePeriod = 2.4f;
@@ -29,6 +30,29 @@ public class TitleScreen : MonoBehaviour
     {
         _t0 = Time.time;
         if (versionText != null) versionText.text = $"v {Application.version}";
+        RefreshLanguageLabel();
+    }
+
+    // ───────── 언어 버튼 ─────────
+    // [2026-10-14] 누를 때마다 KR ↔ EN 을 바꿔 PlayerPrefs("Language") 에 저장한다.
+    //   아직 게임 글자 번역은 없음 — 번역이 생기면 이 값을 읽어 쓰면 된다.
+    public const string LanguageKey = "Language";
+
+    public void OnLanguage()
+    {
+        if (_leaving) return;
+        string next = PlayerPrefs.GetString(LanguageKey, "KR") == "KR" ? "EN" : "KR";
+        PlayerPrefs.SetString(LanguageKey, next);
+        PlayerPrefs.Save();
+        RefreshLanguageLabel();
+    }
+
+    private void RefreshLanguageLabel()
+    {
+        if (langText == null) return;
+        bool kr = PlayerPrefs.GetString(LanguageKey, "KR") == "KR";
+        langText.text = kr ? "KR · <color=#D4A761><b>한국어</b></color>"
+                           : "EN · <color=#D4A761><b>ENGLISH</b></color>";
     }
 
     private void Update()

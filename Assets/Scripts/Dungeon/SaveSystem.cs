@@ -20,8 +20,31 @@ using UnityEngine.SceneManagement;
 public static class SaveSystem
 {
     public const int Version = 1;
-    public static string FilePath => Path.Combine(Application.persistentDataPath, "abyssdawn_save.json");
+
+    // [2026-10-14] 모험의 서 여러 칸 (드퀘식). 0번 칸 = 예전 한 칸짜리 파일 이름 그대로 (기존 저장 유지)
+    public const int SlotCount = 3;
+    /// <summary>지금 쓰는 칸 (0부터). 저장·불러오기·"이어서 하기" 질문이 모두 이 칸을 쓴다.</summary>
+    public static int CurrentSlot;
+    public static string PathFor(int slot) => Path.Combine(Application.persistentDataPath, slot <= 0 ? "abyssdawn_save.json" : $"abyssdawn_save_{slot + 1}.json");
+    public static string FilePath => PathFor(CurrentSlot);
     public static bool HasSave => File.Exists(FilePath);
+    public static bool HasSaveIn(int slot) => File.Exists(PathFor(slot));
+
+    /// <summary>모험의 서 지우기.</summary>
+    public static void Delete(int slot)
+    {
+        try { if (File.Exists(PathFor(slot))) File.Delete(PathFor(slot)); Debug.Log($"[SaveSystem] 모험의 서 {slot + 1} 삭제"); }
+        catch (Exception ex) { Debug.LogWarning("[SaveSystem] 지우기 실패: " + ex.Message); }
+    }
+
+    // [2026-10-14] 플레이 시간 — 불러온/새로 시작한 때부터 실제 시간으로 잰다 (저장 때 합쳐서 기록)
+    private static float _playBase, _playMark;
+    public static float PlaySeconds => _playBase + Mathf.Max(0f, Time.realtimeSinceStartup - _playMark);
+    public static void StartPlayClock(float fromSeconds) { _playBase = Mathf.Max(0f, fromSeconds); _playMark = Time.realtimeSinceStartup; }
+    public static string FormatPlayTime(float seconds) { int m = Mathf.FloorToInt(seconds / 60f); return $"{m / 60}:{m % 60:00}"; }
+
+    /// <summary>[2026-10-14] 새 게임에서 고른 성향 (DispositionData 에셋 이름, 아직 효과 없음).</summary>
+    public static string Disposition;
 
     /// <summary>이번 실행에서 "이어서 하기" 질문을 이미 했는지 (게임 오버 후 다시 묻지 않게).</summary>
     public static bool LaunchChecked;
@@ -66,6 +89,8 @@ public static class SaveSystem
         public GameManager.PartyMemberData hero;
         public string heroKey;
         public string job, rightHand, leftHand, body, accessory1, accessory2, memory1, memory2, memory3;
+        public string oath; // [2026-10-14]
+        public List<string> pathSkills = new List<string>(); // [2026-10-14] 배운 직업 패스
         public List<string> learnedSkills = new List<string>(), equippedSkills = new List<string>(), equippedPassives = new List<string>();
         // 동료
         public List<CompanionSave> active = new List<CompanionSave>(), waitlist = new List<CompanionSave>();
@@ -76,6 +101,8 @@ public static class SaveSystem
         public List<string> equipmentBag = new List<string>();
         public int gold = PlayerWallet.StartingGold;
         public List<int> bossesDefeated = new List<int>(); // [2026-10-09] 보스를 쓰러뜨린 층
+        public float playSeconds;   // [2026-10-14] 모험의 서에 보여줄 플레이 시간
+        public string disposition;  // [2026-10-14] 성향 (에셋 이름)
         // 이어서 하기 창에 보여줄 요약
         public int heroLevel;
     }
@@ -130,6 +157,8 @@ public static class SaveSystem
             if (sd != null)
             {
                 d.job = NameOf(sd.currentJob);
+                d.oath = NameOf(sd.currentOath);
+                if (sd.learnedPathSkills != null) foreach (var p in sd.learnedPathSkills) if (p != null) d.pathSkills.Add(p.name);
                 d.rightHand = NameOf(sd.rightHand); d.leftHand = NameOf(sd.leftHand); d.body = NameOf(sd.body);
                 d.accessory1 = NameOf(sd.accessory1); d.accessory2 = NameOf(sd.accessory2);
                 d.memory1 = NameOf(sd.memorySlot1); d.memory2 = NameOf(sd.memorySlot2); d.memory3 = NameOf(sd.memorySlot3);
@@ -153,6 +182,8 @@ public static class SaveSystem
             foreach (var e in EquipmentBag.Items) if (e != null) d.equipmentBag.Add(e.name);
             d.gold = PlayerWallet.Gold;
             d.bossesDefeated.AddRange(BossEncounter.defeatedFloors);
+            d.playSeconds = PlaySeconds;
+            d.disposition = Disposition;
 
             File.WriteAllText(FilePath, JsonUtility.ToJson(d, true));
             Debug.Log($"[SaveSystem] 저장 완료 — B{d.currentFloor} Lv{d.heroLevel} → {FilePath}");
@@ -170,9 +201,11 @@ public static class SaveSystem
     // 불러오기
     // ─────────────────────────────────────────
 
-    public static SaveData Peek()
+    public static SaveData Peek() => Peek(CurrentSlot);
+
+    public static SaveData Peek(int slot)
     {
-        try { return HasSave ? JsonUtility.FromJson<SaveData>(File.ReadAllText(FilePath)) : null; }
+        try { return HasSaveIn(slot) ? JsonUtility.FromJson<SaveData>(File.ReadAllText(PathFor(slot))) : null; }
         catch (Exception ex) { Debug.LogWarning("[SaveSystem] 저장 파일을 읽지 못했습니다: " + ex.Message); return null; }
     }
 
@@ -230,9 +263,15 @@ public static class SaveSystem
                 //   이름 검색이 다른 쪽을 집으면 HeroData 가 쓸데없이 바뀌었다 (내용은 동일)
                 if (sd.currentJob == null || sd.currentJob.name != d.job)
                     sd.currentJob = Find<CharacterClass>(d.job) ?? sd.currentJob;
+                sd.currentOath = string.IsNullOrEmpty(d.oath) ? null : Find<OathBindingData>(d.oath);
+                if (sd.learnedPathSkills == null) sd.learnedPathSkills = new List<PathSkillData>();
+                sd.learnedPathSkills.Clear();
+                if (d.pathSkills != null)
+                    foreach (var n in d.pathSkills) { var p = Find<PathSkillData>(n); if (p != null) sd.learnedPathSkills.Add(p); }
                 sd.rightHand = Find<EquipmentData>(d.rightHand); sd.leftHand = Find<EquipmentData>(d.leftHand); sd.body = Find<EquipmentData>(d.body);
                 sd.accessory1 = Find<EquipmentData>(d.accessory1); sd.accessory2 = Find<EquipmentData>(d.accessory2);
                 sd.memorySlot1 = Find<MemoryOfSpeciesData>(d.memory1); sd.memorySlot2 = Find<MemoryOfSpeciesData>(d.memory2); sd.memorySlot3 = Find<MemoryOfSpeciesData>(d.memory3);
+                sd.CheckAndActivateTrait(); // [2026-10-14] 불러온 기억으로 종의 특성 다시 계산 (안 하면 이전 판의 특성이 남음)
                 FillList(sd.learnedSkills, d.learnedSkills);
                 FillSlots(sd.equippedSkills, d.equippedSkills, 6);
                 FillSlots(sd.equippedPassives, d.equippedPassives, 3);
@@ -267,6 +306,9 @@ public static class SaveSystem
             BossEncounter.defeatedFloors.Clear();
             if (d.bossesDefeated != null) foreach (int f in d.bossesDefeated) BossEncounter.defeatedFloors.Add(f);
             PlayerStats.PendingLevelUpNotes.Clear();
+            StartPlayClock(d.playSeconds);
+            Disposition = d.disposition;
+            global::Disposition.PerfectionistTrapFloor = -1;
 
             Debug.Log($"[SaveSystem] 불러오기 — B{d.currentFloor} Lv{d.heroLevel} ({d.savedAt}), 씬 '{d.sceneName}'");
             string scene = string.IsNullOrEmpty(d.sceneName) ? SceneManager.GetActiveScene().name : d.sceneName;
