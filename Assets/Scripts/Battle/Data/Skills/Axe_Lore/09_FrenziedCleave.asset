@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: Frenzied Cleave
   skillIcon: {fileID: 21300000, guid: 595112584cd4d4f4a809e692ad00217c, type: 3}
   description: "[\uB3C4\uB07C\uC220 \xB7 \uACF5\uACA9 \xB7 \uB3C4\uB07C \uC7A5\uCC29]
-    \uAD11\uB780\uC758 \uB0B4\uB824\uCC0D\uAE30. \uCD5C\uB300 HP 30%\uB97C \uBC14\uCCD0
+    \uAD11\uB780\uC758 \uB0B4\uB824\uCC0D\uAE30. \uCD5C\uB300 HP 40%\uB97C \uBC14\uCCD0
     \uC801 1\uBA85\uC5D0\uAC8C \uACF5\uACA9\uB825 300% \uD53C\uD574."
   usageType: 0
   damageType: 1
@@ -27,7 +27,7 @@ MonoBehaviour:
     allowedCasterSlots: 3
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 30
+  hpCostPercent: 40
   mpCost: 0
   minMult: 3
   maxMult: 3
@@ -63,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

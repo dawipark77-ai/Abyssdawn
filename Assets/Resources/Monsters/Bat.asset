@@ -20,9 +20,9 @@ MonoBehaviour:
   race: 1
   basicAttackOverride: {fileID: 11400000, guid: c8f5d1a3b96e4827bc1a0d4e6f819203, type: 2}
   level: 2
-  hp: 15
+  hp: 18
   mp: 0
-  atk: 5
+  atk: 8
   def: 2
   mag: 0
   agi: 12
@@ -42,7 +42,7 @@ MonoBehaviour:
   minFloor: 2
   maxFloor: 8
   spawnWeight: 1
-  expReward: 16
+  expReward: 9
   goldReward: 3
   dropTable: []
   companionChance: 0.125

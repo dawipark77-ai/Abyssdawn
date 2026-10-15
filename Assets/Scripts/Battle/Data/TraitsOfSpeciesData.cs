@@ -24,6 +24,9 @@ namespace AbyssdawnBattle
         [Tooltip("특성 아이콘")]
         public Sprite traitIcon;
 
+        [Tooltip("[2026-10-15] 이 특성이 깨어나면 전투 스킬 목록에 들어가는 스킬 (엘프: Ether Sense). 없으면 비움")]
+        public SkillData grantedSkill;
+
         [Header("Activation Requirement")]
         [Tooltip("활성화에 필요한 종의 기억 개수")]
         public int requiredMemoryCount = 3;

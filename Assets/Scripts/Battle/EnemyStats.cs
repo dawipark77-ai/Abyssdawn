@@ -142,6 +142,8 @@ public class EnemyStats : MonoBehaviour
     /// MonsterSO 데이터로 스탯을 초기화합니다.
     /// ConfigureStatsByName()은 호출하지 않으며, SO 데이터가 모든 기본값을 덮어씁니다.
     /// </summary>
+    public const float FloorAtkPerDepth = 0.06f, FloorHpPerDepth = 0.08f, FloorExpPerDepth = 0.05f;
+
     public void Init(MonsterSO so, GameObject uiPanel = null)
     {
         if (so == null)
@@ -168,6 +170,19 @@ public class EnemyStats : MonoBehaviour
         statusResist = so.StatusResist;
         magResist    = so.MagResist;
         physResist   = so.PhysResist;
+
+        // [2026-10-15] 층 보정 — 처음 나오는 층보다 한 층 깊을 때마다 공격·마력 +6%, HP +8%, EXP +5%
+        //   (B1 쥐와 B5 쥐가 같으면 주인공 방어·HP 만 커져 긴장감이 사라짐). minFloor 0(보스 등 고정 배치)은 보정 없음.
+        int depth = so.MinFloor > 0 ? Mathf.Max(0, DungeonPersistentData.currentFloor - so.MinFloor) : 0;
+        if (depth > 0)
+        {
+            attack    = Mathf.RoundToInt(attack * (1f + FloorAtkPerDepth * depth));
+            magic     = Mathf.RoundToInt(magic * (1f + FloorAtkPerDepth * depth));
+            maxHP     = Mathf.RoundToInt(maxHP * (1f + FloorHpPerDepth * depth));
+            currentHP = maxHP;
+            expReward = Mathf.RoundToInt(expReward * (1f + FloorExpPerDepth * depth));
+            Debug.Log($"[EnemyStats] {enemyName} 층 보정 +{depth}층 → HP {maxHP}, ATK {attack}, MAG {magic}, EXP {expReward}");
+        }
 
         // 스프라이트는 BattleManager에서 selectedSprites[i]로 직접 주입 — 여기서 건드리지 않음
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();

@@ -18,10 +18,11 @@ MonoBehaviour:
   hoverOffsetY: 0
   type: 0
   race: 2
+  basicAttackOverride: {fileID: 0}
   level: 12
   hp: 250
   mp: 0
-  atk: 35
+  atk: 30
   def: 16
   mag: 0
   agi: 15
@@ -34,12 +35,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 07e47eebd0354b5584e781b3db392b19, type: 2}
   passiveSkills: []
   aiPattern: 1
+  desperatePhaseThreshold: 0.5
+  criticalPhaseThreshold: 0.2
   rowPreference: 1
   allowedSlots: 0
   minFloor: 0
   maxFloor: 0
   spawnWeight: 0
-  expReward: 800
+  expReward: 500
   goldReward: 0
   dropTable: []
   companionChance: 0

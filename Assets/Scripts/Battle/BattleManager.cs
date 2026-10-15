@@ -4926,6 +4926,7 @@ public class BattleManager : MonoBehaviour
                     (biteOverride != null && biteOverride.isBasicAttackOverride) ? biteOverride.randomRollMaxOverride : 1.15f,
                     enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f)
                 );
+                damage = Mathf.Max(damage, EnemyMinDamage(effectiveAttack, critical)); // [2026-10-15] 공격력의 30% 는 막아도 들어간다
                 damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.playerName);
 
                 if (target.isDefending)
@@ -7869,6 +7870,7 @@ public class BattleManager : MonoBehaviour
                     AbyssdawnBattle.ModStatType.Defense, target.Defense);
             }
             float baseValue = (baseStat * 2f - defValue) / 2f;
+            baseValue = Mathf.Max(baseValue, baseStat * EnemyMinDamageRatio); // [2026-10-15] 최소 30%
             if (baseValue < 1f) baseValue = 1f;
             int damage = Mathf.FloorToInt(baseValue * mult);
             if (critical) damage = Mathf.FloorToInt(damage * enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritDamage, 1.5f));
@@ -8572,6 +8574,15 @@ public class BattleManager : MonoBehaviour
     }
 
     // -------------------- Damage Calculation --------------------
+    /// <summary>[2026-10-15] 몬스터 공격의 최소 피해 = 공격력의 30% (방어구가 피해를 줄이지만 없애지는 못하게).</summary>
+    private const float EnemyMinDamageRatio = 0.3f;
+    private static int EnemyMinDamage(int attack, bool critical)
+    {
+        float v = attack * EnemyMinDamageRatio * UnityEngine.Random.Range(0.85f, 1.15f);
+        if (critical) v *= 1.5f;
+        return Mathf.Max(1, Mathf.RoundToInt(v));
+    }
+
     private int CalculateDQDamage(int atk, int def, bool isCritical, float randomMax = 1.15f, float critDamageMultiplier = 1.5f)
     {
         float baseValue = (atk * 2f - def) / 2f;
@@ -10298,7 +10309,7 @@ private void CacheHeroSkills()
         if (playerStatData.activeTrait != null && playerStatData.activeTrait.specialEffectTags != null
             && System.Array.IndexOf(playerStatData.activeTrait.specialEffectTags, PlayerStats.TraitEtherResonance) >= 0)
         {
-            var ether = Resources.Load<SkillData>("SpeciesSkills/Elf_EtherSense");
+            var ether = playerStatData.activeTrait.grantedSkill != null ? playerStatData.activeTrait.grantedSkill : Resources.Load<SkillData>("SpeciesSkills/Elf_EtherSense"); // [2026-10-15] 에셋이 특성 폴더로 옮겨짐 → 특성에서 직접
             if (ether != null && !heroSkillCache.Contains(ether)) heroSkillCache.Add(ether);
         }
         // [2026-10-14] 배운 직업 패스 액티브 (함성 · 무기의 맹세 등)
