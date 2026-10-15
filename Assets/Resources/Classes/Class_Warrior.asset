@@ -17,10 +17,16 @@ MonoBehaviour:
   classIcon: {fileID: 0}
   traitName: Weapon Discipline
   traitNameKR: "\uBB34\uAE30 \uB2E8\uB828"
-  traitDescription: Hit chance +10% with any weapon.
+  traitDescription: Hit chance +5% with any weapon.
   traitDescriptionKR: "\uBB34\uAE30\uB97C \uB4E0 \uACF5\uACA9\uC758 \uBA85\uC911\uB960
-    +10%."
-  weaponAccuracyBonus: 0.1
+    +5%."
+  weaponAccuracyBonus: 0.05
+  critChanceBonus: 0
+  firstTurnSpeedBonus: 0
+  heavyArmourEvasionPenalty: 0
+  unarmedDamageBonus: 0
+  twoHandedAccuracyPenalty: 0
+  physicalCostUsesMP: 0
   startingEquipment:
   - {fileID: 11400000, guid: 938a3281177bd8a409d5874dfc4f89cf, type: 2}
   oaths:
@@ -46,7 +52,7 @@ MonoBehaviour:
   luckBonus: -1
   hpBonus: 0
   mpBonus: 0
-  hpPerLevel: 5
+  hpPerLevel: 3
   mpPerLevel: 2
   attackGrowthPerLevel: 0
   defenseGrowthPerLevel: 0

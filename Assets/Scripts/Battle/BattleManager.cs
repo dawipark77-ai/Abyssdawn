@@ -3131,24 +3131,24 @@ public class BattleManager : MonoBehaviour
         {
             SetIronDiscipline(hero, false);
             AddMessage(hero.HoldsShield()
-                ? $"<color=#D4A761>Iron Discipline</color> — {hero.playerName} sets the shield. DEF +7"
-                : $"<color=#D4A761>Iron Discipline</color> — {hero.playerName} grips the weapon. ATK +7");
+                ? $"<color=#D4A761>Iron Discipline</color> — {hero.playerName} sets the shield. DEF +3"
+                : $"<color=#D4A761>Iron Discipline</color> — {hero.playerName} grips the weapon. ATK +3");
         }
         else if (hero.HasOath(PlayerStats.OathWarriorsWill))
         {
-            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.Flat, value = 5f }, OathToken, 999);
-            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Defense, modType = StatModType.Flat, value = 5f }, OathToken, 999);
-            AddMessage($"<color=#D4A761>Warrior's Will</color> — ATK +5, DEF +5");
+            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.Flat, value = 2f }, OathToken, 999);
+            hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Defense, modType = StatModType.Flat, value = 2f }, OathToken, 999);
+            AddMessage($"<color=#D4A761>Warrior's Will</color> — ATK +2, DEF +2");
         }
     }
 
-    /// <summary>철의 규율: 무기면 공격 +7, 방패면 방어 +7 (half = 마법을 쓴 뒤 2턴은 절반).</summary>
+    /// <summary>철의 규율: 무기면 공격 +3, 방패면 방어 +3 (2026-10-15 +7 에서 하향) (half = 마법을 쓴 뒤 2턴은 절반).</summary>
     private void SetIronDiscipline(PlayerStats hero, bool half)
     {
         if (hero == null || !hero.HasOath(PlayerStats.OathIronDiscipline)) return;
         hero.RemoveStatModifiersFromSource(OathToken);
         var stat = hero.HoldsShield() ? AbyssdawnBattle.ModStatType.Defense : AbyssdawnBattle.ModStatType.Attack;
-        hero.AddStatModifier(new StatModifier { statType = stat, modType = StatModType.Flat, value = half ? 3.5f : 7f }, OathToken, 999);
+        hero.AddStatModifier(new StatModifier { statType = stat, modType = StatModType.Flat, value = half ? 1.5f : 3f }, OathToken, 999);
         if (!half && hero.oathHalfRounds == 0 && _oathWasHalf.Remove(hero))
             AddMessage($"<color=#D4A761>Iron Discipline</color> holds firm again.");
     }
@@ -7066,9 +7066,9 @@ public class BattleManager : MonoBehaviour
                 return true;
             case SkillWeaponOath: // [2026-10-14] 전사 패스: 공격 +20% · 치명타 +10%p (2턴)
                 attacker.RemoveStatModifiersFromSource(WeaponOathToken);
-                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 1.2f }, WeaponOathToken, PathBuffRounds + 1);
-                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.CritChance, modType = StatModType.Flat, value = 10f }, WeaponOathToken, PathBuffRounds + 1);
-                AddMessage($"<color=#FFB24A>{attacker.playerName} swears upon the blade!</color> ATK +20%, crit +10% ({PathBuffRounds} turns)");
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 1.12f }, WeaponOathToken, PathBuffRounds + 1);
+                attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.CritChance, modType = StatModType.Flat, value = 8f }, WeaponOathToken, PathBuffRounds + 1);
+                AddMessage($"<color=#FFB24A>{attacker.playerName} swears upon the blade!</color> ATK +12%, crit +8% ({PathBuffRounds} turns)");
                 return true;
             case SkillEtherSense:
                 attacker.etherSenseOn = !attacker.etherSenseOn;

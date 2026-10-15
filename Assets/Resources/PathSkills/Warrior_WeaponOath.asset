@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: Weapon Oath
   skillIcon: {fileID: 0}
   description: "[\uC804\uC0AC \uD328\uC2A4] \uBB34\uAE30\uC758 \uB9F9\uC138. 2\uD134
-    \uB3D9\uC548 \uACF5\uACA9 +20%, \uCE58\uBA85\uD0C0 \uD655\uB960 +10%. \uC2DC\uC804\uC790
+    \uB3D9\uC548 \uACF5\uACA9 +12%, \uCE58\uBA85\uD0C0 \uD655\uB960 +8%. \uC2DC\uC804\uC790
     HP 4% \uC18C\uBAA8."
   usageType: 0
   damageType: 0
@@ -62,6 +62,7 @@ MonoBehaviour:
   preemptive: 1
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
