@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Mana_Potion
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Mana Potion
+  itemName: "\uB9C8\uB098 \uD3EC\uC158"
   icon: {fileID: 6276969351316911035, guid: a1d45d86f88e8f04ebe1ea81ee6b2d6f, type: 3}
-  description: The power returns. Briefly, but it does.
+  description: "\uD798\uC774 \uB3CC\uC544\uC628\uB2E4. \uC7A0\uAE50\uC774\uC9C0\uB9CC."
   itemCategory: 3
   itemIcon: {fileID: 6276969351316911035, guid: a1d45d86f88e8f04ebe1ea81ee6b2d6f, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -27,6 +27,10 @@ MonoBehaviour:
   escapeChanceBuff: 0
   buffDuration: 0
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 50
   usableInBattle: 1

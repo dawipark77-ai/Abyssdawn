@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Orc_SubcutaneousFat
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Orc_SubcutaneousFat
-  memoryName: SubcutaneousFat
-  subtitle: Thick Subcutaneous Fat
+  memoryName: "\uD53C\uD558\uC9C0\uBC29"
+  subtitle: "\uB450\uAEBC\uC6B4 \uD53C\uD558\uC9C0\uBC29"
   species: 2
-  memoryIcon: {fileID: 0}
+  memoryIcon: {fileID: 21300000, guid: 4afa47b9db9ed16478eb8b95f8ae00ef, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
@@ -46,7 +46,8 @@ MonoBehaviour:
     \uBEE3\uBEE3\uD574 \uC720\uC5F0\uC131 \uBD80\uC871)\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
     \uCD5C\uB300 HP +0.2 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
     \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +20%p"
-  flavorText: A thick layer of fat dulls both wounds and movement.
+  flavorText: "\uB450\uAEBC\uC6B4 \uC9C0\uBC29\uCE35\uC774 \uC0C1\uCC98\uB3C4 \uC6C0\uC9C1\uC784\uB3C4
+    \uB454\uD558\uAC8C \uB9CC\uB4E0\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

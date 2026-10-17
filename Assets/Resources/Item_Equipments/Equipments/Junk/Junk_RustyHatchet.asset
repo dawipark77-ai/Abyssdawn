@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Junk_RustyHatchet
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
-  itemName: Rusty Hatchet
+  itemName: "\uB179\uC2A8 \uC190\uB3C4\uB07C"
   icon: {fileID: 0}
-  description: More rust than blade. It still chops, eventually. ATK +1.
-  equipmentName: Rusty Hatchet
+  description: "\uCE7C\uB0A0\uBCF4\uB2E4 \uB179\uC774 \uB9CE\uB2E4. \uADF8\uB798\uB3C4
+    \uC5B8\uC820\uAC00\uB294 \uC798\uB9B0\uB2E4. \uACF5\uACA9 +1."
+  equipmentName: "\uB179\uC2A8 \uC190\uB3C4\uB07C"
   equipmentIcon: {fileID: -4334295281319230558, guid: 2d6c95118dbd7fa4597221f54ea8743d, type: 3}
   flatIcon: {fileID: 0}
   equipmentType: 0

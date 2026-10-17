@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: 
   icon: {fileID: 0}
   description: 
-  equipmentName: Tattered Clothes
+  equipmentName: "\uD574\uC9C4 \uC637"
   equipmentIcon: {fileID: 0}
   flatIcon: {fileID: 0}
   equipmentType: 2

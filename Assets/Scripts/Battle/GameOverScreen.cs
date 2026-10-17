@@ -38,6 +38,7 @@ public class GameOverScreen : MonoBehaviour
         GameObject prefab = Resources.Load<GameObject>(PrefabResource);
         GameObject panel = prefab != null ? Instantiate(prefab, root, false) : BuildPanel(root);
         panel.name = "GameOverPanel";
+        ButtonSkin.ApplyPlain(panel.transform); // [2026-10-17] 버튼 배경 통일
 
         var screen = canvasGo.AddComponent<GameOverScreen>();
         screen._group = canvasGo.AddComponent<CanvasGroup>();
@@ -76,9 +77,9 @@ public class GameOverScreen : MonoBehaviour
         foreach (TMP_Text t in panel.GetComponentsInChildren<TMP_Text>(true))
         {
             if (t.name == "SaveInfo")
-                t.text = hasSave ? (saveInfo ?? "") : "<color=#888888>No save yet</color>";
+                t.text = hasSave ? (saveInfo ?? "") : "<color=#888888>아직 기록이 없다</color>";
             else if (t.name == "Desc" && t.transform.parent != null && t.transform.parent.name == "RestartButton")
-                t.text = "<color=#BBBBBB>Same hero, a new journey\nfrom B1</color>"; // [2026-10-15] 같은 프로필로 1층부터
+                t.text = "<color=#BBBBBB>같은 주인공으로\nB1부터 새 여정</color>"; // [2026-10-15] 같은 프로필로 1층부터
         }
         AddTitleButton(panel);
     }
@@ -96,7 +97,7 @@ public class GameOverScreen : MonoBehaviour
         var o = bg.gameObject.AddComponent<Outline>(); o.effectColor = new Color(0.85f, 0.68f, 0.3f, 0.9f); o.effectDistance = new Vector2(3f, -3f);
         var btn = bg.gameObject.AddComponent<Button>(); btn.targetGraphic = bg;
         TextMeshProUGUI l = CreateText(rt, "Label", 40, FontStyles.Bold);
-        l.text = "To Title"; l.color = new Color(1f, 0.92f, 0.65f);
+        l.text = "타이틀로"; l.color = new Color(1f, 0.92f, 0.65f);
         var lrt = l.rectTransform; lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one; lrt.offsetMin = lrt.offsetMax = Vector2.zero;
         btn.onClick.AddListener(() => Choose(GoToTitle));
     }
@@ -148,14 +149,14 @@ public class GameOverScreen : MonoBehaviour
         prt.sizeDelta = new Vector2(1000f, 620f);
 
         TextMeshProUGUI title = CreateText(prt, "Title", 72, FontStyles.Bold);
-        title.text = "<color=#FF6B6B>YOU HAVE FALLEN</color>";
+        title.text = "<color=#FF6B6B>쓰러졌다</color>";
         Place(title.rectTransform, 0f, -50f, 900f, 96f);
 
         TextMeshProUGUI msg = CreateText(prt, "Message", 34, FontStyles.Normal);
-        msg.text = "<color=#BBBBBB>The abyss claims another light.</color>";
+        msg.text = "<color=#BBBBBB>심연이 또 하나의 빛을 삼켰다.</color>";
         Place(msg.rectTransform, 0f, -150f, 900f, 56f);
 
-        CreateChoice(prt, "RestartButton", "Start Over", "<color=#BBBBBB>Begin a new journey\nfrom B1</color>", -225f, false);
+        CreateChoice(prt, "RestartButton", "처음부터", "<color=#BBBBBB>B1부터\n새 여정 시작</color>", -225f, false);
         CreateChoice(prt, "LoadButton", "Last Save", "", 225f, true);
 
         return blocker.gameObject;

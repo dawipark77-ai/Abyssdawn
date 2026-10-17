@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: D3_LungeSlash
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: D3_LungeSlash
-  skillName: Lunge Slash
+  skillName: "\uB6F0\uCCD0\uB098\uC624\uBA70 \uBCA0\uAE30"
+  skillKey: Lunge Slash
   skillIcon: {fileID: 21300000, guid: 6dff11f7a3a1a034d96dcc4ebb208d74, type: 3}
   description: "[\uB2E8\uAC80\uC220 \xB7 \uACF5\uACA9 \xB7 \uD6C4\uC5F4(3\xB74\uC5F4)\uC5D0\uC11C\uB9CC]
     \uB6F0\uCCD0\uB098\uC624\uBA70 \uBCA0\uAE30. \uD55C \uCE78 \uC55E\uC73C\uB85C
@@ -63,6 +64,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

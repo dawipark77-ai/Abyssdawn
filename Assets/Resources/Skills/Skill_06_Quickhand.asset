@@ -13,25 +13,62 @@ MonoBehaviour:
   m_Name: Skill_06_Quickhand
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 06
-  skillName: Quickhand
+  skillName: "\uC18D\uACF5"
+  skillKey: Quickhand
   skillIcon: {fileID: 7002801453173901457, guid: 427edb27ad7da094b984c5f369e757da, type: 3}
-  description: Quick double strike based on agility.
+  description: "\uBBFC\uCCA9 \uAE30\uBC18\uC758 \uBE60\uB978 2\uC5F0\uD0C0."
   usageType: 0
   damageType: 0
-  scaleStat: 3
+  scalingStat: 3
   weaponCategory: 2
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0.6
   maxMult: 0.8
   hitCount: 2
+  accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurse: 0
-  selfCurseChance: 0
-  targetCurse: 0
-  targetCurseChance: 0
-  effectType: 0
-  recoveryTarget: 0
-  effectAmount: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

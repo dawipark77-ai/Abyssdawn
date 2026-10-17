@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 01_AxeMastery
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_01
-  skillName: Axe Mastery
+  skillName: "\uB3C4\uB07C \uC219\uB828"
+  skillKey: Axe Mastery
   skillIcon: {fileID: 21300000, guid: 17238ffc55aa4044fb94e0b64a6fadd6, type: 3}
   description: "\uD328\uC2DC\uBE0C. \uACF5\uACA9\uB825 +3 \uACE0\uC815, \uACF5\uACA9\uB825
     +5%, \uC804\uC5F4 \uC801 \uACF5\uACA9 \uC2DC \uBC29\uC5B4\uD30C\uAD34 \uC790\uB3D9
@@ -75,6 +76,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

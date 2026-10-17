@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: Warfare_BladeOfVoidAndSubstance
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_Deception_01
-  skillName: "\uD798\uC2E4\uC758 \uCE7C\uB2E8"
+  skillName: Blade of Void and Substance
+  skillKey: "\uD798\uC2E4\uC758 \uCE7C\uB2E8"
   skillIcon: {fileID: 0}
-  description: "\uC801\uC774 \uC9C1\uC804 \uD238\uC5D0 \uBC29\uC5B4\uB294\uC758\uC758
-    \uBC84\uD504 \uC2A4\uD2B8\uB9C8 \uC0AC\uC6A9 \uC2DC, \uB2E4\uC74C \uACF5\uACA9
-    \uD53C\uD574 +28%. \uC801\uC774 \uC9C1\uC804 \uD238\uC5D0 \uACF5\uACA9 \uC2A4\uD2B8\uB9C8
-    \uC0AC\uC6A9 \uC2DC \uC790\uC2E0\uC774 \uBC1B\uB294 \uD53C\uD574 +15%. HP 50%
-    \uC774\uD558 \uC801\uC5D0\uAC8C \uCD94\uAC00 \uD53C\uD574 +12%. \uC801 \uD589\uB3D9\uC744
-    \uC7A1\uB294 \uACBD\uC6B0 \uB2E4\uC74C \uD238 \uACF5\uACA9\uB825 -20%."
+  description: If the enemy used a defensive or buff skill last turn, your next attack
+    deals +28% damage. If the enemy used an attack skill last turn, you take +15%
+    damage. +12% damage to enemies at or below 50% HP. If you misread the enemy's
+    action, ATK -20% next turn.
   usageType: 1
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 2
     allowedCasterSlots: -1
@@ -37,10 +37,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -48,5 +47,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

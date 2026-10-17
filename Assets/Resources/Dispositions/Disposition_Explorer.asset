@@ -15,8 +15,7 @@ MonoBehaviour:
   dispositionName: Explorer
   dispositionNameKR: "\uD0D0\uD5D8\uAC00"
   icon: {fileID: 21300000, guid: 9df5c9a07d3b96543b1a62920d5f5b17, type: 3}
-  description: 'Sight +1, search range +1.
+  description: 'Sight +1, search +1.
 
     Random encounters +15%.'
-  descriptionKR: "\uC2DC\uC57C +1\uCE78, \uD0D0\uC0C9 \uBC94\uC704 +1\uCE78.\n\uBB34\uC791\uC704
-    \uC870\uC6B0 +15%."
+  descriptionKR: "\uC2DC\uC57C +1\uCE78, \uC11C\uCE58 \uBC94\uC704 +1\uCE78.\n\uBB34\uC791\uC704 \uC870\uC6B0 +15%."

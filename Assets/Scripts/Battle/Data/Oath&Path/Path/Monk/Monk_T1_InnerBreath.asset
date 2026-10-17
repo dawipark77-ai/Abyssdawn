@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Monk_T1_InnerBreath
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Monk_T1_InnerBreath
-  skillName: Inner Breath
+  skillName: "\uB0B4\uBA74\uC758 \uD638\uD761"
   jobClass: 1
   tier: 1
   type: 2
@@ -22,3 +22,5 @@ MonoBehaviour:
   effectDescription: "\uC989\uC2DC HP Max\uC758 8% \uD68C\uBCF5.\n2\uD134 \uB3D9\uC548
     \uC800\uC8FC \uC800\uD56D +20%."
   drawbackDescription: "MP 6%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

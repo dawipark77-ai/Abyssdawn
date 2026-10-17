@@ -98,6 +98,7 @@ public class ItemListPanel : MonoBehaviour
         if (closeButton != null) closeButton.onClick.AddListener(Close);
         if (discardButton != null) discardButton.onClick.AddListener(OnDiscard);
         if (useButton != null) useButton.onClick.AddListener(OnUse);
+        ButtonSkin.Apply(useButton); ButtonSkin.Apply(discardButton); // [2026-10-17] 금테 패널 배경
         foreach (CategoryTab t in tabs)
         {
             if (t == null || t.button == null) continue;
@@ -365,13 +366,13 @@ public class ItemListPanel : MonoBehaviour
         {
             ConsumableItemSO c = e.consumable;
             bool canUse = c.usableOnMap && (c.isDawnChalice ? e.quantity > 0 : e.quantity > 0 && (!c.isChargeable || c.currentCharges > 0));
-            SetUse("사용 · USE", canUse);
+            SetUse("사용", canUse);
             if (discardButton != null) discardButton.interactable = !c.isPermanent && !c.isDawnChalice;
         }
         else
         {
             bool equipped = e.equippedCopy;
-            SetUse(equipped ? "해제 · UNEQUIP" : "장착 · EQUIP", Manager() != null);
+            SetUse(equipped ? "해제" : "장착", Manager() != null);
             if (discardButton != null) discardButton.interactable = true;
         }
     }
@@ -390,8 +391,8 @@ public class ItemListPanel : MonoBehaviour
         else if (c.mpRecoveryPercent > 0f) { v[0] = "+" + Mathf.RoundToInt(c.mpRecoveryPercent * 100f) + "% MP"; l[0] = "회복"; }
         else if (c.cureTypes != null && c.cureTypes.Count > 0) { v[0] = c.cureTypes.Count >= 5 ? "전부" : CureNames(c); l[0] = "치료"; }
         else if (c.attackBuffPercent > 0f) { v[0] = "ATK +" + Mathf.RoundToInt(c.attackBuffPercent * 100f) + "%"; l[0] = "강화"; }
-        else if (c.agilityBuff != 0) { v[0] = "SPD +" + c.agilityBuff; l[0] = "강화"; }
-        else if (c.evasionBuff > 0f) { v[0] = "EVA +" + Mathf.RoundToInt(c.evasionBuff * 100f) + "%"; l[0] = "강화"; }
+        else if (c.agilityBuff != 0) { v[0] = "AGI +" + c.agilityBuff; l[0] = "강화"; }
+        else if (c.evasionBuff > 0f) { v[0] = "회피 +" + Mathf.RoundToInt(c.evasionBuff * 100f) + "%"; l[0] = "강화"; }
         else if (c.escapeChanceBuff > 0f) { v[0] = "+" + Mathf.RoundToInt(c.escapeChanceBuff * 100f) + "%"; l[0] = "도망"; }
         else { v[0] = "—"; l[0] = "효과"; }
 
@@ -416,8 +417,8 @@ public class ItemListPanel : MonoBehaviour
         v[0] = weapon ? Signed(q.attackBonus) : Signed(q.defenseBonus);
         l[0] = weapon ? "공격력" : "방어력";
         if (q.hpBonus != 0) { v[1] = Signed(q.hpBonus); l[1] = "HP"; }
-        else if (q.agiBonus != 0) { v[1] = Signed(q.agiBonus); l[1] = "민첩"; }
-        else if (q.magicBonus != 0) { v[1] = Signed(q.magicBonus); l[1] = "마력"; }
+        else if (q.agiBonus != 0) { v[1] = Signed(q.agiBonus); l[1] = "AGI"; }
+        else if (q.magicBonus != 0) { v[1] = Signed(q.magicBonus); l[1] = "MAG"; }
         else { v[1] = weapon ? Signed(q.defenseBonus) : Signed(q.attackBonus); l[1] = weapon ? "방어력" : "공격력"; }
         v[2] = q.sellPrice > 0 ? q.sellPrice + " G" : "—";
         l[2] = "판매가";
@@ -471,7 +472,7 @@ public class ItemListPanel : MonoBehaviour
         string name = e.consumable != null ? e.consumable.itemName : e.equipment != null ? e.equipment.equipmentName : "";
         var hud = DungeonHud.Instance;
         if (hud == null) { DiscardNow(e); return; }
-        hud.Confirm($"Discard <b>{name}</b>?\n<size=80%><color=#AAAAAA>It will be gone for good.</color></size>", "Yes", "No", yes =>
+        hud.Confirm($"<b>{name}</b>을(를) 버릴까?\n<size=80%><color=#AAAAAA>다시는 되찾을 수 없다.</color></size>", "예", "아니오", yes =>
         {
             if (yes) DiscardNow(e);
         });

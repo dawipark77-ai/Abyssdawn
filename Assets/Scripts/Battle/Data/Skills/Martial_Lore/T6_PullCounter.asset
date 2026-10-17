@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T6_PullCounter
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: T6_PullCounter
-  skillName: Pull Counter
+  skillName: "\uD480 \uCE74\uC6B4\uD130"
+  skillKey: Pull Counter
   skillIcon: {fileID: 0}
   description: "[\uACA9\uD22C\uC220 \xB7 \uC790\uC138 \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4
     \uC788\uC5B4\uC57C \uD568] \uD480 \uCE74\uC6B4\uD130. \uC774\uBC88 \uD134 \uC790\uC2E0\uC5D0\uAC8C
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 1
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

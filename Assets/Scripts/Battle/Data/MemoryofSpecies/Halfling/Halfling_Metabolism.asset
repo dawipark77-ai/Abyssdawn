@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Halfling_Metabolism
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Halfling_Metabolism
-  memoryName: Metabolism
-  subtitle: Fast Sugar Burn
+  memoryName: "\uB300\uC0AC"
+  subtitle: "\uBE60\uB978 \uB2F9 \uC5F0\uC18C"
   species: 3
   memoryIcon: {fileID: 0}
   hpBonusPercent: -5
   mpBonusPercent: 5
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 0
   agilityBonus: 0
@@ -41,7 +46,8 @@ MonoBehaviour:
     \uCD5C\uB300 MP +0.15 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
     \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960 +10%p\n\uB808\uBCA8\uC5C5
     \uB54C \uD589\uC6B4\uC774 \uC624\uB97C \uD655\uB960 +10%p"
-  flavorText: Energy burns bright and fast in them, leaving little in reserve.
+  flavorText: "\uD798\uC774 \uBC1D\uACE0 \uBE60\uB974\uAC8C \uD0C0\uC62C\uB77C \uB0A8\uB294
+    \uAC83\uC774 \uAC70\uC758 \uC5C6\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

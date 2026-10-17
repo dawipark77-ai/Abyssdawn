@@ -308,7 +308,7 @@ public class MapManager : MonoBehaviour
     {
         if (DungeonPersistentData.playerLightSteps <= 0) return;
         DungeonPersistentData.playerLightSteps--;
-        if (DungeonPersistentData.playerLightSteps == 0) Toast("<color=#AAAAAA>Your light fades...</color>");
+        if (DungeonPersistentData.playerLightSteps == 0) Toast("<color=#AAAAAA>빛이 꺼져 간다...</color>");
     }
 
     private void Update()
@@ -423,6 +423,7 @@ public class MapManager : MonoBehaviour
     {
         if (FloorData == null || FloorState == null) return false;
         bool changed = FloorVisibility.RevealAround(FloorData, pos, FloorState.revealed, SightRadiusAt(pos), _visible);
+        changed |= RevealThroughOpenDoors(pos);
         changed |= ComputeLighting(pos);
         if (automapRenderer != null)
         {
@@ -461,6 +462,51 @@ public class MapManager : MonoBehaviour
         if (automapRenderer != null) automapRenderer.Rebuild();
     }
 
+    private readonly HashSet<Vector2Int> _doorView = new HashSet<Vector2Int>();
+
+    /// <summary>[2026-10-17] 연 문 바로 앞(문 양쪽 칸)에 서 있으면 문 건너편 구역(방 안·통로)도 보인다.</summary>
+    private bool RevealThroughOpenDoors(Vector2Int pos)
+    {
+        bool changed = false;
+        int r = Mathf.Max(1, SightRadiusAt(pos));
+        for (int i = 0; i < FloorData.doors.Count; i++)
+        {
+            if (!FloorState.openedDoors.Contains(i)) continue;
+            FloorDoor d = FloorData.doors[i];
+            Vector2Int other;
+            if (d.corridorCell == pos) other = d.roomCell;
+            else if (d.roomCell == pos) other = d.corridorCell;
+            else continue;
+            FloorVisibility.ComputeVisible(FloorData, other, r, _doorView);
+            foreach (var c in _doorView) { _visible.Add(c); changed |= FloorState.revealed.Add(c); }
+        }
+        return changed;
+    }
+
+    /// <summary>[2026-10-17] from → to 사이에 아직 안 연 문이 있으면 그 문 번호, 없으면 -1.</summary>
+    public int ClosedDoorBetween(Vector2Int from, Vector2Int to)
+    {
+        if (FloorData == null || FloorState == null) return -1;
+        for (int i = 0; i < FloorData.doors.Count; i++)
+        {
+            FloorDoor d = FloorData.doors[i];
+            bool match = (d.roomCell == from && d.corridorCell == to) || (d.roomCell == to && d.corridorCell == from);
+            if (match && !FloorState.openedDoors.Contains(i)) return i;
+        }
+        return -1;
+    }
+
+    /// <summary>[2026-10-17] 문을 연다 — 제자리에서 한 턴 (걸음 효과·인카운터 판정 1번). 지도에서 닫힌 문 표시가 사라진다.</summary>
+    public void OpenDoor(int index)
+    {
+        if (FloorState == null || index < 0) return;
+        FloorState.openedDoors.Add(index);
+        PassTurnInPlace();
+        if (_player != null) RevealAt(_player.gridPos); // 문 너머가 보인다 (자동 지도도 다시 그림)
+        else if (automapRenderer != null) automapRenderer.Rebuild();
+        if (_player != null) DungeonEncounter.Instance?.CheckEncounter(_player.gridPos);
+    }
+
     /// <summary>제자리에서 한 턴이 지남 (탐색 등): 걸음 회복·빛 소모가 한 걸음만큼 진행된다.</summary>
     public void PassTurnInPlace()
     {
@@ -497,7 +543,7 @@ public class MapManager : MonoBehaviour
         _heroDead = true;
         if (_player != null) _player.LockInput(this);
         _hud.Flash(new Color(0.5f, 0f, 0f, 0.8f), 1.2f);
-        Toast("<color=#FF4A4A>You have fallen...</color>");
+        Toast("<color=#FF4A4A>쓰러졌다...</color>");
         Debug.Log($"[MapManager] B{(FloorData != null ? FloorData.floorNumber : 0)} 주인공 사망 (던전) → 게임 오버");
         StartCoroutine(DungeonGameOverRoutine(hero));
     }
@@ -562,8 +608,8 @@ public class MapManager : MonoBehaviour
         RevealFound(found);
         if (_player != null) _player.InterruptHold();
         Toast(found.Count == 1
-            ? $"<color=#FF8A70>You sense a {TrapLabel(FloorData.GetCell(found[0]).trap)} nearby!</color>"
-            : $"<color=#FF8A70>You sense {found.Count} traps nearby!</color>");
+            ? $"<color=#FF8A70>근처에서 {TrapLabel(FloorData.GetCell(found[0]).trap)}의 기척이 느껴진다!</color>"
+            : $"<color=#FF8A70>근처에 함정 {found.Count}개의 기척이 느껴진다!</color>");
     }
 
     // ─────────────────────────────────────────
@@ -587,7 +633,7 @@ public class MapManager : MonoBehaviour
             if (!FieldSkills.Has(FieldSkills.TrapDetection) || Random.value >= FieldSkills.TrapDetectStopChance) return false;
             FloorState.knownTraps.Add(next);
             if (automapRenderer != null) automapRenderer.Rebuild();
-            Toast($"<color=#FF8A70>You stop short — a hidden {TrapLabel(cell.trap)}!</color>");
+            Toast($"<color=#FF8A70>멈칫했다 — 숨은 {TrapLabel(cell.trap)}!</color>");
             return true;
         }
 
@@ -606,10 +652,10 @@ public class MapManager : MonoBehaviour
         if (cell.feature != FloorFeature.Trap || !FloorState.IsTrapArmed(pos, cell.trap) || !FloorState.knownTraps.Contains(pos)) return false;
         int chance = Mathf.RoundToInt(DisarmChance() * 100f);
         string[] options = step != null
-            ? new[] { $"Disarm <color=#9FC8FF>({chance}%)</color>", "Walk over it" }
-            : new[] { $"Disarm <color=#9FC8FF>({chance}%)</color>" };
-        _hud.Choose($"A <b>{TrapLabel(cell.trap)}</b> lies ahead.\n<size=80%><color=#AAAAAA>If disarming fails, it goes off (half damage).</color></size>",
-            options, step != null ? "Back" : "Leave it", false, choice =>
+            ? new[] { $"해제 <color=#9FC8FF>({chance}%)</color>", "그냥 밟고 간다" }
+            : new[] { $"해제 <color=#9FC8FF>({chance}%)</color>" };
+        _hud.Choose($"앞에 <b>{TrapLabel(cell.trap)}</b>이(가) 있다.\n<size=80%><color=#AAAAAA>해제에 실패하면 발동한다 (피해 절반).</color></size>",
+            options, step != null ? "뒤로" : "그냥 둔다", false, choice =>
             {
                 if (choice == 0) TryDisarm(pos);
                 else if (choice == 1 && step != null) step();
@@ -637,16 +683,16 @@ public class MapManager : MonoBehaviour
             string loot = "";
             var parts = Resources.Load<ConsumableItemSO>(TrapPartsResource);
             if (parts != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(parts, 1) > 0)
-                loot = $"\n<size=80%>Salvaged <color=#FFD24A>{parts.itemName}</color>.</size>";
+                loot = $"\n<size=80%><color=#FFD24A>{parts.itemName}</color>을(를) 건졌다.</size>";
             int exp = Mathf.Max(0, disarmExpBase + disarmExpPerFloor * FloorData.floorNumber);
             PlayerStats hero = GetHeroStats();
             if (hero != null && exp > 0) hero.AddExp(exp);
-            Toast($"<color=#9FFF9F>You disarm the {TrapLabel(cell.trap)}.</color> <color=#FFD24A>+{exp} EXP</color>{loot}");
+            Toast($"<color=#9FFF9F>{TrapLabel(cell.trap)}을(를) 해제했다.</color> <color=#FFD24A>EXP +{exp}</color>{loot}");
             Debug.Log($"[MapManager] 함정 해제 성공 {pos}: {cell.trap} (EXP +{exp})");
         }
         else
         {
-            Toast("<color=#FF6B6B>Your hand slips!</color>");
+            Toast("<color=#FF6B6B>손이 미끄러졌다!</color>");
             Debug.Log($"[MapManager] 함정 해제 실패 {pos}: {cell.trap}");
             TriggerTrap(pos, cell.trap, FieldSkills.DisarmFailDamageMult, true);
             CheckHeroDeath();
@@ -679,10 +725,10 @@ public class MapManager : MonoBehaviour
     /// <summary>야영을 지금 할 수 없는 이유 (할 수 있으면 null).</summary>
     public string CampBlockReason()
     {
-        if (FieldSkills.Rank(FieldSkills.MakeCamp) <= 0) return "You don't know how to make camp.";
-        if (FloorData == null || FloorState == null) return "Not here.";
-        if (CurrentFloorSettings != null && CurrentFloorSettings.floorType == FloorType.Town) return "You can't make camp on a town floor.";
-        if (FloorState.campUsed) return "You have already camped on this floor.";
+        if (FieldSkills.Rank(FieldSkills.MakeCamp) <= 0) return "야영하는 법을 모른다.";
+        if (FloorData == null || FloorState == null) return "여기서는 안 된다.";
+        if (CurrentFloorSettings != null && CurrentFloorSettings.floorType == FloorType.Town) return "마을 층에서는 야영할 수 없다.";
+        if (FloorState.campUsed) return "이 층에서는 이미 야영했다.";
         return null;
     }
 
@@ -697,11 +743,11 @@ public class MapManager : MonoBehaviour
         var cures = FieldSkills.CampCures(rank);
         var cureNames = new List<string>();
         foreach (var c in cures) cureNames.Add(DungeonFieldStatus.NameOf(c));
-        string info = $"Rest here to recover <b>{Mathf.RoundToInt(restore * 100f)}%</b> HP·MP." +
-                      (cureNames.Count > 0 ? $"\nCures: {string.Join(", ", cureNames)}." : "") +
-                      (rank >= FieldSkills.CampLightFromRank ? $"\nRekindle your light (+{FieldSkills.CampLightSteps} steps)." : "") +
-                      $"\n<size=80%><color=#FF8A70>Ambush risk {Mathf.RoundToInt(ambush * 100f)}%. Danger +{Mathf.RoundToInt(FieldSkills.CampDangerAfter[rank - 1] * 100f)}% afterwards.</color></size>";
-        _hud.Confirm($"<b>Make Camp</b> <size=80%>(Lv {rank})</size>\n{info}", "Rest", "Not now", ok =>
+        string info = $"여기서 쉬면 HP·MP <b>{Mathf.RoundToInt(restore * 100f)}%</b> 회복." +
+                      (cureNames.Count > 0 ? $"\n치료: {string.Join(", ", cureNames)}." : "") +
+                      (rank >= FieldSkills.CampLightFromRank ? $"\n빛을 다시 밝힌다 (+{FieldSkills.CampLightSteps}걸음)." : "") +
+                      $"\n<size=80%><color=#FF8A70>습격 확률 {Mathf.RoundToInt(ambush * 100f)}%. 야영 후 위험도 +{Mathf.RoundToInt(FieldSkills.CampDangerAfter[rank - 1] * 100f)}%.</color></size>";
+        _hud.Confirm($"<b>야영</b> <size=80%>(Lv {rank})</size>\n{info}", "쉰다", "나중에", ok =>
         {
             if (!ok) return;
             MakeCamp(rank, restore, ambush, cures);
@@ -725,7 +771,7 @@ public class MapManager : MonoBehaviour
 
         if (Random.value < ambushChance)
         {
-            Toast("<color=#FF6B6B>Something was watching your fire... Ambush!</color>");
+            Toast("<color=#FF6B6B>무언가 모닥불을 지켜보고 있었다... 습격이다!</color>");
             Debug.Log($"[MapManager] 야영 중 습격");
             EncounterPlan.ambush = true;
             var enc = DungeonEncounter.Instance != null ? DungeonEncounter.Instance : FindFirstObjectByType<DungeonEncounter>();
@@ -733,7 +779,7 @@ public class MapManager : MonoBehaviour
             else EncounterPlan.ambush = false;
             return;
         }
-        Toast($"<color=#9FFF9F>You rest by the fire.</color> <size=80%>HP·MP +{Mathf.RoundToInt(restore * 100f)}%</size>");
+        Toast($"<color=#9FFF9F>모닥불 곁에서 쉬었다.</color> <size=80%>HP·MP +{Mathf.RoundToInt(restore * 100f)}%</size>");
     }
 
     private void AskDescend()
@@ -742,8 +788,8 @@ public class MapManager : MonoBehaviour
         // [2026-10-09] B10 마지막 계단: 스켈레톤 나이트가 지키고 있다 (이기기 전에는 내려갈 수 없음)
         if (BossEncounter.HasBoss(FloorData.floorNumber))
         {
-            _hud.Confirm("A cold presence bars the stairs.\n<b>The Skeleton Knight</b> rises to face you.\n<size=80%><color=#FF8A70>You cannot flee from this fight.</color></size>",
-                "Fight", "Back away", ok =>
+            _hud.Confirm("차가운 기운이 계단을 가로막는다.\n<b>해골 기사</b>가 일어나 앞을 막아선다.\n<size=80%><color=#FF8A70>이 싸움에서는 도망칠 수 없다.</color></size>",
+                "싸운다", "물러난다", ok =>
                 {
                     if (!ok) return;
                     var boss = BossEncounter.LoadBoss();
@@ -753,7 +799,7 @@ public class MapManager : MonoBehaviour
                 });
             return;
         }
-        _hud.Confirm($"Stairs lead down.\nDescend to <b>B{next}</b>?", "Descend", "Stay", ok =>
+        _hud.Confirm($"아래로 가는 계단이다.\n<b>B{next}</b>(으)로 내려갈까?", "내려간다", "머문다", ok =>
         {
             if (!ok) return;
             string reward = GrantFloorClearExp();
@@ -764,7 +810,7 @@ public class MapManager : MonoBehaviour
                 DungeonPersistentData.innVigorPending = false;
                 DungeonPersistentData.innVigorBattlesLeft = FieldSkills.RegularInnVigorBattles;
             }
-            Toast($"You descend to B{next}." + reward);
+            Toast($"B{next}(으)로 내려왔다." + reward);
         });
     }
 
@@ -804,24 +850,24 @@ public class MapManager : MonoBehaviour
         hero.AddExp(total);
         Debug.Log($"[MapManager] B{floor} 탐험 EXP +{total} (클리어 {exp}{(mapped ? $", 지도 완성 {mapExp}" : "")})");
         return mapped
-            ? $"\n<size=80%><color=#FFD24A>Explored B{floor}: +{exp} EXP  ·  Map complete: +{mapExp} EXP</color></size>"
-            : $"\n<size=80%><color=#FFD24A>Explored B{floor}: +{exp} EXP</color></size>";
+            ? $"\n<size=80%><color=#FFD24A>B{floor} 탐험: EXP +{exp}  ·  지도 완성: EXP +{mapExp}</color></size>"
+            : $"\n<size=80%><color=#FFD24A>B{floor} 탐험: EXP +{exp}</color></size>";
     }
 
     private void AskAscend()
     {
         int prev = FloorData.floorNumber - 1;
-        _hud.Confirm($"Stairs lead up.\nReturn to <b>B{prev}</b>?", "Ascend", "Stay", ok =>
+        _hud.Confirm($"위로 가는 계단이다.\n<b>B{prev}</b>(으)로 돌아갈까?", "올라간다", "머문다", ok =>
         {
             if (!ok) return;
             ChangeFloor(prev, Arrival.DownStairs);
-            Toast($"You climb back to B{prev}.");
+            Toast($"B{prev}(으)로 올라왔다.");
         });
     }
 
     private void AskTown()
     {
-        _hud.Confirm("The town gate.\nEnter the town?", "Enter", "Stay", ok =>
+        _hud.Confirm("마을 문이다.\n마을로 들어갈까?", "들어간다", "머문다", ok =>
         {
             if (ok) OpenTown();
         });
@@ -856,10 +902,10 @@ public class MapManager : MonoBehaviour
     private void AskInn()
     {
         int price = InnPrice;
-        _hud.Confirm($"Rest at the inn for <color=#FFD24A>{price} G</color>?\n<size=75%><color=#9FC8FF>Fully restores HP and MP for the whole party.\nYou have {PlayerWallet.Gold} G.</color></size>", "Rest", "Cancel", ok =>
+        _hud.Confirm($"<color=#FFD24A>{price} G</color>에 여관에서 쉴까?\n<size=75%><color=#9FC8FF>파티 전원의 HP·MP 를 모두 회복하고 새벽의 잔을 채운다.\n가진 돈 {PlayerWallet.Gold} G.</color></size>", "쉰다", "취소", ok =>
         {
             if (!ok) return;
-            if (!PlayerWallet.TrySpend(price)) { Toast("<color=#FF6B6B>Not enough gold.</color>"); return; }
+            if (!PlayerWallet.TrySpend(price)) { Toast("<color=#FF6B6B>골드가 모자란다.</color>"); return; }
             RestAtInn();
         });
     }
@@ -893,18 +939,21 @@ public class MapManager : MonoBehaviour
             entry.currentMP = so.MP;
         }
         _hud.Flash(new Color(1f, 0.85f, 0.5f, 0.45f), 0.6f);
-        Toast("<color=#FFD24A>You rest at the inn.</color>\n<size=80%>The whole party is fully restored.</size>");
+        // [2026-10-17] 마을 여관에서 쉬면 새벽의 잔도 다시 채워진다
+        bool chalice = ConsumableInventory.Instance != null;
+        if (chalice) ConsumableInventory.Instance.RefillDawnChalice();
+        Toast("<color=#FFD24A>여관에서 쉬었다.</color>\n<size=80%>파티 전원이 모두 회복했다." + (chalice ? " <color=#9FD8FF>새벽의 잔도 채워졌다.</color>" : "") + "</size>");
         Debug.Log("[MapManager] 여관 — 파티 전원 HP/MP 완전 회복");
     }
 
     private void AskSave()
     {
-        _hud.Confirm("Record your journey?\n<size=75%><color=#9FC8FF>Your previous save will be overwritten.</color></size>", "Save", "Cancel", ok =>
+        _hud.Confirm("여정을 기록할까?\n<size=75%><color=#9FC8FF>이전 기록은 덮어쓴다.</color></size>", "기록한다", "취소", ok =>
         {
             if (!ok) return;
             string err;
-            if (SaveSystem.Save(out err)) Toast("<color=#FFD24A>Your journey has been recorded.</color>");
-            else Toast("<color=#FF6B6B>Save failed.</color>\n<size=75%>" + err + "</size>");
+            if (SaveSystem.Save(out err)) Toast("<color=#FFD24A>여정을 기록했다.</color>");
+            else Toast("<color=#FF6B6B>기록에 실패했다.</color>\n<size=75%>" + err + "</size>");
         });
     }
 
@@ -913,11 +962,11 @@ public class MapManager : MonoBehaviour
     {
         SaveSystem.SaveData d = SaveSystem.Peek();
         if (d == null) return;
-        _hud.Confirm($"Continue your journey?\n<size=75%><color=#9FC8FF>B{d.currentFloor}  ·  Lv {d.heroLevel}  ·  saved {d.savedAt}</color></size>", "Continue", "New Game", ok =>
+        _hud.Confirm($"여정을 이어갈까?\n<size=75%><color=#9FC8FF>B{d.currentFloor}  ·  Lv {d.heroLevel}  ·  기록 {d.savedAt}</color></size>", "이어간다", "새로 시작", ok =>
         {
             if (!ok) return;
             string err;
-            if (!SaveSystem.Load(out err)) Toast("<color=#FF6B6B>Could not load the save.</color>\n<size=75%>" + err + "</size>");
+            if (!SaveSystem.Load(out err)) Toast("<color=#FF6B6B>기록을 불러오지 못했다.</color>\n<size=75%>" + err + "</size>");
         });
     }
 
@@ -952,16 +1001,16 @@ public class MapManager : MonoBehaviour
         // 함정 감지 스킬: 함정·미믹 상자는 열기 전에 수상함을 알아챈다
         bool sensed = fate != 0 && FieldSkills.Has(FieldSkills.TrapDetection);
         string msg = sensed
-            ? "A treasure chest.\n<size=75%><color=#FF9F6B>Something about it feels wrong...</color></size>\nOpen it?"
-            : "A treasure chest.\nOpen it?";
-        _hud.Confirm(msg, "Open", "Leave", ok =>
+            ? "보물 상자다.\n<size=75%><color=#FF9F6B>어딘가 꺼림칙하다...</color></size>\n열어 볼까?"
+            : "보물 상자다.\n열어 볼까?";
+        _hud.Confirm(msg, "연다", "둔다", ok =>
         {
             if (!ok) return;
             if (fate == 2 && mimicMonster != null)
             {
                 FloorState.openedChests.Add(pos);
                 if (automapRenderer != null) automapRenderer.Rebuild();
-                Toast("<color=#FF5A5A>The chest bares its teeth — a Mimic!</color>");
+                Toast("<color=#FF5A5A>상자가 이빨을 드러낸다 — 미믹이다!</color>");
                 DungeonEncounter.Instance?.StartPresetEncounter(new[] { mimicMonster });
                 return;
             }
@@ -979,13 +1028,13 @@ public class MapManager : MonoBehaviour
             int dmg = DamageHero(0.08f * Disposition.TrapDamageMult);
             DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Poison);
             _hud.Flash(new Color(0.3f, 0.9f, 0.2f, 0.45f));
-            Toast($"<color=#7CFC7C>A poison needle in the lock!</color> <color=#FF6B6B>-{dmg} HP</color>\n<size=80%>You are <color=#7CFC7C>poisoned</color>.</size>");
+            Toast($"<color=#7CFC7C>자물쇠에 독침이!</color> <color=#FF6B6B>HP -{dmg}</color>\n<size=80%><color=#7CFC7C>독</color>에 걸렸다.</size>");
         }
         else
         {
             int dmg = DamageHero((0.12f + 0.005f * floor) * Disposition.TrapDamageMult);
             _hud.Flash(new Color(1f, 0.55f, 0.1f, 0.6f), 0.5f);
-            Toast($"<color=#FF9A3C>The chest explodes!</color> <color=#FF6B6B>-{dmg} HP</color>");
+            Toast($"<color=#FF9A3C>상자가 폭발했다!</color> <color=#FF6B6B>HP -{dmg}</color>");
         }
         Debug.Log($"[MapManager] B{floor} 함정 상자 발동");
         CheckHeroDeath();
@@ -1003,7 +1052,7 @@ public class MapManager : MonoBehaviour
             {
                 hero.skillPoints += 1;
                 FloorState.openedChests.Add(pos);
-                Toast("Opened a chest: <color=#B98CFF>Tome of Lore</color>!\n<size=75%>+1 LP (skill point)</size>");
+                Toast("상자를 열었다: <color=#B98CFF>로어의 서</color>!\n<size=75%>LP +1 (스킬 포인트)</size>");
                 Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → 지식의 서 (LP {hero.skillPoints})");
                 if (automapRenderer != null) automapRenderer.Rebuild();
                 return;
@@ -1020,7 +1069,8 @@ public class MapManager : MonoBehaviour
             {
                 FloorState.openedChests.Add(pos);
                 // [2026-10-09] 자동 장착 없음 — 가방에만 넣는다 (장착은 아이템 창에서)
-                Toast($"Opened a chest: <color=#FFB347>{gear.equipmentName}</color>!\n<size=75%>Added to your pack.</size>");
+                Toast($"상자를 열었다: <color=#FFB347>{gear.equipmentName}</color>!\n<size=75%>소지품에 넣었다.</size>");
+                AskEquipFound(gear); // [2026-10-17] 바로 장착하지 않고 꼭 묻는다 (나중에 저주 장비 등)
                 Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → 장비 {gear.equipmentName}");
                 if (automapRenderer != null) automapRenderer.Rebuild();
                 return;
@@ -1031,7 +1081,7 @@ public class MapManager : MonoBehaviour
         if (item == null)
         {
             FloorState.openedChests.Add(pos);
-            Toast("The chest is empty.");
+            Toast("상자는 비어 있다.");
         }
         else
         {
@@ -1039,7 +1089,7 @@ public class MapManager : MonoBehaviour
             if (added <= 0)
             {
                 // 가방이 가득 참: 상자는 닫힌 채로 남겨 나중에 다시 열 수 있게
-                Toast($"A chest holds <color=#FFD24A>{item.itemName}</color>,\nbut you cannot carry more.");
+                Toast($"상자에 <color=#FFD24A>{item.itemName}</color>이(가) 있지만\n더 들 수 없다.");
                 return;
             }
             FloorState.openedChests.Add(pos);
@@ -1048,9 +1098,9 @@ public class MapManager : MonoBehaviour
             {
                 ConsumableItemSO extra = RollLoot();
                 if (extra != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(extra, 1) > 0)
-                    Toast($"<color=#9FFF9F>Salvaged an extra {extra.itemName}.</color>");
+                    Toast($"<color=#9FFF9F>{extra.itemName}을(를) 하나 더 건졌다.</color>");
             }
-            Toast($"Opened a chest: <color=#FFD24A>{item.itemName}</color>!");
+            Toast($"상자를 열었다: <color=#FFD24A>{item.itemName}</color>!");
             Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → {item.itemName}");
         }
         if (automapRenderer != null) automapRenderer.Rebuild();
@@ -1087,6 +1137,20 @@ public class MapManager : MonoBehaviour
     /// Resources/Item_Equipments/Equipments 중 아직 가지지 않은 장비 하나 (이 층에서 나올 수 있는 것만). 없으면 null.
     /// junkOnly = 허접 무기만, false = 허접 무기를 뺀 나머지.
     /// </summary>
+    /// <summary>[2026-10-17] 주운 장비를 지금 장착할지 묻는다. 예 → (한손 장비면 손 고르기 뒤) 장착, 아니오 → 소지품에만.</summary>
+    private void AskEquipFound(EquipmentData gear)
+    {
+        if (_hud == null || gear == null) return;
+        string name = !string.IsNullOrEmpty(gear.equipmentName) ? gear.equipmentName : gear.name;
+        _hud.Confirm($"<b>{name}</b>을(를) 지금 장착할까?", "장착", "나중에", yes =>
+        {
+            if (!yes) return;
+            var mgr = FindFirstObjectByType<EquipmentManager>(FindObjectsInactive.Include);
+            if (mgr == null || !EquipmentBag.HasSpare(mgr, gear)) return;
+            EquipHandPicker.Equip(mgr, gear, ok => { if (ok) Toast($"<color=#9FFF9F>{name}을(를) 장착했다.</color>"); });
+        });
+    }
+
     private EquipmentData RollEquipment(bool junkOnly)
     {
         if (_gearPool == null)
@@ -1111,7 +1175,7 @@ public class MapManager : MonoBehaviour
     private void AskSpring(Vector2Int pos)
     {
         int percent = Mathf.RoundToInt(springHealPercent * 100f);
-        _hud.Confirm($"A clear spring bubbles here.\nDrink from it?\n<size=75%><color=#9FC8FF>Restores {percent}% HP and MP</color></size>", "Drink", "Leave", ok =>
+        _hud.Confirm($"맑은 샘이 솟고 있다.\n마셔 볼까?\n<size=75%><color=#9FC8FF>HP·MP {percent}% 회복</color></size>", "마신다", "둔다", ok =>
         {
             if (!ok) return;
             FloorState.usedSprings.Add(pos);
@@ -1122,12 +1186,12 @@ public class MapManager : MonoBehaviour
                 int mpGain = Mathf.Min(stats.maxMP - stats.currentMP, Mathf.RoundToInt(stats.maxMP * springHealPercent));
                 stats.currentHP += Mathf.Max(0, hpGain);
                 stats.currentMP += Mathf.Max(0, mpGain);
-                Toast($"You feel refreshed. <color=#8CFF8C>+{Mathf.Max(0, hpGain)} HP</color>  <color=#8CC8FF>+{Mathf.Max(0, mpGain)} MP</color>");
+                Toast($"상쾌해졌다. <color=#8CFF8C>HP +{Mathf.Max(0, hpGain)}</color>  <color=#8CC8FF>MP +{Mathf.Max(0, mpGain)}</color>");
             }
             if (ConsumableInventory.IsRefillFloor(FloorData.floorNumber) && ConsumableInventory.Instance != null)
             {
                 ConsumableInventory.Instance.RefillDawnChalice();
-                Toast("<color=#9FD8FF>The Dawn Chalice is refilled.</color>");
+                Toast("<color=#9FD8FF>새벽의 잔이 다시 채워졌다.</color>");
             }
             _hud.Flash(new Color(0.4f, 0.75f, 1f, 0.35f));
             if (automapRenderer != null) automapRenderer.Rebuild();
@@ -1143,19 +1207,19 @@ public class MapManager : MonoBehaviour
     {
         switch (type)
         {
-            case FloorTrapType.Spike: return "spike trap";
-            case FloorTrapType.Teleport: return "teleport trap";
-            case FloorTrapType.Alarm: return "alarm trap";
-            case FloorTrapType.Pitfall: return "pitfall";
-            case FloorTrapType.PoisonDart: return "poison dart trap";
-            case FloorTrapType.Blade: return "blade trap";
-            case FloorTrapType.FlameVent: return "flame vent";
-            case FloorTrapType.BlindingGas: return "gas trap";
-            case FloorTrapType.Rockfall: return "rockfall trap";
-            case FloorTrapType.Net: return "net trap";
-            case FloorTrapType.ManaDrain: return "mana-drain rune";
-            case FloorTrapType.Crossbow: return "crossbow trap";
-            default: return "trap";
+            case FloorTrapType.Spike: return "가시 함정";
+            case FloorTrapType.Teleport: return "순간이동 함정";
+            case FloorTrapType.Alarm: return "경보 함정";
+            case FloorTrapType.Pitfall: return "구덩이";
+            case FloorTrapType.PoisonDart: return "독침 함정";
+            case FloorTrapType.Blade: return "칼날 함정";
+            case FloorTrapType.FlameVent: return "화염 분출구";
+            case FloorTrapType.BlindingGas: return "가스 함정";
+            case FloorTrapType.Rockfall: return "낙석 함정";
+            case FloorTrapType.Net: return "그물 함정";
+            case FloorTrapType.ManaDrain: return "마나 흡수 룬";
+            case FloorTrapType.Crossbow: return "석궁 함정";
+            default: return "함정";
         }
     }
 
@@ -1224,7 +1288,7 @@ public class MapManager : MonoBehaviour
                 FloorState.knownTraps.Add(pos); // 드러나기만 하고 발동하지 않음
                 if (automapRenderer != null) automapRenderer.Rebuild();
                 Debug.Log($"[MapManager] B{FloorData.floorNumber} 함정 회피 {pos}: {type} ({dodge:P1})");
-                Toast($"<color=#9FFF9F>You leap aside!</color>\n<size=80%>You felt a {TrapLabel(type)} click under your foot just in time.</size>");
+                Toast($"<color=#9FFF9F>몸을 날려 피했다!</color>\n<size=80%>발밑에서 {TrapLabel(type)}이(가) 딸깍하는 걸 아슬아슬하게 느꼈다.</size>");
                 return true;
             }
         }
@@ -1248,11 +1312,11 @@ public class MapManager : MonoBehaviour
         if (Disposition.Is(Disposition.Perfectionist) && Disposition.PerfectionistTrapFloor != FloorData.floorNumber)
         {
             Disposition.PerfectionistTrapFloor = FloorData.floorNumber; // 완벽주의자: 이 층에 있는 동안 명중 −10%
-            Toast("<color=#FF9F6B>A perfectionist's pride is wounded.</color>\n<size=75%>Hit chance -10% on this floor.</size>");
+            Toast("<color=#FF9F6B>완벽주의자의 자존심이 상했다.</color>\n<size=75%>이 층에서 명중 -10%.</size>");
         }
         int dmg = DamageHero(percent);
         DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Bleed, trapBleedTurns, 1);
-        string hit = $"<color=#FF6B6B>-{dmg} HP</color>  <color=#FF5A5A>Bleeding {trapBleedTurns}</color>";
+        string hit = $"<color=#FF6B6B>HP -{dmg}</color>  <color=#FF5A5A>출혈 {trapBleedTurns}</color>";
         Debug.Log($"[MapManager] B{FloorData.floorNumber} 함정 발동 {pos}: {type}{(fromDisarm ? " (해제 실패)" : "")} 피해 {dmg} ({percent:P0}) + 출혈 {trapBleedTurns}턴");
 
         switch (type)
@@ -1260,31 +1324,31 @@ public class MapManager : MonoBehaviour
             case FloorTrapType.PoisonDart:
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Poison);
                 _hud.Flash(new Color(0.3f, 0.9f, 0.2f, 0.45f));
-                Toast($"<color=#7CFC7C>A poison dart!</color> {hit}\n<size=80%>You are <color=#7CFC7C>poisoned</color>. (Antidote cures it)</size>");
+                Toast($"<color=#7CFC7C>독침이다!</color> {hit}\n<size=80%><color=#7CFC7C>독</color>에 걸렸다. (해독제로 치료)</size>");
                 return true;
             case FloorTrapType.Blade:
                 _hud.Flash(new Color(1f, 0.05f, 0.05f, 0.55f));
-                Toast($"<color=#FF5A5A>Hidden blades!</color> {hit}\n<size=80%>(Bandage stops the bleeding)</size>");
+                Toast($"<color=#FF5A5A>숨은 칼날!</color> {hit}\n<size=80%>(붕대로 출혈을 멈춘다)</size>");
                 return true;
             case FloorTrapType.FlameVent:
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Ignite);
                 _hud.Flash(new Color(1f, 0.45f, 0f, 0.55f));
-                Toast($"<color=#FF9A3C>A jet of flame!</color> {hit}\n<size=80%>You are <color=#FF9A3C>burning</color>. (Coolant puts it out)</size>");
+                Toast($"<color=#FF9A3C>불길이 뿜어져 나온다!</color> {hit}\n<size=80%><color=#FF9A3C>점화</color>됐다. (냉각제로 끈다)</size>");
                 return true;
             case FloorTrapType.BlindingGas:
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Blind);
                 if (_player != null) RevealAt(_player.gridPos); // 시야가 바로 좁아진다
                 _hud.Flash(new Color(0.55f, 0.55f, 0.75f, 0.6f), 0.6f);
-                Toast($"<color=#B0B0FF>Choking gas!</color> {hit}\n<size=80%>Your eyes sting — you can barely see. (Purification Water clears it)</size>");
+                Toast($"<color=#B0B0FF>숨 막히는 가스!</color> {hit}\n<size=80%>눈이 따가워 앞이 잘 안 보인다. (정화수로 씻는다)</size>");
                 return true;
             case FloorTrapType.Rockfall:
                 DungeonFieldStatus.Add(AbyssdawnBattle.StatusEffectType.Stun);
                 _hud.Flash(new Color(0.5f, 0.4f, 0.3f, 0.7f), 0.5f);
-                Toast($"<color=#D9C2A0>Rocks crash down!</color> {hit}\n<size=80%>You are <color=#FFD700>concussed</color> — you'll be stunned when the next fight starts.</size>");
+                Toast($"<color=#D9C2A0>돌이 쏟아진다!</color> {hit}\n<size=80%><color=#FFD700>뇌진탕</color> — 다음 전투가 시작되면 기절한다.</size>");
                 return true;
             case FloorTrapType.Crossbow:
                 _hud.Flash(new Color(1f, 0.1f, 0.1f, 0.6f), 0.4f);
-                Toast($"<color=#FF7A5A>Crossbow bolts fly from the walls!</color> {hit}");
+                Toast($"<color=#FF7A5A>벽에서 석궁 화살이 날아온다!</color> {hit}");
                 return true;
             case FloorTrapType.ManaDrain:
             {
@@ -1297,46 +1361,46 @@ public class MapManager : MonoBehaviour
                     lostMp = before - stats.currentMP;
                 }
                 _hud.Flash(new Color(0.3f, 0.5f, 1f, 0.55f));
-                Toast($"<color=#7FA8FF>A mana-drain rune!</color> {hit}  <color=#7FA8FF>-{lostMp} MP</color>");
+                Toast($"<color=#7FA8FF>마나 흡수 룬!</color> {hit}  <color=#7FA8FF>MP -{lostMp}</color>");
                 return true;
             }
             case FloorTrapType.Net:
             {
                 float add = netDangerAdd * damageMult;
                 _hud.Flash(new Color(0.9f, 0.85f, 0.5f, 0.45f));
-                Toast($"<color=#E6D98C>A barbed net drops on you!</color> {hit}\n<size=80%>You struggle free... something heard that.</size>");
+                Toast($"<color=#E6D98C>가시 그물이 떨어진다!</color> {hit}\n<size=80%>겨우 빠져나왔지만... 무언가 그 소리를 들었다.</size>");
                 if (DungeonEncounter.Instance != null) DungeonEncounter.Instance.AddDanger(add);
                 return true;
             }
             case FloorTrapType.Teleport:
             {
-                if (fromDisarm) { Toast($"<color=#D19BFF>The rune flares and burns you!</color> {hit}"); return true; }
+                if (fromDisarm) { Toast($"<color=#D19BFF>룬이 번쩍이며 몸을 태운다!</color> {hit}"); return true; }
                 _hud.Flash(new Color(0.75f, 0.4f, 1f, 0.5f));
                 FloorRoom here = FloorData.GetRoomAt(pos);
                 Vector2Int target = RandomRoomCell(here != null ? here.id : -1);
                 if (_player != null) _player.Teleport(target);
                 RevealAt(target);
                 SnapCamera();
-                Toast($"<color=#D19BFF>A teleport trap!</color> {hit}\n<size=80%>You are torn away...</size>");
+                Toast($"<color=#D19BFF>순간이동 함정!</color> {hit}\n<size=80%>어딘가로 끌려간다...</size>");
                 return true;
             }
             case FloorTrapType.Alarm:
                 _hud.Flash(new Color(1f, 0.55f, 0.15f, 0.5f));
-                Toast($"<color=#FFA040>An alarm trap!</color> {hit}\n<size=80%>Monsters close in!</size>");
+                Toast($"<color=#FFA040>경보 함정!</color> {hit}\n<size=80%>몬스터가 몰려온다!</size>");
                 StartCoroutine(AlarmRoutine());
                 return true;
             case FloorTrapType.Pitfall:
             {
-                if (fromDisarm) { Toast($"<color=#FF5A8C>The floor gives way — you scramble back, cut and bruised.</color> {hit}"); return true; }
+                if (fromDisarm) { Toast($"<color=#FF5A8C>바닥이 꺼진다 — 긁히고 멍든 채 간신히 기어올랐다.</color> {hit}"); return true; }
                 int next = FloorData.floorNumber + 1;
                 _hud.Flash(new Color(0f, 0f, 0f, 0.8f), 0.6f);
                 ChangeFloor(next, Arrival.RandomRoom);
-                Toast($"<color=#FF5A8C>A pitfall!</color> You fall to B{next}. {hit}");
+                Toast($"<color=#FF5A8C>구덩이다!</color> B{next}(으)로 떨어졌다. {hit}");
                 return true;
             }
             default: // Spike
                 _hud.Flash(new Color(1f, 0.15f, 0.1f, 0.5f));
-                Toast($"<color=#FF6B6B>Spike trap!</color> {hit}");
+                Toast($"<color=#FF6B6B>가시 함정!</color> {hit}");
                 return true;
         }
     }

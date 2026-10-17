@@ -165,6 +165,52 @@ public static class CardFx
         }
     }
 
+    // ── [2026-10-15] 지속 테두리 (에테르 감응 켜짐 등): 켜져 있는 동안 카드 테두리가 그 색으로 숨 쉬듯 빛남 ──
+    public static readonly Color EtherGlowColor = new Color(0.45f, 0.85f, 1f, 1f);
+
+    /// <summary>card 에 key 이름의 지속 테두리를 켜거나 끈다 (같은 key 는 카드당 하나).</summary>
+    public static void SetStateGlow(RectTransform card, string key, Color color, bool on)
+    {
+        if (card == null) return;
+        string name = "StateGlow_" + key;
+        var old = card.Find(name);
+        if (!on) { if (old != null) Object.Destroy(old.gameObject); return; }
+        if (old != null || !card.gameObject.activeInHierarchy) return;
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(card, false);
+        go.transform.SetAsLastSibling();
+        var rt = (RectTransform)go.transform;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = new Vector2(-9f, -9f); rt.offsetMax = new Vector2(9f, 9f);
+        var edges = new Image[4];
+        for (int i = 0; i < 4; i++)
+        {
+            var e = new GameObject("Edge", typeof(RectTransform), typeof(Image));
+            e.transform.SetParent(rt, false);
+            var ert = (RectTransform)e.transform;
+            const float w = 4f;
+            switch (i)
+            {
+                case 0: ert.anchorMin = new Vector2(0f, 1f); ert.anchorMax = Vector2.one; ert.pivot = new Vector2(0.5f, 1f); ert.sizeDelta = new Vector2(0f, w); break;
+                case 1: ert.anchorMin = Vector2.zero; ert.anchorMax = new Vector2(1f, 0f); ert.pivot = new Vector2(0.5f, 0f); ert.sizeDelta = new Vector2(0f, w); break;
+                case 2: ert.anchorMin = Vector2.zero; ert.anchorMax = new Vector2(0f, 1f); ert.pivot = new Vector2(0f, 0.5f); ert.sizeDelta = new Vector2(w, 0f); break;
+                default: ert.anchorMin = new Vector2(1f, 0f); ert.anchorMax = Vector2.one; ert.pivot = new Vector2(1f, 0.5f); ert.sizeDelta = new Vector2(w, 0f); break;
+            }
+            ert.anchoredPosition = Vector2.zero;
+            edges[i] = e.GetComponent<Image>(); edges[i].raycastTarget = false; edges[i].color = color;
+        }
+        Get().StartCoroutine(StateGlowRoutine(go, edges, color));
+    }
+
+    private static IEnumerator StateGlowRoutine(GameObject glow, Image[] edges, Color c)
+    {
+        while (glow != null)
+        {
+            float a = 0.5f + 0.5f * (0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 3f));
+            foreach (var e in edges) if (e != null) e.color = new Color(c.r, c.g, c.b, a);
+            yield return null;
+        }
+    }
+
     /// <summary>소비 아이템 사용 결과 연출. 전투 중 HP 회복 숫자는 BattleFx 가 이미 띄우므로 여기선 MP·반짝임만.</summary>
     public static void ItemUsed(PlayerStats user, ConsumableEffectApplier.EffectResult r)
     {

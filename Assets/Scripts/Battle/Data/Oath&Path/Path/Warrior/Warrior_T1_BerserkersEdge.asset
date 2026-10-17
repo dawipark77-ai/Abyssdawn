@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Warrior_T1_BerserkersEdge
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Warrior_T1_BerserkersEdge
-  skillName: Berserker's Edge
+  skillName: "\uAD11\uC804\uC0AC\uC758 \uCE7C\uB0A0"
   jobClass: 0
   tier: 1
   type: 0
@@ -24,3 +24,5 @@ MonoBehaviour:
     \uC911\uC2DC\uD558\uB294 \uC2A4\uD0C0\uC77C."
   drawbackDescription: "\uC704\uD5D8 \uAD6C\uAC04\uC5D0 \uBA38\uBB3C\uC218\uB85D
     \uC0DD\uC874 \uB9AC\uC2A4\uD06C\uAC00 \uCEE4\uC9C4\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

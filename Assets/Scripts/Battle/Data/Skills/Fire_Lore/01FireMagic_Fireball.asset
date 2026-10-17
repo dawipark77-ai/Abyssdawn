@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: 01FireMagic_Fireball
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_01
-  skillName: Fireball
+  skillName: "\uD654\uC5FC\uAD6C"
+  skillKey: Fireball
   skillIcon: {fileID: -1420298040285433542, guid: 8b0ccc502067b6140a5e956c13e40955, type: 3}
-  description: Launches a ball of fire at the target. Has a chance to ignite.
+  description: "\uB300\uC0C1\uC5D0\uAC8C \uBD88\uB369\uC774\uB97C \uB0A0\uB9B0\uB2E4.
+    \uC810\uD654\uB420 \uC218 \uC788\uB2E4."
   usageType: 0
   damageType: 2
   scalingStat: 3
@@ -58,6 +60,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0

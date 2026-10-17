@@ -15,7 +15,7 @@ namespace Abyssdawn
             for (int i = 0; i < skills.Count; i++)
             {
                 var s = skills[i];
-                if (s != null && s.skillName == skillName) return true;
+                if (s != null && s.Key == skillName) return true;
             }
 
             return false;

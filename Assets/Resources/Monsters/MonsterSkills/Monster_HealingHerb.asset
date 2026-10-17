@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Monster_HealingHerb
   m_EditorClassIdentifier: 
   skillID: Monster_HealingHerb
-  skillName: Healing Herb
+  skillName: "\uC57D\uCD08 \uC539\uAE30"
+  skillKey: Healing Herb
   skillIcon: {fileID: 0}
-  description: '[Goblin tool] Chews a bitter herb: recovers 30% of max HP. Once per
-    battle.'
+  description: "[\uACE0\uBE14\uB9B0 \uB3C4\uAD6C] \uC4F4 \uC57D\uCD08\uB97C \uC539\uC5B4
+    \uCD5C\uB300 HP 30% \uD68C\uBCF5. \uC804\uD22C\uB2F9 1\uBC88."
   usageType: 0
   damageType: 0
   scalingStat: 0
@@ -65,6 +66,8 @@ MonoBehaviour:
   requiresSameTarget: 0
   preemptive: 0
   cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 1
   endsTurnImmediately: 0
   critBonusPercent: 0

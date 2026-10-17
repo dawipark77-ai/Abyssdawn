@@ -113,8 +113,8 @@ public static class TownShop
     public static string GradeLabel(EquipmentData q)
     {
         if (q == null) return "";
-        if (q.isJunkWeapon) return "<color=#9A8F7A>Junk</color>";
-        if (!string.IsNullOrEmpty(q.equipmentName) && q.equipmentName.StartsWith("Crude")) return "<color=#C9A86A>Crude</color>";
+        if (q.isJunkWeapon) return "<color=#9A8F7A>허접</color>";
+        if (!string.IsNullOrEmpty(q.equipmentName) && q.name.StartsWith("Crude")) return "<color=#C9A86A>조잡</color>";
         return "";
     }
 
@@ -130,19 +130,19 @@ public static class TownShop
             if (c.cureTypes != null && c.cureTypes.Count > 0)
             {
                 var cures = new List<string>();
-                foreach (var t in c.cureTypes) cures.Add(t.ToString());
-                parts.Add(cures.Count >= 5 ? "Cures all ailments" : "Cures " + string.Join(", ", cures.ToArray()));
+                foreach (var t in c.cureTypes) cures.Add(Ko.Status(t));
+                parts.Add(cures.Count >= 5 ? "모든 상태이상 치료" : string.Join(", ", cures.ToArray()) + " 치료");
             }
             if (c.buffDuration > 0)
             {
                 if (c.attackBuffPercent > 0f) parts.Add("ATK +" + Mathf.RoundToInt(c.attackBuffPercent * 100f) + "%");
-                if (c.agilityBuff != 0) parts.Add("Speed +" + c.agilityBuff);
-                if (c.evasionBuff > 0f) parts.Add("Evasion +" + Mathf.RoundToInt(c.evasionBuff * 100f) + "%");
-                if (c.escapeChanceBuff > 0f) parts.Add("Escape +" + Mathf.RoundToInt(c.escapeChanceBuff * 100f) + "%");
-                parts.Add(c.buffDuration + " turns");
+                if (c.agilityBuff != 0) parts.Add("AGI +" + c.agilityBuff);
+                if (c.evasionBuff > 0f) parts.Add("회피 +" + Mathf.RoundToInt(c.evasionBuff * 100f) + "%");
+                if (c.escapeChanceBuff > 0f) parts.Add("도망 +" + Mathf.RoundToInt(c.escapeChanceBuff * 100f) + "%");
+                parts.Add(c.buffDuration + "턴");
             }
             if (c.mpPenaltyPercent > 0f) parts.Add("MP -" + Mathf.RoundToInt(c.mpPenaltyPercent * 100f) + "%");
-            if (!c.usableOnMap) parts.Add("Battle only");
+            if (!c.usableOnMap) parts.Add("전투 전용");
         }
         else if (e.equipment != null)
         {
@@ -154,7 +154,7 @@ public static class TownShop
             if (q.magicBonus != 0) parts.Add("MAG " + (q.magicBonus > 0 ? "+" : "") + q.magicBonus);
             if (q.hpBonus != 0) parts.Add("HP " + (q.hpBonus > 0 ? "+" : "") + q.hpBonus);
             if (q.agiBonus != 0) parts.Add("AGI " + (q.agiBonus > 0 ? "+" : "") + q.agiBonus);
-            if (q.isTwoHanded) parts.Add("Two-handed");
+            if (q.isTwoHanded) parts.Add("양손");
         }
         return string.Join("  ·  ", parts.ToArray());
     }
@@ -175,22 +175,22 @@ public static class TownShop
     public static string Buy(Entry e)
     {
         int price = e.BuyPrice;
-        if (PlayerWallet.Gold < price) return "<color=#FF6B6B>Not enough gold.</color>";
+        if (PlayerWallet.Gold < price) return "<color=#FF6B6B>골드가 모자란다.</color>";
 
         if (e.consumable != null)
         {
             var inv = ConsumableInventory.Instance;
-            if (inv == null || inv.AddItem(e.consumable, 1) <= 0) return "<color=#FF6B6B>You cannot carry more.</color>";
+            if (inv == null || inv.AddItem(e.consumable, 1) <= 0) return "<color=#FF6B6B>더 들 수 없다.</color>";
             PlayerWallet.TrySpend(price);
-            return $"Bought <color=#FFD24A>{e.Name}</color>  (-{price} G)";
+            return $"<color=#FFD24A>{e.Name}</color> 구입  (-{price} G)";
         }
         if (e.equipment != null)
         {
             // [2026-10-09] 같은 장비도 최대 30개까지 (쌍수용). 자동 장착 없음 — 상점 창이 "장착하시겠습니까?"를 묻는다
-            if (!EquipmentBag.CanAdd(e.equipment)) return "<color=#FF6B6B>You cannot carry more.</color>";
+            if (!EquipmentBag.CanAdd(e.equipment)) return "<color=#FF6B6B>더 들 수 없다.</color>";
             PlayerWallet.TrySpend(price);
             EquipmentBag.Add(e.equipment);
-            return $"Bought <color=#FFD24A>{e.Name}</color>  (-{price} G)";
+            return $"<color=#FFD24A>{e.Name}</color> 구입  (-{price} G)";
         }
         return "";
     }
@@ -204,14 +204,14 @@ public static class TownShop
             var inv = ConsumableInventory.Instance;
             if (inv == null || !inv.RemoveItem(e.consumable, 1)) return "";
             PlayerWallet.Add(price);
-            return $"Sold <color=#FFD24A>{e.Name}</color>  (+{price} G)";
+            return $"<color=#FFD24A>{e.Name}</color> 판매  (+{price} G)";
         }
         if (e.equipment != null)
         {
-            if (EquipmentBag.Count(e.equipment) <= WornCount(e.equipment)) return "Unequip it first.";
+            if (EquipmentBag.Count(e.equipment) <= WornCount(e.equipment)) return "먼저 장착을 해제하세요.";
             if (!EquipmentBag.Remove(e.equipment)) return "";
             PlayerWallet.Add(price);
-            return $"Sold <color=#FFD24A>{e.Name}</color>  (+{price} G)";
+            return $"<color=#FFD24A>{e.Name}</color> 판매  (+{price} G)";
         }
         return "";
     }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Thief_ShadowVeil
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Thief_ShadowVeil
-  oathName: Shadow Veil
+  oathName: "\uADF8\uB9BC\uC790 \uC7A5\uB9C9"
   jobClass: 3
   oathDescription: "\uD6C4\uC5F4 \uC704\uCE58 \uC2DC \uD0C0\uAC9F\uD305 \uD655\uB960
     -20%.\n\uD6D4\uCE58\uAE30 \uC2E4\uD328 \uD328\uB110\uD2F0 \uD655\uB960 -15%.\n\uD568\uC815

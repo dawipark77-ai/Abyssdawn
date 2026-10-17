@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Monster_BlindScratch
   m_EditorClassIdentifier: 
   skillID: Monster_BlindScratch
-  skillName: Blind Scratch
+  skillName: "\uB208 \uD560\uD034\uAE30"
+  skillKey: Blind Scratch
   skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
-  description: Scratches at the target eyes. Reduces Hit Rate by 10% for 3 turns.
-    Stackable.
+  description: "\uB300\uC0C1\uC758 \uB208\uC744 \uD560\uD038\uB2E4. 3\uD134 \uB3D9\uC548
+    \uBA85\uC911\uB960 -10%. \uC911\uCCA9\uB41C\uB2E4."
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -59,6 +60,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -68,6 +73,11 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
   isBasicAttackOverride: 0
   atkMultiplierOverride: 0
   randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

@@ -148,6 +148,17 @@ public class PlayerStats : MonoBehaviour
     [Tooltip("이 필드는 Awake()에서 statData.currentJob을 읽어 자동 설정됩니다. 에디터에서 직접 수정하지 마세요!")]
     public CharacterClass characterClass;
 
+    /// <summary>[2026-10-17] 데이터의 직업(statData.currentJob)을 지금 주인공에게 다시 반영 — Awake 뒤에 직업이 바뀌는 새 게임·불러오기에서 부른다.
+    /// (안 하면 도적으로 시작해도 Awake 때 읽은 전사 직업·스탯이 그대로 남았다)</summary>
+    public void SyncJobFromData()
+    {
+        if (statData != null && statData.currentJob != null && characterClass != statData.currentJob)
+        {
+            characterClass = statData.currentJob;
+            NotifyStatusChanged();
+        }
+    }
+
     // 자유 분배로 증가한 기본 스탯(직업/장비/패시브 적용 전 순수 플레이어 투자치)
     // [2026-05-07] PlayerStatData(SO)에서 분리됨 — 컴포넌트의 _fallback* 필드가 primary
     public int AllocatedAttack   => _fallbackAllocatedAttack;
@@ -336,7 +347,8 @@ public class PlayerStats : MonoBehaviour
     public const string OathIronDiscipline = "Warrior_IronDiscipline", OathWarriorsWill = "Warrior_WarriorsWill";
     public const string PathIronMomentum = "Warrior_T1_IronMomentum", PathBerserkersEdge = "Warrior_T1_BerserkersEdge",
                         PathBloodPrice = "Warrior_T1_BloodPrice", PathWarCry = "Warrior_T1_WarCry", PathWeaponOath = "Warrior_T1_WeaponOath";
-    [System.NonSerialized] public int oathHalfRounds;      // 철의 규율 제약: 마법을 쓰면 서약 효과 절반 (2턴)
+    [System.NonSerialized] public int oathHalfRounds;      // (예전 철의 규율 제약 — 2026-10-17 부터 쓰지 않음)
+    [System.NonSerialized] public int disciplineStacks;    // [2026-10-17] 철의 규율 중첩 (0~5): 공격할 때마다 +1, 방어·아이템·도망이면 0
     [System.NonSerialized] public int allyDeathStacks;     // 전사의 의지: 아군이 쓰러질 때마다 공격 +4% (최대 3)
     [System.NonSerialized] public int bloodPricePercent;   // 피의 대가: HP 를 쓴 만큼 피해 +1% (최대 15)
     [System.NonSerialized] public object momentumTarget;   // 강철의 기세: 같은 대상
@@ -372,16 +384,11 @@ public class PlayerStats : MonoBehaviour
         return m;
     }
 
-    /// <summary>철의 규율: 무기 명중 +3%p (마법 사용 후 2턴은 절반).</summary>
+    /// <summary>[2026-10-17] 철의 규율: 규율 1중첩마다 명중 +3%p (최대 5중첩 = +15%p). 일반 공격·스킬·마법 모두.</summary>
     public float GetOathAccuracyBonus(AbyssdawnBattle.SkillData skillOrNull)
     {
         if (!HasOath(OathIronDiscipline)) return 0f;
-        if (skillOrNull != null && skillOrNull.damageType == AbyssdawnBattle.DamageType.Magic) return 0f;
-        var em = GetComponent<EquipmentManager>();
-        var rh = em != null ? em.rightHand : statData.rightHand;
-        var lh = em != null ? em.leftHand : statData.leftHand;
-        if (!IsWeapon(rh) && !IsWeapon(lh)) return 0f;
-        return 0.03f * (oathHalfRounds > 0 ? 0.5f : 1f);
+        return 0.03f * Mathf.Clamp(disciplineStacks, 0, 5);
     }
 
     /// <summary>방패를 들고 있나 (철의 규율: 방패면 방어, 무기면 공격).</summary>
@@ -863,7 +870,7 @@ public class PlayerStats : MonoBehaviour
             if (passive == null) continue;
             if (!passive.IsPassive) continue;
             if (!IsPassiveWeaponOk(passive)) continue;
-            if (passive.skillName == skillName) return true;
+            if (passive.Key == skillName) return true;
         }
         return false;
     }
@@ -1961,11 +1968,11 @@ public class PlayerStats : MonoBehaviour
         var lines = new System.Collections.Generic.List<string>();
 
         // ① 레벨업 (Level up)
-        lines.Add($"<color={colorName}>{nameStr}</color> leveled up to <b>Lv {level}</b>!");
+        lines.Add($"<color={colorName}>{nameStr}</color> — <b>Lv {level}</b>(으)로 레벨 업!");
 
         // ② 자유 스탯 포인트 +1 획득 (Free Stat Point gained)
         int totalFreePts = _fallbackFreeStatPoints;
-        lines.Add($"<color={colorPoint}>Free Stat Point +1!</color> (Total: {totalFreePts})");
+        lines.Add($"<color={colorPoint}>자유 스탯 포인트 +1!</color> (합계 {totalFreePts})");
 
         // ③ HP/MP 상승분 (변동 있을 때만)
         var hpMpGains = new System.Collections.Generic.List<string>();
@@ -1985,7 +1992,7 @@ public class PlayerStats : MonoBehaviour
         // ⑤ 스킬 포인트(SP) +1 획득 — GrantSkillPoint가 LevelUp마다 호출되므로 항상 표시
         // 메시지에서는 풀네임 "Skill Point" 사용 (Free Stat Point와 패턴 일치). UI 헤더/팝업의 "SP" 약어와 별개.
         int totalSP = _fallbackSkillPoints;
-        lines.Add($"<color={colorPoint}>Skill Point +1!</color> (Total: {totalSP})");
+        lines.Add($"<color={colorPoint}>스킬 포인트 +1!</color> (합계 {totalSP})");
 
         // 시퀀스 출력 — 전투 씬이면 BattleManager의 타이핑 코루틴 사용,
         // 던전 씬 등 BattleManager가 없으면 Debug.Log 한 번에.

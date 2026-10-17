@@ -13,8 +13,23 @@ MonoBehaviour:
   m_Name: Class_Sister
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: Sister
-  description: "A devoted healer who balances sacred magic with modest physical ability."
+  description: "\uC2E0\uC131 \uB9C8\uBC95\uACFC \uC57D\uAC04\uC758 \uBAB8\uC2F8\uC6C0\uC744
+    \uACB8\uD558\uB294 \uD5CC\uC2E0\uC801\uC778 \uCE58\uC720\uC790."
   classIcon: {fileID: 0}
+  traitName: 
+  traitNameKR: 
+  traitDescription: 
+  traitDescriptionKR: 
+  weaponAccuracyBonus: 0
+  critChanceBonus: 0
+  firstTurnSpeedBonus: 0
+  heavyArmourEvasionPenalty: 0
+  unarmedDamageBonus: 0
+  twoHandedAccuracyPenalty: 0
+  physicalCostUsesMP: 0
+  startingEquipment: []
+  oaths: []
+  pathSkills: []
   hpMultiplier: 1
   mpMultiplier: 1
   attackMultiplier: 1

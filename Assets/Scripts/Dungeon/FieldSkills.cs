@@ -25,7 +25,16 @@ public static class FieldSkills
 
     // 수치 (한 곳에서 조정)
     public const float TrapDetectPassiveChance = 0.15f;   // [2026-10-09] 함정 자동 감지 확률 +25%p → +15%p
-    public const int TrapDetectSearchBonus = 1;            // 서치 반경 +1
+    public const int TrapDetectSearchBonus = 1;            // (예전 값 — 이제 SearchRadius 가 등급별로 정함)
+
+    /// <summary>[2026-10-15] 서치 반경: 기본 1칸. 함정 탐지 등급 Lv2 → 2칸, Lv3·4 → 3칸, Lv5 → 4칸 (Lv1 은 1칸 그대로).
+    /// [2026-10-17] 성향 탐험가는 여기에 +1칸.</summary>
+    public static int SearchRadius()
+    {
+        int r = Rank(TrapDetection);
+        int baseR = r >= 5 ? 4 : r >= 3 ? 3 : r >= 2 ? 2 : 1;
+        return baseR + Disposition.SearchBonus;
+    }
     public const float TrapDetectStopChance = 0.5f;       // 숨은 함정 직전 멈춤
     public const float DisarmBaseChance = 0.55f;
     public const float DisarmNoSkillChance = 0.30f;      // [2026-10-08] 스킬 없이 함정을 눌러 해제할 때

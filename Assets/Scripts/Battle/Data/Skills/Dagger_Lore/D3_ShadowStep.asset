@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: D3_ShadowStep
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: D3_ShadowStep
-  skillName: Shadow Step
+  skillName: "\uC100\uB3C4\uC6B0 \uC2A4\uD15D"
+  skillKey: Shadow Step
   skillIcon: {fileID: 21300000, guid: eecd668ae3c9e1f4c9868d2582dfbd70, type: 3}
   description: "[\uB2E8\uAC80\uC220 \xB7 \uC790\uAE30 \uAC15\uD654] \uC100\uB3C4\uC6B0
     \uC2A4\uD15D. 3\uD134 \uB3D9\uC548 \uD68C\uD53C +20%. \uC801 \uACF5\uACA9\uC744
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

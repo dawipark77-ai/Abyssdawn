@@ -1,0 +1,126 @@
+Assets/Resources/Monsters/MonsterSkills/Monster_Bite.asset	Bite	야수(Beast) 전용 평타 대체. 다른 종족은 적용되지 않음.	
+Assets/Resources/Monsters/MonsterSkills/Monster_BlindScratch.asset	Blind Scratch	Scratches at the target eyes. Reduces Hit Rate by 10% for 3 turns. Stackable.	
+Assets/Resources/Monsters/MonsterSkills/Monster_Enrage.asset	Enrage	Enters a rage state. Attack power increases by 10% on the next turn.	
+Assets/Resources/Monsters/MonsterSkills/Monster_Enrage1.asset	Enrage I	Enters a rage, increasing ATK by 10% for 1 turn.	
+Assets/Resources/Monsters/MonsterSkills/Monster_HealingHerb.asset	Healing Herb	[Goblin tool] Chews a bitter herb: recovers 30% of max HP. Once per battle.	
+Assets/Resources/Monsters/MonsterSkills/Monster_HeavySwing.asset	Heavy Swing	Raises its weapon for a turn, then brings it down with crushing force. Guard or strike first!	
+Assets/Resources/Monsters/MonsterSkills/Monster_PushBack.asset	Push Back	대미지↓, 명중 시 대상을 1슬롯 후퇴시킨다. (자리이동 로직은 별도 연동 필요)	
+Assets/Resources/Monsters/MonsterSkills/Monster_RatBite.asset	Rat Bite	Gnaws deep into flesh. May cause Bleed.	
+Assets/Resources/Monsters/MonsterSkills/Monster_SandThrow.asset	Sand Throw	[Goblin tool] Throws sand in the eyes: weak hit + accuracy down. Once per battle.	
+Assets/Resources/Monsters/MonsterSkills/Monster_Scratch.asset	Scratch	2연타 + 출혈 부여. 타격마다 명중 독립 판정.	
+Assets/Resources/Monsters/MonsterSkills/Monster_SmokeBomb.asset	Smoke Bomb	[Goblin tool] Vanishes in smoke: a certain escape (no EXP or gold). Once per battle.	
+Assets/Resources/Monsters/MonsterSkills/Monster_Tackle.asset	Tackle	Slams into the target with full body weight. Deals damage and pushes target back.	
+Assets/Resources/Monsters/MonsterSkills/Monster_ThrowingKnife.asset	Throwing Knife	[Goblin tool] Throws a crude knife (x0.85-0.95). Ranged: cannot be countered. 2 per battle.	
+Assets/Resources/Monsters/MonsterSkills/Monster_WoundLicking.asset	Wound Licking	Lick wounds to recover 5% of max HP. Cannot be used at full HP.	
+Assets/Resources/PathSkills/Warrior_WarCry.asset	War Cry	[전사 패스] 함성. 2턴 동안 파티 전체 공격 +8%, 상태이상 저항 +20%. 시전자 HP 5% 소모.	
+Assets/Resources/PathSkills/Warrior_WeaponOath.asset	Weapon Oath	[전사 패스] 무기의 맹세. 2턴 동안 공격 +12%, 치명타 확률 +8%. 시전자 HP 4% 소모.	
+Assets/Resources/Skills/Skill_01_Slash.asset	Slash	Quick physical attack dealing moderate damage.	
+Assets/Resources/Skills/Skill_02_StrongSlash.asset	Strong Slash	Powerful physical attack with higher damage but greater HP cost.	
+Assets/Resources/Skills/Skill_03_Fireball.asset	Fireball	Launches a fireball. Has a chance to ignite both user and target.	
+Assets/Resources/Skills/Skill_04_Meditation.asset	Meditation	Restores 7% of maximum MP.	
+Assets/Resources/Skills/Skill_05_MagicBolt.asset	Magic Bolt	Low-cost magic attack with a risk of self-damage.	
+Assets/Resources/Skills/Skill_06_Quickhand.asset	Quickhand	Quick double strike based on agility.	
+Assets/Scripts/Battle/Data/Skills/_Archive/Combat Arts/T1_Focus.asset	Focus		
+Assets/Scripts/Battle/Data/Skills/_Archive/Combat Arts/T1_FormationDiscipline.asset	Formation Discipline	파티 전체에 영향. 전열: 피해 -3%, 명중 +3%. 후열: 피해 -1%, 스킬 인터럴트 향률 -20%	This turn, party-wide defense +10%, evasion +10%
+Assets/Scripts/Battle/Data/Skills/_Archive/Combat Arts/T1_Shield Wall.asset	Shield Wall	패시브: 방어 사용 시 방어량 +20% 추가	
+Assets/Scripts/Battle/Data/Skills/_Archive/Combat Arts/T1_WeaponFamiliarity.asset	Weapon Familiarity	장착 무기 타입에 따라 보정. 검/도: 공격 +2, 크리 +3%. 두단기/도끌: 공격 +3, 방어 무시 +5%. 창/포마: 명중 +5%, 전열 적 대상 다임지 +7%	Next weapon attack, weapon type bonus x2
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/01_AxeMastery.asset	Axe Mastery	패시브. 공격력 +3 고정, 공격력 +5%, 전열 적 공격 시 방어파괴 자동 부여. 레벨당 공격력 +1(최대 +5), 민첩 -1 고정 패널티. 투척도끼를 제외한 모든 도끼 스킬은 전열 1번/2번에서만 사용 가능.	
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/02_CleaveDown.asset	Cleave Down	전열 1번/2번에서만 사용 가능. 공격력 x130% 깡뎀. 적 현재 방어력 x8% 방어파괴. HP 12% 소모. 사용 후 자신 민첩 -5 (1턴).	적 현재 방어력 x8% 방어파괴. 자신 민첩 -5(1턴)는 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/03_ThrowingAxe_R1.asset	Throwing Axe I	진형 1/2/3/4에서 사용 가능. 민첩 기반 원거리 선제 공격. 랭크 1: 민첩 x60%, 방어파괴 1%, HP 6% 소모. 사용 후 이번 턴 추가 행동 없음.	방어파괴 1%. 우선권/원거리/추가 행동 없음은 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/03_ThrowingAxe_R2.asset	Throwing Axe II	진형 1/2/3/4에서 사용 가능. 민첩 기반 원거리 선제 공격. 랭크 2: 민첩 x75%, 방어파괴 1%, HP 7% 소모. 사용 후 이번 턴 추가 행동 없음.	방어파괴 1%. 우선권/원거리/추가 행동 없음은 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/03_ThrowingAxe_R3.asset	Throwing Axe III	진형 1/2/3/4에서 사용 가능. 민첩 기반 원거리 선제 공격. 랭크 3: 민첩 x90%, 방어파괴 2%, HP 8% 소모. 사용 후 이번 턴 추가 행동 없음.	방어파괴 2%. 우선권/원거리/추가 행동 없음은 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/03_ThrowingAxe_R4.asset	Throwing Axe IV	진형 1/2/3/4에서 사용 가능. 민첩 기반 원거리 선제 공격. 랭크 4: 민첩 x105%, 방어파괴 2%, HP 9% 소모. 사용 후 이번 턴 추가 행동 없음.	방어파괴 2%. 우선권/원거리/추가 행동 없음은 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/03_ThrowingAxe_R5.asset	Throwing Axe V	진형 1/2/3/4에서 사용 가능. 민첩 기반 원거리 선제 공격. 랭크 5: 민첩 x120%, 방어파괴 3%, HP 10% 소모. 사용 후 이번 턴 추가 행동 없음.	방어파괴 3%. 우선권/원거리/추가 행동 없음은 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/04_ArmorRend.asset	Armor Rend	전열 1번/2번에서만 사용 가능. 데미지 없음. 적 현재 방어력 x20% 방어파괴. HP 8% 소모.	적 현재 방어력 x20% 방어파괴. 실전 무데미지 처리는 전투 로직 구현 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/05_Ruin Echo.asset	Ruin Echo	전열 1번/2번에서만 사용 가능. 공격력 x110% 깡뎀. 적 현재 방어력 x10% 방어파괴. HP 10% 소모. 같은 대상에게 직전 턴 찍어 내리기 또는 갑옷 찢기 사용 시에만 발동. 파티 전체 물리 공격 +5%(1턴), 크리티컬 +5%(2턴) 추가 발동.	적 현재 방어력 x10% 방어파괴. 조건부 파티 버프와 크리티컬 상승은 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/06_DeepWound.asset	Deep Wound	패시브. 적 방어력이 깎일수록 출혈 확률 증가. 방어력 20/40/60/80/100% 감소 시 출혈 확률 +6/+12/+18/+24/+30%(최대). 출혈 스킬과 조합 시 확률 추가 상승 가능.	
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/07_PickUpTheAxe.asset	Pick up the Axe!	[도끼술 · 패시브 · 도끼 장착] 도끼 집기. 투척도끼가 맞으면 20% 확률로 던진 도끼를 다시 집어 적 전열 1명에게 공격력 110~120% 추가타 (던진 대상이 전열이면 그 대상).	
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/08_KillingCatch.asset	Killing Catch	[도끼술 · 패시브 · 도끼 장착] (가칭) 회수의 일격. 도끼 집기 추가타가 10% 확률로 치명타가 된다.	
+Assets/Scripts/Battle/Data/Skills/Axe_Lore/09_FrenziedCleave.asset	Frenzied Cleave	[도끼술 · 공격 · 도끼 장착] 광란의 내려찍기. 최대 HP 40%를 바쳐 적 1명에게 공격력 300% 피해.	적 현재 방어력 x8% 방어파괴. 자신 민첩 -5(1턴)는 설명 기준.
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T1_CombatBreathing.asset	Combat Breathing	[패시브] 공격 스킬을 쓸 때마다 최대 HP의 3% 회복. 뒷열에 있으면 +2% 추가. (버티기·숨고르기 같은 비공격 스킬에는 발동하지 않는다)	This turn recovery x2, or +20% poison/bleed resistance for 1 turn
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T1_HardenedBody.asset	Hardened Body	[패시브] 최대 HP +8%, 받는 피해 -5% (앞열이면 -8%), 출혈·점화 등 지속 피해 -20%. 대신 몸이 무거워 행동 순서가 늦어진다 (민첩 -5로 계산).	This turn, critical hits cannot reduce HP below 1
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T1_TacticalAwareness.asset	Tactical Awareness	[패시브] 명중률 +5%, 회피율 +5%. 살아 있는 적이 3마리 이상이면 치명타 확률 +5%.	This turn, completely evade first enemy attack + counterattack
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T2_Brace.asset	Brace	[액티브 · 선제 · 쿨다운 2턴] 이번 턴 누구보다 먼저 자세를 잡아 이번 턴 받는 피해 -50%. 다음 턴 첫 공격 피해 +20%. 이번 턴에는 공격하지 않는다.	This turn, critical hits cannot reduce HP below 1
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T2_SecondWind.asset	Second Wind	[액티브 · 쿨다운 5턴] 숨을 골라 최대 HP의 20%를 회복하고 출혈을 멈춘다. 이번 턴에는 공격하지 않는다.	This turn, critical hits cannot reduce HP below 1
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T3_CounterGuard.asset	Counter Guard	[액티브 · 선제 · 쿨다운 3턴] 반격 자세를 잡는다 (이번 턴 + 다음 턴). 공격을 받을 때마다 70% 확률로 받는 피해 -50%, 그 공격자에게 기본 공격 80% 위력으로 반격 (턴당 최대 2회). 자세 동안 다른 스킬은 쓸 수 없고 기본 공격만 가능. 최대 HP의 3% 소모.	This turn, critical hits cannot reduce HP below 1
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T3_IntimidatingShout.asset	Intimidating Shout	[액티브 · 쿨다운 4턴] 적 전체 공격력 -20% (2턴). 적마다 40% 확률로 스턴 — 다음 행동 1번을 못 한다. 최대 HP의 3% 소모, 이번 턴에는 공격하지 않는다.	This turn, critical hits cannot reduce HP below 1
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T4_Focus.asset	Focus	[액티브 · 쿨다운 4턴] 정신을 가다듬는다. 3턴 동안 회피 +20%, 명중 +20%. 이번 턴에는 공격하지 않는다.	
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T4_QuickStarter.asset	Quick Starter	[패시브] 전투 시작 후 2턴까지 모든 스탯 +10% (공격·방어·마법·속도). 슬로우 스타터와 함께 장착할 수 없다.	
+Assets/Scripts/Battle/Data/Skills/Combat Arts/T4_SlowStarter.asset	Slow Starter	[패시브] 전투 시작 후 5턴째부터 모든 스탯 +20% (공격·방어·마법·속도, 전투 끝까지). 퀵 스타터와 함께 장착할 수 없다.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D1_Lacerate.asset	Lacerate	[단검술 · 공격] 상처내기. 적 1명에게 민첩 80% 피해, 80% 확률로 출혈 3턴. 이미 출혈 중이면 중첩되어 출혈이 1턴씩 늘어난다 (중첩 확률 75 → 70 → 65 → 60%). HP 4%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D1_QuickHands.asset	Quick Hands	[단검술 · 패시브 · 단검 장착] 신속한 손놀림. 든 단검 하나당 민첩 +5% (두 손 모두 단검이면 +10%).	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D1_RendWound.asset	Rend Wound	[단검술 · 공격 · 출혈 중인 적에게만] 상처 벌리기. 민첩 30% 피해, 출혈 +1턴, 출혈 피해 +50%. HP 3%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D1_VitalStrike.asset	Vital Strike	[단검술 · 패시브 · 단검 장착] 급소 파고들기. 기본 공격이 후열에서 적 전열을 칠 때 치명타 +10%, 전열에서 적 후열을 칠 때 피해 +15%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D2_BackstepSlash.asset	Backstep Slash	[단검술 · 공격 · 전열(1·2열)에서만] 뒤로 빠지며 베기. 적 1명에게 민첩 80% 피해를 주고 한 칸 뒤로 물러난다. HP 4%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D2_FlurryStab.asset	Flurry Stab	[단검술 · 공격] 연속 찌르기. 적 1명을 민첩 50%로 3번 찌른다. HP 6%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D2_ShadowSlash.asset	Shadow Slash	[단검술 · 공격 · 적 후열만] 그림자 베기. 적 후열 1명에게 민첩 130% 피해. HP 7%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D2_TendonSever.asset	Tendon Sever	[단검술 · 공격] 힘줄 끊기. 적 1명에게 민첩 60% 피해, 3턴 동안 힘 -20% (중첩 없음). HP 4%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D3_Hamstring.asset	Hamstring	[단검술 · 공격] 햄스트링 끊기. 적 1명에게 민첩 60% 피해, 3턴 동안 민첩 -20% (중첩 없음). HP 4%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D3_LungeSlash.asset	Lunge Slash	[단검술 · 공격 · 후열(3·4열)에서만] 뛰쳐나오며 베기. 한 칸 앞으로 뛰쳐나오며 적 1명에게 민첩 90% 피해. HP 4%.	
+Assets/Scripts/Battle/Data/Skills/Dagger_Lore/D3_ShadowStep.asset	Shadow Step	[단검술 · 자기 강화] 섀도우 스텝. 3턴 동안 회피 +20%. 적 공격을 피하면 민첩 70%로 반격. HP 5%.	
+Assets/Scripts/Battle/Data/Skills/Devine_Lore/Divine_T1_Detoxify.asset	Detoxify	단일 아군/적군의 독 상태를 완전히 제거한다.	Cleanse all Poison stacks from target
+Assets/Scripts/Battle/Data/Skills/Devine_Lore/Divine_T1_DivineAura.asset	Divine Aura	아군 전체 마법 피해 -10%, 2턴.	
+Assets/Scripts/Battle/Data/Skills/Devine_Lore/Divine_T1_DivineLight.asset	Divine Light	단일 아군/적군 최대 HP 10% 회복. 출혈 상태 대상에게는 회복량 -30%.	
+Assets/Scripts/Battle/Data/Skills/Devine_Lore/Divine_T1_HolyGuard.asset	Holy Guard	아군 단일 받는 피해 -10%, 2턴.	
+Assets/Scripts/Battle/Data/Skills/Devine_Lore/Divine_T1_Valor.asset	Valor	아군 단일 공격력 +10%, 2턴.	
+Assets/Scripts/Battle/Data/Skills/Devine_Lore/Divine_T2_Enfeeble.asset	Enfeeble	적 단일 공격력 -10%, 2턴.	
+Assets/Scripts/Battle/Data/Skills/Devine_Lore/Divine_T2_Hiatus.asset	Hiatus	적 단일 방어력 -25%, 3턴.	
+Assets/Scripts/Battle/Data/Skills/Exploration/EX_T1_ResourceManagement.asset	Resource Management	[보급술 · 상시] 상점 구매가 -10%, 판매가 +10%. 전투 골드 +15%.	This turn, completely evade first enemy attack + counterattack
+Assets/Scripts/Battle/Data/Skills/Exploration/EX_T1_TrapDetection.asset	Trap Detection	[탐험 · 배우면 항상 적용 · 스킬 칸 안 씀] 걸을 때 주변 1칸의 숨은 함정을 15% 확률로 알아챈다. 서치 반경 +1. 숨은 함정을 밟기 직전 50% 확률로 멈춘다.	This turn, completely evade first enemy attack + counterattack
+Assets/Scripts/Battle/Data/Skills/Exploration/EX_T2_DangerSense.asset	Danger Sense	[탐험 · 배우면 항상 적용 · 스킬 칸 안 씀] 위험도 게이지에 %가 표시되고, 80%를 넘으면 무언가 다가온다고 경고한다. 전투가 시작되면 첫 턴 회피율 +20%.	This turn, completely evade first enemy attack + counterattack
+Assets/Scripts/Battle/Data/Skills/Exploration/EX_T2_Survivalist.asset	Survivalist	[보급술 · 상시 · 1~5등급] 회복 아이템 효과 Lv1 +5% · Lv2 +9% · Lv3 +13% · Lv4 +16% · Lv5 +20%. 서치할 때 5% 확률로 약초 (등급 무관).	This turn, completely evade first enemy attack + counterattack
+Assets/Scripts/Battle/Data/Skills/Exploration/EX_T2_TrapDisarm.asset	Trap Disarm	[탐험 · 배우면 항상 적용 · 스킬 칸 안 씀] 알고 있는 함정에 들어서려 하면 해제를 시도할 수 있다 (55% + 민첩 1당 0.5%, 최대 95%). 성공하면 함정이 사라지고 '함정 부품'(상점에서 15G)을 얻는다. 실패하면 함정이 발동하지만 피해는 절반.	This turn, completely evade first enemy attack + counterattack
+Assets/Scripts/Battle/Data/Skills/Exploration/EX_T3_MakeCamp.asset	Make Camp	[탐험 · 던전 지도에서 사용 · 스킬 칸 안 씀 · 1~5등급] 던전 메뉴의 Camp 버튼으로 쉰다. 층마다 1번, 마을 층(B1·B5)에서는 불가.\n위험: 그때의 위험도만큼 습격 확률 (최대 40%) — 습격당하면 적이 먼저 공격. 야영 후 위험도 +30%.\nLv1 HP·MP 30%\nLv2 40% · 출혈 해제\nLv3 50% · 출혈·독 해제 · 빛 +30걸음\nLv4 60% · 출혈·독·화상·실명 해제 · 빛 · 습격 확률 ×0.75\nLv5 70% · 모든 던전 상태이상 해제 · 빛 · 습격 확률 ×0.5 · 위험도 +15%만	
+Assets/Scripts/Battle/Data/Skills/Exploration/EX_T3_SecureRetreat.asset	Secure Retreat	[야전술 · 상시] 이번 층의 계단(올라가는 쪽 또는 내려가는 쪽)을 이미 발견했으면 도주 첫 시도 +15%p. 도주에 실패한 라운드에 받는 피해 -30%. 계단을 못 찾은 층에서는 효과 없음.	
+Assets/Scripts/Battle/Data/Skills/Exploration/QM_T1_AmplePack.asset	Ample Pack	[보급술 · 상시] 소비 아이템 최대 보유 +1 (새벽의 잔 제외).	
+Assets/Scripts/Battle/Data/Skills/Exploration/QM_T2_LootSalvage.asset	Loot Salvage	[보급술 · 상시] 상자를 열 때 25% 확률로 소비 아이템 1개 추가. 전투 승리 시 5% 확률로 HP 포션 1개.	
+Assets/Scripts/Battle/Data/Skills/Exploration/QM_T2_RegularCustomer.asset	Regular Customer	[보급술 · 상시 · 1~5등급] 여관 할인 Lv1 10% · Lv2 15% · Lv3 25% · Lv4 35% · Lv5 50%. 여관에서 쉬고 나가면 다음 층 첫 3번의 전투 동안 최대 HP·MP Lv1 +3% · Lv2 +5% · Lv3 +6% · Lv4 +8% · Lv5 +10% (최소 +1).	
+Assets/Scripts/Battle/Data/Skills/Exploration/QM_T3_FrugalUse.asset	Frugal Use	[보급술 · 상시] 회복·해독 아이템을 쓸 때 15% 확률로 소모되지 않음 (새벽의 잔 제외).	
+Assets/Scripts/Battle/Data/Skills/Fire_Lore/01FireMagic_Fireball.asset	Fireball	Launches a ball of fire at the target. Has a chance to ignite.	
+Assets/Scripts/Battle/Data/Skills/Fire_Lore/02FireMagic_PyromancerDoctrine.asset	Pyromaniac Doctrine	Passive. Increases fire damage per rank, but also increases backflow chance.	
+Assets/Scripts/Battle/Data/Skills/Fire_Lore/03FireMagic_EmbersGreed.asset	Ember's Greed	Passive. Each rank amplifies fire magic further, at increasing backflow risk.	
+Assets/Scripts/Battle/Data/Skills/Fire_Lore/04FireMagic_SmolderingCurse.asset	Smoldering Curse	Curses the target with smoldering flames. High ignite chance, no direct damage.	
+Assets/Scripts/Battle/Data/Skills/Fire_Lore/05FireMagic_Pyroclasm.asset	Pyroclasm	Massive fire explosion. Only usable on ignited targets. High backflow risk.	
+Assets/Scripts/Battle/Data/Skills/Fire_Lore/06FireMagic_HeatMirage.asset	Heat Mirage	Creates a heat distortion that confuses enemies. No backflow risk.	
+Assets/Scripts/Battle/Data/Skills/Fire_Lore/07FireMagic_BurningWill.asset	Burning Will	Passive. When self is ignited, fire skills deal bonus damage. Turns weakness into power.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T1_Focus Strength.asset	Focus Strength	[격투술 · 액티브 · 한 손이 비어 있어야 함] 한 턴 동안 기를 모은다. 다음 턴 공격 위력 ×2. 이번 턴에는 공격하지 않는다. MP 3.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T1_InnerCirculation.asset	Inner Circulation	[격투술 · 패시브 · 1~3등급] 내공을 돌린다. 매 턴 끝에 최대 MP 회복 Lv1 3% · Lv2 4% · Lv3 5% (최소 1).	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T1_Straight Punch.asset	Straight Punch	[격투술 · 공격 · 한 손이 비어 있어야 함] 정권 찌르기. 공격력의 200% 피해, 명중 60%. MP 0.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T2_InnerFortitude.asset	Inner Fortitude	[격투술 · 자기 강화] 내면 강화. 걸린 상태이상(출혈·독 등)의 남은 턴을 1씩 줄이고, 3턴 동안 상태이상 저항 +20%. MP 4.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T2_RoundhouseKick.asset	Roundhouse Kick	[격투술 · 공격 · 한 손이 비어 있어야 함] 돌려차기. 전열의 적 모두에게 민첩의 70% 피해. MP 3.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T2_ShareEnergy.asset	Share Energy	[격투술 · 액티브] 자신의 기를 나눈다. 최대 HP의 10%를 소모해, HP 비율이 가장 낮은 다친 동료의 HP를 그 동료 최대 HP의 20%만큼 회복. MP 4. 다친 동료가 없으면 쓸 수 없다.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T2_Uppercut.asset	Uppercut	[격투술 · 공격 · 한 손이 비어 있어야 함 · 쿨다운 3턴] 턱을 올려친다. 공격력의 90% 피해, 맞으면 2턴 기절 (상태이상 저항 반영). MP 5.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T3_DoubleStrike.asset	Double Strike	[격투술 · 공격 · 전열(1·2열)에서만 · 한 손이 비어 있어야 함] 이중타격. 적 1명에게 공격력 90%로 두 번 친다. 1타가 맞으면 2타는 반드시 들어가며, 1타의 힘이 안에서 터져 1타 피해만큼(대상 최대 HP 대비, 최대 50%) 방어를 무시한다. 1타가 치명타면 2타는 '극점' — 확정 치명타 + 방어 완전 무시. MP 4.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T3_GaleKick.asset	Gale Kick	[격투술 · 공격 · 후열(3·4열)에서만 · 한 손이 비어 있어야 함] 풍압차기. 다리로 풍압을 차 보내 적 1명(전열·후열 모두)에게 민첩의 100% 피해. MP 4.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T3_InnerCleanse.asset	Inner Cleanse	[격투술 · 자기 강화] 내면 정화. 상태이상 1개를 즉시 지우고, 3턴 동안 새 상태이상에 걸리지 않는다. MP 6.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T4_CombatInstinct.asset	Combat Instinct	[격투술 · 패시브] 근육의 기억 (Combat Instinct). 격투 스킬로 같은 적을 맞힐 때마다 중첩 +1 (최대 5, 누적). 1중첩 명중 +3% · 2중첩 치명타 확률 +4% · 3중첩 피해 +6% · 4중첩 방어 관통 +8% · 5중첩 맞힐 때마다 MP 2 회복. 빗나가거나 다른 적을 치거나 여러 명을 치면 처음부터.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T5_Infighter.asset	Infighter	[격투술 · 패시브 · 한 손이 비어 있어야 함] 인파이터. 앞열(1·2열)에 있으면 공격 +20%. 아웃파이터와 둘 중 하나만 장착.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T5_Outfighter.asset	Outfighter	[격투술 · 패시브 · 한 손이 비어 있어야 함] 아웃파이터. 뒷열(3·4열)에 있으면 민첩 +20%. 인파이터와 둘 중 하나만 장착.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T6_CrossCounter.asset	Cross Counter	[격투술 · 자세 · 전열(1·2열)에서만 · 한 손이 비어 있어야 함] 크로스 카운터. 이번 턴 들어오는 모든 물리 공격을 90% 피해로 받아내고, 맞을 때마다 공격력 150~180%로 반격한다. MP 4.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T6_PullCounter.asset	Pull Counter	[격투술 · 자세 · 한 손이 비어 있어야 함] 풀 카운터. 이번 턴 자신에게 들어오는 물리 공격 1번을 흘려 피하고, 민첩 120~150%로 반격한다. MP 4.	
+Assets/Scripts/Battle/Data/Skills/Martial_Lore/T6_WhirlwindKick.asset	Whirlwind Kick	[격투술 · 공격 · 한 손이 비어 있어야 함] 선풍각. 고른 적이 있는 줄(전열 또는 후열)에서 그 적과 가장 가까운 적까지 2명에게 민첩의 75% 피해. MP 6.	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T1_RaiseShield.asset	Raise Shield	[방패 · 액티브 · 선제 · 쿨다운 3턴 · 전열] 방패를 든다. 3턴 동안 막기 확률 +15%p, 막은 피해 감소 +2. 이번 턴에는 공격하지 않는다.	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T1_Resilience.asset	Embodiment of Resilience	[방패 · 패시브] 막기에 성공하면 2턴 동안 받는 피해 -8% (최대 2중첩). 방패 스킬 쿨다운 1 감소.	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T1_Retribution.asset	Moment of Retribution	[방패 · 패시브] 막기에 성공하면 다음 공격 피해 +25% (1회).	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T1_ShieldBash.asset	Shield Bash	[방패 · 공격 · 쿨다운 2턴 · 1·2열] 방패로 후려친다. 공격력의 70% 피해, 명중 100%. 35% 확률로 기절 (상태이상 저항 반영, 다음 행동 1번 봉쇄). 최대 HP의 4% 소모.	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T2_LastBastion.asset	Last Bastion	[방패 · 패시브] 살아 있는 적 1마리당 막기 확률 +3%p (최대 +12%p).	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T2_ShieldDash.asset	Shield Dash	[방패 · 공격 · 쿨다운 4턴 · 전열] 방패를 앞세워 돌진한다. 공격력의 75~85% 피해, 2턴 기절. 60% 확률로 적을 1칸 뒤로 밀치고, 시전자는 앞으로 1칸. 최대 HP의 6% 소모.	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T2_Taunt.asset	Taunt	[방패 · 액티브 · 쿨다운 4턴] 이번 턴에는 자세만 잡는다. 다음 턴 1턴 동안 적이 공격 대상을 고를 때 나를 고른다. 그동안 방어력 +30%.	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T3_Dawnwarden.asset	Dawnwarden	[방패 · 액티브 · 쿨다운 5턴] 이번 턴에는 자세만 잡는다. 다음 턴 1턴 동안 동료에게 가는 공격을 모두 내가 대신 맞는다 (전체 공격은 동료 수만큼). 공격 하나하나에 막기 판정.	
+Assets/Scripts/Battle/Data/Skills/Shield_Lore/T3_HoldTheLine.asset	Hold the Line!	[방패 · 액티브 · 쿨다운 5턴] 3턴 동안 아군 전원 받는 피해 -10%, 내 막기 확률 +5%p. 내가 막을 때마다 지속 +1턴 (최대 5턴).	
+Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_BasicSwordsmanship.asset	Basic Swordsmanship	[검 장착 시 · 패시브] 공격력 +2 (4레벨마다 +1 추가), 명중률 +5%. 앞열에 있을 때 받는 데미지 -5%.	
+Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_Mandritto.asset	Mandritto	[검 전용] 앞열의 적 둘을 한 번에 휩쓰는 횡베기. 고른 적과 가장 가까운 앞열 적에게 각각 공격력의 90% 피해. 아군 앞열(1·2번)에서만 사용 가능. 최대 HP의 4% 소모.	
+Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_SharpEdge.asset	Sharp Edge	[검 전용 · 버프] 칼날을 벼려 방어를 꿰뚫는다. 한 턴을 써서, 다음 2턴 동안 적 방어력의 60%를 무시하고 공격한다. 다시 쓰면 2턴으로 갱신.	
+Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_Slash.asset	Slash	[검 전용] 빠르고 정확한 베기. 공격력의 110~120% 피해. 명중 95%. 최대 HP의 8% 소모.	
+Assets/Scripts/Battle/Data/Skills/Sword_Lore/T1_Strong Slash.asset	Strong Slash	[검 전용] 온 힘을 실어 내려베기. 공격력의 150~170% 피해, 치명타 확률 +20%. 크게 휘두르는 만큼 명중 80%. 최대 HP의 10% 소모.	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_BladeOfVoidAndSubstance.asset	힘실의 칼단	적이 직전 툸에 방어는의의 버프 스트마 사용 시, 다음 공격 피해 +28%. 적이 직전 툸에 공격 스트마 사용 시 자신이 받는 피해 +15%. HP 50% 이하 적에게 추가 피해 +12%. 적 행동을 잡는 경우 다음 툸 공격력 -20%.	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_CavalryChargeFury.asset	기믓의 광기	전열 아국 전체 다음 공격 피해 +32%, 적 후열 1체 스턴 1툸. 돌격 후 전열 아국 HP -15% 작성 소모. 전열→후열 관통 공격 1회 추가. 다음 툸 아국 전열 방어력 -28%. (콜툸 4툸)	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_FlankManeuver.asset	측면의 비수	후열에서 사용 시 적 후열 타곳 피해 +42%, 적 진형 명중률 -12% (2툸). 전열에서 사용 불가. 사용 후 다음 툸 행동 불가. 적 후열 타곳 처리 시 콜툸 1툸 초기화. 사용 후 전열 이동 시 효과 무효 + 콜툸 초기화. (콜툸 3툸)	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_FormationShift.asset	포진 재배치	아군 전열·후열 포진 자유 변경. 변경 직후 1턴 방어력 +22%. 재배치 후 3턴간 모든 스킬 쿨타임 +1, MP 코스트 200%. 진중 타겟 아군 1체를 후열로 이동시켜 보호. 재배치 직후 턴, 사용자 행동 불가. 발동 조건: 파티 내 아군 1명 이상 HP 50% 이하일 때만 사용 가능. (쿨타임 6턴)	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_FrictionOfWar.asset	마체의 교ힴ	적 스트마가 빛나가나 실패할 때마다 아국 전체 피해 적오 +12% (최대 3중척). 자신의 스트마가 빛나가는 경우 받는 피해 +28% + 콜툸 초기화. 적의 연속 행동 실패 시 아국 전체 다음 툸 공격력 +10% 추가. 자신이 명중률 디버프 상태인 때 이덕 효과 50% 감소.	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_PrincelyRuthlessness.asset	군주의 낭효함	마키아벨리 『군주론』 18장. 아국 전체를 위한 신뢰적 진행 스트마. (사용 설명 추가 예정) (콜툸 6툸)	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_PrincelyTerror.asset	마키아벨리의 공편	적 전체 행동속도 -1단계 (1툸), 도발 성고률 +35%. 사용자 본인도 행동속도 -1단계 (1툸). 아국 전체 회백 효과 -15% (2툸). (콜툸 5툸)	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_ReadingTheTide.asset	형세관체	전통 시작 3툸간 아국 전체 명중률 +8%, 회피율 +8%. 해당 3툸간 자신의 가하는 피해 -12%. 적이 행동할 때마다 스트마 타입 사전 표시. 전통 시작 시 행동속도 -1단계.	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_RomanDiscipline.asset	로마 군기의 규육	전열 3명 이상 폴성 시 아국 전체 방어력 +18%, 상태이상 적오 +22%. 후열 딩러 가하는 피해 -15%, 스트마 콜툸 +1툸. 아국이 상태이상에 걸마마다 방어력 추가 +5% 는계 (최대 3중척). 전열 인우 2명 이하로 낮을 때 효과 전부 초기 해제, 재발동 불가.	
+Assets/Scripts/Battle/Data/Skills/Warfare/Warfare_WeightOfTotalWar.asset	절대전의 중량	전통 6툸 이후부터 가하는 피해 매 툸 +6% 누계 (최대 +30%). 전통 초반 4툸간 받는 피해 +12%, 행동속도 -1단계. 전통가 7툸 내 종료되면 는계 버프 전부 속모.	
+Assets/Scripts/Battle/Data/TraitsofSpecies/Elf/Elf_EtherSense.asset	Ether Sense	[엘프 종특 · 켜고 끄기] 에테르 센스. 켜져 있으면 맞힐 때마다 현재 MP 5%를 태워 마력 50%의 추가 마법 피해 (2타부터 피해 절반 · MP 1.5배). MP가 모자라면 저절로 꺼진다.	

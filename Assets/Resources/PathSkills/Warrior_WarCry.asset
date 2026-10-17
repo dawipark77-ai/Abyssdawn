@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Warrior_WarCry
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warrior_WarCry
-  skillName: War Cry
+  skillName: "\uD568\uC131"
+  skillKey: War Cry
   skillIcon: {fileID: 0}
   description: "[\uC804\uC0AC \uD328\uC2A4] \uD568\uC131. 2\uD134 \uB3D9\uC548 \uD30C\uD2F0
     \uC804\uCCB4 \uACF5\uACA9 +8%, \uC0C1\uD0DC\uC774\uC0C1 \uC800\uD56D +20%. \uC2DC\uC804\uC790
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 1
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

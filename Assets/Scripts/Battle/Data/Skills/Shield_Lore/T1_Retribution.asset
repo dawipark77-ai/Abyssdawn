@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_Retribution
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T1_Retribution
-  skillName: Moment of Retribution
+  skillName: "\uC751\uC9D5\uC758 \uC21C\uAC04"
+  skillKey: Moment of Retribution
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uD328\uC2DC\uBE0C] \uB9C9\uAE30\uC5D0 \uC131\uACF5\uD558\uBA74
     \uB2E4\uC74C \uACF5\uACA9 \uD53C\uD574 +25% (1\uD68C)."
@@ -61,6 +62,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

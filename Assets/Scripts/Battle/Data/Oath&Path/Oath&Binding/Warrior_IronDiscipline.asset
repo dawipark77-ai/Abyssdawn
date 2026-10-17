@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Warrior_IronDiscipline
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Warrior_IronDiscipline
-  oathName: Iron Discipline
+  oathName: "\uCCA0\uC758 \uADDC\uC728"
   jobClass: 0
-  oathDescription: "\uBB34\uAE30 \uBA85\uC911 +3%.\n\uC804\uD22C \uC2DC\uC791 \uC2DC
-    \uBB34\uAE30\uB97C \uB4E4\uBA74 \uACF5\uACA9 +3, \uBC29\uD328\uB97C \uB4E4\uBA74
-    \uBC29\uC5B4 +3."
+  oathDescription: "\uACF5\uACA9\uD560 \uB54C\uB9C8\uB2E4 (\uC77C\uBC18 \uACF5\uACA9\xB7\uC2A4\uD0AC\xB7\uB9C8\uBC95)
+    \uADDC\uC728\uC774 1 \uC313\uC778\uB2E4. \uCD5C\uB300 5.\n\uADDC\uC728 1\uB2F9
+    ATK +3%, \uBA85\uC911 +3%."
   bindingStrength: 1
-  bindingDescription: "\uB9C8\uBC95 \uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC \uC774 \uC11C\uC57D
-    \uD6A8\uACFC 50% \uAC10\uC18C (2\uD134)."
+  bindingDescription: "\uBC29\uC5B4\xB7\uC544\uC774\uD15C\xB7\uB3C4\uB9DD\uC744 \uACE0\uB974\uBA74
+    \uADDC\uC728\uC774 \uBB34\uB108\uC838 0\uC774 \uB41C\uB2E4."

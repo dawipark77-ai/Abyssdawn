@@ -252,8 +252,10 @@ public class AutomapRenderer : MonoBehaviour
             // 3) 닫힌 문 — 방 칸 또는 문 바깥 칸이 드러나 있으면 표시.
             //    칸 경계 전체 + 벽 두께만큼 양끝을 늘려 양옆 벽선과 틈 없이 이어진다 (= 확실히 닫힌 문)
             float dt = Mathf.Min(cs.x, cs.y) * doorThickness * _lineScale;
-            foreach (var door in _data.doors)
+            for (int di = 0; di < _data.doors.Count; di++)
             {
+                var door = _data.doors[di];
+                if (_state != null && _state.openedDoors.Contains(di)) continue; // [2026-10-17] 연 문은 그리지 않음
                 if (!_revealed.Contains(door.roomCell) && !_revealed.Contains(door.corridorCell)) continue;
                 Vector3 a = CellCenter(door.roomCell);
                 Vector3 b = CellCenter(door.corridorCell);

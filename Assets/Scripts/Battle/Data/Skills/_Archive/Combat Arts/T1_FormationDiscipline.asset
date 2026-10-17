@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_FormationDiscipline
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_T1_04
-  skillName: Formation Discipline
+  skillName: "\uC9C4\uD615 \uADDC\uC728"
+  skillKey: Formation Discipline
   skillIcon: {fileID: -7881139419853764829, guid: d84ebf3262e43504aaeb9c974718cc48, type: 3}
   description: "\uD30C\uD2F0 \uC804\uCCB4\uC5D0 \uC601\uD5A5. \uC804\uC5F4: \uD53C\uD574
     -3%, \uBA85\uC911 +3%. \uD6C4\uC5F4: \uD53C\uD574 -1%, \uC2A4\uD0AC \uC778\uD130\uB7F4\uD2B8
@@ -21,6 +22,7 @@ MonoBehaviour:
   usageType: 1
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 3
     allowedCasterSlots: -1
@@ -34,21 +36,47 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects:
   - effectType: 19
     recoveryTarget: 0
     effectAmount: 3
-    curseData: {fileID: 0}
-    curseChance: 0
-  legacyCurseData: {fileID: 0}
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 1
-  dunbreakDescription: This turn, party-wide defense +10%, evasion +10%
+  dunbreakDescription: "\uC774\uBC88 \uD134 \uD30C\uD2F0 \uC804\uCCB4 \uBC29\uC5B4
+    +10%, \uD68C\uD53C +10%"
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

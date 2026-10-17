@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mage_T1_ManaVeil
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Mage_T1_ManaVeil
-  skillName: Mana Veil
+  skillName: "\uB9C8\uB098 \uC7A5\uB9C9"
   jobClass: 2
   tier: 1
   type: 2
@@ -22,3 +22,5 @@ MonoBehaviour:
   effectDescription: "2\uD134 \uB3D9\uC548 \uBC1B\uB294 \uB9C8\uBC95 \uD53C\uD574
     -20%, \uBB3C\uB9AC \uD53C\uD574 -10%."
   drawbackDescription: "MP 8%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

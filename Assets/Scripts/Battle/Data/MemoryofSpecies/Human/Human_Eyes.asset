@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Human_Eyes
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Human_Eyes
-  memoryName: Eyes
-  subtitle: Cooperative Gaze
+  memoryName: "\uB208"
+  subtitle: "\uD611\uB825\uC758 \uB208\uBE5B"
   species: 0
-  memoryIcon: {fileID: 5905697594463550521, guid: 369a553544cf2e74ebbc662195091575, type: 3}
+  memoryIcon: {fileID: 21300000, guid: e3556c2f67614d749cc44129d5b3fdd9, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0

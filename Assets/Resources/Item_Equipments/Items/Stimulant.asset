@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Stimulant
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Stimulant
+  itemName: "\uAC01\uC131\uC81C"
   icon: {fileID: 4616213605769740264, guid: 2efab3ea4dd32374a989bf6a64243900, type: 3}
-  description: A brief awakening. There is always a price to pay.
+  description: "\uC9E7\uC740 \uAC01\uC131. \uC5B8\uC81C\uB098 \uB300\uAC00\uAC00
+    \uB530\uB978\uB2E4."
   itemCategory: 3
   itemIcon: {fileID: 4616213605769740264, guid: 2efab3ea4dd32374a989bf6a64243900, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -27,6 +28,10 @@ MonoBehaviour:
   escapeChanceBuff: 0
   buffDuration: 2
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0.15
   maxStack: 50
   usableInBattle: 1

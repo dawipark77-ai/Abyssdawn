@@ -50,9 +50,11 @@ public class BattleItemPanel : MonoBehaviour
 
     private readonly List<BattleItemSlot> spawnedSlots = new List<BattleItemSlot>();
 
+    private bool _opening; // [2026-10-15] 처음 여는 순간 Awake 가 스스로 숨겨 두 번 눌러야 열리던 문제
+
     private void Awake()
     {
-        if (hideOnAwake)
+        if (hideOnAwake && !_opening)
             gameObject.SetActive(false);
     }
 
@@ -180,7 +182,7 @@ public class BattleItemPanel : MonoBehaviour
         if (item == null) return 999;
 
         // itemName으로 강제 우선순위 (대소문자 무시, 공백/언더스코어 무시)
-        string normalized = item.itemName.Replace(" ", "").Replace("_", "").ToLower();
+        string normalized = item.name.Replace(" ", "").Replace("_", "").ToLower();
 
         if (normalized == "hppotion")   return 0;
         if (normalized == "manapotion") return 1;
@@ -309,7 +311,9 @@ public class BattleItemPanel : MonoBehaviour
 
     public void Open()
     {
+        _opening = true;
         ActivateWithParents(gameObject);
+        _opening = false;
         // [2026-10-11] 아이템 창이 전투 기록 창(다른 캔버스, 정렬 10)보다 앞에 그려지도록 — 스킬 창과 같은 SubPanels 캔버스
         if (transform.parent != null)
         {
@@ -328,6 +332,6 @@ public class BattleItemPanel : MonoBehaviour
 
     public void Toggle()
     {
-        gameObject.SetActive(!gameObject.activeSelf);
+        if (gameObject.activeSelf) Close(); else Open();
     }
 }

@@ -264,7 +264,12 @@ namespace AbyssdawnBattle
     {
         [Header("Basic Info")]
         public string skillID;
+        [Tooltip("화면에 보이는 이름 (한국어)")]
         public string skillName;
+        [Tooltip("[2026-10-15] 코드가 스킬을 알아보는 고정 이름 (영어, 바꾸지 말 것). 비어 있으면 skillName 을 쓴다.")]
+        public string skillKey;
+        /// <summary>코드 비교용 고정 이름 — 표시 이름(skillName)을 한국어로 바꿔도 로직이 깨지지 않게.</summary>
+        public string Key => string.IsNullOrEmpty(skillKey) ? skillName : skillKey;
         public Sprite skillIcon;
         [TextArea(2, 4)]
         public string description;

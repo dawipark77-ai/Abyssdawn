@@ -123,7 +123,7 @@ public class DungeonEncounter : MonoBehaviour
         if (before >= DangerSenseWarnAt || after < DangerSenseWarnAt) return;
         if (!FieldSkills.Has(FieldSkills.DangerSense)) return;
         var hud = DungeonHud.Instance;
-        if (hud != null) hud.Toast("<color=#FFB060>You sense something stalking you...</color>");
+        if (hud != null) hud.Toast("<color=#FFB060>무언가 뒤를 밟는 기척이 느껴진다...</color>");
     }
 
     /// <summary>[2026-10-09] 정해진 몬스터와 전투 (층 보스 등). 평소 인카운터와 같은 흐름 — 위치 저장 → 전환 연출 → 전투 씬.</summary>

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 06_DeepWound
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_10
-  skillName: Deep Wound
+  skillName: "\uAE4A\uC740 \uC0C1\uCC98"
+  skillKey: Deep Wound
   skillIcon: {fileID: -8959231232942335855, guid: c4993093907b4aa48ac3078c7ea244f3, type: 3}
   description: "\uD328\uC2DC\uBE0C. \uC801 \uBC29\uC5B4\uB825\uC774 \uAE4E\uC77C\uC218\uB85D
     \uCD9C\uD608 \uD655\uB960 \uC99D\uAC00. \uBC29\uC5B4\uB825 20/40/60/80/100% \uAC10\uC18C
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

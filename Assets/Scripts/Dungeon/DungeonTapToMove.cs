@@ -85,7 +85,16 @@ public class DungeonTapToMove : MonoBehaviour
             Vector2Int d = next - before;
             if (Mathf.Abs(d.x) + Mathf.Abs(d.y) != 1) break; // 경로가 어긋남 (순간이동 함정 등)
             DungeonDirection dir = d.x > 0 ? DungeonDirection.East : d.x < 0 ? DungeonDirection.West : d.y > 0 ? DungeonDirection.South : DungeonDirection.North;
+            var mm = _player.mapManager;
+            bool door = mm != null && mm.ClosedDoorBetween(before, next) >= 0;
             _player.StepOnce(dir);
+            if (door && _player.gridPos == before && mm.ClosedDoorBetween(before, next) < 0)
+            {
+                // [2026-10-17] 문을 열었다 (한 턴) — 무슨 일이 없으면 이어서 지나간다
+                yield return new WaitForSeconds(stepInterval);
+                if (Blocked()) break;
+                _player.StepOnce(dir);
+            }
             if (_player.gridPos != next) break;   // 못 갔음 (함정 확인창 등)
             yield return new WaitForSeconds(stepInterval);
             if (Blocked()) break;                 // 인카운터·확인창·상자 등 무슨 일이 생김

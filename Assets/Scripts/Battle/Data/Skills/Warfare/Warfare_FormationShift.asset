@@ -14,16 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_Formation_02
   skillName: "\uD3EC\uC9C4 \uC7AC\uBC30\uCE58"
+  skillKey: "\uD3EC\uC9C4 \uC7AC\uBC30\uCE58"
   skillIcon: {fileID: 0}
-  description: "아군 전열·후열 포진 자유 변경. 변경 직후 1턴 방어력 +22%. 재배치 후 3턴간 모든 스킬 쿨타임 +1, MP 코스트 200%. 진중 타겟 아군 1체를 후열로 이동시켜 보호. 재배치 직후 턴, 사용자 행동 불가. 발동 조건: 파티 내 아군 1명 이상 HP 50% 이하일 때만 사용 가능. (쿨타임 6턴)"
+  description: "\uC544\uAD70 \uC804\uC5F4\xB7\uD6C4\uC5F4 \uD3EC\uC9C4 \uC790\uC720
+    \uBCC0\uACBD. \uBCC0\uACBD \uC9C1\uD6C4 1\uD134 \uBC29\uC5B4\uB825 +22%. \uC7AC\uBC30\uCE58
+    \uD6C4 3\uD134\uAC04 \uBAA8\uB4E0 \uC2A4\uD0AC \uCFE8\uD0C0\uC784 +1, MP \uCF54\uC2A4\uD2B8
+    200%. \uC9C4\uC911 \uD0C0\uAC9F \uC544\uAD70 1\uCCB4\uB97C \uD6C4\uC5F4\uB85C
+    \uC774\uB3D9\uC2DC\uCF1C \uBCF4\uD638. \uC7AC\uBC30\uCE58 \uC9C1\uD6C4 \uD134,
+    \uC0AC\uC6A9\uC790 \uD589\uB3D9 \uBD88\uAC00. \uBC1C\uB3D9 \uC870\uAC74: \uD30C\uD2F0
+    \uB0B4 \uC544\uAD70 1\uBA85 \uC774\uC0C1 HP 50% \uC774\uD558\uC77C \uB54C\uB9CC
+    \uC0AC\uC6A9 \uAC00\uB2A5. (\uCFE8\uD0C0\uC784 6\uD134)"
   usageType: 0
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 1
     allowedCasterSlots: 15
     allowedTargetSlots: 15
-    specificSlots: []
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -32,10 +41,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -43,5 +51,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

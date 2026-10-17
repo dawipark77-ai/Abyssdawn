@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Human_Skin
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Human_Skin
-  memoryName: Skin
-  subtitle: 'Sweat Glands: Heat Control'
+  memoryName: "\uD53C\uBD80"
+  subtitle: "\uB540\uC0D8: \uCCB4\uC628 \uC870\uC808"
   species: 0
-  memoryIcon: {fileID: -3882488315521381977, guid: 73b2c61308c599b4c858571754bd85c9, type: 3}
+  memoryIcon: {fileID: 21300000, guid: 5bd1c322c54d2874190a58257e987045, type: 3}
   hpBonusPercent: 5
   mpBonusPercent: 0
   hpBonus: 0

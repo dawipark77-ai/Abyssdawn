@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Junk_BoneClub
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
-  itemName: Bone Club
+  itemName: "\uBF08 \uBABD\uB465\uC774"
   icon: {fileID: 0}
-  description: A thick thigh bone with a knot of sinew for a grip. ATK +1.
-  equipmentName: Bone Club
+  description: "\uD798\uC904\uC744 \uAC10\uC544 \uC190\uC7A1\uC774\uB85C \uC0BC\uC740
+    \uAD75\uC740 \uB113\uC801\uB2E4\uB9AC\uBF08. \uACF5\uACA9 +1."
+  equipmentName: "\uBF08 \uBABD\uB465\uC774"
   equipmentIcon: {fileID: -379583048045806632, guid: a134f401465df9d4f9a341866225b9b5, type: 3}
   flatIcon: {fileID: 0}
   equipmentType: 0

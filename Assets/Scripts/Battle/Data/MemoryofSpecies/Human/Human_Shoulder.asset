@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Human_Shoulder
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Human_Shoulder
-  memoryName: Shoulder
-  subtitle: Master of Throwing
+  memoryName: "\uC5B4\uAE68"
+  subtitle: "\uD22C\uCC99\uC758 \uBA85\uC218"
   species: 0
-  memoryIcon: {fileID: 7701394913484588842, guid: 018b1ac7043653248b2125c22186c3f1, type: 3}
+  memoryIcon: {fileID: 21300000, guid: 8ed339d1c0504966873ce9975a7d294a, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0

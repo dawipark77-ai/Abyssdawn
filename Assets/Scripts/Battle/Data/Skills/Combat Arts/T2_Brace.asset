@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T2_Brace
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: CombatArts_T2_Brace
-  skillName: Brace
+  skillName: "\uBC84\uD2F0\uAE30"
+  skillKey: Brace
   skillIcon: {fileID: 9040223973580938310, guid: 4985a8268ae904544946ff1d15b75116, type: 3}
   description: "[\uC561\uD2F0\uBE0C \xB7 \uC120\uC81C \xB7 \uCFE8\uB2E4\uC6B4 2\uD134]
     \uC774\uBC88 \uD134 \uB204\uAD6C\uBCF4\uB2E4 \uBA3C\uC800 \uC790\uC138\uB97C
@@ -46,7 +47,8 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: This turn, critical hits cannot reduce HP below 1
+  dunbreakDescription: "\uC774\uBC88 \uD134 \uCE58\uBA85\uD0C0\uB85C\uB294 HP\uAC00
+    1 \uC544\uB798\uB85C \uB5A8\uC5B4\uC9C0\uC9C0 \uC54A\uB294\uB2E4"
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -63,6 +65,8 @@ MonoBehaviour:
   requiresSameTarget: 0
   preemptive: 1
   cooldownTurns: 2
+  fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

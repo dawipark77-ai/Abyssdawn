@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T2_ShareEnergy
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T2_ShareEnergy
-  skillName: Share Energy
+  skillName: "\uAE30 \uB098\uB204\uAE30"
+  skillKey: Share Energy
   skillIcon: {fileID: 21300000, guid: 39399067a645b8142af0b1bd8e0281b9, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uC561\uD2F0\uBE0C] \uC790\uC2E0\uC758 \uAE30\uB97C
     \uB098\uB208\uB2E4. \uCD5C\uB300 HP\uC758 10%\uB97C \uC18C\uBAA8\uD574, HP \uBE44\uC728\uC774

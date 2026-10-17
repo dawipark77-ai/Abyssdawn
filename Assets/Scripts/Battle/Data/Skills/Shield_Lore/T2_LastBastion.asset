@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T2_LastBastion
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T2_LastBastion
-  skillName: Last Bastion
+  skillName: "\uCD5C\uD6C4\uC758 \uBCF4\uB8E8"
+  skillKey: Last Bastion
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uD328\uC2DC\uBE0C] \uC0B4\uC544 \uC788\uB294
     \uC801 1\uB9C8\uB9AC\uB2F9 \uB9C9\uAE30 \uD655\uB960 +3%p (\uCD5C\uB300 +12%p)."
@@ -61,6 +62,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

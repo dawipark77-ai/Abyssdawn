@@ -13,24 +13,63 @@ MonoBehaviour:
   m_Name: Skill_03_Fireball
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 03
-  skillName: Fireball
+  skillName: "\uD654\uC5FC\uAD6C"
+  skillKey: Fireball
   skillIcon: {fileID: -7585716811160231433, guid: c43880bdb1e15444a8fe104ce0204f40, type: 3}
-  description: Launches a fireball. Has a chance to ignite both user and target.
+  description: "\uD654\uC5FC\uAD6C\uB97C \uB0A0\uB9B0\uB2E4. \uC2DC\uC804\uC790\uC640
+    \uB300\uC0C1 \uBAA8\uB450 \uC810\uD654\uB420 \uC218 \uC788\uB2E4."
   usageType: 0
   damageType: 1
-  scaleStat: 2
+  scalingStat: 2
+  weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 5
   minMult: 1.8
   maxMult: 2.3
   hitCount: 1
+  accuracy: 0.95
   selfDmgPercent: 10
   selfDmgChance: 10
-  selfCurseData: {fileID: 11400000, guid: 2540421fae05f6e409e32647c3a8431f, type: 2}
-  selfCurseChance: 10
-  curseData: {fileID: 11400000, guid: 2540421fae05f6e409e32647c3a8431f, type: 2}
-  curseChance: 100
-  effectType: 0
-  recoveryTarget: 0
-  effectAmount: 0
+  selfStatusEffect: {fileID: 11400000, guid: 2540421fae05f6e409e32647c3a8431f, type: 2}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 11400000, guid: 2540421fae05f6e409e32647c3a8431f, type: 2}
+  curseApplyChance: 100
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

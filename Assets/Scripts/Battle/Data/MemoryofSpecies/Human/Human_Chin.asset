@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Human_Chin
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Human_Chin
-  memoryName: Chin
-  subtitle: Skeletal Anomaly
+  memoryName: "\uD131"
+  subtitle: "\uACE8\uACA9 \uC774\uC0C1"
   species: 0
-  memoryIcon: {fileID: 4868610067582782536, guid: 271ba8e01f5029f4ea609f618e9817c9, type: 3}
+  memoryIcon: {fileID: 21300000, guid: 6d50e9483d5b822488f5be8f444fdaf8, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0

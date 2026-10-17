@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mage_ArcaneOverload
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Mage_ArcaneOverload
-  oathName: Arcane Overload
+  oathName: "\uBE44\uC804 \uACFC\uBD80\uD558"
   jobClass: 2
   oathDescription: "\uB9C8\uB825 10\uD3EC\uC778\uD2B8\uB2F9 \uC2A4\uD0AC \uB370\uBBF8\uC9C0
     +1%.\nMP 30% \uC774\uD558 \uC2DC \uB9C8\uBC95 \uB370\uBBF8\uC9C0 +15%, \uC5ED\uD6A8\uACFC

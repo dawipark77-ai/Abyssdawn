@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Smoke_Bomb
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Smoke Bomb
+  itemName: "\uC5F0\uB9C9\uD0C4"
   icon: {fileID: -1701494332336445342, guid: 19021cc3f742d6144a04ac084e56fcf6, type: 3}
-  description: What they cannot see, they cannot hit.
+  description: "\uBCF4\uC774\uC9C0 \uC54A\uC73C\uBA74 \uB9DE\uD790 \uC218 \uC5C6\uB2E4."
   itemCategory: 3
   itemIcon: {fileID: -1701494332336445342, guid: 19021cc3f742d6144a04ac084e56fcf6, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -27,6 +27,10 @@ MonoBehaviour:
   escapeChanceBuff: 0.4
   buffDuration: 2
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 50
   usableInBattle: 1

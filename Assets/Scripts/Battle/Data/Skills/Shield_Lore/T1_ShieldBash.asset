@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_ShieldBash
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T1_ShieldBash
-  skillName: Shield Bash
+  skillName: "\uBC29\uD328 \uD6C4\uB824\uCE58\uAE30"
+  skillKey: Shield Bash
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uACF5\uACA9 \xB7 \uCFE8\uB2E4\uC6B4 2\uD134 \xB7
     1\xB72\uC5F4] \uBC29\uD328\uB85C \uD6C4\uB824\uCE5C\uB2E4. \uACF5\uACA9\uB825\uC758
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 2
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

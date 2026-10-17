@@ -13,8 +13,22 @@ MonoBehaviour:
   m_Name: Class_Wizard
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: Wizard
-  description: "A wizard specialized in powerful magic."
+  description: "\uAC15\uB825\uD55C \uB9C8\uBC95\uC5D0 \uD2B9\uD654\uB41C \uB9C8\uBC95\uC0AC."
   classIcon: {fileID: 0}
+  traitName: 
+  traitNameKR: 
+  traitDescription: 
+  traitDescriptionKR: 
+  weaponAccuracyBonus: 0
+  critChanceBonus: 0
+  firstTurnSpeedBonus: 0
+  heavyArmourEvasionPenalty: 0
+  unarmedDamageBonus: 0
+  twoHandedAccuracyPenalty: 0
+  physicalCostUsesMP: 0
+  startingEquipment: []
+  oaths: []
+  pathSkills: []
   hpMultiplier: 0.75
   mpMultiplier: 1.4
   attackMultiplier: 1

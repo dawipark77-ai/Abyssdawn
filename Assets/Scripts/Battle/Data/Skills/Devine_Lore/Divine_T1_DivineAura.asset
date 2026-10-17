@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: Divine_T1_DivineAura
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Divine_T1_03
-  skillName: Divine Aura
+  skillName: "\uC2E0\uC131\uD55C \uAE30\uC6B4"
+  skillKey: Divine Aura
   skillIcon: {fileID: -5208227334890303542, guid: 269e692f6d9ec3345a868de1bf159a5b, type: 3}
   description: "\uC544\uAD70 \uC804\uCCB4 \uB9C8\uBC95 \uD53C\uD574 -10%, 2\uD134."
   usageType: 0
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 1
     allowedCasterSlots: -1
@@ -32,15 +34,14 @@ MonoBehaviour:
   accuracy: 1
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects:
   - effectType: 4
     recoveryTarget: 0
     effectAmount: 10
-    curseData: {fileID: 0}
-    curseChance: 0
-  legacyCurseData: {fileID: 0}
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -48,5 +49,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

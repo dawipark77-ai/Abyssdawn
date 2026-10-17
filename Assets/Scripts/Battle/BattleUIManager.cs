@@ -677,7 +677,7 @@ public class BattleUIManager : MonoBehaviour
         textRT.offsetMax = Vector2.zero;
 
         TMPro.TextMeshProUGUI text = textObj.GetComponent<TMPro.TextMeshProUGUI>();
-        text.text = "Back";
+        text.text = "뒤로";
         text.fontSize = 24;
         text.alignment = TMPro.TextAlignmentOptions.Center;
         text.color = Color.white;
@@ -815,7 +815,7 @@ public class BattleUIManager : MonoBehaviour
         GameObject yesTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
         yesTextObj.transform.SetParent(yesBtnObj.transform, false);
         TMPro.TextMeshProUGUI yesText = yesTextObj.GetComponent<TMPro.TextMeshProUGUI>();
-        yesText.text = "Yes";
+        yesText.text = "예";
         yesText.fontSize = 18;
         yesText.alignment = TMPro.TextAlignmentOptions.Center;
         yesText.color = Color.white;
@@ -840,7 +840,7 @@ public class BattleUIManager : MonoBehaviour
         GameObject noTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
         noTextObj.transform.SetParent(noBtnObj.transform, false);
         TMPro.TextMeshProUGUI noText = noTextObj.GetComponent<TMPro.TextMeshProUGUI>();
-        noText.text = "No";
+        noText.text = "아니오";
         noText.fontSize = 18;
         noText.alignment = TMPro.TextAlignmentOptions.Center;
         noText.color = Color.white;

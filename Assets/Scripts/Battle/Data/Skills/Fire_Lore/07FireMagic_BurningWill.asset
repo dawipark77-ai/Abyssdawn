@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: 07FireMagic_BurningWill
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_07
-  skillName: Burning Will
+  skillName: "\uBD88\uD0C0\uB294 \uC758\uC9C0"
+  skillKey: Burning Will
   skillIcon: {fileID: 8984675984341511927, guid: 5e45f0b5a8cbe2340a91ff2ac8745178, type: 3}
-  description: Passive. When self is ignited, fire skills deal bonus damage. Turns
-    weakness into power.
+  description: "\uD328\uC2DC\uBE0C. \uC790\uC2E0\uC774 \uC810\uD654\uB418\uC5B4 \uC788\uC73C\uBA74
+    \uD654\uC5FC \uC2A4\uD0AC \uD53C\uD574 \uC99D\uAC00. \uC57D\uC810\uC744 \uD798\uC73C\uB85C
+    \uBC14\uAFBC\uB2E4."
   usageType: 1
   damageType: 2
   scalingStat: 3
@@ -55,5 +57,20 @@ MonoBehaviour:
   backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 1
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

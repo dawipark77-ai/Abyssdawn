@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Monster_Bite
   m_EditorClassIdentifier: 
   skillID: Monster_Bite
-  skillName: Bite
+  skillName: "\uBB3C\uAE30"
+  skillKey: Bite
   skillIcon: {fileID: -3504630673186957658, guid: de470716e5ee2094aa72d0862083ed16, type: 3}
   description: "\uC57C\uC218(Beast) \uC804\uC6A9 \uD3C9\uD0C0 \uB300\uCCB4. \uB2E4\uB978
     \uC885\uC871\uC740 \uC801\uC6A9\uB418\uC9C0 \uC54A\uC74C."
@@ -59,6 +60,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 8
   partyPhysicalBuffPercent: 0
@@ -68,6 +73,11 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1
+  slotShiftAmount: 0
+  slotShiftChance: 1
   isBasicAttackOverride: 1
   atkMultiplierOverride: 1.25
   randomRollMaxOverride: 1.22
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

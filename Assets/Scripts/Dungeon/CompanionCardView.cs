@@ -31,6 +31,7 @@ public class CompanionCardView : MonoBehaviour
         public RectTransform root;
         public Image portrait;
         public TextMeshProUGUI name, level, hpText, mpText, mpLabel, instinctName, stats, emptyText;
+        public GameObject emptyBox;
         public Image hpFill, mpFill, instinctIcon;
         public Image[] passives = new Image[3], actives = new Image[6];
         public GameObject body, head;
@@ -97,8 +98,9 @@ public class CompanionCardView : MonoBehaviour
         card.mpLabel = Text(head, "MP", tx, 204f, 80f, 30f, 24f, Muted, TextAlignmentOptions.MidlineLeft);
         card.mpFill = Bar(head, tx, 236f, tw, 30f, MpColor, out card.mpText);
 
-        // 동료가 없을 때 문구 (카드 가운데)
-        card.emptyText = Text(card.root, "<color=#777777>Empty slot</color>\n<size=70%><color=#666666>Recruit a monster after battle.</color></size>", 0f, 0f, W, area.height, 44f, Muted, TextAlignmentOptions.Center);
+        // 동료가 없을 때 문구 (카드 가운데) — [2026-10-18] 뒤가 비치지 않게 다른 칸과 같은 어두운 상자 위에
+        card.emptyBox = Panel(card.root, "EmptyBox", 0f, 0f, W, area.height).gameObject;
+        card.emptyText = Text(card.root, "<color=#777777>빈 자리</color>\n<size=70%><color=#666666>전투 후 몬스터를 영입하세요.</color></size>", 0f, 0f, W, area.height, 44f, Muted, TextAlignmentOptions.Center);
         card.emptyText.textWrappingMode = TextWrappingModes.Normal;
 
         card.body = new GameObject("Body", typeof(RectTransform));
@@ -119,18 +121,18 @@ public class CompanionCardView : MonoBehaviour
         // ── 3) 스킬 ──
         float skillH = Mathf.Max(380f, area.height - y - 140f);
         var sk = Panel(body, "Skills", 0f, y, W, skillH); y += skillH + 16f;
-        Text(sk, "Passive Skills", 0f, 18f, W, 46f, 34f, Gold, TextAlignmentOptions.Center);
+        Text(sk, "패시브 스킬", 0f, 18f, W, 46f, 34f, Gold, TextAlignmentOptions.Center);
         float icon = 104f, gap = 18f;
         float px = (W - (3 * icon + 2 * gap)) * 0.5f;
         for (int k = 0; k < 3; k++) card.passives[k] = IconSlot(sk, px + k * (icon + gap), 74f, icon);
-        Text(sk, "Active Skills", 0f, 74f + icon + 26f, W, 46f, 34f, Gold, TextAlignmentOptions.Center);
+        Text(sk, "액티브 스킬", 0f, 74f + icon + 26f, W, 46f, 34f, Gold, TextAlignmentOptions.Center);
         float ax = (W - (6 * icon + 5 * gap)) * 0.5f;
         for (int k = 0; k < 6; k++) card.actives[k] = IconSlot(sk, ax + k * (icon + gap), 74f + icon + 82f, icon);
 
         // ── 4) 버튼 ──
         float bw = (W - 3 * 24f) * 0.5f;
-        card.positionButton = BigButton(body, "Position", "Position", 24f, y, bw, 100f);
-        card.releaseButton = BigButton(body, "Release", "Release", 48f + bw, y, bw, 100f);
+        card.positionButton = BigButton(body, "Position", "자리 바꾸기", 24f, y, bw, 100f);
+        card.releaseButton = BigButton(body, "Release", "놓아주기", 48f + bw, y, bw, 100f);
         int captured = index;
         card.positionButton.onClick.AddListener(() => OpenPositionPicker(captured));
         card.releaseButton.onClick.AddListener(() =>
@@ -158,9 +160,10 @@ public class CompanionCardView : MonoBehaviour
             c.body.SetActive(has);
             c.head.SetActive(has);
             c.emptyText.gameObject.SetActive(!has);
+            if (c.emptyBox != null) c.emptyBox.SetActive(!has);
             c.portrait.transform.parent.parent.gameObject.SetActive(has);
             c.name.text = has ? so.MonsterName : "";
-            c.level.text = has ? $"Lv {so.MonsterLevel}  ·  Companion" : "";
+            c.level.text = has ? $"Lv {so.MonsterLevel}  ·  동료" : "";
             c.hpFill.transform.parent.gameObject.SetActive(has);
             c.mpFill.transform.parent.gameObject.SetActive(has && so.MP > 0);
             c.mpLabel.gameObject.SetActive(has && so.MP > 0);
@@ -234,12 +237,12 @@ public class CompanionCardView : MonoBehaviour
 
         float W = card.root.sizeDelta.x;
         var box = Panel(rt, "Box", 60f, 380f, W - 120f, 560f);
-        Text(box, "Move to which position?", 0f, 24f, W - 120f, 56f, 36f, Gold, TextAlignmentOptions.Center);
+        Text(box, "어느 자리로 옮길까요?", 0f, 24f, W - 120f, 56f, 36f, Gold, TextAlignmentOptions.Center);
         var occ = CompanionPartyPersistence.BuildMainLineOccupancy();
         float bw = (W - 120f - 5 * 20f) / 4f;
         for (int s = 0; s < occ.Length; s++)
         {
-            string who = occ[s].IsHero ? "Hero" : occ[s].IsEmpty ? "Empty" :
+            string who = occ[s].IsHero ? "주인공" : occ[s].IsEmpty ? "빈 자리" :
                 (CompanionPartyPersistence.LoadCompanion(occ[s].entry.resourcePath)?.MonsterName ?? "?");
             string label = $"{s + 1}\n<size=60%>{who}</size>";
             var b = BigButton(box, "Slot" + (s + 1), label, 20f + s * (bw + 20f), 110f, bw, 200f);
@@ -253,10 +256,10 @@ public class CompanionCardView : MonoBehaviour
                 var bar = FindFirstObjectByType<DungeonPartyBar>(); if (bar != null) bar.Refresh();
                 var csv = GetComponent<CompanionSlotView>(); if (csv != null) csv.Refresh();
                 Refresh();
-                if (DungeonHud.Instance != null) DungeonHud.Instance.Toast($"Party order changed: slot {from + 1} ↔ {target + 1}");
+                if (DungeonHud.Instance != null) DungeonHud.Instance.Toast($"파티 순서 변경: {from + 1}번 ↔ {target + 1}번");
             });
         }
-        Text(box, "<color=#888888>Front row: 1 · 2   Back row: 3 · 4</color>", 0f, 340f, W - 120f, 44f, 26f, Muted, TextAlignmentOptions.Center);
+        Text(box, "<color=#888888>전열: 1 · 2   후열: 3 · 4</color>", 0f, 340f, W - 120f, 44f, 26f, Muted, TextAlignmentOptions.Center);
         var cancel = BigButton(box, "Cancel", "Cancel", (W - 120f - 300f) * 0.5f, 420f, 300f, 96f);
         cancel.onClick.AddListener(() => Destroy(_picker));
     }
@@ -338,11 +341,11 @@ public class CompanionCardView : MonoBehaviour
 
     private Image Bar(RectTransform parent, float x, float y, float w, float h, Color color, out TextMeshProUGUI label)
     {
-        var bg = NewImage("Bar", parent, new Color(0.15f, 0.13f, 0.11f, 1f)); Place(bg.rectTransform, x, y, w, h);
-        var fill = NewImage("Fill", bg.rectTransform, color);
+        // [2026-10-17] 게이지 없이 수치만 (HP 12 / 23) — 막대는 투명, 글자를 크게
+        var bg = NewImage("Bar", parent, new Color(0f, 0f, 0f, 0f)); Place(bg.rectTransform, x, y, w, h);
+        var fill = NewImage("Fill", bg.rectTransform, new Color(0f, 0f, 0f, 0f));
         var frt = fill.rectTransform; frt.anchorMin = Vector2.zero; frt.anchorMax = Vector2.one; frt.pivot = new Vector2(0f, 0.5f); frt.offsetMin = frt.offsetMax = Vector2.zero;
-        label = Text(bg.rectTransform, "", 0f, 0f, w - 12f, h, 24f, Color.white, TextAlignmentOptions.MidlineRight);
-        label.outlineWidth = 0.25f; label.outlineColor = new Color32(0, 0, 0, 255);
+        label = Text(bg.rectTransform, "", 0f, -4f, w, h + 8f, 34f, new Color(0.95f, 0.92f, 0.85f, 1f), TextAlignmentOptions.MidlineLeft);
         return fill;
     }
 
@@ -364,6 +367,9 @@ public class CompanionCardView : MonoBehaviour
         var cols = b.colors; cols.highlightedColor = new Color(1.3f, 1.2f, 1f, 1f); cols.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f); b.colors = cols;
         var t = Text(frame.rectTransform, label, 0f, 0f, w, h, 36f, Gold, TextAlignmentOptions.Center);
         t.textWrappingMode = TextWrappingModes.Normal;
+        ButtonSkin.Apply(b);              // [2026-10-17] 금테 패널 배경 (안쪽 Bg 에 입힘)
+        frame.color = new Color(0f, 0f, 0f, 0f); // 바깥 금색 사각형은 숨김 (클릭 영역은 그대로)
+        Inset(bg.rectTransform, 0f);
         return b;
     }
 }

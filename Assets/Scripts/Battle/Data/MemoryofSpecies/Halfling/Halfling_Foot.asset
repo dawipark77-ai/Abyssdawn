@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Halfling_Foot
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Halfling_Foot
-  memoryName: Foot
-  subtitle: Natural Leather Soles
+  memoryName: "\uBC1C"
+  subtitle: "\uD0C0\uACE0\uB09C \uAC00\uC8FD \uBC1C\uBC14\uB2E5"
   species: 3
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: -1
   defenseBonus: 0
   agilityBonus: 2
@@ -39,7 +44,8 @@ MonoBehaviour:
   luckLevelUpChanceBonus: 0
   description: "\uACF5\uACA9 -1\n\uBBFC\uCCA9 +2\n\n\uB808\uBCA8\uC5C5 \uB54C \uBBFC\uCCA9\uC774
     \uC624\uB97C \uD655\uB960 +20%p"
-  flavorText: Bare feet tough as leather let them run quietly over any ground.
+  flavorText: "\uAC00\uC8FD\uCC98\uB7FC \uC9C8\uAE34 \uB9E8\uBC1C\uB85C \uC5B4\uB5A4
+    \uB545\uC774\uB4E0 \uC870\uC6A9\uD788 \uB2EC\uB9B0\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

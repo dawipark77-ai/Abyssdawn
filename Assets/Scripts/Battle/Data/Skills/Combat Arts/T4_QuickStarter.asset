@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T4_QuickStarter
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: CombatArts_T4_QuickStarter
-  skillName: Quick Starter
+  skillName: "\uD035 \uC2A4\uD0C0\uD130"
+  skillKey: Quick Starter
   skillIcon: {fileID: 0}
   description: "[\uD328\uC2DC\uBE0C] \uC804\uD22C \uC2DC\uC791 \uD6C4 2\uD134\uAE4C\uC9C0
     \uBAA8\uB4E0 \uC2A4\uD0EF +10% (\uACF5\uACA9\xB7\uBC29\uC5B4\xB7\uB9C8\uBC95\xB7\uC18D\uB3C4).
@@ -63,6 +64,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

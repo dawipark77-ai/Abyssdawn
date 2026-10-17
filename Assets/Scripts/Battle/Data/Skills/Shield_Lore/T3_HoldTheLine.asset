@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T3_HoldTheLine
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T3_HoldTheLine
-  skillName: Hold the Line!
+  skillName: "\uC804\uC120\uC744 \uC9C0\uCF1C\uB77C!"
+  skillKey: Hold the Line!
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 5\uD134]
     3\uD134 \uB3D9\uC548 \uC544\uAD70 \uC804\uC6D0 \uBC1B\uB294 \uD53C\uD574 -10%,
@@ -63,6 +64,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 5
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

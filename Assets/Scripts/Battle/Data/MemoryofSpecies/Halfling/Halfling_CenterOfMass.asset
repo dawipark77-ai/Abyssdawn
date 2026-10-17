@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Halfling_CenterOfMass
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Halfling_CenterOfMass
-  memoryName: CenterOfMass
-  subtitle: Low Center of Gravity
+  memoryName: "\uBB34\uAC8C\uC911\uC2EC"
+  subtitle: "\uB0AE\uC740 \uBB34\uAC8C\uC911\uC2EC"
   species: 3
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: -1
   defenseBonus: 1
   agilityBonus: 1
@@ -40,7 +45,8 @@ MonoBehaviour:
   description: "\uACF5\uACA9 -1\n\uBC29\uC5B4 +1\n\uBBFC\uCCA9 +1\n\n\uB808\uBCA8\uC5C5
     \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +10%p\n\uB808\uBCA8\uC5C5
     \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960 +15%p"
-  flavorText: Short legs and a low stance make it hard to knock them off balance.
+  flavorText: "\uC9E7\uC740 \uB2E4\uB9AC\uC640 \uB0AE\uC740 \uC790\uC138 \uB355\uC5D0
+    \uC27D\uAC8C \uB118\uC5B4\uC9C0\uC9C0 \uC54A\uB294\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

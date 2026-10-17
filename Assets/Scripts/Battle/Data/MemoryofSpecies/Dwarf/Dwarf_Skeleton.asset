@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Dwarf_Skeleton
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Dwarf_Skeleton
-  memoryName: Skeleton
-  subtitle: High-Density Calcium Bones
+  memoryName: "\uACE8\uACA9"
+  subtitle: "\uACE0\uBC00\uB3C4 \uCE7C\uC298 \uBF08"
   species: 4
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 2
   agilityBonus: -2
@@ -40,7 +45,7 @@ MonoBehaviour:
   description: "\uBC29\uC5B4 +2\n\uBBFC\uCCA9 -2\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
     \uCD5C\uB300 HP +0.2 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
     \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +20%p"
-  flavorText: Their bones are like stone, and just as slow to move.
+  flavorText: "\uBF08\uAC00 \uB3CC \uAC19\uACE0, \uB3CC\uCC98\uB7FC \uAD7C\uB728\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

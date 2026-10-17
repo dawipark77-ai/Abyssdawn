@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Monk_T1_VoidStep
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Monk_T1_VoidStep
-  skillName: Void Step
+  skillName: "\uACF5\uD5C8 \uAC78\uC74C"
   jobClass: 1
   tier: 1
   type: 4
@@ -23,3 +23,5 @@ MonoBehaviour:
     1\uD68C\uB97C \uC644\uC804 \uD68C\uD53C.\n\uD68C\uD53C\uC5D0 \uC131\uACF5\uD558\uBA74
     \uC804\uC5F4\u2194\uD6C4\uC5F4\uC744 \uC790\uC720\uB86D\uAC8C \uC774\uB3D9."
   drawbackDescription: "MP 4%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

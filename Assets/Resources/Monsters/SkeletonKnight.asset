@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9c4b8e1f7a23c5e8f1a4b6d2c9e0f7a, type: 3}
   m_Name: SkeletonKnight
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
-  monsterName: Skeleton Knight
+  monsterName: "\uD574\uACE8 \uAE30\uC0AC"
   sprite: {fileID: 454009205973811108, guid: 8a0eaf3689f1b7e4e883c6046533a5d2, type: 3}
   scaleMultiplier: 1.5
   hoverOffsetY: 0

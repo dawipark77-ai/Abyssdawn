@@ -172,6 +172,16 @@ public class DungeonGridPlayer : MonoBehaviour
             return;
         }
 
+        // [2026-10-17] 닫힌 문: 바로 지나가지 않고 먼저 연다 (제자리 1턴). 다음 걸음에 지나간다
+        int door = mapManager != null ? mapManager.ClosedDoorBetween(gridPos, nextPos) : -1;
+        if (door >= 0)
+        {
+            InterruptHold();
+            mapManager.OpenDoor(door);
+            UpdateView();
+            return;
+        }
+
         // 함정 직전 (탐험 스킬 — 함정 감지 멈춤 / 함정 해제 선택창). 막혔으면 제자리
         if (mapManager != null && mapManager.BeforeStep(nextPos, () => CompleteStep(nextPos)))
         {

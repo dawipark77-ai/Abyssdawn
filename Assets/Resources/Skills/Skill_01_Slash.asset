@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Skill_01_Slash
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 01
-  skillName: Slash
+  skillName: "\uBCA0\uAE30"
+  skillKey: Slash
   skillIcon: {fileID: 21300000, guid: 04fee78d79557154799d8384f1f8547c, type: 3}
-  description: Quick physical attack dealing moderate damage.
+  description: "\uBE60\uB978 \uBB3C\uB9AC \uACF5\uACA9. \uBCF4\uD1B5 \uD53C\uD574."
   usageType: 0
   damageType: 0
   scalingStat: 0
@@ -60,6 +61,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

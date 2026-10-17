@@ -122,21 +122,21 @@ public static class ConsumableEffectApplier
             if (item.agilityBuff != 0)
             {
                 user.AddStatModifier(new StatModifier { statType = ModStatType.Speed, modType = StatModType.Flat, value = item.agilityBuff }, item, item.buffDuration);
-                parts.Add($"Speed +{item.agilityBuff}");
+                parts.Add($"AGI +{item.agilityBuff}");
             }
             if (item.evasionBuff > 0f)
             {
                 user.AddStatModifier(new StatModifier { statType = ModStatType.Evasion, modType = StatModType.Flat, value = item.evasionBuff }, item, item.buffDuration);
-                parts.Add($"Evasion +{item.evasionBuff * 100f:0}%");
+                parts.Add($"회피 +{item.evasionBuff * 100f:0}%");
             }
             if (item.escapeChanceBuff > 0f)
             {
                 user.escapeBonus = item.escapeChanceBuff;
                 user.escapeBonusRounds = item.buffDuration;
-                parts.Add($"Escape +{item.escapeChanceBuff * 100f:0}%");
+                parts.Add($"도망 +{item.escapeChanceBuff * 100f:0}%");
             }
             if (parts.Count > 0)
-                result.buffText = string.Join(", ", parts) + $" ({item.buffDuration} turn{(item.buffDuration == 1 ? "" : "s")})";
+                result.buffText = string.Join(", ", parts) + $" ({item.buffDuration}턴)";
         }
 
         // 6) [2026-10-08] 부작용: 확률로 상태이상 (예: 약초 20% 독 3턴)
@@ -158,7 +158,7 @@ public static class ConsumableEffectApplier
             if (applied)
             {
                 result.sideEffect = item.sideEffectType;
-                string se = $"{DungeonFieldStatus.NameOf(item.sideEffectType)} ({item.sideEffectTurns} turns)";
+                string se = $"{DungeonFieldStatus.NameOf(item.sideEffectType)} ({item.sideEffectTurns}턴)";
                 result.buffText = string.IsNullOrEmpty(result.buffText) ? se : result.buffText + ", " + se;
                 Debug.Log($"[ConsumableEffectApplier] {item.itemName} 부작용 → {item.sideEffectType} {item.sideEffectTurns}턴 ({(inBattle ? "전투" : "던전")})");
             }

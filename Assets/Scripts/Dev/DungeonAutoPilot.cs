@@ -395,7 +395,7 @@ public class DungeonAutoPilot : MonoBehaviour
         {
             _inBattle = true; _stats.battles++;
             var es = Get<List<EnemyStats>>(bm, "activeEnemies");
-            if (es != null && es.Exists(e => e != null && e.enemyName == "Goblin")) _stats.goblinBattles++;
+            if (es != null && es.Exists(e => e != null && e.sourceMonster != null && e.sourceMonster.name == "Goblin")) _stats.goblinBattles++;
             if (es != null) { var names = new List<string>(); foreach (var e in es) if (e != null) names.Add(e.enemyName); _stats.lastEnemies = string.Join("+", names); }
         }
 
@@ -503,7 +503,7 @@ public class DungeonAutoPilot : MonoBehaviour
                 foreach (var g in UnityEditor.AssetDatabase.FindAssets("t:SkillData", new[] { dir }))
                 {
                     var s = UnityEditor.AssetDatabase.LoadAssetAtPath<SkillData>(UnityEditor.AssetDatabase.GUIDToAssetPath(g));
-                    if (s != null && !_skillByName.ContainsKey(s.skillName)) _skillByName[s.skillName] = s;
+                    if (s != null && !_skillByName.ContainsKey(s.Key)) _skillByName[s.Key] = s;
                 }
         }
         SkillData r; return _skillByName.TryGetValue(name, out r) ? r : null;
@@ -545,7 +545,7 @@ public class DungeonAutoPilot : MonoBehaviour
     private bool TrySkill(BattleManager bm, MethodInfo queue, PlayerStats actor, string name, EnemyStats target)
     {
         SkillData skill = null;
-        foreach (var s in actor.statData.equippedSkills) if (s != null && s.skillName == name) { skill = s; break; }
+        foreach (var s in actor.statData.equippedSkills) if (s != null && s.Key == name) { skill = s; break; }
         if (skill == null || skill.IsPassive) return false;
         var limit = typeof(BattleManager).GetMethod("SkillLimitReason", NP);
         if (limit != null && limit.Invoke(bm, new object[] { actor, skill }) != null) return false;
@@ -661,7 +661,8 @@ public class DungeonAutoPilot : MonoBehaviour
             bool yes = true;
             // [2026-10-08] 시작할 때 "Continue your journey?" → 새 게임 (저장을 불러오지 않음)
             var dlgText = typeof(DungeonHud).GetField("_dialogText", NP)?.GetValue(hud) as TMPro.TextMeshProUGUI;
-            if (dlgText != null && dlgText.text.StartsWith("Continue your journey")) yes = false;
+            if (dlgText != null && dlgText.text.StartsWith("여정을 이어갈까")) yes = false;
+            if (dlgText != null && dlgText.text.StartsWith("여정을 기록할까")) yes = false; // [2026-10-17] 시험 중에는 사용자 세이브를 덮어쓰지 않는다
             if (player.gridPos == map.FloorData.stairsPos) yes = WantDescend(map) && !_retreating;
             else if (map.FloorData.hasStairsUp && player.gridPos == map.FloorData.stairsUpPos) yes = _retreating;
             else if (map.FloorData.hasTownGate && player.gridPos == map.FloorData.townGatePos) yes = _retreating || WantTownVisit(map, hero);

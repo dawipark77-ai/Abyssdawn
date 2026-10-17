@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Monster_Enrage1
   m_EditorClassIdentifier: 
   skillID: Monster_Enrage1
-  skillName: Enrage I
+  skillName: "\uACA9\uB178 I"
+  skillKey: Enrage I
   skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
-  description: Enters a rage, increasing ATK by 10% for 1 turn.
+  description: "\uACA9\uB178\uD574 1\uD134 \uB3D9\uC548 \uACF5\uACA9\uB825 +10%."
   usageType: 0
   damageType: 0
   scalingStat: 0
@@ -58,6 +59,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -67,6 +72,11 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
   isBasicAttackOverride: 0
   atkMultiplierOverride: 0
   randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

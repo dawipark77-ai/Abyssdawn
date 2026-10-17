@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Dwarf_Retina
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Dwarf_Retina
-  memoryName: Retina
-  subtitle: Infrared-Sensing Retina
+  memoryName: "\uB9DD\uB9C9"
+  subtitle: "\uC801\uC678\uC120\uC744 \uB290\uB07C\uB294 \uB9DD\uB9C9"
   species: 4
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 1
   defenseBonus: 0
   agilityBonus: 0
@@ -39,7 +44,8 @@ MonoBehaviour:
   luckLevelUpChanceBonus: 0
   description: "\uACF5\uACA9 +1\n\uD589\uC6B4 -1\n\n\uB808\uBCA8\uC5C5 \uB54C \uACF5\uACA9\uC774
     \uC624\uB97C \uD655\uB960 +15%p"
-  flavorText: They see heat where others see only darkness, but miss subtler fortunes.
+  flavorText: "\uB0A8\uB4E4\uC774 \uC5B4\uB460\uB9CC \uBCFC \uB54C \uC5F4\uAE30\uB97C
+    \uBCF4\uC9C0\uB9CC, \uBBF8\uBB18\uD55C \uD589\uC6B4\uC740 \uB193\uCE5C\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

@@ -13,24 +13,67 @@ MonoBehaviour:
   m_Name: Skill_04_Meditation
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 04
-  skillName: Meditation
+  skillName: "\uBA85\uC0C1"
+  skillKey: Meditation
   skillIcon: {fileID: 5604452352051134987, guid: 7668da00db398274fa913c96cc91d1a7, type: 3}
-  description: Restores 7% of maximum MP.
+  description: "\uCD5C\uB300 MP 7% \uD68C\uBCF5."
   usageType: 0
   damageType: 1
-  scaleStat: 2
+  scalingStat: 2
+  weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 15
+    allowedTargetSlots: 1
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
   maxMult: 0
   hitCount: 0
+  accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurse: 0
-  selfCurseChance: 0
-  targetCurse: 0
-  targetCurseChance: 0
-  effectType: 2
-  recoveryTarget: 1
-  effectAmount: 7
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects:
+  - effectType: 2
+    recoveryTarget: 1
+    effectAmount: 7
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
+  legacyCurseChance: 0
+  legacyEffectType: 2
+  legacyRecoveryTarget: 1
+  legacyEffectAmount: 7
   triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 1

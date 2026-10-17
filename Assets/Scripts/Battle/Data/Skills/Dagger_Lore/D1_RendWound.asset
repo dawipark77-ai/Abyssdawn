@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: D1_RendWound
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: D1_RendWound
-  skillName: Rend Wound
+  skillName: "\uC0C1\uCC98 \uBC8C\uB9AC\uAE30"
+  skillKey: Rend Wound
   skillIcon: {fileID: 21300000, guid: 826ed4a247525bb4ca211ee8ea9b2876, type: 3}
   description: "[\uB2E8\uAC80\uC220 \xB7 \uACF5\uACA9 \xB7 \uCD9C\uD608 \uC911\uC778
     \uC801\uC5D0\uAC8C\uB9CC] \uC0C1\uCC98 \uBC8C\uB9AC\uAE30. \uBBFC\uCCA9 30% \uD53C\uD574,
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

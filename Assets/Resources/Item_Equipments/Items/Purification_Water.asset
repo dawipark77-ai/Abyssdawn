@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Purification_Water
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Purification Water
+  itemName: "\uC815\uD654\uC218"
   icon: {fileID: 8498154514395236658, guid: 74fe73734a5122b45aee5aaf9d58575f, type: 3}
-  description: Water drawn from the abyss. It washes away all darkness.
+  description: "\uC2EC\uC5F0\uC5D0\uC11C \uAE38\uC5B4 \uC62C\uB9B0 \uBB3C. \uBAA8\uB4E0
+    \uC5B4\uB460\uC744 \uC53B\uC5B4 \uB0B8\uB2E4."
   itemCategory: 2
   itemIcon: {fileID: 8498154514395236658, guid: 74fe73734a5122b45aee5aaf9d58575f, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}

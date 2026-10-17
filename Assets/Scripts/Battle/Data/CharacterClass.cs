@@ -41,6 +41,16 @@ public class CharacterClass : ScriptableObject
     [Header("기초 장비 (Starting Equipment)")]
     public System.Collections.Generic.List<AbyssdawnBattle.EquipmentData> startingEquipment = new System.Collections.Generic.List<AbyssdawnBattle.EquipmentData>();
 
+    // [2026-10-18] 새 게임에서 이 직업으로 시작하면 받는 소모품 (아이템 + 개수)
+    [System.Serializable]
+    public class StartingItem
+    {
+        public AbyssdawnBattle.ConsumableItemSO item;
+        [Min(1)] public int count = 1;
+    }
+    [Header("시작 소모품 (Starting Consumables)")]
+    public System.Collections.Generic.List<StartingItem> startingConsumables = new System.Collections.Generic.List<StartingItem>();
+
     // [2026-10-14] 서약 후보 — 새 게임에서 이 중 1개를 고른다 (서약마다 제약이 붙음)
     [Header("서약 (Oath & Binding)")]
     public System.Collections.Generic.List<AbyssdawnBattle.OathBindingData> oaths = new System.Collections.Generic.List<AbyssdawnBattle.OathBindingData>();

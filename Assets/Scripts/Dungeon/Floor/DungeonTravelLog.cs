@@ -117,7 +117,7 @@ public class DungeonTravelLog : MonoBehaviour, IPointerClickHandler
         if (_full == null) BuildFull();
         bool show = !_full.activeSelf;
         _full.SetActive(show);
-        if (show) { _fullText.text = _history.Count > 0 ? string.Join("\n", _history) : "<color=#888888>No records yet.</color>"; Canvas.ForceUpdateCanvases(); var sr = _full.GetComponentInChildren<ScrollRect>(); if (sr != null) sr.verticalNormalizedPosition = 0f; }
+        if (show) { _fullText.text = _history.Count > 0 ? string.Join("\n", _history) : "<color=#888888>아직 기록이 없다.</color>"; Canvas.ForceUpdateCanvases(); var sr = _full.GetComponentInChildren<ScrollRect>(); if (sr != null) sr.verticalNormalizedPosition = 0f; }
     }
 
     private void BuildFull()
@@ -154,7 +154,7 @@ public class DungeonTravelLog : MonoBehaviour, IPointerClickHandler
         _full.GetComponent<Button>().onClick.AddListener(() => _full.SetActive(false));
 
         var title = NewText(rt, "Title", 36f, _font);
-        title.text = "<color=#D4A761>TRAVEL LOG</color>"; title.alignment = TextAlignmentOptions.Center;
+        title.text = "<color=#D4A761>여행 기록</color>"; title.alignment = TextAlignmentOptions.Center;
         var trt = title.rectTransform; trt.anchorMin = new Vector2(0f, 1f); trt.anchorMax = new Vector2(1f, 1f); trt.pivot = new Vector2(0.5f, 1f);
         trt.anchoredPosition = new Vector2(0f, -16f); trt.sizeDelta = new Vector2(0f, 56f);
 

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Elf_Hair
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Elf_Hair
-  memoryName: Hair
-  subtitle: Light-Touched Hair
+  memoryName: "\uBA38\uB9AC\uCE74\uB77D"
+  subtitle: "\uBE5B\uC774 \uAE43\uB4E0 \uBA38\uB9AC\uCE74\uB77D"
   species: 1
-  memoryIcon: {fileID: 0}
+  memoryIcon: {fileID: 21300000, guid: 055f766ed491f19419d6168a1cb5a930, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
@@ -48,8 +48,9 @@ MonoBehaviour:
     +10%p\n\uB808\uBCA8\uC5C5 \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960
     +10%p\n\uB808\uBCA8\uC5C5 \uB54C \uD589\uC6B4\uC774 \uC624\uB97C \uD655\uB960
     +10%p"
-  flavorText: Hair that remembers the sun holds traces of ancient blessings, but
-    the body beneath remains fragile.
+  flavorText: "\uD574\uB97C \uAE30\uC5B5\uD558\uB294 \uBA38\uB9AC\uCE74\uB77D\uC5D0
+    \uC624\uB798\uB41C \uCD95\uBCF5\uC774 \uB0A8\uC544 \uC788\uC9C0\uB9CC, \uADF8
+    \uC544\uB798 \uBAB8\uC740 \uC5EC\uC804\uD788 \uC57D\uD558\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

@@ -280,20 +280,20 @@ public class SwordSkillTreeManager : MonoBehaviour
         var hud = DungeonHud.Instance;
         if (hud == null) return;
         var labels = new List<string>();
-        foreach (var s in list) labels.Add(s != null ? s.skillName : "<color=#888888>Empty</color>");
-        string kind = skill.IsPassive ? "passive" : "skill";
+        foreach (var s in list) labels.Add(s != null ? s.skillName : "<color=#888888>비어 있음</color>");
+        string kind = skill.IsPassive ? "패시브" : "스킬";
         hud.ChooseSkillSlot(
-            $"<b>{skill.skillName}</b> learned!\n<size=80%>Your {kind} slots are full. Replace which one?\n<color=#AAAAAA>(Later: equip it any time from Skill Set)</color></size>",
+            $"<b>{skill.skillName}</b> 배움!\n<size=80%>{kind} 칸이 가득 찼습니다. 어느 것을 바꿀까요?\n<color=#AAAAAA>(나중에: 스킬 세트에서 언제든 장착)</color></size>",
             labels,
             index =>
             {
-                if (index < 0) { hud.Toast($"{skill.skillName} learned — not equipped yet."); return; }
+                if (index < 0) { hud.Toast($"{skill.skillName} 배움 — 아직 장착하지 않음."); return; }
                 SkillData old = list[index];
                 playerStatData.EquipAt(skill, index);
 #if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(playerStatData);
 #endif
-                hud.Toast(old != null ? $"{skill.skillName} equipped <color=#AAAAAA>(replaced {old.skillName})</color>" : $"{skill.skillName} equipped");
+                hud.Toast(old != null ? $"{skill.skillName} 장착 <color=#AAAAAA>({old.skillName} 대신)</color>" : $"{skill.skillName} 장착");
                 var ps = FindFirstObjectByType<PlayerStats>();
                 if (ps != null) ps.NotifyStatusChanged(); // 상태창 스킬 아이콘 갱신
             });
@@ -502,7 +502,7 @@ public class SwordSkillTreeManager : MonoBehaviour
         if (skillPointsText != null)
         {
             int available = GetAvailableSkillPoints();
-            skillPointsText.text = $"Skill Points: {available}";
+            skillPointsText.text = $"스킬 포인트: {available}";
         }
     }
     

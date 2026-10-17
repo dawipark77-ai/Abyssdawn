@@ -12,20 +12,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Sword
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
-  equipmentName: Crude Sword
-  attackRangeType: 0
-  weaponCategory: 0
+  itemName: 
+  icon: {fileID: 3041075454101289713, guid: b0667a382ced5ec4088e8d265bc5c27f, type: 3}
   description: 
+  equipmentName: "\uC870\uC7A1\uD55C \uAC80"
+  equipmentIcon: {fileID: 0}
+  flatIcon: {fileID: 0}
   equipmentType: 0
   isTwoHanded: 0
-  icon: {fileID: 3041075454101289713, guid: b0667a382ced5ec4088e8d265bc5c27f, type: 3}
+  weaponCategory: 0
+  armourCategory: 0
+  armourType: 0
   attackBonus: 5
   defenseBonus: 0
+  magicDefenseBonus: 0
   magicBonus: 0
+  hpBonus: 0
+  mpBonus: 0
+  mpBonusPercent: 0
   agiBonus: 1
   luckBonus: 0
   accuracyBonus: 0
-  hpBonus: 0
-  mpBonus: 0
+  armorBreakData: {fileID: 0}
+  armorBreakCoefficient: 0
+  blockData: {fileID: 0}
   weaponEffect: {fileID: 0}
   skill: {fileID: 0}
+  weaponCurses: []
+  magicAmplify: 1
+  backflowSuppression: 0
+  buyPrice: 0
+  sellPrice: 0
+  dropMinFloor: 0
+  dropMaxFloor: 0
+  isJunkWeapon: 0
+  canDropFromChest: 1

@@ -167,8 +167,8 @@ public class OathPathPanel : MonoBehaviour
             string desc = o == null ? "" : (isSworn ? "<color=#D4A761>맹세함</color>\n\n" : "<color=#777777>맹세하지 않음</color>\n\n") + o.oathDescription;
             Set(page, $"Oath_Descliption {i + 1}", desc, 30f, isSworn ? Text : Muted, TextAlignmentOptions.Top);
         }
-        Set(page, "Binding ", "제약 (Binding)", 40f, Cost, TextAlignmentOptions.Center);
-        Set(page, "Binding", "제약 (Binding)", 40f, Cost, TextAlignmentOptions.Center);
+        Set(page, "Binding ", "제약", 40f, Cost, TextAlignmentOptions.Center);
+        Set(page, "Binding", "제약", 40f, Cost, TextAlignmentOptions.Center);
         string binding = sworn == null ? "<color=#777777>맹세한 서약이 없다.</color>"
             : $"<color=#AAAAAA>[{StrengthName(sworn.bindingStrength)}]</color>  {sworn.bindingDescription}";
         Set(page, "Binding_Descliption ", binding, 30f, Text, TextAlignmentOptions.Top);

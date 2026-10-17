@@ -13,17 +13,20 @@ MonoBehaviour:
   m_Name: Warfare_PrincelyRuthlessness
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_Formation_03
-  skillName: "\uAD70\uC8FC\uC758 \uB0AD\uD6A8\uD568"
+  skillName: Princely Ruthlessness
+  skillKey: "\uAD70\uC8FC\uC758 \uB0AD\uD6A8\uD568"
   skillIcon: {fileID: 0}
-  description: "\uB9C8\uD0A4\uC544\uBCA8\uB9AC \u300E\uAD70\uC8FC\uB860\u300F 18\uC7A5. \uC544\uAD6D \uC804\uCCB4\uB97C \uC704\uD55C \uC2E0\uB8B0\uC801 \uC9C4\uD589 \uC2A4\uD2B8\uB9C8. (\uC0AC\uC6A9 \uC124\uBA85 \uCD94\uAC00 \uC608\uC815) (\uCF5C\uD238 6\uD238)"
+  description: Machiavelli, The Prince, chapter 18. A calculated party-wide skill.
+    (Details to be added) (Cooldown 6 turns)
   usageType: 0
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 1
     allowedCasterSlots: 15
     allowedTargetSlots: 15
-    specificSlots: []
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -32,10 +35,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -43,5 +45,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

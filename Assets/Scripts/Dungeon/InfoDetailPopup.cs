@@ -64,11 +64,11 @@ public class InfoDetailPopup : MonoBehaviour
         dim.gameObject.AddComponent<ClickToClose>();
         _root = dim.gameObject;
 
-        // 패널 (가로형 테두리)
-        Image panel = NewImage(dim.rectTransform, "Panel", Color.white, true);
+        // 패널 — [2026-10-17] 스테이터스 창과 같은 드퀘식: 검은 반투명 + 금테 이중선
+        Image panel = NewImage(dim.rectTransform, "Panel", new Color(0f, 0f, 0f, 0.95f), true);
         Sprite frame = DungeonHud.PopupSprite;
-        if (frame != null) { panel.sprite = frame; panel.type = Image.Type.Sliced; }
-        else panel.color = new Color(0.07f, 0.07f, 0.09f, 0.96f);
+        AddGoldFrame(panel.rectTransform, "Frame", new Color(0.86f, 0.74f, 0.45f, 0.95f), 3f);
+        AddGoldFrame(panel.rectTransform, "FrameInner", new Color(0.86f, 0.74f, 0.45f, 0.30f), -8f);
         RectTransform prt = panel.rectTransform;
         prt.anchorMin = prt.anchorMax = new Vector2(0.5f, 0.5f);
         prt.sizeDelta = new Vector2(940f, 620f);
@@ -89,30 +89,62 @@ public class InfoDetailPopup : MonoBehaviour
 
         _tag = NewText(prt, "Tag", font, 28, FontStyles.Normal, TextAlignmentOptions.TopLeft);
         _tag.color = new Color(0.96f, 0.87f, 0.58f, 1f);
-        _body = NewText(prt, "Description", font, 32, FontStyles.Normal, TextAlignmentOptions.TopLeft);
+        // 설명 — [2026-10-17] 넘치면 스크롤 (글자를 줄이지 않는다)
+        var vpGo = new GameObject("BodyViewport", typeof(RectTransform), typeof(RectMask2D), typeof(Image));
+        vpGo.transform.SetParent(prt, false);
+        _bodyViewport = (RectTransform)vpGo.transform;
+        var vpImg = vpGo.GetComponent<Image>(); vpImg.color = new Color(0f, 0f, 0f, 0f); vpImg.raycastTarget = true; // 끌어서 스크롤
+        _body = NewText(_bodyViewport, "Description", font, 32, FontStyles.Normal, TextAlignmentOptions.TopLeft);
         _body.enableWordWrapping = true;
-        _body.enableAutoSizing = true; _body.fontSizeMin = 20f; _body.fontSizeMax = 32f;
+        _body.enableAutoSizing = false;
         _body.color = new Color(0.92f, 0.92f, 0.92f, 1f);
+        var brt = _body.rectTransform;
+        brt.anchorMin = new Vector2(0f, 1f); brt.anchorMax = new Vector2(1f, 1f); brt.pivot = new Vector2(0.5f, 1f);
+        brt.offsetMin = new Vector2(0f, 0f); brt.offsetMax = new Vector2(0f, 0f);
+        var fitter = _body.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        _bodyScroll = vpGo.AddComponent<ScrollRect>();
+        _bodyScroll.content = brt; _bodyScroll.viewport = _bodyViewport;
+        _bodyScroll.horizontal = false; _bodyScroll.vertical = true;
+        _bodyScroll.movementType = ScrollRect.MovementType.Clamped;
+        _bodyScroll.scrollSensitivity = 30f;
 
         // 닫기
         Image closeBg = NewImage(prt, "Close", Color.white, true);
         if (frame != null) { closeBg.sprite = frame; closeBg.type = Image.Type.Sliced; closeBg.pixelsPerUnitMultiplier = 3f; }
         else closeBg.color = new Color(0.15f, 0.15f, 0.18f, 1f);
-        Place(closeBg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 58f), new Vector2(220f, 72f));
+        Place(closeBg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, -56f), new Vector2(220f, 72f)); // [2026-10-17] 창 아래 (테두리에 잘리지 않게)
         var closeBtn = closeBg.gameObject.AddComponent<Button>();
         closeBtn.onClick.AddListener(Hide);
         var closeLabel = NewText(closeBg.rectTransform, "Label", font, 30, FontStyles.Bold, TextAlignmentOptions.Center);
-        closeLabel.text = "Close";
+        closeLabel.text = "닫기";
         Stretch(closeLabel.rectTransform);
 
         _root.SetActive(false);
+    }
+
+    private RectTransform _bodyViewport;
+    private ScrollRect _bodyScroll;
+
+    /// <summary>[2026-10-17] 금테 선 (GlowBorder 9분할, 가운데 비움). outset 음수면 안쪽.</summary>
+    private static void AddGoldFrame(RectTransform parent, string name, Color color, float outset)
+    {
+        var sp = Resources.Load<Sprite>("UI/GlowBorder");
+        if (sp == null) return;
+        var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        var img = go.GetComponent<Image>();
+        img.sprite = sp; img.type = Image.Type.Sliced; img.fillCenter = false; img.color = color; img.raycastTarget = false;
+        var rt = img.rectTransform;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = new Vector2(-outset, -outset); rt.offsetMax = new Vector2(outset, outset);
     }
 
     private void Fill(string title, string tag, Sprite icon, string description)
     {
         _title.text = title ?? "";
         _tag.text = tag ?? "";
-        _body.text = string.IsNullOrEmpty(description) ? "<color=#888888>(No description)</color>" : description;
+        _body.text = string.IsNullOrEmpty(description) ? "<color=#888888>(설명 없음)</color>" : description;
 
         bool hasIcon = icon != null;
         _icon.sprite = icon;
@@ -122,11 +154,13 @@ public class InfoDetailPopup : MonoBehaviour
 
         // 아이콘이 있으면 오른쪽에, 없으면 패널 전체 폭으로
         float left = hasIcon ? 280f : 60f;
-        RectTransform tagRT = _tag.rectTransform, body = _body.rectTransform;
+        RectTransform tagRT = _tag.rectTransform, body = _bodyViewport;
         tagRT.anchorMin = new Vector2(0f, 1f); tagRT.anchorMax = new Vector2(1f, 1f); tagRT.pivot = new Vector2(0f, 1f);
         tagRT.offsetMin = new Vector2(left, -186f); tagRT.offsetMax = new Vector2(-50f, -130f);
         body.anchorMin = new Vector2(0f, 0f); body.anchorMax = new Vector2(1f, 1f); body.pivot = new Vector2(0f, 1f);
-        body.offsetMin = new Vector2(left, 112f); body.offsetMax = new Vector2(-50f, -196f);
+        body.offsetMin = new Vector2(left, 40f); body.offsetMax = new Vector2(-50f, -196f); // 닫기가 창 밖으로 나가 글 칸이 넓어짐
+        Canvas.ForceUpdateCanvases();
+        if (_bodyScroll != null) _bodyScroll.verticalNormalizedPosition = 1f; // 맨 위부터
 
         _root.SetActive(true);
         _root.transform.SetAsLastSibling();
@@ -215,7 +249,7 @@ public class DetailClickTarget : MonoBehaviour, IPointerClickHandler
     public static (string, string, Sprite, string)? ForSkill(AbyssdawnBattle.SkillData s)
     {
         if (s == null) return null;
-        string kind = s.IsPermanent ? "Permanent" : s.IsPassive ? "Passive" : "Active";
+        string kind = s.IsPermanent ? "상시" : s.IsPassive ? "패시브" : "액티브";
         string tag = kind;
         if (s.mpCost > 0) tag += $" · MP {s.mpCost}";
         if (s.hpCostPercent > 0) tag += $" · HP {s.hpCostPercent}%";
@@ -241,9 +275,9 @@ public class DetailClickTarget : MonoBehaviour, IPointerClickHandler
     public static (string, string, Sprite, string)? ForTrait(AbyssdawnBattle.TraitsOfSpeciesData t)
     {
         if (t == null) return null;
-        string name = !string.IsNullOrEmpty(t.traitNameEnglish) ? t.traitNameEnglish : t.traitName;
+        string name = !string.IsNullOrEmpty(t.traitName) ? t.traitName : t.traitNameEnglish;
         string body = t.description ?? "";
         if (!string.IsNullOrEmpty(t.flavorText)) body += $"\n\n<i><color=#999999>{t.flavorText}</color></i>";
-        return (name, "Trait of Species (3-set bonus)", t.traitIcon, body);
+        return (name, "종의 특성 (3세트 효과)", t.traitIcon, body);
     }
 }

@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1076499b2ae04d4b94b2bf3dffc4946, type: 3}
   m_Name: ArmorBreak
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ArmorBreakDataSO
-  icon: {fileID: -3413831905904081113, guid: 98dbaf71e17d87647b41dc5025a2f15b, type: 3}
-  flaticon: {fileID: 8154983939583300115, guid: 3575875ff90c38b4fba5d4b5823d2f7d, type: 3}
-  effectName: Armor Break
-  description: Deals additional fixed damage equal to a percentage of the target's defense.
+  itemIcon: {fileID: -3413831905904081113, guid: 98dbaf71e17d87647b41dc5025a2f15b, type: 3}
+  flatIcon: {fileID: 8154983939583300115, guid: 3575875ff90c38b4fba5d4b5823d2f7d, type: 3}
+  effectName: "\uBC29\uC5B4\uAD6C \uD30C\uAD34"
+  description: "\uB300\uC0C1 \uBC29\uC5B4\uB825\uC758 \uC77C\uC815 \uBE44\uC728\uB9CC\uD07C
+    \uACE0\uC815 \uCD94\uAC00 \uD53C\uD574."
   coefficient: 0.02

@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Dwarf_Beard
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Dwarf_Beard
-  memoryName: Beard
-  subtitle: Ore-Sensing Beard
+  memoryName: "\uC218\uC5FC"
+  subtitle: "\uAD11\uC11D\uC744 \uB290\uB07C\uB294 \uC218\uC5FC"
   species: 4
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
   mpBonusPercent: 5
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 0
   agilityBonus: -1
@@ -41,7 +46,8 @@ MonoBehaviour:
     \uCD5C\uB300 MP +0.15 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
     \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +10%p\n\uB808\uBCA8\uC5C5
     \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960 +15%p"
-  flavorText: Their beards twitch at the scent of ore and buried treasure.
+  flavorText: "\uAD11\uC11D\uACFC \uBB3B\uD78C \uBCF4\uBB3C \uB0C4\uC0C8\uC5D0 \uC218\uC5FC\uC774
+    \uC6C0\uCC14\uAC70\uB9B0\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

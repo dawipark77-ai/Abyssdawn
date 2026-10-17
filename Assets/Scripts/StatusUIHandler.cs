@@ -139,7 +139,7 @@ public class StatusUIHandler : MonoBehaviour
             title.anchorMin = activeLabel.anchorMin; title.anchorMax = activeLabel.anchorMax; title.pivot = activeLabel.pivot;
             var src = activeLabel.GetComponent<TMPro.TMP_Text>();
             var dst = go.GetComponent<TMPro.TextMeshProUGUI>();
-            dst.text = "Permanent Skills";
+            dst.text = "상시 스킬";
             if (src != null) { dst.font = src.font; dst.fontSharedMaterial = src.fontSharedMaterial; dst.fontSize = src.fontSize * 0.8f; dst.color = src.color; dst.alignment = src.alignment; dst.fontStyle = src.fontStyle; }
             dst.enableWordWrapping = false;
             dst.raycastTarget = false;

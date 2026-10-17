@@ -156,13 +156,18 @@ public static class FloorTableDefaults
         // [2026-10-15] 맵 크기를 픽셀 던전 수준으로 — 1~10층 모두 4×3 구획 (32×30칸), 빈 구획 3~5 → 방 7~9개.
         //   (픽셀 던전: 32×32, 하수도 일반 방 4~6 + 특수 1~2 + 입구·출구). 화면보다 넓으므로 지도는 스크롤 + 칸을 눌러 이동.
         //   넓어진 만큼 상자 2~3, 함정 2~3 (밀도는 예전보다 낮게 유지)
-        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 4, 3, 8, 10, 3, 5, 1, 2).WithContents(2, 3, 2, 3, 0.5f).WithShapes(0.3f, 0.2f, 1, 2).WithGroups(78, 18, 3, 1));
+        // [2026-10-15] B1 은 조금 작게 (3×3 구획 = 24×30칸, 빈 구획 2~3 → 방 6~7개), 몬스터는 거의 1마리 (2마리 4%, 3·4마리 없음)
+        // [2026-10-17] B1 더 작게: 3×2 구획(24×20칸), 빈 구획 2~3 → 방 3~4개
+        list.Add(FloorTableEntry.Create(1, 1, FloorType.Town, 3, 2, 8, 10, 2, 3, 1, 1).WithContents(1, 2, 1, 2, 0.5f).WithShapes(0.3f, 0.2f, 0, 1).WithGroups(96, 4, 0, 0));
         // [2026-10-07 2차] 함정 밀도 약 3% → 약 8% (걸을 수 있는 칸 기준. 1·2~4·5층 약 100칸, 6~8층 156, 9~10층 239, 11층~ 318)
         //   1층 0~1 → 6~9 / 2~4층 2~4 → 7~10 / 5층 0~1 → 5~7 / 6~8층 3~6 → 11~15 / 9~10층 4~7 → 17~22 / 11층~ 5~8 → 23~29
         // [2026-10-09] 5층까지 함정 대폭 감소 (시뮬: B1 사망의 56%가 함정) — 1층 6~9 → 2~3 / 2~4층 7~10 → 3~5 / 5층 5~7 → 3~4
         // [2026-10-11] 1~10층 전부 1층 수준(2~3개)으로 — 2~4층 3~5 / 5층 3~4 / 6~8층 11~15 / 9~10층 17~22 → 모두 2~3
         // [2026-10-12] 함정 사망이 여전히 많아 전 층 더 줄임 — 1~10층 2~3 → 1~2 / 11층~ 23~29 → 4~6
-        list.Add(FloorTableEntry.Create(2, 4, FloorType.Dungeon, 4, 3, 8, 10, 3, 5, 1, 2).WithContents(2, 3, 2, 3, 0.3f).WithShapes(0.4f, 0.3f, 1, 3).WithGroups(40, 35, 18, 7));
+        // [2026-10-17] B2 도 작게 (3×3 구획 = 24×30칸, 빈 구획 1~2 → 방 7~8개). 몬스터 무리는 아직 가볍게 (1마리 70 · 2마리 25 · 3마리 5)
+        // [2026-10-17] B2 더 작게: 3×2 구획(24×20칸), 빈 구획 1~2 → 방 4~5개
+        list.Add(FloorTableEntry.Create(2, 2, FloorType.Dungeon, 3, 2, 8, 10, 1, 2, 1, 1).WithContents(1, 2, 2, 2, 0.3f).WithShapes(0.4f, 0.3f, 0, 1).WithGroups(70, 25, 5, 0));
+        list.Add(FloorTableEntry.Create(3, 4, FloorType.Dungeon, 4, 3, 8, 10, 3, 5, 1, 2).WithContents(2, 3, 2, 3, 0.3f).WithShapes(0.4f, 0.3f, 1, 3).WithGroups(40, 35, 18, 7));
         list.Add(FloorTableEntry.Create(5, 5, FloorType.Town, 4, 3, 8, 10, 3, 5, 1, 2).WithContents(2, 3, 2, 3, 0.5f).WithShapes(0.4f, 0.3f, 1, 2).WithGroups(30, 35, 22, 13));
         list.Add(FloorTableEntry.Create(6, 8, FloorType.Dungeon, 4, 3, 8, 10, 3, 5, 1, 2).WithContents(2, 3, 2, 3, 0.3f).WithShapes(0.5f, 0.35f, 1, 3).WithGroups(30, 35, 22, 13));
         list.Add(FloorTableEntry.Create(9, 10, FloorType.Dungeon, 4, 3, 8, 10, 3, 4, 1, 3).WithContents(2, 3, 2, 3, 0.35f).WithShapes(0.55f, 0.4f, 1, 3).WithGroups(30, 35, 22, 13));

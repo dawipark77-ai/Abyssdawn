@@ -66,6 +66,7 @@ public static class SaveSystem
         public List<V2> sprungTraps = new List<V2>(), disarmedTraps = new List<V2>(); // [2026-10-07]
         public bool clearRewarded;
         public List<int> enteredRooms = new List<int>();
+        public List<int> openedDoors = new List<int>(); // [2026-10-17]
     }
 
     [Serializable] public class CompanionSave { public bool empty = true; public int id; public string resourcePath; public int currentHP, currentMP; }
@@ -150,6 +151,7 @@ public static class SaveSystem
                 foreach (var p in s.sprungTraps) fs.sprungTraps.Add(new V2(p));
                 foreach (var p in s.disarmedTraps) fs.disarmedTraps.Add(new V2(p));
                 fs.enteredRooms.AddRange(s.enteredRooms);
+                fs.openedDoors.AddRange(s.openedDoors);
                 d.floors.Add(fs);
             }
 
@@ -234,6 +236,7 @@ public static class SaveSystem
                 else foreach (var p in fs.knownTraps) s.sprungTraps.Add(p.ToV()); // 예전 저장: 아는 함정 = 밟은 함정으로 간주
                 if (fs.disarmedTraps != null) foreach (var p in fs.disarmedTraps) s.disarmedTraps.Add(p.ToV());
                 foreach (var r in fs.enteredRooms) s.enteredRooms.Add(r);
+                if (fs.openedDoors != null) foreach (var r in fs.openedDoors) s.openedDoors.Add(r); // 예전 저장엔 없음 → 문은 모두 닫힘
                 DungeonPersistentData.floors[fs.floor] = s;
             }
             DungeonFloorState cur;
@@ -263,6 +266,7 @@ public static class SaveSystem
                 //   이름 검색이 다른 쪽을 집으면 HeroData 가 쓸데없이 바뀌었다 (내용은 동일)
                 if (sd.currentJob == null || sd.currentJob.name != d.job)
                     sd.currentJob = Find<CharacterClass>(d.job) ?? sd.currentJob;
+                if (hero != null) hero.SyncJobFromData(); // [2026-10-17] 불러온 직업을 주인공에게도
                 sd.currentOath = string.IsNullOrEmpty(d.oath) ? null : Find<OathBindingData>(d.oath);
                 if (sd.learnedPathSkills == null) sd.learnedPathSkills = new List<PathSkillData>();
                 sd.learnedPathSkills.Clear();
@@ -301,7 +305,7 @@ public static class SaveSystem
             }
             if (ConsumableInventory.Instance != null) ConsumableInventory.Instance.RestoreFromSave(slots, d.chaliceCharges);
             EquipmentBag.Clear();
-            foreach (var n in d.equipmentBag) { var e = Find<EquipmentData>(n); if (e != null) EquipmentBag.Add(e); }
+            foreach (var n in d.equipmentBag) { var e = Find<EquipmentData>(n); if (e != null) EquipmentBag.AddLoaded(e); }
             PlayerWallet.Set(d.gold);
             BossEncounter.defeatedFloors.Clear();
             if (d.bossesDefeated != null) foreach (int f in d.bossesDefeated) BossEncounter.defeatedFloors.Add(f);

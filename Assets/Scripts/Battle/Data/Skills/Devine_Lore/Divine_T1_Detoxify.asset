@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Divine_T1_Detoxify
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Divine_T1_02
-  skillName: Detoxify
+  skillName: "\uD574\uB3C5"
+  skillKey: Detoxify
   skillIcon: {fileID: -2372372660779944486, guid: f94f8a1a1ff0b494b88ffdcb8841d2dc, type: 3}
   description: "\uB2E8\uC77C \uC544\uAD70/\uC801\uAD70\uC758 \uB3C5 \uC0C1\uD0DC\uB97C
     \uC644\uC804\uD788 \uC81C\uAC70\uD55C\uB2E4."
@@ -48,7 +49,8 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: Cleanse all Poison stacks from target
+  dunbreakDescription: "\uB300\uC0C1\uC758 \uB3C5 \uC911\uCCA9\uC744 \uBAA8\uB450
+    \uC9C0\uC6B4\uB2E4"
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0

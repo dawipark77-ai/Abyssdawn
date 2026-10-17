@@ -159,10 +159,10 @@ public class PlayerStatData : ScriptableObject
     public static string RivalOf(AbyssdawnBattle.SkillData skill)
     {
         if (skill == null) return null;
-        if (skill.skillName == PlayerStats.SkillQuickStarter) return PlayerStats.SkillSlowStarter;
-        if (skill.skillName == PlayerStats.SkillSlowStarter) return PlayerStats.SkillQuickStarter;
-        if (skill.skillName == PlayerStats.SkillInfighter) return PlayerStats.SkillOutfighter;   // [2026-10-12]
-        if (skill.skillName == PlayerStats.SkillOutfighter) return PlayerStats.SkillInfighter;
+        if (skill.Key == PlayerStats.SkillQuickStarter) return PlayerStats.SkillSlowStarter;
+        if (skill.Key == PlayerStats.SkillSlowStarter) return PlayerStats.SkillQuickStarter;
+        if (skill.Key == PlayerStats.SkillInfighter) return PlayerStats.SkillOutfighter;   // [2026-10-12]
+        if (skill.Key == PlayerStats.SkillOutfighter) return PlayerStats.SkillInfighter;
         return null;
     }
 
@@ -170,7 +170,7 @@ public class PlayerStatData : ScriptableObject
     {
         string rival = RivalOf(skill);
         if (rival == null || list == null) return false;
-        foreach (var s in list) if (s != null && s.skillName == rival) return true;
+        foreach (var s in list) if (s != null && s.Key == rival) return true;
         return false;
     }
 
@@ -196,7 +196,7 @@ public class PlayerStatData : ScriptableObject
         if (already >= 0) list[already] = null;
         // [2026-10-11] 퀵 스타터 ↔ 슬로우 스타터: 하나를 끼우면 다른 하나는 칸에서 빠진다
         string rival = RivalOf(skill);
-        if (rival != null) for (int i = 0; i < list.Count; i++) if (list[i] != null && list[i].skillName == rival) list[i] = null;
+        if (rival != null) for (int i = 0; i < list.Count; i++) if (list[i] != null && list[i].Key == rival) list[i] = null;
         list[index] = skill;
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);
@@ -220,7 +220,7 @@ public class PlayerStatData : ScriptableObject
     {
         if (learnedSkills == null) return 0;
         int n = 0;
-        foreach (var s in learnedSkills) if (s != null && s.fieldSkill && s.skillName == skillName) n++;
+        foreach (var s in learnedSkills) if (s != null && s.fieldSkill && s.Key == skillName) n++;
         return n;
     }
 
@@ -228,7 +228,7 @@ public class PlayerStatData : ScriptableObject
     public bool HasFieldSkill(string skillName)
     {
         if (learnedSkills == null) return false;
-        foreach (var s in learnedSkills) if (s != null && s.fieldSkill && s.skillName == skillName) return true;
+        foreach (var s in learnedSkills) if (s != null && s.fieldSkill && s.Key == skillName) return true;
         return false;
     }
 

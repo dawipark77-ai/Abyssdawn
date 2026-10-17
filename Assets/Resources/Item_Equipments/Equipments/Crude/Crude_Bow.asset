@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   itemName: 
   icon: {fileID: 0}
-  description: A warped bow. ATK +1, AGI +1.
-  equipmentName: Crude Bow
+  description: "\uD718\uC5B4\uC9C4 \uD65C. \uACF5\uACA9 +1, \uBBFC\uCCA9 +1."
+  equipmentName: "\uC870\uC7A1\uD55C \uD65C"
   equipmentIcon: {fileID: -7856493677412862020, guid: 93ea913936abfb44fa7b4bacc1c6725b, type: 3}
   flatIcon: {fileID: -8776072426445690183, guid: 36744b15529cb184bbfbd0481d05c6ef, type: 3}
   equipmentType: 1

@@ -22,11 +22,11 @@ public static class DungeonFieldStatus
 
     private static readonly Dictionary<StatusEffectType, Rule> Rules = new Dictionary<StatusEffectType, Rule>
     {
-        { StatusEffectType.Poison, new Rule { steps = 30, every = 3, percent = 0.03f, name = "Poison", color = "#7CFC7C" } },
-        { StatusEffectType.Bleed,  new Rule { steps = 24, every = 4, percent = 0.04f, name = "Bleeding", color = "#FF5A5A" } },
-        { StatusEffectType.Ignite, new Rule { steps = 16, every = 2, percent = 0.03f, name = "Burn", color = "#FF9A3C" } },
-        { StatusEffectType.Blind,  new Rule { steps = 40, every = 0, percent = 0f, name = "Blind", color = "#B0B0FF" } },
-        { StatusEffectType.Stun,   new Rule { steps = UntilNextBattle, every = 0, percent = 0f, name = "Concussed", color = "#FFD700" } },
+        { StatusEffectType.Poison, new Rule { steps = 30, every = 3, percent = 0.03f, name = "독", color = "#7CFC7C" } },
+        { StatusEffectType.Bleed,  new Rule { steps = 24, every = 4, percent = 0.04f, name = "출혈", color = "#FF5A5A" } },
+        { StatusEffectType.Ignite, new Rule { steps = 16, every = 2, percent = 0.03f, name = "점화", color = "#FF9A3C" } },
+        { StatusEffectType.Blind,  new Rule { steps = 40, every = 0, percent = 0f, name = "실명", color = "#B0B0FF" } },
+        { StatusEffectType.Stun,   new Rule { steps = UntilNextBattle, every = 0, percent = 0f, name = "뇌진탕", color = "#FFD700" } },
     };
 
     /// <summary>전투에 걸 때 쓰는 상태이상 에셋 (Resources 경로).</summary>

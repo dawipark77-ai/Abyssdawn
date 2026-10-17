@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T2_Taunt
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T2_Taunt
-  skillName: Taunt
+  skillName: "\uB3C4\uBC1C"
+  skillKey: Taunt
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 4\uD134]
     \uC774\uBC88 \uD134\uC5D0\uB294 \uC790\uC138\uB9CC \uC7A1\uB294\uB2E4. \uB2E4\uC74C
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 4
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

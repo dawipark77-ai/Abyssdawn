@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Monster_PushBack
   m_EditorClassIdentifier: 
   skillID: Monster_PushBack
-  skillName: Push Back
+  skillName: "\uBC00\uCCD0\uB0B4\uAE30"
+  skillKey: Push Back
   skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
   description: "\uB300\uBBF8\uC9C0\u2193, \uBA85\uC911 \uC2DC \uB300\uC0C1\uC744
     1\uC2AC\uB86F \uD6C4\uD1F4\uC2DC\uD0A8\uB2E4. (\uC790\uB9AC\uC774\uB3D9 \uB85C\uC9C1\uC740
@@ -60,6 +61,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -74,3 +79,6 @@ MonoBehaviour:
   isBasicAttackOverride: 0
   atkMultiplierOverride: 0
   randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

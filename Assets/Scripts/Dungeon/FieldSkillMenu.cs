@@ -76,12 +76,12 @@ public class FieldSkillMenu : MonoBehaviour
         var dim = _root.GetComponent<Image>(); dim.color = new Color(0f, 0f, 0f, 0.6f);
 
         var frame = Panel(rt, "Frame", 40f, 140f, 1000f, 1000f);
-        Text(frame, "SKILLS", 0f, 26f, 1000f, 70f, 54f, Gold, TextAlignmentOptions.Center).characterSpacing = 10f;
-        Text(frame, "<color=#9E8A5E>스킬 트리는 SKILL SET 에서</color>", 0f, 96f, 1000f, 40f, 26f, Muted, TextAlignmentOptions.Center);
+        Text(frame, "스킬", 0f, 26f, 1000f, 70f, 54f, Gold, TextAlignmentOptions.Center).characterSpacing = 10f;
+        Text(frame, "<color=#9E8A5E>스킬 트리는 스킬 세트에서</color>", 0f, 96f, 1000f, 40f, 26f, Muted, TextAlignmentOptions.Center);
         _list = new GameObject("List", typeof(RectTransform)).GetComponent<RectTransform>();
         _list.SetParent(frame, false);
         Place(_list, 30f, 160f, 940f, 700f);
-        var back = MakeButton(frame, "Back", "Back", 1000f - 30f - 220f, 1000f - 30f - 90f, 220f, 90f);
+        var back = MakeButton(frame, "Back", "뒤로", 1000f - 30f - 220f, 1000f - 30f - 90f, 220f, 90f);
         back.onClick.AddListener(Close);
     }
 
@@ -126,8 +126,8 @@ public class FieldSkillMenu : MonoBehaviour
     private static string CannotUse(PlayerStats hero, SkillData s)
     {
         if (hero == null) return "—";
-        if (s.mpCost > 0 && hero.currentMP < s.mpCost) return "Not enough MP";
-        if (s.hpCostPercent > 0 && hero.currentHP <= Mathf.Max(1, Mathf.RoundToInt(hero.maxHP * s.hpCostPercent / 100f))) return "Not enough HP";
+        if (s.mpCost > 0 && hero.currentMP < s.mpCost) return "MP 부족";
+        if (s.hpCostPercent > 0 && hero.currentHP <= Mathf.Max(1, Mathf.RoundToInt(hero.maxHP * s.hpCostPercent / 100f))) return "HP 부족";
         return null;
     }
 
@@ -136,8 +136,8 @@ public class FieldSkillMenu : MonoBehaviour
     {
         if (_picker != null) Destroy(_picker);
         var hero = Hero();
-        bool selfOnly = skill.skillName == "Inner Cleanse";
-        bool alliesOnly = skill.skillName == "Share Energy";
+        bool selfOnly = skill.Key == "Inner Cleanse";
+        bool alliesOnly = skill.Key == "Share Energy";
 
         _picker = new GameObject("TargetPicker", typeof(RectTransform), typeof(Image), typeof(Button));
         _picker.transform.SetParent(_root.transform, false);
@@ -170,7 +170,7 @@ public class FieldSkillMenu : MonoBehaviour
             }
         }
         if (y == 110f) Text(box, "<color=#888888>쓸 대상이 없다.</color>", 0f, 200f, 800f, 60f, 32f, Muted, TextAlignmentOptions.Center);
-        var cancel = MakeButton(box, "Cancel", "Cancel", 290f, 640f - 30f - 86f, 220f, 86f);
+        var cancel = MakeButton(box, "Cancel", "취소", 290f, 640f - 30f - 86f, 220f, 86f);
         cancel.onClick.AddListener(() => Destroy(_picker));
     }
 
@@ -196,21 +196,21 @@ public class FieldSkillMenu : MonoBehaviour
     private string Apply(SkillData skill, PlayerStats hero, PlayerStats heroTarget, CompanionPartyPersistence.Entry ally, int rosterIndex)
     {
         string who = heroTarget != null ? heroTarget.playerName : (ally != null ? CompanionPartyPersistence.LoadCompanion(ally.resourcePath)?.MonsterName : "?");
-        switch (skill.skillName)
+        switch (skill.Key)
         {
             case "Detoxify":
-                if (heroTarget != null && DungeonFieldStatus.Has(StatusEffectType.Poison)) { DungeonFieldStatus.Remove(StatusEffectType.Poison); Flash(heroTarget, rosterIndex, null); return $"{skill.skillName}: <color=#9FFF9F>{who} is cured of poison.</color>"; }
+                if (heroTarget != null && DungeonFieldStatus.Has(StatusEffectType.Poison)) { DungeonFieldStatus.Remove(StatusEffectType.Poison); Flash(heroTarget, rosterIndex, null); return $"{skill.skillName}: <color=#9FFF9F>{who}의 독이 나았다.</color>"; }
                 Flash(heroTarget, rosterIndex, null);
-                return $"{skill.skillName}: <color=#AAAAAA>{who} is not poisoned.</color>";
+                return $"{skill.skillName}: <color=#AAAAAA>{Ko.Eun(who)} 독에 걸려 있지 않다.</color>";
             case "Inner Cleanse":
                 foreach (var kv in DungeonFieldStatus.ActiveIcons())
                 {
                     DungeonFieldStatus.Remove(kv.Key);
                     Flash(hero, -1, null);
-                    return $"{skill.skillName}: <color=#9FFF9F>{hero.playerName} purges {DungeonFieldStatus.NameOf(kv.Key)}.</color>";
+                    return $"{skill.skillName}: <color=#9FFF9F>{Ko.I(hero.playerName)} {DungeonFieldStatus.NameOf(kv.Key)}을(를) 씻어 냈다.</color>";
                 }
                 Flash(hero, -1, null);
-                return $"{skill.skillName}: <color=#AAAAAA>Nothing to purge.</color>";
+                return $"{skill.skillName}: <color=#AAAAAA>씻어 낼 것이 없다.</color>";
             case "Share Energy":
                 return HealTarget(skill, heroTarget, ally, rosterIndex, ShareEnergyHealPercent, who);
         }
@@ -220,7 +220,7 @@ public class FieldSkillMenu : MonoBehaviour
             foreach (var e in skill.Effects)
                 if (e != null && e.effectType == EffectType.Recovery && (e.recoveryTarget == RecoveryTarget.HP || e.recoveryTarget == RecoveryTarget.Both)) pct = Mathf.Max(pct, e.effectAmount / 100f);
         if (pct > 0f) return HealTarget(skill, heroTarget, ally, rosterIndex, pct, who);
-        return $"{skill.skillName}: <color=#AAAAAA>nothing happens here.</color>";
+        return $"{skill.skillName}: <color=#AAAAAA>여기서는 아무 일도 없다.</color>";
     }
 
     private string HealTarget(SkillData skill, PlayerStats heroTarget, CompanionPartyPersistence.Entry ally, int rosterIndex, float pct, string who)

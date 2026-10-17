@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Whetstone
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Whetstone
+  itemName: "\uC22B\uB3CC"
   icon: {fileID: -8563153612813847178, guid: 33868d5d6a6205f4f941fcc8831bd0d1, type: 3}
-  description: A sharper edge means less effort.
+  description: "\uB0A0\uC774 \uC124\uC218\uB85D \uD798\uC774 \uB35C \uB4E0\uB2E4."
   itemCategory: 3
   itemIcon: {fileID: -8563153612813847178, guid: 33868d5d6a6205f4f941fcc8831bd0d1, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -27,6 +27,10 @@ MonoBehaviour:
   escapeChanceBuff: 0
   buffDuration: 3
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 50
   usableInBattle: 1

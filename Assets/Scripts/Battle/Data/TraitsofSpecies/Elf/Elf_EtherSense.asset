@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Elf_EtherSense
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Elf_EtherSense
-  skillName: Ether Sense
+  skillName: "\uC5D0\uD14C\uB974 \uC13C\uC2A4"
+  skillKey: Ether Sense
   skillIcon: {fileID: 21300000, guid: 43683633804d13d43a006e920135989d, type: 3}
   description: "[\uC5D8\uD504 \uC885\uD2B9 \xB7 \uCF1C\uACE0 \uB044\uAE30] \uC5D0\uD14C\uB974
     \uC13C\uC2A4. \uCF1C\uC838 \uC788\uC73C\uBA74 \uB9DE\uD790 \uB54C\uB9C8\uB2E4

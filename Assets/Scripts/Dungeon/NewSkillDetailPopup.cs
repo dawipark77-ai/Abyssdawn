@@ -122,7 +122,7 @@ public class NewSkillDetailPopup : MonoBehaviour
             mpCostText.text = data.mpCost > 0 ? $"MP {data.mpCost}" : "MP 0";
 
         if (lpCostText != null)
-            lpCostText.text = $"SP {data.requiredLorePoints}";
+            lpCostText.text = $"LP {data.requiredLorePoints}";
 
         if (hitCountText != null)
             hitCountText.text = data.hitCount > 1 ? $"{data.hitCount}타" : "단타";

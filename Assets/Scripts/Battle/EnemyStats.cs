@@ -144,6 +144,16 @@ public class EnemyStats : MonoBehaviour
     /// </summary>
     public const float FloorAtkPerDepth = 0.06f, FloorHpPerDepth = 0.08f, FloorExpPerDepth = 0.05f;
 
+    /// <summary>[2026-10-15] 클릭 상자를 그림 한가운데로 + 조금 크게 (기준점이 발밑이라 상자 절반이 발 아래에 있었음).</summary>
+    public void FitClickCollider()
+    {
+        BoxCollider2D col = GetComponent<BoxCollider2D>();
+        if (col == null || spriteRenderer == null || spriteRenderer.sprite == null) return;
+        Bounds b = spriteRenderer.sprite.bounds;
+        col.size = new Vector2(b.size.x * 1.3f, b.size.y * 1.15f);
+        col.offset = b.center;
+    }
+
     public void Init(MonsterSO so, GameObject uiPanel = null)
     {
         if (so == null)
@@ -188,11 +198,7 @@ public class EnemyStats : MonoBehaviour
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
         // 박스 콜라이더 크기를 스프라이트에 맞게 자동 설정 (BattleManager가 sr.sprite 주입 후 적용됨)
-        BoxCollider2D col = GetComponent<BoxCollider2D>();
-        if (col != null && spriteRenderer != null && spriteRenderer.sprite != null)
-        {
-            col.size = spriteRenderer.sprite.bounds.size;
-        }
+        FitClickCollider();
 
         // 프리팹 내부에 부착된 UI를 우선 사용
         TryBindEmbeddedStatusUI();
@@ -378,7 +384,7 @@ public class EnemyStats : MonoBehaviour
         // 피해 숫자 팝업 (+ 크리티컬이면 순간 멈춤·화면 흔들림)
         // [2026-10-14] 방어구 파괴 피해는 일반 숫자 대신 작은 금 간 방패 + 작은 숫자
         if (armorBreak) BattleFx.ArmorBreak(this, damage);
-        else BattleFx.EnemyHit(this, damage, isCritical);
+        else { BattleFx.EnemyHit(this, damage, isCritical); BattleFxCombat.OnEnemyHit(this, isCritical); } // [2026-10-17] 무기별 베기 궤적
 
         if (currentHP <= 0)
         {
@@ -687,7 +693,7 @@ public class EnemyStats : MonoBehaviour
         }
         transform.position = originalPosition;
 
-        // 스프라이트 숨기기
+        // 스프라이트 숨기기 (부서지는 연출은 빼기로 함 — 2026-10-17, 평소처럼 그냥 사라진다)
         if (spriteRenderer != null)
         {
             spriteRenderer.enabled = false;

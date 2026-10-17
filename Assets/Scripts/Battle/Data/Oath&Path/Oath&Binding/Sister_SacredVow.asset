@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sister_SacredVow
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Sister_SacredVow
-  oathName: Sacred Vow
+  oathName: "\uC2E0\uC131\uD55C \uC11C\uC57D"
   jobClass: 4
   oathDescription: "\uD790 \uC2A4\uD0AC \uD6A8\uACFC\uB7C9 +15%.\n\uC800\uC8FC \uD574\uC81C
     \uC131\uACF5 \uC2DC \uB300\uC0C1 HP 5% \uCD94\uAC00 \uD68C\uBCF5.\n\uD30C\uD2F0\uC6D0

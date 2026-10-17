@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T6_CrossCounter
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: T6_CrossCounter
-  skillName: Cross Counter
+  skillName: "\uD06C\uB85C\uC2A4 \uCE74\uC6B4\uD130"
+  skillKey: Cross Counter
   skillIcon: {fileID: 21300000, guid: 6325eb13f7171934081517ba3b25e464, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uC790\uC138 \xB7 \uC804\uC5F4(1\xB72\uC5F4)\uC5D0\uC11C\uB9CC
     \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4 \uC788\uC5B4\uC57C \uD568] \uD06C\uB85C\uC2A4
@@ -65,6 +66,7 @@ MonoBehaviour:
   preemptive: 1
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: D2_TendonSever
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: D2_TendonSever
-  skillName: Tendon Sever
+  skillName: "\uD798\uC904 \uB04A\uAE30"
+  skillKey: Tendon Sever
   skillIcon: {fileID: 21300000, guid: 0fa9c982a6c3ad14999b808840011bcb, type: 3}
   description: "[\uB2E8\uAC80\uC220 \xB7 \uACF5\uACA9] \uD798\uC904 \uB04A\uAE30.
     \uC801 1\uBA85\uC5D0\uAC8C \uBBFC\uCCA9 60% \uD53C\uD574, 3\uD134 \uB3D9\uC548
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

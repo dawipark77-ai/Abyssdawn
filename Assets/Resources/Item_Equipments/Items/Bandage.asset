@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Bandage
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Bandage
+  itemName: "\uBD95\uB300"
   icon: {fileID: 6851228247741294694, guid: 19ddce721897761468576bea0364c23d, type: 3}
-  description: Tied rough, but the bleeding stops.
+  description: "\uAC70\uCE60\uAC8C \uBB36\uC5C8\uC9C0\uB9CC \uD53C\uB294 \uBA4E\uB294\uB2E4."
   itemCategory: 2
   itemIcon: {fileID: 6851228247741294694, guid: 19ddce721897761468576bea0364c23d, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -27,6 +27,10 @@ MonoBehaviour:
   escapeChanceBuff: 0
   buffDuration: 0
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 50
   usableInBattle: 1

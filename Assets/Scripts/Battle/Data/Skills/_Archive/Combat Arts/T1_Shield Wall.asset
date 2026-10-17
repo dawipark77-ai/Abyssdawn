@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: T1_Shield Wall
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 07
-  skillName: Shield Wall
+  skillName: "\uBC29\uD328\uBCBD"
+  skillKey: Shield Wall
   skillIcon: {fileID: 9040223973580938310, guid: 4985a8268ae904544946ff1d15b75116, type: 3}
   description: "\uD328\uC2DC\uBE0C: \uBC29\uC5B4 \uC0AC\uC6A9 \uC2DC \uBC29\uC5B4\uB7C9
     +20% \uCD94\uAC00"
   usageType: 1
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 0
     allowedCasterSlots: -1
@@ -33,10 +35,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -44,5 +45,31 @@ MonoBehaviour:
   triggerCondition: 1
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

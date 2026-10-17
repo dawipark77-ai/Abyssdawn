@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_WeaponFamiliarity
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_T1_05
-  skillName: Weapon Familiarity
+  skillName: "\uBB34\uAE30 \uC219\uB828"
+  skillKey: Weapon Familiarity
   skillIcon: {fileID: -5816105751508217489, guid: 609d5d3bf3eed144e8b9b21aa45a3189, type: 3}
   description: "\uC7A5\uCC29 \uBB34\uAE30 \uD0C0\uC785\uC5D0 \uB530\uB77C \uBCF4\uC815.
     \uAC80/\uB3C4: \uACF5\uACA9 +2, \uD06C\uB9AC +3%. \uB450\uB2E8\uAE30/\uB3C4\uB04C:
@@ -22,6 +23,7 @@ MonoBehaviour:
   usageType: 1
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 2
     allowedCasterSlots: -1
@@ -35,21 +37,47 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects:
   - effectType: 17
     recoveryTarget: 0
     effectAmount: 2
-    curseData: {fileID: 0}
-    curseChance: 0
-  legacyCurseData: {fileID: 0}
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0.8
-  dunbreakDescription: Next weapon attack, weapon type bonus x2
+  dunbreakDescription: "\uB2E4\uC74C \uBB34\uAE30 \uACF5\uACA9\uC5D0 \uBB34\uAE30
+    \uC885\uB958 \uBCF4\uB108\uC2A4 \xD72"
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

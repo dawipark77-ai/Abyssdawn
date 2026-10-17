@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9c4b8e1f7a23c5e8f1a4b6d2c9e0f7a, type: 3}
   m_Name: Slime
   m_EditorClassIdentifier: Assembly-CSharp::Abyssdawn.MonsterSO
-  monsterName: Slime
+  monsterName: "\uC2AC\uB77C\uC784"
   sprite: {fileID: -691275006349873449, guid: a291bd318076d264eb6c7547cfa65db5, type: 3}
   scaleMultiplier: 0.8
   hoverOffsetY: 0

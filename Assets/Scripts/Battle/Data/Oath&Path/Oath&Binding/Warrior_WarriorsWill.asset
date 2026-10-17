@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Warrior_WarriorsWill
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Warrior_WarriorsWill
-  oathName: Warrior's Will
+  oathName: "\uC804\uC0AC\uC758 \uC758\uC9C0"
   jobClass: 0
   oathDescription: "\uC804\uD22C \uC2DC\uC791 \uC2DC STR +2, DEF +2.\nHP \uC18C\uBAA8
     \uC2A4\uD0AC \uC18C\uBAA8\uB7C9 -15%.\n\uC544\uAD70 \uC0AC\uB9DD \uC2DC \uACF5\uACA9\uB825

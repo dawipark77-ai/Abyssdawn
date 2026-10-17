@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Skill_02_StrongSlash
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: 02
-  skillName: Strong Slash
+  skillName: "\uAC15\uBCA0\uAE30"
+  skillKey: Strong Slash
   skillIcon: {fileID: 21300000, guid: db7f26ed18b6b6242875e6283afda248, type: 3}
-  description: Powerful physical attack with higher damage but greater HP cost.
+  description: "\uAC15\uB825\uD55C \uBB3C\uB9AC \uACF5\uACA9. \uD53C\uD574\uAC00
+    \uD06C\uC9C0\uB9CC HP\uB97C \uB354 \uC4F4\uB2E4."
   usageType: 0
   damageType: 0
   scalingStat: 0
@@ -60,6 +62,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

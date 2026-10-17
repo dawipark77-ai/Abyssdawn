@@ -109,7 +109,7 @@ public class MemoryOfSpeciesUI : MonoBehaviour
         if (traitData != null)
         {
             // 특성이 활성화된 경우
-            traitsText.text = traitData.traitNameEnglish;
+            traitsText.text = !string.IsNullOrEmpty(traitData.traitName) ? traitData.traitName : traitData.traitNameEnglish;
             
             // 나중에 아이콘 추가 시
             if (traitsImage != null && traitData.traitIcon != null)

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: EX_T3_MakeCamp
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: EX_T3_MakeCamp
-  skillName: Make Camp
+  skillName: "\uC57C\uC601"
+  skillKey: Make Camp
   skillIcon: {fileID: 0}
   description: "[\uD0D0\uD5D8 \xB7 \uB358\uC804 \uC9C0\uB3C4\uC5D0\uC11C \uC0AC\uC6A9
     \xB7 \uC2A4\uD0AC \uCE78 \uC548 \uC500 \xB7 1~5\uB4F1\uAE09] \uB358\uC804 \uBA54\uB274\uC758
@@ -71,6 +72,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 1
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Thief_GhostStep
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Thief_GhostStep
-  oathName: Ghost Step
+  oathName: "\uC720\uB839 \uAC78\uC74C"
   jobClass: 3
   oathDescription: "\uD568\uC815 \uAC10\uC9C0\uC728 +25%.\n\uB3C4\uC8FC \uC131\uACF5\uB960
     +20%.\n\uC120\uC81C\uACF5\uACA9 \uB2F9\uD560 \uD655\uB960 -30%."

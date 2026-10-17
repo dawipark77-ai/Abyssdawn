@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Divine_T1_DivineLight
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Divine_T1_01
-  skillName: Divine Light
+  skillName: "\uC2E0\uC131\uD55C \uBE5B"
+  skillKey: Divine Light
   skillIcon: {fileID: 652824721443678339, guid: ae23fe189c58d314bbe31a6fe65340dd, type: 3}
   description: "\uB2E8\uC77C \uC544\uAD70/\uC801\uAD70 \uCD5C\uB300 HP 10% \uD68C\uBCF5.
     \uCD9C\uD608 \uC0C1\uD0DC \uB300\uC0C1\uC5D0\uAC8C\uB294 \uD68C\uBCF5\uB7C9 -30%."

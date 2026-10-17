@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Medicinal_Herb
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Medicinal Herb
+  itemName: "\uC57D\uCD08"
   icon: {fileID: 6867248042669577871, guid: 2c97f8b4d39c6364299368f5888da15f, type: 3}
-  description: Bitter, but it closes small wounds.
+  description: "\uC4F0\uC9C0\uB9CC \uC791\uC740 \uC0C1\uCC98\uB294 \uC544\uBB38\uB2E4."
   itemCategory: 0
   itemIcon: {fileID: 6867248042669577871, guid: 2c97f8b4d39c6364299368f5888da15f, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -29,7 +29,8 @@ MonoBehaviour:
   skillPointGain: 0
   sideEffectChance: 0.2
   sideEffectType: 2
-  sideEffectTurns: 3
+  sideEffectTurns: 10
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 50
   usableInBattle: 1

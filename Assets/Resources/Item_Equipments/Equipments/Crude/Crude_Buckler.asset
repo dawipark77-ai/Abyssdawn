@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   itemName: 
   icon: {fileID: 0}
-  description: A thin buckler. DEF +0, Block +3%, Parry Counter +20%.
-  equipmentName: Crude Buckler
+  description: "\uC587\uC740 \uBC84\uD074\uB7EC. \uBC29\uC5B4 +0, \uB9C9\uAE30 +3%,
+    \uD328\uB9AC \uBC18\uACA9 +20%."
+  equipmentName: "\uC870\uC7A1\uD55C \uBC84\uD074\uB7EC"
   equipmentIcon: {fileID: 0}
   flatIcon: {fileID: 0}
   equipmentType: 0

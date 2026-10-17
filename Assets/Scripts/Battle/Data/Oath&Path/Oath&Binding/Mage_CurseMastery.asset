@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mage_CurseMastery
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Mage_CurseMastery
-  oathName: Curse Mastery
+  oathName: "\uC800\uC8FC \uC219\uB2EC"
   jobClass: 2
   oathDescription: "\uBD80\uC5EC \uC800\uC8FC \uC9C0\uC18D\uC2DC\uAC04 +1\uD134.\n\uC790\uC2E0
     \uC800\uC8FC \uC9C0\uC18D\uC2DC\uAC04 -1\uD134.\n\uC800\uC8FC \uBD80\uC5EC \uC131\uACF5

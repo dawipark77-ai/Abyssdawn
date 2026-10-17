@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T2_RoundhouseKick
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T2_RoundhouseKick
-  skillName: Roundhouse Kick
+  skillName: "\uB3CC\uB824\uCC28\uAE30"
+  skillKey: Roundhouse Kick
   skillIcon: {fileID: 21300000, guid: 32c8c697d6bbd8e44b307261a825f65b, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4
     \uC788\uC5B4\uC57C \uD568] \uB3CC\uB824\uCC28\uAE30. \uC804\uC5F4\uC758 \uC801
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

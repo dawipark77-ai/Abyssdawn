@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_InnerCirculation
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T1_InnerCirculation
-  skillName: Inner Circulation
+  skillName: "\uB0B4\uACF5 \uC21C\uD658"
+  skillKey: Inner Circulation
   skillIcon: {fileID: 21300000, guid: d1ffc460304eeb94ba4eb46372842036, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uD328\uC2DC\uBE0C \xB7 1~3\uB4F1\uAE09]
     \uB0B4\uACF5\uC744 \uB3CC\uB9B0\uB2E4. \uB9E4 \uD134 \uB05D\uC5D0 \uCD5C\uB300
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

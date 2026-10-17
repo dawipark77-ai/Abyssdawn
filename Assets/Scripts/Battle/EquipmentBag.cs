@@ -41,6 +41,15 @@ public static class EquipmentBag
     /// <summary>하나 추가. 이미 MaxPerItem 개면 false.</summary>
     public static bool Add(EquipmentData item)
     {
+        // [2026-10-15] 장착 중인 장비(시작 장비 등)를 먼저 목록에 맞춘다 — 안 하면 같은 장비를 하나 더 주웠을 때
+        //   그게 장착 중인 것으로 세어져 목록에서 사라짐 (나무 막대기 2개 → 1개로 보이던 버그)
+        EnsureEquipped(UnityEngine.Object.FindFirstObjectByType<EquipmentManager>());
+        return AddLoaded(item);
+    }
+
+    /// <summary>세이브 불러오기용 — 장착 맞추기 없이 그대로 추가 (저장된 목록에 이미 장착 장비가 들어 있음).</summary>
+    public static bool AddLoaded(EquipmentData item)
+    {
         if (!CanAdd(item)) return false;
         _items.Add(item);
         OnChanged?.Invoke();

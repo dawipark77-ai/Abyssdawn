@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: 04FireMagic_SmolderingCurse
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_04
-  skillName: Smoldering Curse
+  skillName: "\uADF8\uC744\uB9B0 \uC800\uC8FC"
+  skillKey: Smoldering Curse
   skillIcon: {fileID: -7874233037761765674, guid: 23ad7eee9bb970f41aa81c81a4cd7256, type: 3}
-  description: Curses the target with smoldering flames. High ignite chance, no direct
-    damage.
+  description: "\uB300\uC0C1\uC5D0\uAC8C \uADF8\uC744\uB9B0 \uBD88\uAF43\uC758 \uC800\uC8FC\uB97C
+    \uAC74\uB2E4. \uC810\uD654 \uD655\uB960\uC774 \uB192\uACE0 \uC9C1\uC811 \uD53C\uD574\uB294
+    \uC5C6\uB2E4."
   usageType: 0
   damageType: 2
   scalingStat: 3
@@ -55,5 +57,20 @@ MonoBehaviour:
   backflowPerRank: []
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

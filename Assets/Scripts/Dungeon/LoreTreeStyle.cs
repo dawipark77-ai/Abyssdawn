@@ -178,7 +178,7 @@ public class LoreTreeStyle : MonoBehaviour
             }
             else
             {
-                t.text = "SKILL POINTS";
+                t.text = "스킬 포인트";
                 t.fontSize = 21f; t.fontStyle = FontStyles.Bold; t.color = GoldDim; t.characterSpacing = 4f;
                 t.alignment = TextAlignmentOptions.MidlineLeft;
                 t.enableWordWrapping = false;
@@ -210,7 +210,7 @@ public class LoreTreeStyle : MonoBehaviour
         tgo.transform.SetParent(go.transform, false);
         var t = tgo.AddComponent<TextMeshProUGUI>();
         SetFont(t);
-        t.text = "CLOSE"; t.fontSize = 22f; t.fontStyle = FontStyles.Bold; t.characterSpacing = 4f;
+        t.text = "닫기"; t.fontSize = 22f; t.fontStyle = FontStyles.Bold; t.characterSpacing = 4f;
         t.color = Gold; t.alignment = TextAlignmentOptions.Center; t.raycastTarget = false;
         var trt = t.rectTransform; trt.anchorMin = Vector2.zero; trt.anchorMax = Vector2.one; trt.offsetMin = trt.offsetMax = Vector2.zero;
     }
@@ -394,7 +394,22 @@ public class LoreTreeStyle : MonoBehaviour
             var x = close.GetComponentInChildren<TMP_Text>(true);
             if (x != null) { SetFont(x); x.text = "X"; x.fontSize = 30f; x.fontStyle = FontStyles.Bold; x.color = Gold; x.alignment = TextAlignmentOptions.Center; }
         }
+
+        // [2026-10-17] 창 전체(틀·글자·버튼)를 크게 — 717×933 → ×1.3 (화면 폭 1080 안)
+        var bgImg = pop.Find("Background_Image");
+        if (bgImg != null && bgImg.localScale.x < 1.01f)
+        {
+            foreach (Transform c in pop)
+            {
+                var rt = c as RectTransform;
+                if (rt == null) continue;
+                rt.anchoredPosition *= DetailPopupScale;
+                rt.localScale = Vector3.one * DetailPopupScale;
+            }
+        }
     }
+
+    private const float DetailPopupScale = 1.3f;
 
     private static TMP_Text FindText(Transform parent, string name)
     {

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Monk_T1_HarmonicStrike
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Monk_T1_HarmonicStrike
-  skillName: Harmonic Strike
+  skillName: "\uC870\uD654\uC758 \uC77C\uACA9"
   jobClass: 1
   tier: 1
   type: 1
@@ -23,3 +23,5 @@ MonoBehaviour:
     \uC801 \uACF5\uACA9.\n\uBA85\uC911 \uC2DC \uC790\uC2E0 HP Max\uC758 3%\uB97C
     \uD68C\uBCF5."
   drawbackDescription: "MP 5%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

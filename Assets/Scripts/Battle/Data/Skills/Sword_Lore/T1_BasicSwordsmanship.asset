@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_BasicSwordsmanship
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Swords_T1_01
-  skillName: Basic Swordsmanship
+  skillName: "\uAE30\uCD08 \uAC80\uC220"
+  skillKey: Basic Swordsmanship
   skillIcon: {fileID: 21300000, guid: e55bc0d89a2b3fe4881deeac7d680dce, type: 3}
   description: "[\uAC80 \uC7A5\uCC29 \uC2DC \xB7 \uD328\uC2DC\uBE0C] \uACF5\uACA9\uB825
     +2 (4\uB808\uBCA8\uB9C8\uB2E4 +1 \uCD94\uAC00), \uBA85\uC911\uB960 +5%. \uC55E\uC5F4\uC5D0
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

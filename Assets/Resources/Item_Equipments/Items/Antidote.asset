@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Antidote
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Antidote
+  itemName: "\uD574\uB3C5\uC81C"
   icon: {fileID: -2185028427614365439, guid: c14c0502dd717ba409d37cb24a06abc6, type: 3}
-  description: Poison kills over time. This steals that time away.
+  description: "\uB3C5\uC740 \uC2DC\uAC04\uC744 \uB4E4\uC5EC \uC8FD\uC778\uB2E4.
+    \uC774\uAC83\uC774 \uADF8 \uC2DC\uAC04\uC744 \uBE7C\uC557\uB294\uB2E4."
   itemCategory: 2
   itemIcon: {fileID: -2185028427614365439, guid: c14c0502dd717ba409d37cb24a06abc6, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -27,6 +28,10 @@ MonoBehaviour:
   escapeChanceBuff: 0
   buffDuration: 0
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 50
   usableInBattle: 1

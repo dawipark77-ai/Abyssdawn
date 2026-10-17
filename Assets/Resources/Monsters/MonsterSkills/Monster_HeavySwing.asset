@@ -13,9 +13,12 @@ MonoBehaviour:
   m_Name: Monster_HeavySwing
   m_EditorClassIdentifier: 
   skillID: Monster_HeavySwing
-  skillName: Heavy Swing
+  skillName: "\uBB35\uC9C1\uD55C \uD718\uB450\uB974\uAE30"
+  skillKey: Heavy Swing
   skillIcon: {fileID: 0}
-  description: Raises its weapon for a turn, then brings it down with crushing force. Guard or strike first!
+  description: "\uD55C \uD134 \uBB34\uAE30\uB97C \uCE58\uCF1C\uB4E0 \uB4A4 \uC628
+    \uD798\uC73C\uB85C \uB0B4\uB9AC\uCE5C\uB2E4. \uB9C9\uAC70\uB098 \uBA3C\uC800
+    \uCCD0\uB77C!"
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -58,6 +61,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -67,11 +74,11 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
   isBasicAttackOverride: 0
   atkMultiplierOverride: 0
   randomRollMaxOverride: 0
-  slotShiftAmount: 0
-  slotShiftChance: 1
   chargeTurns: 1
   chargeMessage: '{0} raises its axe high!'
   chargeIntentLabel: '!! HEAVY SWING'

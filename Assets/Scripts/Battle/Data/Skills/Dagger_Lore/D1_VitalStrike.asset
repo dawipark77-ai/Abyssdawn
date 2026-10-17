@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: D1_VitalStrike
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: D1_VitalStrike
-  skillName: Vital Strike
+  skillName: "\uAE09\uC18C \uD30C\uACE0\uB4E4\uAE30"
+  skillKey: Vital Strike
   skillIcon: {fileID: 21300000, guid: 04c3d9ec856ead242ab05f4555bebf09, type: 3}
   description: "[\uB2E8\uAC80\uC220 \xB7 \uD328\uC2DC\uBE0C \xB7 \uB2E8\uAC80 \uC7A5\uCC29]
     \uAE09\uC18C \uD30C\uACE0\uB4E4\uAE30. \uAE30\uBCF8 \uACF5\uACA9\uC774 \uD6C4\uC5F4\uC5D0\uC11C
@@ -63,6 +64,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: 05FireMagic_Pyroclasm
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_05
-  skillName: Pyroclasm
+  skillName: "\uD654\uC1C4\uB958"
+  skillKey: Pyroclasm
   skillIcon: {fileID: 926779604491896607, guid: 3f1f6dbbafdc29b4f9400ea67b59903d, type: 3}
-  description: Massive fire explosion. Only usable on ignited targets. High backflow
-    risk.
+  description: "\uAC70\uB300\uD55C \uD654\uC5FC \uD3ED\uBC1C. \uC810\uD654\uB41C
+    \uB300\uC0C1\uC5D0\uAC8C\uB9CC \uC4F8 \uC218 \uC788\uB2E4. \uC5ED\uB958 \uC704\uD5D8\uC774
+    \uB192\uB2E4."
   usageType: 0
   damageType: 2
   scalingStat: 3
@@ -55,5 +57,20 @@ MonoBehaviour:
   backflowPerRank: []
   requireTargetIgnited: 1
   selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

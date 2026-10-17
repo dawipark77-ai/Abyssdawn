@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 탐색 (픽셀 던전·이상한 던전식). 서치 버튼(이름 "Search_Button")을 누르면 플레이어 주변으로 탐색 물결이 퍼지고,
 /// 반경 안의 숨겨진 것(지금은 모르는 함정)을 찾아 자동 지도에 드러낸다.
-///  - 범위: radius 칸 (기본 2, 2026-10-15). 시야와 같은 규칙 — 벽·문 너머는 찾지 못함.
+///  - 범위: 기본 1칸, 함정 탐지 Lv2/3/5 → 2/3/4칸 (FieldSkills.SearchRadius, 2026-10-15). 시야와 같은 규칙 — 벽·문 너머는 찾지 못함.
 ///  - [2026-10-15] 턴을 쓰지 않는다 (costsTurn 기본 false) — 서치로 인카운터가 나지 않게
 ///    걸음 회복·빛 소모도 한 걸음만큼 진행. 무한 연타를 막는 대가.
 ///  - 물결이 도는 동안은 이동이 잠긴다.
@@ -19,7 +19,7 @@ public class DungeonSearch : MonoBehaviour
 
     [Header("탐색")]
     [Tooltip("탐색 반경 (칸)")]
-    public int radius = 2;
+    public int radius = 1; // (표시용 — 실제 반경은 FieldSkills.SearchRadius)
     [Tooltip("탐색하면 한 턴이 지난다 (위험도 상승·인카운터 판정, 걸음 회복·빛 소모 한 걸음)")]
     public bool costsTurn = false;
 
@@ -54,7 +54,7 @@ public class DungeonSearch : MonoBehaviour
         {
             button.onClick.RemoveListener(Search);
             button.onClick.AddListener(Search);
-            Debug.Log($"[DungeonSearch] '{buttonName}' 버튼 연결 (반경 {radius}칸)");
+            Debug.Log($"[DungeonSearch] '{buttonName}' 버튼 연결 (반경 {FieldSkills.SearchRadius()}칸)");
         }
         else Debug.LogWarning($"[DungeonSearch] '{buttonName}' 버튼을 찾지 못했습니다. F 키로만 탐색할 수 있습니다.");
     }
@@ -62,7 +62,7 @@ public class DungeonSearch : MonoBehaviour
 #if UNITY_EDITOR || UNITY_STANDALONE
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F)) Search();
+        if (Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Q)) Search(); // [2026-10-17] Q 키로도 서치
     }
 #endif
 
@@ -87,8 +87,7 @@ public class DungeonSearch : MonoBehaviour
         _busy = true;
         _player.LockInput(this);
         Vector2Int pos = _player.gridPos;
-        int searchR = radius + (FieldSkills.Has(FieldSkills.TrapDetection) ? FieldSkills.TrapDetectSearchBonus : 0) // 함정 감지: 반경 +1
-                    + Disposition.SearchBonus; // [2026-10-14] 성향 탐험가: +1
+        int searchR = FieldSkills.SearchRadius(); // [2026-10-15] 기본 1칸, 함정 탐지 등급으로 2·3·4칸 (성향 보너스 없음)
         _map.FindHiddenAround(pos, searchR, _found);
 
         // 1) 탐색 물결 — [2026-10-14] 레트로 느낌: 바닥 칸 크기의 사각 타일이 한 칸씩 사각 링으로 퍼진다.
@@ -147,14 +146,14 @@ public class DungeonSearch : MonoBehaviour
         {
             var item = Resources.Load<AbyssdawnBattle.ConsumableItemSO>(HerbResource);
             if (item != null && ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(item, 1) > 0)
-                herb = $"\n<size=80%><color=#9FFF9F>You gather a {item.itemName}.</color></size>";
+                herb = $"\n<size=80%><color=#9FFF9F>{item.itemName}을(를) 채집했다.</color></size>";
         }
 
         Toast((_found.Count == 0
-            ? "<color=#AAAAAA>You search the area... nothing.</color>"
+            ? "<color=#AAAAAA>주변을 살폈다... 아무것도 없다.</color>"
             : _found.Count == 1
-                ? $"<color=#FF8A70>You found a hidden {MapManager.TrapLabel(_map.FloorData.GetCell(_found[0]).trap)}!</color>"
-                : $"<color=#FF8A70>You found {_found.Count} hidden traps!</color>") + herb);
+                ? $"<color=#FF8A70>숨은 {MapManager.TrapLabel(_map.FloorData.GetCell(_found[0]).trap)}을(를) 찾았다!</color>"
+                : $"<color=#FF8A70>숨은 함정 {_found.Count}개를 찾았다!</color>") + herb);
         Debug.Log($"[DungeonSearch] B{_map.FloorData.floorNumber} {pos} 반경 {searchR} 탐색 → 숨은 함정 {_found.Count}개");
 
         _player.UnlockInput(this);

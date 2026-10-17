@@ -11,11 +11,13 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7e4c93a1f2d4856ab09cd3e5f7081a2, type: 3}
   m_Name: Monster_WoundLicking
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   skillID: Monster_WoundLicking
-  skillName: Wound Licking
+  skillName: "\uC0C1\uCC98 \uD565\uAE30"
+  skillKey: Wound Licking
   skillIcon: {fileID: 0}
-  description: "Lick wounds to recover 5% of max HP. Cannot be used at full HP."
+  description: "\uC0C1\uCC98\uB97C \uD565\uC544 \uCD5C\uB300 HP 5% \uD68C\uBCF5.
+    HP\uAC00 \uAC00\uB4DD\uD558\uBA74 \uC4F8 \uC218 \uC5C6\uB2E4."
   usageType: 0
   damageType: 0
   scalingStat: 0
@@ -24,7 +26,7 @@ MonoBehaviour:
     targetFaction: 2
     allowedCasterSlots: 15
     allowedTargetSlots: 15
-    specificSlots:
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -39,15 +41,15 @@ MonoBehaviour:
   - effectType: 2
     recoveryTarget: 0
     effectAmount: 5
-    curseData: {fileID: 0}
-    curseChance: 0
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription:
+  dunbreakDescription: 
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -60,9 +62,13 @@ MonoBehaviour:
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
   armorBreakPercent: 0
-  requiresPreviousSkillId:
+  requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -72,6 +78,11 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
   isBasicAttackOverride: 0
   atkMultiplierOverride: 0
   randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

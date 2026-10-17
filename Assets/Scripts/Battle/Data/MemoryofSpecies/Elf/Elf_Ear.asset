@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Elf_Ear
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Elf_Ear
-  memoryName: Pointed Ear
-  subtitle: Mana-Sensitive Ears
+  memoryName: "\uBFB0\uC871\uD55C \uADC0"
+  subtitle: "\uB9C8\uB098\uC5D0 \uC608\uBBFC\uD55C \uADC0"
   species: 1
-  memoryIcon: {fileID: 0}
+  memoryIcon: {fileID: 21300000, guid: 280d5d8d222c0384283debc6fa5bc9b0, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
@@ -47,8 +47,9 @@ MonoBehaviour:
     MP +15\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4 \uCD5C\uB300 MP +0.2 (\uC18C\uC218\uC810\uC740
     \uC313\uC784)\n\uB808\uBCA8\uC5C5 \uB54C \uB9C8\uB825\uC774 \uC624\uB97C \uD655\uB960
     +20%p"
-  flavorText: Every whisper of mana is pain and power both, sharpening their spellcraft
-    while wearing down their bodies.
+  flavorText: "\uB9C8\uB098\uC758 \uC18D\uC0AD\uC784 \uD558\uB098\uD558\uB098\uAC00
+    \uACE0\uD1B5\uC774\uC790 \uD798\uC774\uB2E4. \uB9C8\uBC95\uC740 \uB0A0\uCE74\uB85C\uC6CC\uC9C0\uC9C0\uB9CC
+    \uBAB8\uC740 \uB2F3\uB294\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

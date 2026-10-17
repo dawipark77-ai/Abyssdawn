@@ -11,11 +11,13 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7e4c93a1f2d4856ab09cd3e5f7081a2, type: 3}
   m_Name: Monster_Enrage
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   skillID: Monster_Enrage
-  skillName: Enrage
+  skillName: "\uACA9\uB178"
+  skillKey: Enrage
   skillIcon: {fileID: 0}
-  description: "Enters a rage state. Attack power increases by 10% on the next turn."
+  description: "\uACA9\uB178\uD55C\uB2E4. \uB2E4\uC74C \uD134 \uACF5\uACA9\uB825
+    +10%."
   usageType: 0
   damageType: 0
   scalingStat: 0
@@ -24,7 +26,7 @@ MonoBehaviour:
     targetFaction: 2
     allowedCasterSlots: 15
     allowedTargetSlots: 15
-    specificSlots:
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -42,7 +44,7 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription:
+  dunbreakDescription: 
   curseEffect: {fileID: 11400000, guid: a94b3091769d48108af20b197339d016, type: 2}
   curseApplyChance: 1
   backflowChance: 0
@@ -55,9 +57,13 @@ MonoBehaviour:
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
   armorBreakPercent: 0
-  requiresPreviousSkillId:
+  requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -67,6 +73,11 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
   isBasicAttackOverride: 0
   atkMultiplierOverride: 0
   randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: EX_T1_TrapDetection
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Explore_TrapDetection
-  skillName: Trap Detection
+  skillName: "\uD568\uC815 \uD0D0\uC9C0"
+  skillKey: Trap Detection
   skillIcon: {fileID: 21300000, guid: 58da1a4385be36c4da354031ce36bb9f, type: 3}
   description: "[\uD0D0\uD5D8 \xB7 \uBC30\uC6B0\uBA74 \uD56D\uC0C1 \uC801\uC6A9 \xB7
-    \uC2A4\uD0AC \uCE78 \uC548 \uC500] \uAC78\uC744 \uB54C \uC8FC\uBCC0 1\uCE78\uC758
-    \uC228\uC740 \uD568\uC815\uC744 15% \uD655\uB960\uB85C \uC54C\uC544\uCC48\uB2E4.
-    \uC11C\uCE58 \uBC18\uACBD +1. \uC228\uC740 \uD568\uC815\uC744 \uBC1F\uAE30 \uC9C1\uC804
-    50% \uD655\uB960\uB85C \uBA48\uCD98\uB2E4."
+    \uC2A4\uD0AC \uCE78 \uC548 \uC500 \xB7 1~5\uB4F1\uAE09] \uAC78\uC744 \uB54C \uC8FC\uBCC0
+    1\uCE78\uC758 \uC228\uC740 \uD568\uC815\uC744 15% \uD655\uB960\uB85C \uC54C\uC544\uCC48\uB2E4.
+    \uC228\uC740 \uD568\uC815\uC744 \uBC1F\uAE30 \uC9C1\uC804 50% \uD655\uB960\uB85C
+    \uBA48\uCD98\uB2E4.\n\uC11C\uCE58 \uBC94\uC704 (\uAE30\uBCF8 1\uCE78): Lv2 2\uCE78
+    \xB7 Lv3 3\uCE78 \xB7 Lv4 3\uCE78 \xB7 Lv5 4\uCE78"
   usageType: 2
   damageType: 0
   scalingStat: 4
@@ -46,14 +48,15 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: This turn, completely evade first enemy attack + counterattack
+  dunbreakDescription: "\uC774\uBC88 \uD134 \uCCAB \uC801 \uACF5\uACA9\uC744 \uC644\uC804\uD788
+    \uD53C\uD558\uACE0 \uBC18\uACA9"
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
   backflowType: 0
   backflowStatusEffect: {fileID: 0}
   backflowSuppression: 0
-  maxRank: 0
+  maxRank: 5
   bonusPerRank: []
   backflowPerRank: []
   requireTargetIgnited: 0
@@ -64,6 +67,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 1
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

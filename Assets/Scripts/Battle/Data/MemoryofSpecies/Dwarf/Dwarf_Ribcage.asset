@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Dwarf_Ribcage
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Dwarf_Ribcage
-  memoryName: Ribcage
-  subtitle: Expanded Thorax
+  memoryName: "\uD749\uACFD"
+  subtitle: "\uB113\uC740 \uD749\uACFD"
   species: 4
   memoryIcon: {fileID: 0}
   hpBonusPercent: 20
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 0
   agilityBonus: -1
@@ -40,7 +45,8 @@ MonoBehaviour:
   description: "\uCD5C\uB300 HP +20%\n\uBBFC\uCCA9 -1\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
     \uCD5C\uB300 HP +0.3 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
     \uB54C \uBC29\uC5B4\uAC00 \uC624\uB97C \uD655\uB960 +10%p"
-  flavorText: Broad chests hold deep lungs and stubborn hearts.
+  flavorText: "\uB113\uC740 \uAC00\uC2B4\uC5D0 \uAE4A\uC740 \uD3D0\uC640 \uACE0\uC9D1
+    \uC13C \uC2EC\uC7A5\uC774 \uB4E4\uC5B4 \uC788\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

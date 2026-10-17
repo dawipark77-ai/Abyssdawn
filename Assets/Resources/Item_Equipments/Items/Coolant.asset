@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Coolant
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Coolant
+  itemName: "\uB0C9\uAC01\uC81C"
   icon: {fileID: -7324355551065766614, guid: 1cdfdc1aff8dee34fb7735b0ed24c961, type: 3}
-  description: Fire can be put out. The scars remain, though.
+  description: "\uBD88\uC740 \uB04C \uC218 \uC788\uB2E4. \uD749\uD130\uB294 \uB0A8\uC9C0\uB9CC."
   itemCategory: 2
   itemIcon: {fileID: -7324355551065766614, guid: 1cdfdc1aff8dee34fb7735b0ed24c961, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
@@ -27,6 +27,10 @@ MonoBehaviour:
   escapeChanceBuff: 0
   buffDuration: 0
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 50
   usableInBattle: 1

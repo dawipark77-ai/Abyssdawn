@@ -188,8 +188,8 @@ public class DungeonHud : MonoBehaviour
             PlayerStats.PendingLevelUpNotes.RemoveAt(i);
         }
         _lvRandom.text = parts.Count > 0
-            ? "Random growth\n" + string.Join("\n", parts)
-            : "Random growth applied";
+            ? "무작위 성장\n" + string.Join("\n", parts)
+            : "무작위 성장 적용";
 
         RefreshLevelUp();
         _levelUp.SetActive(true);
@@ -203,9 +203,9 @@ public class DungeonHud : MonoBehaviour
     private void RefreshLevelUp()
     {
         if (_lvHero == null) return;
-        _lvTitle.text = $"<color=#FFD24A>LEVEL UP!</color>  Lv {_lvHero.level}";
+        _lvTitle.text = $"<color=#FFD24A>레벨 업!</color>  Lv {_lvHero.level}";
         int pts = _lvHero.FreeStatPoints;
-        _lvPrompt.text = $"Choose a stat to raise  <color=#FFD24A>({pts} point{(pts == 1 ? "" : "s")})</color>";
+        _lvPrompt.text = $"올릴 스탯을 고르세요  <color=#FFD24A>({pts} 포인트)</color>";
         int[] values = { _lvHero.Attack, _lvHero.Defense, _lvHero.Magic, _lvHero.Agility, _lvHero.Luck };
         for (int i = 0; i < LvStats.Length; i++)
         {
@@ -287,7 +287,7 @@ public class DungeonHud : MonoBehaviour
         TextMeshProUGUI later = CreateButton(panel.rectTransform, "Later", new Vector2(0f, 40f), new Color(0.1f, 0.1f, 0.1f, 0.85f),
                                              new Color(0.8f, 0.8f, 0.8f), () => CloseLevelUp(true));
         later.fontSize = 32;
-        later.text = "Later";
+        later.text = "나중에";
         ((RectTransform)later.transform.parent).sizeDelta = new Vector2(220f, 70f);
 
         _levelUp.SetActive(false);
@@ -312,7 +312,7 @@ public class DungeonHud : MonoBehaviour
         bool withMap = explored >= 0f;
         bool complete = explored >= 0.9999f;
         _floorText.text = withMap
-            ? $"B{floor}  <size=70%><color={(complete ? "#FFD24A" : "#BBBBBB")}>Mapped {(complete ? 100 : Mathf.FloorToInt(explored * 100f))}%</color></size>"
+            ? $"B{floor}  <size=70%><color={(complete ? "#FFD24A" : "#BBBBBB")}>지도 {(complete ? 100 : Mathf.FloorToInt(explored * 100f))}%</color></size>"
             : $"B{floor}";
         _floorBg.sizeDelta = new Vector2(withMap ? 520f : 220f, _floorBg.sizeDelta.y);
     }
@@ -398,7 +398,7 @@ public class DungeonHud : MonoBehaviour
     /// </summary>
     public void ChooseSkillSlot(string title, IList<string> slotLabels, Action<int> onPick)
     {
-        Choose(title, slotLabels, "Later", true, onPick);
+        Choose(title, slotLabels, "나중에", true, onPick);
     }
 
     /// <summary>여러 선택지 창 (2열 버튼 + 맨 아래 취소). numbered 면 버튼 앞에 번호. 취소 = -1.</summary>
@@ -601,7 +601,7 @@ public class DungeonHud : MonoBehaviour
     public void ShowShop(TownShop.Kind kind)
     {
         _shopKind = kind;
-        if (_shopTitle != null) _shopTitle.text = kind == TownShop.Kind.Arms ? "<color=#FFD24A>ARMS</color>" : "<color=#FFD24A>GENERAL STORE</color>";
+        if (_shopTitle != null) _shopTitle.text = kind == TownShop.Kind.Arms ? "<color=#FFD24A>무기점</color>" : "<color=#FFD24A>잡화점</color>";
         OpenShopPanel();
     }
 
@@ -631,6 +631,7 @@ public class DungeonHud : MonoBehaviour
         GameObject prefab = Resources.Load<GameObject>(ShopPanelResource);
         _shop = prefab != null ? Instantiate(prefab, _overlayRoot, false) : BuildShopPanel(_overlayRoot);
         _shop.name = "ShopPanel";
+        ButtonSkin.ApplyPlain(_shop.transform); // [2026-10-17] (줄 견본도 여기서 입혀 두면 복제한 줄도 같은 배경)
 
         Transform rows = FindChildRecursive(_shop.transform, "Rows");
         _shopRows = rows as RectTransform;
@@ -758,7 +759,7 @@ public class DungeonHud : MonoBehaviour
         if (_shopEmpty != null)
         {
             _shopEmpty.gameObject.SetActive(list.Count == 0);
-            _shopEmpty.text = _shopSelling ? "Nothing to sell." : "Nothing for sale.";
+            _shopEmpty.text = _shopSelling ? "팔 물건이 없다." : "파는 물건이 없다.";
         }
         foreach (TownShop.Entry e in list)
         {
@@ -781,7 +782,7 @@ public class DungeonHud : MonoBehaviour
             {
                 // [2026-10-09] 같은 장비도 다시 살 수 있음 (쌍수) — 30개까지
                 bool full = !_shopSelling && e.equipment != null && !EquipmentBag.CanAdd(e.equipment);
-                SetText(act, "Label", _shopSelling ? "Sell" : full ? "Full" : "Buy");
+                SetText(act, "Label", _shopSelling ? "팔기" : full ? "가득" : "사기");
                 bool canBuy = _shopSelling || (!full && PlayerWallet.Gold >= price);
                 btn.interactable = canBuy;
                 TownShop.Entry captured = e;
@@ -793,10 +794,10 @@ public class DungeonHud : MonoBehaviour
                     if (!string.IsNullOrEmpty(msg)) Toast(msg);
                     RefreshShop();
                     // [2026-10-09] 장비를 샀으면 바로 장착할지 묻는다 (자동 장착 없음)
-                    if (!selling && captured.equipment != null && msg != null && msg.StartsWith("Bought"))
+                    if (!selling && captured.equipment != null && msg != null && msg.Contains("구입")) // [2026-10-17] 한글 문구 기준 (예전 "Bought" 는 번역 뒤 안 맞아 질문이 안 떴음)
                     {
                         AbyssdawnBattle.EquipmentData bought = captured.equipment;
-                        Confirm($"Equip <b>{captured.Name}</b> now?", "Equip", "Later", yes =>
+                        Confirm($"<b>{captured.Name}</b>을(를) 지금 장착할까?", "장착", "나중에", yes =>
                         {
                             var mgr = FindFirstObjectByType<EquipmentManager>(FindObjectsInactive.Include);
                             if (yes && mgr != null && EquipmentBag.HasSpare(mgr, bought))
@@ -804,12 +805,12 @@ public class DungeonHud : MonoBehaviour
                                 // [2026-10-09] 한손 장비는 어느 손에 들지 고른 뒤 장착
                                 EquipHandPicker.Equip(mgr, bought, ok =>
                                 {
-                                    if (ok) Toast($"<color=#9FFF9F>Equipped {captured.Name}.</color>");
+                                    if (ok) Toast($"<color=#9FFF9F>{captured.Name}을(를) 장착했다.</color>");
                                     RefreshShop();
                                 });
                                 return;
                             }
-                            if (yes && mgr == null && TownShop.Equip(bought)) Toast($"<color=#9FFF9F>Equipped {captured.Name}.</color>");
+                            if (yes && mgr == null && TownShop.Equip(bought)) Toast($"<color=#9FFF9F>{captured.Name}을(를) 장착했다.</color>");
                             RefreshShop();
                         });
                     }
@@ -857,7 +858,7 @@ public class DungeonHud : MonoBehaviour
         SetAnchor(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 1500f));
 
         TextMeshProUGUI title = CreateText(panel.rectTransform, "Title", 58, FontStyles.Bold, TextAlignmentOptions.Center);
-        title.text = "<color=#FFD24A>SHOP</color>";
+        title.text = "<color=#FFD24A>상점</color>";
         Place(title.rectTransform, 0f, -46f, 880f, 76f);
 
         TextMeshProUGUI gold = CreateText(panel.rectTransform, "Gold", 40, FontStyles.Bold, TextAlignmentOptions.Right);
@@ -873,7 +874,7 @@ public class DungeonHud : MonoBehaviour
             var b = tab.gameObject.AddComponent<Button>();
             b.targetGraphic = tab;
             TextMeshProUGUI l = CreateText(tab.rectTransform, "Label", 38, FontStyles.Bold, TextAlignmentOptions.Center);
-            l.text = i == 0 ? "Buy" : "Sell";
+            l.text = i == 0 ? "사기" : "팔기";
             Stretch(l.rectTransform);
         }
 
@@ -918,19 +919,19 @@ public class DungeonHud : MonoBehaviour
         var actBtn = act.gameObject.AddComponent<Button>();
         actBtn.targetGraphic = act;
         TextMeshProUGUI actLabel = CreateText(act.rectTransform, "Label", 36, FontStyles.Bold, TextAlignmentOptions.Center);
-        actLabel.text = "Buy";
+        actLabel.text = "사기";
         actLabel.color = new Color(1f, 0.92f, 0.65f);
         Stretch(actLabel.rectTransform);
 
         TextMeshProUGUI empty = CreateText(panel.rectTransform, "Empty", 36, FontStyles.Normal, TextAlignmentOptions.Center);
-        empty.text = "Nothing to sell.";
+        empty.text = "팔 물건이 없다.";
         empty.color = new Color(0.7f, 0.7f, 0.7f);
         Place(empty.rectTransform, 0f, -420f, 880f, 60f);
         empty.gameObject.SetActive(false);
 
         TextMeshProUGUI close = CreateButton(panel.rectTransform, "Close", new Vector2(0f, 44f), new Color(0.1f, 0.1f, 0.1f, 0.85f),
                                              new Color(0.85f, 0.85f, 0.85f), null);
-        close.text = "Close";
+        close.text = "닫기";
         close.fontSize = 34;
         ((RectTransform)close.transform.parent).sizeDelta = new Vector2(240f, 76f);
 
@@ -990,6 +991,7 @@ public class DungeonHud : MonoBehaviour
             _town = BuildTownPanel(_overlayRoot);
         }
         BindTownButtons(_town);
+        ButtonSkin.ApplyPlain(_town.transform); // [2026-10-17] 마을 버튼도 금테 패널 배경
         _town.SetActive(false);
     }
 
@@ -1022,15 +1024,16 @@ public class DungeonHud : MonoBehaviour
         SetAnchor(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 600f));
 
         TextMeshProUGUI title = CreateText(panel.rectTransform, "Title", 58, FontStyles.Bold, TextAlignmentOptions.Center);
-        title.text = "<color=#FFD24A>TOWN</color>";
+        title.text = "<color=#FFD24A>마을</color>";
         Place(title.rectTransform, 0f, -46f, 880f, 76f);
         TextMeshProUGUI sub = CreateText(panel.rectTransform, "Subtitle", 32, FontStyles.Normal, TextAlignmentOptions.Center);
-        sub.text = "<color=#BBBBBB>A moment of light above the abyss.</color>";
+        sub.text = "<color=#BBBBBB>심연 위의 잠깐의 빛.</color>";
         Place(sub.rectTransform, 0f, -122f, 880f, 50f);
 
         // 명령 3개 (가로 한 줄)
         string[] names = { "Inn", "Shop", "Save" };
-        string[] descs = { "Rest and fully\nrecover the party", "Buy and sell\nsupplies", "Record your\njourney" };
+        string[] descs = { "쉬면서 파티를\n모두 회복", "물자를\n사고팔기", "여정을\n기록" };
+        string[] labelsKo = { "여관", "상점", "기록" };
         const float w = 270f, gap = 24f;
         float startX = -(w * 3 + gap * 2) / 2f + w / 2f;
         for (int i = 0; i < 3; i++)
@@ -1050,7 +1053,7 @@ public class DungeonHud : MonoBehaviour
             var btn = btnImg.gameObject.AddComponent<Button>();
             btn.targetGraphic = btnImg;
             TextMeshProUGUI label = CreateText(rt, "Label", 50, FontStyles.Bold, TextAlignmentOptions.Center);
-            label.text = names[i];
+            label.text = labelsKo[i];
             label.color = new Color(1f, 0.92f, 0.65f);
             Place(label.rectTransform, 0f, -30f, w - 20f, 70f);
             TextMeshProUGUI desc = CreateText(rt, "Desc", 28, FontStyles.Normal, TextAlignmentOptions.Center);
@@ -1061,7 +1064,7 @@ public class DungeonHud : MonoBehaviour
         // 마을 나가기 (명령이 아니라 창 닫기)
         TextMeshProUGUI leave = CreateButton(panel.rectTransform, "Leave", new Vector2(0f, 40f), new Color(0.1f, 0.1f, 0.1f, 0.85f),
                                              new Color(0.85f, 0.85f, 0.85f), null);
-        leave.text = "Leave";
+        leave.text = "떠나기";
         leave.fontSize = 34;
         ((RectTransform)leave.transform.parent).sizeDelta = new Vector2(240f, 76f);
 
@@ -1238,6 +1241,7 @@ public class DungeonHud : MonoBehaviour
         TextMeshProUGUI label = CreateText(img.rectTransform, "Label", 40, FontStyles.Bold, TextAlignmentOptions.Center);
         label.color = fg;
         Stretch(label.rectTransform);
+        ButtonSkin.Apply(button); // [2026-10-17] 모든 버튼 = 금테 패널 배경
         return label;
     }
 

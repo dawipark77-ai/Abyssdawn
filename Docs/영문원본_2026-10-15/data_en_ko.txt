@@ -1,0 +1,198 @@
+A martial artist who relies on agility and inner power.	민첩과 내공에 기대어 싸우는 무도가.
+Inner Flow	내면의 흐름
+Unarmed damage +10%. Physical skills cost MP instead of HP.\nCost: Accuracy -10% with two-handed weapons.	맨손 피해 +10%. 물리 스킬이 HP 대신 MP를 쓴다.\n대가: 양손 무기를 들면 명중 -10%.
+No class selected. Neutral baseline.	직업 없음. 기본 상태.
+A devoted healer who balances sacred magic with modest physical ability.	신성 마법과 약간의 몸싸움을 겸하는 헌신적인 치유자.
+A thief specialized in Agility and Luck.	민첩과 행운으로 싸우는 도적.
+Light Fingers	가벼운 손
+Crit chance +5%. First turn Agility +15%.\nCost: Evasion -10% in heavy armour.	치명타 확률 +5%. 첫 턴 민첩 +15%.\n대가: 무거운 갑옷을 입으면 회피 -10%.
+A warrior specialized in close combat.	근접 전투에 특화된 전사.
+Weapon Discipline	무기 단련
+Hit chance +5% with any weapon.	어떤 무기든 명중 +5%.
+A wizard specialized in powerful magic.	강력한 마법에 특화된 마법사.
+Armor Break	방어구 파괴
+Deals additional fixed damage equal to a percentage of the target's defense.	대상 방어력의 일정 비율만큼 고정 추가 피해.
+Block	막기
+Blocks an enemy attack and reduces incoming damage.	적 공격을 막아 받는 피해를 줄인다.
+A roughly ground axe. ATK +2.	대충 간 도끼. 공격 +2.
+Crude Axe	조잡한 도끼
+A warped bow. ATK +1, AGI +1.	휘어진 활. 공격 +1, 민첩 +1.
+Crude Bow	조잡한 활
+A thin buckler. DEF +0, Block +3%, Parry Counter +20%.	얇은 버클러. 방어 +0, 막기 +3%, 패리 반격 +20%.
+Crude Buckler	조잡한 버클러
+A rickety crossbow. ATK +2.	삐걱거리는 석궁. 공격 +2.
+Crude Crossbow	조잡한 석궁
+A crudely made dagger. ATK +1, AGI +1.	조잡하게 만든 단검. 공격 +1, 민첩 +1.
+Crude Dagger	조잡한 단검
+Heavy and thick. DEF +2, Block +8%, AGI -2.	무겁고 두껍다. 방어 +2, 막기 +8%, 민첩 -2.
+Crude Greatshield	조잡한 대방패
+Heavy and rough. ATK +2.	무겁고 거칠다. 공격 +2.
+Crude Greatsword	조잡한 대검
+An unbalanced hammer. ATK +2.	균형이 안 맞는 망치. 공격 +2.
+Crude Hammer	조잡한 망치
+A poorly tempered blade. ATK +1, AGI +1.	담금질이 엉성한 칼날. 공격 +1, 민첩 +1.
+Crude Katana	조잡한 도
+An unbalanced polearm. ATK +1, ACC +1%.	균형이 안 맞는 폴암. 공격 +1, 명중 +1%.
+Crude Polearm	조잡한 폴암
+A crude wooden shield. DEF +1, Block +5%.	조잡한 나무 방패. 방어 +1, 막기 +5%.
+Crude Wooden Shield	조잡한 나무 방패
+A roughly carved spear. ATK +1, ACC +2%.	대충 깎은 창. 공격 +1, 명중 +2%.
+Crude Spear	조잡한 창
+An unbalanced two-handed staff. MAG +2, Max MP +8%.	균형이 안 맞는 양손 지팡이. 마력 +2, 최대 MP +8%.
+Crude Staff	조잡한 지팡이
+A roughly carved magic rod. MAG +1, Max MP +5%.	대충 깎은 마법 막대. 마력 +1, 최대 MP +5%.
+Crude Wand	조잡한 완드
+Offers some protection, but movement feels rather stiff.	어느 정도 막아 주지만 움직임이 꽤 뻣뻣하다.
+Crude Armour	조잡한 갑옷
+Better than bare feet, but the heels keep rubbing raw.	맨발보단 낫지만 뒤꿈치가 계속 쓸린다.
+Crude Boots	조잡한 장화
+Cheap trinkets clank together, drawing unwanted attention. Max HP +5.	싸구려 장신구가 짤랑거려 괜한 눈길을 끈다. 최대 HP +5.
+Crude Bracelet	조잡한 팔찌
+Looks more like a lid than a shield. 2.5x damage penalty on parry failure.	방패라기보다 냄비 뚜껑 같다. 패리 실패 시 피해 2.5배.
+Crude Shield	조잡한 방패
+Every swing leaves a dull ache in the wrist. ATK +5, ACC -5%.	휘두를 때마다 손목이 욱신거린다. 공격 +5, 명중 -5%.
+Crude Sword	조잡한 검
+Bone Club	뼈 몽둥이
+A thick thigh bone with a knot of sinew for a grip. ATK +1.	힘줄을 감아 손잡이로 삼은 굵은 넓적다리뼈. 공격 +1.
+Bone Shiv	뼈 송곳
+A sharpened sliver of rat bone. It breaks skin, not much else. ATK +0, AGI +1.	날카롭게 간 쥐뼈 조각. 살갗은 뚫지만 그뿐이다. 공격 +0, 민첩 +1.
+Broken Spear Shaft	부러진 창 자루
+The head is long gone; someone whittled the end to a point. ATK +1.	창날은 오래전에 사라졌고, 누군가 끝을 뾰족하게 깎았다. 공격 +1.
+Rusty Hatchet	녹슨 손도끼
+More rust than blade. It still chops, eventually. ATK +1.	칼날보다 녹이 많다. 그래도 언젠가는 잘린다. 공격 +1.
+Tattered Clothes	해진 옷
+Wooden Stick	나무 막대기
+A branch snapped off a dead tree. Barely a weapon, but you can practise sword forms with it. ATK +1.	죽은 나무에서 꺾은 가지. 무기라 하기 힘들지만 검술 연습은 된다. 공격 +1.
+Antidote	해독제
+Poison kills over time. This steals that time away.	독은 시간을 들여 죽인다. 이것이 그 시간을 빼앗는다.
+Bandage	붕대
+Tied rough, but the bleeding stops.	거칠게 묶었지만 피는 멎는다.
+Coolant	냉각제
+Fire can be put out. The scars remain, though.	불은 끌 수 있다. 흉터는 남지만.
+Dawn Chalice	새벽의 잔
+Even in the abyss, dawn will come. At least, that is what we must believe.	심연에도 새벽은 온다. 적어도 그렇게 믿어야 한다.
+HP Potion	HP 포션
+Alive is enough.	살아 있으면 된다.
+Mana Potion	마나 포션
+The power returns. Briefly, but it does.	힘이 돌아온다. 잠깐이지만.
+Medicinal Herb	약초
+Bitter, but it closes small wounds.	쓰지만 작은 상처는 아문다.
+Purification Water	정화수
+Water drawn from the abyss. It washes away all darkness.	심연에서 길어 올린 물. 모든 어둠을 씻어 낸다.
+Smoke Bomb	연막탄
+What they cannot see, they cannot hit.	보이지 않으면 맞힐 수 없다.
+Stimulant	각성제
+A brief awakening. There is always a price to pay.	짧은 각성. 언제나 대가가 따른다.
+Trap Parts	함정 부품
+Springs, wire and a sharp edge. Someone in town will pay for these.	용수철, 철사, 날카로운 날. 마을의 누군가는 돈을 쳐 줄 것이다.
+Whetstone	숫돌
+A sharper edge means less effort.	날이 설수록 힘이 덜 든다.
+Bat	박쥐
+Goblin	고블린
+Orc	오크
+Rat	쥐
+Skeleton	스켈레톤
+Skeleton Knight	해골 기사
+Slime	슬라임
+Wizard	위저드
+Beard	수염
+Ore-Sensing Beard	광석을 느끼는 수염
+Their beards twitch at the scent of ore and buried treasure.	광석과 묻힌 보물 냄새에 수염이 움찔거린다.
+Forearm	팔뚝
+Thick Forearm Muscles	굵은 팔뚝 근육
+Arms forged by a lifetime of hammer blows swing weapons with brutal force.	평생 망치질로 단련된 팔이 무기를 무자비하게 휘두른다.
+Retina	망막
+Infrared-Sensing Retina	적외선을 느끼는 망막
+They see heat where others see only darkness, but miss subtler fortunes.	남들이 어둠만 볼 때 열기를 보지만, 미묘한 행운은 놓친다.
+Ribcage	흉곽
+Expanded Thorax	넓은 흉곽
+Broad chests hold deep lungs and stubborn hearts.	넓은 가슴에 깊은 폐와 고집 센 심장이 들어 있다.
+High-Density Calcium Bones	고밀도 칼슘 뼈
+Their bones are like stone, and just as slow to move.	뼈가 돌 같고, 돌처럼 굼뜨다.
+Pointed Ear	뾰족한 귀
+Mana-Sensitive Ears	마나에 예민한 귀
+Every whisper of mana is pain and power both, sharpening their spellcraft while wearing down their bodies.	마나의 속삭임 하나하나가 고통이자 힘이다. 마법은 날카로워지지만 몸은 닳는다.
+Hair	머리카락
+Light-Touched Hair	빛이 깃든 머리카락
+Hair that remembers the sun holds traces of ancient blessings, but the body beneath remains fragile.	해를 기억하는 머리카락에 오래된 축복이 남아 있지만, 그 아래 몸은 여전히 약하다.
+Iris	홍채
+Monochrome Iris	흑백 홍채
+These eyes see further into both light and shadow, but they expose a fragile body.	빛과 그림자 너머를 더 멀리 보지만, 연약한 몸을 드러낸다.
+Lightweight Bones	가벼운 뼈
+Their hollow, light bones let them dance between blows, but a single hit can be fatal.	속이 빈 가벼운 뼈로 공격 사이를 춤추듯 피하지만, 한 대가 치명적일 수 있다.
+Stomach	위장
+Narrow Stomach	좁은 위장
+Their bodies accept little food but much mana, reshaping what sustains them.	음식은 조금, 마나는 많이 받아들여 몸을 지탱하는 것이 바뀌었다.
+CenterOfMass	무게중심
+Low Center of Gravity	낮은 무게중심
+Short legs and a low stance make it hard to knock them off balance.	짧은 다리와 낮은 자세 덕에 쉽게 넘어지지 않는다.
+Eye	눈
+Fine Cone Cells	섬세한 원뿔세포
+Their eyes pick out small details, but miss the heavy blows coming.	작은 것은 잘 보지만 날아오는 묵직한 일격은 놓친다.
+Foot	발
+Natural Leather Soles	타고난 가죽 발바닥
+Bare feet tough as leather let them run quietly over any ground.	가죽처럼 질긴 맨발로 어떤 땅이든 조용히 달린다.
+Metabolism	대사
+Fast Sugar Burn	빠른 당 연소
+Energy burns bright and fast in them, leaving little in reserve.	힘이 밝고 빠르게 타올라 남는 것이 거의 없다.
+Nose	코
+Heightened Smell	예민한 후각
+They can smell danger and supper alike long before anyone else.	위험이든 저녁밥이든 누구보다 먼저 냄새 맡는다.
+Chin	턱
+Skeletal Anomaly	골격 이상
+Eyes	눈
+Cooperative Gaze	협력의 눈빛
+Lips	입술
+Precise Articulation	정확한 발음
+Shoulder	어깨
+Master of Throwing	투척의 명수
+Skin	피부
+Sweat Glands: Heat Control	땀샘: 체온 조절
+Greenskin	녹색 피부
+Greenskin Pigmentation	녹색 피부 색소
+Their green skin drinks in light and violence alike.	녹색 피부가 빛도 폭력도 똑같이 빨아들인다.
+KneeJoint	무릎 관절
+Reverse Knee Joints	역관절 무릎
+Their legs drive them forward in brutal charges, not graceful steps.	우아한 걸음이 아니라 거친 돌격으로 몸을 내민다.
+Tusk	엄니
+Massive Tusks	거대한 엄니
+Tusks turn even a headbutt into a killing blow.	엄니 덕에 박치기조차 치명타가 된다.
+RedBloodCells	적혈구
+Excessive Red Blood Cells	넘치는 적혈구
+Blood thick with power keeps them fighting long after others fall.	힘이 진한 피 덕에 남들이 쓰러진 뒤에도 오래 싸운다.
+SubcutaneousFat	피하지방
+Thick Subcutaneous Fat	두꺼운 피하지방
+A thick layer of fat dulls both wounds and movement.	두꺼운 지방층이 상처도 움직임도 둔하게 만든다.
+Arcane Overload	비전 과부하
+Curse Mastery	저주 숙달
+Unarmed Prowess	맨손의 기량
+Dark Revelation	어둠의 계시
+Sacred Vow	신성한 서약
+Ghost Step	유령 걸음
+Shadow Veil	그림자 장막
+Iron Discipline	철의 규율
+Warrior's Will	전사의 의지
+Chain Curse	연쇄 저주
+Mana Surge	마나 쇄도
+Mana Veil	마나 장막
+Overcharge	과충전
+Spell Rebound	주문 반사
+Focused Mind	집중된 정신
+Harmonic Strike	조화의 일격
+Inner Breath	내면의 호흡
+Transcendence	초월
+Void Step	공허 걸음
+Dark Offering	어둠의 제물
+Healing Light	치유의 빛
+Sanctuary	성역
+Soul Drain	영혼 흡수
+Twisted Prayer	뒤틀린 기도
+Blindside	기습
+Pickpocket	소매치기
+Shadow Swap	그림자 교대
+Venom Coat	독 바르기
+Berserker's Edge	광전사의 칼날
+Blood Price	피의 대가
+Iron Momentum	철의 기세
+War Cry	함성
+Weapon Oath	무기의 맹세

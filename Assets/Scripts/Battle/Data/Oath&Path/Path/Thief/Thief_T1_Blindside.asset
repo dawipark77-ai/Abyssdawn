@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Thief_T1_Blindside
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Thief_T1_Blindside
-  skillName: Blindside
+  skillName: "\uAE30\uC2B5"
   jobClass: 3
   tier: 1
   type: 1
@@ -27,3 +27,5 @@ MonoBehaviour:
   drawbackDescription: "\uC804\uC5F4\uC5D0\uC11C\uB294 \uC0AC\uC6A9\uD560 \uC218
     \uC5C6\uACE0,\n\uC801\uC774 \uC544\uC9C1 \uD589\uB3D9 \uC804\uC774\uBA74 \uBC30\uC728\uC774
     \uB0AE\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

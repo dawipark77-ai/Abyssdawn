@@ -13,17 +13,23 @@ MonoBehaviour:
   m_Name: Warfare_FlankManeuver
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_Deception_04
-  skillName: "\uCE21\uBA74\uC758 \uBE44\uC218"
+  skillName: Flank Maneuver
+  skillKey: "\uCE21\uBA74\uC758 \uBE44\uC218"
   skillIcon: {fileID: 0}
-  description: "\uD6C4\uC5F4\uC5D0\uC11C \uC0AC\uC6A9 \uC2DC \uC801 \uD6C4\uC5F4 \uD0C0\uACF3 \uD53C\uD574 +42%, \uC801 \uC9C4\uD615 \uBA85\uC911\uB960 -12% (2\uD238). \uC804\uC5F4\uC5D0\uC11C \uC0AC\uC6A9 \uBD88\uAC00. \uC0AC\uC6A9 \uD6C4 \uB2E4\uC74C \uD238 \uD589\uB3D9 \uBD88\uAC00. \uC801 \uD6C4\uC5F4 \uD0C0\uACF3 \uCC98\uB9AC \uC2DC \uCF5C\uD238 1\uD238 \uCD08\uAE30\uD654. \uC0AC\uC6A9 \uD6C4 \uC804\uC5F4 \uC774\uB3D9 \uC2DC \uD6A8\uACFC \uBB34\uD6A8 + \uCF5C\uD238 \uCD08\uAE30\uD654. (\uCF5C\uD238 3\uD238)"
+  description: 'From the back row: damage to the enemy back row +42%, enemy formation
+    accuracy -12% (2 turns). Cannot be used from the front row. You cannot act next
+    turn. Defeating a back-row enemy reduces the cooldown by 1 turn. Moving to the
+    front row afterwards cancels the effect and resets the cooldown. (Cooldown 3
+    turns)'
   usageType: 0
   damageType: 1
   scalingStat: 1
+  weaponCategory: 0
   targeting:
     targetFaction: 0
     allowedCasterSlots: 12
     allowedTargetSlots: 12
-    specificSlots: []
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -32,10 +38,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -43,5 +48,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

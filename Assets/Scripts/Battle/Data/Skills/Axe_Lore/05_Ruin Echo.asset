@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 05_Ruin Echo
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_09
-  skillName: Ruin Echo
+  skillName: "\uD30C\uBA78\uC758 \uBA54\uC544\uB9AC"
+  skillKey: Ruin Echo
   skillIcon: {fileID: 21300000, guid: 4d0031558ba592546a3f08b68b30593f, type: 3}
   description: "\uC804\uC5F4 1\uBC88/2\uBC88\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5.
     \uACF5\uACA9\uB825 x110% \uAE61\uB380. \uC801 \uD604\uC7AC \uBC29\uC5B4\uB825
@@ -68,6 +69,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

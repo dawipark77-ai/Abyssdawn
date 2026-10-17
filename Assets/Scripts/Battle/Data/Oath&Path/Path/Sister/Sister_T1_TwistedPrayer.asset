@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sister_T1_TwistedPrayer
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Sister_T1_TwistedPrayer
-  skillName: Twisted Prayer
+  skillName: "\uB4A4\uD2C0\uB9B0 \uAE30\uB3C4"
   jobClass: 4
   tier: 1
   type: 0
@@ -24,3 +24,5 @@ MonoBehaviour:
   drawbackDescription: "\uC800\uC8FC \uC0C1\uD0DC\uB97C \uC720\uC9C0\uD560\uC218\uB85D
     \uD654\uB825\uC740 \uAC15\uD574\uC9C0\uC9C0\uB9CC,\n\uD68C\uBCF5 \uB2A5\uB825\uC740
     \uB5A8\uC5B4\uC9C4\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

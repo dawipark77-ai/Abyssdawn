@@ -42,7 +42,7 @@ public class PersonalitySlotUI : MonoBehaviour
             {
                 var cur = Current();
                 if (cur == null) return null;
-                return (Name(cur), "성향 · Disposition", cur.icon, string.IsNullOrEmpty(cur.descriptionKR) ? cur.description : cur.descriptionKR);
+                return (Name(cur), "성향", cur.icon, string.IsNullOrEmpty(cur.descriptionKR) ? cur.description : cur.descriptionKR);
             });
         }
         var t = transform.Find("Text");

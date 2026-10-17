@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Junk_BrokenSpearShaft
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
-  itemName: Broken Spear Shaft
+  itemName: "\uBD80\uB7EC\uC9C4 \uCC3D \uC790\uB8E8"
   icon: {fileID: 5247734079238193135, guid: 2a3d99bfa2a8de8499754799f1d64e30, type: 3}
-  description: The head is long gone; someone whittled the end to a point. ATK +1.
-  equipmentName: Broken Spear Shaft
+  description: "\uCC3D\uB0A0\uC740 \uC624\uB798\uC804\uC5D0 \uC0AC\uB77C\uC84C\uACE0,
+    \uB204\uAD70\uAC00 \uB05D\uC744 \uBFB0\uC871\uD558\uAC8C \uAE4E\uC558\uB2E4.
+    \uACF5\uACA9 +1."
+  equipmentName: "\uBD80\uB7EC\uC9C4 \uCC3D \uC790\uB8E8"
   equipmentIcon: {fileID: 5247734079238193135, guid: 2a3d99bfa2a8de8499754799f1d64e30, type: 3}
   flatIcon: {fileID: 5247734079238193135, guid: 2a3d99bfa2a8de8499754799f1d64e30, type: 3}
   equipmentType: 1

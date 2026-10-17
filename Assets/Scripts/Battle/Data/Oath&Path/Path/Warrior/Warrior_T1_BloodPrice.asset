@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Warrior_T1_BloodPrice
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Warrior_T1_BloodPrice
-  skillName: Blood Price
+  skillName: "\uD53C\uC758 \uB300\uAC00"
   jobClass: 0
   tier: 1
   type: 0
@@ -24,3 +24,5 @@ MonoBehaviour:
     \uC885\uB8CC \uC2DC \uB204\uC801 \uD6A8\uACFC \uCD08\uAE30\uD654."
   drawbackDescription: "HP\uB97C \uC18C\uBAA8\uD558\uB294 \uC2A4\uD0AC\uC744 \uC790\uC8FC
     \uC0AC\uC6A9\uD560\uC218\uB85D \uB9AC\uC2A4\uD06C\uAC00 \uCEE4\uC9C4\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

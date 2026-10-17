@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_TacticalAwareness
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: CombatArts_T2_TacticalAwareness
-  skillName: Tactical Awareness
+  skillName: "\uC804\uC220 \uAC10\uAC01"
+  skillKey: Tactical Awareness
   skillIcon: {fileID: -8400421116468495983, guid: 2664d9dbb95aa5349b08846d3eac75ec, type: 3}
   description: "[\uD328\uC2DC\uBE0C] \uBA85\uC911\uB960 +5%, \uD68C\uD53C\uC728 +5%.
     \uC0B4\uC544 \uC788\uB294 \uC801\uC774 3\uB9C8\uB9AC \uC774\uC0C1\uC774\uBA74
@@ -44,7 +45,8 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: This turn, completely evade first enemy attack + counterattack
+  dunbreakDescription: "\uC774\uBC88 \uD134 \uCCAB \uC801 \uACF5\uACA9\uC744 \uC644\uC804\uD788
+    \uD53C\uD558\uACE0 \uBC18\uACA9"
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -61,6 +63,8 @@ MonoBehaviour:
   requiresSameTarget: 0
   preemptive: 0
   cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

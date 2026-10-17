@@ -32,6 +32,8 @@ public class DungeonFloorState
     public bool campUsed;
     /// <summary>한 번이라도 들어가 본 방 (처음 들어설 때만 연속 이동을 멈추기 위해).</summary>
     public readonly HashSet<int> enteredRooms = new HashSet<int>();
+    /// <summary>[2026-10-17] 연 문 (DungeonFloorData.doors 의 번호 — 시드로 늘 같은 순서). 닫힌 문은 먼저 열어야(1턴) 지나간다.</summary>
+    public readonly HashSet<int> openedDoors = new HashSet<int>();
 
     public DungeonFloorState(int floor, int seed)
     {

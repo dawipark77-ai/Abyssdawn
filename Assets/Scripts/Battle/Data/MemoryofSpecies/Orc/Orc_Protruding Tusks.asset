@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Orc_Protruding Tusks
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Orc_Tusk
-  memoryName: Tusk
-  subtitle: Massive Tusks
+  memoryName: "\uC5C4\uB2C8"
+  subtitle: "\uAC70\uB300\uD55C \uC5C4\uB2C8"
   species: 2
-  memoryIcon: {fileID: 0}
+  memoryIcon: {fileID: 21300000, guid: 88660dc6994ca6f4bbf7bab3f926984a, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
@@ -46,7 +46,8 @@ MonoBehaviour:
     -1 (\uC815\uAD50\uD55C \uC8FC\uBB38 \uBC1C\uC74C \uBD88\uAC00)  \u2192 \uCD5C\uB300
     MP -3\n\n\uB808\uBCA8\uC5C5 \uB54C \uACF5\uACA9\uC774 \uC624\uB97C \uD655\uB960
     +20%p"
-  flavorText: Tusks turn even a headbutt into a killing blow.
+  flavorText: "\uC5C4\uB2C8 \uB355\uC5D0 \uBC15\uCE58\uAE30\uC870\uCC28 \uCE58\uBA85\uD0C0\uAC00
+    \uB41C\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

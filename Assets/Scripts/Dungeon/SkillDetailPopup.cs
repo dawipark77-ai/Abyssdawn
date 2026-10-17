@@ -312,10 +312,17 @@ public class SkillDetailPopup : MonoBehaviour
             nameText.text = currentSkillData.skillName;
         }
         
-        // 설명 설정
+        // 설명 설정 — [2026-10-17] 스톤샤드식 정리 (핵심 수치 → 표 → 효과 → 조건). SkillTooltip 참고
         if (descriptionText != null)
         {
-            descriptionText.text = currentSkillData.description;
+            descriptionText.richText = true;
+            descriptionText.enableAutoSizing = true;
+            descriptionText.fontSizeMax = 30f;
+            descriptionText.fontSizeMin = 20f;
+            descriptionText.lineSpacing = 6f;
+            descriptionText.paragraphSpacing = 4f;
+            descriptionText.alignment = TextAlignmentOptions.TopLeft;
+            descriptionText.text = SkillTooltip.Body(currentSkillData);
         }
         
         // 코스트 설정
@@ -336,14 +343,15 @@ public class SkillDetailPopup : MonoBehaviour
             
             if (costInfo.Length == 0)
             {
-                costInfo = "Passive";
+                costInfo = "패시브";
             }
             else
             {
-                costInfo = "Cost: " + costInfo;
+                costInfo = "소모: " + costInfo;
             }
             
-            costText.text = costInfo;
+            costText.enableAutoSizing = true; costText.fontSizeMax = 26f; costText.fontSizeMin = 16f; costText.characterSpacing = 1f;
+            costText.text = SkillTooltip.Subtitle(currentSkillData); // [2026-10-17] 종류 한 줄 (소모는 아래 표로)
         }
         
         // 노드 상태에 따라 Learn 버튼 업데이트
@@ -367,7 +375,7 @@ public class SkillDetailPopup : MonoBehaviour
             learnButton.interactable = false;
             if (learnButtonText != null)
             {
-                learnButtonText.text = "View Only";
+                learnButtonText.text = "보기만";
             }
             if (statusText != null)
             {
@@ -388,7 +396,7 @@ public class SkillDetailPopup : MonoBehaviour
         // 필요 LP 표시
         if (requiredLPText != null)
         {
-            requiredLPText.text = $"Required LP: {currentNode.requiredSkillPoints}";
+            requiredLPText.text = $"필요 LP: {currentNode.requiredSkillPoints}";
         }
         
         // TreeManager에서 현재 LP 확인
@@ -403,11 +411,11 @@ public class SkillDetailPopup : MonoBehaviour
                 learnButton.interactable = false;
                 if (learnButtonText != null)
                 {
-                    learnButtonText.text = "Locked";
+                    learnButtonText.text = "잠김";
                 }
                 if (statusText != null)
                 {
-                    statusText.text = "⛔ Locked (선행 스킬 필요)";
+                    statusText.text = "⛔ 잠김 (선행 스킬 필요)";
                     statusText.color = Color.gray;
                 }
                 Debug.Log($"[SkillDetailPopup] {skillName}: Locked → 버튼 비활성화");
@@ -419,13 +427,13 @@ public class SkillDetailPopup : MonoBehaviour
                 
                 if (learnButtonText != null)
                 {
-                    learnButtonText.text = canLearn ? "Learn!" : "Insufficient LP";
+                    learnButtonText.text = canLearn ? "배우기!" : "LP 부족";
                 }
                 if (statusText != null)
                 {
                     if (canLearn)
                     {
-                        statusText.text = "✨ Available (배울 수 있음!)";
+                        statusText.text = "✨ 배울 수 있음!";
                         statusText.color = Color.yellow;
                     }
                     else
@@ -444,7 +452,7 @@ public class SkillDetailPopup : MonoBehaviour
                     int rank = manager.GetSkillRank(currentSkillData);
                     bool canRank = availableLP >= currentNode.requiredSkillPoints;
                     learnButton.interactable = canRank;
-                    if (learnButtonText != null) learnButtonText.text = canRank ? $"Rank Up (Lv {rank + 1})" : "Insufficient LP";
+                    if (learnButtonText != null) learnButtonText.text = canRank ? $"등급 올리기 (Lv {rank + 1})" : "LP 부족";
                     if (statusText != null)
                     {
                         statusText.text = $"Lv {rank}/{currentSkillData.maxRank}";
@@ -455,11 +463,11 @@ public class SkillDetailPopup : MonoBehaviour
                 learnButton.interactable = false;
                 if (learnButtonText != null)
                 {
-                    learnButtonText.text = currentSkillData != null && currentSkillData.maxRank > 1 ? $"Max (Lv {currentSkillData.maxRank})" : "Learned";
+                    learnButtonText.text = currentSkillData != null && currentSkillData.maxRank > 1 ? $"최대 (Lv {currentSkillData.maxRank})" : "배움";
                 }
                 if (statusText != null)
                 {
-                    statusText.text = "✅ Learned (이미 배움)";
+                    statusText.text = "✅ 이미 배움";
                     statusText.color = Color.green;
                 }
                 Debug.Log($"[SkillDetailPopup] {skillName}: Learned → 버튼 비활성화");

@@ -18,13 +18,13 @@ public static class EquipHandPicker
         if (!NeedsChoice(item) || hud == null) { done?.Invoke(mgr.EquipItem(item)); return; }
 
         string name = !string.IsNullOrEmpty(item.equipmentName) ? item.equipmentName : item.name;
-        hud.Choose($"Equip <b>{name}</b> in which hand?",
+        hud.Choose($"<b>{name}</b> — 어느 손에 들까?",
             new[]
             {
-                $"<color=#FFD24A>R</color>  Right hand  <size=75%><color=#AAAAAA>({Holding(mgr.rightHand)})</color></size>",
-                $"<color=#FFD24A>L</color>  Left hand  <size=75%><color=#AAAAAA>({Holding(mgr.leftHand)})</color></size>",
+                $"<color=#FFD24A>R</color>  오른손  <size=75%><color=#AAAAAA>({Holding(mgr.rightHand)})</color></size>",
+                $"<color=#FFD24A>L</color>  왼손  <size=75%><color=#AAAAAA>({Holding(mgr.leftHand)})</color></size>",
             },
-            "Cancel", false, pick =>
+            "취소", false, pick =>
             {
                 if (pick < 0) { done?.Invoke(false); return; }
                 done?.Invoke(mgr.EquipToHand(item, pick == 0));
@@ -33,7 +33,7 @@ public static class EquipHandPicker
 
     private static string Holding(EquipmentData e)
     {
-        if (e == null) return "empty";
+        if (e == null) return "비어 있음";
         return !string.IsNullOrEmpty(e.equipmentName) ? e.equipmentName : e.name;
     }
 }

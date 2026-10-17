@@ -1,0 +1,143 @@
+Bite	물기
+Blind Scratch	눈 할퀴기
+Enrage	격노
+Enrage I	격노 I
+Healing Herb	약초 씹기
+Heavy Swing	묵직한 휘두르기
+Push Back	밀쳐내기
+Rat Bite	쥐 물어뜯기
+Sand Throw	모래 뿌리기
+Scratch	할퀴기
+Smoke Bomb	연막탄
+Tackle	몸통 박치기
+Throwing Knife	단검 던지기
+Wound Licking	상처 핥기
+War Cry	함성
+Weapon Oath	무기의 맹세
+Slash	베기
+Strong Slash	강베기
+Fireball	화염구
+Meditation	명상
+Magic Bolt	마력탄
+Quickhand	속공
+Focus	집중
+Formation Discipline	진형 규율
+Shield Wall	방패벽
+Weapon Familiarity	무기 숙련
+Axe Mastery	도끼 숙련
+Cleave Down	찍어 내리기
+Throwing Axe I	투척 도끼 I
+Throwing Axe II	투척 도끼 II
+Throwing Axe III	투척 도끼 III
+Throwing Axe IV	투척 도끼 IV
+Throwing Axe V	투척 도끼 V
+Armor Rend	갑옷 찢기
+Ruin Echo	파멸의 메아리
+Deep Wound	깊은 상처
+Pick up the Axe!	도끼 집어들기!
+Killing Catch	회수의 일격
+Frenzied Cleave	정신나간 내려찍기
+Combat Breathing	전투 호흡
+Hardened Body	단련된 육체
+Tactical Awareness	전술 감각
+Brace	버티기
+Second Wind	숨 고르기
+Counter Guard	반격 태세
+Intimidating Shout	위협의 함성
+Quick Starter	퀵 스타터
+Slow Starter	슬로우 스타터
+Lacerate	상처내기
+Quick Hands	신속한 손놀림
+Rend Wound	상처 벌리기
+Vital Strike	급소 파고들기
+Backstep Slash	뒤로 빠지며 베기
+Flurry Stab	연속 찌르기
+Shadow Slash	그림자 베기
+Tendon Sever	힘줄 끊기
+Hamstring	햄스트링 끊기
+Lunge Slash	뛰쳐나오며 베기
+Shadow Step	섀도우 스텝
+Detoxify	해독
+Divine Aura	신성한 기운
+Divine Light	신성한 빛
+Holy Guard	성스러운 수호
+Valor	용기
+Enfeeble	쇠약
+Hiatus	무방비
+Resource Management	자원 관리
+Trap Detection	함정 탐지
+Danger Sense	위험 감지
+Survivalist	생존술
+Trap Disarm	함정 해제
+Make Camp	야영
+Secure Retreat	안전한 후퇴
+Ample Pack	넉넉한 배낭
+Loot Salvage	전리품 회수
+Regular Customer	단골손님
+Frugal Use	알뜰한 사용
+Pyromaniac Doctrine	방화광의 교리
+Ember's Greed	불씨의 탐욕
+Smoldering Curse	그을린 저주
+Pyroclasm	화쇄류
+Heat Mirage	아지랑이
+Burning Will	불타는 의지
+Focus Strength	기 모으기
+Inner Circulation	내공 순환
+Straight Punch	정권 찌르기
+Inner Fortitude	내면 강화
+Roundhouse Kick	돌려차기
+Share Energy	기 나누기
+Uppercut	어퍼컷
+Double Strike	이중타격
+Gale Kick	풍압차기
+Inner Cleanse	내면 정화
+Combat Instinct	근육의 기억
+Infighter	인파이터
+Outfighter	아웃파이터
+Cross Counter	크로스 카운터
+Pull Counter	풀 카운터
+Whirlwind Kick	선풍각
+Raise Shield	방패 들기
+Embodiment of Resilience	불굴의 화신
+Moment of Retribution	응징의 순간
+Shield Bash	방패 후려치기
+Last Bastion	최후의 보루
+Shield Dash	방패 돌진
+Taunt	도발
+Dawnwarden	새벽의 수호자
+Hold the Line!	전선을 지켜라!
+Basic Swordsmanship	기초 검술
+Mandritto	만드리토
+Sharp Edge	날 세우기
+Ether Sense	에테르 센스
+#DESC
+Scratches at the target eyes. Reduces Hit Rate by 10% for 3 turns. Stackable.	대상의 눈을 할퀸다. 3턴 동안 명중률 -10%. 중첩된다.
+Enters a rage state. Attack power increases by 10% on the next turn.	격노한다. 다음 턴 공격력 +10%.
+Enters a rage, increasing ATK by 10% for 1 turn.	격노해 1턴 동안 공격력 +10%.
+[Goblin tool] Chews a bitter herb: recovers 30% of max HP. Once per battle.	[고블린 도구] 쓴 약초를 씹어 최대 HP 30% 회복. 전투당 1번.
+Raises its weapon for a turn, then brings it down with crushing force. Guard or strike first!	한 턴 무기를 치켜든 뒤 온 힘으로 내리친다. 막거나 먼저 쳐라!
+Gnaws deep into flesh. May cause Bleed.	살을 깊게 물어뜯는다. 출혈을 일으킬 수 있다.
+[Goblin tool] Throws sand in the eyes: weak hit + accuracy down. Once per battle.	[고블린 도구] 눈에 모래를 뿌린다: 약한 피해 + 명중 하락. 전투당 1번.
+[Goblin tool] Vanishes in smoke: a certain escape (no EXP or gold). Once per battle.	[고블린 도구] 연기 속으로 사라진다: 반드시 도망 (EXP·골드 없음). 전투당 1번.
+Slams into the target with full body weight. Deals damage and pushes target back.	온몸으로 들이받는다. 피해를 주고 대상을 뒤로 밀친다.
+[Goblin tool] Throws a crude knife (x0.85-0.95). Ranged: cannot be countered. 2 per battle.	[고블린 도구] 조잡한 단검을 던진다 (×0.85~0.95). 원거리: 반격당하지 않음. 전투당 2번.
+Lick wounds to recover 5% of max HP. Cannot be used at full HP.	상처를 핥아 최대 HP 5% 회복. HP가 가득하면 쓸 수 없다.
+Quick physical attack dealing moderate damage.	빠른 물리 공격. 보통 피해.
+Powerful physical attack with higher damage but greater HP cost.	강력한 물리 공격. 피해가 크지만 HP를 더 쓴다.
+Launches a fireball. Has a chance to ignite both user and target.	화염구를 날린다. 시전자와 대상 모두 점화될 수 있다.
+Restores 7% of maximum MP.	최대 MP 7% 회복.
+Low-cost magic attack with a risk of self-damage.	적은 MP로 쓰는 마법 공격. 자신이 다칠 위험이 있다.
+Quick double strike based on agility.	민첩 기반의 빠른 2연타.
+Launches a ball of fire at the target. Has a chance to ignite.	대상에게 불덩이를 날린다. 점화될 수 있다.
+Passive. Increases fire damage per rank, but also increases backflow chance.	패시브. 등급마다 화염 피해가 오르지만 역류 확률도 오른다.
+Passive. Each rank amplifies fire magic further, at increasing backflow risk.	패시브. 등급마다 화염 마법이 더 강해지고, 역류 위험도 커진다.
+Curses the target with smoldering flames. High ignite chance, no direct damage.	대상에게 그을린 불꽃의 저주를 건다. 점화 확률이 높고 직접 피해는 없다.
+Massive fire explosion. Only usable on ignited targets. High backflow risk.	거대한 화염 폭발. 점화된 대상에게만 쓸 수 있다. 역류 위험이 높다.
+Creates a heat distortion that confuses enemies. No backflow risk.	열기로 공기를 일그러뜨려 적을 혼란시킨다. 역류 위험 없음.
+Passive. When self is ignited, fire skills deal bonus damage. Turns weakness into power.	패시브. 자신이 점화되어 있으면 화염 스킬 피해 증가. 약점을 힘으로 바꾼다.
+This turn, party-wide defense +10%, evasion +10%	이번 턴 파티 전체 방어 +10%, 회피 +10%
+Next weapon attack, weapon type bonus x2	다음 무기 공격에 무기 종류 보너스 ×2
+This turn recovery x2, or +20% poison/bleed resistance for 1 turn	이번 턴 회복량 ×2, 또는 1턴 동안 독·출혈 저항 +20%
+This turn, critical hits cannot reduce HP below 1	이번 턴 치명타로는 HP가 1 아래로 떨어지지 않는다
+This turn, completely evade first enemy attack + counterattack	이번 턴 첫 적 공격을 완전히 피하고 반격
+Cleanse all Poison stacks from target	대상의 독 중첩을 모두 지운다

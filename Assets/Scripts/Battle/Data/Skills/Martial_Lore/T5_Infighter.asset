@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T5_Infighter
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T5_Infighter
-  skillName: Infighter
+  skillName: "\uC778\uD30C\uC774\uD130"
+  skillKey: Infighter
   skillIcon: {fileID: 21300000, guid: 9958809437b917f44be8f96e0d194a43, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uD328\uC2DC\uBE0C \xB7 \uD55C \uC190\uC774
     \uBE44\uC5B4 \uC788\uC5B4\uC57C \uD568] \uC778\uD30C\uC774\uD130. \uC55E\uC5F4(1\xB72\uC5F4)\uC5D0
@@ -63,6 +64,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

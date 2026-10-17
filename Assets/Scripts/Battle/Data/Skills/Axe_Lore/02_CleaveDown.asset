@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 02_CleaveDown
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_07
-  skillName: Cleave Down
+  skillName: "\uCC0D\uC5B4 \uB0B4\uB9AC\uAE30"
+  skillKey: Cleave Down
   skillIcon: {fileID: 21300000, guid: a993e324aa365f44e9ad59e33564cd2d, type: 3}
   description: "\uC804\uC5F4 1\uBC88/2\uBC88\uC5D0\uC11C\uB9CC \uC0AC\uC6A9 \uAC00\uB2A5.
     \uACF5\uACA9\uB825 x130% \uAE61\uB380. \uC801 \uD604\uC7AC \uBC29\uC5B4\uB825
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

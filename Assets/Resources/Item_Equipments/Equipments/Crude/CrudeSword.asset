@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
   itemName: 
   icon: {fileID: 0}
-  description: Every swing leaves a dull ache in the wrist. ATK +5, ACC -5%.
-  equipmentName: Crude Sword
+  description: "\uD718\uB450\uB97C \uB54C\uB9C8\uB2E4 \uC190\uBAA9\uC774 \uC6B1\uC2E0\uAC70\uB9B0\uB2E4.
+    \uACF5\uACA9 +5, \uBA85\uC911 -5%."
+  equipmentName: "\uC870\uC7A1\uD55C \uAC80"
   equipmentIcon: {fileID: 5843060452261051782, guid: d68843735a6e85146b6764dbac708c2f, type: 3}
   flatIcon: {fileID: 5843060452261051782, guid: d68843735a6e85146b6764dbac708c2f, type: 3}
   equipmentType: 0

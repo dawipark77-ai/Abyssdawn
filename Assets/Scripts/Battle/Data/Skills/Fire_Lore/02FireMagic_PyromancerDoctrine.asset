@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: 02FireMagic_PyromancerDoctrine
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_02
-  skillName: Pyromaniac Doctrine
+  skillName: "\uBC29\uD654\uAD11\uC758 \uAD50\uB9AC"
+  skillKey: Pyromaniac Doctrine
   skillIcon: {fileID: -6324087370441366954, guid: 440894af2553a0f44b9410b1fc52c368, type: 3}
-  description: Passive. Increases fire damage per rank, but also increases backflow
-    chance.
+  description: "\uD328\uC2DC\uBE0C. \uB4F1\uAE09\uB9C8\uB2E4 \uD654\uC5FC \uD53C\uD574\uAC00
+    \uC624\uB974\uC9C0\uB9CC \uC5ED\uB958 \uD655\uB960\uB3C4 \uC624\uB978\uB2E4."
   usageType: 1
   damageType: 2
   scalingStat: 3
@@ -61,5 +62,20 @@ MonoBehaviour:
   - 0.15
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

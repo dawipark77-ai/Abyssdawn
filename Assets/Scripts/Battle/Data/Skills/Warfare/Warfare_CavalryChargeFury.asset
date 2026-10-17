@@ -13,17 +13,22 @@ MonoBehaviour:
   m_Name: Warfare_CavalryChargeFury
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_Momentum_02
-  skillName: "\uAE30\uBBD3\uC758 \uAD11\uAE30"
+  skillName: Cavalry Charge Fury
+  skillKey: "\uAE30\uBBD3\uC758 \uAD11\uAE30"
   skillIcon: {fileID: 0}
-  description: "\uC804\uC5F4 \uC544\uAD6D \uC804\uCCB4 \uB2E4\uC74C \uACF5\uACA9 \uD53C\uD574 +32%, \uC801 \uD6C4\uC5F4 1\uCCB4 \uC2A4\uD134 1\uD238. \uB3CC\uACA9 \uD6C4 \uC804\uC5F4 \uC544\uAD6D HP -15% \uC791\uC131 \uC18C\uBAA8. \uC804\uC5F4\u2192\uD6C4\uC5F4 \uAD00\uD1B5 \uACF5\uACA9 1\uD68C \uCD94\uAC00. \uB2E4\uC74C \uD238 \uC544\uAD6D \uC804\uC5F4 \uBC29\uC5B4\uB825 -28%. (\uCF5C\uD238 4\uD238)"
+  description: Front-row allies' next attack deals +32% damage, and 1 enemy in the
+    back row is stunned for 1 turn. After the charge, front-row allies lose 15% HP.
+    Adds 1 piercing attack from the front row to the back row. Next turn, front-row
+    allies' DEF -28%. (Cooldown 4 turns)
   usageType: 0
   damageType: 1
   scalingStat: 1
+  weaponCategory: 0
   targeting:
     targetFaction: 1
     allowedCasterSlots: 3
     allowedTargetSlots: 12
-    specificSlots: []
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -32,10 +37,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -43,5 +47,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

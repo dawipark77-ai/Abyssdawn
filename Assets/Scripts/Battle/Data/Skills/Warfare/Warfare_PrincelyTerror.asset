@@ -13,17 +13,21 @@ MonoBehaviour:
   m_Name: Warfare_PrincelyTerror
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_Deception_03
-  skillName: "\uB9C8\uD0A4\uC544\uBCA8\uB9AC\uC758 \uACF5\uD3B8"
+  skillName: Princely Terror
+  skillKey: "\uB9C8\uD0A4\uC544\uBCA8\uB9AC\uC758 \uACF5\uD3B8"
   skillIcon: {fileID: 0}
-  description: "\uC801 \uC804\uCCB4 \uD589\uB3D9\uC18D\uB3C4 -1\uB2E8\uACC4 (1\uD238), \uB3C4\uBC1C \uC131\uACE0\uB960 +35%. \uC0AC\uC6A9\uC790 \uBCF8\uC778\uB3C4 \uD589\uB3D9\uC18D\uB3C4 -1\uB2E8\uACC4 (1\uD238). \uC544\uAD6D \uC804\uCCB4 \uD68C\uBC31 \uD6A8\uACFC -15% (2\uD238). (\uCF5C\uD238 5\uD238)"
+  description: All enemies' speed -1 stage (1 turn), taunt success +35%. Your own
+    speed also -1 stage (1 turn). Party healing received -15% (2 turns). (Cooldown
+    5 turns)
   usageType: 0
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 3
     allowedCasterSlots: 15
     allowedTargetSlots: 15
-    specificSlots: []
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -32,10 +36,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -43,5 +46,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

@@ -13,17 +13,22 @@ MonoBehaviour:
   m_Name: Warfare_FrictionOfWar
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Warfare_Deception_02
-  skillName: "\uB9C8\uCCB4\uC758 \uAD50\uD7B4"
+  skillName: Friction of War
+  skillKey: "\uB9C8\uCCB4\uC758 \uAD50\uD7B4"
   skillIcon: {fileID: 0}
-  description: "\uC801 \uC2A4\uD2B8\uB9C8\uAC00 \uBE5B\uB098\uAC00\uB098 \uC2E4\uD328\uD560 \uB54C\uB9C8\uB2E4 \uC544\uAD6D \uC804\uCCB4 \uD53C\uD574 \uC801\uC624 +12% (\uCD5C\uB300 3\uC911\uCC99). \uC790\uC2E0\uC758 \uC2A4\uD2B8\uB9C8\uAC00 \uBE5B\uB098\uAC00\uB294 \uACBD\uC6B0 \uBC1B\uB294 \uD53C\uD574 +28% + \uCF5C\uD238 \uCD08\uAE30\uD654. \uC801\uC758 \uC5F0\uC18D \uD589\uB3D9 \uC2E4\uD328 \uC2DC \uC544\uAD6D \uC804\uCCB4 \uB2E4\uC74C \uD238 \uACF5\uACA9\uB825 +10% \uCD94\uAC00. \uC790\uC2E0\uC774 \uBA85\uC911\uB960 \uB514\uBC84\uD504 \uC0C1\uD0DC\uC778 \uB54C \uC774\uB355 \uD6A8\uACFC 50% \uAC10\uC18C."
+  description: Each time an enemy skill misses or fails, party damage resistance
+    +12% (max 3 stacks). If your own skill misses, you take +28% damage and the cooldown
+    resets. When the enemy fails actions in a row, party ATK +10% next turn. Effects
+    are halved while you have an accuracy debuff.
   usageType: 1
   damageType: 0
   scalingStat: 0
+  weaponCategory: 0
   targeting:
     targetFaction: 2
     allowedCasterSlots: 15
     allowedTargetSlots: 1
-    specificSlots: []
+    specificSlots: 
   hpCostPercent: 0
   mpCost: 0
   minMult: 0
@@ -32,10 +37,9 @@ MonoBehaviour:
   accuracy: 0.95
   selfDmgPercent: 0
   selfDmgChance: 0
-  selfCurseData: {fileID: 0}
-  selfCurseChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
   effects: []
-  legacyCurseData: {fileID: 0}
   legacyCurseChance: 0
   legacyEffectType: 0
   legacyRecoveryTarget: 0
@@ -43,5 +47,31 @@ MonoBehaviour:
   triggerCondition: 0
   dunbreakChance: 0
   dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Junk_BoneShiv
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
-  itemName: Bone Shiv
+  itemName: "\uBF08 \uC1A1\uACF3"
   icon: {fileID: 0}
-  description: A sharpened sliver of rat bone. It breaks skin, not much else. ATK
-    +0, AGI +1.
-  equipmentName: Bone Shiv
+  description: "\uB0A0\uCE74\uB86D\uAC8C \uAC04 \uC950\uBF08 \uC870\uAC01. \uC0B4\uAC17\uC740
+    \uB6AB\uC9C0\uB9CC \uADF8\uBFD0\uC774\uB2E4. \uACF5\uACA9 +0, \uBBFC\uCCA9 +1."
+  equipmentName: "\uBF08 \uC1A1\uACF3"
   equipmentIcon: {fileID: 3545242504023248292, guid: 11f0ac674db4a0d45a1e3dc9fadc7389, type: 3}
   flatIcon: {fileID: 0}
   equipmentType: 0

@@ -44,7 +44,7 @@ public static class GameStartRequest
             if (!SaveSystem.Load(out err))
             {
                 Debug.LogWarning("[GameStartRequest] 모험의 서 불러오기 실패: " + err);
-                if (DungeonHud.Instance != null) DungeonHud.Instance.Toast("<color=#FF6B6B>Could not load the adventure log.</color>\n<size=75%>" + err + "</size>");
+                if (DungeonHud.Instance != null) DungeonHud.Instance.Toast("<color=#FF6B6B>모험 기록을 불러오지 못했다.</color>\n<size=75%>" + err + "</size>");
             }
             return true;
         }
@@ -58,6 +58,10 @@ public static class GameStartRequest
         if (sd != null && job != null) sd.currentJob = job; // 기초 장비가 직업을 보므로 먼저
         if (sd != null) sd.currentOath = oath;
         ConsumableInventory.ResetForNewRun();
+        // [2026-10-18] 직업의 시작 소모품 (전사: 약초 3 · 붕대 2 · HP 포션 1 · 해독제 1)
+        if (job != null && job.startingConsumables != null && ConsumableInventory.Instance != null)
+            foreach (var it in job.startingConsumables)
+                if (it != null && it.item != null && it.count > 0) ConsumableInventory.Instance.AddItem(it.item, it.count);
         EquipmentBag.ResetForNewRun(sd); // 주운 장비 비움 + 직업 기초 장비 장착
         // 던전의 EquipmentManager 는 이미 HeroData 를 읽어 둔 상태 — 새 장비로 다시 맞춤
         var em = hero != null ? hero.GetComponent<EquipmentManager>() : null;
@@ -76,6 +80,7 @@ public static class GameStartRequest
         }
         if (hero != null)
         {
+            hero.SyncJobFromData(); // [2026-10-17] 고른 직업을 주인공에게 바로 반영 (HP·스탯도 그 직업 기준으로)
             hero.currentHP = hero.maxHP;
             hero.currentMP = hero.maxMP;
             hero.NotifyStatusChanged();
@@ -103,8 +108,8 @@ public static class GameStartRequest
         bool ok = SaveSystem.Save(out err);
         yield return new WaitForSecondsRealtime(3.9f); // 눈 뜨는 연출이 끝난 뒤에 알림
         if (DungeonHud.Instance != null)
-            DungeonHud.Instance.Toast(ok ? $"<color=#FFD24A>Adventure Log {s + 1}</color> has been created."
-                                         : "<color=#FF6B6B>Could not create the adventure log.</color>\n<size=75%>" + err + "</size>");
+            DungeonHud.Instance.Toast(ok ? $"<color=#FFD24A>모험 기록 {s + 1}</color>을(를) 만들었다."
+                                         : "<color=#FF6B6B>모험 기록을 만들지 못했다.</color>\n<size=75%>" + err + "</size>");
     }
 
     private static PlayerStats FindHero()

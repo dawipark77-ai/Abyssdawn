@@ -51,6 +51,21 @@ public class BattleFx : MonoBehaviour
         if (crit) fx.CritImpact();
     }
 
+    public static readonly Color EtherColor = new Color(0.49f, 0.88f, 1f);
+
+    /// <summary>[2026-10-15] 에테르 감응 추가 피해: 파란 숫자, 일반 피해보다 작게, 조금 오른쪽 위.</summary>
+    public static void EtherHit(EnemyStats e, int damage)
+    {
+        var fx = Get();
+        if (fx == null || e == null || damage <= 0) return;
+        var t = fx.CreateText(fx._root, "EtherPopup", 38f, FontStyles.Bold);
+        t.rectTransform.sizeDelta = new Vector2(300f, 90f);
+        t.text = damage.ToString();
+        t.color = EtherColor;
+        t.rectTransform.anchoredPosition = fx.EnemyAnchor(e) + new Vector2(70f + Random.Range(-10f, 10f), 40f);
+        fx.StartCoroutine(fx.PopupRoutine(t, false));
+    }
+
     /// <summary>[2026-10-12] 이중타격 2타 같은 '터지는' 한 방: 큰 글자 + 긴 히트 스톱 + 강한 화면 흔들림. strength 1 = 보통, 2 = 극점.</summary>
     public static void Burst(EnemyStats e, string label, Color color, float strength = 1f)
     {
@@ -129,6 +144,72 @@ public class BattleFx : MonoBehaviour
         var fx = Get();
         if (fx == null || e == null) return;
         fx.Popup(fx.EnemyAnchor(e), "MISS", new Color(0.7f, 0.7f, 0.75f), false);
+        // [2026-10-17] 빗나가면 적 그림이 왼쪽으로 살짝 비켜났다 돌아오고, 아주 잠깐 느려진다 (다키스트 던전 느낌)
+        var sr = e.GetComponent<SpriteRenderer>();
+        if (sr == null) sr = e.GetComponentInChildren<SpriteRenderer>();
+        Transform body = sr != null ? sr.transform : e.transform;
+        fx.StartCoroutine(fx.DodgeWorld(body, MissDodgeWorld));
+        fx.MissSlow();
+    }
+
+    // ── [2026-10-17] 빗나감 연출 ──
+    private const float MissDodgeWorld = 0.12f;  // 적 그림이 비켜나는 거리 (월드 단위)
+    private const float MissDodgeUi = 22f;       // 아군 카드가 비켜나는 거리 (픽셀)
+    private const float MissSlowScale = 0.35f, MissSlowSeconds = 0.18f;
+    private readonly HashSet<Transform> _dodging = new HashSet<Transform>();
+
+    private IEnumerator DodgeWorld(Transform t, float dist)
+    {
+        if (t == null || _dodging.Contains(t)) yield break;
+        _dodging.Add(t);
+        Vector3 home = t.localPosition;
+        Vector3 side = t.parent != null ? t.parent.InverseTransformVector(Vector3.left * dist) : Vector3.left * dist;
+        yield return Slide(t, home, home + side, 0.07f);
+        yield return new WaitForSecondsRealtime(0.08f);
+        yield return Slide(t, home + side, home, 0.16f);
+        if (t != null) t.localPosition = home;
+        _dodging.Remove(t);
+    }
+
+    private IEnumerator DodgeUi(RectTransform t, float dist)
+    {
+        if (t == null || _dodging.Contains(t)) yield break;
+        _dodging.Add(t);
+        Vector3 home = t.localPosition;
+        Vector3 side = new Vector3(-dist, 0f, 0f);
+        yield return Slide(t, home, home + side, 0.07f);
+        yield return new WaitForSecondsRealtime(0.08f);
+        yield return Slide(t, home + side, home, 0.16f);
+        if (t != null) t.localPosition = home;
+        _dodging.Remove(t);
+    }
+
+    private static IEnumerator Slide(Transform t, Vector3 from, Vector3 to, float seconds)
+    {
+        for (float e = 0f; e < seconds && t != null; e += Time.unscaledDeltaTime)
+        {
+            float k = e / seconds; k = 1f - (1f - k) * (1f - k);
+            t.localPosition = Vector3.Lerp(from, to, k);
+            yield return null;
+        }
+        if (t != null) t.localPosition = to;
+    }
+
+    /// <summary>빗나감 순간 아주 잠깐 느려짐 (치명타 멈춤과 겹치면 건너뜀).</summary>
+    private void MissSlow()
+    {
+        if (_hitStop != null || Time.timeScale <= 0.5f) return;
+        _hitStop = StartCoroutine(MissSlowRoutine());
+    }
+
+    private IEnumerator MissSlowRoutine()
+    {
+        float prev = Time.timeScale;
+        float slow = prev * MissSlowScale;
+        Time.timeScale = slow;
+        yield return new WaitForSecondsRealtime(MissSlowSeconds);
+        if (Mathf.Approximately(Time.timeScale, slow)) Time.timeScale = prev;
+        _hitStop = null;
     }
 
     /// <summary>다음 아군 피해가 크리티컬임을 표시 (BattleManager 가 TakeDamage 직전에 호출).</summary>
@@ -153,6 +234,10 @@ public class BattleFx : MonoBehaviour
         if (fx == null || p == null) return;
         Vector2? pos = fx.AllyAnchor(p);
         if (pos != null) fx.Popup(pos.Value, "MISS", new Color(0.7f, 0.7f, 0.75f), false);
+        var bm = FindFirstObjectByType<BattleManager>(); // [2026-10-17] 아군 카드도 왼쪽으로 살짝 비켜남 + 잠깐 느려짐
+        RectTransform card = bm != null ? bm.GetPlayerCardRect(p) : null;
+        if (card != null) fx.StartCoroutine(fx.DodgeUi(card, MissDodgeUi));
+        fx.MissSlow();
     }
 
     private static readonly Color HealColor = new Color(0.35f, 1f, 0.45f);
@@ -274,7 +359,7 @@ public class BattleFx : MonoBehaviour
     {
         var t = CreateText(_root, "Popup", crit ? 76 : 56, FontStyles.Bold);
         t.rectTransform.sizeDelta = new Vector2(400f, 120f);
-        t.text = crit ? $"<size=45%>CRITICAL</size>\n{text}" : text;
+        t.text = crit ? $"<size=45%>치명타</size>\n{text}" : text;
         t.color = color;
         t.rectTransform.anchoredPosition = pos + new Vector2(Random.Range(-20f, 20f), 0f);
         StartCoroutine(PopupRoutine(t, crit));

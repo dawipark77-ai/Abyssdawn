@@ -198,7 +198,7 @@ public class DungeonStatusView : MonoBehaviour
         if (slot.classText != null)
         {
             string displayClass = string.IsNullOrEmpty(playerInScene.jobClass) ? "None" : playerInScene.jobClass;
-            slot.classText.text = displayClass;
+            slot.classText.text = Ko.Job(displayClass); // [2026-10-17] 직업 이름 한글
         }
 
         if (slot.expText != null) slot.expText.text = $"{playerInScene.exp} / {playerInScene.maxExp}";

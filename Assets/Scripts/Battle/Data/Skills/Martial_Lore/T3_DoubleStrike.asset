@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T3_DoubleStrike
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Martial_T3_DoubleStrike
-  skillName: Double Strike
+  skillName: "\uC774\uC911\uD0C0\uACA9"
+  skillKey: Double Strike
   skillIcon: {fileID: 21300000, guid: 391e2b19ed98c2248b834b5bfaa86d68, type: 3}
   description: "[\uACA9\uD22C\uC220 \xB7 \uACF5\uACA9 \xB7 \uC804\uC5F4(1\xB72\uC5F4)\uC5D0\uC11C\uB9CC
     \xB7 \uD55C \uC190\uC774 \uBE44\uC5B4 \uC788\uC5B4\uC57C \uD568] \uC774\uC911\uD0C0\uACA9.
@@ -67,6 +68,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

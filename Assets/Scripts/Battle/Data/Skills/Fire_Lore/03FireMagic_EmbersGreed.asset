@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: 03FireMagic_EmbersGreed
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: FireMagic_03
-  skillName: Ember's Greed
+  skillName: "\uBD88\uC528\uC758 \uD0D0\uC695"
+  skillKey: Ember's Greed
   skillIcon: {fileID: -3817071420948106756, guid: 320edd8051d78ba44a2b4e061e22f31a, type: 3}
-  description: Passive. Each rank amplifies fire magic further, at increasing backflow
-    risk.
+  description: "\uD328\uC2DC\uBE0C. \uB4F1\uAE09\uB9C8\uB2E4 \uD654\uC5FC \uB9C8\uBC95\uC774
+    \uB354 \uAC15\uD574\uC9C0\uACE0, \uC5ED\uB958 \uC704\uD5D8\uB3C4 \uCEE4\uC9C4\uB2E4."
   usageType: 1
   damageType: 2
   scalingStat: 3
@@ -65,5 +66,20 @@ MonoBehaviour:
   - 0.15
   requireTargetIgnited: 0
   selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 1

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Orc_Greenskin
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Orc_Greenskin
-  memoryName: Greenskin
-  subtitle: Greenskin Pigmentation
+  memoryName: "\uB179\uC0C9 \uD53C\uBD80"
+  subtitle: "\uB179\uC0C9 \uD53C\uBD80 \uC0C9\uC18C"
   species: 2
-  memoryIcon: {fileID: 0}
+  memoryIcon: {fileID: 21300000, guid: de8829b10740ec843b37854857153427, type: 3}
   hpBonusPercent: -10
   mpBonusPercent: 0
   hpBonus: 0
@@ -46,7 +46,8 @@ MonoBehaviour:
     \uC7A5\uAE30\uC804 \uBD88\uB9AC)\n\uBBFC\uCCA9 +1 (\uC740\uC2E0\xB7\uAE30\uC2B5)\n\n\uB808\uBCA8\uC5C5\uB9C8\uB2E4
     \uCD5C\uB300 MP +0.15 (\uC18C\uC218\uC810\uC740 \uC313\uC784)\n\uB808\uBCA8\uC5C5
     \uB54C \uB9C8\uB825\uC774 \uC624\uB97C \uD655\uB960 +15%p"
-  flavorText: Their green skin drinks in light and violence alike.
+  flavorText: "\uB179\uC0C9 \uD53C\uBD80\uAC00 \uBE5B\uB3C4 \uD3ED\uB825\uB3C4 \uB611\uAC19\uC774
+    \uBE68\uC544\uB4E4\uC778\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T2_ShieldDash
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T2_ShieldDash
-  skillName: Shield Dash
+  skillName: "\uBC29\uD328 \uB3CC\uC9C4"
+  skillKey: Shield Dash
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uACF5\uACA9 \xB7 \uCFE8\uB2E4\uC6B4 4\uD134 \xB7
     \uC804\uC5F4] \uBC29\uD328\uB97C \uC55E\uC138\uC6CC \uB3CC\uC9C4\uD55C\uB2E4.
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 4
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

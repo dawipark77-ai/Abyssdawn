@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: EX_T3_SecureRetreat
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: EX_T3_SecureRetreat
-  skillName: Secure Retreat
+  skillName: "\uC548\uC804\uD55C \uD6C4\uD1F4"
+  skillKey: Secure Retreat
   skillIcon: {fileID: 0}
   description: "[\uC57C\uC804\uC220 \xB7 \uC0C1\uC2DC] \uC774\uBC88 \uCE35\uC758
     \uACC4\uB2E8(\uC62C\uB77C\uAC00\uB294 \uCABD \uB610\uB294 \uB0B4\uB824\uAC00\uB294
@@ -65,6 +66,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 1
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

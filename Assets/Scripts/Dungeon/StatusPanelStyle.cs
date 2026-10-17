@@ -20,7 +20,10 @@ public class StatusPanelStyle : MonoBehaviour
     private static readonly Color GoldDim = new Color(0.72f, 0.64f, 0.45f, 1f);
     private static readonly Color FrameDim = new Color(0.72f, 0.64f, 0.45f, 0.55f);
     private static readonly Color EmptySlot = new Color(0.10f, 0.09f, 0.08f, 0.9f);
-    private static readonly Color BoxColor = new Color(0f, 0f, 0f, 0.45f);
+    // [2026-10-17] 드퀘식 반투명 창: 검은 반투명 + 아비스던 금테 (바깥 금선 + 안쪽 가는 금선)
+    private static readonly Color BoxColor = new Color(0f, 0f, 0f, 0.85f); // [2026-10-18] 드퀘 레퍼런스처럼 검은 반투명 (남색 아님)
+    private static readonly Color FrameBright = new Color(0.86f, 0.74f, 0.45f, 0.95f);
+    private static readonly Color FrameInner = new Color(0.86f, 0.74f, 0.45f, 0.30f);
 
     private static readonly HashSet<string> BoxNames = new HashSet<string>
         { "BasicPanel", "Memory of Species", "Personality", "StatusPanel", "EquipmentPanel", "BattleSkills" };
@@ -71,14 +74,9 @@ public class StatusPanelStyle : MonoBehaviour
                 if (t != null && t.font != null && t.font.name.Contains("NotoSansKR")) { font = t.font; break; }
         _border = Resources.Load<Sprite>("UI/GlowBorder");
 
-        // 바깥 패널
+        // 바깥 패널 — [2026-10-17] 드퀘처럼 큰 판은 없애고 (뒤 던전이 비쳐 보임), 안쪽 상자들이 각각 반투명 창으로 떠 있게
         var root = GetComponent<Image>();
-        Sprite frame = DungeonHud.PopupSprite;
-        if (root != null && frame != null)
-        {
-            root.sprite = frame; root.type = Image.Type.Sliced; root.fillCenter = true;
-            root.pixelsPerUnitMultiplier = 1.4f; root.color = Color.white;
-        }
+        if (root != null) { root.sprite = null; root.color = new Color(0f, 0f, 0f, 0.45f); } // 뒤를 조금 어둡게 (클릭 막기는 그대로)
 
         foreach (var img in GetComponentsInChildren<Image>(true))
         {
@@ -127,7 +125,8 @@ public class StatusPanelStyle : MonoBehaviour
         box.sprite = null;
         box.color = BoxColor;
         var outline = box.GetComponent<Outline>(); if (outline != null) outline.enabled = false;
-        AddFrame(box.transform, "BoxFrame", FrameDim, 2f);
+        AddFrame(box.transform, "BoxFrame", FrameBright, 3f);     // 바깥 금선 (또렷하게)
+        AddFrame(box.transform, "BoxFrameInner", FrameInner, -6f); // 안쪽 가는 금선 (이중 테두리)
     }
 
     private void StyleHeader(TMP_Text t)

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T2_SecondWind
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: CombatArts_T2_SecondWind
-  skillName: Second Wind
+  skillName: "\uC228 \uACE0\uB974\uAE30"
+  skillKey: Second Wind
   skillIcon: {fileID: -4115274655291430038, guid: bfa8fa2bb381ba34080fc3506d6ada0f, type: 3}
   description: "[\uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 5\uD134] \uC228\uC744
     \uACE8\uB77C \uCD5C\uB300 HP\uC758 20%\uB97C \uD68C\uBCF5\uD558\uACE0 \uCD9C\uD608\uC744
@@ -45,7 +46,8 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: This turn, critical hits cannot reduce HP below 1
+  dunbreakDescription: "\uC774\uBC88 \uD134 \uCE58\uBA85\uD0C0\uB85C\uB294 HP\uAC00
+    1 \uC544\uB798\uB85C \uB5A8\uC5B4\uC9C0\uC9C0 \uC54A\uB294\uB2E4"
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -62,6 +64,8 @@ MonoBehaviour:
   requiresSameTarget: 0
   preemptive: 0
   cooldownTurns: 5
+  fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

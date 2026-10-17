@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Monster_Scratch
   m_EditorClassIdentifier: 
   skillID: Monster_Scratch
-  skillName: Scratch
+  skillName: "\uD560\uD034\uAE30"
+  skillKey: Scratch
   skillIcon: {fileID: 2874756452421268667, guid: dd47eec43950c3b4e9c29a32d7980b7d, type: 3}
   description: "2\uC5F0\uD0C0 + \uCD9C\uD608 \uBD80\uC5EC. \uD0C0\uACA9\uB9C8\uB2E4
     \uBA85\uC911 \uB3C5\uB9BD \uD310\uC815."
@@ -59,6 +60,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0
@@ -68,6 +73,11 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills: []
   requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
   isBasicAttackOverride: 0
   atkMultiplierOverride: 0
   randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

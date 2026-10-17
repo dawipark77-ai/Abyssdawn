@@ -1,0 +1,437 @@
+Resources/CharacterClassDatabase.asset	m_Name	CharacterClassDatabase
+Resources/Classes/Class_Monk.asset	m_Name	Class_Monk
+Resources/Classes/Class_Monk.asset	className	Monk
+Resources/Classes/Class_Monk.asset	description	A martial artist who relies on agility and inner power.
+Resources/Classes/Class_Monk.asset	traitName	Inner Flow
+Resources/Classes/Class_Monk.asset	traitDescription	Unarmed damage +10%. Physical skills cost MP instead of HP.\nCost: Accuracy -10% with two-handed weapons.
+Resources/Classes/Class_None.asset	m_Name	Class_None
+Resources/Classes/Class_None.asset	className	None
+Resources/Classes/Class_None.asset	description	No class selected. Neutral baseline.
+Resources/Classes/Class_Sister.asset	m_Name	Class_Sister
+Resources/Classes/Class_Sister.asset	className	Sister
+Resources/Classes/Class_Sister.asset	description	A devoted healer who balances sacred magic with modest physical ability.
+Resources/Classes/Class_Thief.asset	m_Name	Class_Thief
+Resources/Classes/Class_Thief.asset	className	Thief
+Resources/Classes/Class_Thief.asset	description	A thief specialized in Agility and Luck.
+Resources/Classes/Class_Thief.asset	traitName	Light Fingers
+Resources/Classes/Class_Thief.asset	traitDescription	Crit chance +5%. First turn Agility +15%.\nCost: Evasion -10% in heavy armour.
+Resources/Classes/Class_Warrior.asset	m_Name	Class_Warrior
+Resources/Classes/Class_Warrior.asset	className	Warrior
+Resources/Classes/Class_Warrior.asset	description	A warrior specialized in close combat.
+Resources/Classes/Class_Warrior.asset	traitName	Weapon Discipline
+Resources/Classes/Class_Warrior.asset	traitDescription	Hit chance +5% with any weapon.
+Resources/Classes/Class_Wizard.asset	m_Name	Class_Wizard
+Resources/Classes/Class_Wizard.asset	className	Wizard
+Resources/Classes/Class_Wizard.asset	description	A wizard specialized in powerful magic.
+Resources/Curse/Bleed1_Dagger.asset	m_Name	Bleed1_Dagger
+Resources/Curse/Bleed2_Katana.asset	m_Name	Bleed2_Katana
+Resources/Curse/Buff_Enrage.asset	m_Name	Buff_Enrage
+Resources/Curse/Buff_Enrage1.asset	m_Name	Buff_Enrage1
+Resources/Curse/Buff_SharpEdge.asset	m_Name	Buff_SharpEdge
+Resources/Curse/Curse_Ignite.asset	m_Name	Curse_Ignite
+Resources/Curse/Curse_Poison.asset	m_Name	Curse_Poison
+Resources/Curse/Curse_Stun.asset	m_Name	Curse_Stun
+Resources/Curse/Debuff_BlindScratch.asset	m_Name	Debuff_BlindScratch
+Resources/Curse/Test_StatMod.asset	m_Name	Test_StatMod
+Resources/Dispositions/Disposition_Cautious.asset	m_Name	Disposition_Cautious
+Resources/Dispositions/Disposition_Cautious.asset	dispositionName	Cautious
+Resources/Dispositions/Disposition_Cautious.asset	description	Trap sense +25%, trap damage -50%.\nFirst turn of battle: AGI -20%.
+Resources/Dispositions/Disposition_ColdBlooded.asset	m_Name	Disposition_ColdBlooded
+Resources/Dispositions/Disposition_ColdBlooded.asset	dispositionName	Cold-blooded
+Resources/Dispositions/Disposition_ColdBlooded.asset	description	After a kill, next attack +10%.\nMonster recruit chance -50%.
+Resources/Dispositions/Disposition_Coward.asset	m_Name	Disposition_Coward
+Resources/Dispositions/Disposition_Coward.asset	dispositionName	Coward
+Resources/Dispositions/Disposition_Coward.asset	description	Escape chance +25%.\nFirst turn of battle: ATK -15%.
+Resources/Dispositions/Disposition_Curious.asset	m_Name	Disposition_Curious
+Resources/Dispositions/Disposition_Curious.asset	dispositionName	Curious
+Resources/Dispositions/Disposition_Curious.asset	description	Better finds in chests +20%.\nTrap damage +30%.
+Resources/Dispositions/Disposition_Explorer.asset	m_Name	Disposition_Explorer
+Resources/Dispositions/Disposition_Explorer.asset	dispositionName	Explorer
+Resources/Dispositions/Disposition_Explorer.asset	description	Sight +1.\nRandom encounters +15%.
+Resources/Dispositions/Disposition_Greedy.asset	m_Name	Disposition_Greedy
+Resources/Dispositions/Disposition_Greedy.asset	dispositionName	Greedy
+Resources/Dispositions/Disposition_Greedy.asset	description	Gold from monsters +25%.\nENTROPY rises 20% faster.
+Resources/Dispositions/Disposition_LoneWolf.asset	m_Name	Disposition_LoneWolf
+Resources/Dispositions/Disposition_LoneWolf.asset	dispositionName	Lone Wolf
+Resources/Dispositions/Disposition_LoneWolf.asset	description	Fighting alone: all stats +10%.\nWith allies: healing received -15%.
+Resources/Dispositions/Disposition_Miser.asset	m_Name	Disposition_Miser
+Resources/Dispositions/Disposition_Miser.asset	dispositionName	Miser
+Resources/Dispositions/Disposition_Miser.asset	description	Shop prices -15%.\nHealing items -20% effect.
+Resources/Dispositions/Disposition_Perfectionist.asset	m_Name	Disposition_Perfectionist
+Resources/Dispositions/Disposition_Perfectionist.asset	dispositionName	Perfectionist
+Resources/Dispositions/Disposition_Perfectionist.asset	description	Hit +5%, evasion +5%.\nA miss: next turn ATK -10%.\nSprung trap: hit -10% on that floor.
+Resources/Dispositions/Disposition_Reckless.asset	m_Name	Disposition_Reckless
+Resources/Dispositions/Disposition_Reckless.asset	dispositionName	Reckless
+Resources/Dispositions/Disposition_Reckless.asset	description	Critical chance +8%.\nDamage taken +10%.
+Resources/EnemyDatabase.asset	m_Name	EnemyDatabase
+Resources/EquipmentsSkills/ArmorBreak.asset	m_Name	ArmorBreak
+Resources/EquipmentsSkills/ArmorBreak.asset	effectName	Armor Break
+Resources/EquipmentsSkills/ArmorBreak.asset	description	Deals additional fixed damage equal to a percentage of the target's defense.
+Resources/EquipmentsSkills/Block_Buckler.asset	m_Name	Block_Buckler
+Resources/EquipmentsSkills/Block_Greatshield.asset	m_Name	Block_Greatshield
+Resources/EquipmentsSkills/Block_Shield.asset	m_Name	Block_Shield
+Resources/EquipmentsSkills/Block_Shield.asset	effectName	Block
+Resources/EquipmentsSkills/Block_Shield.asset	description	Blocks an enemy attack and reduces incoming damage.
+Resources/Item_Equipments/Equipments/Crude/Crude_Axe.asset	m_Name	Crude_Axe
+Resources/Item_Equipments/Equipments/Crude/Crude_Axe.asset	description	A roughly ground axe. ATK +2.
+Resources/Item_Equipments/Equipments/Crude/Crude_Axe.asset	equipmentName	Crude Axe
+Resources/Item_Equipments/Equipments/Crude/Crude_Bow.asset	m_Name	Crude_Bow
+Resources/Item_Equipments/Equipments/Crude/Crude_Bow.asset	description	A warped bow. ATK +1, AGI +1.
+Resources/Item_Equipments/Equipments/Crude/Crude_Bow.asset	equipmentName	Crude Bow
+Resources/Item_Equipments/Equipments/Crude/Crude_Buckler.asset	m_Name	Crude_Buckler
+Resources/Item_Equipments/Equipments/Crude/Crude_Buckler.asset	description	A thin buckler. DEF +0, Block +3%, Parry Counter +20%.
+Resources/Item_Equipments/Equipments/Crude/Crude_Buckler.asset	equipmentName	Crude Buckler
+Resources/Item_Equipments/Equipments/Crude/Crude_Crossbow.asset	m_Name	Crude_Crossbow
+Resources/Item_Equipments/Equipments/Crude/Crude_Crossbow.asset	description	A rickety crossbow. ATK +2.
+Resources/Item_Equipments/Equipments/Crude/Crude_Crossbow.asset	equipmentName	Crude Crossbow
+Resources/Item_Equipments/Equipments/Crude/Crude_Dagger.asset	m_Name	Crude_Dagger
+Resources/Item_Equipments/Equipments/Crude/Crude_Dagger.asset	description	A crudely made dagger. ATK +1, AGI +1.
+Resources/Item_Equipments/Equipments/Crude/Crude_Dagger.asset	equipmentName	Crude Dagger
+Resources/Item_Equipments/Equipments/Crude/Crude_Greatshield.asset	m_Name	Crude_Greatshield
+Resources/Item_Equipments/Equipments/Crude/Crude_Greatshield.asset	description	Heavy and thick. DEF +2, Block +8%, AGI -2.
+Resources/Item_Equipments/Equipments/Crude/Crude_Greatshield.asset	equipmentName	Crude Greatshield
+Resources/Item_Equipments/Equipments/Crude/Crude_Greatsword.asset	m_Name	Crude_Greatsword
+Resources/Item_Equipments/Equipments/Crude/Crude_Greatsword.asset	description	Heavy and rough. ATK +2.
+Resources/Item_Equipments/Equipments/Crude/Crude_Greatsword.asset	equipmentName	Crude Greatsword
+Resources/Item_Equipments/Equipments/Crude/Crude_Hammer.asset	m_Name	Crude_Hammer
+Resources/Item_Equipments/Equipments/Crude/Crude_Hammer.asset	description	An unbalanced hammer. ATK +2.
+Resources/Item_Equipments/Equipments/Crude/Crude_Hammer.asset	equipmentName	Crude Hammer
+Resources/Item_Equipments/Equipments/Crude/Crude_Katana.asset	m_Name	Crude_Katana
+Resources/Item_Equipments/Equipments/Crude/Crude_Katana.asset	description	A poorly tempered blade. ATK +1, AGI +1.
+Resources/Item_Equipments/Equipments/Crude/Crude_Katana.asset	equipmentName	Crude Katana
+Resources/Item_Equipments/Equipments/Crude/Crude_Polearm.asset	m_Name	Crude_Polearm
+Resources/Item_Equipments/Equipments/Crude/Crude_Polearm.asset	description	An unbalanced polearm. ATK +1, ACC +1%.
+Resources/Item_Equipments/Equipments/Crude/Crude_Polearm.asset	equipmentName	Crude Polearm
+Resources/Item_Equipments/Equipments/Crude/Crude_Shield.asset	m_Name	Crude_Shield
+Resources/Item_Equipments/Equipments/Crude/Crude_Shield.asset	description	A crude wooden shield. DEF +1, Block +5%.
+Resources/Item_Equipments/Equipments/Crude/Crude_Shield.asset	equipmentName	Crude Wooden Shield
+Resources/Item_Equipments/Equipments/Crude/Crude_Spear.asset	m_Name	Crude_Spear
+Resources/Item_Equipments/Equipments/Crude/Crude_Spear.asset	description	A roughly carved spear. ATK +1, ACC +2%.
+Resources/Item_Equipments/Equipments/Crude/Crude_Spear.asset	equipmentName	Crude Spear
+Resources/Item_Equipments/Equipments/Crude/Crude_Staff.asset	m_Name	Crude_Staff
+Resources/Item_Equipments/Equipments/Crude/Crude_Staff.asset	description	An unbalanced two-handed staff. MAG +2, Max MP +8%.
+Resources/Item_Equipments/Equipments/Crude/Crude_Staff.asset	equipmentName	Crude Staff
+Resources/Item_Equipments/Equipments/Crude/Crude_Wand.asset	m_Name	Crude_Wand
+Resources/Item_Equipments/Equipments/Crude/Crude_Wand.asset	description	A roughly carved magic rod. MAG +1, Max MP +5%.
+Resources/Item_Equipments/Equipments/Crude/Crude_Wand.asset	equipmentName	Crude Wand
+Resources/Item_Equipments/Equipments/Crude/CrudeArmor.asset	m_Name	CrudeArmor
+Resources/Item_Equipments/Equipments/Crude/CrudeArmor.asset	description	Offers some protection, but movement feels rather stiff.
+Resources/Item_Equipments/Equipments/Crude/CrudeArmor.asset	equipmentName	Crude Armour
+Resources/Item_Equipments/Equipments/Crude/CrudeBoots.asset	m_Name	CrudeBoots
+Resources/Item_Equipments/Equipments/Crude/CrudeBoots.asset	description	Better than bare feet, but the heels keep rubbing raw.
+Resources/Item_Equipments/Equipments/Crude/CrudeBoots.asset	equipmentName	Crude Boots
+Resources/Item_Equipments/Equipments/Crude/CrudeBracelet.asset	m_Name	CrudeBracelet
+Resources/Item_Equipments/Equipments/Crude/CrudeBracelet.asset	description	Cheap trinkets clank together, drawing unwanted attention. Max HP +5.
+Resources/Item_Equipments/Equipments/Crude/CrudeBracelet.asset	equipmentName	Crude Bracelet
+Resources/Item_Equipments/Equipments/Crude/CrudeShield.asset	m_Name	CrudeShield
+Resources/Item_Equipments/Equipments/Crude/CrudeShield.asset	description	Looks more like a lid than a shield. 2.5x damage penalty on parry failure.
+Resources/Item_Equipments/Equipments/Crude/CrudeShield.asset	equipmentName	Crude Shield
+Resources/Item_Equipments/Equipments/Crude/CrudeSword.asset	m_Name	CrudeSword
+Resources/Item_Equipments/Equipments/Crude/CrudeSword.asset	description	Every swing leaves a dull ache in the wrist. ATK +5, ACC -5%.
+Resources/Item_Equipments/Equipments/Crude/CrudeSword.asset	equipmentName	Crude Sword
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneClub.asset	m_Name	Junk_BoneClub
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneClub.asset	itemName	Bone Club
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneClub.asset	description	A thick thigh bone with a knot of sinew for a grip. ATK +1.
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneClub.asset	equipmentName	Bone Club
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneShiv.asset	m_Name	Junk_BoneShiv
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneShiv.asset	itemName	Bone Shiv
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneShiv.asset	description	A sharpened sliver of rat bone. It breaks skin, not much else. ATK +0, AGI +1.
+Resources/Item_Equipments/Equipments/Junk/Junk_BoneShiv.asset	equipmentName	Bone Shiv
+Resources/Item_Equipments/Equipments/Junk/Junk_BrokenSpearShaft.asset	m_Name	Junk_BrokenSpearShaft
+Resources/Item_Equipments/Equipments/Junk/Junk_BrokenSpearShaft.asset	itemName	Broken Spear Shaft
+Resources/Item_Equipments/Equipments/Junk/Junk_BrokenSpearShaft.asset	description	The head is long gone; someone whittled the end to a point. ATK +1.
+Resources/Item_Equipments/Equipments/Junk/Junk_BrokenSpearShaft.asset	equipmentName	Broken Spear Shaft
+Resources/Item_Equipments/Equipments/Junk/Junk_RustyHatchet.asset	m_Name	Junk_RustyHatchet
+Resources/Item_Equipments/Equipments/Junk/Junk_RustyHatchet.asset	itemName	Rusty Hatchet
+Resources/Item_Equipments/Equipments/Junk/Junk_RustyHatchet.asset	description	More rust than blade. It still chops, eventually. ATK +1.
+Resources/Item_Equipments/Equipments/Junk/Junk_RustyHatchet.asset	equipmentName	Rusty Hatchet
+Resources/Item_Equipments/Equipments/Junk/Junk_TatteredClothes.asset	m_Name	Junk_TatteredClothes
+Resources/Item_Equipments/Equipments/Junk/Junk_TatteredClothes.asset	equipmentName	Tattered Clothes
+Resources/Item_Equipments/Equipments/Junk/Junk_WoodenStick.asset	m_Name	Junk_WoodenStick
+Resources/Item_Equipments/Equipments/Junk/Junk_WoodenStick.asset	itemName	Wooden Stick
+Resources/Item_Equipments/Equipments/Junk/Junk_WoodenStick.asset	description	A branch snapped off a dead tree. Barely a weapon, but you can practise sword forms with it. ATK +1.
+Resources/Item_Equipments/Equipments/Junk/Junk_WoodenStick.asset	equipmentName	Wooden Stick
+Resources/Item_Equipments/Equipments/Sword.asset	m_Name	Sword
+Resources/Item_Equipments/Equipments/Sword.asset	equipmentName	Crude Sword
+Resources/Item_Equipments/Items/Antidote.asset	m_Name	Antidote
+Resources/Item_Equipments/Items/Antidote.asset	itemName	Antidote
+Resources/Item_Equipments/Items/Antidote.asset	description	Poison kills over time. This steals that time away.
+Resources/Item_Equipments/Items/Bandage.asset	m_Name	Bandage
+Resources/Item_Equipments/Items/Bandage.asset	itemName	Bandage
+Resources/Item_Equipments/Items/Bandage.asset	description	Tied rough, but the bleeding stops.
+Resources/Item_Equipments/Items/Coolant.asset	m_Name	Coolant
+Resources/Item_Equipments/Items/Coolant.asset	itemName	Coolant
+Resources/Item_Equipments/Items/Coolant.asset	description	Fire can be put out. The scars remain, though.
+Resources/Item_Equipments/Items/Dawn_Chalice.asset	m_Name	Dawn_Chalice
+Resources/Item_Equipments/Items/Dawn_Chalice.asset	itemName	Dawn Chalice
+Resources/Item_Equipments/Items/Dawn_Chalice.asset	description	Even in the abyss, dawn will come. At least, that is what we must believe.
+Resources/Item_Equipments/Items/HP_Potion.asset	m_Name	HP_Potion
+Resources/Item_Equipments/Items/HP_Potion.asset	itemName	HP Potion
+Resources/Item_Equipments/Items/HP_Potion.asset	description	Alive is enough.
+Resources/Item_Equipments/Items/Mana_Potion.asset	m_Name	Mana_Potion
+Resources/Item_Equipments/Items/Mana_Potion.asset	itemName	Mana Potion
+Resources/Item_Equipments/Items/Mana_Potion.asset	description	The power returns. Briefly, but it does.
+Resources/Item_Equipments/Items/Medicinal_Herb.asset	m_Name	Medicinal_Herb
+Resources/Item_Equipments/Items/Medicinal_Herb.asset	itemName	Medicinal Herb
+Resources/Item_Equipments/Items/Medicinal_Herb.asset	description	Bitter, but it closes small wounds.
+Resources/Item_Equipments/Items/Purification_Water.asset	m_Name	Purification_Water
+Resources/Item_Equipments/Items/Purification_Water.asset	itemName	Purification Water
+Resources/Item_Equipments/Items/Purification_Water.asset	description	Water drawn from the abyss. It washes away all darkness.
+Resources/Item_Equipments/Items/Smoke_Bomb.asset	m_Name	Smoke_Bomb
+Resources/Item_Equipments/Items/Smoke_Bomb.asset	itemName	Smoke Bomb
+Resources/Item_Equipments/Items/Smoke_Bomb.asset	description	What they cannot see, they cannot hit.
+Resources/Item_Equipments/Items/Stimulant.asset	m_Name	Stimulant
+Resources/Item_Equipments/Items/Stimulant.asset	itemName	Stimulant
+Resources/Item_Equipments/Items/Stimulant.asset	description	A brief awakening. There is always a price to pay.
+Resources/Item_Equipments/Items/Trap_Parts.asset	m_Name	Trap_Parts
+Resources/Item_Equipments/Items/Trap_Parts.asset	itemName	Trap Parts
+Resources/Item_Equipments/Items/Trap_Parts.asset	description	Springs, wire and a sharp edge. Someone in town will pay for these.
+Resources/Item_Equipments/Items/Whetstone.asset	m_Name	Whetstone
+Resources/Item_Equipments/Items/Whetstone.asset	itemName	Whetstone
+Resources/Item_Equipments/Items/Whetstone.asset	description	A sharper edge means less effort.
+Resources/Monsters/Bat.asset	m_Name	Bat
+Resources/Monsters/Bat.asset	monsterName	Bat
+Resources/Monsters/Goblin.asset	m_Name	Goblin
+Resources/Monsters/Goblin.asset	monsterName	Goblin
+Resources/Monsters/Orc.asset	m_Name	Orc
+Resources/Monsters/Orc.asset	monsterName	Orc
+Resources/Monsters/Rat.asset	m_Name	Rat
+Resources/Monsters/Rat.asset	monsterName	Rat
+Resources/Monsters/Skeleton.asset	m_Name	Skeleton
+Resources/Monsters/Skeleton.asset	monsterName	Skeleton
+Resources/Monsters/SkeletonKnight.asset	m_Name	SkeletonKnight
+Resources/Monsters/SkeletonKnight.asset	monsterName	Skeleton Knight
+Resources/Monsters/Slime.asset	m_Name	Slime
+Resources/Monsters/Slime.asset	monsterName	Slime
+Resources/Monsters/Wizard.asset	m_Name	Wizard
+Resources/Monsters/Wizard.asset	monsterName	Wizard
+Resources/Traits/Elf_Trait.asset	m_Name	Elf_Trait
+Resources/Traits/Elf_Trait.asset	traitNameEnglish	Ether Resonance
+Resources/Traits/Human_LastStand.asset	m_Name	Human_LastStand
+Resources/Traits/Human_LastStand.asset	traitNameEnglish	Last Stand
+Resources/Traits/Orc_Trait.asset	m_Name	Orc_Trait
+Resources/Traits/Orc_Trait.asset	traitNameEnglish	Battle Frenzy
+Scripts/Battle/Data/Classes/Class_Monk.asset	m_Name	Class_Monk
+Scripts/Battle/Data/Classes/Class_Monk.asset	className	Monk
+Scripts/Battle/Data/Classes/Class_Monk.asset	description	A martial artist who relies on agility and inner power.
+Scripts/Battle/Data/Classes/Class_Monk.asset	traitName	Inner Flow
+Scripts/Battle/Data/Classes/Class_Monk.asset	traitDescription	Unarmed damage +10%. Physical skills cost MP instead of HP.\nCost: Accuracy -10% with two-handed weapons.
+Scripts/Battle/Data/Classes/Class_None.asset	m_Name	Class_None
+Scripts/Battle/Data/Classes/Class_None.asset	className	None
+Scripts/Battle/Data/Classes/Class_None.asset	description	No class selected. Neutral baseline.
+Scripts/Battle/Data/Classes/Class_Sister.asset	m_Name	Class_Sister
+Scripts/Battle/Data/Classes/Class_Sister.asset	className	Sister
+Scripts/Battle/Data/Classes/Class_Sister.asset	description	A devoted healer who balances sacred magic with modest physical ability.
+Scripts/Battle/Data/Classes/Class_Thief.asset	m_Name	Class_Thief
+Scripts/Battle/Data/Classes/Class_Thief.asset	className	Thief
+Scripts/Battle/Data/Classes/Class_Thief.asset	description	A thief specialized in Agility and Luck.
+Scripts/Battle/Data/Classes/Class_Thief.asset	traitName	Light Fingers
+Scripts/Battle/Data/Classes/Class_Thief.asset	traitDescription	Crit chance +5%. First turn Agility +15%.\nCost: Evasion -10% in heavy armour.
+Scripts/Battle/Data/Classes/Class_Warrior.asset	m_Name	Class_Warrior
+Scripts/Battle/Data/Classes/Class_Warrior.asset	className	Warrior
+Scripts/Battle/Data/Classes/Class_Warrior.asset	description	A warrior specialized in close combat.
+Scripts/Battle/Data/Classes/Class_Warrior.asset	traitName	Weapon Discipline
+Scripts/Battle/Data/Classes/Class_Warrior.asset	traitDescription	Hit chance +5% with any weapon.
+Scripts/Battle/Data/Classes/Class_Wizard.asset	m_Name	Class_Wizard
+Scripts/Battle/Data/Classes/Class_Wizard.asset	className	Wizard
+Scripts/Battle/Data/Classes/Class_Wizard.asset	description	A wizard specialized in powerful magic.
+Scripts/Battle/Data/EquipmentsSkills/ArmorBreak.asset	m_Name	ArmorBreak
+Scripts/Battle/Data/EquipmentsSkills/Block_Buckler.asset	m_Name	Block_Buckler
+Scripts/Battle/Data/EquipmentsSkills/Block_Greatshield.asset	m_Name	Block_Greatshield
+Scripts/Battle/Data/EquipmentsSkills/Block_Shield.asset	m_Name	Block_Shield
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Beard.asset	m_Name	Dwarf_Beard
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Beard.asset	memoryName	Beard
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Beard.asset	subtitle	Ore-Sensing Beard
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Beard.asset	flavorText	Their beards twitch at the scent of ore and buried treasure.
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Forearm.asset	m_Name	Dwarf_Forearm
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Forearm.asset	memoryName	Forearm
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Forearm.asset	subtitle	Thick Forearm Muscles
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Forearm.asset	flavorText	Arms forged by a lifetime of hammer blows swing weapons with brutal force.
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Retina.asset	m_Name	Dwarf_Retina
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Retina.asset	memoryName	Retina
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Retina.asset	subtitle	Infrared-Sensing Retina
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Retina.asset	flavorText	They see heat where others see only darkness, but miss subtler fortunes.
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Ribcage.asset	m_Name	Dwarf_Ribcage
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Ribcage.asset	memoryName	Ribcage
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Ribcage.asset	subtitle	Expanded Thorax
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Ribcage.asset	flavorText	Broad chests hold deep lungs and stubborn hearts.
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Skeleton.asset	m_Name	Dwarf_Skeleton
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Skeleton.asset	memoryName	Skeleton
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Skeleton.asset	subtitle	High-Density Calcium Bones
+Scripts/Battle/Data/MemoryofSpecies/Dwarf/Dwarf_Skeleton.asset	flavorText	Their bones are like stone, and just as slow to move.
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Ear.asset	m_Name	Elf_Ear
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Ear.asset	memoryName	Pointed Ear
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Ear.asset	subtitle	Mana-Sensitive Ears
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Ear.asset	flavorText	Every whisper of mana is pain and power both, sharpening their spellcraft while wearing down their bodies.
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Hair.asset	m_Name	Elf_Hair
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Hair.asset	memoryName	Hair
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Hair.asset	subtitle	Light-Touched Hair
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Hair.asset	flavorText	Hair that remembers the sun holds traces of ancient blessings, but the body beneath remains fragile.
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Iris.asset	m_Name	Elf_Iris
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Iris.asset	memoryName	Iris
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Iris.asset	subtitle	Monochrome Iris
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Iris.asset	flavorText	These eyes see further into both light and shadow, but they expose a fragile body.
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Skeleton.asset	m_Name	Elf_Skeleton
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Skeleton.asset	memoryName	Skeleton
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Skeleton.asset	subtitle	Lightweight Bones
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Skeleton.asset	flavorText	Their hollow, light bones let them dance between blows, but a single hit can be fatal.
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Stomach.asset	m_Name	Elf_Stomach
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Stomach.asset	memoryName	Stomach
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Stomach.asset	subtitle	Narrow Stomach
+Scripts/Battle/Data/MemoryofSpecies/Elf/Elf_Stomach.asset	flavorText	Their bodies accept little food but much mana, reshaping what sustains them.
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_CenterOfMass.asset	m_Name	Halfling_CenterOfMass
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_CenterOfMass.asset	memoryName	CenterOfMass
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_CenterOfMass.asset	subtitle	Low Center of Gravity
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_CenterOfMass.asset	flavorText	Short legs and a low stance make it hard to knock them off balance.
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Eye.asset	m_Name	Halfling_Eye
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Eye.asset	memoryName	Eye
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Eye.asset	subtitle	Fine Cone Cells
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Eye.asset	flavorText	Their eyes pick out small details, but miss the heavy blows coming.
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Foot.asset	m_Name	Halfling_Foot
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Foot.asset	memoryName	Foot
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Foot.asset	subtitle	Natural Leather Soles
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Foot.asset	flavorText	Bare feet tough as leather let them run quietly over any ground.
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Metabolism.asset	m_Name	Halfling_Metabolism
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Metabolism.asset	memoryName	Metabolism
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Metabolism.asset	subtitle	Fast Sugar Burn
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Metabolism.asset	flavorText	Energy burns bright and fast in them, leaving little in reserve.
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Nose.asset	m_Name	Halfling_Nose
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Nose.asset	memoryName	Nose
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Nose.asset	subtitle	Heightened Smell
+Scripts/Battle/Data/MemoryofSpecies/Halfling/Halfling_Nose.asset	flavorText	They can smell danger and supper alike long before anyone else.
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Chin.asset	m_Name	Human_Chin
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Chin.asset	memoryName	Chin
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Chin.asset	subtitle	Skeletal Anomaly
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Eyes.asset	m_Name	Human_Eyes
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Eyes.asset	memoryName	Eyes
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Eyes.asset	subtitle	Cooperative Gaze
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Lips.asset	m_Name	Human_Lips
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Lips.asset	memoryName	Lips
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Lips.asset	subtitle	Precise Articulation
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Shoulder.asset	m_Name	Human_Shoulder
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Shoulder.asset	memoryName	Shoulder
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Shoulder.asset	subtitle	Master of Throwing
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Skin.asset	m_Name	Human_Skin
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Skin.asset	memoryName	Skin
+Scripts/Battle/Data/MemoryofSpecies/Human/Human_Skin.asset	subtitle	Sweat Glands: Heat Control
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Greenskin.asset	m_Name	Orc_Greenskin
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Greenskin.asset	memoryName	Greenskin
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Greenskin.asset	subtitle	Greenskin Pigmentation
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Greenskin.asset	flavorText	Their green skin drinks in light and violence alike.
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_KneeJoint.asset	m_Name	Orc_KneeJoint
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_KneeJoint.asset	memoryName	KneeJoint
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_KneeJoint.asset	subtitle	Reverse Knee Joints
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_KneeJoint.asset	flavorText	Their legs drive them forward in brutal charges, not graceful steps.
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Protruding Tusks.asset	m_Name	Orc_Protruding Tusks
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Protruding Tusks.asset	memoryName	Tusk
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Protruding Tusks.asset	subtitle	Massive Tusks
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_Protruding Tusks.asset	flavorText	Tusks turn even a headbutt into a killing blow.
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_RedBloodCells.asset	m_Name	Orc_RedBloodCells
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_RedBloodCells.asset	memoryName	RedBloodCells
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_RedBloodCells.asset	subtitle	Excessive Red Blood Cells
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_RedBloodCells.asset	flavorText	Blood thick with power keeps them fighting long after others fall.
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_SubcutaneousFat.asset	m_Name	Orc_SubcutaneousFat
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_SubcutaneousFat.asset	memoryName	SubcutaneousFat
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_SubcutaneousFat.asset	subtitle	Thick Subcutaneous Fat
+Scripts/Battle/Data/MemoryofSpecies/Orc/Orc_SubcutaneousFat.asset	flavorText	A thick layer of fat dulls both wounds and movement.
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Mage_ArcaneOverload.asset	m_Name	Mage_ArcaneOverload
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Mage_ArcaneOverload.asset	oathName	Arcane Overload
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Mage_CurseMastery.asset	m_Name	Mage_CurseMastery
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Mage_CurseMastery.asset	oathName	Curse Mastery
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_InnerFlow.asset	m_Name	Monk_InnerFlow
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_InnerFlow.asset	oathName	Inner Flow
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_UnarmedProwess.asset	m_Name	Monk_UnarmedProwess
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Monk_UnarmedProwess.asset	oathName	Unarmed Prowess
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_DarkRevelation.asset	m_Name	Sister_DarkRevelation
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_DarkRevelation.asset	oathName	Dark Revelation
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_SacredVow.asset	m_Name	Sister_SacredVow
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Sister_SacredVow.asset	oathName	Sacred Vow
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_GhostStep.asset	m_Name	Thief_GhostStep
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_GhostStep.asset	oathName	Ghost Step
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_ShadowVeil.asset	m_Name	Thief_ShadowVeil
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Thief_ShadowVeil.asset	oathName	Shadow Veil
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_IronDiscipline.asset	m_Name	Warrior_IronDiscipline
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_IronDiscipline.asset	oathName	Iron Discipline
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_WarriorsWill.asset	m_Name	Warrior_WarriorsWill
+Scripts/Battle/Data/Oath&Path/Oath&Binding/Warrior_WarriorsWill.asset	oathName	Warrior's Will
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ChainCurse.asset	m_Name	Mage_T1_ChainCurse
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ChainCurse.asset	skillName	Chain Curse
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ManaSurge.asset	m_Name	Mage_T1_ManaSurge
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ManaSurge.asset	skillName	Mana Surge
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ManaVeil.asset	m_Name	Mage_T1_ManaVeil
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_ManaVeil.asset	skillName	Mana Veil
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_Overcharge.asset	m_Name	Mage_T1_Overcharge
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_Overcharge.asset	skillName	Overcharge
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_SpellRebound.asset	m_Name	Mage_T1_SpellRebound
+Scripts/Battle/Data/Oath&Path/Path/Mage/Mage_T1_SpellRebound.asset	skillName	Spell Rebound
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_FocusedMind.asset	m_Name	Monk_T1_FocusedMind
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_FocusedMind.asset	skillName	Focused Mind
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_HarmonicStrike.asset	m_Name	Monk_T1_HarmonicStrike
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_HarmonicStrike.asset	skillName	Harmonic Strike
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_InnerBreath.asset	m_Name	Monk_T1_InnerBreath
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_InnerBreath.asset	skillName	Inner Breath
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_Transcendence.asset	m_Name	Monk_T1_Transcendence
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_Transcendence.asset	skillName	Transcendence
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_VoidStep.asset	m_Name	Monk_T1_VoidStep
+Scripts/Battle/Data/Oath&Path/Path/Monk/Monk_T1_VoidStep.asset	skillName	Void Step
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_DarkOffering.asset	m_Name	Sister_T1_DarkOffering
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_DarkOffering.asset	skillName	Dark Offering
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_HealingLight.asset	m_Name	Sister_T1_HealingLight
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_HealingLight.asset	skillName	Healing Light
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_Sanctuary.asset	m_Name	Sister_T1_Sanctuary
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_Sanctuary.asset	skillName	Sanctuary
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_SoulDrain.asset	m_Name	Sister_T1_SoulDrain
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_SoulDrain.asset	skillName	Soul Drain
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_TwistedPrayer.asset	m_Name	Sister_T1_TwistedPrayer
+Scripts/Battle/Data/Oath&Path/Path/Sister/Sister_T1_TwistedPrayer.asset	skillName	Twisted Prayer
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_Blindside.asset	m_Name	Thief_T1_Blindside
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_Blindside.asset	skillName	Blindside
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_Pickpocket.asset	m_Name	Thief_T1_Pickpocket
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_Pickpocket.asset	skillName	Pickpocket
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_ShadowSwap.asset	m_Name	Thief_T1_ShadowSwap
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_ShadowSwap.asset	skillName	Shadow Swap
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_SmokeBomb.asset	m_Name	Thief_T1_SmokeBomb
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_SmokeBomb.asset	skillName	Smoke Bomb
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_VenomCoat.asset	m_Name	Thief_T1_VenomCoat
+Scripts/Battle/Data/Oath&Path/Path/Thief/Thief_T1_VenomCoat.asset	skillName	Venom Coat
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_BerserkersEdge.asset	m_Name	Warrior_T1_BerserkersEdge
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_BerserkersEdge.asset	skillName	Berserker's Edge
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_BloodPrice.asset	m_Name	Warrior_T1_BloodPrice
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_BloodPrice.asset	skillName	Blood Price
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_IronMomentum.asset	m_Name	Warrior_T1_IronMomentum
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_IronMomentum.asset	skillName	Iron Momentum
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_WarCry.asset	m_Name	Warrior_T1_WarCry
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_WarCry.asset	skillName	War Cry
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_WeaponOath.asset	m_Name	Warrior_T1_WeaponOath
+Scripts/Battle/Data/Oath&Path/Path/Warrior/Warrior_T1_WeaponOath.asset	skillName	Weapon Oath
+Scripts/Battle/Data/Skills/Bow_Lore/Bow_AimedShot.asset	m_Name	Bow_AimedShot
+Scripts/Battle/Data/Skills/Bow_Lore/Bow_FocusFire.asset	m_Name	Bow_FocusFire
+Scripts/Battle/Data/Skills/Bow_Lore/Bow_Mastery.asset	m_Name	Bow_Mastery
+Scripts/Battle/Data/Skills/Bow_Lore/Bow_RapidShot.asset	m_Name	Bow_RapidShot
+Scripts/Battle/Data/Skills/Bow_Lore/Bow_ScatterShot.asset	m_Name	Bow_ScatterShot
+Scripts/Battle/Data/Skills/Bow_Lore/Bow_SuppressingShot.asset	m_Name	Bow_SuppressingShot
+Scripts/Battle/Data/Skills/Dual_Lore/Dual_BloodFeast.asset	m_Name	Dual_BloodFeast
+Scripts/Battle/Data/Skills/Dual_Lore/Dual_CrossResonance.asset	m_Name	Dual_CrossResonance
+Scripts/Battle/Data/Skills/Dual_Lore/Dual_CrossSlash.asset	m_Name	Dual_CrossSlash
+Scripts/Battle/Data/Skills/Dual_Lore/Dual_FrenziedDance.asset	m_Name	Dual_FrenziedDance
+Scripts/Battle/Data/Skills/Dual_Lore/Dual_OffRhythmStrike.asset	m_Name	Dual_OffRhythmStrike
+Scripts/Battle/Data/Skills/Dual_Lore/Dual_TwinFlow.asset	m_Name	Dual_TwinFlow
+Scripts/Battle/Data/Skills/Katana_Lore/Katana_CleavingDraw.asset	m_Name	Katana_CleavingDraw
+Scripts/Battle/Data/Skills/Katana_Lore/Katana_CrimsonStance.asset	m_Name	Katana_CrimsonStance
+Scripts/Battle/Data/Skills/Katana_Lore/Katana_FlowingCut.asset	m_Name	Katana_FlowingCut
+Scripts/Battle/Data/Skills/Katana_Lore/Katana_IaiStrike.asset	m_Name	Katana_IaiStrike
+Scripts/Battle/Data/Skills/Katana_Lore/Katana_Mastery.asset	m_Name	Katana_Mastery
+Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_Dominance.asset	m_Name	Polearm_Dominance
+Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_FrontArcSlash.asset	m_Name	Polearm_FrontArcSlash
+Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_Mastery.asset	m_Name	Polearm_Mastery
+Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_RearArcSlash.asset	m_Name	Polearm_RearArcSlash
+Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_RearSuppression.asset	m_Name	Polearm_RearSuppression
+Scripts/Battle/Data/Skills/Polearm_Lore/Polearm_SweepingStrike.asset	m_Name	Polearm_SweepingStrike
+Scripts/Battle/Data/Skills/Spear_Lore/Spear_Impale.asset	m_Name	Spear_Impale
+Scripts/Battle/Data/Skills/Spear_Lore/Spear_LinearThrust.asset	m_Name	Spear_LinearThrust
+Scripts/Battle/Data/Skills/Spear_Lore/Spear_Mastery.asset	m_Name	Spear_Mastery
+Scripts/Battle/Data/Skills/Spear_Lore/Spear_PreemptiveThrust.asset	m_Name	Spear_PreemptiveThrust
+Scripts/Battle/Data/Skills/Spear_Lore/Spear_RushingThrust.asset	m_Name	Spear_RushingThrust
+Scripts/Battle/Data/Skills/Spear_Lore/Spear_ThreateningReach.asset	m_Name	Spear_ThreateningReach
+Scripts/Battle/Data/TraitsofSpecies/Human/Human_LastStand.asset	m_Name	Human_LastStand
+Scripts/Battle/Data/TraitsofSpecies/Human/Human_LastStand.asset	traitNameEnglish	Last Stand

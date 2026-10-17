@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Monk_UnarmedProwess
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Monk_UnarmedProwess
-  oathName: Unarmed Prowess
+  oathName: "\uB9E8\uC190\uC758 \uAE30\uB7C9"
   jobClass: 1
   oathDescription: "STR +10.\n\uCD5C\uC885 \uBB3C\uB9AC \uACF5\uACA9\uB825 +20%."
   bindingStrength: 2

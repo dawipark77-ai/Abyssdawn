@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Halfling_Nose
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Halfling_Nose
-  memoryName: Nose
-  subtitle: Heightened Smell
+  memoryName: "\uCF54"
+  subtitle: "\uC608\uBBFC\uD55C \uD6C4\uAC01"
   species: 3
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: 0
   agilityBonus: 0
@@ -39,7 +44,8 @@ MonoBehaviour:
   luckLevelUpChanceBonus: 20
   description: "\uB9C8\uB825 -1  \u2192 \uCD5C\uB300 MP -3\n\uD589\uC6B4 +2\n\n\uB808\uBCA8\uC5C5
     \uB54C \uD589\uC6B4\uC774 \uC624\uB97C \uD655\uB960 +20%p"
-  flavorText: They can smell danger and supper alike long before anyone else.
+  flavorText: "\uC704\uD5D8\uC774\uB4E0 \uC800\uB141\uBC25\uC774\uB4E0 \uB204\uAD6C\uBCF4\uB2E4
+    \uBA3C\uC800 \uB0C4\uC0C8 \uB9E1\uB294\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

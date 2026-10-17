@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: T1_Mandritto
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Swords_T1_03
-  skillName: Mandritto
+  skillName: "\uB9CC\uB4DC\uB9AC\uD1A0"
+  skillKey: Mandritto
   skillIcon: {fileID: 0}
   description: "[\uAC80 \uC804\uC6A9] \uC55E\uC5F4\uC758 \uC801 \uB458\uC744 \uD55C
     \uBC88\uC5D0 \uD729\uC4F0\uB294 \uD6A1\uBCA0\uAE30. \uACE0\uB978 \uC801\uACFC
     \uAC00\uC7A5 \uAC00\uAE4C\uC6B4 \uC55E\uC5F4 \uC801\uC5D0\uAC8C \uAC01\uAC01
     \uACF5\uACA9\uB825\uC758 90% \uD53C\uD574. \uC544\uAD70 \uC55E\uC5F4(1\xB72\uBC88)\uC5D0\uC11C\uB9CC
-    \uC0AC\uC6A9 \uAC00\uB2A5. \uCD5C\uB300 HP\uC758 4% \uC18C\uBAA8."
+    \uC0AC\uC6A9 \uAC00\uB2A5. \uCD5C\uB300 HP\uC758 10% \uC18C\uBAA8."
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -29,7 +30,7 @@ MonoBehaviour:
     allowedCasterSlots: 3
     allowedTargetSlots: 15
     specificSlots: 
-  hpCostPercent: 4
+  hpCostPercent: 10
   mpCost: 0
   minMult: 0.9
   maxMult: 0.9
@@ -67,6 +68,10 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0

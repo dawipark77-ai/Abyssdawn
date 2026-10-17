@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sister_T1_DarkOffering
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.PathSkillData
   skillID: Sister_T1_DarkOffering
-  skillName: Dark Offering
+  skillName: "\uC5B4\uB460\uC758 \uC81C\uBB3C"
   jobClass: 4
   tier: 1
   type: 1
@@ -24,3 +24,5 @@ MonoBehaviour:
     60% \uD655\uB960\uB85C \uBD80\uC5EC."
   drawbackDescription: "HP \uD76C\uC0DD + MP 7% \uC18C\uBAA8.\n\uAC15\uD55C \uC77C\uACA9\uC774\uC9C0\uB9CC
     \uBC29\uC5B4\uC801\uC73C\uB85C \uCDE8\uC57D\uD574\uC9C4\uB2E4."
+  lpCost: 2
+  battleSkill: {fileID: 0}

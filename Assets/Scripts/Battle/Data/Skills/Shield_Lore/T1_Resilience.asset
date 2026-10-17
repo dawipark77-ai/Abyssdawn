@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_Resilience
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T1_Resilience
-  skillName: Embodiment of Resilience
+  skillName: "\uBD88\uAD74\uC758 \uD654\uC2E0"
+  skillKey: Embodiment of Resilience
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uD328\uC2DC\uBE0C] \uB9C9\uAE30\uC5D0 \uC131\uACF5\uD558\uBA74
     2\uD134 \uB3D9\uC548 \uBC1B\uB294 \uD53C\uD574 -8% (\uCD5C\uB300 2\uC911\uCCA9).
@@ -62,6 +63,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

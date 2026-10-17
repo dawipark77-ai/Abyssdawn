@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T1_HardenedBody
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: CombatArts_T1_HardenedBody
-  skillName: Hardened Body
+  skillName: "\uB2E8\uB828\uB41C \uC721\uCCB4"
+  skillKey: Hardened Body
   skillIcon: {fileID: 843639385197948872, guid: 039cd1b67ae44b7438bc5d896fe0f8fb, type: 3}
   description: "[\uD328\uC2DC\uBE0C] \uCD5C\uB300 HP +8%, \uBC1B\uB294 \uD53C\uD574
     -5% (\uC55E\uC5F4\uC774\uBA74 -8%), \uCD9C\uD608\xB7\uC810\uD654 \uB4F1 \uC9C0\uC18D
@@ -45,7 +46,8 @@ MonoBehaviour:
   legacyEffectAmount: 0
   triggerCondition: 0
   dunbreakChance: 0
-  dunbreakDescription: This turn, critical hits cannot reduce HP below 1
+  dunbreakDescription: "\uC774\uBC88 \uD134 \uCE58\uBA85\uD0C0\uB85C\uB294 HP\uAC00
+    1 \uC544\uB798\uB85C \uB5A8\uC5B4\uC9C0\uC9C0 \uC54A\uB294\uB2E4"
   curseEffect: {fileID: 0}
   curseApplyChance: 0
   backflowChance: 0
@@ -62,6 +64,8 @@ MonoBehaviour:
   requiresSameTarget: 0
   preemptive: 0
   cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

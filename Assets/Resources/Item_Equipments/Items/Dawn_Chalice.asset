@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3847bf297618c0840aa520f9c4d4f342, type: 3}
   m_Name: Dawn_Chalice
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
-  itemName: Dawn Chalice
+  itemName: "\uC0C8\uBCBD\uC758 \uC794"
   icon: {fileID: -5063216152701466143, guid: 9193eccd8dc30974a8da62eba23f0727, type: 3}
-  description: Even in the abyss, dawn will come. At least, that is what we must
-    believe.
+  description: "\uC2EC\uC5F0\uC5D0\uB3C4 \uC0C8\uBCBD\uC740 \uC628\uB2E4. \uC801\uC5B4\uB3C4
+    \uADF8\uB807\uAC8C \uBBFF\uC5B4\uC57C \uD55C\uB2E4."
   itemCategory: 3
   itemIcon: {fileID: -5063216152701466143, guid: 9193eccd8dc30974a8da62eba23f0727, type: 3}
   flatIcon: {fileID: 7043268739260826568, guid: 72bbb49c45579934b889efe7db9227a1, type: 3}
@@ -28,6 +28,10 @@ MonoBehaviour:
   escapeChanceBuff: 0
   buffDuration: 0
   skillPointGain: 0
+  sideEffectChance: 0
+  sideEffectType: 2
+  sideEffectTurns: 3
+  excludeFromChests: 0
   mpPenaltyPercent: 0
   maxStack: 3
   usableInBattle: 1

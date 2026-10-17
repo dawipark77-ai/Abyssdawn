@@ -259,7 +259,7 @@ public class ConsumableInventory : MonoBehaviour
         {
             Debug.Log($"[ConsumableInventory] 아껴 쓰기: {item.itemName} 소모되지 않음");
             var hud = DungeonHud.Instance;
-            if (hud != null) hud.Toast($"<color=#9FFF9F>Frugal use — the {item.itemName} was not used up.</color>");
+            if (hud != null) hud.Toast($"<color=#9FFF9F>알뜰한 사용 — {item.itemName}이(가) 줄지 않았다.</color>");
             return true;
         }
         return RemoveItem(item, 1);

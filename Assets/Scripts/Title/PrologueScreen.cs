@@ -59,6 +59,15 @@ public class PrologueScreen : MonoBehaviour
 
     private RectTransform _msgWindow;
     private TextMeshProUGUI _msgText;
+    private ScrollRect _msgScroll;
+
+    /// <summary>[2026-10-18] 대화창 글을 맨 위부터 보이게.</summary>
+    private void MsgScrollTop()
+    {
+        if (_msgScroll == null) return;
+        Canvas.ForceUpdateCanvases();
+        _msgScroll.verticalNormalizedPosition = 1f;
+    }
     private RectTransform _msgNext; // ▼
     private RectTransform _yesNo;
     private TextMeshProUGUI _yesText, _noText;
@@ -391,8 +400,15 @@ public class PrologueScreen : MonoBehaviour
             oath = null;
             if (job.oaths != null && job.oaths.Count > 0)
             {
-                yield return Say(T("몸에 새겨진 맹세가 희미하게 떠오른다……", "A vow carved into your body faintly surfaces..."));
-                while (oath == null)
+                // [2026-10-17] 서약은 고르지 않아도 된다 — 나중에 성소에서 파기·재서약 가능
+                bool? remember = null;
+                AskYesNo(T("서약이 기억나는가?", "Do you remember an oath?") + "\n<size=70%><color=#AAAAAA>"
+                         + T("서약을 하든 하지 않든, 나중에 성소에서 서약을 파기하거나 다시 맹세할 수 있다.",
+                             "Whether you swear or not, you can break or renew an oath later at a sanctuary.") + "</color></size>", y => remember = y);
+                while (remember == null) yield return null;
+                if (!remember.Value) yield return Say(T("……맹세는 떠오르지 않았다. 아무것에도 묶이지 않은 채 나아간다.", "...No vow surfaces. You go on, bound to nothing."));
+                else yield return Say(T("몸에 새겨진 맹세가 희미하게 떠오른다……", "A vow carved into your body faintly surfaces..."));
+                while (remember.Value && oath == null)
                 {
                     AbyssdawnBattle.OathBindingData picked = null;
                     yield return PickOath(job, o => picked = o);
@@ -458,12 +474,18 @@ public class PrologueScreen : MonoBehaviour
         Row(T("종의 기억", "Memories"), memNames + (trait != null ? $"\n<size=80%><color=#D4A761>{T("종의 특성", "Species Trait")}: {(KR ? trait.traitName : trait.traitNameEnglish)}</color></size>" : ""));
         string gear = GearNames(job);
         Row(T("장비", "Gear"), gear.Length > 0 ? gear : T("없음", "None"));
+        // [2026-10-18] 시작 소모품
+        var items = new List<string>();
+        if (job != null && job.startingConsumables != null)
+            foreach (var it in job.startingConsumables)
+                if (it != null && it.item != null && it.count > 0) items.Add($"{it.item.itemName} ×{it.count}");
+        Row(T("소지품", "Items"), items.Count > 0 ? string.Join(", ", items) : T("없음", "None"));
 
         // 아래: 능력치 (시작 장비·기억·직업 모두 적용된 값)
         y += 10f;
         var line2 = NewImage("Divider2", _finalWindow, null); Place(line2.rectTransform, 60f, y, 840f, 2f); line2.color = new Color(GoldDim.r, GoldDim.g, GoldDim.b, 0.4f);
         y += 20f;
-        string[] keys = { "HP", "MP", T("공격", "STR"), T("방어", "DEF"), T("마력", "MAG"), T("민첩", "AGI"), T("행운", "LUK") };
+        string[] keys = { "HP", "MP", "STR", "DEF", "MAG", "AGI", "LUK" };
         int[] vals = { ps.maxHP, ps.maxMP, ps.Attack, ps.Defense, ps.Magic, ps.Agility, ps.Luck };
         for (int i = 0; i < keys.Length; i++)
         {
@@ -555,23 +577,13 @@ public class PrologueScreen : MonoBehaviour
         int maxRows = 0;
         foreach (var sp in species) { int c = memoryChoices.FindAll(x => x != null && x.species == sp).Count; if (c > maxRows) maxRows = c; }
 
-        ChoiceWindow(out RectTransform list, out TextMeshProUGUI header, maxRows, withDecide: true, out Button decide, out TextMeshProUGUI decideText, rowH: 170f);
-        header.alignment = TextAlignmentOptions.MidlineLeft;
-        header.rectTransform.anchoredPosition = new Vector2(70f, header.rectTransform.anchoredPosition.y);
-        header.rectTransform.sizeDelta = new Vector2(420f, header.rectTransform.sizeDelta.y);
-
-        // 탭 (오른쪽 위)
-        int tab = 0;
-        var tabTexts = new List<TextMeshProUGUI>();
-        Action rebuild = null;
-        for (int i = 0; i < species.Count; i++)
-        {
-            int ti = i;
-            float x = 960f - 70f - (species.Count - i) * 130f;
-            var tt = Text(_choiceWindow, BranchName(i), x, 40f, 125f, 60f, 34f, Muted, TextAlignmentOptions.Center);
-            tabTexts.Add(tt);
-            Hit(_choiceWindow, x, 36f, 125f, 70f).onClick.AddListener(() => { tab = ti; rebuild(); });
-        }
+        // [2026-10-18] 모든 갈래를 한 화면에 — 갈래마다 금테 하나, 그 안에 아이콘 2·1·2 (주사위 5 모양)
+        //   왼쪽 위 = 갈래 Ⅰ(인간), 오른쪽 위 = Ⅱ(엘프), 왼쪽 아래 = Ⅲ(오크). 누르면 상세 팝업 → "이걸로 고르시겠습니까?"
+        const float groupW = 440f, groupH = 516f, groupGap = 18f;
+        int groupRows = Mathf.Max(1, (species.Count + 1) / 2);
+        float listH = groupRows * groupH + (groupRows - 1) * groupGap;
+        ChoiceWindow(out RectTransform list, out TextMeshProUGUI header, 1, withDecide: true, out Button decide, out TextMeshProUGUI decideText, rowH: listH);
+        MemoryOfSpeciesData tappedMem = null;
 
         RectTransform cursor = null;
         var shown = new List<MemoryOfSpeciesData>();
@@ -580,49 +592,77 @@ public class PrologueScreen : MonoBehaviour
         {
             header.text = T($"종의 기억  ({chosen.Count}/{memoriesToPick})", $"Memories  ({chosen.Count}/{memoriesToPick})");
             for (int i = 0; i < shown.Count; i++) tints[i].color = chosen.Contains(shown[i]) ? SelectTint : new Color(0, 0, 0, 0);
-            for (int i = 0; i < tabTexts.Count; i++)
-            {
-                int n = chosen.FindAll(x => x.species == species[i]).Count;
-                tabTexts[i].text = BranchName(i) + (n > 0 ? $"<size=70%> {n}</size>" : "");
-                tabTexts[i].color = i == tab ? Gold : Muted;
-            }
             decide.interactable = chosen.Count == memoriesToPick;
             decideText.color = decide.interactable ? Gold : Disabled;
         };
-        rebuild = () =>
+        cursor = NewCursor(list);
+        const float cell = 112f, nameH = 34f, colGap = 76f, rowStride = 152f, padTop = 46f;
+        for (int g = 0; g < species.Count; g++)
         {
-            for (int c = list.childCount - 1; c >= 0; c--) Destroy(list.GetChild(c).gameObject);
-            shown.Clear(); tints.Clear(); _choiceNav.Clear();
-            cursor = NewCursor(list);
-            foreach (var m in memoryChoices) if (m != null && m.species == species[tab]) shown.Add(m);
-            for (int i = 0; i < shown.Count; i++)
+            float gx = 30f + (g % 2) * (groupW + groupGap), gy = (g / 2) * (groupH + groupGap);
+            var group = NewImage("MemoryGroupFrame", list, frame); group.type = Image.Type.Sliced; group.pixelsPerUnitMultiplier = 3f;
+            Place(group.rectTransform, gx, gy, groupW, groupH);
+            var label = Text(list, BranchName(g), gx + 18f, gy + 6f, 90f, 34f, 22f, GoldDim, TextAlignmentOptions.MidlineLeft);
+            var members = memoryChoices.FindAll(x => x != null && x.species == species[g]);
+            for (int k = 0; k < members.Count && k < 5; k++)
             {
-                var m = shown[i];
-                var row = ChoiceRow(list, i, m.memoryIcon, MemoryName(m), MemorySubtitle(m), m.GetStatSummary(), out Image tint);
-                tints.Add(tint);
-                _choiceNav.Add(row);
-                row.onClick.AddListener(() =>
+                var m = members[k];
+                // 2 · 1 · 2 배치
+                int row = k < 2 ? 0 : (k == 2 ? 1 : 2);
+                float side = (k == 0 || k == 3) ? -1f : (k == 2 ? 0f : 1f); // 왼쪽 · 가운데 · 오른쪽
+                float cx = groupW * 0.5f + side * (cell + colGap) * 0.5f;
+                float x = gx + cx - cell * 0.5f, y = gy + padTop + row * rowStride;
+                var tint = NewImage("Tint", list, null); Place(tint.rectTransform, x - 10f, y - 6f, cell + 20f, cell + nameH + 12f);
+                tint.color = new Color(0, 0, 0, 0);
+                shown.Add(m); tints.Add(tint);
+                var box = NewImage("IconBox", list, frame); box.type = Image.Type.Sliced; box.pixelsPerUnitMultiplier = 3f;
+                Place(box.rectTransform, x, y, cell, cell);
+                if (m.memoryIcon != null)
                 {
-                    PlaceCursor(cursor, (RectTransform)row.transform, 38f);
-                    if (chosen.Contains(m)) chosen.Remove(m);
-                    else if (chosen.Count < memoriesToPick) chosen.Add(m);
-                    else { ShowMessage(T($"기억은 {memoriesToPick}가지까지만 떠올릴 수 있다.", $"You can recall only {memoriesToPick} memories.")); refresh(); return; }
-                    ShowMessage(MemoryDetail(m) + SetHint(chosen));
-                    refresh();
-                });
+                    var ic = NewImage("Icon", box.rectTransform, m.memoryIcon); Stretch(ic.rectTransform);
+                    ic.rectTransform.offsetMin = new Vector2(7f, 7f); ic.rectTransform.offsetMax = new Vector2(-7f, -7f);
+                    ic.preserveAspect = true;
+                }
+                var nm = Text(list, MemoryName(m), x - 34f, y + cell + 2f, cell + 68f, nameH, 26f, Cream, TextAlignmentOptions.Center);
+                nm.enableAutoSizing = true; nm.fontSizeMin = 16f; nm.fontSizeMax = 26f;
+                var hit = Hit(list, x - 10f, y - 6f, cell + 20f, cell + nameH + 12f);
+                _choiceNav.Add(hit);
+                hit.onClick.AddListener(() => { PlaceCursor(cursor, (RectTransform)hit.transform, 30f); tappedMem = m; });
             }
-            _choiceNav.Add(decide);
-            SetNav(_choiceNav, cursor, 38f, 0, null);
-            refresh();
-        };
+        }
+        _choiceNav.Add(decide);
+        SetNav(_choiceNav, cursor, 30f, 0, null);
         decide.onClick.AddListener(() => { if (chosen.Count == memoriesToPick) done = true; });
-        _tabPrev = () => { tab = (tab - 1 + species.Count) % species.Count; rebuild(); };
-        _tabNext = () => { tab = (tab + 1) % species.Count; rebuild(); };
-        rebuild();
+        _tabPrev = _tabNext = null;
+        refresh();
         // [2026-10-15] 종족 이름은 쓰지 않는다 — 기억을 잃은 용사가 몸에 남은 조각을 더듬는 것 (갈래 I·II·III)
         ShowMessage(T($"기억을 잃었다. 몸에 남은 기억의 조각을 {memoriesToPick}가지 고르시오.\n<size=75%><color=#AAAAAA>갈래를 섞어도 된다. 같은 갈래 3개면 무언가가 깨어난다.</color></size>",
                       $"Your memory is lost. Choose {memoriesToPick} fragments your body still remembers.\n<size=75%><color=#AAAAAA>You may mix branches. Three of one branch awaken something within.</color></size>"));
-        while (!done) yield return null;
+        while (!done)
+        {
+            if (tappedMem != null)
+            {
+                // [2026-10-17] 상세 팝업 (큰 그림 + 이름 + 수치·설명) → 고를지 / 내려놓을지 묻는다
+                var m = tappedMem; tappedMem = null;
+                string flavor = !string.IsNullOrEmpty(m.flavorText) ? m.flavorText : m.description;
+                var detail = DetailPopup(m.memoryIcon, MemoryName(m),
+                    $"<color=#8F7B54>{m.subtitle}</color>\n\n<color=#D4A761>{m.GetStatSummary()}</color>" + (string.IsNullOrEmpty(flavor) ? "" : $"\n\n<color=#AAAAAA>{flavor}</color>"));
+                bool has = chosen.Contains(m);
+                bool? ok = null;
+                AskYesNo(has ? T("이 기억을 내려놓겠습니까?", "Let go of this memory?") : T("이걸로 고르시겠습니까?", "Choose this one?"), y => ok = y);
+                while (ok == null) yield return null;
+                if (detail != null) Destroy(detail.gameObject);
+                if (ok.Value)
+                {
+                    if (has) chosen.Remove(m);
+                    else if (chosen.Count < memoriesToPick) chosen.Add(m);
+                    else ShowMessage(T($"기억은 {memoriesToPick}가지까지만 떠올릴 수 있다.", $"You can recall only {memoriesToPick} memories."));
+                }
+                if (ok.Value && (has || chosen.Contains(m))) ShowMessage(MemoryDetail(m) + SetHint(chosen));
+                refresh();
+            }
+            yield return null;
+        }
         _tabPrev = _tabNext = null;
         result.AddRange(chosen);
     }
@@ -778,6 +818,7 @@ public class PrologueScreen : MonoBehaviour
         var line = NewImage("Divider", w, null); Place(line.rectTransform, 120f, 745f, 720f, 2f); line.color = new Color(GoldDim.r, GoldDim.g, GoldDim.b, 0.6f);
         var desc = Text(w, body, 90f, 775f, 780f, 480f, 36f, Cream, TextAlignmentOptions.Top);
         desc.textWrappingMode = TextWrappingModes.Normal;
+        desc.enableAutoSizing = true; desc.fontSizeMin = 22f; desc.fontSizeMax = 36f; // [2026-10-17] 넘치지 않게
         desc.lineSpacing = 14f;
         return w;
     }
@@ -872,6 +913,7 @@ public class PrologueScreen : MonoBehaviour
         _msgText.text = text;
         _msgText.maxVisibleCharacters = 99999;
         if (_yesNoAnswer == null) _msgText.rectTransform.sizeDelta = new Vector2(840f, _msgText.rectTransform.sizeDelta.y);
+        MsgScrollTop();
         _waitingTap = false;
     }
 
@@ -888,6 +930,7 @@ public class PrologueScreen : MonoBehaviour
         _msgWindow.gameObject.SetActive(true);
         _msgText.text = text;
         _msgText.ForceMeshUpdate();
+        MsgScrollTop();
         int total = _msgText.textInfo.characterCount;
         _typing = true; _tapped = false;
         for (int i = 0; i <= total; i++)
@@ -1018,9 +1061,18 @@ public class PrologueScreen : MonoBehaviour
         img.sprite = frame; img.type = Image.Type.Sliced; img.raycastTarget = true;
         var btn = _msgWindow.gameObject.AddComponent<Button>(); btn.transition = Selectable.Transition.None;
         btn.onClick.AddListener(OnMessageTap);
-        _msgText = Text(_msgWindow, "", 60f, 48f, 840f, 240f, 44f, Cream, TextAlignmentOptions.TopLeft);
+        // [2026-10-18] 글이 넘치면 대화창 안에서 스크롤 (휠·끌기). 누르기는 그대로 대화창 버튼으로 간다.
+        var vp = NewRect("MsgViewport", _msgWindow); Place(vp, 60f, 44f, 860f, 248f);
+        vp.gameObject.AddComponent<RectMask2D>();
+        var vpImg = vp.gameObject.AddComponent<Image>(); vpImg.color = new Color(0f, 0f, 0f, 0f);
+        _msgText = Text(vp, "", 0f, 0f, 840f, 240f, 44f, Cream, TextAlignmentOptions.TopLeft);
         _msgText.textWrappingMode = TextWrappingModes.Normal;
         _msgText.lineSpacing = 12f;
+        _msgText.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        _msgScroll = vp.gameObject.AddComponent<ScrollRect>();
+        _msgScroll.content = _msgText.rectTransform; _msgScroll.viewport = vp;
+        _msgScroll.horizontal = false; _msgScroll.vertical = true;
+        _msgScroll.movementType = ScrollRect.MovementType.Clamped; _msgScroll.scrollSensitivity = 30f;
         var next = NewImage("Next", _msgWindow, _arrow);
         next.color = Gold;
         next.rectTransform.anchorMin = next.rectTransform.anchorMax = new Vector2(0.5f, 0f);

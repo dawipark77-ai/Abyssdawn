@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Monster_SandThrow
   m_EditorClassIdentifier: 
   skillID: Monster_SandThrow
-  skillName: Sand Throw
+  skillName: "\uBAA8\uB798 \uBFCC\uB9AC\uAE30"
+  skillKey: Sand Throw
   skillIcon: {fileID: -376088948105539100, guid: d01983443cae3ee4eb8ef309cec38df0, type: 3}
-  description: '[Goblin tool] Throws sand in the eyes: weak hit + accuracy down.
-    Once per battle.'
+  description: "[\uACE0\uBE14\uB9B0 \uB3C4\uAD6C] \uB208\uC5D0 \uBAA8\uB798\uB97C
+    \uBFCC\uB9B0\uB2E4: \uC57D\uD55C \uD53C\uD574 + \uBA85\uC911 \uD558\uB77D. \uC804\uD22C\uB2F9
+    1\uBC88."
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -60,6 +62,8 @@ MonoBehaviour:
   requiresSameTarget: 0
   preemptive: 0
   cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 1
   endsTurnImmediately: 0
   critBonusPercent: 0

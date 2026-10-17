@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 03_ThrowingAxe_R1
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Axe_T1_02
-  skillName: Throwing Axe I
+  skillName: "\uD22C\uCC99 \uB3C4\uB07C I"
+  skillKey: Throwing Axe I
   skillIcon: {fileID: 21300000, guid: f85194da31397974a8e565cbd12dbbd8, type: 3}
   description: "\uC9C4\uD615 1/2/3/4\uC5D0\uC11C \uC0AC\uC6A9 \uAC00\uB2A5. \uBBFC\uCCA9
     \uAE30\uBC18 \uC6D0\uAC70\uB9AC \uC120\uC81C \uACF5\uACA9. \uB7AD\uD06C 1: \uBBFC\uCCA9
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

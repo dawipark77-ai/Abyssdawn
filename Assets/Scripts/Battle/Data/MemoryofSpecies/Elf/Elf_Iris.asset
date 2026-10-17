@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Elf_Iris
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Elf_Iris
-  memoryName: Iris
-  subtitle: Monochrome Iris
+  memoryName: "\uD64D\uCC44"
+  subtitle: "\uD751\uBC31 \uD64D\uCC44"
   species: 1
-  memoryIcon: {fileID: 0}
+  memoryIcon: {fileID: 21300000, guid: 37adb90066b508d4a877e9de7eec1804, type: 3}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
@@ -47,8 +47,8 @@ MonoBehaviour:
     \uD611\uB3D9 \uBD88\uAC00)\n\uCE58\uBA85\uD0C0\uC728 +5%\n\n\uB808\uBCA8\uC5C5
     \uB54C \uB9C8\uB825\uC774 \uC624\uB97C \uD655\uB960 +15%p\n\uB808\uBCA8\uC5C5
     \uB54C \uBBFC\uCCA9\uC774 \uC624\uB97C \uD655\uB960 +10%p"
-  flavorText: These eyes see further into both light and shadow, but they expose
-    a fragile body.
+  flavorText: "\uBE5B\uACFC \uADF8\uB9BC\uC790 \uB108\uBA38\uB97C \uB354 \uBA40\uB9AC
+    \uBCF4\uC9C0\uB9CC, \uC5F0\uC57D\uD55C \uBAB8\uC744 \uB4DC\uB7EC\uB0B8\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

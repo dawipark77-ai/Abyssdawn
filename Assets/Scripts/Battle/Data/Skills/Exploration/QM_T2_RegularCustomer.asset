@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: QM_T2_RegularCustomer
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: QM_T2_RegularCustomer
-  skillName: Regular Customer
+  skillName: "\uB2E8\uACE8\uC190\uB2D8"
+  skillKey: Regular Customer
   skillIcon: {fileID: 0}
   description: "[\uBCF4\uAE09\uC220 \xB7 \uC0C1\uC2DC \xB7 1~5\uB4F1\uAE09] \uC5EC\uAD00
     \uD560\uC778 Lv1 10% \xB7 Lv2 15% \xB7 Lv3 25% \xB7 Lv4 35% \xB7 Lv5 50%. \uC5EC\uAD00\uC5D0\uC11C
@@ -64,6 +65,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 0
   fieldSkill: 1
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

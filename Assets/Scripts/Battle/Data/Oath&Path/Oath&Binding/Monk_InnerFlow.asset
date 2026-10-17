@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Monk_InnerFlow
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.OathBindingData
   oathID: Monk_InnerFlow
-  oathName: Inner Flow
+  oathName: "\uB0B4\uBA74\uC758 \uD750\uB984"
   jobClass: 1
   oathDescription: "\uD68C\uD53C \uC131\uACF5 \uC2DC MP +3% \uD68C\uBCF5.\nMP 70%
     \uC774\uC0C1 \uC2DC \uC2A4\uD0AC \uB370\uBBF8\uC9C0 +10%.\nHP 10% \uC774\uD558

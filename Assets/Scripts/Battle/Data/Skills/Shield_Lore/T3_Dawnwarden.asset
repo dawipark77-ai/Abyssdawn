@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: T3_Dawnwarden
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
   skillID: Shield_T3_Dawnwarden
-  skillName: Dawnwarden
+  skillName: "\uC0C8\uBCBD\uC758 \uC218\uD638\uC790"
+  skillKey: Dawnwarden
   skillIcon: {fileID: 0}
   description: "[\uBC29\uD328 \xB7 \uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 5\uD134]
     \uC774\uBC88 \uD134\uC5D0\uB294 \uC790\uC138\uB9CC \uC7A1\uB294\uB2E4. \uB2E4\uC74C
@@ -65,6 +66,7 @@ MonoBehaviour:
   preemptive: 0
   cooldownTurns: 5
   fieldSkill: 0
+  usableInField: 0
   usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0

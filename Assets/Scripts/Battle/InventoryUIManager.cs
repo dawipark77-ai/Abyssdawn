@@ -170,6 +170,7 @@ public class InventoryUIManager : MonoBehaviour
         if (closeButton   != null) closeButton  .onClick.AddListener(OnCloseButtonClicked);
         if (discardButton != null) discardButton.onClick.AddListener(OnDiscardClicked);
         if (cancelButton  != null) cancelButton .onClick.AddListener(OnCancelClicked);
+        foreach (var bb in new[] { primaryButton, discardButton, cancelButton }) ButtonSkin.Apply(bb); // [2026-10-17] 사용·버리기·취소 = 스킬 창 닫기와 같은 금테 패널
 
         if (consumableInventory != null)
             consumableInventory.OnInventoryChanged += RefreshGrid;
@@ -513,7 +514,7 @@ public class InventoryUIManager : MonoBehaviour
     {
         if (item == null) return 999;
 
-        string normalized = item.itemName.Replace(" ", "").Replace("_", "").ToLower();
+        string normalized = item.name.Replace(" ", "").Replace("_", "").ToLower();
 
         if (normalized == "hppotion")   return 0;
         if (normalized == "manapotion") return 1;
@@ -590,7 +591,7 @@ public class InventoryUIManager : MonoBehaviour
     {
         if (detailIcon     != null) detailIcon.sprite    = item.itemIcon != null ? item.itemIcon : item.flatIcon;
         if (detailNameText != null) detailNameText.text  = item.itemName;
-        if (detailTypeText != null) detailTypeText.text  = item.isDawnChalice ? "Special Consumable" : "Consumable";
+        if (detailTypeText != null) detailTypeText.text  = item.isDawnChalice ? "특수 소비 아이템" : "소비 아이템";
         if (detailDescText != null) detailDescText.text  = item.description;
 
         if (qtyText != null)
@@ -631,26 +632,30 @@ public class InventoryUIManager : MonoBehaviour
         foreach (Transform child in statListContainer) Destroy(child.gameObject);
 
         if (item.hpRecoveryPercent > 0f)
-            AddStatRowFloat("HP Recovery", item.hpRecoveryPercent * 100f, "%");
+            AddStatRowFloat("HP 회복", item.hpRecoveryPercent * 100f, "%");
         if (item.mpRecoveryPercent > 0f)
-            AddStatRowFloat("MP Recovery", item.mpRecoveryPercent * 100f, "%");
+            AddStatRowFloat("MP 회복", item.mpRecoveryPercent * 100f, "%");
         if (item.attackBuffPercent > 0f)
-            AddStatRowFloat("ATK Buff", item.attackBuffPercent * 100f, "%");
+            AddStatRowFloat("ATK 강화", item.attackBuffPercent * 100f, "%");
         if (item.agilityBuff != 0)
-            AddStatRowFloat("AGI Buff", item.agilityBuff);
+            AddStatRowFloat("AGI 강화", item.agilityBuff);
         if (item.evasionBuff > 0f)
-            AddStatRowFloat("Evasion Buff", item.evasionBuff * 100f, "%");
+            AddStatRowFloat("회피 강화", item.evasionBuff * 100f, "%");
         if (item.escapeChanceBuff > 0f)
-            AddStatRowFloat("Escape Chance", item.escapeChanceBuff * 100f, "%");
+            AddStatRowFloat("도망 확률", item.escapeChanceBuff * 100f, "%");
         if (item.mpPenaltyPercent > 0f)
-            AddStatRowFloat("MP Penalty", -item.mpPenaltyPercent * 100f, "%");
+            AddStatRowFloat("MP 감소", -item.mpPenaltyPercent * 100f, "%");
         if (item.buffDuration > 0)
-            AddStatRowFloat("Duration", item.buffDuration, "turns");
+            AddStatRowFloat("지속", item.buffDuration, "턴");
         if (item.cureTypes != null && item.cureTypes.Count > 0)
         {
-            string cureList = string.Join(", ", item.cureTypes);
-            AddStatRowText("Cures", cureList);
+            var cures = new List<string>();
+            foreach (var c in item.cureTypes) cures.Add(Ko.Status(c)); // [2026-10-17] 한글 (예전엔 Bleed, Poison…)
+            AddStatRowText("치료", string.Join(", ", cures));
         }
+        // [2026-10-17] 부작용 표시 (예: 약초 — 독 20% · 10턴)
+        if (item.sideEffectChance > 0f && item.sideEffectTurns > 0)
+            AddStatRowText("부작용", $"{Ko.Status(item.sideEffectType)} {Mathf.RoundToInt(item.sideEffectChance * 100f)}% ({item.sideEffectTurns}턴)");
     }
 
     private void RefreshConsumablePrimaryButton(ConsumableItemSO item)
@@ -658,7 +663,7 @@ public class InventoryUIManager : MonoBehaviour
         if (primaryButton == null) return;
 
         if (primaryButtonText != null)
-            primaryButtonText.text = "Use";
+            primaryButtonText.text = "사용";
 
         bool hasItem  = consumableInventory != null && consumableInventory.HasItem(item);
         bool hasCharge;
@@ -846,15 +851,15 @@ public class InventoryUIManager : MonoBehaviour
             AddCompareRow("DEF", current?.defenseBonus ?? 0, item.defenseBonus);
 
         AddCompareRow("MAG",    current?.magicBonus ?? 0, item.magicBonus);
-        AddCompareRow("Max HP", current?.hpBonus    ?? 0, item.hpBonus);
-        AddCompareRow("Max MP", current?.mpBonus    ?? 0, item.mpBonus);
+        AddCompareRow("최대 HP", current?.hpBonus    ?? 0, item.hpBonus);
+        AddCompareRow("최대 MP", current?.mpBonus    ?? 0, item.mpBonus);
         AddCompareRow("AGI",    current?.agiBonus   ?? 0, item.agiBonus);
         AddCompareRow("LCK",    current?.luckBonus  ?? 0, item.luckBonus);
 
         float curAcc = current?.accuracyBonus  ?? 0f;
         float curMp  = current?.mpBonusPercent ?? 0f;
         if (curAcc != 0f || item.accuracyBonus != 0f)
-            AddCompareRowF("Accuracy", curAcc * 100f, item.accuracyBonus * 100f, "%");
+            AddCompareRowF("명중", curAcc * 100f, item.accuracyBonus * 100f, "%");
         if (curMp != 0f || item.mpBonusPercent != 0f)
             AddCompareRowF("MP%", curMp * 100f, item.mpBonusPercent * 100f, "%");
     }
@@ -1053,7 +1058,7 @@ public class InventoryUIManager : MonoBehaviour
         if (primaryButton == null) return;
         bool equipped = _copyEquipped ?? IsEquipped(item);
         if (primaryButtonText != null)
-            primaryButtonText.text = equipped ? "Unequip" : "Equip";
+            primaryButtonText.text = equipped ? "해제" : "장착";
 
         primaryButton.interactable = true;
         primaryButton.onClick.RemoveAllListeners();
@@ -1175,7 +1180,7 @@ public class InventoryUIManager : MonoBehaviour
         var hud = DungeonHud.Instance;
         if (hud == null) { DiscardNow(); return; }
         var keepConsumable = selectedConsumable; var keepItem = selectedItem;
-        hud.Confirm($"Discard <b>{name}</b>?\n<size=80%><color=#AAAAAA>It will be gone for good.</color></size>", "Yes", "No", yes =>
+        hud.Confirm($"<b>{name}</b>을(를) 버릴까?\n<size=80%><color=#AAAAAA>다시는 되찾을 수 없다.</color></size>", "예", "아니오", yes =>
         {
             if (!yes) return;
             selectedConsumable = keepConsumable; selectedItem = keepItem;
@@ -1235,12 +1240,27 @@ public class InventoryUIManager : MonoBehaviour
         {
             animCoroutine = null;
             detailPanelVisible = show;
-            detailPanelRT.anchoredPosition = new Vector2(0f, 0f);
+            detailPanelRT.anchoredPosition = new Vector2(0f, PopupLiftY()); // [2026-10-17] 아래 캐릭터 카드가 다 보이게 위로
             detailPanel.SetActive(show);
             if (!show) EndPopup(true);
             return;
         }
         animCoroutine = StartCoroutine(DetailPanelAnim(show));
+    }
+
+    /// <summary>[2026-10-17] 팝업 상세 창의 바닥을 캐릭터 카드(파티 바) 윗선 + 16 에 맞추는 높이. 카드를 못 찾으면 0.</summary>
+    private float PopupLiftY()
+    {
+        if (detailPanelRT == null || detailPanelRT.parent == null) return 0f;
+        RectTransform hero = DungeonPartyBar.Instance != null ? DungeonPartyBar.Instance.HeroCardRect() : null;
+        if (hero == null) return 0f;
+        var parent = (RectTransform)detailPanelRT.parent;
+        var c = new Vector3[4]; hero.GetWorldCorners(c);
+        float cardTop = parent.InverseTransformPoint(c[1]).y;           // 카드 윗선 (부모 좌표)
+        float anchorY = parent.rect.yMin + parent.rect.height * detailPanelRT.anchorMin.y; // 앵커 기준선
+        float bottomNow = anchorY + 0f - detailPanelRT.pivot.y * detailPanelRT.rect.height; // anchoredPosition 0 일 때 바닥
+        float lift = cardTop + 16f - bottomNow;
+        return Mathf.Max(0f, lift);
     }
 
     private void ForceHideDetail()

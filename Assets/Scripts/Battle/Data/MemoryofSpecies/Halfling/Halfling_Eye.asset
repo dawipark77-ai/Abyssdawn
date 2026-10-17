@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: Halfling_Eye
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.MemoryOfSpeciesData
   memoryID: Halfling_Eye
-  memoryName: Eye
-  subtitle: Fine Cone Cells
+  memoryName: "\uB208"
+  subtitle: "\uC12C\uC138\uD55C \uC6D0\uBFD4\uC138\uD3EC"
   species: 3
   memoryIcon: {fileID: 0}
   hpBonusPercent: 0
   mpBonusPercent: 0
   hpBonus: 0
+  mpBonus: 0
+  attackPercent: 0
+  defensePercent: 0
+  magicPercent: 0
+  critChanceBonus: 0
   attackBonus: 0
   defenseBonus: -1
   agilityBonus: 0
@@ -39,7 +44,8 @@ MonoBehaviour:
   luckLevelUpChanceBonus: 15
   description: "\uBC29\uC5B4 -1\n\uD589\uC6B4 +1\n\n\uB808\uBCA8\uC5C5 \uB54C \uD589\uC6B4\uC774
     \uC624\uB97C \uD655\uB960 +15%p"
-  flavorText: Their eyes pick out small details, but miss the heavy blows coming.
+  flavorText: "\uC791\uC740 \uAC83\uC740 \uC798 \uBCF4\uC9C0\uB9CC \uB0A0\uC544\uC624\uB294
+    \uBB35\uC9C1\uD55C \uC77C\uACA9\uC740 \uB193\uCE5C\uB2E4."
   requiredMemoriesForTrait: 3
   traitName: 
   traitDescription: 

@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b30da8f6c92414f8fcd498be8b7f49, type: 3}
   m_Name: Junk_WoodenStick
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.EquipmentData
-  itemName: Wooden Stick
+  itemName: "\uB098\uBB34 \uB9C9\uB300\uAE30"
   icon: {fileID: 0}
-  description: A branch snapped off a dead tree. Barely a weapon, but you can practise
-    sword forms with it. ATK +1.
-  equipmentName: Wooden Stick
+  description: "\uC8FD\uC740 \uB098\uBB34\uC5D0\uC11C \uAEBE\uC740 \uAC00\uC9C0.
+    \uBB34\uAE30\uB77C \uD558\uAE30 \uD798\uB4E4\uC9C0\uB9CC \uAC80\uC220 \uC5F0\uC2B5\uC740
+    \uB41C\uB2E4. \uACF5\uACA9 +1."
+  equipmentName: "\uB098\uBB34 \uB9C9\uB300\uAE30"
   equipmentIcon: {fileID: 5843060452261051782, guid: d68843735a6e85146b6764dbac708c2f, type: 3}
   flatIcon: {fileID: 5843060452261051782, guid: d68843735a6e85146b6764dbac708c2f, type: 3}
   equipmentType: 0
