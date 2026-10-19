@@ -660,8 +660,8 @@ public class BattleUIManager : MonoBehaviour
         rt.anchorMin = new Vector2(1, 0);
         rt.anchorMax = new Vector2(1, 0);
         rt.pivot = new Vector2(1, 0);
-        rt.anchoredPosition = new Vector2(-20, 20); // 여백
-        rt.sizeDelta = new Vector2(120, 60);
+        rt.anchoredPosition = new Vector2(-24, 24); // 여백
+        rt.sizeDelta = new Vector2(220, 90); // [2026-10-20] 크게
 
         // 스타일 설정
         Image img = btnObj.GetComponent<Image>();
@@ -677,8 +677,8 @@ public class BattleUIManager : MonoBehaviour
         textRT.offsetMax = Vector2.zero;
 
         TMPro.TextMeshProUGUI text = textObj.GetComponent<TMPro.TextMeshProUGUI>();
-        text.text = "뒤로";
-        text.fontSize = 24;
+        text.text = "취소"; // [2026-10-20] 행동 취소
+        text.fontSize = 34;
         text.alignment = TMPro.TextAlignmentOptions.Center;
         text.color = Color.white;
 
@@ -688,6 +688,7 @@ public class BattleUIManager : MonoBehaviour
             if (battleManager != null) battleManager.OnCancelButton();
         });
 
+        ButtonSkin.Apply(backButton); // [2026-10-20] 금테 버튼
         // 초기에는 숨김
         btnObj.SetActive(false);
         Debug.Log("[BattleUIManager] Global Back Button created.");

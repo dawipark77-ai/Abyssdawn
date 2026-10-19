@@ -154,6 +154,14 @@ public class MapManager : MonoBehaviour
 
         HideLegacyMapVisuals();
         BuildCurrentFloor(restoring ? Arrival.SavedPosition : Arrival.Start);
+        // [2026-10-20] 칼등치기로 항복한 적이 도망치며 계단 위치를 알려 줬으면 지도에 표시
+        if (DungeonPersistentData.revealStairsPending && FloorData != null && FloorState != null)
+        {
+            DungeonPersistentData.revealStairsPending = false;
+            FloorState.revealed.Add(FloorData.stairsPos);
+            if (automapRenderer != null) automapRenderer.Rebuild();
+            Toast("<color=#FFD24A>항복한 적이 아래로 가는 계단 위치를 알려 주었다.</color>");
+        }
 
         if (_player != null) DungeonInputBinder.BindMovePad(_player);
 

@@ -774,7 +774,7 @@ public class DungeonHud : MonoBehaviour
             SetText(row.transform, "Name", e.Name);
             SetText(row.transform, "Info", TownShop.InfoText(e));
             SetText(row.transform, "Price", $"<color=#FFD24A>{price} G</color>");
-            SetText(row.transform, "Owned", TownShop.OwnedText(e));
+            SetText(row.transform, "Owned", TownShop.OwnedText(e, _shopSelling));
 
             Transform act = FindChildRecursive(row.transform, "ActionButton");
             Button btn = act != null ? act.GetComponent<Button>() : null;

@@ -18,6 +18,7 @@ public static class DungeonPersistentData
 
     // 위험도 게이지 (0~1, 세계수의 미궁식). 가득 차면 반드시 전투. 전투가 시작되면 0.
     public static float danger;
+    public static bool revealStairsPending; // [2026-10-20] 항복한 적이 계단 위치를 알려 줌 → 던전으로 돌아오면 계단 칸을 밝힘
     // [2026-10-11] 보급술 '단골 손님': 여관 → 다음 층 첫 3번 전투 최대 HP·MP +%
     public static bool innVigorPending;
     public static int innVigorBattlesLeft;

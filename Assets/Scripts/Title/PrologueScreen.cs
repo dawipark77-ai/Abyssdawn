@@ -646,7 +646,7 @@ public class PrologueScreen : MonoBehaviour
                 var m = tappedMem; tappedMem = null;
                 string flavor = !string.IsNullOrEmpty(m.flavorText) ? m.flavorText : m.description;
                 var detail = DetailPopup(m.memoryIcon, MemoryName(m),
-                    $"<color=#8F7B54>{m.subtitle}</color>\n\n<color=#D4A761>{m.GetStatSummary()}</color>" + (string.IsNullOrEmpty(flavor) ? "" : $"\n\n<color=#AAAAAA>{flavor}</color>"));
+                    $"<color=#8F7B54>{m.subtitle}</color>\n\n" + StatLines(m) + (string.IsNullOrEmpty(flavor) ? "" : $"\n\n<color=#AAAAAA>{flavor}</color>"));
                 bool has = chosen.Contains(m);
                 bool? ok = null;
                 AskYesNo(has ? T("이 기억을 내려놓겠습니까?", "Let go of this memory?") : T("이걸로 고르시겠습니까?", "Choose this one?"), y => ok = y);
@@ -898,8 +898,7 @@ public class PrologueScreen : MonoBehaviour
     {
         if (m == null) return "";
         string flavor = !string.IsNullOrEmpty(m.flavorText) ? m.flavorText : m.description;
-        string stats = m.GetStatSummary();
-        return $"<color=#D4A761>{MemoryName(m)}</color>  <size=80%><color=#8F7B54>{m.subtitle}</color></size>\n<size=85%>{stats}</size>"
+        return $"<color=#D4A761>{MemoryName(m)}</color>  <size=80%><color=#8F7B54>{m.subtitle}</color></size>\n<size=85%>{StatLines(m)}</size>"
              + (string.IsNullOrEmpty(flavor) ? "" : $"\n<size=75%><color=#AAAAAA>{flavor}</color></size>");
     }
 
@@ -1187,6 +1186,15 @@ public class PrologueScreen : MonoBehaviour
             }
         }
         return Hit(list, 40f, y + 6f, 880f, rowH - 12f);
+    }
+
+    /// <summary>[2026-10-20] 종의 기억 수치: 바로 붙는 수치(금색) 한 줄 / 레벨업 성장·확률(하늘색) 한 줄.</summary>
+    private static string StatLines(MemoryOfSpeciesData m)
+    {
+        SplitStats(m.GetStatSummary(), out string basic, out string growth);
+        string a = basic.Length > 0 ? $"<color=#D4A761>{basic}</color>" : "";
+        string b = growth.Length > 0 ? $"<color=#8CC8FF>{growth}</color>" : "";
+        return a.Length > 0 && b.Length > 0 ? a + "\n" + b : a + b;
     }
 
     /// <summary>"DEF +1, AGI -1, Lv업 DEF확률 +20%p" → 기본 수치 "DEF +1   AGI -1" / 레벨업·성장 "Lv업 DEF확률 +20%p"</summary>

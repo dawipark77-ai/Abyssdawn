@@ -99,6 +99,7 @@ public static class SaveSystem
         // 소지품
         public List<ItemSave> consumables = new List<ItemSave>();
         public int chaliceCharges;
+        public int chaliceLevel; // [2026-10-18] 새벽의 잔 강화 단계
         public List<string> equipmentBag = new List<string>();
         public int gold = PlayerWallet.StartingGold;
         public List<int> bossesDefeated = new List<int>(); // [2026-10-09] 보스를 쓰러뜨린 층
@@ -180,6 +181,7 @@ public static class SaveSystem
             {
                 foreach (var s in inv.slots) if (s != null && s.item != null) d.consumables.Add(new ItemSave { name = s.item.name, quantity = s.quantity });
                 d.chaliceCharges = inv.dawnChaliceCharges;
+                d.chaliceLevel = inv.dawnChaliceLevel;
             }
             foreach (var e in EquipmentBag.Items) if (e != null) d.equipmentBag.Add(e.name);
             d.gold = PlayerWallet.Gold;
@@ -303,7 +305,7 @@ public static class SaveSystem
                 var so = Find<ConsumableItemSO>(it.name);
                 if (so != null && !so.isDawnChalice) slots.Add(new ConsumableInventory.ConsumableSlot(so, it.quantity));
             }
-            if (ConsumableInventory.Instance != null) ConsumableInventory.Instance.RestoreFromSave(slots, d.chaliceCharges);
+            if (ConsumableInventory.Instance != null) { ConsumableInventory.Instance.dawnChaliceLevel = d.chaliceLevel; ConsumableInventory.Instance.RestoreFromSave(slots, d.chaliceCharges); }
             EquipmentBag.Clear();
             foreach (var n in d.equipmentBag) { var e = Find<EquipmentData>(n); if (e != null) EquipmentBag.AddLoaded(e); }
             PlayerWallet.Set(d.gold);

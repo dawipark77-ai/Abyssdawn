@@ -51,9 +51,10 @@ public static class ConsumableEffectApplier
         if (Disposition.IsHero(user)) potency *= Disposition.HealItemMult; // [2026-10-14] 성향 구두쇠: 회복 아이템 −20%
 
         // 1) HP 회복 (hpRecoveryPercent × maxHP, 반올림)
+        float chaliceBonus = item.isDawnChalice ? ConsumableInventory.DawnChaliceBonusPercent : 0f; // [2026-10-18] 성소 강화
         if (item.hpRecoveryPercent > 0f)
         {
-            int healAmount = Mathf.RoundToInt(item.hpRecoveryPercent * potency * user.maxHP);
+            int healAmount = Mathf.RoundToInt((item.hpRecoveryPercent + chaliceBonus) * potency * user.maxHP);
             if (healAmount > 0)
             {
                 int before = user.currentHP;
@@ -65,7 +66,7 @@ public static class ConsumableEffectApplier
         // 2) MP 회복 (mpRecoveryPercent × maxMP, 반올림)
         if (item.mpRecoveryPercent > 0f)
         {
-            int mpAmount = Mathf.RoundToInt(item.mpRecoveryPercent * potency * user.maxMP);
+            int mpAmount = Mathf.RoundToInt((item.mpRecoveryPercent + chaliceBonus) * potency * user.maxMP);
             if (mpAmount > 0)
             {
                 int before = user.currentMP;

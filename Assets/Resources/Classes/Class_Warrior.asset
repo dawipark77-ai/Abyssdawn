@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClass
   className: Warrior
   description: "\uADFC\uC811 \uC804\uD22C\uC5D0 \uD2B9\uD654\uB41C \uC804\uC0AC."
-  classIcon: {fileID: 3753546306663819397, guid: 335e50fd555614b49959853264b682f5, type: 3}
+  classIcon: {fileID: 21300000, guid: 86b25b227257d5c47b06acafdc023717, type: 3}
   traitName: "\uBB34\uAE30 \uB2E8\uB828"
   traitNameKR: "\uBB34\uAE30 \uB2E8\uB828"
   traitDescription: "\uC5B4\uB5A4 \uBB34\uAE30\uB4E0 \uBA85\uC911 +5%."
@@ -33,10 +33,6 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: c3124b0ddddc8c5448e95d406ea711dd, type: 2}
     count: 3
   - item: {fileID: 11400000, guid: 2bf10685458a43344ac9a13d5f512985, type: 2}
-    count: 2
-  - item: {fileID: 11400000, guid: e0d8da405b906cd45a2c35baadd4a6d0, type: 2}
-    count: 1
-  - item: {fileID: 11400000, guid: 96abca17c19565f4ca9da5cb1ad81736, type: 2}
     count: 1
   oaths:
   - {fileID: 11400000, guid: 54916d042f2f104488ce695aefc0c415, type: 2}

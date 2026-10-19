@@ -160,14 +160,19 @@ public static class TownShop
     }
 
     /// <summary>표시용: 가진 개수 / 장착 여부.</summary>
-    public static string OwnedText(Entry e)
+    public static string OwnedText(Entry e, bool selling = false)
     {
         if (e.consumable != null)
         {
             int q = ConsumableInventory.Instance != null ? ConsumableInventory.Instance.GetQuantity(e.consumable) : 0;
             return "x" + q;
         }
-        if (e.equipment != null) { int n = EquipmentBag.Count(e.equipment); return n > 0 ? "x" + n : ""; } // [2026-10-09] 같은 장비도 더 살 수 있음 — 가진 개수만
+        if (e.equipment != null)
+        {
+            int n = EquipmentBag.Count(e.equipment); // [2026-10-09] 같은 장비도 더 살 수 있음 — 가진 개수만
+            if (selling) n -= WornCount(e.equipment); // [2026-10-18] 팔 때는 착용 중인 것을 빼고 (팔 수 있는 개수)
+            return n > 0 ? "x" + n : "";
+        }
         return "";
     }
 

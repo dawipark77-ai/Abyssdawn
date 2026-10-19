@@ -454,13 +454,8 @@ public class ItemListPanel : MonoBehaviour
         ConsumableInventory inv = ConsumableInventory.Instance;
         ConsumableItemSO c = e.consumable;
         if (inv == null || c == null || !c.usableOnMap || !inv.HasItem(c)) return;
-        PlayerStats hero = Hero();
-        if (hero == null) { Debug.LogWarning("[ItemListPanel] 주인공 PlayerStats 를 찾지 못했습니다."); return; }
-        if (!inv.UseItem(c)) return;
-        var fx = ConsumableEffectApplier.ApplyEffects(hero, c);
-        Debug.Log($"[ItemListPanel] {c.itemName} 사용 — HP +{fx.hpHealed}, MP +{fx.mpHealed}" +
-                  (fx.curesApplied != null && fx.curesApplied.Count > 0 ? ", 해제 " + string.Join(", ", fx.curesApplied) : ""));
-        Refresh(); // 인벤토리 이벤트로도 불리지만, 새벽의 잔 충전처럼 이벤트가 없는 변화도 있어 한 번 더
+        // [2026-10-18] 혼자면 바로 주인공에게, 동료가 있으면 아래 카드에서 대상 고르기
+        DungeonItemUse.Use(c, Refresh); // 인벤토리 이벤트로도 불리지만, 새벽의 잔 충전처럼 이벤트가 없는 변화도 있어 한 번 더
     }
 
     /// <summary>[2026-10-14] 버리기 전에 "정말 버릴까요?" Yes / No.</summary>

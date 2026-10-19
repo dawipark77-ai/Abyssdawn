@@ -90,11 +90,11 @@ public class AutomapRenderer : MonoBehaviour
     [Tooltip("어둠 색 — 밝기 0 인 칸을 이 색으로 완전히 덮는다")]
     public Color darknessColor = Color.black;
     [Tooltip("가 본 곳이지만 지금 안 보이는 칸의 밝기 (0.2 = 80% 어둡게). 비교안(sharpSightEdge)일 때는 rememberedBrightnessSharp 사용")]
-    [Range(0f, 1f)] public float rememberedBrightness = 0.2f;
+    [Range(0f, 1f)] public float rememberedBrightness = 0f; // [2026-10-18] 시야 밖은 확실히 안 보이게 (0.2 → 0)
     [Tooltip("[2026-10-08 비교안] 켜면: 칸 모서리 = 둘레 4칸 중 가장 어두운 값 + 칸 가운데 점 (시야 경계가 날카롭고 3칸 너머가 더 검다). 끄면: 모서리 = 둘레 4칸 평균 (부드러운 기본안)")]
-    public bool sharpSightEdge = false;
+    public bool sharpSightEdge = true; // [2026-10-18] 시야 밖 칸이 옆 칸 빛에 비쳐 보이지 않게 (모서리 = 가장 어두운 값)
     [Tooltip("비교안(sharpSightEdge)일 때 기억한 칸의 밝기")]
-    [Range(0f, 1f)] public float rememberedBrightnessSharp = 0.1f;
+    [Range(0f, 1f)] public float rememberedBrightnessSharp = 0f; // [2026-10-18] 0.1 → 0
     [Tooltip("지도 바깥도 어둡게 덮는 여백 (칸)")]
     public int darknessMargin = 40;
 

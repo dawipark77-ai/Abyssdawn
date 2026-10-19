@@ -601,7 +601,7 @@ public class SkillTreeNode : MonoBehaviour
         SetLearnedBorder(currentState == SkillState.Learned);
         RefreshRankLabel(); // [2026-10-09] 등급 스킬 Lv 표시
         // [2026-10-09] 모든 스킬 아이콘 황금 테두리. 배운 스킬은 더 밝게 — 바깥 배운 스킬 테두리와 겹쳐 환하게 빛남
-        SkillIconFrame.Apply(skillIcon, 2f, currentState == SkillState.Learned);
+        SkillIconFrame.Apply(skillIcon, 2f, currentState == SkillState.Learned, true); // [2026-10-19] 그림이 없어도 빈 틀
     }
 
     private TextMeshProUGUI _rankLabel;

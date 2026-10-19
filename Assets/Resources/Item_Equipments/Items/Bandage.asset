@@ -18,7 +18,7 @@ MonoBehaviour:
   itemCategory: 2
   itemIcon: {fileID: 6851228247741294694, guid: 19ddce721897761468576bea0364c23d, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
-  hpRecoveryPercent: 0.2
+  hpRecoveryPercent: 0
   mpRecoveryPercent: 0
   cureTypes: 01000000
   attackBuffPercent: 0

@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: S2_AdvancingThrust
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Swords_S2_AdvancingThrust
+  skillName: "\uC804\uC9C4\uCC0C\uB974\uAE30"
+  skillKey: Advancing Thrust
+  skillIcon: {fileID: 0}
+  description: "[\uAC80 \uC804\uC6A9] \uD6C4\uC5F4(3\xB74\uBC88)\uC5D0\uC11C\uB9CC.
+    \uC55E\uC73C\uB85C 1\uCE78 \uD30C\uACE0\uB4E4\uBA70 \uC801 \uC804\uC5F4\uC744
+    STR 80%\uB85C \uCC0C\uB978\uB2E4. \uCD5C\uB300 HP\uC758 6% \uC18C\uBAA8."
+  usageType: 0
+  damageType: 1
+  scalingStat: 1
+  weaponCategory: 1
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 12
+    allowedTargetSlots: 15
+    specificSlots: 
+  hpCostPercent: 6
+  mpCost: 0
+  minMult: 0.8
+  maxMult: 0.8
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects:
+  - effectType: 1
+    recoveryTarget: 0
+    effectAmount: 0
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 8a0e13040b5c22040b525bf89feedeb7, type: 2}
+  requiredLorePoints: 3

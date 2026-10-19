@@ -80,5 +80,5 @@ MonoBehaviour:
   selfAgilityPenaltyTurns: 0
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
-  - {fileID: 11400000, guid: fcbeb2fd6e7fa9a49873162e0d3d162f, type: 2}
-  requiredLorePoints: 1
+  - {fileID: 11400000, guid: db0cc0a74e55b8647bf22681e22977a7, type: 2}
+  requiredLorePoints: 2

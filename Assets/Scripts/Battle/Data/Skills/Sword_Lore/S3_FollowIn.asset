@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: S3_FollowIn
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Swords_S3_FollowIn
+  skillName: "\uB530\uB77C \uB4E4\uC5B4\uAC00\uAE30"
+  skillKey: Follow In
+  skillIcon: {fileID: 0}
+  description: "[\uAC80 \uC804\uC6A9] STR 70%\uB85C \uBCA4\uB2E4. \uC774\uBC88 \uB77C\uC6B4\uB4DC\uC5D0
+    \uC801\xB7\uC544\uAD70 \uD589\uB3D9\uC774 \uBAA8\uB450 \uB05D\uB098\uBA74, \uACF5\uACA9
+    \uB9D0\uACE0 \uB2E4\uB978 \uD589\uB3D9(\uBC29\uC5B4\xB7\uBC84\uD504\xB7\uD798
+    \uBAA8\uC73C\uAE30 \uB4F1)\uC744 \uD55C \uC801 1\uBA85\uC5D0\uAC8C STR 60% \uCD94\uAC00
+    \uD53C\uD574. \uCD5C\uB300 HP\uC758 6% \uC18C\uBAA8."
+  usageType: 0
+  damageType: 1
+  scalingStat: 1
+  weaponCategory: 1
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 15
+    allowedTargetSlots: 15
+    specificSlots: 
+  hpCostPercent: 6
+  mpCost: 0
+  minMult: 0.7
+  maxMult: 0.7
+  hitCount: 1
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects:
+  - effectType: 1
+    recoveryTarget: 0
+    effectAmount: 0
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: feba555009448ee40935a8c4b1a6e0f7, type: 2}
+  requiredLorePoints: 3

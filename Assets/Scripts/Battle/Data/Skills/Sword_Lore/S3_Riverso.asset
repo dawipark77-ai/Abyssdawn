@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
+  m_Name: S3_Riverso
+  m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.SkillData
+  skillID: Swords_S3_Riverso
+  skillName: "\uB9AC\uBCA0\uB974\uC18C"
+  skillKey: Riverso
+  skillIcon: {fileID: 0}
+  description: "[\uAC80 \uC804\uC6A9] \uB9CC\uB4DC\uB9AC\uD1A0\uC758 \uD30C\uC0DD\uAE30.
+    \uC801 \uC804\uC5F4 \uB458\uC744 \uC67C\uCABD\uC5D0\uC11C \uC624\uB978\uCABD\uC73C\uB85C
+    STR 90%\uC529 \uBCA4 \uB4A4, \uB9C8\uC9C0\uB9C9\uC73C\uB85C \uBCA4 1\uCCB4\uB97C
+    \uCE7C\uC744 \uB418\uB3CC\uB824 STR 40%\uB85C \uD55C \uBC88 \uB354 \uBCA4\uB2E4.
+    \uC544\uAD70 \uC804\uC5F4(1\xB72\uBC88)\uC5D0\uC11C\uB9CC. \uCD5C\uB300 HP\uC758
+    12% \uC18C\uBAA8."
+  usageType: 0
+  damageType: 1
+  scalingStat: 1
+  weaponCategory: 1
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 3
+    allowedTargetSlots: 15
+    specificSlots: 
+  hpCostPercent: 12
+  mpCost: 0
+  minMult: 0.9
+  maxMult: 0.9
+  hitCount: 2
+  accuracy: 0.95
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects:
+  - effectType: 1
+    recoveryTarget: 0
+    effectAmount: 0
+    statusEffect: {fileID: 0}
+    statusEffectChance: 0
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills:
+  - {fileID: 11400000, guid: 93c136e16b863d842bcecfad060f578b, type: 2}
+  requiredLorePoints: 3

@@ -360,6 +360,10 @@ public class EnemyStats : MonoBehaviour
 
     /// <summary>방어 자세 플래그 (1턴 유지)</summary>
     public bool isDefending = false;
+    // [2026-10-20] 칼등치기: 이 공격으로는 쓰러지지 않음(HP 1 남김) / HP 1 이 되어 항복하려는 상태
+    [System.NonSerialized] public bool nonLethalHit;
+    [System.NonSerialized] public bool surrendering;
+    [System.NonSerialized] public int pommelStuns; // 자루치기로 기절시킨 횟수 (같은 적일수록 확률이 내려감)
 
     // 모아 치기(MonsterSkillData.chargeTurns) 예고 중인 스킬과 대상 — 다음 자기 턴에 발동, 스턴되면 취소
     [System.NonSerialized] public SkillData pendingChargeSkill;
@@ -373,6 +377,7 @@ public class EnemyStats : MonoBehaviour
     {
         if (isDead) return 0;
 
+        if (nonLethalHit && damage >= currentHP) damage = Mathf.Max(0, currentHP - 1); // [2026-10-20] 칼등치기 — HP 1 아래로는 내리지 않음
         int appliedDamage = Mathf.Min(damage, currentHP);
         currentHP -= damage;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);

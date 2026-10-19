@@ -19,7 +19,7 @@ MonoBehaviour:
   description: "[\uAC80 \uC804\uC6A9] \uC628 \uD798\uC744 \uC2E4\uC5B4 \uB0B4\uB824\uBCA0\uAE30.
     \uACF5\uACA9\uB825\uC758 150~170% \uD53C\uD574, \uCE58\uBA85\uD0C0 \uD655\uB960
     +20%. \uD06C\uAC8C \uD718\uB450\uB974\uB294 \uB9CC\uD07C \uBA85\uC911 80%. \uCD5C\uB300
-    HP\uC758 10% \uC18C\uBAA8."
+    HP\uC758 15% \uC18C\uBAA8."
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -29,7 +29,7 @@ MonoBehaviour:
     allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 10
+  hpCostPercent: 15
   mpCost: 0
   minMult: 1.5
   maxMult: 1.7

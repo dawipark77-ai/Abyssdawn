@@ -28,7 +28,7 @@ MonoBehaviour:
   weaponCategory: 11
   targeting:
     targetFaction: 2
-    allowedCasterSlots: 15
+    allowedCasterSlots: 3
     allowedTargetSlots: 15
     specificSlots: 
   hpCostPercent: 0

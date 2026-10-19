@@ -282,6 +282,7 @@ public class BattleManager : MonoBehaviour
         public ConsumableItemSO usedItem;
         public PlayerStats moveActor;   // [2026-10-15] "move": 주인공이 옮기는 아군 (자신 포함)
         public BattleSlot moveTo;       //   그 아군이 갈 칸 (옆 1칸)
+        public PlayerStats targetAlly;  // [2026-10-20] 아이템을 쓸 아군 (null = 쓰는 사람 자신)
     }
 
     private List<AllyCommand> pendingCommands = new List<AllyCommand>();
@@ -2018,9 +2019,36 @@ public class BattleManager : MonoBehaviour
         return false; // 타겟 선택 안함
     }
 
+    // ── [2026-10-20] 명령을 다 고른 뒤 짧은 틈 — "취소"를 누르면 마지막 명령을 되돌림 ──
+    public const float ResolveGraceSeconds = 0.9f;
+    private Coroutine _graceRoutine;
+
+    private void StartResolveGrace()
+    {
+        if (_graceRoutine != null) StopCoroutine(_graceRoutine);
+        _graceRoutine = StartCoroutine(ResolveGraceRoutine());
+    }
+
+    private IEnumerator ResolveGraceRoutine()
+    {
+        if (battleUIManager != null) battleUIManager.ShowBackButton(true);
+        float t = 0f;
+        while (t < ResolveGraceSeconds) { t += Time.unscaledDeltaTime; yield return null; }
+        _graceRoutine = null;
+        if (battleUIManager != null) battleUIManager.ShowBackButton(false);
+        BeginResolutionPhase();
+    }
+
     public void OnCancelButton()
     {
         Debug.Log("[BattleManager] OnCancelButton called");
+        if (_graceRoutine != null) // [2026-10-20] 라운드 시작 직전 — 마지막 명령 취소
+        {
+            StopCoroutine(_graceRoutine); _graceRoutine = null;
+            commandIndex = activePartyMembers.Count;
+            if (!UndoPreviousCommand() && battleUIManager != null) battleUIManager.ShowBackButton(false);
+            return;
+        }
 
         // 1. 타겟 선택 중일 때 -> Fight 메뉴로 복귀
         if (waitingForTargetSelection)
@@ -2060,7 +2088,11 @@ public class BattleManager : MonoBehaviour
                 return; // [2026-10-15] 이전 동료의 명령을 취소하고 그 동료 차례로
             }
             battleUIManager.ShowBackButton(false);
+            return;
         }
+
+        // 3. [2026-10-20] 동료 차례(메뉴가 닫힌 상태)여도 앞 명령이 있으면 되돌린다
+        if (currentPhase == BattlePhase.Command && commandIndex > 0 && UndoPreviousCommand()) return;
     }
 
     // ── [2026-10-15] 위치 이동 명령 (주인공 전용, 행동 소모) ──
@@ -2193,6 +2225,7 @@ public class BattleManager : MonoBehaviour
     {
         if (_movePicker != null) Destroy(_movePicker);
         _movePicker = null;
+        CleanupAllyPick(); // [2026-10-20] 카드로 고르기 정리
     }
 
     private RectTransform MoveUiPanel(RectTransform parent, float h)
@@ -3853,7 +3886,7 @@ public class BattleManager : MonoBehaviour
                 return;
             }
             
-            BeginResolutionPhase();
+            StartResolveGrace(); // [2026-10-20] 바로 시작하지 않고 잠깐 — 그 사이 "취소"로 마지막 명령을 되돌릴 수 있다
             return;
         }
 
@@ -3990,6 +4023,7 @@ public class BattleManager : MonoBehaviour
             usedItem = usedItem
         };
 
+        command.targetAlly = _nextAllyTarget; _nextAllyTarget = null; // [2026-10-20]
         pendingCommands.Add(command);
 
         waitingForTargetSelection = false;
@@ -4251,6 +4285,8 @@ public class BattleManager : MonoBehaviour
         // AGI 차이가 크면(10 vs 3) 항상 높은 쪽이 먼저, 작으면(10 vs 8) 낮은 쪽이 먼저 움직일 수도 있다.
         BuildTurnOrder();
         _enemiesActedThisRound.Clear();
+        _enemiesNonAttackThisRound.Clear(); // [2026-10-19] 따라 들어가기
+        _followInThisRound.Clear();
 
         // [2026-10-07] 압도(레벨 차이 30↑): 첫 라운드는 적이 겁먹어 행동하지 못함 → 아군 선공
         bool enemiesCowed = _resolutionRound == 0 && player != null
@@ -4305,8 +4341,13 @@ public class BattleManager : MonoBehaviour
                 yield return StartCoroutine(ExecuteEnemyTurn(actor.enemy));
             }
 
-            yield return new WaitForSeconds(turnDelay);
+            if (!battleEnded) AnnounceDowns(); // [2026-10-20] 상태이상 등으로 쓰러진 것도
+            yield return StartCoroutine(BeatWait(ResultHold)); // [2026-10-20] 결과를 읽을 시간 (드퀘5식)
         }
+
+        // [2026-10-19] 따라 들어가기: 적·아군 행동이 다 끝난 뒤
+        if (!battleEnded && _followInThisRound.Count > 0) yield return StartCoroutine(ProcessFollowIn());
+        if (battleEnded) yield break;
 
         // 모든 행동이 끝난 후 점화 데미지 처리 (가장 마지막)
         yield return StartCoroutine(ProcessAllIgniteDamage());
@@ -4337,7 +4378,13 @@ public class BattleManager : MonoBehaviour
             yield break;
         }
 
-        yield return new WaitForSeconds(actionDelay);
+        // [2026-10-20] 드퀘5식 선언 줄 — "Hero의 공격!" / "Hero의 베기!" 다음 잠깐 멈췄다가 연출·결과
+        bool declared = false;
+        if (cmd.actionType == "attack" && cmd.targetEnemy != null && cmd.targetEnemy.currentHP > 0)
+        { AddMessage($"{Ko.Ui(cmd.actor.playerName)} 공격!"); declared = true; }
+        else if (cmd.actionType == "skill" && cmd.skill != null && !cmd.actor.IsSilenced())
+        { AddMessage($"{Ko.Ui(cmd.actor.playerName)} {cmd.skill.skillName}!"); declared = true; }
+        yield return StartCoroutine(BeatWait(declared ? DeclareHold : 0.15f));
 
         Debug.Log($"[ExecuteAllyResolution] Executing action: {cmd.actionType} for {cmd.actor.playerName}");
         // [2026-10-17] 연출: 공격·스킬이면 카드가 튀고, 이 행동의 타격에 무기별 베기 궤적을 그린다
@@ -4391,11 +4438,16 @@ public class BattleManager : MonoBehaviour
                     {
                         // 통합 헬퍼: HP/MP 회복 + 상태이상 해제 + MP 페널티 일괄 적용
                         // (cmd.itemHealAmount는 더 이상 사용하지 않음 — SO 필드에서 직접 계산)
-                        var fx = ConsumableEffectApplier.ApplyEffects(cmd.actor, cmd.usedItem);
+                        // [2026-10-20] 고른 아군에게 (새벽의 잔은 주인공 전용)
+                        PlayerStats itemTarget = cmd.targetAlly != null && cmd.targetAlly.currentHP > 0 ? cmd.targetAlly : cmd.actor;
+                        if (cmd.usedItem.isDawnChalice && player != null) itemTarget = player;
+                        var fx = ConsumableEffectApplier.ApplyEffects(itemTarget, cmd.usedItem);
 
                         SyncPotionCount();
 
-                        string msg = $"{Ko.I(cmd.actor.playerName)} {Ko.Eul(cmd.usedItem.itemName)} 사용했다";
+                        string msg = itemTarget == cmd.actor
+                            ? $"{Ko.I(cmd.actor.playerName)} {Ko.Eul(cmd.usedItem.itemName)} 사용했다"
+                            : $"{Ko.I(cmd.actor.playerName)} {itemTarget.playerName}에게 {Ko.Eul(cmd.usedItem.itemName)} 사용했다";
                         if (fx.hpHealed > 0) msg += $" — HP {fx.hpHealed} 회복";
                         if (fx.mpHealed > 0) msg += $" — MP {fx.mpHealed} 회복";
                         if (fx.mpLost   > 0) msg += $" — MP {fx.mpLost} 잃음";
@@ -4884,8 +4936,11 @@ public class BattleManager : MonoBehaviour
     // [Enemy AI] 도망(Flee) 실행 — 리스트 제거 없이(인덱스 안정) 처치 처리 + EXP 0.
     //   ※ EnemyStats.isDead/spriteRenderer/statusUI는 private이라 접근 불가 →
     //     currentHP=0(IsDead()/AllEnemiesDefeated가 '처치됨'으로 인식) + GetComponent + StatusUI 프로퍼티로 보정.
+    private readonly HashSet<EnemyStats> _fledEnemies = new HashSet<EnemyStats>(); // [2026-10-18] 도망친 적 (마무리 로그용)
+
     private IEnumerator HandleFlee(EnemyStats enemy)
     {
+        _fledEnemies.Add(enemy);
         // 1. 메시지
         AddMessage($"{Ko.I(enemy.enemyName)} 전투에서 도망쳤다!");
         yield return new WaitForSeconds(actionDelay);
@@ -4927,7 +4982,7 @@ public class BattleManager : MonoBehaviour
             yield break;
         }
 
-        yield return new WaitForSeconds(actionDelay);
+        yield return StartCoroutine(BeatWait(0.15f)); // [2026-10-20] 선언 줄은 행동이 정해진 뒤 (아래)
 
         // [모아 치기] 지난 턴에 예고했던 스킬을 지금 발동
         if (enemy.pendingChargeSkill != null)
@@ -4960,9 +5015,29 @@ public class BattleManager : MonoBehaviour
                 yield break;
             }
         }
+        // [2026-10-20] 칼등치기로 HP 1 이 된 적: 이번 차례에 항복하고 도망칠 수 있다 (안 도망치면 효과 끝)
+        if (enemy.surrendering)
+        {
+            enemy.surrendering = false;
+            if (UnityEngine.Random.value < SurrenderFleeChance)
+            {
+                AddMessage($"<color=#FFD24A>{Ko.I(enemy.enemyName)} 무기를 내려놓고 항복한다!</color>");
+                SurrenderRewards(enemy);
+                yield return StartCoroutine(HandleFlee(enemy));
+                yield break;
+            }
+            AddMessage($"<color=#AAAAAA>{Ko.I(enemy.enemyName)} 이를 악물고 버틴다.</color>");
+        }
+        else if (_surrenderMorale > 0f && UnityEngine.Random.value < _surrenderMorale)
+        {
+            AddMessage($"<color=#AAAAAA>{Ko.I(enemy.enemyName)} 겁에 질려 달아난다!</color>");
+            yield return StartCoroutine(HandleFlee(enemy));
+            yield break;
+        }
         Debug.Log($"[EnemyAI] {enemy.enemyName} (AI={(enemy.sourceMonster != null ? enemy.sourceMonster.AIPattern.ToString() : "?")}) → 선택: {decision.type}{(decision.skill != null ? $" ('{decision.skill.skillName}')" : "")}");
         if (decision.type == EnemyActionType.Defend)
         {
+            _enemiesNonAttackThisRound.Add(enemy); // [2026-10-19] 따라 들어가기 대상
             enemy.isDefending = true;
             AddMessage($"{Ko.I(enemy.enemyName)} 방어 자세를 잡는다!");
             yield return new WaitForSeconds(actionDelay);
@@ -4980,6 +5055,7 @@ public class BattleManager : MonoBehaviour
             if (decision.skill is MonsterSkillData msd &&
                 msd.targeting.targetFaction == TargetFaction.Self)
             {
+                _enemiesNonAttackThisRound.Add(enemy); // [2026-10-19]
                 yield return StartCoroutine(ExecuteEnemySkill(enemy, null, decision.skill));
                 yield break;
             }
@@ -4990,6 +5066,7 @@ public class BattleManager : MonoBehaviour
                 // [모아 치기] 이번 턴은 예고만 — 다음 자기 턴에 발동 (그사이 방어·선제 처치·스턴으로 대응)
                 if (decision.skill is MonsterSkillData chargeSkill && chargeSkill.chargeTurns > 0)
                 {
+                    _enemiesNonAttackThisRound.Add(enemy); // [2026-10-19] 힘을 모으는 것도 공격이 아님
                     enemy.pendingChargeSkill = chargeSkill;
                     enemy.pendingChargeTarget = skillTarget;
                     string msg = string.IsNullOrEmpty(chargeSkill.chargeMessage)
@@ -5017,12 +5094,15 @@ public class BattleManager : MonoBehaviour
 
         if (target != null && target.currentHP > 0)
         {
+            AddMessage($"{Ko.Ui(enemy.enemyName)} 공격!"); // [2026-10-20] 드퀘5식 선언
+            yield return StartCoroutine(BeatWait(DeclareHold));
             BattleFxCombat.EnemyLunge(enemy); // [2026-10-17] 공격 동작: 화면 쪽으로 튀어나왔다 돌아감
             yield return new WaitForSeconds(BattleFxCombat.LungeLead);
             if (TryPullCounter(target, enemy)) { } // [2026-10-14] 풀 카운터: 피하고 반격
+            else if (TryParry(target, enemy)) { } // [2026-10-19] 받아 넘기기
             else if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, biteOverride))
             {
-                AddMessage($"{Ko.I(target.playerName)} {enemy.enemyName}의 공격을 피했다!");
+                AddMessage($"{Ko.Eun(target.playerName)} 재빨리 몸을 피했다!"); // [2026-10-20] 드퀘5식 (선언 줄에 공격자 이름)
                 BattleFx.AllyMiss(target);
                 ShadowStepCounter(target, enemy); // [2026-10-14]
             }
@@ -5082,8 +5162,8 @@ public class BattleManager : MonoBehaviour
                 bool guardProc = RollCounterGuard(target, ref damage); // 반격 태세: 50% 확률로 피해 -50%
                 bool crossProc = CrossCounterGuard(target, ref damage); // [2026-10-14] 크로스 카운터: 90%로 받고 반격
                 damage = target.TakeDamage(damage); // [2026-10-06] 메시지에 실제로 받은 피해 (방어·패시브·버티기 감소 후)
-                AddMessage(critical ? $"{enemy.enemyName}의 치명타! {Ko.I(target.playerName)} {damage} 피해를 입었다!" :
-                                      $"{Ko.I(enemy.enemyName)} {Ko.Eul(target.playerName)} 공격해 {damage} 피해!");
+                AddMessage(critical ? $"<color=#FF6060>통한의 일격!</color> {Ko.Eun(target.playerName)} {damage}의 피해를 입었다!" // [2026-10-20] 드퀘5식
+                                    : $"{Ko.Eun(target.playerName)} {damage}의 피해를 입었다!");
                 if (guardProc) CounterAttack(target, enemy); // 반격 (공격 메시지 다음)
                 if (crossProc) CrossCounterStrike(target, enemy);
                 // [LastStand] HP가 0이 아닌 1로 유지됐다면 불굴 발동
@@ -5094,6 +5174,7 @@ public class BattleManager : MonoBehaviour
                 // 아군이 데미지를 받으면 UI 흔들림
                 ShakePlayerStatusUI(target);
             }
+            OxAfterAttacked(target, enemy); // [2026-10-19] 옥스 디펜스 (맞든 피하든 공격받으면 중첩)
         }
 
         UpdateStatusUI();
@@ -5557,9 +5638,34 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        // [2026-10-20] 칼등치기: 아군(격려) 또는 HP 30% 미만 적
+        if (skill.Key == SkillFlatBlade)
+        {
+            OpenFlatBladePicker(currentControlledMember, skill);
+            return;
+        }
+        // [2026-10-19] 자리 옮기기: 대상은 무작위 — 친 뒤 옮길 쪽만 고른다
+        if (skill.Key == SkillReposition)
+        {
+            OpenRepositionPicker(currentControlledMember, skill);
+            return;
+        }
+
         // 즉시 발동 스킬 (회복, 방어 등 본인 대상)
         if (IsSelfTargetSkill(skill))
         {
+            // [2026-10-20] HP 회복 스킬은 살아 있는 동료가 있으면 누구를 회복할지 고른다
+            var caster = currentControlledMember;
+            if (IsAllyHealSkill(skill) && activePartyMembers.Exists(m => m != null && m != caster && m.currentHP > 0))
+            {
+                OpenAllyPicker($"{skill.skillName} — 누구를 회복할까?", caster, pick =>
+                {
+                    caster.healTarget = pick;
+                    QueueAllyCommand(caster, "skill", null, skill);
+                });
+                return;
+            }
+            caster.healTarget = null;
             QueueAllyCommand(currentControlledMember, "skill", null, skill);
             return;
         }
@@ -5579,9 +5685,103 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public void UseItemInBattle(PlayerStats user, ConsumableItemSO item, int healAmount)
     {
+        // [2026-10-20] 살아 있는 동료가 있으면 누구에게 쓸지 고른다 (새벽의 잔은 주인공 전용이라 고르지 않음)
+        bool others = activePartyMembers.Exists(m => m != null && m != user && m.currentHP > 0);
+        if (item != null && !item.isDawnChalice && others)
+        {
+            OpenAllyPicker($"{item.itemName} — 누구에게?", user, pick =>
+            {
+                turnInProgress = true;
+                _nextAllyTarget = pick;
+                QueueAllyCommand(user, "item", null, null, healAmount, true, item);
+                HideBackButton();
+            });
+            return;
+        }
         turnInProgress = true;
+        if (item != null && item.isDawnChalice) _nextAllyTarget = player;
         QueueAllyCommand(user, "item", null, null, healAmount, true, item);
         HideBackButton();
+    }
+
+    // ── [2026-10-20] 아군 고르기 (아이템 · 회복 스킬) ──
+    private PlayerStats _nextAllyTarget;
+
+    // [2026-10-20] 팝업 대신 아래 캐릭터 카드를 직접 눌러 고른다 — 화면 위쪽은 어둡게, 고를 수 있는 카드만 금테로 빛남.
+    //   어두운 곳(카드 바깥)을 누르면 취소. 카드는 칸마다 Canvas(overrideSorting)를 잠깐 붙여 어둠 위로 올린다.
+    private readonly List<Component> _allyPickAdded = new List<Component>();
+    private readonly List<GameObject> _allyPickBits = new List<GameObject>();
+
+    private void OpenAllyPicker(string title, PlayerStats user, System.Action<PlayerStats> onPick)
+    {
+        CloseMovePicker();
+        _movePicker = new GameObject("AllyPicker", typeof(RectTransform));
+        var cv = _movePicker.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
+        var sc = _movePicker.AddComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1080f, 1920f); sc.matchWidthOrHeight = 0f;
+        _movePicker.AddComponent<GraphicRaycaster>();
+        var dimGo = new GameObject("Dim", typeof(RectTransform), typeof(Image), typeof(Button));
+        dimGo.transform.SetParent(_movePicker.transform, false);
+        var rt = (RectTransform)dimGo.transform; rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
+        dimGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+        var dimBtn = dimGo.GetComponent<Button>(); dimBtn.transition = Selectable.Transition.None;
+        dimBtn.onClick.AddListener(CloseMovePicker);
+
+        // 안내 글 (카드 바로 위)
+        var cap = MoveUiText((RectTransform)_movePicker.transform, title, 0f, 70f, 44f, new Color(0.96f, 0.87f, 0.58f));
+        cap.fontStyle = TMPro.FontStyles.Bold;
+        var crt = cap.rectTransform; crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0f); crt.pivot = new Vector2(0.5f, 0f);
+        crt.sizeDelta = new Vector2(1000f, 70f); crt.anchoredPosition = new Vector2(0f, 540f);
+
+        var glowSp = Resources.Load<Sprite>("UI/GlowBorder");
+        for (int i = 0; i < activePartyMembers.Count && i < playerStatusSlots.Count; i++)
+        {
+            var m = activePartyMembers[i];
+            var slot = playerStatusSlots[i];
+            if (m == null || m.currentHP <= 0 || slot == null) continue;
+
+            // 카드를 어둠 위로
+            if (slot.GetComponent<Canvas>() == null)
+            {
+                var c = slot.gameObject.AddComponent<Canvas>(); c.overrideSorting = true; c.sortingOrder = 201;
+                _allyPickAdded.Add(c);
+                _allyPickAdded.Add(slot.gameObject.AddComponent<GraphicRaycaster>());
+            }
+            // 금테
+            var g = new GameObject("AllyPickGlow", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+            g.transform.SetParent(slot, false);
+            g.GetComponent<LayoutElement>().ignoreLayout = true;
+            var grt = (RectTransform)g.transform; grt.anchorMin = Vector2.zero; grt.anchorMax = Vector2.one; grt.offsetMin = new Vector2(-6f, -6f); grt.offsetMax = new Vector2(6f, 6f);
+            var gi = g.GetComponent<Image>(); gi.sprite = glowSp; gi.type = Image.Type.Sliced; gi.fillCenter = false; gi.raycastTarget = false;
+            gi.color = new Color(1f, 0.85f, 0.45f, 1f);
+            _allyPickBits.Add(g);
+            // 카드 전체를 덮는 투명 누름판 (카드 안의 다른 버튼보다 위)
+            var hit = new GameObject("AllyPickHit", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            hit.transform.SetParent(slot, false);
+            hit.GetComponent<LayoutElement>().ignoreLayout = true;
+            var hrt = (RectTransform)hit.transform; hrt.anchorMin = Vector2.zero; hrt.anchorMax = Vector2.one; hrt.offsetMin = hrt.offsetMax = Vector2.zero;
+            hit.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0f);
+            var hb = hit.GetComponent<Button>(); hb.transition = Selectable.Transition.None;
+            var pick = m;
+            hb.onClick.AddListener(() => { CloseMovePicker(); onPick(pick); });
+            _allyPickBits.Add(hit);
+        }
+    }
+
+    private void CleanupAllyPick()
+    {
+        foreach (var b in _allyPickBits) if (b != null) { b.SetActive(false); Destroy(b); }
+        _allyPickBits.Clear();
+        // GraphicRaycaster 를 Canvas 보다 먼저 지운다 (같은 프레임에 둘 다 Destroy 해도 순서상 안전)
+        for (int i = _allyPickAdded.Count - 1; i >= 0; i--) if (_allyPickAdded[i] != null) Destroy(_allyPickAdded[i]);
+        _allyPickAdded.Clear();
+    }
+
+    private static bool IsAllyHealSkill(SkillData s)
+    {
+        if (s == null || s.Effects == null || s.Key == "Meditation") return false;
+        foreach (var e in s.Effects)
+            if (e != null && e.effectType == EffectType.Recovery && (e.recoveryTarget == RecoveryTarget.HP || e.recoveryTarget == RecoveryTarget.Both)) return true;
+        return false;
     }
 
     public void OnItemButton()
@@ -6384,7 +6584,7 @@ public class BattleManager : MonoBehaviour
 
         if (!RollPhysicalHit_PlayerVsEnemy(attacker, target, biteOverride))
         {
-            AddMessage($"{Ko.I(target.enemyName)} {attacker.playerName}의 공격을 피했다!");
+            AddMessage($"{Ko.Eun(target.enemyName)} 재빨리 몸을 피했다!"); // [2026-10-20] 드퀘5식
             BattleFx.EnemyMiss(target);
             PerfectionistMissed(attacker);
         }
@@ -6498,9 +6698,9 @@ public class BattleManager : MonoBehaviour
 
                 shownTotal = applied1 + applied2;
                 string hits = applied2 > 0 ? $"{applied1}, {applied2}" : $"{applied1}";
-                AddMessage(critical
-                    ? $"치명타! {Ko.I(attacker.playerName)} 두 번 베었다 — {hits}!"
-                    : $"{Ko.I(attacker.playerName)} 두 번 베었다 — {hits} 피해!");
+                AddMessage(critical // [2026-10-20] 드퀘5식
+                    ? $"<color=#FFD24A>회심의 일격!</color> {target.enemyName}에게 {hits}의 피해!"
+                    : $"{target.enemyName}에게 {hits}의 피해!");
             }
             else
             {
@@ -6555,9 +6755,9 @@ public class BattleManager : MonoBehaviour
 
                 shownTotal = applied1 + applied2;
                 string armorMsg = defenseReduced > 0 ? $" [방어구 파괴: DEF -{defenseReduced}]" : "";
-                AddMessage(critical
-                    ? $"치명타! {Ko.I(attacker.playerName)} {shownTotal} 피해!{armorMsg}"
-                    : $"{Ko.I(attacker.playerName)} {shownTotal} 피해를 입혔다!{armorMsg}");
+                AddMessage(critical // [2026-10-20] 드퀘5식
+                    ? $"<color=#FFD24A>회심의 일격!</color> {target.enemyName}에게 {shownTotal}의 피해!{armorMsg}"
+                    : $"{target.enemyName}에게 {shownTotal}의 피해!{armorMsg}");
             }
 
             // ───────── 무기 저주 부여 ─────────
@@ -6831,6 +7031,7 @@ public class BattleManager : MonoBehaviour
         if (skill.weaponCategory == AbyssdawnBattle.WeaponCategory.Axe && skill.IsActive && !IsThrowingAxe(skill) && !who.IsFrontRow) return "전열에서만";
         if (skill.Key == SkillBackstepSlash && !who.IsFrontRow) return "전열에서만";
         if (skill.Key == SkillLungeSlash && !who.IsBackRow) return "후열에서만";
+        if (skill.Key == SkillAdvancingThrust && !who.IsBackRow) return "후열에서만"; // [2026-10-19]
         if (skill.Key == SkillShadowSlash && FixDaggerTarget(skill, null) == null) return "후열에 적 없음";
         if (skill.Key == SkillRendWound && FixDaggerTarget(skill, null) == null) return "출혈 중인 적 없음";
         if (skill.usesPerBattle > 0 && GetCount(_skillUses, who, skill) >= skill.usesPerBattle)
@@ -6869,6 +7070,8 @@ public class BattleManager : MonoBehaviour
             if (m.crossCounterRounds > 0) m.crossCounterRounds--; // [2026-10-14]
             if (m.pullCounterRounds > 0) m.pullCounterRounds--;
             if (m.shadowStepRounds > 0) m.shadowStepRounds--;
+            if (m.parryRounds > 0) m.parryRounds--; // [2026-10-19] 받아 넘기기는 그 라운드만
+            if (m.oxRounds > 0 && --m.oxRounds <= 0) { m.oxStacks = 0; ApplyOxModifiers(m); } // [2026-10-19] 옥스 디펜스 만료
             if (m.escapeBonusRounds > 0 && --m.escapeBonusRounds <= 0) m.escapeBonus = 0f;
         }
 
@@ -7047,6 +7250,292 @@ public class BattleManager : MonoBehaviour
         int dmg = ApplyPhysResist(ApplySlotDamageToTarget(CalculateDQDamage(agi, def, crit), enemy.currentSlot, enemy.enemyName), enemy);
         int applied = enemy.TakeDamage(Mathf.Max(1, dmg), crit);
         AddMessage($"<color=#9FC8FF>섀도우 스텝!</color> {Ko.I(hero.playerName)} 되받아 베어 {applied}{(crit ? " (치명타!)" : "")}.");
+    }
+
+    // ─────────────────────────────────────────
+    // [2026-10-19] 검술 추가 (사용자 설계 — 받아 넘기기·비용은 제안안)
+    //   자리 옮기기: 무작위 적 1명 STR 60% → 1턴 치명 +13% + 고른 쪽으로 1칸 이동
+    //   옥스 디펜스(패시브): 공격받을 때마다 중첩 (최대 3, 3턴) — 중첩당 반격·치명·회피·명중·출혈 +5%
+    //   손등치기: 40% 피해 + 대상 STR -20% (1턴)
+    //   전진찌르기: 후열(3·4번)에서만, 앞으로 1칸 나오며 적 전열을 80%로 찌르기
+    //   페인트: 2타 — 1타는 일부러 빗맞히고 2타는 반드시 명중, 70%, 치명 +15%
+    //   따라 들어가기: 70% 공격 + 라운드 끝에 공격 말고 다른 행동을 한 적 1명에게 60% 추가 피해
+    //   받아 넘기기(선제): 이번 라운드 첫 물리 공격을 받아 넘긴다 (60% ± 민첩 차) → 피해 0, 공격자 명중 -15% (1턴), 다음 공격 +25%
+    //   검의 리듬(패시브): 검 스킬이 맞으면 명중 +8% (1턴) + 출혈 13% / 받아 넘기기 성공 시 HP 2% 회복
+    // ─────────────────────────────────────────
+    private const string SkillReposition = "Reposition";
+    private const string SkillOxDefense = "Ox Defense";
+    private const string SkillBackhand = "Backhand Strike";
+    private const string SkillAdvancingThrust = "Advancing Thrust";
+    private const string SkillFeint = "Feint";
+    private const string SkillFollowIn = "Follow In";
+    private const string SkillParry = "Parry";
+    private const string SkillSwordRhythm = "Sword Rhythm";
+    private const float RepositionCrit = 13f;
+    private const float OxPerStack = 0.05f;
+    private const int OxMaxStacks = 3, OxRounds = 3;
+    private const float BackhandAtkMult = 0.8f;
+    private const float FollowInMult = 0.6f;
+    private const float RhythmAcc = 0.08f, RhythmBleed = 0.13f, RhythmParryHeal = 0.02f;
+    private const float ParryBase = 0.6f, ParryMin = 0.35f, ParryMax = 0.85f, ParryRiposte = 0.25f, ParryStagger = 0.15f;
+    private static readonly object OxToken = new object(), RhythmToken = new object(), RepositionToken = new object(), BackhandToken = new object(), ParryStaggerToken = new object();
+    private readonly HashSet<PlayerStats> _followInThisRound = new HashSet<PlayerStats>();
+    private readonly HashSet<EnemyStats> _enemiesNonAttackThisRound = new HashSet<EnemyStats>();
+    private BattleSlot _nextCmdMoveTo = BattleSlot.None;
+
+    private static bool IsSwordSkill(SkillData s) => s != null && s.weaponCategory == AbyssdawnBattle.WeaponCategory.Sword;
+
+    // ── [2026-10-20] 검술 추가 2 ──
+    //   리베르소: 만드리토처럼 전열 둘을 왼쪽→오른쪽으로 벤 뒤, 마지막으로 벤 1체를 반대로 한 번 더 (STR 40%)
+    //   자루치기: 1체 STR 50% + 기절 3턴 (같은 적에게 70 → 60 → 50 → 40 → 30% → 더는 안 걸림)
+    //   칼등치기: 아군 = 격려 (명중·치명·회피·STR +5%, 2턴) / 적 = HP 30% 미만인 적만, STR 50%, HP 1 아래로는 안 내림
+    //             HP 1 이 된 적은 다음 자기 차례에 항복하고 도망칠 확률↑ — 도망치면 골드 ×1.5, 소지품 30%, 계단 위치 35%, 다른 적도 겁먹음
+    private const string SkillRiverso = "Riverso";
+    private const string SkillPommelStrike = "Pommel Strike";
+    private const string SkillFlatBlade = "Flat of the Blade";
+    private const float RiversoMult = 0.4f;
+    private static readonly float[] PommelStunChance = { 0.7f, 0.6f, 0.5f, 0.4f, 0.3f };
+    private const int PommelStunTurns = 3;
+    private const float FlatBladeHpGate = 0.3f, FlatBladeBuff = 0.05f;
+    private const float SurrenderFleeChance = 0.6f, SurrenderGoldMult = 1.5f, SurrenderLootChance = 0.3f, SurrenderStairsChance = 0.35f, SurrenderMoraleFlee = 0.15f;
+    private static readonly object FlatBladeToken = new object();
+    private EnemyStats _lastMandrittoHit;
+    private float _surrenderMorale;
+
+    private bool FlatBladeEnemyOk(EnemyStats e) => e != null && e.currentHP > 0 && e.currentHP < e.maxHP * FlatBladeHpGate;
+
+    /// <summary>칼등치기: 아군(격려) 또는 HP 30% 미만 적을 고른다.</summary>
+    private void OpenFlatBladePicker(PlayerStats caster, SkillData skill)
+    {
+        CloseMovePicker();
+        _movePicker = new GameObject("FlatBladePicker", typeof(RectTransform));
+        var cv = _movePicker.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
+        var sc = _movePicker.AddComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1080f, 1920f); sc.matchWidthOrHeight = 0f;
+        _movePicker.AddComponent<GraphicRaycaster>();
+        var dimGo = new GameObject("Dim", typeof(RectTransform), typeof(Image), typeof(Button));
+        dimGo.transform.SetParent(_movePicker.transform, false);
+        var rt = (RectTransform)dimGo.transform; rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
+        dimGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+        dimGo.GetComponent<Button>().onClick.AddListener(CloseMovePicker);
+        var allies = activePartyMembers.FindAll(m => m != null && m.currentHP > 0);
+        var foes = activeEnemies.Where(FlatBladeEnemyOk).ToList();
+        float h = 230f + (allies.Count + foes.Count) * 100f;
+        var box = MoveUiPanel((RectTransform)_movePicker.transform, h);
+        MoveUiText(box, $"{skill.skillName} — 누구에게?", 24f, 60f, 40f, new Color(0.86f, 0.74f, 0.47f));
+        float y = 110f;
+        foreach (var m in allies)
+        {
+            var cap = m;
+            MoveUiButton(box, $"{m.playerName} <size=70%><color=#9FC8FF>격려 (명중·치명·회피·STR +5%)</color></size>", y, () =>
+            { CloseMovePicker(); caster.healTarget = cap; QueueAllyCommand(caster, "skill", null, skill); });
+            y += 100f;
+        }
+        foreach (var e in foes)
+        {
+            var cap = e;
+            MoveUiButton(box, $"<color=#FF8C8C>{e.enemyName}</color> <size=70%><color=#BBBBBB>HP {e.currentHP}/{e.maxHP} — 제압</color></size>", y, () =>
+            { CloseMovePicker(); caster.healTarget = null; QueueAllyCommand(caster, "skill", cap, skill); });
+            y += 100f;
+        }
+        MoveUiButton(box, "취소", h - 120f, CloseMovePicker);
+    }
+
+    /// <summary>자루치기 기절: 같은 적일수록 확률이 내려가고 다섯 번째 뒤로는 걸리지 않는다.</summary>
+    private void PommelStun(EnemyStats target)
+    {
+        if (target == null || target.IsDead() || StunSO == null) return;
+        if (target.pommelStuns >= PommelStunChance.Length) { AddMessage($"<color=#AAAAAA>{Ko.I(target.enemyName)} 이제 자루치기에 익숙해졌다.</color>"); return; }
+        float chance = PommelStunChance[target.pommelStuns];
+        if (UnityEngine.Random.value >= chance * Mathf.Max(0f, target.statusResist)) { AddMessage($"<color=#AAAAAA>{Ko.I(target.enemyName)} 버텨 냈다.</color> (기절 {Mathf.RoundToInt(chance * 100f)}%)"); return; }
+        if (!target.ApplyStatusEffectDirect(StunSO, PommelStunTurns)) return;
+        var inst = target.activeStatusEffects.Find(se => se.data != null && se.data.effectType == StunSO.effectType);
+        if (inst != null) inst.appliedThisTurn = _enemiesActedThisRound.Contains(target);
+        target.pommelStuns++;
+        AddMessage($"<color=#FFE066>{Ko.I(target.enemyName)} 정신을 잃었다!</color> {PommelStunTurns}턴 기절 <color=#AAAAAA>(다음엔 {(target.pommelStuns < PommelStunChance.Length ? Mathf.RoundToInt(PommelStunChance[target.pommelStuns] * 100f) + "%" : "안 걸림")})</color>");
+    }
+
+    /// <summary>리베르소 마지막 반대 베기 (STR 40%).</summary>
+    private void RiversoBackstroke(PlayerStats attacker, EnemyStats e)
+    {
+        if (attacker == null || e == null || e.currentHP <= 0 || battleEnded) return;
+        bool crit = CheckCritical(attacker.luck, PlayerCritBonus(attacker) + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+        int atk = Mathf.FloorToInt(attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, attacker.Attack) * RiversoMult);
+        int def = Mathf.FloorToInt(PenetratedDefense(attacker, e.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, e.defense)));
+        int dmg = ApplyPhysResist(ApplySlotDamageToTarget(CalculateDQDamage(atk, def, crit), e.currentSlot, e.enemyName), e);
+        int applied = e.TakeDamage(Mathf.Max(1, dmg), crit);
+        AddMessage($"<color=#9FC8FF>리베르소!</color> 칼을 되돌려 {Ko.Eul(e.enemyName)} 한 번 더 — {applied}{(crit ? " (치명타!)" : "")}.");
+    }
+
+    /// <summary>항복한 적이 도망칠 때 보상.</summary>
+    private void SurrenderRewards(EnemyStats enemy)
+    {
+        int gold = Mathf.RoundToInt(enemy.goldReward * SurrenderGoldMult);
+        if (gold > 0) { PlayerWallet.Add(gold); AddMessage($"<color=#FFD24A>{Ko.I(enemy.enemyName)} 목숨값으로 {gold} G를 내놓았다.</color>"); }
+        if (UnityEngine.Random.value < SurrenderLootChance && ConsumableInventory.Instance != null)
+        {
+            var pool = Resources.LoadAll<ConsumableItemSO>("Item_Equipments/Items").Where(c => c != null && !c.isDawnChalice && !c.isPermanent && c.buyPrice > 0).ToList();
+            if (pool.Count > 0)
+            {
+                var it = pool[UnityEngine.Random.Range(0, pool.Count)];
+                ConsumableInventory.Instance.AddItem(it, 1);
+                AddMessage($"<color=#FFD24A>{Ko.I(enemy.enemyName)} 떨어뜨린 {Ko.Eul(it.itemName)} 주웠다.</color>");
+            }
+        }
+        if (UnityEngine.Random.value < SurrenderStairsChance)
+        {
+            DungeonPersistentData.revealStairsPending = true;
+            AddMessage($"<color=#FFD24A>{Ko.I(enemy.enemyName)} 아래로 가는 길을 털어놓고 달아났다.</color>");
+        }
+        _surrenderMorale = SurrenderMoraleFlee;
+    }
+
+    /// <summary>검 스킬이 맞은 뒤: 손등치기 약화 · 자리 옮기기 치명 버프 · 검의 리듬 · 옥스 출혈 · 따라 들어가기 예약.</summary>
+    private void SwordAfterHit(PlayerStats attacker, SkillData skill, EnemyStats target, int hits)
+    {
+        if (attacker == null || !IsSwordSkill(skill)) return;
+        if (skill.Key == SkillFollowIn) _followInThisRound.Add(attacker);
+        if (skill.Key == SkillReposition)
+        {
+            attacker.RemoveStatModifiersFromSource(RepositionToken);
+            attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.CritChance, modType = StatModType.Flat, value = RepositionCrit }, RepositionToken, 2);
+            AddMessage($"<color=#9FC8FF>{Ko.I(attacker.playerName)} 틈을 노린다.</color> 1턴 동안 치명 +{RepositionCrit:0}%.");
+        }
+        if (hits <= 0 || target == null || target.IsDead()) return;
+        if (skill.Key == SkillBackhand)
+        {
+            target.RemoveStatModifiersFromSource(BackhandToken);
+            target.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = BackhandAtkMult }, BackhandToken, 2);
+            AddMessage($"<color=#C8A0FF>{target.enemyName}의 손목이 저린다!</color> 1턴 동안 STR -{Mathf.RoundToInt((1f - BackhandAtkMult) * 100f)}%.");
+        }
+        bool rhythm = attacker.HasEquippedPassiveByName(SkillSwordRhythm);
+        if (rhythm)
+        {
+            attacker.RemoveStatModifiersFromSource(RhythmToken);
+            attacker.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Accuracy, modType = StatModType.Flat, value = RhythmAcc }, RhythmToken, 2);
+        }
+        float bleed = (rhythm ? RhythmBleed : 0f) + (attacker.HasEquippedPassiveByName(SkillOxDefense) ? attacker.oxStacks * OxPerStack : 0f);
+        if (bleed > 0f && BleedSO != null && !IsBleeding(target))
+        {
+            float resist = Mathf.Max(0f, target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f));
+            if (UnityEngine.Random.value < bleed * resist)
+            {
+                target.ApplyStatusEffectDirect(BleedSO, 3);
+                var inst = target.activeStatusEffects.Find(x => x.data != null && x.data.effectType == BleedSO.effectType);
+                if (inst != null) { inst.appliedThisTurn = _enemiesActedThisRound.Contains(target); inst.stacks = 1; }
+                AddMessage($"<color=#FF5A5A>{Ko.I(target.enemyName)} 피를 흘린다!</color> (3턴)");
+            }
+        }
+    }
+
+    /// <summary>받아 넘기기: 이번 라운드 첫 물리 공격. 성공하면 true (피해 없음).</summary>
+    private bool TryParry(PlayerStats target, EnemyStats enemy)
+    {
+        if (target == null || enemy == null || target.parryRounds <= 0 || target.currentHP <= 0) return false;
+        target.parryRounds = 0; // 한 번만
+        float chance = Mathf.Clamp(ParryBase + (target.Agility - enemy.Agility) * 0.01f, ParryMin, ParryMax);
+        if (UnityEngine.Random.value >= chance)
+        {
+            AddMessage($"<color=#AAAAAA>{Ko.I(target.playerName)} 받아 넘기려 했지만 놓쳤다!</color>");
+            return false;
+        }
+        BattleFx.AllyMiss(target);
+        enemy.RemoveStatModifiersFromSource(ParryStaggerToken);
+        enemy.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Accuracy, modType = StatModType.Flat, value = -ParryStagger }, ParryStaggerToken, 2);
+        target.nextAttackBonus = Mathf.Max(target.nextAttackBonus, ParryRiposte);
+        target.nextAttackBonusRounds = Mathf.Max(target.nextAttackBonusRounds, 2);
+        AddMessage($"<color=#9FC8FF>{Ko.I(target.playerName)} 칼날로 받아 넘겼다!</color> {enemy.enemyName} 휘청 (명중 -{Mathf.RoundToInt(ParryStagger * 100f)}%), 다음 공격 +{Mathf.RoundToInt(ParryRiposte * 100f)}%.");
+        if (target.HasEquippedPassiveByName(SkillSwordRhythm))
+        {
+            int heal = Mathf.Max(1, Mathf.RoundToInt(target.maxHP * RhythmParryHeal));
+            int before = target.currentHP;
+            target.Heal(heal);
+            if (target.currentHP > before) AddMessage($"<color=#8CFF8C>검의 리듬 — HP +{target.currentHP - before}</color>");
+        }
+        return true;
+    }
+
+    /// <summary>옥스 디펜스: 공격받을 때마다 중첩 (3턴 갱신) → 중첩당 5% 확률로 반격.</summary>
+    private void OxAfterAttacked(PlayerStats hero, EnemyStats enemy)
+    {
+        if (hero == null || hero.currentHP <= 0 || !hero.HasEquippedPassiveByName(SkillOxDefense)) return;
+        if (hero.oxStacks < OxMaxStacks) hero.oxStacks++;
+        hero.oxRounds = OxRounds;
+        ApplyOxModifiers(hero);
+        if (enemy == null || enemy.currentHP <= 0 || battleEnded) return;
+        if (UnityEngine.Random.value >= hero.oxStacks * OxPerStack) return;
+        bool crit = CheckCritical(hero.luck, PlayerCritBonus(hero) + hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+        int atk = Mathf.FloorToInt(hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, hero.Attack) * 0.6f);
+        int def = Mathf.FloorToInt(PenetratedDefense(hero, enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, enemy.defense)));
+        int dmg = ApplyPhysResist(ApplySlotDamageToTarget(CalculateDQDamage(atk, def, crit), enemy.currentSlot, enemy.enemyName), enemy);
+        int applied = enemy.TakeDamage(Mathf.Max(1, dmg), crit);
+        AddMessage($"<color=#9FC8FF>옥스 디펜스!</color> {Ko.I(hero.playerName)} 되받아 친다 — {applied}{(crit ? " (치명타!)" : "")}.");
+    }
+
+    private void ApplyOxModifiers(PlayerStats hero)
+    {
+        hero.RemoveStatModifiersFromSource(OxToken);
+        if (hero.oxStacks <= 0) return;
+        float v = hero.oxStacks * OxPerStack;
+        hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.CritChance, modType = StatModType.Flat, value = v * 100f }, OxToken, -1);
+        hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = v }, OxToken, -1);
+        hero.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Accuracy, modType = StatModType.Flat, value = v }, OxToken, -1);
+    }
+
+    /// <summary>따라 들어가기: 라운드 끝 — 공격 말고 다른 행동을 한 적 1명에게 60% 추가 피해.</summary>
+    private IEnumerator ProcessFollowIn()
+    {
+        foreach (var hero in new List<PlayerStats>(_followInThisRound))
+        {
+            if (battleEnded) yield break;
+            if (hero == null || hero.currentHP <= 0) continue;
+            var cands = _enemiesNonAttackThisRound.Where(e => e != null && e.currentHP > 0).ToList();
+            if (cands.Count == 0) continue;
+            var enemy = cands[UnityEngine.Random.Range(0, cands.Count)];
+            bool crit = CheckCritical(hero.luck, PlayerCritBonus(hero) + hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
+            int atk = Mathf.FloorToInt(hero.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Attack, hero.Attack) * FollowInMult);
+            int def = Mathf.FloorToInt(PenetratedDefense(hero, enemy.ApplyStatModifiers(AbyssdawnBattle.ModStatType.Defense, enemy.defense)));
+            int dmg = ApplyPhysResist(ApplySlotDamageToTarget(CalculateDQDamage(atk, def, crit), enemy.currentSlot, enemy.enemyName), enemy);
+            int applied = enemy.TakeDamage(Mathf.Max(1, dmg), crit);
+            AddMessage($"<color=#9FC8FF>따라 들어가기!</color> {Ko.I(hero.playerName)} 머뭇거린 {Ko.Eul(enemy.enemyName)} 파고든다 — {applied}{(crit ? " (치명타!)" : "")}.");
+            yield return new WaitForSeconds(0.35f);
+            CheckBattleEnd();
+        }
+        _followInThisRound.Clear();
+    }
+
+    /// <summary>자리 옮기기: 어느 쪽으로 옮길지 먼저 고른다 (◀ / ▶ / 그대로) → 명령 등록.</summary>
+    private void OpenRepositionPicker(PlayerStats hero, SkillData skill)
+    {
+        CloseMovePicker();
+        _movePicker = new GameObject("RepositionPicker", typeof(RectTransform));
+        var cv = _movePicker.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
+        var sc = _movePicker.AddComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1080f, 1920f); sc.matchWidthOrHeight = 0f;
+        _movePicker.AddComponent<GraphicRaycaster>();
+        var dimGo = new GameObject("Dim", typeof(RectTransform), typeof(Image), typeof(Button));
+        dimGo.transform.SetParent(_movePicker.transform, false);
+        var rt = (RectTransform)dimGo.transform; rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
+        dimGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
+        dimGo.GetComponent<Button>().onClick.AddListener(CloseMovePicker);
+        var box = MoveUiPanel((RectTransform)_movePicker.transform, 640f);
+        MoveUiText(box, $"{skill.skillName} — 친 뒤 어디로?", 24f, 60f, 44f, new Color(0.86f, 0.74f, 0.47f));
+        float y = 110f;
+        System.Action<BattleSlot> pick = to =>
+        {
+            CloseMovePicker();
+            hero.repositionTo = to;
+            QueueAllyCommand(hero, "skill", null, skill);
+        };
+        foreach (int dir in new[] { -1, 1 })
+        {
+            BattleSlot to = GetHorizontalNeighbor4(hero.currentSlot, dir);
+            if (to == BattleSlot.None) continue;
+            PlayerStats occ = activePartyMembers.Find(p => p != null && p != hero && p.currentSlot == to);
+            string what = occ != null ? $"{Ko.Gwa(occ.playerName)} 자리 바꿈" : "빈 자리";
+            var capTo = to;
+            MoveUiButton(box, $"{(dir < 0 ? "◀" : "▶")}  {(int)to}번 자리  <size=70%><color=#BBBBBB>{what}</color></size>", y, () => pick(capTo)); y += 100f;
+        }
+        MoveUiButton(box, "그 자리에 남는다", y, () => pick(BattleSlot.None)); y += 100f;
+        MoveUiButton(box, "취소", 640f - 120f, CloseMovePicker);
     }
 
     private const string SkillCrossCounter = "Cross Counter";
@@ -7607,6 +8096,12 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || skill == null) return;
         if (ApplyShieldActive(attacker, skill)) return; // [2026-10-09] 방패
+        if (skill.Key == SkillParry) // [2026-10-19] 받아 넘기기 자세 (이번 라운드)
+        {
+            attacker.parryRounds = 1;
+            AddMessage($"{Ko.I(attacker.playerName)} 칼끝을 낮추고 받아 넘길 자세를 잡는다.");
+            return;
+        }
         if (skill.Effects == null) return;
         if (ApplyCombatArtsActive(attacker, skill)) return;
 
@@ -7623,7 +8118,7 @@ public class BattleManager : MonoBehaviour
                     if (effect.effectAmount > 0)
                     {
                         attacker.defenseBuffAmount = effect.effectAmount;
-                        AddMessage($"{Ko.I(attacker.playerName)} {Ko.Eul(skill.skillName)} 썼다! 방어가 올랐다!");
+                        AddMessage($"{Ko.Ui(attacker.playerName)} 방어가 올랐다!"); // [2026-10-20] 선언 줄에 스킬 이름
                     }
                     break;
             }
@@ -7642,7 +8137,7 @@ public class BattleManager : MonoBehaviour
                 attacker.AddStatModifier(mod, skill, dur + 1);
                 parts.Add(DescribeBuffModifier(mod));
             }
-            AddMessage($"{Ko.I(attacker.playerName)} {Ko.Eul(skill.skillName)} 썼다! {dur}턴 동안 {string.Join(", ", parts)}!");
+            AddMessage($"{dur}턴 동안 {string.Join(", ", parts)}!"); // [2026-10-20] 선언 줄에 스킬 이름
         }
 
         // [MonsterSkillData Buff 분기] curseEffect.statModifiers 기반 Self 버프
@@ -7709,9 +8204,13 @@ public class BattleManager : MonoBehaviour
 
         if (effect.recoveryTarget == RecoveryTarget.HP || effect.recoveryTarget == RecoveryTarget.Both)
         {
-            int recoverAmount = Mathf.FloorToInt(attacker.maxHP * (effect.effectAmount / 100f));
-            attacker.Heal(recoverAmount);
-            AddMessage($"{Ko.I(attacker.playerName)} HP {recoverAmount} 회복!");
+            // [2026-10-20] 고른 동료가 있으면 그 동료를 (그 동료의 최대 HP 기준)
+            PlayerStats who = attacker.healTarget != null && attacker.healTarget.currentHP > 0 ? attacker.healTarget : attacker;
+            int recoverAmount = Mathf.FloorToInt(who.maxHP * (effect.effectAmount / 100f));
+            who.Heal(recoverAmount);
+            AddMessage(who == attacker ? $"{Ko.I(attacker.playerName)} HP {recoverAmount} 회복!"
+                                       : $"{Ko.I(attacker.playerName)} {who.playerName}의 HP를 {recoverAmount} 회복시켰다!");
+            attacker.healTarget = null;
         }
     }
 
@@ -7975,15 +8474,18 @@ public class BattleManager : MonoBehaviour
 
         int hits = Mathf.Max(1, skill.hitCount);
         int totalDamage = 0;
+        AddMessage($"{Ko.Ui(enemy.enemyName)} {EnemySkillShortName(enemy, skill)}!"); // [2026-10-20] 드퀘5식 선언
+        yield return StartCoroutine(BeatWait(DeclareHold));
 
         for (int i = 0; i < hits; i++)
         {
             // 3. 타격마다 독립 명중 판정
             bool physicalHit = skill.damageType != DamageType.Magic && !(skill is MonsterSkillData mPhys && mPhys.Category == MonsterSkillCategory.MagicAttack);
-            if (physicalHit && TryPullCounter(target, enemy)) continue; // [2026-10-14] 풀 카운터
+            if (physicalHit && (TryPullCounter(target, enemy) || TryParry(target, enemy))) continue; // [2026-10-14] 풀 카운터 · [2026-10-19] 받아 넘기기
+            if (physicalHit && i == 0) OxAfterAttacked(target, enemy); // [2026-10-19] 옥스 디펜스
             if (!RollPhysicalHit_EnemyVsPlayer(enemy, target, skill))
             {
-                AddMessage($"{enemy.enemyName}의 {Ko.I(skill.skillName)} 빗나갔다!");
+                AddMessage($"{Ko.Eun(target.playerName)} 재빨리 몸을 피했다!"); // [2026-10-20] 선언 줄에 스킬 이름이 이미 있음
                 BattleFx.AllyMiss(target);
                 if (physicalHit) ShadowStepCounter(target, enemy); // [2026-10-14]
                 continue;
@@ -8058,7 +8560,8 @@ public class BattleManager : MonoBehaviour
             bool crossProc = physicalHit && skill.Key != ToolThrowingKnife && CrossCounterGuard(target, ref damage); // [2026-10-14]
             damage = target.TakeDamage(damage); // [2026-10-06] 실제로 받은 피해로 표시
             totalDamage += damage;
-            AddMessage($"{Ko.I(enemy.enemyName)} {Ko.Eul(skill.skillName)} 쓴다! {Ko.I(target.playerName)} {damage} 피해{(critical ? " (치명타!)" : "")}.");
+            AddMessage(critical ? $"<color=#FF6060>통한의 일격!</color> {Ko.Eun(target.playerName)} {damage}의 피해를 입었다!" // [2026-10-20]
+                                : $"{Ko.Eun(target.playerName)} {damage}의 피해를 입었다!");
             if (guardProc) CounterAttack(target, enemy); // 반격 (공격 메시지 다음)
             if (crossProc) CrossCounterStrike(target, enemy); // [2026-10-14]
 
@@ -8116,8 +8619,23 @@ public class BattleManager : MonoBehaviour
             }
             target = fixedTarget;
         }
+        // [2026-10-19] 자리 옮기기: 무작위 적 1명 / 전진찌르기: 적 전열만
+        if (skill.Key == SkillReposition)
+        {
+            var alive = activeEnemies.Where(e => e != null && e.currentHP > 0).ToList();
+            target = alive.Count > 0 ? alive[UnityEngine.Random.Range(0, alive.Count)] : null;
+        }
+        if (skill.Key == SkillAdvancingThrust && target != null && !IsEnemyFrontLine(target))
+            target = activeEnemies.Where(e => e != null && e.currentHP > 0 && IsEnemyFrontLine(e)).OrderBy(e => (int)e.currentSlot).FirstOrDefault() ?? target;
+        // [2026-10-20] 칼등치기: 적 모드인데 그새 HP 30% 이상이 되었으면 비용 없이 실패
+        bool flatAlly = skill.Key == SkillFlatBlade && target == null;
+        if (skill.Key == SkillFlatBlade && target != null && !FlatBladeEnemyOk(target))
+        {
+            AddMessage($"{skill.skillName}: {Ko.I(target.enemyName)} 아직 기세가 꺾이지 않았다 (HP 30% 미만만).");
+            yield break;
+        }
         // 타겟이 필요한 스킬인데 타겟이 없으면 리턴 (회복/방어 스킬 제외)
-        if (target == null && !IsSelfTargetSkill(skill)) yield break;
+        if (target == null && !IsSelfTargetSkill(skill) && !flatAlly) yield break;
 
         // 전투당 사용 횟수 · 쿨다운 기록
         RecordSkillUse(attacker, skill);
@@ -8167,8 +8685,20 @@ public class BattleManager : MonoBehaviour
 
         bool isSelfSkill = IsSelfTargetSkill(skill);
 
+        if (flatAlly) // [2026-10-20] 칼등치기 — 아군 격려
+        {
+            PlayerStats ally = attacker.healTarget != null && attacker.healTarget.currentHP > 0 ? attacker.healTarget : attacker;
+            attacker.healTarget = null;
+            ally.RemoveStatModifiersFromSource(FlatBladeToken);
+            ally.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Accuracy, modType = StatModType.Flat, value = FlatBladeBuff }, FlatBladeToken, 3);
+            ally.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Evasion, modType = StatModType.Flat, value = FlatBladeBuff }, FlatBladeToken, 3);
+            ally.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.CritChance, modType = StatModType.Flat, value = FlatBladeBuff * 100f }, FlatBladeToken, 3);
+            ally.AddStatModifier(new StatModifier { statType = AbyssdawnBattle.ModStatType.Attack, modType = StatModType.PercentMult, value = 1f + FlatBladeBuff }, FlatBladeToken, 3);
+            AddMessage($"{Ko.I(attacker.playerName)} 칼등으로 {(ally == attacker ? "자신의" : ally.playerName + "의")} 어깨를 두드린다. <color=#9FC8FF>2턴 동안 명중·치명·회피·STR +5%</color>");
+            isSelfSkill = false; target = null;
+        }
         // 1. 회복/버프 스킬
-        if (isSelfSkill)
+        else if (isSelfSkill)
         {
             ApplySelfEffects(attacker, skill);
         }
@@ -8176,9 +8706,23 @@ public class BattleManager : MonoBehaviour
         else if (target != null)
         {
             // Mandritto: 전열 2명 동시 공격 (멀티 타겟)
-            if (skill.Key == "Mandritto")
+            if (skill.Key == "Mandritto" || skill.Key == SkillRiverso)
             {
+                _lastMandrittoHit = null;
                 yield return StartCoroutine(ExecuteMandritto(attacker, skill, target));
+                if (skill.Key == SkillRiverso) { yield return new WaitForSeconds(0.3f); RiversoBackstroke(attacker, _lastMandrittoHit); } // [2026-10-20]
+            }
+            else if (skill.Key == SkillFlatBlade)
+            {
+                // [2026-10-20] 칼등치기 — HP 1 아래로는 내리지 않음. HP 1 이 되면 항복하려 한다
+                target.nonLethalHit = true;
+                yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, target));
+                target.nonLethalHit = false;
+                if (target.currentHP == 1)
+                {
+                    target.surrendering = true;
+                    AddMessage($"<color=#FFD24A>{Ko.I(target.enemyName)} 무릎을 꿇었다…</color> <color=#AAAAAA>(다음 차례에 항복할지도)</color>");
+                }
             }
             else if (skill.Key == SkillRoundhouse)
             {
@@ -8206,10 +8750,24 @@ public class BattleManager : MonoBehaviour
             }
             else
             {
+                // [2026-10-19] 전진찌르기: 앞으로 1칸 나오며 찌른다
+                if (skill.Key == SkillAdvancingThrust && attacker.IsBackRow)
+                {
+                    BattleSlot fwd = (BattleSlot)((int)attacker.currentSlot - 1);
+                    if (MovePlayerToSlot(attacker, fwd)) AddMessage($"{Ko.I(attacker.playerName)} 앞으로 파고든다.");
+                }
                 yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, target));
                 if (IsThrowingAxe(skill) && _lastSkillHits > 0) yield return StartCoroutine(TryPickUpAxe(attacker, target)); // [2026-10-13]
                 if (_lastSkillHits > 0) DaggerAfterHit(attacker, skill, target); // [2026-10-14] 단검 효과
                 DaggerStep(attacker, skill);
+                SwordAfterHit(attacker, skill, target, _lastSkillHits); // [2026-10-19] 검술
+                if (skill.Key == SkillPommelStrike && _lastSkillHits > 0) PommelStun(target); // [2026-10-20]
+                // [2026-10-19] 자리 옮기기: 친 뒤 고른 칸으로
+                if (skill.Key == SkillReposition && attacker.repositionTo != BattleSlot.None && attacker.currentHP > 0)
+                {
+                    if (MovePlayerToSlot(attacker, attacker.repositionTo)) AddMessage($"{Ko.I(attacker.playerName)} {(int)attacker.repositionTo}번 자리로 옮겨 선다.");
+                    attacker.repositionTo = BattleSlot.None;
+                }
             }
         }
 
@@ -8362,6 +8920,18 @@ public class BattleManager : MonoBehaviour
             bool detonation = doubleStrike && i == 1 && firstHitDamage > 0; // 이중타격 2타: 1타가 맞았으면 반드시 들어간다
             float roll = UnityEngine.Random.Range(0f, 1f);
             bool missed = !detonation && roll >= hitChance;
+            // [2026-10-19] 페인트: 1타는 일부러 빗맞히고, 2타부터는 반드시 들어간다
+            if (skill.Key == SkillFeint)
+            {
+                if (i == 0)
+                {
+                    BattleFx.EnemyMiss(target);
+                    AddMessage($"1타: <color=#AAAAAA>허초 —</color> {Ko.I(target.enemyName)} 속았다!");
+                    yield return new WaitForSeconds(0.3f);
+                    continue;
+                }
+                missed = false;
+            }
             Debug.Log($"[HIT] {attacker.playerName} → {target.enemyName}(슬롯{(int)target.currentSlot}): 스킬accuracy={logSkillAcc}, 슬롯보정={logSlotAcc}, 최종={hitChance}, 결과={(missed ? "miss" : "hit")}");
             if (missed)
             {
@@ -8514,12 +9084,12 @@ public class BattleManager : MonoBehaviour
             else if (hits > 1)
             {
                 string critMsg = critical ? " 치명타!" : "";
-                AddMessage($"{i + 1}타: {damage} 피해{critMsg}");
+                AddMessage(critical ? $"<color=#FFD24A>회심의 일격!</color> {target.enemyName}에게 {damage}의 피해!" : $"{target.enemyName}에게 {damage}의 피해!"); // [2026-10-20]
             }
             else
             {
                 string critMsg = critical ? " 치명타!" : "";
-                AddMessage($"{Ko.I(attacker.playerName)} {Ko.Eul(skill.skillName)} 썼다! {damage} 피해{critMsg}");
+                AddMessage(critical ? $"<color=#FFD24A>회심의 일격!</color> {target.enemyName}에게 {damage}의 피해!" : $"{target.enemyName}에게 {damage}의 피해!"); // [2026-10-20]
             }
             
             // [2026-10-12] 근육의 기억: 맞힐 때마다 중첩 +1 (5중첩이면 MP +2)
@@ -8618,6 +9188,7 @@ public class BattleManager : MonoBehaviour
         }
 
         if (frontRowEnemies.Count == 0) yield break;
+        if (skill.Key == SkillRiverso) frontRowEnemies = frontRowEnemies.OrderBy(e => (int)e.currentSlot).ToList(); // [2026-10-20] 왼쪽 → 오른쪽
 
         int totalDamage = 0;
 
@@ -8635,6 +9206,7 @@ public class BattleManager : MonoBehaviour
                 BattleFx.EnemyMiss(target);
                 continue;
             }
+            _lastMandrittoHit = target; // [2026-10-20] 리베르소: 마지막으로 맞힌 적
 
             // [StatMod 5단계] CritChance는 Flat(퍼센트포인트 가산) 전용 설계.
             bool critical = CheckCritical(attacker.luck, skill.critBonusPercent + PlayerCritBonus(attacker) + attacker.ApplyStatModifiers(AbyssdawnBattle.ModStatType.CritChance, 0f));
@@ -8703,7 +9275,7 @@ public class BattleManager : MonoBehaviour
             totalDamage += damage;
 
             string critMsg = critical ? " 치명타!" : "";
-            AddMessage($"{Ko.I(attacker.playerName)} {target.enemyName}에게 {Ko.Eul(skill.skillName)} 썼다! {damage} 피해{critMsg}");
+            AddMessage(critical ? $"<color=#FFD24A>회심의 일격!</color> {target.enemyName}에게 {damage}의 피해!" : $"{target.enemyName}에게 {damage}의 피해!"); // [2026-10-20]
 
             ApplyCurseEffects(target, skill);
 
@@ -9571,6 +10143,7 @@ public class BattleManager : MonoBehaviour
                 continue;
             }
             Debug.Log($"[SeqMsg-DIAG] ▶ 줄 #{li + 1}/{lines.Count} 시작: \"{line}\"");
+            if (_cardFreezeMember != null && line.Contains("레벨 업")) { CardUnfreeze(); UpdateStatusUI(); } // [2026-10-18] 이때 카드 수치가 바뀐다
 
             // 누적 + 새 줄(개행 포함) 전체를 텍스트에 박아두고 maxVisibleCharacters로 가린다.
             string full = string.IsNullOrEmpty(accumulated) ? line : (accumulated + "\n" + line);
@@ -10565,6 +11138,17 @@ private void CacheHeroSkills()
     /// <summary>쓰러진 아군 카드에 해골 그림 — 던전 파티 카드(DungeonPartyBar)와 공용 (PartyCardVisuals).</summary>
     private static void SetDeathSkull(Transform card, bool dead) => PartyCardVisuals.SetDeathSkull(card, dead);
 
+    // [2026-10-18] 레벨업 카드 수치 늦추기 — 승리 EXP 직전 값을 붙잡아 두었다가 "레벨 업!" 줄에서 놓는다
+    private PlayerStats _cardFreezeMember;
+    private int _fzLevel, _fzHp, _fzMaxHp, _fzMp, _fzMaxMp;
+    private void CardFreeze(PlayerStats m)
+    {
+        if (m == null) return;
+        _cardFreezeMember = m; _fzLevel = PartyCardVisuals.LevelOf(m);
+        _fzHp = m.currentHP; _fzMaxHp = m.maxHP; _fzMp = m.currentMP; _fzMaxMp = m.maxMP;
+    }
+    private void CardUnfreeze() { _cardFreezeMember = null; }
+
     private void UpdateStatusUI()
     {
         string heroHpLine = player != null ? $"HP: {player.currentHP} / {player.maxHP}" : "HP: -";
@@ -10611,8 +11195,16 @@ private void CacheHeroSkills()
                     if (hasDedicatedSlotTexts)
                     {
                         playerStatusNameTexts[i].text = member.playerName;
-                        playerStatusHPTexts[i].text = $"HP {member.currentHP}/{member.maxHP}";
-                        playerStatusMPTexts[i].text = $"MP {member.currentMP}/{member.maxMP}";
+                        if (member == _cardFreezeMember)
+                        {
+                            playerStatusHPTexts[i].text = $"HP {_fzHp}/{_fzMaxHp}";
+                            playerStatusMPTexts[i].text = $"MP {_fzMp}/{_fzMaxMp}";
+                        }
+                        else
+                        {
+                            playerStatusHPTexts[i].text = $"HP {member.currentHP}/{member.maxHP}";
+                            playerStatusMPTexts[i].text = $"MP {member.currentMP}/{member.maxMP}";
+                        }
                     }
                     else
                     {
@@ -10631,7 +11223,7 @@ private void CacheHeroSkills()
 
                     if (i < playerStatusLevelTexts.Count && playerStatusLevelTexts[i] != null)
                     {
-                        playerStatusLevelTexts[i].text = PartyCardVisuals.LevelOf(member).ToString();
+                        playerStatusLevelTexts[i].text = (member == _cardFreezeMember ? _fzLevel : PartyCardVisuals.LevelOf(member)).ToString();
                         playerStatusLevelTexts[i].color = isDead ? downedTextColor : aliveTextColor;
                     }
 
@@ -10991,6 +11583,48 @@ private void CacheHeroSkills()
 
 
     // -------------------- 전투 종료 체크 --------------------
+    // ── [2026-10-20] 드퀘5식 전투 박자 ──
+    //   선언 줄("쥐의 공격!") → DeclareHold → 연출·결과 줄("Hero은(는) 5의 피해를 입었다!") → ResultHold → 다음 행동.
+    //   두 값에 BattleSpeed.Scale (단계 1~5) 을 곱하고, 누르고 있으면 BattleSpeed.HoldBoost 배 빨라진다. 수치는 추측(드퀘5 기본 속도 체감).
+    public const float DeclareHold = 0.45f;
+    public const float ResultHold = 0.7f;
+
+    /// <summary>"쥐 물어뜯기" 처럼 스킬 이름 앞에 몬스터 이름이 붙어 있으면 떼어 낸다 → "쥐의 물어뜯기!"</summary>
+    private static string EnemySkillShortName(EnemyStats enemy, SkillData skill)
+    {
+        string n = skill.skillName ?? "";
+        string pre = (enemy != null ? enemy.enemyName : "") + " ";
+        return pre.Length > 1 && n.StartsWith(pre) && n.Length > pre.Length ? n.Substring(pre.Length) : n;
+    }
+
+    private IEnumerator BeatWait(float seconds)
+    {
+        float need = seconds * BattleSpeed.Scale, t = 0f;
+        while (t < need)
+        {
+            t += Time.deltaTime * (BattleSpeed.FastHeld || AutoAdvanceMessages ? BattleSpeed.HoldBoost : 1f);
+            yield return null;
+        }
+    }
+
+    /// <summary>[2026-10-20] 새로 쓰러진 적·아군마다 한 줄 ("쥐를 쓰러뜨렸다!" / "Hero은(는) 쓰러졌다!").</summary>
+    private readonly HashSet<Component> _downAnnounced = new HashSet<Component>();
+    private void AnnounceDowns()
+    {
+        foreach (var e in activeEnemies)
+        {
+            if (e == null || _downAnnounced.Contains(e) || _fledEnemies.Contains(e) || !e.IsDead()) continue;
+            _downAnnounced.Add(e);
+            AddMessage($"{Ko.Eul(e.enemyName)} 쓰러뜨렸다!");
+        }
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null) continue;
+            if (m.currentHP > 0) { _downAnnounced.Remove(m); continue; }
+            if (_downAnnounced.Add(m)) AddMessage($"<color=#FF8C8C>{Ko.Eun(m.playerName)} 쓰러졌다!</color>");
+        }
+    }
+
     private void CheckBattleEnd()
     {
         // [DUPLICATE GUARD 2026-05-11] 이미 종료된 전투는 다시 처리하지 않음
@@ -11007,6 +11641,7 @@ private void CacheHeroSkills()
             Debug.Log($"[BM:DIAG] CheckBattleEnd SKIPPED (already ended) | caller={_diagCaller}");
             return;
         }
+        AnnounceDowns(); // [2026-10-20]
 
         if (!AnyPartyAlive())
         {
@@ -11027,7 +11662,11 @@ private void CacheHeroSkills()
             battleEnded = true;
 
             UpdateStatusUI();
-            AddMessage("적을 모두 쓰러뜨렸다!");
+            // [2026-10-18] 도망친 적이 있으면 "쓰러뜨렸다"가 아니라 "도망쳤다. 전투에서 승리했다."
+            int fled = 0, total = 0;
+            foreach (var e in activeEnemies) if (e != null) { total++; if (_fledEnemies.Contains(e)) fled++; }
+            if (fled == 0) AddMessage("적을 모두 쓰러뜨렸다!");
+            else AddMessage((fled == total ? "적이 도망쳤다." : "남은 적이 도망쳤다.") + " 전투에서 승리했다.");
             // [2026-10-09] 층 보스를 쓰러뜨렸으면 기록 (그 층 계단으로 내려갈 수 있게)
             foreach (var e in activeEnemies)
                 if (BossEncounter.IsBoss(e))
@@ -11063,7 +11702,11 @@ private void CacheHeroSkills()
                                 memberExp += Mathf.Max(1, Mathf.RoundToInt(e.expReward * Abyssdawn.PlayerExpProgression.LevelDiffMultiplier(e.level, member.level)));
                         if (member == player) { AddMessage($"승리! {Ko.I(member.playerName)} EXP {memberExp}를 얻었다!"); }
                         Debug.Log($"[BM:DIAG] AddExp ABOUT TO CALL | member='{member.playerName}', InstanceID={member.GetInstanceID()}, Before EXP={member.exp}");
+                        // [2026-10-18] 레벨업이면 카드 수치는 "레벨 업!" 줄이 나올 때 바뀐다 — 그때까지 이전 값을 보여 준다
+                        CardFreeze(member);
+                        int lvBefore = member.level;
                         member.AddExp(memberExp);
+                        if (member.level == lvBefore) CardUnfreeze();
                         Debug.Log($"[BM:DIAG] AddExp returned | member='{member.playerName}', After EXP={member.exp}, Lv={member.level}");
                     }
                     else

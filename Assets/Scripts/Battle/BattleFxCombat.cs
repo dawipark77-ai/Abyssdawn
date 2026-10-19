@@ -134,13 +134,30 @@ public class BattleFxCombat : MonoBehaviour
     }
     private const float StabFrameTime = 0.075f; // [2026-10-18] 더 느리게 (0.045 → 0.075)
 
+    // [2026-10-20] 효과 크기 고정: 몬스터 그림 크기 대신 화면 높이의 일정 비율 (쥐 크기쯤). 어느 적이든 같은 크기
+    public const float FxScreenFraction = 0.19f;
+    public const float StabScreenFraction = 0.12f; // [2026-10-20] 베기 연출만 더 작게 (0.19 → 0.12)
+    private static Bounds FixedBounds(SpriteRenderer target, float fraction = FxScreenFraction)
+    {
+        Vector3 c = target.bounds.center;
+        float size = 2f;
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            Vector3 sp = cam.WorldToScreenPoint(c);
+            Vector3 up = cam.ScreenToWorldPoint(new Vector3(sp.x, sp.y + Screen.height * fraction, sp.z));
+            size = Mathf.Max(0.01f, Vector3.Distance(c, up));
+        }
+        return new Bounds(c, new Vector3(size, size, 0.01f));
+    }
+
     private const float StabAngle = 46f;        // 그림 속 칼날 방향 (오른쪽 위 ↗ 기준 각도)
     private const float StabLengthScale = 1.7f; // [2026-10-18] 칼날 길이만 1.7배
 
     private IEnumerator StabFlip(SpriteRenderer target, bool crit)
     {
         var frames = StabFrames;
-        Bounds b = target.bounds;
+        Bounds b = FixedBounds(target, StabScreenFraction); // [2026-10-20] 몬스터 크기와 상관없이 같은 크기 (쥐 기준)
         var go = new GameObject("SlashStab");
         go.transform.SetParent(transform, false);
         go.transform.position = new Vector3(b.center.x, b.center.y, b.center.z - 0.01f);
@@ -201,7 +218,7 @@ public class BattleFxCombat : MonoBehaviour
 
     private IEnumerator Slash(SpriteRenderer target, SlashKind kind, bool crit)
     {
-        Bounds b = target.bounds;
+        Bounds b = FixedBounds(target); // [2026-10-20] 몬스터 크기와 상관없이 같은 크기 (쥐 기준)
         bool sharp = kind == SlashKind.Sword || kind == SlashKind.Thrust; // [2026-10-17] 베기·찌르기는 더 가늘고 길게
         float q = sharp ? Mathf.Max(0.02f, b.size.x / 26f) : Mathf.Max(0.035f, b.size.x / 16f);  // 픽셀 조각 한 칸 크기
         Vector3 c = b.center;

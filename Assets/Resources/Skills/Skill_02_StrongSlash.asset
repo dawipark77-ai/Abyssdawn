@@ -27,7 +27,7 @@ MonoBehaviour:
     allowedCasterSlots: 15
     allowedTargetSlots: 1
     specificSlots: 
-  hpCostPercent: 10
+  hpCostPercent: 15
   mpCost: 0
   minMult: 2
   maxMult: 2.5

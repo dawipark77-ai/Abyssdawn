@@ -89,6 +89,7 @@ public class ConsumableInventory : MonoBehaviour
         if (_instance != null)
         {
             _instance.slots.Clear();
+            _instance.dawnChaliceLevel = 0; // [2026-10-18] 새 탐험은 강화 없이
             _instance.dawnChaliceCharges = _instance.dawnChaliceMaxCharges;
             _instance.FlushSessionDawnCharges();
             _instance.OnInventoryChanged?.Invoke();
@@ -171,6 +172,14 @@ public class ConsumableInventory : MonoBehaviour
     public ConsumableItemSO dawnChaliceItem;
     public int dawnChaliceCharges    = 0;
     public int dawnChaliceMaxCharges = 3;
+
+    // [2026-10-18] 새벽의 잔 강화 단계 (성소에서 올림). 기본 회복 25% + 단계당 +10%p.
+    public int dawnChaliceLevel = 0;
+    public const float DawnChaliceStepPercent = 0.10f;
+    /// <summary>새벽의 잔 강화로 더해지는 회복 비율 (0.1 = +10%p).</summary>
+    public static float DawnChaliceBonusPercent => _instance != null ? _instance.dawnChaliceLevel * DawnChaliceStepPercent : 0f;
+    /// <summary>[2026-10-18] 성소에서 부른다 — 새벽의 잔 한 단계 강화.</summary>
+    public void UpgradeDawnChalice() { dawnChaliceLevel++; OnInventoryChanged?.Invoke(); }
 
     // ─── 이벤트 ───────────────────────────────────────────────
     public event System.Action OnInventoryChanged;

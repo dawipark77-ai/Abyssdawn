@@ -15,8 +15,8 @@ using AbyssdawnBattle;
 public class SkillTreeLinks : MonoBehaviour
 {
     [Header("선 모양")]
-    public float thickness = 6f;
-    public float glowThickness = 18f;
+    public float thickness = 4f;      // [2026-10-19] 꺾인 선 (위 노드 아래 → 가운데 높이 → 아래 노드 위)
+    public float glowThickness = 12f;
 
     [Header("색")]
     public Color learnedColor = new Color(0.96f, 0.87f, 0.58f, 1f);
@@ -54,17 +54,17 @@ public class SkillTreeLinks : MonoBehaviour
                 Vector2 b = LocalCenter(child.transform as RectTransform);
                 if (parentLearned && childLearned)
                 {
-                    DrawLine(a, b, glowThickness, learnedGlowColor);
-                    DrawLine(a, b, thickness, learnedColor);
+                    DrawElbow(a, b, glowThickness, learnedGlowColor);
+                    DrawElbow(a, b, thickness, learnedColor);
                 }
                 else if (parentLearned)
                 {
-                    DrawLine(a, b, glowThickness, availableGlowColor);
-                    DrawLine(a, b, thickness, availableColor);
+                    DrawElbow(a, b, glowThickness, availableGlowColor);
+                    DrawElbow(a, b, thickness, availableColor);
                 }
                 else
                 {
-                    DrawLine(a, b, thickness, lockedColor);
+                    DrawElbow(a, b, thickness, lockedColor);
                 }
             }
         }
@@ -89,6 +89,18 @@ public class SkillTreeLinks : MonoBehaviour
         if (rt == null) return Vector2.zero;
         Vector3 worldCenter = rt.TransformPoint(rt.rect.center);
         return _root.InverseTransformPoint(worldCenter);
+    }
+
+    /// <summary>[2026-10-19] 꺾인 선: 위 노드 → 아래로 → 가로 → 아래 노드. 같은 줄이면 곧은 선.</summary>
+    private void DrawElbow(Vector2 a, Vector2 b, float width, Color color)
+    {
+        if (Mathf.Abs(a.y - b.y) < 1f || Mathf.Abs(a.x - b.x) < 1f) { DrawLine(a, b, width, color); return; }
+        float midY = (a.y + b.y) * 0.5f;
+        Vector2 p1 = new Vector2(a.x, midY), p2 = new Vector2(b.x, midY);
+        float h = width * 0.5f; // 모서리 이음새가 비지 않게 조금 겹침
+        DrawLine(a, p1 + new Vector2(0f, Mathf.Sign(p1.y - a.y) * h), width, color);
+        DrawLine(new Vector2(p1.x - Mathf.Sign(p2.x - p1.x) * h, p1.y), new Vector2(p2.x + Mathf.Sign(p2.x - p1.x) * h, p2.y), width, color);
+        DrawLine(p2 - new Vector2(0f, Mathf.Sign(b.y - p2.y) * h), b, width, color);
     }
 
     private void DrawLine(Vector2 a, Vector2 b, float width, Color color)

@@ -227,6 +227,11 @@ public class PlayerStats : MonoBehaviour
     public const string SkillQuickHands = "Quick Hands";
     public const string SkillVitalStrike = "Vital Strike";
     [System.NonSerialized] public int shadowStepRounds;
+    // [2026-10-19] 검술 추가
+    [System.NonSerialized] public int oxStacks, oxRounds;          // 옥스 디펜스: 공격받을 때마다 중첩 (최대 3, 3턴)
+    [System.NonSerialized] public int parryRounds;                 // 받아 넘기기: 이번 라운드 첫 물리 공격
+    [System.NonSerialized] public BattleSlot repositionTo = BattleSlot.None; // 자리 옮기기: 공격 뒤 옮길 칸
+    [System.NonSerialized] public PlayerStats healTarget; // [2026-10-20] 회복 스킬을 동료에게 쓸 때 대상
 
     /// <summary>오른손·왼손에 든 단검 수 (0~2).</summary>
     public int DaggersHeld()

@@ -19,8 +19,8 @@ MonoBehaviour:
   itemCategory: 3
   itemIcon: {fileID: -5063216152701466143, guid: 9193eccd8dc30974a8da62eba23f0727, type: 3}
   flatIcon: {fileID: 7043268739260826568, guid: 72bbb49c45579934b889efe7db9227a1, type: 3}
-  hpRecoveryPercent: 0.6
-  mpRecoveryPercent: 0.6
+  hpRecoveryPercent: 0.25
+  mpRecoveryPercent: 0.25
   cureTypes: 0100000002000000030000000000000004000000050000000600000007000000
   attackBuffPercent: 0
   agilityBuff: 0

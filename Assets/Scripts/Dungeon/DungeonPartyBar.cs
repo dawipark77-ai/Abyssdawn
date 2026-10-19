@@ -43,6 +43,107 @@ public class DungeonPartyBar : MonoBehaviour
     /// <summary>[2026-10-15] 카드 연출(CardFx)이 주인공 카드를 찾을 때 쓴다.</summary>
     public static DungeonPartyBar Instance { get; private set; }
 
+    // ─────────────────────────────────────────
+    // [2026-10-18] 아이템 대상 고르기 — 화면을 살짝 어둡게 하고 카드만 위로 올려 빛나게. 카드를 누르면 그 칸 번호로 콜백.
+    // ─────────────────────────────────────────
+    private System.Action<int> _pickCallback;
+    private GameObject _pickDim;
+    private Canvas _pickRaise;
+    private GraphicRaycaster _pickRaiseRay;
+    private readonly List<GameObject> _pickGlows = new List<GameObject>();
+    public bool IsPicking => _pickCallback != null;
+
+    public void BeginTargetPick(string caption, System.Action<int> onPick)
+    {
+        if (!EnsureBound() || onPick == null) return;
+        EndPick();
+        _pickCallback = onPick;
+
+        // 어두운 막 (맨 위 화면 캔버스) — 누르면 취소
+        _pickDim = new GameObject("ItemTargetDim", typeof(RectTransform));
+        var dimCanvas = _pickDim.AddComponent<Canvas>();
+        dimCanvas.renderMode = RenderMode.ScreenSpaceOverlay; dimCanvas.sortingOrder = 900;
+        var scaler = _pickDim.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1080f, 1920f); scaler.matchWidthOrHeight = 0f;
+        _pickDim.AddComponent<GraphicRaycaster>();
+        var shade = new GameObject("Shade", typeof(RectTransform), typeof(Image));
+        shade.transform.SetParent(_pickDim.transform, false);
+        var srt = (RectTransform)shade.transform; srt.anchorMin = Vector2.zero; srt.anchorMax = Vector2.one; srt.offsetMin = srt.offsetMax = Vector2.zero;
+        var simg = shade.GetComponent<Image>(); simg.color = new Color(0f, 0f, 0f, 0.55f); simg.raycastTarget = true;
+        var cancel = shade.AddComponent<Button>(); cancel.transition = Selectable.Transition.None;
+        cancel.onClick.AddListener(EndPick);
+
+        // 안내 글 (카드 바로 위)
+        var capGo = new GameObject("Caption", typeof(RectTransform), typeof(TextMeshProUGUI));
+        capGo.transform.SetParent(_pickDim.transform, false);
+        var cap = capGo.GetComponent<TextMeshProUGUI>();
+        foreach (var f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>()) if (f != null && f.name == "NotoSansKR SDF") { cap.font = f; break; }
+        cap.text = caption; cap.fontSize = 44f; cap.fontStyle = FontStyles.Bold; cap.alignment = TextAlignmentOptions.Center;
+        cap.color = new Color(0.96f, 0.87f, 0.58f, 1f); cap.raycastTarget = false;
+        var crt = cap.rectTransform; crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0f); crt.pivot = new Vector2(0.5f, 0f);
+        crt.sizeDelta = new Vector2(1000f, 70f); crt.anchoredPosition = new Vector2(0f, 540f); // 메뉴 줄 위
+
+        // 카드 묶음을 막 위로 올린다
+        _pickRaise = partyBar.gameObject.GetComponent<Canvas>();
+        bool added = false;
+        if (_pickRaise == null) { _pickRaise = partyBar.gameObject.AddComponent<Canvas>(); added = true; }
+        _pickRaise.overrideSorting = true; _pickRaise.sortingOrder = 901;
+        _pickRaiseRay = partyBar.gameObject.GetComponent<GraphicRaycaster>();
+        if (_pickRaiseRay == null) _pickRaiseRay = partyBar.gameObject.AddComponent<GraphicRaycaster>(); else _pickRaiseRay = null;
+        if (!added) _pickRaise = null; // 원래 있던 캔버스는 지우지 않는다 (정렬만 되돌림 — 아래 EndPick)
+
+        // 고를 수 있는 카드에 금테
+        var sp = Resources.Load<Sprite>("UI/GlowBorder");
+        var occ = CompanionPartyPersistence.BuildMainLineOccupancy();
+        for (int i = 0; i < _cards.Count && i < occ.Length; i++)
+        {
+            if (_cards[i] == null || occ[i].IsEmpty) continue;
+            var g = new GameObject("PickGlow", typeof(RectTransform), typeof(Image));
+            g.transform.SetParent(_cards[i].slot, false);
+            var grt = (RectTransform)g.transform; grt.anchorMin = Vector2.zero; grt.anchorMax = Vector2.one; grt.offsetMin = new Vector2(-6f, -6f); grt.offsetMax = new Vector2(6f, 6f);
+            var gi = g.GetComponent<Image>(); gi.sprite = sp; gi.type = Image.Type.Sliced; gi.fillCenter = false; gi.raycastTarget = false;
+            gi.color = new Color(1f, 0.85f, 0.45f, 1f);
+            _pickGlows.Add(g);
+        }
+        var player = FindFirstObjectByType<DungeonGridPlayer>();
+        if (player != null) player.LockInput(this);
+    }
+
+    private void FinishPick(int cardIndex)
+    {
+        var occ = CompanionPartyPersistence.BuildMainLineOccupancy();
+        if (cardIndex < 0 || cardIndex >= occ.Length || occ[cardIndex].IsEmpty) return; // 빈 칸은 무시
+        var cb = _pickCallback;
+        EndPick();
+        cb(cardIndex);
+        Refresh();
+    }
+
+    public void EndPick()
+    {
+        bool was = _pickCallback != null;
+        _pickCallback = null;
+        if (_pickDim != null) Destroy(_pickDim);
+        _pickDim = null;
+        foreach (var g in _pickGlows) if (g != null) Destroy(g);
+        _pickGlows.Clear();
+        if (partyBar != null)
+        {
+            if (_pickRaiseRay != null) Destroy(_pickRaiseRay);
+            if (_pickRaise != null) Destroy(_pickRaise);
+            else { var c = partyBar.GetComponent<Canvas>(); if (c != null) c.overrideSorting = false; }
+        }
+        _pickRaise = null; _pickRaiseRay = null;
+        if (was) { var player = FindFirstObjectByType<DungeonGridPlayer>(); if (player != null) player.UnlockInput(this); }
+    }
+
+    private void Update2Pulse()
+    {
+        if (_pickGlows.Count == 0) return;
+        float a = 0.55f + 0.45f * Mathf.Abs(Mathf.Sin(Time.unscaledTime * 3f));
+        foreach (var g in _pickGlows) if (g != null) { var im = g.GetComponent<Image>(); var c = im.color; c.a = a; im.color = c; }
+    }
+
     /// <summary>주인공 카드 (지금 주인공이 서 있는 칸).</summary>
     public RectTransform HeroCardRect()
     {
@@ -78,6 +179,7 @@ public class DungeonPartyBar : MonoBehaviour
 
     private void Update()
     {
+        Update2Pulse(); // [2026-10-18] 대상 고르기 금테 깜빡임
         if (Time.unscaledTime < _nextRefresh) return;
         _nextRefresh = Time.unscaledTime + Mathf.Max(0.05f, refreshInterval);
         // 바뀐 게 있을 때만 다시 채운다 (주인공 최대 HP 계산은 로그를 많이 남겨서 매번 부르지 않음)
@@ -258,6 +360,8 @@ public class DungeonPartyBar : MonoBehaviour
     /// </summary>
     public void OnCardClicked(int cardIndex)
     {
+        if (_pickCallback != null) { FinishPick(cardIndex); return; } // [2026-10-18] 아이템 대상 고르는 중
+
         var occupancy = CompanionPartyPersistence.BuildMainLineOccupancy();
         int tab = (cardIndex < occupancy.Length && occupancy[cardIndex].IsHero)
             ? 0

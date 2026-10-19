@@ -316,13 +316,14 @@ public class SkillDetailPopup : MonoBehaviour
         if (descriptionText != null)
         {
             descriptionText.richText = true;
-            descriptionText.enableAutoSizing = true;
-            descriptionText.fontSizeMax = 30f;
-            descriptionText.fontSizeMin = 20f;
+            descriptionText.enableAutoSizing = false; // [2026-10-20] 줄이지 않고 스크롤 (LoreTreeStyle 의 DescScroll)
+            descriptionText.fontSize = 26f;
             descriptionText.lineSpacing = 6f;
             descriptionText.paragraphSpacing = 4f;
             descriptionText.alignment = TextAlignmentOptions.TopLeft;
             descriptionText.text = SkillTooltip.Body(currentSkillData);
+            var descScroll = descriptionText.GetComponentInParent<UnityEngine.UI.ScrollRect>();
+            if (descScroll != null) { Canvas.ForceUpdateCanvases(); descScroll.verticalNormalizedPosition = 1f; } // 맨 위부터
         }
         
         // 코스트 설정
@@ -352,6 +353,7 @@ public class SkillDetailPopup : MonoBehaviour
             
             costText.enableAutoSizing = true; costText.fontSizeMax = 26f; costText.fontSizeMin = 16f; costText.characterSpacing = 1f;
             costText.text = SkillTooltip.Subtitle(currentSkillData); // [2026-10-17] 종류 한 줄 (소모는 아래 표로)
+            SkillPositionIndicator.Refresh(transform, currentSkillData); // [2026-10-19] 사용 위치 · 목표
         }
         
         // 노드 상태에 따라 Learn 버튼 업데이트

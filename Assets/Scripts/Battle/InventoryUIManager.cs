@@ -624,17 +624,19 @@ public class InventoryUIManager : MonoBehaviour
 
         BuildConsumableStatRows(item);
         RefreshConsumablePrimaryButton(item);
+        CompactLayout(); // [2026-10-19] 디아블로식: 글자 크게, 내용 높이만큼만
     }
 
     private void BuildConsumableStatRows(ConsumableItemSO item)
     {
         if (statListContainer == null) return;
-        foreach (Transform child in statListContainer) Destroy(child.gameObject);
+        foreach (Transform child in statListContainer) { child.gameObject.SetActive(false); Destroy(child.gameObject); } // [2026-10-20] 끄고 지움 — 지우기는 프레임 끝이라, 안 끄면 창 높이 계산에 옛 줄까지 세어 창이 늘어났음
 
+        float chaliceBonus = item.isDawnChalice ? ConsumableInventory.DawnChaliceBonusPercent : 0f; // [2026-10-18] 성소 강화 포함
         if (item.hpRecoveryPercent > 0f)
-            AddStatRowFloat("HP 회복", item.hpRecoveryPercent * 100f, "%");
+            AddStatRowFloat("HP 회복", (item.hpRecoveryPercent + chaliceBonus) * 100f, "%");
         if (item.mpRecoveryPercent > 0f)
-            AddStatRowFloat("MP 회복", item.mpRecoveryPercent * 100f, "%");
+            AddStatRowFloat("MP 회복", (item.mpRecoveryPercent + chaliceBonus) * 100f, "%");
         if (item.attackBuffPercent > 0f)
             AddStatRowFloat("ATK 강화", item.attackBuffPercent * 100f, "%");
         if (item.agilityBuff != 0)
@@ -720,6 +722,7 @@ public class InventoryUIManager : MonoBehaviour
 
         BuildStatRows(item);
         RefreshPrimaryButton(item);
+        CompactLayout(); // [2026-10-19]
     }
 
     // weaponCurses + armorBreakData를 StatusEffectRow에 Instantiate
@@ -729,7 +732,7 @@ public class InventoryUIManager : MonoBehaviour
 
         // 기존 자식 제거
         foreach (Transform child in statusEffectRow)
-            Destroy(child.gameObject);
+        { child.gameObject.SetActive(false); Destroy(child.gameObject); } // [2026-10-20] 끄고 지움
 
         bool hasCurses    = item.weaponCurses != null && item.weaponCurses.Count > 0;
         // [2026-10-14] 장비에 직접 적힌 수치(armorBreakCoefficient)도 표시 — 전에는 SO가 붙은 장비만 보여 줬다
@@ -836,7 +839,7 @@ public class InventoryUIManager : MonoBehaviour
     private void BuildStatRows(EquipmentData item)
     {
         if (statListContainer == null) return;
-        foreach (Transform child in statListContainer) Destroy(child.gameObject);
+        foreach (Transform child in statListContainer) { child.gameObject.SetActive(false); Destroy(child.gameObject); } // [2026-10-20] 끄고 지움 — 지우기는 프레임 끝이라, 안 끄면 창 높이 계산에 옛 줄까지 세어 창이 늘어났음
 
         // 장착중이면 비교 없이 단독 표시, 미장착이면 현재 슬롯 장비와 비교
         EquipmentData current = IsEquipped(item) ? null : GetEquippedInSameSlot(item);
@@ -1130,6 +1133,13 @@ public class InventoryUIManager : MonoBehaviour
             return;
         }
 
+        // [2026-10-18] 던전: 혼자면 바로 주인공에게, 동료가 있으면 아래 카드에서 대상 고르기 (DungeonItemUse)
+        if (DungeonPartyBar.Instance != null)
+        {
+            DungeonItemUse.Use(item, () => PopulateDetailPanelConsumable(item));
+            return;
+        }
+
         // 아이템 사용 (새벽의 잔 분기 처리 포함)
         if (!consumableInventory.UseItem(item))
         {
@@ -1248,6 +1258,249 @@ public class InventoryUIManager : MonoBehaviour
         animCoroutine = StartCoroutine(DetailPanelAnim(show));
     }
 
+    // ═════════════════════════════════════════════════════════
+    //  [2026-10-19] 디아블로식 상세 창 — 형식(아이콘 · 이름 · 종류 · 설명 · 수치 줄 · 가격 · 버튼)은 그대로,
+    //  글자를 키우고 위에서부터 빈틈없이 쌓은 뒤 창 높이를 내용만큼으로 줄인다 (고정 1320 높이의 빈 공간 제거).
+    // ═════════════════════════════════════════════════════════
+    private const float CL_Pad = 34f, CL_Icon = 160f, CL_Row = 48f, CL_Bottom = 205f; // 아래 = 버튼 줄 자리
+    private const float CL_W = 660f; // [2026-10-19] 세로 창 폭
+    private static readonly Color CL_Dim = new Color(0.72f, 0.64f, 0.45f, 1f);
+    private bool _clReparented;
+    private RectTransform _clBodyViewport, _clBody;
+    private ScrollRect _clScroll;
+    private const float CL_MaxBody = 560f; // 몸통이 이보다 길면 스크롤
+
+    private static void CL_Top(RectTransform rt, float x, float y, float w, float h)
+    {
+        rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
+        rt.pivot = new Vector2(0f, 1f);
+        rt.anchoredPosition = new Vector2(x, y);
+        rt.sizeDelta = new Vector2(w, h);
+    }
+
+    private static void CL_Stretch(RectTransform rt, float y, float h, float side)
+    {
+        rt.anchorMin = new Vector2(0f, 1f); rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0f, y);
+        rt.sizeDelta = new Vector2(-side * 2f, h);
+    }
+
+    private void CompactLayout()
+    {
+        if (detailPanelRT == null) return;
+        var dp = detailPanelRT;
+        // 한 번만: 머리 줄 요소를 상세 창 바로 아래로 옮겨 좌표를 단순하게
+        if (!_clReparented)
+        {
+            _clReparented = true;
+            foreach (Component c in new Component[] { detailIcon, detailNameText, detailTypeText, detailDescText, qtyText, mainStatText })
+                if (c != null) c.transform.SetParent(dp, false);
+            if (priceText != null) priceText.transform.SetParent(dp, false);
+            var div1 = dp.Find("ItemInfoRow/TextGroup/Divider 1"); if (div1 != null) div1.gameObject.SetActive(false);
+            var d4 = dp.Find("Divider 4"); if (d4 != null) d4.gameObject.SetActive(false);
+            // [2026-10-19] 몸통(수치·저주·판매가)은 스크롤 칸 안 — 길면 창이 끝없이 커지지 않고 스크롤
+            var vpGo = new GameObject("BodyViewport", typeof(RectTransform), typeof(RectMask2D), typeof(Image));
+            vpGo.transform.SetParent(dp, false);
+            _clBodyViewport = (RectTransform)vpGo.transform;
+            var vimg = vpGo.GetComponent<Image>(); vimg.color = new Color(0f, 0f, 0f, 0f); vimg.raycastTarget = true;
+            var cGo = new GameObject("BodyContent", typeof(RectTransform));
+            cGo.transform.SetParent(_clBodyViewport, false);
+            _clBody = (RectTransform)cGo.transform;
+            _clBody.anchorMin = new Vector2(0f, 1f); _clBody.anchorMax = new Vector2(1f, 1f); _clBody.pivot = new Vector2(0.5f, 1f);
+            _clBody.offsetMin = _clBody.offsetMax = Vector2.zero;
+            _clScroll = vpGo.AddComponent<ScrollRect>();
+            _clScroll.content = _clBody; _clScroll.viewport = _clBodyViewport;
+            _clScroll.horizontal = false; _clScroll.vertical = true;
+            _clScroll.movementType = ScrollRect.MovementType.Clamped; _clScroll.scrollSensitivity = 30f;
+            foreach (var t in new Transform[] { mainStatText != null ? mainStatText.transform : null, statListContainer, dp.Find("Divider 3"), statusEffectRow, priceText != null ? priceText.transform : null })
+                if (t != null) t.SetParent(_clBody, false);
+        }
+        // [2026-10-19] 창 모양 = 디아블로 툴팁처럼 좁고 긴 세로 창 (가운데)
+        if (Mathf.Abs(dp.anchorMin.x - 0.5f) > 0.01f || Mathf.Abs(dp.anchorMax.x - 0.5f) > 0.01f)
+        {
+            dp.anchorMin = new Vector2(0.5f, dp.anchorMin.y); dp.anchorMax = new Vector2(0.5f, dp.anchorMax.y);
+            dp.pivot = new Vector2(0.5f, dp.pivot.y);
+        }
+        dp.sizeDelta = new Vector2(CL_W, dp.sizeDelta.y);
+        float W = CL_W;
+        float y = -CL_Pad;
+
+        // ── 머리: 그림 왼쪽 · 오른쪽에 이름 / 종류 / 설명 3줄 ── [2026-10-19 사용자 지시]
+        if (detailIcon != null) { CL_Top(detailIcon.rectTransform, CL_Pad, y, CL_Icon, CL_Icon); detailIcon.preserveAspect = true; }
+        float tx = CL_Pad + CL_Icon + 22f, tw = W - tx - CL_Pad;
+        float ty = y;
+        if (detailNameText != null)
+        {
+            detailNameText.fontSize = 42f; detailNameText.fontStyle = FontStyles.Bold;
+            detailNameText.enableAutoSizing = true; detailNameText.fontSizeMin = 26f; detailNameText.fontSizeMax = 42f;
+            detailNameText.alignment = TextAlignmentOptions.TopLeft; detailNameText.enableWordWrapping = true;
+            CL_Top(detailNameText.rectTransform, tx, ty, tw, 56f); ty -= 58f;
+        }
+        if (detailTypeText != null)
+        {
+            detailTypeText.fontSize = 26f; detailTypeText.enableAutoSizing = false; detailTypeText.color = CL_Dim;
+            detailTypeText.alignment = TextAlignmentOptions.TopLeft;
+            CL_Top(detailTypeText.rectTransform, tx, ty, tw, 34f); ty -= 40f;
+        }
+        if (detailDescText != null)
+        {
+            detailDescText.fontSize = 28f; detailDescText.enableAutoSizing = false; detailDescText.enableWordWrapping = true;
+            detailDescText.alignment = TextAlignmentOptions.TopLeft; detailDescText.lineSpacing = 2f;
+            CL_Top(detailDescText.rectTransform, tx, ty, tw, 40f);
+            detailDescText.ForceMeshUpdate();
+            float dh = string.IsNullOrEmpty(detailDescText.text) ? 0f : Mathf.Max(36f, detailDescText.preferredHeight + 4f);
+            detailDescText.rectTransform.sizeDelta = new Vector2(tw, dh);
+            ty -= dh;
+        }
+        if (qtyText != null)
+        {
+            qtyText.fontSize = 32f; qtyText.fontStyle = FontStyles.Bold; qtyText.enableAutoSizing = false;
+            qtyText.alignment = TextAlignmentOptions.BottomRight;
+            CL_Top(qtyText.rectTransform, CL_Pad, y - CL_Icon + 42f, CL_Icon - 6f, 42f); // 그림 오른쪽 아래 (그림 안)
+        }
+        y = Mathf.Min(y - CL_Icon, ty) - 18f;
+
+        // ── 구분선 ──
+        var div2 = dp.Find("Divider 2") as RectTransform;
+        if (div2 != null) { CL_Stretch(div2, y, 22f, 20f); y -= 30f; }
+
+        // ── 몸통 (스크롤 칸 안, 위에서부터) ──
+        float by = 0f;
+        float bw = W - CL_Pad * 2f;
+        if (mainStatText != null && mainStatText.gameObject.activeSelf)
+        {
+            mainStatText.fontSize = 42f; mainStatText.alignment = TextAlignmentOptions.MidlineLeft;
+            CL_Top(mainStatText.rectTransform, CL_Pad + 6f, by, bw, 56f); by -= 60f;
+        }
+
+        // 수치 줄: 디아블로처럼 "◆ 이름  값" 한 줄 글자 — 길면 다음 줄로 (칸 밖으로 잘리지 않음)
+        if (statListContainer != null)
+        {
+            var slr = (RectTransform)statListContainer;
+            var vlg = statListContainer.GetComponent<VerticalLayoutGroup>();
+            if (vlg != null) { vlg.childControlHeight = false; vlg.childForceExpandHeight = false; vlg.childControlWidth = true; vlg.childForceExpandWidth = true; }
+            float sp = vlg != null ? vlg.spacing : 0f;
+            float total = 0f; int rows = 0;
+            foreach (Transform row in statListContainer)
+            {
+                if (!row.gameObject.activeSelf) continue;
+                rows++;
+                var label = row.Find("Label") != null ? row.Find("Label").GetComponent<TextMeshProUGUI>() : null;
+                var value = row.Find("Value") != null ? row.Find("Value").GetComponent<TextMeshProUGUI>() : null;
+                bool compare = (row.Find("Current") != null && row.Find("Current").gameObject.activeSelf) || (row.Find("New") != null && row.Find("New").gameObject.activeSelf);
+                float rh = CL_Row;
+                if (label != null && value != null && value.gameObject.activeSelf && !compare)
+                {
+                    string hex = ColorUtility.ToHtmlStringRGB(value.color);
+                    label.text = $"{label.text}   <color=#{hex}>{value.text}</color>";
+                    value.gameObject.SetActive(false);
+                }
+                foreach (var t in row.GetComponentsInChildren<TextMeshProUGUI>(true)) { t.enableAutoSizing = false; t.fontSize = 30f; }
+                if (label != null && !compare)
+                {
+                    // 한 줄 글자는 행 폭을 다 쓴다 (행의 가로 배치를 끄고 꽉 채움)
+                    var hl = row.GetComponent<HorizontalLayoutGroup>(); if (hl != null) hl.enabled = false;
+                    var lrt = label.rectTransform;
+                    lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one; lrt.pivot = new Vector2(0f, 1f);
+                    lrt.offsetMin = new Vector2(12f, 0f); lrt.offsetMax = new Vector2(-8f, 0f);
+                    label.enableWordWrapping = true; label.overflowMode = TextOverflowModes.Overflow;
+                    label.alignment = TextAlignmentOptions.TopLeft;
+                    float lw = bw - 20f;
+                    rh = Mathf.Max(CL_Row, label.GetPreferredValues(label.text, lw, 0f).y + 10f);
+                }
+                var le = row.GetComponent<LayoutElement>() ?? row.gameObject.AddComponent<LayoutElement>();
+                le.preferredHeight = rh; le.minHeight = rh;
+                var rrt = row as RectTransform; if (rrt != null) rrt.sizeDelta = new Vector2(bw, rh);
+                le.preferredWidth = bw; le.flexibleWidth = 1f;
+                total += rh;
+            }
+            float lh = rows > 0 ? total + (rows - 1) * sp + (vlg != null ? vlg.padding.top + vlg.padding.bottom : 0) : 0f;
+            CL_Stretch(slr, by, lh, CL_Pad);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(slr);
+            by -= lh + (rows > 0 ? 12f : 0f);
+        }
+
+        // 저주 · 방어구 파괴 줄
+        var d3 = _clBody != null ? _clBody.Find("Divider 3") as RectTransform : null;
+        if (statusEffectRow != null && statusEffectRow.gameObject.activeSelf)
+        {
+            if (d3 != null) { d3.gameObject.SetActive(true); CL_Stretch(d3, by, 22f, 6f); by -= 30f; }
+            var ser = (RectTransform)statusEffectRow;
+            int entries = 0;
+            float rowW = bw;
+            foreach (Transform e in statusEffectRow)
+            {
+                if (!e.gameObject.activeSelf) continue;
+                entries++;
+                var ert = (RectTransform)e;
+                ert.anchorMin = ert.anchorMax = new Vector2(0f, 1f); ert.pivot = new Vector2(0f, 1f);
+                ert.sizeDelta = new Vector2(rowW, 58f);
+                var le = e.GetComponent<LayoutElement>() ?? e.gameObject.AddComponent<LayoutElement>();
+                le.preferredHeight = 58f; le.minHeight = 58f; le.preferredWidth = rowW;
+                var big = e.Find("ItemIcon"); if (big != null) big.gameObject.SetActive(false);
+                var flat = e.Find("FlatIcon") as RectTransform;
+                if (flat != null) { flat.anchorMin = flat.anchorMax = new Vector2(0f, 0.5f); flat.pivot = new Vector2(0f, 0.5f); flat.anchoredPosition = new Vector2(6f, 0f); flat.sizeDelta = new Vector2(44f, 44f); }
+                var st = e.Find("StatText") as RectTransform;
+                if (st != null)
+                {
+                    st.anchorMin = st.anchorMax = new Vector2(0f, 0.5f); st.pivot = new Vector2(0f, 0.5f);
+                    st.anchoredPosition = new Vector2(60f, 0f); st.sizeDelta = new Vector2(rowW - 66f, 52f);
+                    var stt = st.GetComponent<TextMeshProUGUI>();
+                    if (stt != null) { stt.fontSize = 28f; stt.enableAutoSizing = true; stt.fontSizeMin = 18f; stt.fontSizeMax = 28f; stt.alignment = TextAlignmentOptions.MidlineLeft; stt.enableWordWrapping = false; }
+                }
+            }
+            var svl = statusEffectRow.GetComponent<VerticalLayoutGroup>();
+            if (svl != null) { svl.childControlHeight = false; svl.childControlWidth = false; svl.childForceExpandHeight = false; svl.childAlignment = TextAnchor.UpperLeft; svl.padding = new RectOffset(0, 0, 0, 0); svl.spacing = 6f; }
+            float eh = Mathf.Max(58f, entries * 58f + Mathf.Max(0, entries - 1) * 6f);
+            CL_Stretch(ser, by, eh, CL_Pad);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(ser);
+            by -= eh + 10f;
+        }
+        else if (d3 != null) d3.gameObject.SetActive(false);
+
+        // 판매가 (오른쪽, 따로 한 줄)
+        if (priceText != null)
+        {
+            priceText.fontSize = 28f; priceText.alignment = TextAlignmentOptions.MidlineRight; priceText.color = CL_Dim;
+            if (!priceText.text.StartsWith("판매")) priceText.text = "판매가  " + priceText.text;
+            CL_Top(priceText.rectTransform, CL_Pad, by - 4f, bw, 40f); by -= 48f;
+        }
+
+        // 스크롤 칸 크기: 몸통이 길면 CL_MaxBody 까지만 보이고 나머지는 스크롤
+        float bodyH = -by;
+        if (_clBody != null && _clBodyViewport != null)
+        {
+            _clBody.sizeDelta = new Vector2(0f, bodyH);
+            float vh = Mathf.Min(bodyH, CL_MaxBody);
+            CL_Stretch(_clBodyViewport, y, vh, 0f);
+            _clScroll.enabled = bodyH > CL_MaxBody + 1f;
+            _clScroll.verticalNormalizedPosition = 1f;
+            y -= vh;
+        }
+        else y -= bodyH;
+
+        // ── 버튼: 좁은 창 안에 고르게 ──
+        var actionRow = dp.Find("ActionRow") as RectTransform;
+        if (actionRow != null)
+        {
+            float rowW = W + actionRow.sizeDelta.x;
+            var btns = new List<RectTransform>();
+            foreach (string bn in new[] { "PrimaryButton", "DiscardButton", "CancelButton" })
+            { var b = actionRow.Find(bn) as RectTransform; if (b != null && b.gameObject.activeSelf) btns.Add(b); }
+            for (int i = 0; i < btns.Count; i++)
+            {
+                float cx = (i + 0.5f) * rowW / btns.Count;
+                btns[i].anchoredPosition = new Vector2(cx - (btns[i].pivot.x - 0.5f) * btns[i].sizeDelta.x * 0f, btns[i].anchoredPosition.y);
+            }
+        }
+
+        // ── 창 높이 = 내용 + 아래 버튼 자리 ──
+        float h = -y + CL_Bottom;
+        dp.sizeDelta = new Vector2(dp.sizeDelta.x, h);
+        detailPanelHeight = h;
+    }
+
     /// <summary>[2026-10-17] 팝업 상세 창의 바닥을 캐릭터 카드(파티 바) 윗선 + 16 에 맞추는 높이. 카드를 못 찾으면 0.</summary>
     private float PopupLiftY()
     {
@@ -1259,7 +1512,10 @@ public class InventoryUIManager : MonoBehaviour
         float cardTop = parent.InverseTransformPoint(c[1]).y;           // 카드 윗선 (부모 좌표)
         float anchorY = parent.rect.yMin + parent.rect.height * detailPanelRT.anchorMin.y; // 앵커 기준선
         float bottomNow = anchorY + 0f - detailPanelRT.pivot.y * detailPanelRT.rect.height; // anchoredPosition 0 일 때 바닥
-        float lift = cardTop + 16f - bottomNow;
+        // [2026-10-19] 카드 윗선 ~ 화면 위 사이 가운데쯤 (너무 아래 붙지 않게)
+        float space = parent.rect.yMax - cardTop;
+        float gap = Mathf.Max(16f, (space - detailPanelRT.rect.height) * 0.45f);
+        float lift = cardTop + gap - bottomNow;
         return Mathf.Max(0f, lift);
     }
 
