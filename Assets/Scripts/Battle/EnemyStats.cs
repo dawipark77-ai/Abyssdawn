@@ -80,6 +80,7 @@ public class EnemyStats : MonoBehaviour
     // 런타임 UI 참조
     private Image monsterImage;
     private TextMeshProUGUI nameText;
+    private TextMeshProUGUI numberText; // [2026-10-22] 카드의 자리 번호 칸 ("No.1")
 
     private bool isDead = false;
     private Vector3 originalPosition;
@@ -181,6 +182,13 @@ public class EnemyStats : MonoBehaviour
         magResist    = so.MagResist;
         physResist   = so.PhysResist;
 
+        // [2026-10-22] 든 무기의 공격·민첩 보너스 (층 보정 전에 더함)
+        if (so.EquippedWeapon != null)
+        {
+            attack  += so.EquippedWeapon.attackBonus;
+            Agility += so.EquippedWeapon.agiBonus;
+        }
+
         // [2026-10-15] 층 보정 — 처음 나오는 층보다 한 층 깊을 때마다 공격·마력 +6%, HP +8%, EXP +5%
         //   (B1 쥐와 B5 쥐가 같으면 주인공 방어·HP 만 커져 긴장감이 사라짐). minFloor 0(보스 등 고정 배치)은 보정 없음.
         int depth = so.MinFloor > 0 ? Mathf.Max(0, DungeonPersistentData.currentFloor - so.MinFloor) : 0;
@@ -241,6 +249,9 @@ public class EnemyStats : MonoBehaviour
         Transform nameTransform = FindNamedDescendantRecursive(uiRoot, "NameText")
             ?? FindNamedDescendantRecursive(uiRoot, "Nametext");
         if (nameTransform != null) nameText = nameTransform.GetComponent<TextMeshProUGUI>();
+
+        Transform numberTransform = FindNamedDescendantRecursive(uiRoot, "Number"); // [2026-10-22]
+        if (numberTransform != null) numberText = numberTransform.GetComponent<TextMeshProUGUI>();
 
         Transform hpTransform = FindNamedDescendantRecursive(uiRoot, "HPText");
         if (hpTransform != null) hpText = hpTransform.GetComponent<TextMeshProUGUI>();
@@ -363,6 +374,7 @@ public class EnemyStats : MonoBehaviour
     // [2026-10-20] 칼등치기: 이 공격으로는 쓰러지지 않음(HP 1 남김) / HP 1 이 되어 항복하려는 상태
     [System.NonSerialized] public bool nonLethalHit;
     [System.NonSerialized] public bool surrendering;
+    [System.NonSerialized] public int focusRounds; // [2026-10-22] 슬라임 집중시키기: 남은 라운드 (전열 아군의 공격이 이 적에게)
     [System.NonSerialized] public int pommelStuns; // 자루치기로 기절시킨 횟수 (같은 적일수록 확률이 내려감)
 
     // 모아 치기(MonsterSkillData.chargeTurns) 예고 중인 스킬과 대상 — 다음 자기 턴에 발동, 스턴되면 취소
@@ -484,6 +496,7 @@ public class EnemyStats : MonoBehaviour
     public bool ApplyStatusEffectDirect(StatusEffectSO effect, int duration = 0)
     {
         if (effect == null) return false;
+        if (sourceMonster != null && sourceMonster.IsImmune(effect.effectType)) return false; // [2026-10-23] 면역
 
         int turns = duration > 0 ? duration : effect.physicalDuration;
 
@@ -576,10 +589,22 @@ public class EnemyStats : MonoBehaviour
         if (--ligamentTurns <= 0) { Agility += _ligamentLoss; _ligamentLoss = 0; }
     }
 
-    public void ProcessStatusEffectsEndOfTurn()
+    /// <summary>[2026-10-20] 지속 피해 하나만 적용 (출혈·독을 따로 보여 주려고). 실제 깎인 피해를 돌려준다. 사망 처리는 하지 않음.</summary>
+    public int ApplyDotTick(StatusEffectInstance se)
+    {
+        if (se == null || se.data == null || se.data.physicalDamagePerTurn <= 0f || currentHP <= 0) return 0;
+        int dot = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn * Mathf.Max(0f, se.damageMult)));
+        int before = currentHP;
+        currentHP = Mathf.Max(0, currentHP - dot);
+        UpdateStatusUI();
+        return before - currentHP;
+    }
+
+    /// <param name="skipDot">[2026-10-20] true = 지속 피해는 이미 ApplyDotTick 으로 넣었음 — 남은 턴만 줄이고 사망 처리</param>
+    public void ProcessStatusEffectsEndOfTurn(bool skipDot = false)
     {
         TickLigament();
-        if (activeStatusEffects.Count == 0 || currentHP <= 0 || isDead) return;
+        if (activeStatusEffects.Count == 0 || (currentHP <= 0 && !skipDot) || isDead) return; // skipDot: 지속 피해로 0이 됐어도 아래에서 사망 처리
 
         for (int i = activeStatusEffects.Count - 1; i >= 0; i--)
         {
@@ -593,7 +618,7 @@ public class EnemyStats : MonoBehaviour
                 continue;
             }
 
-            if (se.data.physicalDamagePerTurn > 0f)
+            if (!skipDot && se.data.physicalDamagePerTurn > 0f)
             {
                 int dotDamage = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn * Mathf.Max(0f, se.damageMult)));
                 currentHP = Mathf.Max(0, currentHP - dotDamage);
@@ -828,6 +853,15 @@ public class EnemyStats : MonoBehaviour
         Debug.Log($"[EnemyStats] World space UI created for {enemyName} at position {originalPosition}");
     }
 
+    /// <summary>[2026-10-22] 카드 왼쪽 위 번호 칸 — "1" → "No.1" (플레이어 카드의 No. 와 같게). 자리가 바뀌면 다시 부른다.</summary>
+    public void RefreshNumberLabel()
+    {
+        if (numberText == null) return;
+        int no = (int)currentSlot;
+        numberText.textWrappingMode = TextWrappingModes.NoWrap;
+        numberText.text = no >= 1 && no <= 7 ? $"No.{no}" : "";
+    }
+
     // 상태 UI 업데이트 (외부에서 호출)
     public void UpdateStatusUI()
     {
@@ -837,6 +871,7 @@ public class EnemyStats : MonoBehaviour
         {
             nameText.text = enemyName;
         }
+        RefreshNumberLabel();
 
         // originalPosition 기준으로 UI 위치 업데이트 (런타임 생성 UI만 위치·회전 조정)
         if (statusCanvas != null && Camera.main != null && runtimeGeneratedStatusUI)

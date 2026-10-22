@@ -69,7 +69,7 @@ public static class SaveSystem
         public List<int> openedDoors = new List<int>(); // [2026-10-17]
     }
 
-    [Serializable] public class CompanionSave { public bool empty = true; public int id; public string resourcePath; public int currentHP, currentMP; }
+    [Serializable] public class CompanionSave { public bool empty = true; public int id; public string resourcePath; public int currentHP, currentMP; public bool hpKnown; } // hpKnown: 대기 명단 HP 기록 여부 (예전 저장 = false → 가득)
     [Serializable] public class ItemSave { public string name; public int quantity; }
 
     [Serializable]
@@ -84,6 +84,7 @@ public static class SaveSystem
         public int facing;
         public float danger;
         public int lightSteps;
+        public int lastTownFloor; // [2026-10-22] 귀향의 거울 목적지 (0 = 없음)
         public List<DungeonFieldStatus.SaveEntry> fieldStatuses = new List<DungeonFieldStatus.SaveEntry>(); // 함정 상태이상 [2026-10-07]
         public List<FloorSave> floors = new List<FloorSave>();
         // 주인공
@@ -132,6 +133,7 @@ public static class SaveSystem
                 facing = (int)(player != null ? player.facing : DungeonPersistentData.lastPlayerFacing),
                 danger = DungeonPersistentData.danger,
                 lightSteps = DungeonPersistentData.playerLightSteps,
+                lastTownFloor = DungeonPersistentData.lastTownFloor,
                 fieldStatuses = DungeonFieldStatus.ToSave(),
                 heroKey = hero.playerName,
                 heroLevel = hero.level,
@@ -174,7 +176,7 @@ public static class SaveSystem
             foreach (var e in CompanionPartyPersistence.ActiveRoster)
                 d.active.Add(e == null ? new CompanionSave() : new CompanionSave { empty = false, id = e.id, resourcePath = e.resourcePath, currentHP = e.currentHP, currentMP = e.currentMP });
             foreach (var w in CompanionPartyPersistence.WaitlistPaths)
-                d.waitlist.Add(w == null ? new CompanionSave() : new CompanionSave { empty = false, id = w.id, resourcePath = w.resourcePath });
+                d.waitlist.Add(w == null ? new CompanionSave() : new CompanionSave { empty = false, id = w.id, resourcePath = w.resourcePath, currentHP = w.currentHP, currentMP = w.currentMP, hpKnown = true });
 
             var inv = ConsumableInventory.Instance;
             if (inv != null)
@@ -191,6 +193,7 @@ public static class SaveSystem
 
             File.WriteAllText(FilePath, JsonUtility.ToJson(d, true));
             Debug.Log($"[SaveSystem] 저장 완료 — B{d.currentFloor} Lv{d.heroLevel} → {FilePath}");
+            PlayLog.Saved(); // [2026-10-22]
             return true;
         }
         catch (Exception ex)
@@ -252,6 +255,7 @@ public static class SaveSystem
             DungeonPersistentData.lastPlayerFacing = (DungeonDirection)d.facing;
             DungeonPersistentData.danger = d.danger;
             DungeonPersistentData.playerLightSteps = d.lightSteps;
+            DungeonPersistentData.lastTownFloor = d.lastTownFloor;
             DungeonFieldStatus.FromSave(d.fieldStatuses);
 
             // 주인공 수치
@@ -293,7 +297,8 @@ public static class SaveSystem
             for (int i = 0; i < CompanionPartyPersistence.WaitlistPaths.Count && i < d.waitlist.Count; i++)
             {
                 var c = d.waitlist[i];
-                CompanionPartyPersistence.WaitlistPaths[i] = c.empty ? null : new CompanionPartyPersistence.WaitEntry { id = c.id, resourcePath = c.resourcePath };
+                CompanionPartyPersistence.WaitlistPaths[i] = c.empty ? null : new CompanionPartyPersistence.WaitEntry { id = c.id, resourcePath = c.resourcePath,
+                    currentHP = c.hpKnown ? c.currentHP : -1, currentMP = c.hpKnown ? c.currentMP : -1 }; // [2026-10-22] 예전 저장은 가득
             }
             CompanionPartyPersistence.heroSlotIndex = d.heroSlotIndex;
             CompanionPartyPersistence.NextCompanionId = d.nextCompanionId;
@@ -309,6 +314,7 @@ public static class SaveSystem
             EquipmentBag.Clear();
             foreach (var n in d.equipmentBag) { var e = Find<EquipmentData>(n); if (e != null) EquipmentBag.AddLoaded(e); }
             PlayerWallet.Set(d.gold);
+            PlayLog.Loaded(d.gold); // [2026-10-22] 불러온 골드는 번 돈으로 치지 않음
             BossEncounter.defeatedFloors.Clear();
             if (d.bossesDefeated != null) foreach (int f in d.bossesDefeated) BossEncounter.defeatedFloors.Add(f);
             PlayerStats.PendingLevelUpNotes.Clear();
@@ -318,7 +324,7 @@ public static class SaveSystem
 
             Debug.Log($"[SaveSystem] 불러오기 — B{d.currentFloor} Lv{d.heroLevel} ({d.savedAt}), 씬 '{d.sceneName}'");
             string scene = string.IsNullOrEmpty(d.sceneName) ? SceneManager.GetActiveScene().name : d.sceneName;
-            EncounterTransition.LoadSceneWithFade(scene);
+            EncounterTransition.LoadSceneWithFadeQueued(scene); // [2026-10-21] 타이틀→던전 전환 중이어도 버려지지 않게
             return true;
         }
         catch (Exception ex)
@@ -345,7 +351,6 @@ public static class SaveSystem
     }
 
     private static string NameOf(UnityEngine.Object o) { return o != null ? o.name : null; }
-
     private static readonly Dictionary<string, UnityEngine.Object> _cache = new Dictionary<string, UnityEngine.Object>();
 
     /// <summary>에셋 이름으로 찾기 — Resources 전체 + 이미 불러온 에셋(씬이 참조하는 스킬 등).</summary>
@@ -357,6 +362,8 @@ public static class SaveSystem
         if (_cache.TryGetValue(key, out hit) && hit != null) return hit as T;
         foreach (var o in Resources.LoadAll<T>("")) if (o != null && o.name == name) { _cache[key] = o; return o; }
         foreach (var o in Resources.FindObjectsOfTypeAll<T>()) if (o != null && o.name == name) { _cache[key] = o; return o; }
+        var reg = SaveAssetRegistry.Find<T>(name); // [2026-10-21] Resources 밖 에셋 (종의 기억 등)
+        if (reg != null) { _cache[key] = reg; return reg; }
         Debug.LogWarning($"[SaveSystem] '{name}' ({typeof(T).Name}) 에셋을 찾지 못했습니다.");
         return null;
     }

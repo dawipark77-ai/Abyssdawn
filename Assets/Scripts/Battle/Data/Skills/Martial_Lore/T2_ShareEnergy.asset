@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uAE30 \uB098\uB204\uAE30"
   skillKey: Share Energy
   skillIcon: {fileID: 21300000, guid: 39399067a645b8142af0b1bd8e0281b9, type: 3}
-  description: "[\uACA9\uD22C\uC220 \xB7 \uC561\uD2F0\uBE0C] \uC790\uC2E0\uC758 \uAE30\uB97C
+  description: "[\uACA9\uD22C\uD559 \xB7 \uC561\uD2F0\uBE0C] \uC790\uC2E0\uC758 \uAE30\uB97C
     \uB098\uB208\uB2E4. \uCD5C\uB300 HP\uC758 10%\uB97C \uC18C\uBAA8\uD574, HP \uBE44\uC728\uC774
     \uAC00\uC7A5 \uB0AE\uC740 \uB2E4\uCE5C \uB3D9\uB8CC\uC758 HP\uB97C \uADF8 \uB3D9\uB8CC
     \uCD5C\uB300 HP\uC758 20%\uB9CC\uD07C \uD68C\uBCF5. MP 4. \uB2E4\uCE5C \uB3D9\uB8CC\uAC00

@@ -73,7 +73,7 @@ public class StatusUIUpdate : MonoBehaviour
             List<Transform> slotTransforms = new List<Transform>();
             foreach (Transform child in passiveContainer)
             {
-                if (child.name.Contains("Slot"))
+                if (child.name.Contains("Slot") && !child.name.Contains("_Back")) // [2026-10-22] 뒤판 제외
                 {
                     slotTransforms.Add(child);
                 }
@@ -106,7 +106,7 @@ public class StatusUIUpdate : MonoBehaviour
             List<Transform> slotTransforms = new List<Transform>();
             foreach (Transform child in activeContainer)
             {
-                if (child.name.Contains("Slot"))
+                if (child.name.Contains("Slot") && !child.name.Contains("_Back")) // [2026-10-22] 뒤판 제외
                 {
                     slotTransforms.Add(child);
                 }

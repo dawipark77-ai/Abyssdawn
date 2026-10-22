@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uC0DD\uC874\uC220"
   skillKey: Survivalist
   skillIcon: {fileID: 21300000, guid: 0e1049a81a857794992e3667d8c62656, type: 3}
-  description: "[\uBCF4\uAE09\uC220 \xB7 \uC0C1\uC2DC \xB7 1~5\uB4F1\uAE09] \uD68C\uBCF5
+  description: "[\uBCF4\uAE09\uD559 \xB7 \uC0C1\uC2DC \xB7 1~5\uB4F1\uAE09] \uD68C\uBCF5
     \uC544\uC774\uD15C \uD6A8\uACFC Lv1 +5% \xB7 Lv2 +9% \xB7 Lv3 +13% \xB7 Lv4 +16%
     \xB7 Lv5 +20%. \uC11C\uCE58\uD560 \uB54C 5% \uD655\uB960\uB85C \uC57D\uCD08 (\uB4F1\uAE09
     \uBB34\uAD00)."

@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e4c93a1f2d4856ab09cd3e5f7081a2, type: 3}
+  m_Name: Monster_SonicWave
+  m_EditorClassIdentifier: 
+  skillID: Monster_SonicWave
+  skillName: "\uC74C\uD30C"
+  skillKey: Sonic Wave
+  skillIcon: {fileID: 21300000, guid: df11532707bc4707808b08b8c00a78e2, type: 3}
+  description: "[\uD6C4\uC5F4 3\u00B74\uBC88 \uC804\uC6A9] \uB0A0\uCE74\uB85C\uC6B4 \uCD08\uC74C\uD30C\uB85C \uC0C1\uB300 \uC804\uC6D0\uC744 \uCE5C\uB2E4. \uBBFC\uCCA9\uC758 <color=#8CFF8C>100%</color> \uD53C\uD574 (\uBA85\uC911 <color=#F5DE94>90%</color>) \u2014 \uC67C\uCABD\uBD80\uD130, \uD55C \uBA85 \uAC74\uB110 \uB54C\uB9C8\uB2E4 <color=#FF6B6B>-15%</color>\uC529 \uC57D\uD574\uC9C4\uB2E4. \uCD5C\uB300 HP\uC758 <color=#FF6B6B>8%</color> \uC18C\uBAA8."
+  usageType: 0
+  damageType: 1
+  scalingStat: 4
+  weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 12
+    allowedTargetSlots: 15
+    specificSlots: 
+  hpCostPercent: 8
+  mpCost: 0
+  minMult: 1
+  maxMult: 1
+  hitCount: 1
+  accuracy: 0.9
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 0}
+  curseApplyChance: 0
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
+  isBasicAttackOverride: 0
+  atkMultiplierOverride: 0
+  randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

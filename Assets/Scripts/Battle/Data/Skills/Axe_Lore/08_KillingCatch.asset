@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uD68C\uC218\uC758 \uC77C\uACA9"
   skillKey: Killing Catch
   skillIcon: {fileID: -8959231232942335855, guid: c4993093907b4aa48ac3078c7ea244f3, type: 3}
-  description: "[\uB3C4\uB07C\uC220 \xB7 \uD328\uC2DC\uBE0C \xB7 \uB3C4\uB07C \uC7A5\uCC29]
+  description: "[\uB3C4\uB07C\uD559 \xB7 \uD328\uC2DC\uBE0C \xB7 \uB3C4\uB07C \uC7A5\uCC29]
     (\uAC00\uCE6D) \uD68C\uC218\uC758 \uC77C\uACA9. \uB3C4\uB07C \uC9D1\uAE30 \uCD94\uAC00\uD0C0\uAC00
     10% \uD655\uB960\uB85C \uCE58\uBA85\uD0C0\uAC00 \uB41C\uB2E4."
   usageType: 1

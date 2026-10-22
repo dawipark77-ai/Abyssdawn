@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_T1_02
   skillName: "\uBCA0\uAE30"
   skillKey: Slash
-  skillIcon: {fileID: 21300000, guid: 69df82ed2574fe94e86708adc7675fdd, type: 3}
+  skillIcon: {fileID: 21300000, guid: ce967f652af54500a9aefe9c36572c7d, type: 3}
   description: "[\uAC80 \uC804\uC6A9] \uBE60\uB974\uACE0 \uC815\uD655\uD55C \uBCA0\uAE30.
     \uACF5\uACA9\uB825\uC758 120~130% \uD53C\uD574. \uBA85\uC911 95%. \uCD5C\uB300
     HP\uC758 8% \uC18C\uBAA8."
@@ -26,7 +26,7 @@ MonoBehaviour:
   targeting:
     targetFaction: 0
     allowedCasterSlots: 3
-    allowedTargetSlots: 1
+    allowedTargetSlots: 3
     specificSlots: 
   hpCostPercent: 8
   mpCost: 0

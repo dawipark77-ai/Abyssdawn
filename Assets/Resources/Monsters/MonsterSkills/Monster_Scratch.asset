@@ -15,9 +15,8 @@ MonoBehaviour:
   skillID: Monster_Scratch
   skillName: "\uD560\uD034\uAE30"
   skillKey: Scratch
-  skillIcon: {fileID: 2874756452421268667, guid: dd47eec43950c3b4e9c29a32d7980b7d, type: 3}
-  description: "2\uC5F0\uD0C0 + \uCD9C\uD608 \uBD80\uC5EC. \uD0C0\uACA9\uB9C8\uB2E4
-    \uBA85\uC911 \uB3C5\uB9BD \uD310\uC815."
+  skillIcon: {fileID: 21300000, guid: 1f2880139d0340fb85341a6318138857, type: 3}
+  description: "\uB0A0\uCE74\uB85C\uC6B4 \uBC1C\uD1B1\uC73C\uB85C <color=#8CFF8C>2</color>\uBC88 \uD560\uD038\uB2E4. \uD55C \uBC88\uC5D0 \uD798\uC758 <color=#8CFF8C>58~68%</color> \uD53C\uD574 (\uBA85\uC911 <color=#F5DE94>90%</color>, \uD0C0\uACA9\uB9C8\uB2E4 \uB530\uB85C \uD310\uC815). \uD0C0\uACA9\uB9C8\uB2E4 <color=#F5DE94>25%</color> \uD655\uB960\uB85C \uCD9C\uD608 \u2014 <color=#F5DE94>2\uD134</color> \uB3D9\uC548 \uB9E4 \uD134 \uCD5C\uB300 HP\uC758 <color=#FF6B6B>1.5%</color> \uD53C\uD574. \uCD5C\uB300 HP\uC758 <color=#FF6B6B>5%</color> \uC18C\uBAA8."
   usageType: 0
   damageType: 1
   scalingStat: 1

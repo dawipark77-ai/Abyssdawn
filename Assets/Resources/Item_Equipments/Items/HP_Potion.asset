@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: HP_Potion
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: "HP \uD3EC\uC158"
-  icon: {fileID: 6867248042669577871, guid: 2c97f8b4d39c6364299368f5888da15f, type: 3}
+  icon: {fileID: 21300000, guid: 16d43d0a406d4833acb228b9a389547a, type: 3}
   description: "\uC0B4\uC544 \uC788\uC73C\uBA74 \uB41C\uB2E4."
   itemCategory: 0
-  itemIcon: {fileID: 6867248042669577871, guid: 2c97f8b4d39c6364299368f5888da15f, type: 3}
+  itemIcon: {fileID: 21300000, guid: 16d43d0a406d4833acb228b9a389547a, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0.3
   mpRecoveryPercent: 0

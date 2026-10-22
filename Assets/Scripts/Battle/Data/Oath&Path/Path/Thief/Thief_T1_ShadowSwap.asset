@@ -27,5 +27,5 @@ MonoBehaviour:
     \uC788\uC5B4\uC57C \uC790\uC2E0\uC774 \uD6C4\uC5F4\uB85C \uC774\uB3D9\uD560 \uC218
     \uC788\uACE0,\n\uBC18\uB300 \uC0C1\uD669\uB3C4 \uB3D9\uC77C\uD55C \uC81C\uC57D\uC744
     \uBC1B\uB294\uB2E4."
-  lpCost: 2
+  lpCost: 1
   battleSkill: {fileID: 0}

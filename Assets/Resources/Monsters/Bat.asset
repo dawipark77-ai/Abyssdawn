@@ -25,7 +25,7 @@ MonoBehaviour:
   atk: 8
   def: 2
   mag: 0
-  agi: 12
+  agi: 9
   luk: 5
   physResist: 1
   magResist: 1
@@ -33,6 +33,7 @@ MonoBehaviour:
   activeSkills:
   - {fileID: 11400000, guid: a04e9f8e7ad743258b0360ef39bb46f2, type: 2}
   - {fileID: 11400000, guid: c75307f0e4fe4e7395ead00f082e8770, type: 2}
+  - {fileID: 11400000, guid: 1a43ed1246174378b322fe107a7cd678, type: 2}
   passiveSkills: []
   aiPattern: 0
   desperatePhaseThreshold: 0.5
@@ -44,5 +45,7 @@ MonoBehaviour:
   spawnWeight: 1
   expReward: 12
   goldReward: 3
-  dropTable: []
+  dropTable:
+  - item: {fileID: 11400000, guid: c6c24792a07d481bb4222fdb21649ec0, type: 2}
+    dropChance: 0.35
   companionChance: 0.125

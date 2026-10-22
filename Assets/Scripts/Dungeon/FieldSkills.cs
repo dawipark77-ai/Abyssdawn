@@ -22,6 +22,7 @@ public static class FieldSkills
     public const string LootSalvage = "Loot Salvage";
     public const string FrugalUse = "Frugal Use";
     public const string RegularCustomer = "Regular Customer";
+    public const string NaturalRecovery = "Natural Recovery"; // [2026-10-20] 걷기 회복 — 기본 기능에서 스킬로 (트리 위치 미정)
 
     // 수치 (한 곳에서 조정)
     public const float TrapDetectPassiveChance = 0.15f;   // [2026-10-09] 함정 자동 감지 확률 +25%p → +15%p

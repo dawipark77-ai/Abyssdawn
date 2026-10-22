@@ -135,8 +135,8 @@ public class BattleFxCombat : MonoBehaviour
     private const float StabFrameTime = 0.075f; // [2026-10-18] 더 느리게 (0.045 → 0.075)
 
     // [2026-10-20] 효과 크기 고정: 몬스터 그림 크기 대신 화면 높이의 일정 비율 (쥐 크기쯤). 어느 적이든 같은 크기
-    public const float FxScreenFraction = 0.19f;
-    public const float StabScreenFraction = 0.12f; // [2026-10-20] 베기 연출만 더 작게 (0.19 → 0.12)
+    public const float FxScreenFraction = 0.13f; // [2026-10-21] 기본 공격 칼선 더 작게 (0.19 → 0.13)
+    public const float StabScreenFraction = 0.07f; // [2026-10-20] 베기 연출만 더 작게 (0.19 → 0.12 → 0.07 — 칼날 길이 화면 높이 약 19%)
     private static Bounds FixedBounds(SpriteRenderer target, float fraction = FxScreenFraction)
     {
         Vector3 c = target.bounds.center;

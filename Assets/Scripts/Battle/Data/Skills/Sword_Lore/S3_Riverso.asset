@@ -19,7 +19,7 @@ MonoBehaviour:
   description: "[\uAC80 \uC804\uC6A9] \uB9CC\uB4DC\uB9AC\uD1A0\uC758 \uD30C\uC0DD\uAE30.
     \uC801 \uC804\uC5F4 \uB458\uC744 \uC67C\uCABD\uC5D0\uC11C \uC624\uB978\uCABD\uC73C\uB85C
     STR 90%\uC529 \uBCA4 \uB4A4, \uB9C8\uC9C0\uB9C9\uC73C\uB85C \uBCA4 1\uCCB4\uB97C
-    \uCE7C\uC744 \uB418\uB3CC\uB824 STR 40%\uB85C \uD55C \uBC88 \uB354 \uBCA4\uB2E4.
+    \uCE7C\uC744 \uB418\uB3CC\uB824 STR 60%\uB85C \uD55C \uBC88 \uB354 \uBCA4\uB2E4.
     \uC544\uAD70 \uC804\uC5F4(1\xB72\uBC88)\uC5D0\uC11C\uB9CC. \uCD5C\uB300 HP\uC758
     12% \uC18C\uBAA8."
   usageType: 0
@@ -82,4 +82,4 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: 93c136e16b863d842bcecfad060f578b, type: 2}
-  requiredLorePoints: 3
+  requiredLorePoints: 1

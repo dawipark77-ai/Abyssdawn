@@ -22,7 +22,7 @@ MonoBehaviour:
   level: 3
   hp: 40
   mp: 0
-  atk: 13
+  atk: 11
   def: 5
   mag: 2
   agi: 10
@@ -34,7 +34,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 439ac44eba6eaee4cbcfaa97106ceca1, type: 2}
   - {fileID: 11400000, guid: c316f46fa8569fc4dbe053ae5d40ef28, type: 2}
   - {fileID: 11400000, guid: 7e443bae661e8ba4a8a92acc380b4597, type: 2}
+  - {fileID: 11400000, guid: 4c5592c76d0904e4899bd0c452338acb, type: 2}
   passiveSkills: []
+  equippedWeapon: {fileID: 11400000, guid: 729f4137cf6d445c831ff227d8404362, type: 2}
   aiPattern: 3
   desperatePhaseThreshold: 0.5
   criticalPhaseThreshold: 0.2
@@ -45,5 +47,11 @@ MonoBehaviour:
   spawnWeight: 1
   expReward: 18
   goldReward: 8
-  dropTable: []
+  dropTable:
+  - item: {fileID: 11400000, guid: e0d8da405b906cd45a2c35baadd4a6d0, type: 2}
+    dropChance: 0.15
+  - item: {fileID: 11400000, guid: f08321c72d95a5a4c98c8b2a2d5db661, type: 2}
+    dropChance: 0.2
+  - item: {fileID: 11400000, guid: 729f4137cf6d445c831ff227d8404362, type: 2}
+    dropChance: 0.25
   companionChance: 0.0625

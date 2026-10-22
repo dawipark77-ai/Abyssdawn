@@ -197,6 +197,7 @@ public class DungeonGridPlayer : MonoBehaviour
     private void CompleteStep(Vector2Int nextPos)
     {
         gridPos = nextPos;
+        PlayLog.Step(gridPos); // [2026-10-22] 플레이 로그
         StartSlide();
         UpdateView();
 

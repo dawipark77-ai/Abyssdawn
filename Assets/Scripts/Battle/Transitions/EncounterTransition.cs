@@ -81,6 +81,19 @@ public class EncounterTransition : MonoBehaviour
         Ensure().StartCoroutine(_instance.FadeRoutine(() => SceneManager.LoadSceneAsync(buildIndex)));
     }
 
+    /// <summary>[2026-10-21] 지금 다른 전환 중이면 무시하지 않고 끝날 때까지 기다렸다가 전환한다 (세이브 불러오기용).
+    ///   타이틀 → 던전 전환이 아직 밝아지는 중에 SaveSystem.Load 가 부르면, 예전엔 요청이 버려져 Lv1 새 게임 상태로 남았다.</summary>
+    public static void LoadSceneWithFadeQueued(string sceneName)
+    {
+        Ensure().StartCoroutine(_instance.WaitThenFade(sceneName));
+    }
+
+    private IEnumerator WaitThenFade(string sceneName)
+    {
+        while (IsPlaying) yield return null;
+        yield return FadeRoutine(() => SceneManager.LoadSceneAsync(sceneName));
+    }
+
     // ─────────────────────────────────────────
     // 흐름
     // ─────────────────────────────────────────

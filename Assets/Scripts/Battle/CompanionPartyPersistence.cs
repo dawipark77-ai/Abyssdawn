@@ -28,6 +28,14 @@ public static class CompanionPartyPersistence
     {
         public int id;
         public string resourcePath;
+        // [2026-10-22] 대기 중에도 HP/MP 를 기억한다 — 쓰러진 동료를 대기 명단에 넣었다 빼면 HP 가 가득 차던 문제 (안치소 우회).
+        //   -1 = 기록 없음 → 가득 (예전 저장 파일·새로 영입한 동료)
+        public int currentHP = -1;
+        public int currentMP = -1;
+
+        /// <summary>실제 HP (-1 이면 최대 HP).</summary>
+        public int HPOr(int max) => currentHP < 0 ? max : Mathf.Clamp(currentHP, 0, max);
+        public int MPOr(int max) => currentMP < 0 ? max : Mathf.Clamp(currentMP, 0, max);
     }
 
     // [2026-05-25 ID 1단계] 동료 개체 ID 순차 카운터. 발급 시마다 ++.
@@ -43,7 +51,7 @@ public static class CompanionPartyPersistence
     }
 
     public const int MaxActive = 3;
-    public const int MaxWaitlist = 3;
+    public const int MaxWaitlist = 4; // [2026-10-22] 3 → 4
 
     // [2026-05-25 고정 3칸] ActiveRoster는 항상 Count==MaxActive(3) 고정. 각 칸은 Entry 또는 null.
     //   - ActiveRoster[0]=슬롯0(Companion_SLot2), [1]=슬롯1(Slot3), [2]=슬롯2(Slot4) — 인덱스=슬롯 고정.
@@ -171,7 +179,7 @@ public static class CompanionPartyPersistence
         {
             // [2단계] 대기열도 id 발급 (_nextCompanionId 공유 → 활성·대기 전역 유일)
             int waitId = _nextCompanionId++;
-            WaitlistPaths[waitSlot] = new WaitEntry { id = waitId, resourcePath = path };
+            WaitlistPaths[waitSlot] = new WaitEntry { id = waitId, resourcePath = path, currentHP = currentHP, currentMP = currentMP };
             Debug.Log($"[Companion-ID] 발급(대기열): resourcePath='{path}', id={waitId} (TryAddActive 대기열, slot={waitSlot})");
             return false;
         }
@@ -291,7 +299,7 @@ public static class CompanionPartyPersistence
 
         // 활성→대기: Entry → WaitEntry (HP/MP 버림)
         WaitEntry newWait = (a != null)
-            ? new WaitEntry { id = a.id, resourcePath = a.resourcePath }
+            ? new WaitEntry { id = a.id, resourcePath = a.resourcePath, currentHP = a.currentHP, currentMP = a.currentMP } // [2026-10-22] HP 그대로
             : null;
 
         // 대기→활성: WaitEntry → Entry (풀피)
@@ -299,8 +307,8 @@ public static class CompanionPartyPersistence
         if (w != null)
         {
             var so = LoadCompanion(w.resourcePath);
-            int hp = (so != null) ? so.HP : 0;
-            int mp = (so != null) ? so.MP : 0;
+            int hp = (so != null) ? w.HPOr(so.HP) : 0; // [2026-10-22] 대기 중 HP 그대로 (쓰러졌으면 쓰러진 채로)
+            int mp = (so != null) ? w.MPOr(so.MP) : 0;
             if (so == null)
                 Debug.LogWarning($"[Swap] SwapActiveWait: CompanionSO 로드 실패 '{w.resourcePath}' → HP/MP 0으로 승격");
             newActive = new Entry { id = w.id, resourcePath = w.resourcePath, currentHP = hp, currentMP = mp };
@@ -308,7 +316,7 @@ public static class CompanionPartyPersistence
 
         ActiveRoster[activeIndex] = newActive;
         WaitlistPaths[waitIndex] = newWait;
-        Debug.Log($"[Swap] 활성↔대기 — ActiveRoster[{activeIndex}] ↔ WaitlistPaths[{waitIndex}] (활성→대기 HP버림, 대기→활성 풀피)");
+        Debug.Log($"[Swap] 활성↔대기 — ActiveRoster[{activeIndex}] ↔ WaitlistPaths[{waitIndex}] (HP·MP 유지)");
         return true;
     }
 

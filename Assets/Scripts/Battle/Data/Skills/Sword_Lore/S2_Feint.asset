@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_S2_Feint
   skillName: "\uD398\uC778\uD2B8"
   skillKey: Feint
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 66926becaea20924b9a5a5be1d1a08cd, type: 3}
   description: "[\uAC80 \uC804\uC6A9] 2\uD0C0. 1\uD0C0\uB294 \uC77C\uBD80\uB7EC \uBE57\uB9DE\uD600
     \uC18D\uC774\uACE0, 2\uD0C0\uB294 \uBC18\uB4DC\uC2DC \uBA85\uC911. STR 70%, \uCE58\uBA85
     +15%. \uCD5C\uB300 HP\uC758 5% \uC18C\uBAA8."
@@ -79,4 +79,4 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: 2a916594b5ec46244b130f78b7a63d1b, type: 2}
-  requiredLorePoints: 2
+  requiredLorePoints: 1

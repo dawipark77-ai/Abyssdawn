@@ -18,6 +18,9 @@ public static class SkillTooltip
 
     private static readonly Regex LeadingTag = new Regex(@"^\s*\[([^\]]*)\]\s*");
 
+    /// <summary>[2026-10-21] 선행 스킬 이름 앞 아이콘 자리 폭 (em)</summary>
+    public const float PrereqIconEm = 1.35f;
+
     /// <summary>종류 한 줄 (이름 바로 아래, 흐린 글자).</summary>
     public static string Subtitle(SkillData s)
     {
@@ -71,8 +74,14 @@ public static class SkillTooltip
         // ④ 조건
         if (s.prerequisiteSkills != null && s.prerequisiteSkills.Count > 0)
         {
+            // [2026-10-21] 이름 앞에 작은 아이콘 자리 (<space>) — 아이콘은 SkillDetailPopup 이 link "pre{i}" 위치에 그린다
             var names = new List<string>();
-            foreach (var p in s.prerequisiteSkills) if (p != null) names.Add(p.skillName);
+            for (int i = 0; i < s.prerequisiteSkills.Count; i++)
+            {
+                var p = s.prerequisiteSkills[i];
+                if (p == null) continue;
+                names.Add(p.skillIcon != null ? "<space=" + PrereqIconEm + "em><link=\"pre" + i + "\">" + p.skillName + "</link>" : p.skillName);
+            }
             if (names.Count > 0) sb.Append("\n<size=85%><color=").Append(Muted).Append(">선행: ").Append(string.Join(", ", names.ToArray())).Append("</color></size>");
         }
         return sb.ToString().TrimEnd('\n');
@@ -167,6 +176,21 @@ public static class SkillTooltip
         text = Plus.Replace(text, m => C(Good, m.Value));
         text = Minus.Replace(text, m => C(Bad, m.Value));
         text = Pct.Replace(text, m => C(Gold, m.Value));
+        return text;
+    }
+
+    // [2026-10-22] 몬스터 스킬 설명 — 플레이어 설명처럼 + 초록 / - 빨강, 거기에 "N% 회복" 초록 · "N% 소모" 빨강
+    private static readonly Regex HealPct = new Regex(@"\d+(?:\.\d+)?%(?=\s*회복)");
+    private static readonly Regex CostPct = new Regex(@"\d+(?:\.\d+)?%(?=\s*소모)");
+
+    public static string ColorMonsterNumbers(string text)
+    {
+        if (string.IsNullOrEmpty(text) || text.IndexOf('<') >= 0) return text;
+        text = HealPct.Replace(text, m => C(Good, m.Value));
+        text = CostPct.Replace(text, m => C(Bad, m.Value));
+        text = Plus.Replace(text, m => C(Good, m.Value));
+        text = Minus.Replace(text, m => C(Bad, m.Value));
+        text = Pct.Replace(text, m => C(Gold, m.Value)); // 이미 칠한 숫자는 '>' 뒤라 건너뜀
         return text;
     }
 }

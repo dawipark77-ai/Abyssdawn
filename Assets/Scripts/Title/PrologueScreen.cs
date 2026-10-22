@@ -537,7 +537,7 @@ public class PrologueScreen : MonoBehaviour
         for (int i = 0; i < job.oaths.Count; i++)
         {
             var o = job.oaths[i];
-            var row = ChoiceRow(list, i, null, o.oathName, $"{o.oathDescription}\n<color=#FF9F6B>{T("제약", "Binding")}: {o.bindingDescription}</color>", "", out _);
+            var row = ChoiceRow(list, i, o.oathIcon, o.oathName, $"{o.oathDescription}\n<color=#FF9F6B>{T("제약", "Binding")}: {o.bindingDescription}</color>", "", out _);
             row.onClick.AddListener(() => { PlaceCursor(cursor, (RectTransform)row.transform, 38f); tapped = o; ShowMessage(OathDetail(o)); });
             _choiceNav.Add(row);
         }

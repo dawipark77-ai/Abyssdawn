@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Mana_Potion
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: "\uB9C8\uB098 \uD3EC\uC158"
-  icon: {fileID: 6276969351316911035, guid: a1d45d86f88e8f04ebe1ea81ee6b2d6f, type: 3}
+  icon: {fileID: 21300000, guid: bb32155d074346dab2eb7635cc7deb13, type: 3}
   description: "\uD798\uC774 \uB3CC\uC544\uC628\uB2E4. \uC7A0\uAE50\uC774\uC9C0\uB9CC."
   itemCategory: 3
-  itemIcon: {fileID: 6276969351316911035, guid: a1d45d86f88e8f04ebe1ea81ee6b2d6f, type: 3}
+  itemIcon: {fileID: 21300000, guid: bb32155d074346dab2eb7635cc7deb13, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0
   mpRecoveryPercent: 0.3

@@ -197,7 +197,8 @@ public class AutomapRenderer : MonoBehaviour
             if (gridColor.a > 0f) AddFloorGrid(cs);
 
             // 1-0) [2026-10-09] 벽 너머(바위)·아직 모르는 칸은 배경 그림이 비치지 않게 완전히 검게 (벽선은 이 위에 그려짐)
-            if (_light != null && !_overview && hiddenBackingColor.a > 0f)
+            //      [2026-10-21] 전체 지도에서도 — 예전엔 벽선 바깥(벽 칸)의 배경 그림이 비쳐 지도 밖 타일이 보였다
+            if ((_light != null || _overview) && hiddenBackingColor.a > 0f)
                 for (int x = 0; x < _data.width; x++)
                     for (int y = 0; y < _data.height; y++)
                     {

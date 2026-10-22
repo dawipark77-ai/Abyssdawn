@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: CombatArts_T4_Focus
   skillName: "\uC9D1\uC911"
   skillKey: Focus
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: cef6e44d19f243dda98e81c21721823b, type: 3}
   description: "[\uC561\uD2F0\uBE0C \xB7 \uCFE8\uB2E4\uC6B4 4\uD134] \uC815\uC2E0\uC744
     \uAC00\uB2E4\uB4EC\uB294\uB2E4. 3\uD134 \uB3D9\uC548 \uD68C\uD53C +20%, \uBA85\uC911
     +20%. \uC774\uBC88 \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0 \uC54A\uB294\uB2E4."

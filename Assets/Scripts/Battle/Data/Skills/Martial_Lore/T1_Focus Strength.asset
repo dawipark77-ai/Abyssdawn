@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uAE30 \uBAA8\uC73C\uAE30"
   skillKey: Focus Strength
   skillIcon: {fileID: 21300000, guid: 141e3bd75269e5e4bb848c0a16b576e9, type: 3}
-  description: "[\uACA9\uD22C\uC220 \xB7 \uC561\uD2F0\uBE0C \xB7 \uD55C \uC190\uC774
+  description: "[\uACA9\uD22C\uD559 \xB7 \uC561\uD2F0\uBE0C \xB7 \uD55C \uC190\uC774
     \uBE44\uC5B4 \uC788\uC5B4\uC57C \uD568] \uD55C \uD134 \uB3D9\uC548 \uAE30\uB97C
     \uBAA8\uC740\uB2E4. \uB2E4\uC74C \uD134 \uACF5\uACA9 \uC704\uB825 \xD72. \uC774\uBC88
     \uD134\uC5D0\uB294 \uACF5\uACA9\uD558\uC9C0 \uC54A\uB294\uB2E4. MP 3."

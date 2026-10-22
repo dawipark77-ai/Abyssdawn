@@ -83,7 +83,13 @@ public class EnemyStatusPanel : MonoBehaviour
     private void Awake()
     {
         BringToFront();
-        if (closeButton != null) closeButton.onClick.AddListener(Hide);
+        if (closeButton != null)
+        {
+            closeButton.onClick.AddListener(Hide);
+            // [2026-10-22] 씬에 "Button" 기본 글자로 남아 있던 것 → "닫기"
+            foreach (var t in closeButton.GetComponentsInChildren<TMPro.TMP_Text>(true)) t.text = "닫기";
+            foreach (var t in closeButton.GetComponentsInChildren<UnityEngine.UI.Text>(true)) t.text = "닫기";
+        }
         if (hideOnAwake) Root.SetActive(false);
     }
 

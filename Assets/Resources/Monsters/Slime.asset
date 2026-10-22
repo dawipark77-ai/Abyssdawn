@@ -20,7 +20,7 @@ MonoBehaviour:
   race: 0
   basicAttackOverride: {fileID: 0}
   level: 4
-  hp: 50
+  hp: 60
   mp: 0
   atk: 12
   def: 12
@@ -32,10 +32,16 @@ MonoBehaviour:
   statusResist: 1
   activeSkills:
   - {fileID: 11400000, guid: 21a6501fa77f475997a7f33ea21db64c, type: 2}
+  - {fileID: 11400000, guid: 2a9e3e1293ab4f67b5c5024e2d2ecf02, type: 2}
+  - {fileID: 11400000, guid: 6b3f8e8e0f5648908d036dd120d0e76b, type: 2}
+  - {fileID: 11400000, guid: 33ae866801434301a845955ec529b11b, type: 2}
   passiveSkills: []
+  equippedWeapon: {fileID: 0}
+  statusImmunities: 02000000
   aiPattern: 0
   desperatePhaseThreshold: 0.5
   criticalPhaseThreshold: 0.2
+  fleeWeightMultiplier: 0.05
   rowPreference: 1
   allowedSlots: 0
   minFloor: 4
@@ -43,5 +49,7 @@ MonoBehaviour:
   spawnWeight: 1
   expReward: 24
   goldReward: 10
-  dropTable: []
+  dropTable:
+  - item: {fileID: 11400000, guid: 9f17eb79895c4c15a18a735f768ed984, type: 2}
+    dropChance: 0.1
   companionChance: 0.125

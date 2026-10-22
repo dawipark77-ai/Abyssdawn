@@ -122,7 +122,7 @@ public class NewSkillDetailPopup : MonoBehaviour
             mpCostText.text = data.mpCost > 0 ? $"MP {data.mpCost}" : "MP 0";
 
         if (lpCostText != null)
-            lpCostText.text = $"LP {data.requiredLorePoints}";
+            lpCostText.text = $"SP {data.requiredLorePoints}";
 
         if (hitCountText != null)
             hitCountText.text = data.hitCount > 1 ? $"{data.hitCount}타" : "단타";
@@ -164,7 +164,7 @@ public class NewSkillDetailPopup : MonoBehaviour
         learnButton.interactable = available;
 
         if (learnButtonLabel != null)
-            learnButtonLabel.text = learned ? "습득됨" : "습득";
+            learnButtonLabel.text = learned ? "기억했다" : "기억하기";
 
         var colors = learnButton.colors;
         colors.normalColor   = learned ? AlreadyLearnedColor : available ? LearnableColor : UnlearnableColor;

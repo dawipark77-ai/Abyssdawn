@@ -59,6 +59,24 @@ namespace AbyssdawnBattle
         [Tooltip("부작용 지속 턴 (던전에서는 한 걸음 = 1턴)")]
         public int sideEffectTurns = 3;
 
+        [Header("Light (2026-10-22) — 횃불")]
+        [Tooltip("던전에서 쓰면 이 걸음 수 동안 빛을 든다 (시야 3 → 5칸, 함정 감지 ↑). 0 = 빛 아이템 아님")]
+        public int lightSteps = 0;
+
+        [Header("Return (2026-10-22) — 귀향의 거울")]
+        [Tooltip("던전에서 쓰면 가장 가까운 위쪽 마을 층의 마을 문 앞으로 돌아가 마을을 연다")]
+        public bool returnsToTown = false;
+
+        [Header("Revive (2026-10-22) — 쓰러진 아군을 되살림")]
+        [Tooltip("쓰러진(HP 0) 아군을 최대 HP 의 이 비율로 되살린다. 0 = 부활 아이템 아님. 살아 있는 아군에게는 쓸 수 없다")]
+        [Range(0f, 1f)] public float reviveHpPercent = 0f;
+
+        /// <summary>[2026-10-22] 잡템 — 쓸 수 없고 팔기만 하는 물건 (쥐뼈 · 박쥐 날개 · 함정 부품 등). 아이템 창에는 안 보이고 상점 팔기에만 나온다.</summary>
+        public bool IsJunk => !usableInBattle && !usableOnMap && !isDawnChalice && !isPermanent;
+
+        /// <summary>부활 아이템인지 (쓰러진 아군에게만 쓴다).</summary>
+        public bool IsRevive => reviveHpPercent > 0f;
+
         [Header("Loot (2026-10-08)")]
         [Tooltip("켜면 보물상자에서 나오지 않음 (예: 정화수 — 너무 강해 일단 뺌)")]
         public bool excludeFromChests = false;

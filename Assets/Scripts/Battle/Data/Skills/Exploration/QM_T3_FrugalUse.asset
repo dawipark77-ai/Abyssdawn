@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uC54C\uB730\uD55C \uC0AC\uC6A9"
   skillKey: Frugal Use
   skillIcon: {fileID: 0}
-  description: "[\uBCF4\uAE09\uC220 \xB7 \uC0C1\uC2DC] \uD68C\uBCF5\xB7\uD574\uB3C5
+  description: "[\uBCF4\uAE09\uD559 \xB7 \uC0C1\uC2DC] \uD68C\uBCF5\xB7\uD574\uB3C5
     \uC544\uC774\uD15C\uC744 \uC4F8 \uB54C 15% \uD655\uB960\uB85C \uC18C\uBAA8\uB418\uC9C0
     \uC54A\uC74C (\uC0C8\uBCBD\uC758 \uC794 \uC81C\uC678)."
   usageType: 2

@@ -35,6 +35,9 @@ namespace AbyssdawnBattle
         [Tooltip("해당 서약이 속한 직업")]
         public JobClassType jobClass;
 
+        [Tooltip("[2026-10-22] 서약 아이콘 (프롤로그 서약 고르기 · 서약&패스 창)")]
+        public Sprite oathIcon;
+
         [Header("서약 설명")]
         [Tooltip("서약 효과에 대한 상세 설명 (UI 표기용)")]
         [TextArea(3, 6)]

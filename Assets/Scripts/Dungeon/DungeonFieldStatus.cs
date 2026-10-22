@@ -50,7 +50,7 @@ public static class DungeonFieldStatus
     public static event Action OnChanged;
 
     public static bool Has(StatusEffectType type) => _left.ContainsKey(type);
-    public static bool Any => _left.Count > 0;
+    public static bool Any => _left.Count > 0 || _comp.Count > 0; // [2026-10-21] 동료 것도 있으면 걸음마다 진행
 
     /// <summary>[2026-10-08] 지금 걸린 던전 상태이상의 아이콘 (전투용 상태이상 에셋의 아이콘을 그대로 씀). 상태 창·파티 바 표시용.</summary>
     public static List<KeyValuePair<StatusEffectType, Sprite>> ActiveIcons()
@@ -116,11 +116,131 @@ public static class DungeonFieldStatus
 
     public static void Clear()
     {
-        if (_left.Count == 0) return;
+        if (_left.Count == 0 && _comp.Count == 0) return;
         _left.Clear();
         _walked.Clear();
         _everyOverride.Clear();
+        _comp.Clear(); // [2026-10-21] 동료 것도
         OnChanged?.Invoke();
+    }
+
+    // ─────────────────────────────────────────
+    // [2026-10-21] 동료 상태이상 — 전투에서 걸린 출혈·독·점화·실명이 남은 턴만큼 맵에서도 이어진다.
+    //   동료 고유 번호(CompanionPartyPersistence.Entry.id) 별로. 한 걸음 = 1턴, 매 턴 피해 (주인공 규칙과 같은 % · 동료 최대 HP 기준).
+    //   다음 전투가 시작되면 남은 턴을 다시 건다. 동료 HP 가 0 이 되면 쓰러진다 (주인공과 달리 게임 오버는 아님).
+    // ─────────────────────────────────────────
+    private class CompStat { public int left, walked, every; }
+    private static readonly Dictionary<int, Dictionary<StatusEffectType, CompStat>> _comp = new Dictionary<int, Dictionary<StatusEffectType, CompStat>>();
+
+    /// <summary>전투 → 맵으로 넘기는 상태이상 종류.</summary>
+    public static readonly StatusEffectType[] CarriedTypes = { StatusEffectType.Bleed, StatusEffectType.Poison, StatusEffectType.Ignite, StatusEffectType.Blind };
+
+    public static bool CompanionHas(int id, StatusEffectType type) { Dictionary<StatusEffectType, CompStat> d; return _comp.TryGetValue(id, out d) && d.ContainsKey(type); }
+
+    /// <summary>[2026-10-23] 고유 번호로 동료 몬스터를 찾아 면역인지 (파티 · 대기 모두)</summary>
+    private static bool CompanionImmune(int id, StatusEffectType type)
+    {
+        string path = null;
+        foreach (var e in CompanionPartyPersistence.ActiveRoster) if (e != null && e.id == id) { path = e.resourcePath; break; }
+        if (path == null) foreach (var w in CompanionPartyPersistence.WaitlistPaths) if (w != null && w.id == id) { path = w.resourcePath; break; }
+        var so = path != null ? CompanionPartyPersistence.LoadCompanion(path) : null;
+        return so != null && so.IsImmune(type);
+    }
+
+    public static void AddCompanion(int id, StatusEffectType type, int turns, int every = 1)
+    {
+        if (id == 0 || turns <= 0 || !Rules.ContainsKey(type)) return;
+        if (CompanionImmune(id, type)) return; // [2026-10-23] 면역 (슬라임 = 독)
+        Dictionary<StatusEffectType, CompStat> d;
+        if (!_comp.TryGetValue(id, out d)) { d = new Dictionary<StatusEffectType, CompStat>(); _comp[id] = d; }
+        d[type] = new CompStat { left = turns, walked = 0, every = Mathf.Max(0, every) };
+        OnChanged?.Invoke();
+    }
+
+    public static void RemoveCompanion(int id, StatusEffectType type)
+    {
+        Dictionary<StatusEffectType, CompStat> d;
+        if (_comp.TryGetValue(id, out d) && d.Remove(type)) { if (d.Count == 0) _comp.Remove(id); OnChanged?.Invoke(); }
+    }
+
+    public static void ClearCompanion(int id)
+    {
+        if (_comp.Remove(id)) OnChanged?.Invoke();
+    }
+
+    /// <summary>동료 카드 아이콘용.</summary>
+    public static List<KeyValuePair<StatusEffectType, Sprite>> CompanionIcons(int id)
+    {
+        var list = new List<KeyValuePair<StatusEffectType, Sprite>>();
+        Dictionary<StatusEffectType, CompStat> d;
+        if (!_comp.TryGetValue(id, out d)) return list;
+        foreach (var type in d.Keys)
+        {
+            var so = BattleAssetFor(type);
+            list.Add(new KeyValuePair<StatusEffectType, Sprite>(type, so != null ? (so.flatIcon != null ? so.flatIcon : so.itemIcon) : null));
+        }
+        return list;
+    }
+
+    /// <summary>전투 시작: 이 동료에게 남은 맵 상태이상을 전투 상태이상으로 다시 건다. 걸린 이름 목록.</summary>
+    public static List<string> ApplyToBattleCompanion(PlayerStats ally)
+    {
+        var applied = new List<string>();
+        Dictionary<StatusEffectType, CompStat> d;
+        if (ally == null || ally.companionId == 0 || !_comp.TryGetValue(ally.companionId, out d)) return applied;
+        foreach (var kv in d)
+        {
+            var so = BattleAssetFor(kv.Key);
+            if (so != null && ally.ApplyStatusEffect(so, Mathf.Max(1, kv.Value.left))) applied.Add(Rules[kv.Key].name);
+        }
+        return applied;
+    }
+
+    /// <summary>전투 끝: 동료의 전투 상태이상이 진짜 — 이전 맵 기록을 지우고 남은 턴으로 다시 적는다. 쓰러졌으면 모두 지운다.</summary>
+    public static void CarryFromBattleCompanion(PlayerStats ally)
+    {
+        if (ally == null || ally.companionId == 0) return;
+        _comp.Remove(ally.companionId);
+        if (ally.currentHP > 0 && ally.activeStatusEffects != null)
+            foreach (var type in CarriedTypes)
+            {
+                var se = ally.activeStatusEffects.Find(e => e != null && e.data != null && e.data.effectType == type);
+                if (se != null && se.remainingTurns > 0) AddCompanion(ally.companionId, type, se.remainingTurns, 1);
+            }
+        OnChanged?.Invoke();
+    }
+
+    /// <summary>한 걸음: 동료 상태이상 진행 + 피해. 없어진 동료(내보냄·대기열로 감) 기록은 정리.</summary>
+    private static string TickCompanions()
+    {
+        if (_comp.Count == 0) return null;
+        string msg = null;
+        foreach (int id in new List<int>(_comp.Keys))
+        {
+            CompanionPartyPersistence.Entry entry = null;
+            foreach (var e in CompanionPartyPersistence.ActiveRoster) if (e != null && e.id == id) { entry = e; break; }
+            var so = entry != null ? CompanionPartyPersistence.LoadCompanion(entry.resourcePath) : null;
+            if (entry == null || so == null || entry.currentHP <= 0) { _comp.Remove(id); continue; }
+            var d = _comp[id];
+            foreach (var type in new List<StatusEffectType>(d.Keys))
+            {
+                Rule r = Rules[type];
+                CompStat st = d[type];
+                st.walked++;
+                int every = st.every > 0 ? st.every : r.every;
+                if (every > 0 && r.percent > 0f && st.walked % every == 0 && entry.currentHP > 0)
+                {
+                    int dmg = Mathf.Max(1, Mathf.RoundToInt(so.HP * r.percent));
+                    int before = entry.currentHP;
+                    entry.currentHP = Mathf.Max(0, before - dmg);
+                    if (before > entry.currentHP)
+                        msg = (msg == null ? "" : msg + "  ") + $"{so.MonsterName} <color={r.color}>{r.name} -{before - entry.currentHP}</color>" + (entry.currentHP <= 0 ? " <color=#FF4A4A>쓰러졌다!</color>" : "");
+                }
+                if (--st.left <= 0) d.Remove(type);
+            }
+            if (d.Count == 0 || entry.currentHP <= 0) _comp.Remove(id);
+        }
+        return msg;
     }
 
     /// <summary>
@@ -128,8 +248,13 @@ public static class DungeonFieldStatus
     /// </summary>
     public static string TickStep(PlayerStats hero)
     {
-        if (_left.Count == 0 || hero == null) return null;
-        string msg = null;
+        string compMsg = TickCompanions(); // [2026-10-21] 동료 상태이상
+        if (_left.Count == 0 || hero == null)
+        {
+            if (compMsg != null) OnChanged?.Invoke();
+            return compMsg;
+        }
+        string msg = compMsg;
         int total = 0;
         var keys = new List<StatusEffectType>(_left.Keys);
         foreach (var type in keys)
@@ -203,7 +328,8 @@ public static class DungeonFieldStatus
     }
 
     // ── 저장 ──
-    [Serializable] public class SaveEntry { public int type, left, walked, every; } // every 0 = 기본 규칙
+    // companion 0 = 주인공, 그 외 = 동료 고유 번호 [2026-10-21] (예전 저장엔 없음 → 0 = 주인공)
+    [Serializable] public class SaveEntry { public int type, left, walked, every, companion; } // every 0 = 기본 규칙
 
     public static List<SaveEntry> ToSave()
     {
@@ -211,6 +337,9 @@ public static class DungeonFieldStatus
         foreach (var kv in _left)
             list.Add(new SaveEntry { type = (int)kv.Key, left = kv.Value, walked = _walked.TryGetValue(kv.Key, out int w) ? w : 0,
                                      every = _everyOverride.TryGetValue(kv.Key, out int ev) ? ev : 0 });
+        foreach (var c in _comp)
+            foreach (var kv in c.Value)
+                list.Add(new SaveEntry { type = (int)kv.Key, left = kv.Value.left, walked = kv.Value.walked, every = kv.Value.every, companion = c.Key });
         return list;
     }
 
@@ -219,11 +348,19 @@ public static class DungeonFieldStatus
         _left.Clear();
         _walked.Clear();
         _everyOverride.Clear();
+        _comp.Clear();
         if (list != null)
             foreach (var e in list)
             {
                 var t = (StatusEffectType)e.type;
                 if (!Rules.ContainsKey(t)) continue;
+                if (e.companion != 0)
+                {
+                    Dictionary<StatusEffectType, CompStat> d;
+                    if (!_comp.TryGetValue(e.companion, out d)) { d = new Dictionary<StatusEffectType, CompStat>(); _comp[e.companion] = d; }
+                    d[t] = new CompStat { left = e.left, walked = e.walked, every = e.every };
+                    continue;
+                }
                 _left[t] = e.left;
                 _walked[t] = e.walked;
                 if (e.every > 0) _everyOverride[t] = e.every;

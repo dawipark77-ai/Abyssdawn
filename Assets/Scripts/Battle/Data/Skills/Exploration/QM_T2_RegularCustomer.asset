@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uB2E8\uACE8\uC190\uB2D8"
   skillKey: Regular Customer
   skillIcon: {fileID: 0}
-  description: "[\uBCF4\uAE09\uC220 \xB7 \uC0C1\uC2DC \xB7 1~5\uB4F1\uAE09] \uC5EC\uAD00
+  description: "[\uBCF4\uAE09\uD559 \xB7 \uC0C1\uC2DC \xB7 1~5\uB4F1\uAE09] \uC5EC\uAD00
     \uD560\uC778 Lv1 10% \xB7 Lv2 15% \xB7 Lv3 25% \xB7 Lv4 35% \xB7 Lv5 50%. \uC5EC\uAD00\uC5D0\uC11C
     \uC26C\uACE0 \uB098\uAC00\uBA74 \uB2E4\uC74C \uCE35 \uCCAB 3\uBC88\uC758 \uC804\uD22C
     \uB3D9\uC548 \uCD5C\uB300 HP\xB7MP Lv1 +3% \xB7 Lv2 +5% \xB7 Lv3 +6% \xB7 Lv4

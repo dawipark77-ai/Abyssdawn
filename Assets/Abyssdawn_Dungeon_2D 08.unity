@@ -18824,7 +18824,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: LP 1
+  m_text: SP 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 0}
   m_sharedMaterial: {fileID: 0}
@@ -29413,7 +29413,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -179.51, y: -873.67}
-  m_SizeDelta: {x: 112.47, y: 98.682}
+  m_SizeDelta: {x: 112.47, y: 85.682}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &378839156
 MonoBehaviour:
@@ -53960,7 +53960,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -65.51, y: -873.67}
-  m_SizeDelta: {x: 116.6232, y: 98.6799}
+  m_SizeDelta: {x: 116.6232, y: 85.6799}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &704431175
 MonoBehaviour:
@@ -64428,7 +64428,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -519, y: -874}
-  m_SizeDelta: {x: 112.46, y: 99.308}
+  m_SizeDelta: {x: 112.46, y: 86.308}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &827032900
 MonoBehaviour:
@@ -81679,7 +81679,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -294.06, y: -873.99}
-  m_SizeDelta: {x: 112.4755, y: 99.329}
+  m_SizeDelta: {x: 112.4755, y: 86.329}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1054553580
 MonoBehaviour:
@@ -83003,7 +83003,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1070246426
 RectTransform:
   m_ObjectHideFlags: 0
@@ -105822,6 +105822,10 @@ MonoBehaviour:
   darkSightRadius: 1
   lightSightBonus: 2
   forceDarkFloor: 0
+  testStartingCompanions:
+  - {fileID: 11400000, guid: a1f2e3d4c5b6a7b8c9d0e1f2a3b4c5d6, type: 2}
+  - {fileID: 11400000, guid: b2e3d4c5a6b7c8d9e0f1a2b3c4d5e6f7, type: 2}
+  - {fileID: 11400000, guid: 27eec78f5835712448fd1c257cb94489, type: 2}
   stepsPerRegenHP: 12
   floorClearExpPerFloor: 20
   mapCompleteExpPerFloor: 20
@@ -105835,6 +105839,14 @@ MonoBehaviour:
   - 0.5
   - 0.2
   heroLightFar: 0.15
+  carriedLightByDistance:
+  - 1
+  - 1
+  - 0.85
+  - 0.65
+  - 0.45
+  - 0.22
+  carriedLightTrapSenseBonus: 0.1
   torchLightByDistance:
   - 1
   - 0.7
@@ -105848,6 +105860,8 @@ MonoBehaviour:
   - 1
   - 0.5
   - 0.25
+  morgueBasePrice: 30
+  morguePricePerLevel: 15
   chestTrapBase: 0.1
   chestTrapPerFloor: 0.015
   chestTrapMax: 0.25
@@ -119211,7 +119225,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: LP  0
+  m_text: SP  0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -119500,7 +119514,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -406.53, y: -873.99}
-  m_SizeDelta: {x: 112.4755, y: 99.329}
+  m_SizeDelta: {x: 112.4755, y: 86.329}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1521091250
 MonoBehaviour:
@@ -126667,7 +126681,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1601164601
 RectTransform:
   m_ObjectHideFlags: 0
@@ -158314,7 +158328,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 48.49, y: -873.67}
-  m_SizeDelta: {x: 116.6232, y: 98.6799}
+  m_SizeDelta: {x: 116.6232, y: 85.6799}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2053480981
 MonoBehaviour:
@@ -162662,7 +162676,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: -270, y: -889}
-  m_SizeDelta: {x: 112.46, y: 97.633}
+  m_SizeDelta: {x: 112.46, y: 84.633}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2109797974
 MonoBehaviour:

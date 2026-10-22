@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uADFC\uC721\uC758 \uAE30\uC5B5"
   skillKey: Combat Instinct
   skillIcon: {fileID: 21300000, guid: 204ae26eec65ce84eb969bd5c6930351, type: 3}
-  description: "[\uACA9\uD22C\uC220 \xB7 \uD328\uC2DC\uBE0C] \uADFC\uC721\uC758 \uAE30\uC5B5
+  description: "[\uACA9\uD22C\uD559 \xB7 \uD328\uC2DC\uBE0C] \uADFC\uC721\uC758 \uAE30\uC5B5
     (Combat Instinct). \uACA9\uD22C \uC2A4\uD0AC\uB85C \uAC19\uC740 \uC801\uC744
     \uB9DE\uD790 \uB54C\uB9C8\uB2E4 \uC911\uCCA9 +1 (\uCD5C\uB300 5, \uB204\uC801).
     1\uC911\uCCA9 \uBA85\uC911 +3% \xB7 2\uC911\uCCA9 \uCE58\uBA85\uD0C0 \uD655\uB960

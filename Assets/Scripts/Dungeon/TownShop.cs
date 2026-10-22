@@ -24,6 +24,9 @@ public static class TownShop
         "Item_Equipments/Items/Whetstone",
         "Item_Equipments/Items/Stimulant",
         "Item_Equipments/Items/Smoke_Bomb",
+        "Item_Equipments/Items/Torch",         // [2026-10-22] 횃불 — 60걸음 시야 5칸
+        "Item_Equipments/Items/Soul_Incense",  // [2026-10-22] 귀혼향 — 쓰러진 아군 부활
+        "Item_Equipments/Items/Homecoming_Mirror", // [2026-10-22] 귀향의 거울 — 가장 가까운 위쪽 마을로
         // [2026-10-08] 조잡한 검은 무기점(CatalogArms)으로 옮김
     };
 
@@ -187,6 +190,7 @@ public static class TownShop
             var inv = ConsumableInventory.Instance;
             if (inv == null || inv.AddItem(e.consumable, 1) <= 0) return "<color=#FF6B6B>더 들 수 없다.</color>";
             PlayerWallet.TrySpend(price);
+            PlayLog.Purchase(e.Name, price);
             return $"<color=#FFD24A>{e.Name}</color> 구입  (-{price} G)";
         }
         if (e.equipment != null)
@@ -195,6 +199,7 @@ public static class TownShop
             if (!EquipmentBag.CanAdd(e.equipment)) return "<color=#FF6B6B>더 들 수 없다.</color>";
             PlayerWallet.TrySpend(price);
             EquipmentBag.Add(e.equipment);
+            PlayLog.Purchase(e.Name, price);
             return $"<color=#FFD24A>{e.Name}</color> 구입  (-{price} G)";
         }
         return "";
@@ -209,6 +214,7 @@ public static class TownShop
             var inv = ConsumableInventory.Instance;
             if (inv == null || !inv.RemoveItem(e.consumable, 1)) return "";
             PlayerWallet.Add(price);
+            PlayLog.Sale(e.Name, price);
             return $"<color=#FFD24A>{e.Name}</color> 판매  (+{price} G)";
         }
         if (e.equipment != null)
@@ -216,6 +222,7 @@ public static class TownShop
             if (EquipmentBag.Count(e.equipment) <= WornCount(e.equipment)) return "먼저 장착을 해제하세요.";
             if (!EquipmentBag.Remove(e.equipment)) return "";
             PlayerWallet.Add(price);
+            PlayLog.Sale(e.Name, price);
             return $"<color=#FFD24A>{e.Name}</color> 판매  (+{price} G)";
         }
         return "";

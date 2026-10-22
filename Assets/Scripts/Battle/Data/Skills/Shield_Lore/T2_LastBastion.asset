@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Shield_T2_LastBastion
   skillName: "\uCD5C\uD6C4\uC758 \uBCF4\uB8E8"
   skillKey: Last Bastion
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: e7f3e96827cc4b59a2de4bc879fb28ae, type: 3}
   description: "[\uBC29\uD328 \xB7 \uD328\uC2DC\uBE0C] \uC0B4\uC544 \uC788\uB294
     \uC801 1\uB9C8\uB9AC\uB2F9 \uB9C9\uAE30 \uD655\uB960 +3%p (\uCD5C\uB300 +12%p)."
   usageType: 1

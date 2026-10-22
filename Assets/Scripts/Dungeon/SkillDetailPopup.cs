@@ -322,6 +322,7 @@ public class SkillDetailPopup : MonoBehaviour
             descriptionText.paragraphSpacing = 4f;
             descriptionText.alignment = TextAlignmentOptions.TopLeft;
             descriptionText.text = SkillTooltip.Body(currentSkillData);
+            _prereqIconFrames = 3; // [2026-10-21] 선행 스킬 이름 앞 작은 아이콘 — 창이 켜지고 글 배치가 끝난 뒤 LateUpdate 에서 (꺼진 채로는 글자 위치가 없음)
             var descScroll = descriptionText.GetComponentInParent<UnityEngine.UI.ScrollRect>();
             if (descScroll != null) { Canvas.ForceUpdateCanvases(); descScroll.verticalNormalizedPosition = 1f; } // 맨 위부터
         }
@@ -361,6 +362,58 @@ public class SkillDetailPopup : MonoBehaviour
     }
     
     /// <summary>
+    /// [2026-10-21] 선행 스킬 줄: SkillTooltip 이 이름을 link "pre{i}" 로 감싸고 앞에 빈 자리를 둔다 → 그 자리에 아이콘 Image 를 놓는다.
+    /// 설명 글자의 자식이라 스크롤과 함께 움직인다. 글이 바뀔 때마다 지우고 다시 만든다.
+    /// </summary>
+    private int _prereqIconFrames;
+
+    private void LateUpdate()
+    {
+        if (_prereqIconFrames <= 0 || descriptionText == null || !descriptionText.isActiveAndEnabled) return;
+        _prereqIconFrames--; // 몇 프레임 동안 다시 맞춘다 (정렬·크기가 늦게 바뀌어도 따라가게)
+        PlacePrereqIcons();
+    }
+
+    private void PlacePrereqIcons()
+    {
+        if (descriptionText == null) return;
+        var parent = descriptionText.rectTransform;
+        for (int i = parent.childCount - 1; i >= 0; i--)
+            if (parent.GetChild(i).name == "PrereqIcon") Destroy(parent.GetChild(i).gameObject);
+        if (currentSkillData == null || currentSkillData.prerequisiteSkills == null) return;
+
+        descriptionText.ForceMeshUpdate();
+        var info = descriptionText.textInfo;
+        for (int l = 0; l < info.linkCount; l++)
+        {
+            var link = info.linkInfo[l];
+            string id = link.GetLinkID();
+            int idx;
+            if (!id.StartsWith("pre") || !int.TryParse(id.Substring(3), out idx)) continue;
+            if (idx < 0 || idx >= currentSkillData.prerequisiteSkills.Count) continue;
+            var pre = currentSkillData.prerequisiteSkills[idx];
+            if (pre == null || pre.skillIcon == null || link.linkTextfirstCharacterIndex >= info.characterCount) continue;
+
+            var ci = info.characterInfo[link.linkTextfirstCharacterIndex];
+            float h = (ci.ascender - ci.descender) * 1.05f;     // 줄 높이쯤
+            float gap = ci.pointSize * SkillTooltip.PrereqIconEm; // 비워 둔 폭
+            var go = new GameObject("PrereqIcon", typeof(RectTransform), typeof(Image));
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(parent, false);
+            // 글이 위·왼쪽 정렬이므로 왼쪽 위 모서리 기준으로 붙인다 (스크롤 상자가 글 높이를 바꿔도 같이 움직이게)
+            rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(h, h);
+            Rect r = parent.rect;
+            rt.anchoredPosition = new Vector2(ci.origin - gap * 0.5f - r.xMin, (ci.ascender + ci.descender) * 0.5f - r.yMax);
+            var img = go.GetComponent<Image>();
+            img.sprite = pre.skillIcon;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+    }
+
+    /// <summary>
     /// Learn 버튼 상태 업데이트
     /// </summary>
     private void UpdateLearnButton()
@@ -398,7 +451,7 @@ public class SkillDetailPopup : MonoBehaviour
         // 필요 LP 표시
         if (requiredLPText != null)
         {
-            requiredLPText.text = $"필요 LP: {currentNode.requiredSkillPoints}";
+            requiredLPText.text = $"필요 SP: {currentNode.requiredSkillPoints}";
         }
         
         // TreeManager에서 현재 LP 확인
@@ -429,18 +482,18 @@ public class SkillDetailPopup : MonoBehaviour
                 
                 if (learnButtonText != null)
                 {
-                    learnButtonText.text = canLearn ? "배우기!" : "LP 부족";
+                    learnButtonText.text = canLearn ? "기억하기" : "SP 부족";
                 }
                 if (statusText != null)
                 {
                     if (canLearn)
                     {
-                        statusText.text = "✨ 배울 수 있음!";
+                        statusText.text = "✨ 기억해 낼 수 있음";
                         statusText.color = Color.yellow;
                     }
                     else
                     {
-                        statusText.text = $"⚠️ LP 부족 (필요: {currentNode.requiredSkillPoints}, 보유: {availableLP})";
+                        statusText.text = $"⚠️ SP 부족 (필요: {currentNode.requiredSkillPoints}, 보유: {availableLP})";
                         statusText.color = Color.red;
                     }
                 }
@@ -454,7 +507,7 @@ public class SkillDetailPopup : MonoBehaviour
                     int rank = manager.GetSkillRank(currentSkillData);
                     bool canRank = availableLP >= currentNode.requiredSkillPoints;
                     learnButton.interactable = canRank;
-                    if (learnButtonText != null) learnButtonText.text = canRank ? $"등급 올리기 (Lv {rank + 1})" : "LP 부족";
+                    if (learnButtonText != null) learnButtonText.text = canRank ? $"등급 올리기 (Lv {rank + 1})" : "SP 부족";
                     if (statusText != null)
                     {
                         statusText.text = $"Lv {rank}/{currentSkillData.maxRank}";
@@ -465,11 +518,11 @@ public class SkillDetailPopup : MonoBehaviour
                 learnButton.interactable = false;
                 if (learnButtonText != null)
                 {
-                    learnButtonText.text = currentSkillData != null && currentSkillData.maxRank > 1 ? $"최대 (Lv {currentSkillData.maxRank})" : "배움";
+                    learnButtonText.text = currentSkillData != null && currentSkillData.maxRank > 1 ? $"최대 (Lv {currentSkillData.maxRank})" : "기억했다";
                 }
                 if (statusText != null)
                 {
-                    statusText.text = "✅ 이미 배움";
+                    statusText.text = "✅ 이미 기억했다";
                     statusText.color = Color.green;
                 }
                 Debug.Log($"[SkillDetailPopup] {skillName}: Learned → 버튼 비활성화");

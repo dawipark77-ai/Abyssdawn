@@ -15,10 +15,8 @@ MonoBehaviour:
   skillID: Monster_ThrowingKnife
   skillName: "\uB2E8\uAC80 \uB358\uC9C0\uAE30"
   skillKey: Throwing Knife
-  skillIcon: {fileID: 2874756452421268667, guid: dd47eec43950c3b4e9c29a32d7980b7d, type: 3}
-  description: "[\uACE0\uBE14\uB9B0 \uB3C4\uAD6C] \uC870\uC7A1\uD55C \uB2E8\uAC80\uC744
-    \uB358\uC9C4\uB2E4 (\xD70.85~0.95). \uC6D0\uAC70\uB9AC: \uBC18\uACA9\uB2F9\uD558\uC9C0
-    \uC54A\uC74C. \uC804\uD22C\uB2F9 2\uBC88."
+  skillIcon: {fileID: 21300000, guid: 3311f443f51b4678844e8320d07ab687, type: 3}
+  description: "[\uACE0\uBE14\uB9B0 \uB3C4\uAD6C] \uC870\uC7A1\uD55C \uB2E8\uAC80\uC744 \uB358\uC9C4\uB2E4. \uD798\uC758 <color=#8CFF8C>85~95%</color> \uD53C\uD574 (\uBA85\uC911 <color=#F5DE94>90%</color>). \uC6D0\uAC70\uB9AC\uB77C \uBC18\uACA9\uB2F9\uD558\uC9C0 \uC54A\uB294\uB2E4. \uCD5C\uB300 HP\uC758 <color=#FF6B6B>5%</color> \uC18C\uBAA8."
   usageType: 0
   damageType: 1
   scalingStat: 1
@@ -64,7 +62,7 @@ MonoBehaviour:
   cooldownTurns: 0
   fieldSkill: 0
   usableInField: 0
-  usesPerBattle: 2
+  usesPerBattle: 0
   endsTurnImmediately: 0
   critBonusPercent: 0
   partyPhysicalBuffPercent: 0

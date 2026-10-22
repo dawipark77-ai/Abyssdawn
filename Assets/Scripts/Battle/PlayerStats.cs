@@ -269,6 +269,7 @@ public class PlayerStats : MonoBehaviour
     [System.NonSerialized] public int tauntRounds = 0;         // 도발 발동 중 (적이 나를 고름 · 방어 +30%)
     [System.NonSerialized] public bool wardenPending = false;  // 새벽 수문장: 이번 턴 자세 → 다음 턴 발동
     [System.NonSerialized] public int wardenRounds = 0;        // 새벽 수문장 발동 중 (동료에게 가는 공격을 대신 맞음)
+    [System.NonSerialized] public int focusRounds = 0;         // [2026-10-22] 집중시키기 (동료 슬라임): 적 전열의 공격이 이 아군에게
     [System.NonSerialized] public int holdLineRounds = 0;      // 전열 유지 (시전자): 남은 턴
 
     /// <summary>패시브 회피 보너스 (0.05 = 적 명중 5% 감소). 전장의 직감.</summary>
@@ -1702,6 +1703,7 @@ public class PlayerStats : MonoBehaviour
     public bool ApplyStatusEffect(StatusEffectSO effect, int customDuration)
     {
         if (effect == null || customDuration <= 0) return false;
+        if (companionSource != null && companionSource.IsImmune(effect.effectType)) return false; // [2026-10-23] 동료 몬스터 면역 (슬라임 = 독)
 
         // Luck 기반 저항 (최대 25%)
         float resistChance = Mathf.Clamp(Luck * 0.2f, 0f, 25f);
@@ -1780,9 +1782,22 @@ public class PlayerStats : MonoBehaviour
     /// <summary>
     /// 턴 종료 시 호출: 상태이상 DoT 처리 및 턴 감소
     /// </summary>
-    public void ProcessStatusEffectsEndOfTurn()
+    /// <summary>[2026-10-20] 지속 피해 하나만 적용 (출혈·독을 따로 보여 주려고). 실제 깎인 피해를 돌려준다. 사망 처리는 하지 않음.</summary>
+    public int ApplyDotTick(StatusEffectInstance se)
     {
-        if (activeStatusEffects.Count == 0 || currentHP <= 0) return;
+        if (se == null || se.data == null || se.data.physicalDamagePerTurn <= 0f || currentHP <= 0) return 0;
+        float dotMult = HasEquippedPassiveByName(SkillHardenedBody) ? 0.8f : 1f; // 단련된 육체 -20%
+        int dot = Mathf.Max(1, Mathf.FloorToInt(maxHP * se.data.physicalDamagePerTurn * dotMult));
+        int before = currentHP;
+        currentHP = Mathf.Max(0, currentHP - dot);
+        OnStatusChanged?.Invoke();
+        return before - currentHP;
+    }
+
+    /// <param name="skipDot">[2026-10-20] true = 지속 피해는 이미 ApplyDotTick 으로 넣었음 — 남은 턴만 줄이고 사망 처리</param>
+    public void ProcessStatusEffectsEndOfTurn(bool skipDot = false)
+    {
+        if (activeStatusEffects.Count == 0 || (currentHP <= 0 && !skipDot)) return; // skipDot: 지속 피해로 0이 됐어도 아래에서 사망 처리
 
         Debug.Log($"[StatusEffect] {playerName}의 상태이상 처리 시작 (수: {activeStatusEffects.Count})");
 
@@ -1798,7 +1813,7 @@ public class PlayerStats : MonoBehaviour
                 continue;
             }
 
-            if (se.data.physicalDamagePerTurn > 0f)
+            if (!skipDot && se.data.physicalDamagePerTurn > 0f)
             {
                 // 전투학: 단련된 육체 — 출혈·점화 등 지속 피해 -20%
                 float dotMult = HasEquippedPassiveByName(SkillHardenedBody) ? 0.8f : 1f;
@@ -1915,11 +1930,16 @@ public class PlayerStats : MonoBehaviour
         _lvUpAgiGain = 0;
         _lvUpLukGain = 0;
         _lvUpHasRandomStat = false;
+        int maxHpBefore = maxHP, maxMpBefore = maxMP; // [2026-10-20] 레벨업 문구는 실제 최대치 변화로
 
         ApplyHpMpGrowth();
         ApplyCombinedClassMemoryRandomStatGrowth();
         ApplyHpMpBonusFromDefenseMagicGainedThisLevel();
         GrantFreeStatPoint();
+        // [2026-10-20] 기본 MP 가 올라도 종의 기억(예: 인간 피부 마력 -1 → 최대 MP -3) 때문에 최대 MP 는 그대로일 수 있다.
+        //   "MP +2" 라고 해 놓고 상태창은 0 이던 문제 — 실제로 늘어난 최대치만 보여 준다.
+        _lvUpHpGain = Mathf.Max(0, maxHP - maxHpBefore);
+        _lvUpMpGain = Mathf.Max(0, maxMP - maxMpBefore);
 
         // 레벨업 = 무작위 스탯 1개(직업 성장률 가중) + 자유 스탯 1개(플레이어 선택 — 던전의 레벨업 선택 화면)
         PendingLevelUpNotes.Add(new LevelUpNote

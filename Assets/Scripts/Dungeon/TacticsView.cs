@@ -179,8 +179,8 @@ public class TacticsView : MonoBehaviour
         }
         if (slot.nameText != null) slot.nameText.text = so.MonsterName;
         if (slot.lvText != null)   slot.lvText.text   = lvPlaceholder;            // 동료 LV "—"
-        if (slot.hpText != null)   slot.hpText.text   = $"{so.HP} / {so.HP}";     // 대기 중 풀피 (max/max)
-        if (slot.mpText != null)   slot.mpText.text   = $"{so.MP} / {so.MP}";
+        if (slot.hpText != null)   slot.hpText.text   = $"{wait.HPOr(so.HP)} / {so.HP}";     // [2026-10-22] 대기 중에도 실제 HP
+        if (slot.mpText != null)   slot.mpText.text   = $"{wait.MPOr(so.MP)} / {so.MP}";
     }
 
     // ════════════════════════ Swap (동료끼리만) ════════════════════════

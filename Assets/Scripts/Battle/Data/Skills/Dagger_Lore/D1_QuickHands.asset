@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uC2E0\uC18D\uD55C \uC190\uB180\uB9BC"
   skillKey: Quick Hands
   skillIcon: {fileID: 21300000, guid: e1101c75c7b2a96419faf89e85ce0ede, type: 3}
-  description: "[\uB2E8\uAC80\uC220 \xB7 \uD328\uC2DC\uBE0C \xB7 \uB2E8\uAC80 \uC7A5\uCC29]
+  description: "[\uB2E8\uAC80\uD559 \xB7 \uD328\uC2DC\uBE0C \xB7 \uB2E8\uAC80 \uC7A5\uCC29]
     \uC2E0\uC18D\uD55C \uC190\uB180\uB9BC. \uB4E0 \uB2E8\uAC80 \uD558\uB098\uB2F9
     \uBBFC\uCCA9 +5% (\uB450 \uC190 \uBAA8\uB450 \uB2E8\uAC80\uC774\uBA74 +10%)."
   usageType: 1

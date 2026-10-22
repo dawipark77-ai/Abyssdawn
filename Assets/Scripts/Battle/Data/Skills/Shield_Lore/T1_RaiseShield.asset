@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Shield_T1_RaiseShield
   skillName: "\uBC29\uD328 \uB4E4\uAE30"
   skillKey: Raise Shield
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 1bb40e88e8c04116b6736a54c282ea51, type: 3}
   description: "[\uBC29\uD328 \xB7 \uC561\uD2F0\uBE0C \xB7 \uC120\uC81C \xB7 \uCFE8\uB2E4\uC6B4
     3\uD134 \xB7 \uC804\uC5F4] \uBC29\uD328\uB97C \uB4E0\uB2E4. 3\uD134 \uB3D9\uC548
     \uB9C9\uAE30 \uD655\uB960 +15%p, \uB9C9\uC740 \uD53C\uD574 \uAC10\uC18C +2. \uC774\uBC88

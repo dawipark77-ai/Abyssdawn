@@ -73,16 +73,17 @@ public class ReservesView : MonoBehaviour
                 continue;
             }
 
-            FillSlot(slot, so);
+            FillSlot(slot, so, waitlist[i]);
         }
     }
 
-    private void FillSlot(ReserveSlot slot, MonsterSO so)
+    private void FillSlot(ReserveSlot slot, MonsterSO so, CompanionPartyPersistence.WaitEntry wait)
     {
         if (slot.nameText != null) slot.nameText.text = so.MonsterName;
         if (slot.lvText != null)   slot.lvText.text   = lvPlaceholder;          // 레벨 없음 → "—"
-        if (slot.hpText != null)   slot.hpText.text   = $"{so.HP} / {so.HP}";   // 대기 중 풀피 (max/max)
-        if (slot.mpText != null)   slot.mpText.text   = $"{so.MP} / {so.MP}";
+        // [2026-10-22] 대기 중에도 실제 HP (쓰러졌으면 0)
+        if (slot.hpText != null)   slot.hpText.text   = $"{wait.HPOr(so.HP)} / {so.HP}";
+        if (slot.mpText != null)   slot.mpText.text   = $"{wait.MPOr(so.MP)} / {so.MP}";
     }
 
     /// <summary>빈 대기 슬롯 — 값 텍스트만 비움(라벨은 씬 정적 텍스트라 안 건드림). 틀은 유지.</summary>

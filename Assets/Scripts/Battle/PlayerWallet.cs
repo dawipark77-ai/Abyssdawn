@@ -10,7 +10,7 @@ using UnityEngine;
 /// </summary>
 public static class PlayerWallet
 {
-    public const int StartingGold = 100;
+    public const int StartingGold = 500; // [2026-10-23] 테스트용 500 (원래 100)
     public const int MaxGold = 999999;
 
     private static int _gold = StartingGold;

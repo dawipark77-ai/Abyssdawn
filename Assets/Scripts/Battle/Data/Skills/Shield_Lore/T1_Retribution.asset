@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Shield_T1_Retribution
   skillName: "\uC751\uC9D5\uC758 \uC21C\uAC04"
   skillKey: Moment of Retribution
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: fc1bb7e280114c6aaf609d1de2e0d454, type: 3}
   description: "[\uBC29\uD328 \xB7 \uD328\uC2DC\uBE0C] \uB9C9\uAE30\uC5D0 \uC131\uACF5\uD558\uBA74
     \uB2E4\uC74C \uACF5\uACA9 \uD53C\uD574 +25% (1\uD68C)."
   usageType: 1

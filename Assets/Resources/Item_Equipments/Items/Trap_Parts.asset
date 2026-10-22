@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Trap_Parts
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.ConsumableItemSO
   itemName: "\uD568\uC815 \uBD80\uD488"
-  icon: {fileID: -2185028427614365439, guid: c14c0502dd717ba409d37cb24a06abc6, type: 3}
+  icon: {fileID: 21300000, guid: d5dc07dfe8cc4664b5c457143025232e, type: 3}
   description: "\uC6A9\uC218\uCCA0, \uCCA0\uC0AC, \uB0A0\uCE74\uB85C\uC6B4 \uB0A0.
     \uB9C8\uC744\uC758 \uB204\uAD70\uAC00\uB294 \uB3C8\uC744 \uCCD0 \uC904 \uAC83\uC774\uB2E4."
   itemCategory: 4
-  itemIcon: {fileID: -2185028427614365439, guid: c14c0502dd717ba409d37cb24a06abc6, type: 3}
+  itemIcon: {fileID: 21300000, guid: d5dc07dfe8cc4664b5c457143025232e, type: 3}
   flatIcon: {fileID: -8413184758101522004, guid: d4f5798b1d7743a4e8bff0bf903f2c7e, type: 3}
   hpRecoveryPercent: 0
   mpRecoveryPercent: 0

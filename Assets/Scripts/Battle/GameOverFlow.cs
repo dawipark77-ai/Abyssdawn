@@ -12,6 +12,8 @@ public static class GameOverFlow
 {
     public static void ShowScreen(Action onRestart, Action onLoadSave)
     {
+        PlayLog.BattleEnd("패배"); // [2026-10-22]
+        PlayLog.Event("게임 오버", "");
         bool hasSave = SaveSystem.HasSave;
         string saveInfo = null;
         if (hasSave)
@@ -63,6 +65,11 @@ public static class GameOverFlow
 
         // [2026-09-30] 아이템·장비도 새 탐험 상태로 (새벽의 잔 최대 충전, 주운 아이템·장비 초기화, 장착 장비 = 시작 장비)
         ConsumableInventory.ResetForNewRun();
+        // [2026-10-20] 처음부터 = 새 게임과 같게 — 직업의 시작 소모품(전사: 약초·붕대)도 다시 지급 (전엔 비우기만 해서 약초가 사라졌음)
+        var job = playerStatData != null ? playerStatData.currentJob : null;
+        if (job != null && job.startingConsumables != null && ConsumableInventory.Instance != null)
+            foreach (var it in job.startingConsumables)
+                if (it != null && it.item != null && it.count > 0) ConsumableInventory.Instance.AddItem(it.item, it.count);
         EquipmentBag.ResetForNewRun(playerStatData);
         PlayerWallet.ResetForNewRun();
         // [2026-10-04] 저장 없이 죽으면 스킬도 처음부터 (배운 스킬·장착 슬롯 비움, SP 는 새 주인공 생성 시 PlayerStats.StartingSkillPoints)

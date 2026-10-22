@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: CombatArts_T1_HardenedBody
   skillName: "\uB2E8\uB828\uB41C \uC721\uCCB4"
   skillKey: Hardened Body
-  skillIcon: {fileID: 843639385197948872, guid: 039cd1b67ae44b7438bc5d896fe0f8fb, type: 3}
+  skillIcon: {fileID: 21300000, guid: 99e9ba096fee4c609a37580f7d813f12, type: 3}
   description: "[\uD328\uC2DC\uBE0C] \uCD5C\uB300 HP +8%, \uBC1B\uB294 \uD53C\uD574
     -5% (\uC55E\uC5F4\uC774\uBA74 -8%), \uCD9C\uD608\xB7\uC810\uD654 \uB4F1 \uC9C0\uC18D
     \uD53C\uD574 -20%. \uB300\uC2E0 \uBAB8\uC774 \uBB34\uAC70\uC6CC \uD589\uB3D9

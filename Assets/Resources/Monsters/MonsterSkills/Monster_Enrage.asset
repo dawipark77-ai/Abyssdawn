@@ -15,9 +15,8 @@ MonoBehaviour:
   skillID: Monster_Enrage
   skillName: "\uACA9\uB178"
   skillKey: Enrage
-  skillIcon: {fileID: 0}
-  description: "\uACA9\uB178\uD55C\uB2E4. \uB2E4\uC74C \uD134 \uACF5\uACA9\uB825
-    +10%."
+  skillIcon: {fileID: 21300000, guid: e08ab031509c4b93a78c79052a56a0ab, type: 3}
+  description: "\uACA9\uB178\uD55C\uB2E4. <color=#F5DE94>2\uD134</color> \uB3D9\uC548 \uACF5\uACA9\uB825 <color=#8CFF8C>+10%</color>."
   usageType: 0
   damageType: 0
   scalingStat: 0

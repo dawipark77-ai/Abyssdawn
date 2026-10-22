@@ -162,8 +162,8 @@ public class BattleItemSlot : MonoBehaviour
         if (useButton != null)
             useButton.interactable = false;
 
-        // 사용자(주인공) — BattleManager.player 사용
-        PlayerStats user = battleManager.player;
+        // 사용자 — [2026-10-22] 지금 차례인 동료 (예전엔 늘 주인공이라, 동료 차례에 쓴 아이템이 주인공 명령으로 들어갔다)
+        PlayerStats user = battleManager.CurrentCommandActor;
         if (user == null)
         {
             Debug.LogError("[BattleItemSlot] BattleManager.player가 null — 사용 불가", this);

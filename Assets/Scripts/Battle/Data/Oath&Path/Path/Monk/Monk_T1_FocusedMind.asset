@@ -23,5 +23,5 @@ MonoBehaviour:
     AGI +8%, \uD06C\uB9AC\uD2F0\uCEEC \uD655\uB960 +5%."
   drawbackDescription: "MP\uB97C \uC808\uBC18 \uC774\uC0C1 \uC720\uC9C0\uD574\uC57C
     \uD6A8\uACFC\uB97C \uBC1B\uC744 \uC218 \uC788\uB2E4."
-  lpCost: 2
+  lpCost: 1
   battleSkill: {fileID: 0}

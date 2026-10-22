@@ -23,5 +23,5 @@ MonoBehaviour:
     \uD655\uB960 +15%."
   drawbackDescription: "HP 5%\uB97C \uD76C\uC0DD\uD558\uACE0 \uC5ED\uD6A8\uACFC \uB9AC\uC2A4\uD06C\uB97C
     \uB192\uC778\uB2E4."
-  lpCost: 2
+  lpCost: 1
   battleSkill: {fileID: 0}

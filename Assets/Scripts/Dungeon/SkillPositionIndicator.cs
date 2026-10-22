@@ -57,6 +57,12 @@ public static class SkillPositionIndicator
         return root;
     }
 
+    /// <summary>[2026-10-22] 한 번에 상대 전원을 치는 스킬 — 목표 칸이 전부 빨강 + 숫자 대신 "A".</summary>
+    public static bool HitsAll(SkillData skill)
+    {
+        return skill != null && skill.Key == "Sonic Wave"; // 박쥐 음파 (BattleManager.EnemySkillSonicWave)
+    }
+
     public static void Refresh(Transform parent, SkillData skill)
     {
         var root = parent != null ? parent.Find(ObjName) : null;
@@ -64,10 +70,18 @@ public static class SkillPositionIndicator
         bool show = skill != null && skill.usageType == UsageType.Active;
         root.gameObject.SetActive(show);
         if (!show) return;
-        int caster = skill.targeting != null ? (int)skill.targeting.allowedCasterSlots : 15;
+        int caster = skill.targeting != null ? (int)skill.targeting.allowedCasterSlots & 15 : 15; // 몬스터 255(어디서나) → 15
         bool enemyTarget = skill.targeting == null || skill.targeting.targetFaction == TargetFaction.Enemy;
-        int target = enemyTarget && skill.targeting != null ? (int)skill.targeting.allowedTargetSlots : (enemyTarget ? 15 : 0);
+        int target = enemyTarget && skill.targeting != null ? (int)skill.targeting.allowedTargetSlots & 15 : (enemyTarget ? 15 : 0);
         if (caster == 0) caster = 15;
+        bool all = enemyTarget && HitsAll(skill);
+        if (all) target = 15;
+        for (int i = 0; i < 4; i++)
+        {
+            var e = root.Find($"Edge0{i}");
+            var t = e != null ? e.GetComponentInChildren<TMP_Text>(true) : null;
+            if (t != null) t.text = all ? "A" : (i + 1).ToString();
+        }
         for (int row = 0; row < 2; row++)
             for (int i = 0; i < 4; i++)
             {

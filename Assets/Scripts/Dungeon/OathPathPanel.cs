@@ -166,6 +166,7 @@ public class OathPathPanel : MonoBehaviour
             Set(page, $"Oath {i + 1}", o != null ? o.oathName : "—", 40f, isSworn ? Gold : Muted, TextAlignmentOptions.Center);
             string desc = o == null ? "" : (isSworn ? "<color=#D4A761>맹세함</color>\n\n" : "<color=#777777>맹세하지 않음</color>\n\n") + o.oathDescription;
             Set(page, $"Oath_Descliption {i + 1}", desc, 30f, isSworn ? Text : Muted, TextAlignmentOptions.Top);
+            SetOathIcon(page, $"Oath {i + 1}", o != null ? o.oathIcon : null, isSworn);
         }
         Set(page, "Binding ", "제약", 40f, Cost, TextAlignmentOptions.Center);
         Set(page, "Binding", "제약", 40f, Cost, TextAlignmentOptions.Center);
@@ -187,6 +188,40 @@ public class OathPathPanel : MonoBehaviour
             case "Sister": return "수녀";
         }
         return job.className;
+    }
+
+    /// <summary>[2026-10-22] 서약 이름 왼쪽에 서약 아이콘 (없으면 숨김). 맹세하지 않은 서약은 어둡게.</summary>
+    private static void SetOathIcon(Transform page, string titleChild, Sprite icon, bool sworn)
+    {
+        var title = page.Find(titleChild) as RectTransform;
+        if (title == null) return;
+        string name = titleChild + "_Icon";
+        var t = title.parent.Find(name);
+        Image img;
+        if (t == null)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(title.parent, false);
+            img = go.GetComponent<Image>();
+            img.preserveAspect = true; img.raycastTarget = false;
+        }
+        else img = t.GetComponent<Image>();
+        img.gameObject.SetActive(icon != null);
+        if (icon == null) return;
+        img.sprite = icon;
+        img.color = sworn ? Color.white : new Color(0.55f, 0.55f, 0.55f, 1f);
+        float size = 84f;
+        var rt = img.rectTransform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(1f, 0.5f);
+        rt.sizeDelta = new Vector2(size, size);
+        // 서약 이름 글자가 시작하는 곳 바로 왼쪽 (칸이 넓어 칸 끝에 두면 글자와 멀어진다)
+        var tmp = title.GetComponent<TMP_Text>();
+        float left = title.rect.xMin;
+        if (tmp != null) { tmp.ForceMeshUpdate(); if (tmp.textInfo.characterCount > 0) left = tmp.textBounds.min.x; }
+        Vector3 leftMid = title.TransformPoint(new Vector3(left, title.rect.center.y, 0f));
+        rt.position = leftMid - title.right * 14f * title.lossyScale.x;
+        SkillIconFrame.Apply(img, 3f);
     }
 
     private static string StrengthName(OathBindingStrength s)
@@ -241,7 +276,7 @@ public class OathPathPanel : MonoBehaviour
         {
             if (Font() != null) _pathTitle.font = Font();
             _pathTitle.fontSize = 40f; _pathTitle.color = Gold; _pathTitle.alignment = TextAlignmentOptions.Center;
-            _pathTitle.text = $"{JobName(job)} 패스   <size=75%><color=#E6DECC>LP {lp}</color></size>";
+            _pathTitle.text = $"{JobName(job)} 패스   <size=75%><color=#E6DECC>SP {lp}</color></size>";
         }
 
         var list = job != null ? job.pathSkills : null;
@@ -293,7 +328,7 @@ public class OathPathPanel : MonoBehaviour
         btnGo.GetComponent<Image>().color = learned ? new Color(0, 0, 0, 0) : canLearn ? new Color(0.35f, 0.26f, 0.10f, 1f) : new Color(0.15f, 0.15f, 0.15f, 1f);
         var btn = btnGo.GetComponent<Button>();
         btn.interactable = canLearn;
-        string label = learned ? "<color=#D4A761>배움</color>" : $"배우기\n<size=75%>LP {p.lpCost}</size>";
+        string label = learned ? "<color=#D4A761>기억했다</color>" : $"기억하기\n<size=75%>SP {p.lpCost}</size>";
         var bt = NewText(btnGo.transform, "Text", label, 28f, canLearn ? Gold : Muted, TextAlignmentOptions.Center);
         var brt = (RectTransform)bt.transform; brt.anchorMin = Vector2.zero; brt.anchorMax = Vector2.one; brt.offsetMin = brt.offsetMax = Vector2.zero;
         if (canLearn && onLearn != null) btn.onClick.AddListener(() => onLearn());

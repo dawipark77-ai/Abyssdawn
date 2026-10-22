@@ -26,6 +26,79 @@ public static class PartyCardVisuals
         return member.companionSource != null ? member.companionSource.MonsterLevel : member.level;
     }
 
+    private const string LevelBadgeName = "LvBadge";
+    private static readonly Color LevelBadgeColor = new Color(0.96f, 0.87f, 0.58f, 1f); // #F5DE94 옅은 황금색
+
+    /// <summary>
+    /// [2026-10-22] 이름 줄 왼쪽의 "Lv2" — 이름과 따로 둔 글자. 오른쪽 끝을 바로 위 "No.2" 의 숫자가 끝나는 곳에 맞춘다
+    /// (예전엔 이름 앞에 붙어 가운데 정렬이라 이름 길이마다 위치가 달랐다). level &lt;= 0 이면 숨김.
+    /// </summary>
+    public static void SetLevelBadge(TextMeshProUGUI numberText, TextMeshProUGUI nameText, int level)
+    {
+        if (nameText == null) return;
+        var parent = (RectTransform)nameText.transform.parent;
+        var t = parent.Find(LevelBadgeName);
+        TextMeshProUGUI badge;
+        if (t == null)
+        {
+            var go = new GameObject(LevelBadgeName, typeof(RectTransform), typeof(TextMeshProUGUI));
+            go.transform.SetParent(parent, false);
+            badge = go.GetComponent<TextMeshProUGUI>();
+            badge.font = nameText.font;
+            badge.alignment = TextAlignmentOptions.MidlineRight;
+            badge.textWrappingMode = TextWrappingModes.NoWrap;
+            badge.raycastTarget = false;
+            var le = go.AddComponent<LayoutElement>(); le.ignoreLayout = true;
+        }
+        else badge = t.GetComponent<TextMeshProUGUI>();
+
+        bool show = level > 0 && numberText != null;
+        badge.gameObject.SetActive(show);
+        if (!show) { var m0 = nameText.margin; m0.x = 0f; nameText.margin = m0; return; }
+        badge.text = "Lv" + level;
+        badge.color = LevelBadgeColor;
+        badge.fontSize = nameText.fontSize * 0.72f;
+
+        // 위 "No." 글자가 시작하는 x — 글자 모양 기준 (칸 크기가 아니라). numberText(숫자)는 "No." 글자의 자식
+        var label = numberText.transform.parent != null ? numberText.transform.parent.GetComponent<TextMeshProUGUI>() : null;
+        if (label == null) label = numberText;
+        label.ForceMeshUpdate();
+        float labelLeft = label.textInfo.characterCount > 0
+            ? label.transform.TransformPoint(new Vector3(label.textBounds.min.x, 0f, 0f)).x
+            : label.rectTransform.TransformPoint(new Vector3(label.rectTransform.rect.xMin, 0f, 0f)).x;
+        var nrt = nameText.rectTransform;
+        Vector3 nameCenter = nrt.TransformPoint(nrt.rect.center);
+
+        badge.alignment = TextAlignmentOptions.MidlineLeft;
+        var brt = badge.rectTransform;
+        brt.anchorMin = brt.anchorMax = new Vector2(0.5f, 0.5f);
+        brt.pivot = new Vector2(0f, 0.5f);
+        brt.sizeDelta = new Vector2(160f, nrt.rect.height);
+        brt.position = new Vector3(labelLeft, nameCenter.y, nrt.position.z);
+
+        // 이름은 카드 기준 가운데 그대로 (Lv 때문에 밀지 않는다)
+        var m = nameText.margin; m.x = 0f; nameText.margin = m;
+    }
+
+    /// <summary>[2026-10-22] 카드 왼쪽 위의 "Lv." 글자를 "No." 로 — 그 옆 숫자 칸(LvText)에는 자리 번호가 들어간다.</summary>
+    public static void SetNumberLabel(Transform slot)
+    {
+        if (slot == null) return;
+        foreach (var t in slot.GetComponentsInChildren<TextMeshProUGUI>(true))
+        {
+            if (System.Array.IndexOf(LevelTextNames, t.name) >= 0) continue;
+            string s = t.text != null ? t.text.Trim() : "";
+            if (s != "Lv." && s != "Lv" && s != "LV." && s != "LV") continue;
+            // "No." 는 "Lv." 보다 넓어 점이 다음 줄로 넘어갔다 — 줄바꿈을 끄고, 옆 숫자(LvText 자식)를 넓어진 만큼 민다
+            float wider = t.GetPreferredValues("No.").x - t.GetPreferredValues(t.text).x;
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            t.text = "No.";
+            if (wider > 0f)
+                foreach (Transform c in t.transform)
+                    if (System.Array.IndexOf(LevelTextNames, c.name) >= 0) ((RectTransform)c).anchoredPosition += new Vector2(wider, 0f);
+        }
+    }
+
     public static Transform FindSlot(Transform root, int index)
     {
         if (root == null) return null;
@@ -82,7 +155,7 @@ public static class PartyCardVisuals
     /// 오른쪽 칸부터 걸린 순서대로 채우고, 칸보다 많으면 1.5초마다 한 칸씩 돌아가며 보인다 (StatusIconRotator).
     /// icons = 왼쪽→오른쪽 순 (StatusIcon_1~4).
     /// </summary>
-    public static void ShowStatusIcons(List<Image> icons, PlayerStats member)
+    public static void ShowStatusIcons(List<Image> icons, PlayerStats member, int companionId = 0)
     {
         if (icons == null || icons.Count == 0) return;
 
@@ -104,6 +177,10 @@ public static class PartyCardVisuals
                              member.activeStatusEffects.Exists(se => se != null && se.data != null && se.data.effectType == kv.Key);
                 if (!shown && kv.Value != null) sprites.Add(kv.Value);
             }
+        // [2026-10-21] 던전 카드의 동료 (PlayerStats 없음) — 맵에서 이어진 상태이상
+        if (member == null && companionId != 0)
+            foreach (var kv in DungeonFieldStatus.CompanionIcons(companionId))
+                if (kv.Value != null) sprites.Add(kv.Value);
 
         Transform host = null;
         foreach (var img in icons) if (img != null) { host = img.transform.parent; break; }

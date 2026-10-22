@@ -15,9 +15,8 @@ MonoBehaviour:
   skillID: Monster_WoundLicking
   skillName: "\uC0C1\uCC98 \uD565\uAE30"
   skillKey: Wound Licking
-  skillIcon: {fileID: 0}
-  description: "\uC0C1\uCC98\uB97C \uD565\uC544 \uCD5C\uB300 HP 5% \uD68C\uBCF5.
-    HP\uAC00 \uAC00\uB4DD\uD558\uBA74 \uC4F8 \uC218 \uC5C6\uB2E4."
+  skillIcon: {fileID: 21300000, guid: 92f43d3467ed4f0dae676fbca43dccc0, type: 3}
+  description: "\uC0C1\uCC98\uB97C \uD565\uC544 \uCD5C\uB300 HP\uC758 <color=#8CFF8C>20%</color> \uD68C\uBCF5. HP\uAC00 \uAC00\uB4DD\uD558\uBA74 \uC4F8 \uC218 \uC5C6\uB2E4. \uC7AC\uC0AC\uC6A9 \uB300\uAE30 <color=#F5DE94>2\uD134</color>."
   usageType: 0
   damageType: 0
   scalingStat: 0
@@ -40,7 +39,7 @@ MonoBehaviour:
   effects:
   - effectType: 2
     recoveryTarget: 0
-    effectAmount: 5
+    effectAmount: 20
     statusEffect: {fileID: 0}
     statusEffectChance: 0
   legacyCurseChance: 0
@@ -65,7 +64,7 @@ MonoBehaviour:
   requiresPreviousSkillId: 
   requiresSameTarget: 0
   preemptive: 0
-  cooldownTurns: 0
+  cooldownTurns: 2
   fieldSkill: 0
   usableInField: 0
   usesPerBattle: 0

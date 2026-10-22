@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_S1_Backhand
   skillName: "\uC190\uB4F1\uCE58\uAE30"
   skillKey: Backhand Strike
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: cb85b7673e729fb4f8911c8bd94ebc8f, type: 3}
   description: "[\uAC80 \uC804\uC6A9] \uCE7C\uC790\uB8E8 \uCABD \uC190\uB4F1\uC73C\uB85C
     \uD6C4\uB824\uCE5C\uB2E4. STR 40% \uD53C\uD574 + \uB300\uC0C1 STR -20% (1\uD134).
     \uCD5C\uB300 HP\uC758 3% \uC18C\uBAA8."

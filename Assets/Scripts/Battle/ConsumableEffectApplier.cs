@@ -23,6 +23,7 @@ public static class ConsumableEffectApplier
         public List<StatusEffectType> curesApplied;
         public string buffText;  // 건 버프 요약 (예: "ATK +15% (3 turns)"). 없으면 null
         public StatusEffectType? sideEffect; // [2026-10-08] 부작용으로 걸린 상태이상 (없으면 null)
+        public bool revived;                 // [2026-10-22] 부활 아이템으로 일어났으면 true (hpHealed = 일어난 뒤 HP)
 
         public bool AnyApplied =>
             hpHealed > 0 || mpHealed > 0 || mpLost > 0
@@ -43,6 +44,19 @@ public static class ConsumableEffectApplier
         if (user == null || item == null)
         {
             Debug.LogWarning("[ConsumableEffectApplier] user or item is null — abort");
+            return result;
+        }
+
+        // [2026-10-22] 부활 아이템: 쓰러진 아군만 되살린다 (다른 효과 없음). 살아 있으면 아무 일도 없음
+        if (item.IsRevive)
+        {
+            if (user.currentHP <= 0)
+            {
+                user.RemoveAllStatusEffects();
+                user.currentHP = Mathf.Max(1, Mathf.RoundToInt(user.maxHP * item.reviveHpPercent));
+                result.revived = true;
+                result.hpHealed = user.currentHP;
+            }
             return result;
         }
 

@@ -28,7 +28,7 @@ using UnityEngine.Tilemaps;
 public class MapManager : MonoBehaviour
 {
     /// <summary>층에 도착하는 자리.</summary>
-    public enum Arrival { Start, SavedPosition, DownStairs, RandomRoom }
+    public enum Arrival { Start, SavedPosition, DownStairs, RandomRoom, TownGate } // TownGate: [2026-10-22] 귀향의 거울 — 마을 문 칸
 
     [Header("Tilemaps (칸 좌표 기준용 — 새 방식에서는 타일을 그리지 않고 비워둔다)")]
     public Tilemap floorTilemap;
@@ -104,6 +104,10 @@ public class MapManager : MonoBehaviour
     [Tooltip("테스트용: 지금 층을 어두운 층으로 취급")]
     public bool forceDarkFloor = false;
 
+    [Header("테스트용 — 시작 동료")]
+    [Tooltip("새 탐험으로 이 씬에 들어왔고 동료가 하나도 없으면, 이 몬스터들을 동료로 넣고 시작 (HP·MP 가득). 비우면 끔")]
+    public List<Abyssdawn.MonsterSO> testStartingCompanions = new List<Abyssdawn.MonsterSO>();
+
     [Header("Growth (전투 외 성장 — 스톤샤드식)")]
     [Tooltip("걸을 때 자연 회복: 이 걸음 수마다 HP 1 (0 이면 끔)")]
     public int stepsPerRegenHP = 12;
@@ -146,6 +150,11 @@ public class MapManager : MonoBehaviour
             DungeonPersistentData.danger = 0f;
             DungeonPersistentData.playerLightSteps = 0;
             DungeonFieldStatus.Clear();
+
+            // [2026-10-22] 테스트용 시작 동료 — 동료가 없을 때만 (영입해 둔 동료를 덮어쓰지 않음)
+            if (testStartingCompanions.Count > 0 && CompanionPartyPersistence.CountActive() == 0)
+                foreach (var so in testStartingCompanions)
+                    if (so != null) CompanionPartyPersistence.TryAddActive(so, so.HP, so.MP);
         }
 
         _player = FindFirstObjectByType<DungeonGridPlayer>();
@@ -176,6 +185,7 @@ public class MapManager : MonoBehaviour
 
         // 소지금 표시 (화면의 "Money" 글자)
         MoneyLabel.Bind(moneyLabelName);
+        BattleLogView.AttachMenuButton(); // [2026-10-22] 메뉴 줄 "전투 설정" 옆 "전투 기록"
 
         // 화면 아래 파티 카드 (전투의 PartyBar 를 그대로 배치하면 자동 연결)
         if (FindFirstObjectByType<DungeonPartyBar>() == null) gameObject.AddComponent<DungeonPartyBar>();
@@ -380,6 +390,10 @@ public class MapManager : MonoBehaviour
     public float[] heroLightByDistance = { 1f, 1f, 0.5f, 0.2f };
     [Tooltip("시야가 넓을 때(빛을 들었을 때) 3칸 너머의 밝기")]
     [Range(0f, 1f)] public float heroLightFar = 0.15f;
+    [Tooltip("[2026-10-22] 횃불 아이템을 들었을 때 거리 0~5칸의 밝기 (5칸은 흐리게)")]
+    public float[] carriedLightByDistance = { 1f, 1f, 0.85f, 0.65f, 0.45f, 0.22f };
+    [Tooltip("[2026-10-22] 횃불을 들었을 때 함정 자동 감지 확률 (1칸 거리 기준) 추가")]
+    [Range(0f, 0.5f)] public float carriedLightTrapSenseBonus = 0.10f;
     [Tooltip("횃불에서 거리 0·1·2칸의 밝기 (길이 = 밝히는 범위)")]
     public float[] torchLightByDistance = { 1f, 0.7f, 0.4f };
     [Tooltip("멀리 있는 횃불이 보이는 최대 거리 (같은 방/통로 안)")]
@@ -394,10 +408,13 @@ public class MapManager : MonoBehaviour
     {
         _light.Clear();
         bool changed = false;
+        // [2026-10-22] 횃불을 들고 있으면 밝기 곡선이 길어진다 (5칸까지, 끝 칸은 흐리게)
+        bool lit = DungeonPersistentData.playerLightSteps > 0;
+        float[] curve = lit ? carriedLightByDistance : heroLightByDistance;
         foreach (Vector2Int p in _visible)
         {
             int d = Mathf.Max(Mathf.Abs(p.x - pos.x), Mathf.Abs(p.y - pos.y));
-            float b = d < heroLightByDistance.Length ? heroLightByDistance[d] : heroLightFar;
+            float b = d < curve.Length ? curve[d] : heroLightFar;
             if (b > 0f) _light[p] = b;
         }
         if (FloorData.torches.Count == 0) return false;
@@ -588,7 +605,9 @@ public class MapManager : MonoBehaviour
         float c = trapSenseBaseChance + agi * trapSensePerAgi;
         if (FieldSkills.Has(FieldSkills.TrapDetection)) c += FieldSkills.TrapDetectPassiveChance;
         c += Disposition.TrapSenseBonus; // [2026-10-14] 성향 신중함: +25%
-        return Mathf.Clamp(c, 0f, trapSenseMaxChance);
+        bool lit = DungeonPersistentData.playerLightSteps > 0;
+        if (lit) c += carriedLightTrapSenseBonus; // [2026-10-22] 횃불: 밝으면 함정이 더 잘 보인다 (상한도 +10%p)
+        return Mathf.Clamp(c, 0f, trapSenseMaxChance + (lit ? carriedLightTrapSenseBonus : 0f));
     }
 
     private readonly HashSet<Vector2Int> _senseArea = new HashSet<Vector2Int>();
@@ -773,6 +792,8 @@ public class MapManager : MonoBehaviour
             hero.NotifyStatusChanged();
         }
         foreach (var c in cures) if (DungeonFieldStatus.Has(c)) DungeonFieldStatus.Remove(c);
+        foreach (var e in CompanionPartyPersistence.ActiveRoster) // [2026-10-21] 동료 상태이상도 같은 종류 치료
+            if (e != null) foreach (var c in cures) DungeonFieldStatus.RemoveCompanion(e.id, c);
         if (rank >= FieldSkills.CampLightFromRank) AddPlayerLight(FieldSkills.CampLightSteps);
         DungeonEncounter.SetDanger(DungeonPersistentData.danger + FieldSkills.CampDangerAfter[rank - 1]);
         Debug.Log($"[MapManager] B{FloorData.floorNumber} 야영 Lv{rank}: 회복 {restore:P0}, 습격 확률 {ambushChance:P0}");
@@ -829,6 +850,7 @@ public class MapManager : MonoBehaviour
     private void TickWalkRegen()
     {
         if (stepsPerRegenHP <= 0) return;
+        if (!FieldSkills.Has(FieldSkills.NaturalRecovery)) return; // [2026-10-20] 기본 기능 아님 — 스킬 "자연 회복"을 배워야 (트리 위치 미정)
         if (++_regenSteps < stepsPerRegenHP) return;
         _regenSteps = 0;
         PlayerStats hero = GetHeroStats();
@@ -873,6 +895,52 @@ public class MapManager : MonoBehaviour
         });
     }
 
+    // ─────────────────────────────────────────
+    // [2026-10-22] 귀향의 거울 — 지금 층에서 가장 가까운 위쪽 마을 층(B1·B5 …)의 마을 문 앞으로 순간이동하고 마을을 연다
+    // ─────────────────────────────────────────
+
+    private FloorTableEntry SettingsFor(int floor)
+    {
+        FloorTable table = DevFloorTableOverride != null ? DevFloorTableOverride : floorTable;
+        return table != null && table.entries != null && table.entries.Count > 0 ? table.GetEntry(floor) : FloorTableDefaults.Find(null, floor);
+    }
+
+    /// <summary>from 층과 그 위쪽에서 가장 가까운 마을 층. 없으면 -1.</summary>
+    public int NearestTownFloor(int from)
+    {
+        for (int f = Mathf.Max(1, from); f >= 1; f--)
+        {
+            var s = SettingsFor(f);
+            if (s != null && s.floorType == FloorType.Town) return f;
+        }
+        return -1;
+    }
+
+    /// <summary>
+    /// 귀향의 거울 목적지 — 마지막으로 들어간 마을 (몇 층이든). 아직 들어간 마을이 없으면 위쪽에서 가장 가까운 마을. 없으면 -1.
+    /// </summary>
+    public int ReturnTownFloor()
+    {
+        int last = DungeonPersistentData.lastTownFloor;
+        if (last > 0) { var s = SettingsFor(last); if (s != null && s.floorType == FloorType.Town) return last; }
+        return NearestTownFloor(DungeonPersistentData.currentFloor);
+    }
+
+    /// <summary>마을로 돌아간다. 갈 마을이 없으면 false (아이템을 쓰지 않는다).</summary>
+    public bool ReturnToTown()
+    {
+        int town = ReturnTownFloor();
+        if (town < 0) return false;
+        bool sameFloor = town == DungeonPersistentData.currentFloor;
+        if (sameFloor) { if (FloorData.hasTownGate && _player != null) { _player.Teleport(FloorData.townGatePos); RevealAt(FloorData.townGatePos); } }
+        else ChangeFloor(town, Arrival.TownGate);
+        _hud.Flash(new Color(1f, 0.55f, 0.25f, 0.55f), 0.8f);
+        Toast($"<color=#FFB070>거울 속 눈이 깜박인다...</color>\n<size=80%>B{town} 마을 문 앞으로 끌려왔다.</size>");
+        Debug.Log($"[MapManager] 귀향 — B{DungeonPersistentData.currentFloor} 마을 문 앞");
+        OpenTown();
+        return true;
+    }
+
     private void AskTown()
     {
         _hud.Confirm("마을 문이다.\n마을로 들어갈까?", "들어간다", "머문다", ok =>
@@ -887,7 +955,9 @@ public class MapManager : MonoBehaviour
 
     private void OpenTown()
     {
-        _hud.ShowTown(AskInn, _hud.ShowShop, AskSave, null);
+        DungeonPersistentData.lastTownFloor = DungeonPersistentData.currentFloor; // [2026-10-22] 귀향의 거울 목적지
+        PlayLog.TownVisit(DungeonPersistentData.currentFloor);
+        _hud.ShowTown(AskInn, _hud.ShowShop, AskSave, null, AskMorgue);
     }
 
     /// <summary>여관 요금: 첫 마을(B1~4) / 두 번째 마을(B5~).</summary>
@@ -938,11 +1008,14 @@ public class MapManager : MonoBehaviour
             hero.currentMP = hero.maxMP;
             GameManager.EnsureInstance().SaveFromPlayer(hero);
         }
+        int fallen = 0;
         foreach (var entry in CompanionPartyPersistence.ActiveRoster)
         {
             if (entry == null) continue;
             var so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
             if (so == null) continue;
+            // [2026-10-22] 잠으로는 죽은 이가 돌아오지 않는다 — 쓰러진 동료는 안치소에서
+            if (entry.currentHP <= 0) { fallen++; continue; }
             entry.currentHP = so.HP;
             entry.currentMP = so.MP;
         }
@@ -950,8 +1023,54 @@ public class MapManager : MonoBehaviour
         // [2026-10-17] 마을 여관에서 쉬면 새벽의 잔도 다시 채워진다
         bool chalice = ConsumableInventory.Instance != null;
         if (chalice) ConsumableInventory.Instance.RefillDawnChalice();
-        Toast("<color=#FFD24A>여관에서 쉬었다.</color>\n<size=80%>파티 전원이 모두 회복했다." + (chalice ? " <color=#9FD8FF>새벽의 잔도 채워졌다.</color>" : "") + "</size>");
+        Toast("<color=#FFD24A>여관에서 쉬었다.</color>\n<size=80%>" + (fallen > 0 ? "살아 있는 이들이 모두 회복했다." : "파티 전원이 모두 회복했다.")
+              + (chalice ? " <color=#9FD8FF>새벽의 잔도 채워졌다.</color>" : "")
+              + (fallen > 0 ? $"\n<color=#C8A0FF>쓰러진 동료 {fallen}명은 안치소로.</color>" : "") + "</size>");
         Debug.Log("[MapManager] 여관 — 파티 전원 HP/MP 완전 회복");
+    }
+
+    // ─────────────────────────────────────────
+    // [2026-10-22] 안치소 — 쓰러진 동료를 골드를 내고 되살린다 (HP·MP 가득). 여관은 회복만.
+    //   값 = morgueBasePrice + 레벨 × morguePricePerLevel  (예: 쥐 Lv2 = 60G, 고블린 Lv3 = 75G)
+    //   쓰러진 동료가 여럿이면 한 명씩 차례로 묻는다.
+    // ─────────────────────────────────────────
+    [Header("Morgue (안치소)")]
+    public int morgueBasePrice = 30;
+    public int morguePricePerLevel = 15;
+
+    public int MorguePrice(Abyssdawn.MonsterSO so) => so == null ? 0 : morgueBasePrice + so.MonsterLevel * morguePricePerLevel;
+
+    private void AskMorgue()
+    {
+        var list = new List<CompanionPartyPersistence.Entry>();
+        foreach (var e in CompanionPartyPersistence.ActiveRoster) if (e != null && e.currentHP <= 0) list.Add(e);
+        if (list.Count == 0)
+        {
+            Toast("<color=#AAAAAA>안치소의 관은 비어 있다.</color>\n<size=80%>쓰러진 동료가 없다.</size>");
+            return;
+        }
+        AskMorgueOne(list, 0);
+    }
+
+    private void AskMorgueOne(List<CompanionPartyPersistence.Entry> list, int i)
+    {
+        if (i >= list.Count) return;
+        var entry = list[i];
+        var so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
+        if (so == null) { AskMorgueOne(list, i + 1); return; }
+        int price = MorguePrice(so);
+        _hud.Confirm($"<color=#C8A0FF>안치소</color>\n{so.MonsterName} <size=75%>Lv {so.MonsterLevel}</size> 의 혼을 불러올까?\n<size=75%><color=#9FC8FF>{price} G — HP·MP 를 모두 채워 되살린다.\n가진 돈 {PlayerWallet.Gold} G.</color></size>", "되살린다", "그만둔다", ok =>
+        {
+            if (!ok) return;
+            if (!PlayerWallet.TrySpend(price)) { Toast("<color=#FF6B6B>골드가 모자란다.</color>"); return; }
+            entry.currentHP = so.HP;
+            entry.currentMP = so.MP;
+            _hud.Flash(new Color(0.8f, 0.7f, 1f, 0.45f), 0.6f);
+            Toast($"<color=#E6D6FF>촛불이 흔들린다... {Ko.I(so.MonsterName)} 숨을 되찾았다.</color>");
+            var bar = FindFirstObjectByType<DungeonPartyBar>(); if (bar != null) bar.Refresh();
+            Debug.Log($"[MapManager] 안치소 — {so.MonsterName} 부활 ({price}G)");
+            AskMorgueOne(list, i + 1);
+        });
     }
 
     private void AskSave()
@@ -1060,7 +1179,7 @@ public class MapManager : MonoBehaviour
             {
                 hero.skillPoints += 1;
                 FloorState.openedChests.Add(pos);
-                Toast("상자를 열었다: <color=#B98CFF>로어의 서</color>!\n<size=75%>LP +1 (스킬 포인트)</size>");
+                Toast("상자를 열었다: <color=#B98CFF>로어의 서</color>!\n<size=75%>SP +1 (스킬 포인트)</size>");
                 Debug.Log($"[MapManager] B{FloorData.floorNumber} 보물상자 {pos} → 지식의 서 (LP {hero.skillPoints})");
                 if (automapRenderer != null) automapRenderer.Rebuild();
                 return;
@@ -1518,6 +1637,9 @@ public class MapManager : MonoBehaviour
                 break;
             case Arrival.RandomRoom:
                 spawn = RandomRoomCell(-1);
+                break;
+            case Arrival.TownGate:
+                if (FloorData.hasTownGate) spawn = FloorData.townGatePos;
                 break;
         }
 

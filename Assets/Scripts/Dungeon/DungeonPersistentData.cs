@@ -27,6 +27,9 @@ public static class DungeonPersistentData
     // 플레이어가 들고 있는 빛이 남은 걸음 수 (0 이면 빛 없음). 시야 +2 (MapManager.SightRadiusAt)
     public static int playerLightSteps;
 
+    // [2026-10-22] 마지막으로 들어간 마을 층 (0 = 아직 없음). 귀향의 거울이 여기로 데려간다
+    public static int lastTownFloor;
+
     /// <summary>floor 층의 기록. 없으면 새 시드로 만든다.</summary>
     public static DungeonFloorState GetOrCreateFloor(int floor)
     {
@@ -58,6 +61,7 @@ public static class DungeonPersistentData
         floors.Clear();
         danger = 0f;
         playerLightSteps = 0;
+        lastTownFloor = 0;
         DungeonFieldStatus.Clear(); // 함정 상태이상
         BossEncounter.defeatedFloors.Clear(); // [2026-10-09] 층 보스
         innVigorPending = false; innVigorBattlesLeft = 0; innVigorPercent = 0f; PlayerStats.InnVigorPercent = 0f;

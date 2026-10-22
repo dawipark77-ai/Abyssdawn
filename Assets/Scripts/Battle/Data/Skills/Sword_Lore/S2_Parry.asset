@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_S2_Parry
   skillName: "\uBC1B\uC544 \uB118\uAE30\uAE30"
   skillKey: Parry
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: f9e600648b9a4025ade3631152fcf5eb, type: 3}
   description: "[\uAC80 \uC804\uC6A9 \xB7 \uC120\uC81C] \uC774\uBC88 \uB77C\uC6B4\uB4DC
     \uCCAB \uBB3C\uB9AC \uACF5\uACA9\uC744 \uCE7C\uB0A0\uB85C \uBC1B\uC544 \uB118\uAE34\uB2E4
     (\uAE30\uBCF8 60% \xB1 \uBBFC\uCCA9 \uCC28, 35~85%). \uC131\uACF5: \uD53C\uD574
@@ -76,4 +76,4 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: 1bb604e4edec13b40ae51f815d350a7e, type: 2}
-  requiredLorePoints: 2
+  requiredLorePoints: 1

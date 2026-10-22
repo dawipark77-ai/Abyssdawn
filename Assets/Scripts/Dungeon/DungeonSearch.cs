@@ -88,6 +88,7 @@ public class DungeonSearch : MonoBehaviour
         _player.LockInput(this);
         Vector2Int pos = _player.gridPos;
         int searchR = FieldSkills.SearchRadius(); // [2026-10-15] 기본 1칸, 함정 탐지 등급으로 2·3·4칸 (성향 보너스 없음)
+        if (DungeonPersistentData.playerLightSteps > 0) searchR += 1; // [2026-10-22] 횃불을 들면 탐색 범위 +1칸
         _map.FindHiddenAround(pos, searchR, _found);
 
         // 1) 탐색 물결 — [2026-10-14] 레트로 느낌: 바닥 칸 크기의 사각 타일이 한 칸씩 사각 링으로 퍼진다.

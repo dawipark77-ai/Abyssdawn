@@ -283,11 +283,11 @@ public class SwordSkillTreeManager : MonoBehaviour
         foreach (var s in list) labels.Add(s != null ? s.skillName : "<color=#888888>비어 있음</color>");
         string kind = skill.IsPassive ? "패시브" : "스킬";
         hud.ChooseSkillSlot(
-            $"<b>{skill.skillName}</b> 배움!\n<size=80%>{kind} 칸이 가득 찼습니다. 어느 것을 바꿀까요?\n<color=#AAAAAA>(나중에: 스킬 세트에서 언제든 장착)</color></size>",
+            $"<b>{skill.skillName}</b> 기억해 냈다!\n<size=80%>{kind} 칸이 가득 찼습니다. 어느 것을 바꿀까요?\n<color=#AAAAAA>(나중에: 스킬 세트에서 언제든 장착)</color></size>",
             labels,
             index =>
             {
-                if (index < 0) { hud.Toast($"{skill.skillName} 배움 — 아직 장착하지 않음."); return; }
+                if (index < 0) { hud.Toast($"{skill.skillName} 기억해 냄 — 아직 장착하지 않음."); return; }
                 SkillData old = list[index];
                 playerStatData.EquipAt(skill, index);
 #if UNITY_EDITOR

@@ -740,6 +740,7 @@ public class LoreTreeStyle : MonoBehaviour
 
     private void StyleNode(SkillTreeNode n)
     {
+        n.requiredSkillPoints = 1; // [2026-10-20] 모든 스킬 SP 1 (씬 노드에 남은 2·3 값 무시)
         // [2026-10-20] 칸마다 따로 깔린 바탕은 없앰 — 트리 전체 배경이 그대로 보이게 (틀과 아이콘만)
         var slot = n.GetComponent<Image>();
         if (slot != null && slot != n.skillIcon && (slot.sprite == null || slot.sprite.name == "UISprite"))

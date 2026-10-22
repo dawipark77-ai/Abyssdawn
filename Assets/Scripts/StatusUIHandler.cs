@@ -181,10 +181,34 @@ public class StatusUIHandler : MonoBehaviour
             SkillData skill = (i < count) ? skills[i] : null;
             Sprite icon = (skill != null) ? skill.skillIcon : null;
             SetSlotIcon(slot, icon);
+            SetFallbackName(slot, skill != null && icon == null ? skill.skillName : null); // [2026-10-22] 아이콘 없는 스킬(리베르소 등)은 이름으로
+            if (skill != null && icon == null) { var c = slot.color; c.a = 0.001f; slot.color = c; } // 거의 투명해도 눌리게
             // [2026-10-11] 아이콘을 누르면 스킬 상세 팝업 (빈 칸이면 아무 일 없음)
             SkillData captured = skill;
             DetailClickTarget.Attach(slot, () => DetailClickTarget.ForSkill(captured));
         }
+    }
+
+    private static void SetFallbackName(Image slot, string name)
+    {
+        var t = slot.transform.Find("FallbackName");
+        if (string.IsNullOrEmpty(name)) { if (t != null) t.gameObject.SetActive(false); return; }
+        TMPro.TextMeshProUGUI tmp;
+        if (t == null)
+        {
+            var go = new GameObject("FallbackName", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+            go.transform.SetParent(slot.transform, false);
+            var rt = (RectTransform)go.transform; rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = new Vector2(2, 2); rt.offsetMax = new Vector2(-2, -2);
+            tmp = go.GetComponent<TMPro.TextMeshProUGUI>();
+            tmp.enableAutoSizing = true; tmp.fontSizeMin = 10; tmp.fontSizeMax = 22;
+            tmp.alignment = TMPro.TextAlignmentOptions.Center; tmp.raycastTarget = false;
+            tmp.color = new Color(0.96f, 0.87f, 0.58f);
+            foreach (var other in slot.transform.root.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
+                if (other.font != null && other.font.name.Contains("NotoSansKR")) { tmp.font = other.font; break; }
+        }
+        else tmp = t.GetComponent<TMPro.TextMeshProUGUI>();
+        tmp.gameObject.SetActive(true);
+        tmp.text = name;
     }
 
     private void SetSlotIcon(Image slot, Sprite icon)
@@ -248,7 +272,9 @@ public class StatusUIHandler : MonoBehaviour
         // 자식들 중에서 이름에 "Slot"을 포함하는 모든 오브젝트를 가져오기
         foreach (Transform child in root)
         {
-            if (child.name.Contains("Slot"))
+            // [2026-10-22] StatusPanelStyle 이 칸마다 뒤판("Slot1_Back0" 등)을 같은 부모에 만든다 — 뒤판은 칸이 아니다.
+            //   예전엔 뒤판까지 칸으로 세어 6개 스킬이 12칸에 엇갈려 들어가, 4번째부터(강베기 등) 뒤판에 그려져 안 보였다.
+            if (child.name.Contains("Slot") && !child.name.Contains("_Back"))
             {
                 slotTransforms.Add(child);
             }

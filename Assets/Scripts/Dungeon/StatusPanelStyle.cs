@@ -96,6 +96,11 @@ public class StatusPanelStyle : MonoBehaviour
             string s = t.text.Trim();
             if (IsLabel(s)) StyleLabel(t);
         }
+
+        // [2026-10-22] 주인공 기본 정보 칸 오른쪽 위에 "상세" 버튼 → 능력치 상세 페이지
+        var heroBasic = transform.Find("Slot1/Character_Slot1/BasicPanel") as RectTransform;
+        if (heroBasic != null)
+            StatDetailPopup.AttachButton(heroBasic, () => StatDetailPopup.ShowHero(FindFirstObjectByType<PlayerStats>()));
         _styled = true;
     }
 

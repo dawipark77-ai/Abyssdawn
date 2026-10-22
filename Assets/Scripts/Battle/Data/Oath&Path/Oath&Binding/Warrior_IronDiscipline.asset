@@ -15,6 +15,7 @@ MonoBehaviour:
   oathID: Warrior_IronDiscipline
   oathName: "\uCCA0\uC758 \uADDC\uC728"
   jobClass: 0
+  oathIcon: {fileID: 21300000, guid: d3f4eaf0e1e34291ab5eaaebd64768dd, type: 3}
   oathDescription: "\uACF5\uACA9\uD560 \uB54C\uB9C8\uB2E4 (\uC77C\uBC18 \uACF5\uACA9\xB7\uC2A4\uD0AC\xB7\uB9C8\uBC95)
     \uADDC\uC728\uC774 1 \uC313\uC778\uB2E4. \uCD5C\uB300 5.\n\uADDC\uC728 1\uB2F9
     ATK +3%, \uBA85\uC911 +3%."

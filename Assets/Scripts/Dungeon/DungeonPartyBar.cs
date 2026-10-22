@@ -30,6 +30,7 @@ public class DungeonPartyBar : MonoBehaviour
         public Transform slot;
         public Transform skullParent;
         public TextMeshProUGUI nameText, hpText, mpText, levelText;
+        public int number; // [2026-10-22] 자리 번호 1~4
         public List<Image> icons;
     }
 
@@ -47,17 +48,23 @@ public class DungeonPartyBar : MonoBehaviour
     // [2026-10-18] 아이템 대상 고르기 — 화면을 살짝 어둡게 하고 카드만 위로 올려 빛나게. 카드를 누르면 그 칸 번호로 콜백.
     // ─────────────────────────────────────────
     private System.Action<int> _pickCallback;
+    private System.Func<int, bool> _pickFilter;
     private GameObject _pickDim;
     private Canvas _pickRaise;
     private GraphicRaycaster _pickRaiseRay;
     private readonly List<GameObject> _pickGlows = new List<GameObject>();
+    private bool _pickAllowEmpty;
     public bool IsPicking => _pickCallback != null;
 
-    public void BeginTargetPick(string caption, System.Action<int> onPick)
+    /// <param name="canPick">[2026-10-22] 고를 수 있는 칸 (없으면 사람이 있는 칸 전부). 부활 아이템은 쓰러진 동료 칸만.</param>
+    /// <param name="allowEmpty">[2026-10-22] 빈 칸도 고를 수 있게 (대기 동료를 파티의 원하는 자리에 넣을 때)</param>
+    public void BeginTargetPick(string caption, System.Action<int> onPick, System.Func<int, bool> canPick = null, bool allowEmpty = false)
     {
         if (!EnsureBound() || onPick == null) return;
         EndPick();
         _pickCallback = onPick;
+        _pickFilter = canPick;
+        _pickAllowEmpty = allowEmpty;
 
         // 어두운 막 (맨 위 화면 캔버스) — 누르면 취소
         _pickDim = new GameObject("ItemTargetDim", typeof(RectTransform));
@@ -97,7 +104,7 @@ public class DungeonPartyBar : MonoBehaviour
         var occ = CompanionPartyPersistence.BuildMainLineOccupancy();
         for (int i = 0; i < _cards.Count && i < occ.Length; i++)
         {
-            if (_cards[i] == null || occ[i].IsEmpty) continue;
+            if (_cards[i] == null || (occ[i].IsEmpty && !_pickAllowEmpty) || (_pickFilter != null && !_pickFilter(i))) continue;
             var g = new GameObject("PickGlow", typeof(RectTransform), typeof(Image));
             g.transform.SetParent(_cards[i].slot, false);
             var grt = (RectTransform)g.transform; grt.anchorMin = Vector2.zero; grt.anchorMax = Vector2.one; grt.offsetMin = new Vector2(-6f, -6f); grt.offsetMax = new Vector2(6f, 6f);
@@ -112,7 +119,8 @@ public class DungeonPartyBar : MonoBehaviour
     private void FinishPick(int cardIndex)
     {
         var occ = CompanionPartyPersistence.BuildMainLineOccupancy();
-        if (cardIndex < 0 || cardIndex >= occ.Length || occ[cardIndex].IsEmpty) return; // 빈 칸은 무시
+        if (cardIndex < 0 || cardIndex >= occ.Length || (occ[cardIndex].IsEmpty && !_pickAllowEmpty)) return; // 빈 칸은 무시 (허용할 때 빼고)
+        if (_pickFilter != null && !_pickFilter(cardIndex)) return;                       // 고를 수 없는 칸도 무시
         var cb = _pickCallback;
         EndPick();
         cb(cardIndex);
@@ -123,6 +131,7 @@ public class DungeonPartyBar : MonoBehaviour
     {
         bool was = _pickCallback != null;
         _pickCallback = null;
+        _pickFilter = null;
         if (_pickDim != null) Destroy(_pickDim);
         _pickDim = null;
         foreach (var g in _pickGlows) if (g != null) Destroy(g);
@@ -177,6 +186,41 @@ public class DungeonPartyBar : MonoBehaviour
         DungeonFieldStatus.OnChanged -= Refresh;
     }
 
+    // ── [2026-10-22] 한글 글자 아틀라스(NotoSansKR SDF, Dynamic)가 바뀌면 카드 글자를 다시 그린다 ──
+    //   서약 창 등 다른 창이 새 한글을 쓰면 아틀라스에 글자·페이지가 추가되는데, 그때 카드의 한글 이름(폴백 서브메시)이
+    //   사라지는 일이 있었다 (영문 "hero"·"Lv2"는 멀쩡). 재현이 일정하지 않아 원인 확정 전 — 바뀔 때마다 다시 그려 막는다.
+    private TMP_FontAsset _krFont;
+    private int _atlasSig = -1;
+
+    private int AtlasSignature()
+    {
+        if (_krFont == null)
+            foreach (var f in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+                if (f != null && f.name == "NotoSansKR SDF") { _krFont = f; break; }
+        if (_krFont == null) return 0;
+        int pages = _krFont.atlasTextures != null ? _krFont.atlasTextures.Length : 0;
+        int glyphs = _krFont.glyphTable != null ? _krFont.glyphTable.Count : 0;
+        return glyphs * 16 + pages;
+    }
+
+    private void RemeshCardTexts()
+    {
+        foreach (var c in _cards)
+        {
+            if (c == null || c.slot == null) continue;
+            foreach (var t in c.slot.GetComponentsInChildren<TextMeshProUGUI>(false)) t.ForceMeshUpdate(true, true);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        int a = AtlasSignature();
+        if (a == _atlasSig) return;
+        bool first = _atlasSig < 0;
+        _atlasSig = a;
+        if (!first) RemeshCardTexts();
+    }
+
     private void Update()
     {
         Update2Pulse(); // [2026-10-18] 대상 고르기 금테 깜빡임
@@ -229,27 +273,29 @@ public class DungeonPartyBar : MonoBehaviour
                 var entry = occupancy[i].entry;
                 MonsterSO so = CompanionPartyPersistence.LoadCompanion(entry.resourcePath);
                 if (so == null) { FillEmpty(card); continue; }
-                FillCard(card, so.MonsterName, so.MonsterLevel, entry.currentHP, so.HP, entry.currentMP, so.MP, null);
+                FillCard(card, so.MonsterName, so.MonsterLevel, entry.currentHP, so.HP, entry.currentMP, so.MP, null, entry.id);
             }
         }
     }
 
-    private void FillCard(Card card, string name, int level, int hp, int maxHp, int mp, int maxMp, PlayerStats statusSource)
+    private void FillCard(Card card, string name, int level, int hp, int maxHp, int mp, int maxMp, PlayerStats statusSource, int companionId = 0)
     {
         bool dead = hp <= 0;
         Color c = dead ? DownedTextColor : AliveTextColor;
         SetText(card.nameText, name, c);
-        SetText(card.levelText, level.ToString(), c);
+        SetText(card.levelText, card.number.ToString(), c);                  // 왼쪽 위 = 자리 번호 (No.)
+        PartyCardVisuals.SetLevelBadge(card.levelText, card.nameText, level); // [2026-10-22] Lv 는 No. 숫자 끝에 맞춘 별도 글자
         SetText(card.hpText, $"HP {hp}/{maxHp}", c);
         SetText(card.mpText, $"MP {mp}/{maxMp}", c);
         PartyCardVisuals.SetDeathSkull(card.skullParent, dead);
-        PartyCardVisuals.ShowStatusIcons(card.icons, statusSource);
+        PartyCardVisuals.ShowStatusIcons(card.icons, statusSource, companionId); // [2026-10-21] 동료 상태이상 아이콘
     }
 
     private void FillEmpty(Card card)
     {
         SetText(card.nameText, "", AliveTextColor);
-        SetText(card.levelText, "", AliveTextColor);
+        SetText(card.levelText, card.number.ToString(), AliveTextColor); // [2026-10-22] 빈 칸도 "No.2" 처럼 번호는 보인다
+        PartyCardVisuals.SetLevelBadge(null, card.nameText, 0);
         SetText(card.hpText, "", AliveTextColor);
         SetText(card.mpText, "", AliveTextColor);
         PartyCardVisuals.SetDeathSkull(card.skullParent, false);
@@ -303,6 +349,8 @@ public class DungeonPartyBar : MonoBehaviour
             // 해골은 전투와 같은 자리 — 글자의 부모(카드 안쪽 배경) 맨 아래 층
             TextMeshProUGUI anchor = card.hpText != null ? card.hpText : (card.nameText != null ? card.nameText : card.mpText);
             card.skullParent = anchor != null ? anchor.transform.parent : slot;
+            card.number = i + 1;
+            PartyCardVisuals.SetNumberLabel(slot); // [2026-10-22] "Lv." → "No."
             _cards.Add(card);
         }
 

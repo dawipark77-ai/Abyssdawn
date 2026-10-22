@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uD798\uC904 \uB04A\uAE30"
   skillKey: Tendon Sever
   skillIcon: {fileID: 21300000, guid: 0fa9c982a6c3ad14999b808840011bcb, type: 3}
-  description: "[\uB2E8\uAC80\uC220 \xB7 \uACF5\uACA9] \uD798\uC904 \uB04A\uAE30.
+  description: "[\uB2E8\uAC80\uD559 \xB7 \uACF5\uACA9] \uD798\uC904 \uB04A\uAE30.
     \uC801 1\uBA85\uC5D0\uAC8C \uBBFC\uCCA9 60% \uD53C\uD574, 3\uD134 \uB3D9\uC548
     \uD798 -20% (\uC911\uCCA9 \uC5C6\uC74C). HP 4%."
   usageType: 0

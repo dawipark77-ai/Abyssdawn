@@ -269,6 +269,8 @@ public class BattleManager : MonoBehaviour
     private bool turnInProgress = false;
     /// <summary>외부 UI(BattleItemSlot 등)가 행동 중복 방지용으로 읽는 read-only 프로퍼티.</summary>
     public bool IsTurnInProgress => turnInProgress;
+    /// <summary>[2026-10-22] 지금 명령을 고르는 동료 (명령 단계가 아니면 주인공). 아이템 사용자 등에 쓴다.</summary>
+    public PlayerStats CurrentCommandActor => currentPhase == BattlePhase.Command && currentControlledMember != null ? currentControlledMember : player;
 
     [System.Serializable]
     public class AllyCommand
@@ -1834,6 +1836,7 @@ public class BattleManager : MonoBehaviour
 
     void Start()
     {
+        BattleLogArchive.Begin($"B{Mathf.Max(1, DungeonPersistentData.currentFloor)}"); // [2026-10-22] 전투 기록 — 이번 전투부터 새로
         ForceDisableUIPanels();
         StartCoroutine(EnsureUIPanelsClosedAfterFrames(3));
 
@@ -1887,8 +1890,44 @@ public class BattleManager : MonoBehaviour
         StartBattle();
     }
 
+    // ── [2026-10-22] 명령을 다 낸 뒤(행동이 진행되는 동안)에는 명령 버튼을 회색으로 덮어 누를 수 없게 ──
+    private bool _commandLockShown;
+    private const string CommandLockShadeName = "CommandLockShade";
+
+    private void UpdateCommandLock()
+    {
+        // 명령을 다 낸 직후의 "취소 가능" 잠깐(_graceRoutine)도 잠금 — 그때는 취소 버튼만 쓸 수 있다
+        bool locked = currentPhase == BattlePhase.Resolution || battleEnded || _graceRoutine != null;
+        if (locked == _commandLockShown) return;
+        _commandLockShown = locked;
+        foreach (var b in new[] { attackButton, skillButton, itemButton, defendButton, fleeButton, _moveButton })
+        {
+            if (b == null) continue;
+            var cg = b.GetComponent<CanvasGroup>();
+            if (cg == null) cg = b.gameObject.AddComponent<CanvasGroup>();
+            cg.interactable = !locked;
+            cg.blocksRaycasts = true; // 덮개가 클릭을 받아 아래로 새지 않게
+            var shade = b.transform.Find(CommandLockShadeName);
+            if (shade == null)
+            {
+                var go = new GameObject(CommandLockShadeName, typeof(RectTransform), typeof(Image));
+                go.transform.SetParent(b.transform, false);
+                var rt = (RectTransform)go.transform;
+                rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero;
+                var img = go.GetComponent<Image>();
+                img.color = new Color(0.18f, 0.18f, 0.18f, 0.72f); // 회색 덮개
+                img.raycastTarget = true;
+                go.AddComponent<LayoutElement>().ignoreLayout = true;
+                shade = go.transform;
+            }
+            shade.SetAsLastSibling();
+            shade.gameObject.SetActive(locked);
+        }
+    }
+
     void Update()
     {
+        UpdateCommandLock();
         if (Input.GetKeyDown(soloPartyHotkey)) SetPartyMode(PartyMode.Solo);
         if (Input.GetKeyDown(fullPartyHotkey)) SetPartyMode(PartyMode.Full);
 
@@ -2000,6 +2039,12 @@ public class BattleManager : MonoBehaviour
                 hoveredEnemy = clickedEnemy;
                 hoveredEnemy.SetHighlight(true);
 
+                // [2026-10-22] 자리 제한 스킬 (예: 베기 = 전열 1·2번만)
+                if (pendingAction == "skill" && pendingSkill != null && !SkillReachesEnemy(pendingSkill, clickedEnemy))
+                {
+                    AddMessage($"<color=#AAAAAA>{Ko.Eun(pendingSkill.skillName)} {Ko.Ui(clickedEnemy.enemyName)} 자리까지 닿지 않는다.</color>");
+                    return false;
+                }
                 // 타겟 선택 완료
                 if (pendingAction == "attack")
                 {
@@ -2026,6 +2071,7 @@ public class BattleManager : MonoBehaviour
     private void StartResolveGrace()
     {
         if (_graceRoutine != null) StopCoroutine(_graceRoutine);
+        CardFx.SetTurnGlow(null); // [2026-10-22] 명령을 다 골랐으면 카드 빛은 끈다 (취소하면 다시 켜짐)
         _graceRoutine = StartCoroutine(ResolveGraceRoutine());
     }
 
@@ -2068,7 +2114,7 @@ public class BattleManager : MonoBehaviour
             if (battleUIManager != null)
             {
                 battleUIManager.ShowFightSubPanel();
-                battleUIManager.ShowBackButton(false); // 메뉴에서는 Back 버튼 숨김 (선택 사항)
+                battleUIManager.ShowBackButton(CanUndoNow()); // [2026-10-21] 앞 동료 명령이 있으면 취소 버튼 유지 (예전엔 숨겨져 더 못 돌아감)
             }
             return;
         }
@@ -2161,8 +2207,44 @@ public class BattleManager : MonoBehaviour
 
     public void OnMoveButton()
     {
-        if (currentPhase != BattlePhase.Command || currentControlledMember == null || currentControlledMember.IsRecruitedCompanion) return;
-        OpenMovePicker(null);
+        if (currentPhase != BattlePhase.Command || currentControlledMember == null) return; // [2026-10-22] 동료(몬스터)도 자기 차례에 이동 가능
+        OpenMoveByCards();
+    }
+
+    /// <summary>
+    /// [2026-10-22] 이동 — 팝업 대신 아래 캐릭터 카드를 눌러 고른다.
+    ///  1) 누가 움직일까: 살아 있는 아군 카드가 빛남 → 2) 어디로: 옆자리(왼·오른쪽 1칸) 아군 카드가 빛남 (빈 자리는 카드 위 버튼)
+    /// </summary>
+    private void OpenMoveByCards()
+    {
+        OpenAllyPicker("이동 — 누가 움직일까?", currentControlledMember, who =>
+        {
+            // [2026-10-22] 옆 1칸만이 아니라 1~4번 어느 자리든 — 동료가 있으면 맞바꾸고, 비어 있으면 그 자리로
+            var targets = new List<PlayerStats>();
+            var extras = new List<(string label, System.Action act)>();
+            for (int n = 1; n <= 4; n++)
+            {
+                BattleSlot to = (BattleSlot)n;
+                if (to == who.currentSlot) continue;
+                PlayerStats occ = activePartyMembers.Find(p => p != null && p != who && p.currentSlot == to);
+                var capTo = to;
+                if (occ != null) targets.Add(occ);
+                else extras.Add(($"{n}번 빈 자리", () => QueueMove(who, capTo)));
+            }
+            if (targets.Count == 0 && extras.Count == 0) { AddMessage($"<color=#AAAAAA>{Ko.Eun(who.playerName)} 옮길 자리가 없다.</color>"); return; }
+            OpenAllyPicker($"{who.playerName} — 누구와 자리를 바꿀까?", currentControlledMember,
+                other => QueueMove(who, other.currentSlot), m => targets.Contains(m), extras);
+        });
+    }
+
+    private void QueueMove(PlayerStats who, BattleSlot to)
+    {
+        var hero = currentControlledMember;
+        // 안내 줄을 먼저 — 명령을 넣으면 바로 다음 동료의 "행동을 준비한다" 가 나온다
+        AddMessage(who == hero ? $"<color=#AAAAAA>{Ko.I(hero.playerName)} {(int)to}번 자리로 움직인다.</color>" : $"<color=#AAAAAA>{Ko.I(hero.playerName)} {Ko.Eul(who.playerName)} {(int)to}번 자리로 보낸다.</color>");
+        QueueAllyCommand(hero, "move");
+        var cmd = pendingCommands.FindLast(c => c.actor == hero && c.actionType == "move");
+        if (cmd != null) { cmd.moveActor = who; cmd.moveTo = to; }
     }
 
     /// <summary>1단계: 누가 움직일지 (who == null) → 2단계: 어느 쪽으로.</summary>
@@ -2264,6 +2346,54 @@ public class BattleManager : MonoBehaviour
         t.rectTransform.anchorMin = Vector2.zero; t.rectTransform.anchorMax = Vector2.one; t.rectTransform.offsetMin = t.rectTransform.offsetMax = Vector2.zero;
     }
 
+    /// <summary>[2026-10-22] 이 디버프가 중첩되는가 — 가산(Flat) 수정치만 쌓인다 (눈 할퀴기 명중 -5% ×2~4).</summary>
+    private static bool CurseStacks(AbyssdawnBattle.StatusEffectSO fx)
+    {
+        if (fx == null || fx.statModifiers == null || fx.statModifiers.Count == 0) return false;
+        if (fx.noStack) return false; // [2026-10-22] 모래 뿌리기 — 가산이어도 중첩 없음
+        return fx.statModifiers.TrueForAll(m => m.modType == StatModType.Flat);
+    }
+
+    /// <summary>[2026-10-22] 디버프 문구를 실제 수정치에서 만든다 — "명중 -10%", "DEF -20%". nameOnly 면 "DEF 저하".</summary>
+    private static string CurseModText(AbyssdawnBattle.StatusEffectSO fx, int stacks, bool nameOnly = false)
+    {
+        if (fx == null || fx.statModifiers == null) return "";
+        var parts = new List<string>();
+        foreach (var m in fx.statModifiers)
+        {
+            string stat = Ko.Stat(m.statType);
+            if (nameOnly) { parts.Add($"{stat} {(m.value < (m.modType == StatModType.PercentMult ? 1f : 0f) ? "저하" : "상승")}"); continue; }
+            float pct = m.modType == StatModType.PercentMult ? (Mathf.Pow(m.value, stacks) - 1f) * 100f
+                      : m.modType == StatModType.PercentAdd ? m.value * stacks * 100f
+                      : (Mathf.Abs(m.value) < 1f ? m.value * stacks * 100f : m.value * stacks);
+            parts.Add($"{stat} {(pct >= 0f ? "+" : "")}{pct:0.#}%");
+        }
+        return string.Join(" · ", parts);
+    }
+
+    /// <summary>[2026-10-22] GlowBorder 9분할 금선 (가운데 비움). outset 음수면 안쪽 — 상태창 테두리와 같은 모양.</summary>
+    private static void AddGoldFrame(RectTransform parent, string name, Color color, float outset)
+    {
+        var sp = Resources.Load<Sprite>("UI/GlowBorder");
+        if (sp == null) return;
+        var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        var img = go.GetComponent<Image>();
+        img.sprite = sp; img.type = Image.Type.Sliced; img.fillCenter = false; img.color = color; img.raycastTarget = false;
+        var rt = img.rectTransform;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = new Vector2(-outset, -outset); rt.offsetMax = new Vector2(outset, outset);
+    }
+
+    /// <summary>[2026-10-21] 지금 되돌릴 앞 명령이 있는가 (취소 버튼 표시용).</summary>
+    private bool CanUndoNow()
+    {
+        if (currentPhase != BattlePhase.Command) return false;
+        for (int i = 0; i < commandIndex && i < activePartyMembers.Count; i++)
+            if (activePartyMembers[i] != null && pendingCommands.Exists(c => c.actor == activePartyMembers[i])) return true;
+        return false;
+    }
+
     /// <summary>[2026-10-15] 행동 취소 — 바로 앞 동료의 명령을 지우고 그 동료가 다시 고르게 한다 (아이템은 실행 때 쓰므로 돌려줄 것 없음).</summary>
     private bool UndoPreviousCommand()
     {
@@ -2273,7 +2403,7 @@ public class BattleManager : MonoBehaviour
             var m = activePartyMembers[i];
             if (m == null || m.currentHP <= 0) continue;
             int ci = pendingCommands.FindLastIndex(c => c.actor == m);
-            if (ci < 0) return false;
+            if (ci < 0) continue; // [2026-10-21] 명령이 없던 동료(기절 등)는 건너뛰고 그 앞 동료로
             pendingCommands.RemoveAt(ci);
             commandIndex = i;
             AddMessage($"<color=#AAAAAA>{m.playerName}의 명령을 취소했다.</color>");
@@ -2296,7 +2426,9 @@ public class BattleManager : MonoBehaviour
     {
         if (battleUIManager != null)
         {
-            battleUIManager.ShowBackButton(false);
+            // [2026-10-21] 명령 버튼들이 명령을 넣은 "뒤에" 이걸 불러, 다음 동료 차례·마지막 명령 뒤 유예 시간의 취소 버튼까지 숨겼다
+            //   → 되돌릴 앞 명령이 있으면(또는 유예 중이면) 그대로 보이게 둔다
+            battleUIManager.ShowBackButton(_graceRoutine != null || CanUndoNow());
         }
     }
 
@@ -2305,9 +2437,31 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(ReturnToDungeonRoutine(delay));
     }
 
+    /// <summary>[2026-10-21] 전투 상태이상 → 던전 상태이상 (한 걸음 = 1턴, 매 턴 피해). 예: 3턴 출혈을 받고 바로 이기면 맵에서 3걸음 출혈.
+    ///   종류: 출혈·독·점화·실명 (DungeonFieldStatus.CarriedTypes). 주인공 + 동료(고유 번호별).</summary>
+    private void CarryStatusesToDungeon()
+    {
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null) continue;
+            if (m.IsRecruitedCompanion) { DungeonFieldStatus.CarryFromBattleCompanion(m); continue; }
+            if (m.currentHP <= 0) continue;
+            foreach (var type in DungeonFieldStatus.CarriedTypes)
+            {
+                var se = m.activeStatusEffects.Find(e => e != null && e.data != null && e.data.effectType == type);
+                if (se != null && se.remainingTurns > 0)
+                {
+                    DungeonFieldStatus.Add(type, se.remainingTurns, 1);
+                    Debug.Log($"[BattleManager] {type} {se.remainingTurns}턴 → 던전으로 이어짐");
+                }
+            }
+        }
+    }
+
     private IEnumerator ReturnToDungeonRoutine(float delay)
     {
         EndInnVigor(); // [2026-10-11] 단골 손님 최대 HP·MP 보너스는 전투 동안만
+        CarryStatusesToDungeon(); // [2026-10-21] 전투에서 걸린 출혈·독·점화·실명은 남은 턴만큼 맵에서도 이어진다 (동료 포함)
         var gm = GameManager.EnsureInstance();
         Debug.Log($"[BM:DIAG] ReturnToDungeonRoutine START | activePartyMembers.Count={activePartyMembers.Count} | GM={(gm != null ? "exists" : "NULL")} | delay={delay}, IsPlayingMessageSequence={IsPlayingMessageSequence}");
         foreach (var member in activePartyMembers)
@@ -2590,6 +2744,8 @@ public class BattleManager : MonoBehaviour
         }
 
         PositionPartyMembers();
+        // [2026-10-22] 쓰러진 채로 전투에 들어온 동료는 이미 알린 것으로 — "쓰러졌다!" 가 또 나오지 않게
+        foreach (var m in activePartyMembers) if (m != null && m.currentHP <= 0) _downAnnounced.Add(m);
         Debug.Log($"[CompanionParty] BuildBattleParty — members={activePartyMembers.Count} (companions={_companionInstances.Count})");
     }
 
@@ -3168,6 +3324,13 @@ public class BattleManager : MonoBehaviour
         var carried = DungeonFieldStatus.ApplyToBattle(hero);
         if (carried.Count > 0)
             AddMessage($"<color=#FF9F6B>{Ko.I(hero.playerName)} 아직 시달리고 있다: {string.Join(", ", carried)}.</color>");
+        // [2026-10-21] 동료도 맵에서 이어진 상태이상을 다시 건다
+        foreach (var m in activePartyMembers)
+        {
+            if (m == null || !m.IsRecruitedCompanion || m.currentHP <= 0) continue;
+            var c = DungeonFieldStatus.ApplyToBattleCompanion(m);
+            if (c.Count > 0) AddMessage($"<color=#FF9F6B>{Ko.I(m.playerName)} 아직 시달리고 있다: {string.Join(", ", c)}.</color>");
+        }
 
         // [2026-10-11] 보급술 '단골 손님': 여관 뒤 첫 3번 전투 동안 최대 HP·MP +% (늘어난 만큼 현재 HP·MP 도)
         if (DungeonPersistentData.innVigorBattlesLeft > 0 && DungeonPersistentData.innVigorPercent > 0f)
@@ -3540,7 +3703,7 @@ public class BattleManager : MonoBehaviour
                 if (waitingForTargetSelection && activeEnemies.Count > captured && activeEnemies[captured] != null)
                 {
                     EnemyStats clickedEnemy = activeEnemies[captured];
-                    if (clickedEnemy.currentHP > 0)
+                    if (clickedEnemy.currentHP > 0 && !(pendingAction == "skill" && pendingSkill != null && !SkillReachesEnemy(pendingSkill, clickedEnemy)))
                     {
                         if (hoveredEnemy != null && hoveredEnemy != clickedEnemy)
                         {
@@ -3923,7 +4086,7 @@ public class BattleManager : MonoBehaviour
             battleUIManager.ShowBackButton(canUndo);
         }
         EnsureMoveButton(); // [2026-10-15] 위치 이동 — 주인공만 명령할 수 있다
-        if (_moveButton != null) _moveButton.gameObject.SetActive(!currentControlledMember.IsRecruitedCompanion);
+        if (_moveButton != null) _moveButton.gameObject.SetActive(true); // [2026-10-22] 누구 차례든 이동 (예전엔 주인공만)
 
         AddMessage($"{Ko.I(currentControlledMember.playerName)} 행동을 준비한다.");
         UpdateStatusUI();
@@ -4011,6 +4174,14 @@ public class BattleManager : MonoBehaviour
     private void QueueAllyCommand(PlayerStats actor, string actionType, EnemyStats targetEnemy = null, SkillData skill = null, int itemHeal = 0, bool consumesPotion = false, ConsumableItemSO usedItem = null)
     {
         if (actor == null) return;
+        // [2026-10-22] 명령 고르기 중에는 "지금 차례인 동료"의 명령만 받는다.
+        //   한 번 누른 것이 두 번 들어오면(적 그림 클릭 + 적 목록 버튼 등) commandIndex 가 두 칸 올라가
+        //   다음 동료(예: 2번)를 건너뛰고 3번으로 넘어가던 문제 — 두 번째 것은 차례가 이미 넘어가 버려진다.
+        if (currentPhase == BattlePhase.Command && currentControlledMember != null && actor != currentControlledMember)
+        {
+            Debug.LogWarning($"[BattleManager] QueueAllyCommand 무시 — 차례가 아닌 {actor.playerName} 의 {actionType} (지금 차례: {currentControlledMember.playerName})");
+            return;
+        }
 
         var command = new AllyCommand
         {
@@ -4038,7 +4209,9 @@ public class BattleManager : MonoBehaviour
         // skillPanel만 닫고 actionPanel은 유지 (다음 동료 턴을 위해)
         HideCommandPanels(hideMainPanel: false, closeFightMenu: false);
 
-        commandIndex++;
+        // [2026-10-22] ++ 대신 "명령을 낸 동료 다음 칸" — 몇 번 불려도 한 칸만 넘어간다
+        int actorIdx = activePartyMembers.IndexOf(actor);
+        commandIndex = actorIdx >= 0 ? actorIdx + 1 : commandIndex + 1;
         PrepareNextCommand();
     }
 
@@ -4286,6 +4459,7 @@ public class BattleManager : MonoBehaviour
         BuildTurnOrder();
         _enemiesActedThisRound.Clear();
         _enemiesNonAttackThisRound.Clear(); // [2026-10-19] 따라 들어가기
+        _enemyTargetsThisRound.Clear(); // [2026-10-21] 이번 라운드에 적들이 고른 대상 (몰림 방지)
         _followInThisRound.Clear();
 
         // [2026-10-07] 압도(레벨 차이 30↑): 첫 라운드는 적이 겁먹어 행동하지 못함 → 아군 선공
@@ -4371,7 +4545,7 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteAllyResolution(AllyCommand cmd)
     {
         if (cmd.actor == null || cmd.actor.currentHP <= 0) yield break;
-        CardFx.SetTurnGlow(GetPlayerCardRect(cmd.actor)); // [2026-10-15] 행동하는 카드 테두리
+        CardFx.SetTurnGlow(null); // [2026-10-22] 행동 진행 중엔 카드를 빛내지 않는다 (명령 고를 때만)
         if (cmd.actor.IsStunned())
         {
             AddMessage($"{Ko.I(cmd.actor.playerName)} <color=#FFD700>기절</color>해 움직이지 못한다!");
@@ -4406,6 +4580,8 @@ public class BattleManager : MonoBehaviour
                 }
                 break;
             case "attack":
+                cmd.targetEnemy = RetargetIfGone(cmd.targetEnemy, null); // [2026-10-22] 고른 적이 사라졌으면 다른 적
+                cmd.targetEnemy = RedirectToFocus(cmd.actor, cmd.targetEnemy); // [2026-10-22] 슬라임 집중시키기
                 if (cmd.targetEnemy != null && cmd.targetEnemy.currentHP > 0)
                 {
                     yield return StartCoroutine(ExecuteAttack(cmd.actor, cmd.targetEnemy));
@@ -4422,6 +4598,8 @@ public class BattleManager : MonoBehaviour
                     }
                     // 타겟이 필요한 스킬인데 타겟이 없거나 죽었으면 실행 불가 (단, 회복/방어 스킬은 타겟 없이(본인) 실행 가능)
                     bool isSelfSkill = IsSelfTargetSkill(cmd.skill);
+                    if (!isSelfSkill && cmd.targetEnemy != null) cmd.targetEnemy = RetargetIfGone(cmd.targetEnemy, cmd.skill); // [2026-10-22] 만드리토가 도망친 적 때문에 취소되던 문제
+                    if (!isSelfSkill && cmd.targetEnemy != null) cmd.targetEnemy = RedirectToFocus(cmd.actor, cmd.targetEnemy); // [2026-10-22] 슬라임 집중시키기
                     if (isSelfSkill || (cmd.targetEnemy != null && cmd.targetEnemy.currentHP > 0))
                     {
                         yield return StartCoroutine(ExecuteSkill(cmd.actor, cmd.skill, cmd.targetEnemy));
@@ -4429,6 +4607,24 @@ public class BattleManager : MonoBehaviour
                 }
                 break;
             case "item":
+                // [2026-10-22] 부활 아이템: 고른 아군이 아직 쓰러져 있을 때만 쓴다 (그새 일어났으면 아이템을 아낀다)
+                if (cmd.consumesPotion && cmd.usedItem != null && cmd.usedItem.IsRevive)
+                {
+                    var fallen = cmd.targetAlly;
+                    if (fallen == null || fallen.currentHP > 0)
+                    {
+                        AddMessage($"<color=#AAAAAA>{Ko.Eun(cmd.usedItem.itemName)} 쓸 곳이 없어 아껴 두었다.</color>");
+                        break;
+                    }
+                    bool usedRevive = ConsumableInventory.Instance != null && ConsumableInventory.Instance.UseItem(cmd.usedItem);
+                    if (!usedRevive) break;
+                    var rfx = ConsumableEffectApplier.ApplyEffects(fallen, cmd.usedItem);
+                    SyncPotionCount();
+                    _downAnnounced.Remove(fallen);
+                    AddMessage($"<color=#FFE6A0>{Ko.I(cmd.actor.playerName)} {Ko.Eul(cmd.usedItem.itemName)} 피웠다. {Ko.I(fallen.playerName)} 다시 일어났다!</color> HP {rfx.hpHealed}");
+                    UpdateStatusUI();
+                    break;
+                }
                 if (cmd.consumesPotion && cmd.usedItem != null)
                 {
                     bool used = ConsumableInventory.Instance != null
@@ -4600,12 +4796,54 @@ public class BattleManager : MonoBehaviour
         public string note;          // [2026-10-06] 행동 전 보여줄 '생각' 문구 (교활 AI)
     }
 
+    // [2026-10-21] 약한 아군 쪽으로 기울지만 확률로 고른다 — 예전엔 HP 비율 역수(1/HP%)라 HP 10% 아군 가중치가 10배 → 모든 적이 한 명만 노렸다.
+    //   가중치 = (1 + lean × 잃은 HP 비율) × 0.6^(이번 라운드에 이미 노려진 횟수)
+    //   예) lean 1.5: 멀쩡한 아군 1.0 · 빈사 아군 2.5 → 4인 파티에서 빈사 아군 약 45%. 앞선 적이 이미 노렸으면 줄어든다.
+    private readonly Dictionary<PlayerStats, int> _enemyTargetsThisRound = new Dictionary<PlayerStats, int>();
+    private const float AggressiveWeakLean = 1.5f, CunningWeakLean = 2.5f, AlreadyTargetedFactor = 0.6f;
+
+    private PlayerStats PickWeakLeaning(List<PlayerStats> alive, float lean = AggressiveWeakLean)
+    {
+        if (alive == null || alive.Count == 0) return null;
+        var weights = new float[alive.Count];
+        float total = 0f;
+        for (int i = 0; i < alive.Count; i++)
+        {
+            float hpRatio = Mathf.Clamp01((float)alive[i].currentHP / Mathf.Max(1, alive[i].maxHP));
+            float w = 1f + lean * (1f - hpRatio);
+            int n;
+            if (_enemyTargetsThisRound.TryGetValue(alive[i], out n)) w *= Mathf.Pow(AlreadyTargetedFactor, n);
+            weights[i] = w;
+            total += w;
+        }
+        float roll = UnityEngine.Random.Range(0f, total);
+        for (int i = 0; i < alive.Count; i++)
+        {
+            roll -= weights[i];
+            if (roll <= 0f) return alive[i];
+        }
+        return alive[alive.Count - 1];
+    }
+
+    private void RecordEnemyTarget(PlayerStats target)
+    {
+        if (target == null) return;
+        int n; _enemyTargetsThisRound.TryGetValue(target, out n);
+        _enemyTargetsThisRound[target] = n + 1;
+    }
+
     /// <summary>AIPattern별 타겟 선택. null 반환 시 ExecuteEnemyTurn이 랜덤으로 폴백.</summary>
     private PlayerStats SelectEnemyTarget(EnemyStats enemy, Abyssdawn.AIPattern pattern)
     {
         // [2026-10-09] 도발 중인 아군이 있으면 그 아군을 고른다
         PlayerStats taunter = ActiveTaunter();
         if (taunter != null) return taunter;
+        // [2026-10-22] 집중시키기(동료 슬라임): 적 전열(1·2번)만 끌려간다
+        if (enemy != null && SlotOrder(enemy) <= 2)
+        {
+            var focus = activePartyMembers.Where(m => m != null && m.currentHP > 0 && m.focusRounds > 0).OrderBy(m => (int)m.currentSlot).FirstOrDefault();
+            if (focus != null) return focus;
+        }
 
         List<PlayerStats> alive = activePartyMembers
             .Where(p => p != null && p.currentHP > 0)
@@ -4615,27 +4853,7 @@ public class BattleManager : MonoBehaviour
         switch (pattern)
         {
             case Abyssdawn.AIPattern.Aggressive:
-            {
-                // HP 낮을수록 가중치 높음 (역수 방식) — 다키스트 던전 참고
-                float totalWeight = 0f;
-                var weights = new float[alive.Count];
-                for (int i = 0; i < alive.Count; i++)
-                {
-                    float hpRatio = (float)alive[i].currentHP / Mathf.Max(1, alive[i].maxHP);
-                    // HP 비율 역수. 최소 0.1 보장 (HP 0 방지)
-                    weights[i] = 1f / Mathf.Max(0.1f, hpRatio);
-                    totalWeight += weights[i];
-                }
-                float roll = UnityEngine.Random.Range(0f, totalWeight);
-                float cumulative = 0f;
-                for (int i = 0; i < alive.Count; i++)
-                {
-                    cumulative += weights[i];
-                    if (roll <= cumulative)
-                        return alive[i];
-                }
-                return alive[alive.Count - 1];
-            }
+                return PickWeakLeaning(alive);
 
             case Abyssdawn.AIPattern.Defensive:
                 // 방어 중인 아군 제외, 후열 우선 (안전한 타겟)
@@ -4720,8 +4938,9 @@ public class BattleManager : MonoBehaviour
             candidates.Add((EnemyActionType.Defend, null, DefendBaseWeight(pattern) * 2f));
 
         // [Phase] 도망 — Critical 페이즈에서 후보 추가 (가중치 ×3)
-        if (isCriticalPhase && !BossEncounter.IsBoss(enemy)) // [2026-10-09] 보스는 도망치지 않음
-            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f));
+        float fleeMult = enemy.sourceMonster != null ? enemy.sourceMonster.FleeWeightMultiplier : 1f; // [2026-10-21] 몬스터별 (쥐 0.3)
+        if (isCriticalPhase && !BossEncounter.IsBoss(enemy) && fleeMult > 0f) // [2026-10-09] 보스는 도망치지 않음
+            candidates.Add((EnemyActionType.Flee, null, FleeBaseWeight(pattern) * 3f * fleeMult));
 
         // [Zeta] 역전 시나리오 — Critical 페이즈에서 15% 확률로 최강 스킬 강제 선택
         if (isCriticalPhase && strongestCastable != null && Random.value < 0.15f)
@@ -4777,6 +4996,21 @@ public class BattleManager : MonoBehaviour
         Dictionary<SkillData, int> d;
         if (!_enemySkillUses.TryGetValue(e, out d)) { d = new Dictionary<SkillData, int>(); _enemySkillUses[e] = d; }
         int v; d.TryGetValue(s, out v); d[s] = v + 1;
+        // [2026-10-22] 재사용 대기: 플레이어 스킬과 같은 규칙 (쓴 라운드 끝에도 한 번 줄므로 +1)
+        if (UseCooldowns && s.cooldownTurns > 0)
+        {
+            Dictionary<SkillData, int> cd;
+            if (!_enemySkillCooldowns.TryGetValue(e, out cd)) { cd = new Dictionary<SkillData, int>(); _enemySkillCooldowns[e] = cd; }
+            cd[s] = s.cooldownTurns + 1;
+        }
+    }
+
+    private readonly Dictionary<EnemyStats, Dictionary<SkillData, int>> _enemySkillCooldowns = new Dictionary<EnemyStats, Dictionary<SkillData, int>>();
+
+    private int EnemySkillCooldown(EnemyStats e, SkillData s)
+    {
+        Dictionary<SkillData, int> d; int v;
+        return e != null && s != null && _enemySkillCooldowns.TryGetValue(e, out d) && d.TryGetValue(s, out v) ? v : 0;
     }
 
     /// <summary>이 적이 지금 쓸 수 있는 도구(스킬)를 이름으로 찾는다. 없거나 다 썼으면 null.</summary>
@@ -4810,14 +5044,8 @@ public class BattleManager : MonoBehaviour
 
     private EnemyActionDecision SelectCunningAction(EnemyStats enemy)
     {
-        // 목표: HP 비율이 가장 낮은 아군 (약한 쪽을 노린다)
-        PlayerStats target = null; float best = 2f;
-        foreach (var m in activePartyMembers)
-        {
-            if (m == null || m.currentHP <= 0) continue;
-            float r = m.maxHP > 0 ? (float)m.currentHP / m.maxHP : 1f;
-            if (r < best) { best = r; target = m; }
-        }
+        // 목표: 약한 아군 쪽으로 크게 기울지만 확률로 (2026-10-21 — 예전엔 HP 비율 최저 한 명만)
+        PlayerStats target = PickWeakLeaning(activePartyMembers.Where(p => p != null && p.currentHP > 0).ToList(), CunningWeakLean);
         if (target == null) target = GetRandomAlivePartyMember();
         PlayerStats taunter = ActiveTaunter(); // [2026-10-09] 도발에는 교활한 적도 끌려온다
         if (taunter != null) target = taunter;
@@ -4871,6 +5099,7 @@ public class BattleManager : MonoBehaviour
         if (enemy.currentMP < skill.mpCost) return false;
         // [2026-10-06] 도구 등 전투당 사용 횟수
         if (skill.usesPerBattle > 0 && EnemySkillUses(enemy, skill) >= skill.usesPerBattle) return false;
+        if (UseCooldowns && skill.cooldownTurns > 0 && EnemySkillCooldown(enemy, skill) > 0) return false;
 
         // 회복 스킬: HP가 이미 최대치면 사용 불가
         if (skill is MonsterSkillData msd && msd.Category == MonsterSkillCategory.Heal)
@@ -4967,7 +5196,7 @@ public class BattleManager : MonoBehaviour
     {
         if (enemy == null || enemy.currentHP <= 0 || enemy.IsDead()) yield break;
         BattleFxCombat.EndAllyAction(); // [2026-10-17] 적 차례에는 베기 궤적 없음
-        CardFx.SetTurnGlow(GetEnemyCardRect(enemy)); // [2026-10-15] 행동하는 적 카드 테두리
+        CardFx.SetTurnGlow(null); // [2026-10-22] 행동 진행 중엔 카드를 빛내지 않는다
         if (enemy.IsStunned())
         {
             AddMessage($"{Ko.I(enemy.enemyName)} <color=#FFD700>기절</color>해 움직이지 못한다!");
@@ -5003,6 +5232,7 @@ public class BattleManager : MonoBehaviour
 
         // [Enemy AI] 행동 선택 레이어 — 이번 단계는 선택만. Skill/Defend/Flee 실행 경로 미구현 → 평타 fallback.
         EnemyActionDecision decision = SelectEnemyAction(enemy);
+        if (decision.type == EnemyActionType.Attack || decision.type == EnemyActionType.Skill) RecordEnemyTarget(decision.target); // [2026-10-21] 몰림 방지
         if (!string.IsNullOrEmpty(decision.note)) AddMessage(decision.note);   // 교활 AI 의 '생각'
         if (decision.type == EnemyActionType.Skill && decision.skill != null)
         {
@@ -5051,6 +5281,16 @@ public class BattleManager : MonoBehaviour
         }
         if (decision.type == EnemyActionType.Skill && decision.skill != null)
         {
+            // [2026-10-22] 슬라임 집중시키기: 전열 아군의 공격이 이 슬라임에게만 향한다 (2턴)
+            if (decision.skill.Key == EnemySkillFocus)
+            {
+                _enemiesNonAttackThisRound.Add(enemy);
+                enemy.focusRounds = DrawFocusRounds + 1; // 쓴 라운드 끝에도 한 번 줄어든다
+                AddMessage($"<color=#C8FF9F>{Ko.I(enemy.enemyName)} 몸을 크게 부풀린다!</color> 전열의 공격이 {Ko.Ro(enemy.enemyName)} 쏠린다. ({DrawFocusRounds}턴)");
+                yield return new WaitForSeconds(actionDelay);
+                UpdateStatusUI();
+                yield break;
+            }
             // Self 타겟 스킬(버프 등)은 플레이어 타겟 불필요
             if (decision.skill is MonsterSkillData msd &&
                 msd.targeting.targetFaction == TargetFaction.Self)
@@ -5076,6 +5316,21 @@ public class BattleManager : MonoBehaviour
                     BattleFx.SetIntent(enemy, chargeSkill.chargeIntentLabel);
                     Debug.Log($"[EnemyAI] {enemy.enemyName} 모아 치기 예고: {chargeSkill.skillName} → 다음 턴 {skillTarget.playerName}");
                     yield return new WaitForSeconds(actionDelay);
+                    yield break;
+                }
+                // [2026-10-22] 박쥐 음파: 아군 전원 — 왼쪽 → 오른쪽, 뒤로 갈수록 약하게 (드퀘식)
+                if (decision.skill.Key == EnemySkillSonicWave)
+                {
+                    var all = activePartyMembers.Where(m => m != null && m.currentHP > 0).OrderBy(m => (int)m.currentSlot).ToList();
+                    for (int k = 0; k < all.Count; k++)
+                    {
+                        if (battleEnded) break;
+                        if (all[k] == null || all[k].currentHP <= 0) continue;
+                        _enemyMultiMult = MultiTargetFalloff(k);
+                        _skipEnemyDeclare = k > 0;
+                        yield return StartCoroutine(ExecuteEnemySkill(enemy, all[k], decision.skill));
+                    }
+                    _enemyMultiMult = 1f; _skipEnemyDeclare = false;
                     yield break;
                 }
                 yield return StartCoroutine(ExecuteEnemySkill(enemy, skillTarget, decision.skill));
@@ -5197,20 +5452,22 @@ public class BattleManager : MonoBehaviour
                         .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
                         .ToList();
 
-                    int hpBefore = member.currentHP;
-                    member.ProcessStatusEffectsEndOfTurn();
-
-                    if (member.currentHP < hpBefore)
+                    // [2026-10-20] 출혈·독 등 지속 피해를 하나씩 — 숫자·흔들림·메시지를 효과마다 따로, 사이에 잠깐 멈춤
+                    foreach (var se in dotEffects)
                     {
-                        foreach (var se in dotEffects)
-                        {
-                            int dmg = Mathf.Max(1, Mathf.FloorToInt(member.maxHP * se.data.physicalDamagePerTurn));
-                            string col = GetStatusColor(se.data.effectType);
-                            AddMessage($"{Ko.I(member.playerName)} <color={col}>{Ko.Status(se.data.effectType)}</color>(으)로 <color={col}>{dmg} 피해</color>를 입었다!");
-                        }
+                        if (member.currentHP <= 0) break;
+                        int dmg = member.ApplyDotTick(se);
+                        if (dmg <= 0) continue;
+                        string col = GetStatusColor(se.data.effectType);
+                        Color c; if (!ColorUtility.TryParseHtmlString(col, out c)) c = Color.white;
+                        BattleFx.AllyDot(member, dmg, c);
                         ShakePlayerStatusUI(member);
+                        UpdateStatusUI();
+                        AddMessage($"{Ko.Eun(member.playerName)} <color={col}>{Ko.Status(se.data.effectType)}</color>(으)로 <color={col}>{dmg}의 피해</color>를 입었다!");
                         anyCurseDamage = true;
+                        yield return StartCoroutine(BeatWait(DeclareHold + 0.15f));
                     }
+                    member.ProcessStatusEffectsEndOfTurn(true);
                 }
                 member.TickStatModifiers();   // ← 조건 밖으로 이동 (activeStatusEffects가 없어도 항상 호출)
                 if (member.oathHalfRounds > 0 && --member.oathHalfRounds == 0) SetIronDiscipline(member, false); // [2026-10-14]
@@ -5228,20 +5485,21 @@ public class BattleManager : MonoBehaviour
                         .Where(e => !e.appliedThisTurn && e.data.physicalDamagePerTurn > 0f)
                         .ToList();
 
-                    int hpBefore = enemy.currentHP;
-                    enemy.ProcessStatusEffectsEndOfTurn();
-
-                    if (enemy.currentHP < hpBefore)
+                    // [2026-10-20] 지속 피해를 하나씩 (아군과 같음)
+                    foreach (var se in dotEffects)
                     {
-                        foreach (var se in dotEffects)
-                        {
-                            int dmg = Mathf.Max(1, Mathf.FloorToInt(enemy.maxHP * se.data.physicalDamagePerTurn));
-                            string col = GetStatusColor(se.data.effectType);
-                            AddMessage($"{Ko.I(enemy.enemyName)} <color={col}>{Ko.Status(se.data.effectType)}</color>(으)로 <color={col}>{dmg} 피해</color>를 입었다!");
-                        }
-                        enemy.UpdateStatusUI();
+                        if (enemy.currentHP <= 0) break;
+                        int dmg = enemy.ApplyDotTick(se);
+                        if (dmg <= 0) continue;
+                        string col = GetStatusColor(se.data.effectType);
+                        Color c; if (!ColorUtility.TryParseHtmlString(col, out c)) c = Color.white;
+                        BattleFx.EnemyDot(enemy, dmg, c);
+                        AddMessage($"{Ko.Eun(enemy.enemyName)} <color={col}>{Ko.Status(se.data.effectType)}</color>(으)로 <color={col}>{dmg}의 피해</color>를 입었다!");
                         anyCurseDamage = true;
+                        yield return StartCoroutine(BeatWait(DeclareHold + 0.15f));
                     }
+                    enemy.ProcessStatusEffectsEndOfTurn(true);
+                    enemy.UpdateStatusUI();
                 }
                 enemy.TickStatModifiers();   // ← 조건 밖으로 이동 (activeStatusEffects가 없어도 항상 호출)
             }
@@ -5251,7 +5509,7 @@ public class BattleManager : MonoBehaviour
         if (anyCurseDamage)
         {
             UpdateStatusUI();
-            yield return new WaitForSeconds(actionDelay);
+            AnnounceDowns(); // [2026-10-20] 지속 피해로 쓰러진 것
         }
     }
     
@@ -5685,6 +5943,23 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public void UseItemInBattle(PlayerStats user, ConsumableItemSO item, int healAmount)
     {
+        // [2026-10-22] 부활 아이템: 쓰러진 아군 카드만 빛나고, 그중에서 고른다 (없으면 쓰지 않음)
+        if (item != null && item.IsRevive)
+        {
+            if (!activePartyMembers.Exists(m => m != null && m.currentHP <= 0))
+            {
+                AddMessage($"<color=#AAAAAA>쓰러진 아군이 없다. {Ko.Eun(item.itemName)} 아껴 둔다.</color>");
+                return;
+            }
+            OpenAllyPicker($"{item.itemName} — 누구를 일으킬까?", user, pick =>
+            {
+                turnInProgress = true;
+                _nextAllyTarget = pick;
+                QueueAllyCommand(user, "item", null, null, healAmount, true, item);
+                HideBackButton();
+            }, m => m.currentHP <= 0);
+            return;
+        }
         // [2026-10-20] 살아 있는 동료가 있으면 누구에게 쓸지 고른다 (새벽의 잔은 주인공 전용이라 고르지 않음)
         bool others = activePartyMembers.Exists(m => m != null && m != user && m.currentHP > 0);
         if (item != null && !item.isDawnChalice && others)
@@ -5712,8 +5987,12 @@ public class BattleManager : MonoBehaviour
     private readonly List<Component> _allyPickAdded = new List<Component>();
     private readonly List<GameObject> _allyPickBits = new List<GameObject>();
 
-    private void OpenAllyPicker(string title, PlayerStats user, System.Action<PlayerStats> onPick)
+    /// <param name="canPick">고를 수 있는 아군 (없으면 살아 있는 아군 전부). 부활 아이템은 쓰러진 아군, 이동은 옆자리 아군.</param>
+    /// <param name="extras">카드가 없는 선택지(빈 자리 등) — 안내 글 위에 버튼으로 놓는다.</param>
+    private void OpenAllyPicker(string title, PlayerStats user, System.Action<PlayerStats> onPick,
+        System.Func<PlayerStats, bool> canPick = null, List<(string label, System.Action act)> extras = null)
     {
+        if (canPick == null) canPick = m => m.currentHP > 0;
         CloseMovePicker();
         _movePicker = new GameObject("AllyPicker", typeof(RectTransform));
         var cv = _movePicker.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 200;
@@ -5726,18 +6005,46 @@ public class BattleManager : MonoBehaviour
         var dimBtn = dimGo.GetComponent<Button>(); dimBtn.transition = Selectable.Transition.None;
         dimBtn.onClick.AddListener(CloseMovePicker);
 
-        // 안내 글 (카드 바로 위)
-        var cap = MoveUiText((RectTransform)_movePicker.transform, title, 0f, 70f, 44f, new Color(0.96f, 0.87f, 0.58f));
+        // 안내 글 (카드 바로 위) — [2026-10-22] 상태창과 같은 테두리 창 안에
+        var capBox = new GameObject("CaptionBox", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+        capBox.SetParent(_movePicker.transform, false);
+        capBox.anchorMin = capBox.anchorMax = new Vector2(0.5f, 0f); capBox.pivot = new Vector2(0.5f, 0f);
+        capBox.sizeDelta = new Vector2(940f, 96f); capBox.anchoredPosition = new Vector2(0f, 528f);
+        var capBg = capBox.GetComponent<Image>(); capBg.color = new Color(0f, 0f, 0f, 0.9f); capBg.raycastTarget = true; // 창을 눌러도 취소되지 않게
+        AddGoldFrame(capBox, "Frame", new Color(0.86f, 0.74f, 0.45f, 0.95f), 3f);
+        AddGoldFrame(capBox, "FrameInner", new Color(0.86f, 0.74f, 0.45f, 0.30f), -6f);
+        var cap = MoveUiText(capBox, title, 0f, 96f, 40f, new Color(0.96f, 0.87f, 0.58f));
         cap.fontStyle = TMPro.FontStyles.Bold;
-        var crt = cap.rectTransform; crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0f); crt.pivot = new Vector2(0.5f, 0f);
-        crt.sizeDelta = new Vector2(1000f, 70f); crt.anchoredPosition = new Vector2(0f, 540f);
+        var crt = cap.rectTransform; crt.anchorMin = Vector2.zero; crt.anchorMax = Vector2.one; crt.offsetMin = crt.offsetMax = Vector2.zero;
+        cap.alignment = TMPro.TextAlignmentOptions.Center;
+
+        // 카드가 없는 선택지 (예: 이동할 빈 자리) — 안내 글 바로 위에 작은 버튼 줄
+        if (extras != null && extras.Count > 0)
+        {
+            float bw = 300f, gap = 30f, x0 = -(extras.Count * bw + (extras.Count - 1) * gap) * 0.5f + bw * 0.5f;
+            for (int k = 0; k < extras.Count; k++)
+            {
+                var ex = extras[k];
+                var b = new GameObject("PickExtra", typeof(RectTransform), typeof(Image), typeof(Button));
+                b.transform.SetParent(_movePicker.transform, false);
+                var brt = (RectTransform)b.transform; brt.anchorMin = brt.anchorMax = new Vector2(0.5f, 0f); brt.pivot = new Vector2(0.5f, 0f);
+                brt.sizeDelta = new Vector2(bw, 90f); brt.anchoredPosition = new Vector2(x0 + k * (bw + gap), 630f);
+                b.GetComponent<Image>().color = new Color(0.10f, 0.08f, 0.05f, 1f);
+                var bb = b.GetComponent<Button>();
+                bb.onClick.AddListener(() => { CloseMovePicker(); ex.act(); });
+                ButtonSkin.Apply(bb);
+                var lt = MoveUiText(brt, ex.label, 0f, 0f, 32f, new Color(0.96f, 0.87f, 0.58f));
+                var lrt = lt.rectTransform; lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one; lrt.offsetMin = lrt.offsetMax = Vector2.zero;
+                lt.alignment = TMPro.TextAlignmentOptions.Center;
+            }
+        }
 
         var glowSp = Resources.Load<Sprite>("UI/GlowBorder");
         for (int i = 0; i < activePartyMembers.Count && i < playerStatusSlots.Count; i++)
         {
             var m = activePartyMembers[i];
             var slot = playerStatusSlots[i];
-            if (m == null || m.currentHP <= 0 || slot == null) continue;
+            if (m == null || slot == null || !canPick(m)) continue;
 
             // 카드를 어둠 위로
             if (slot.GetComponent<Canvas>() == null)
@@ -5771,14 +6078,18 @@ public class BattleManager : MonoBehaviour
     {
         foreach (var b in _allyPickBits) if (b != null) { b.SetActive(false); Destroy(b); }
         _allyPickBits.Clear();
-        // GraphicRaycaster 를 Canvas 보다 먼저 지운다 (같은 프레임에 둘 다 Destroy 해도 순서상 안전)
-        for (int i = _allyPickAdded.Count - 1; i >= 0; i--) if (_allyPickAdded[i] != null) Destroy(_allyPickAdded[i]);
+        // GraphicRaycaster 를 Canvas 보다 먼저 지운다.
+        // [2026-10-22] 바로 지운다 (DestroyImmediate) — Destroy 는 프레임 끝이라, 같은 프레임에 다음 고르기(이동 2단계 "누구와 바꿀까")를 열면
+        //   카드에 아직 Canvas 가 있어 새로 안 붙이고 → 프레임 끝에 사라져 카드가 어두운 막 아래로 내려감 → 카드를 눌러도 막이 받아 취소되던 문제
+        for (int i = _allyPickAdded.Count - 1; i >= 0; i--) if (_allyPickAdded[i] != null) DestroyImmediate(_allyPickAdded[i]);
         _allyPickAdded.Clear();
     }
 
     private static bool IsAllyHealSkill(SkillData s)
     {
         if (s == null || s.Effects == null || s.Key == "Meditation") return false;
+        // [2026-10-23] 대상이 "자신"인 회복(약초 씹기·상처 핥기)은 아군을 고르지 않는다 — 본인만
+        if (s.targeting != null && s.targeting.targetFaction == TargetFaction.Self) return false;
         foreach (var e in s.Effects)
             if (e != null && e.effectType == EffectType.Recovery && (e.recoveryTarget == RecoveryTarget.HP || e.recoveryTarget == RecoveryTarget.Both)) return true;
         return false;
@@ -5868,6 +6179,7 @@ public class BattleManager : MonoBehaviour
             HideCommandPanels();
             battleEnded = true;
             HideBackButton();
+            PlayLog.BattleEnd("도망"); // [2026-10-22]
             ReturnToDungeon(1.5f);
             return;
         }
@@ -6244,7 +6556,7 @@ public class BattleManager : MonoBehaviour
         // 이미 배운 스킬인지 확인
         if (currentSkills.Exists(s => s.skillID == newSkill.skillID))
         {
-            AddMessage($"{Ko.Eun(newSkill.skillName)} 이미 배웠습니다!");
+            AddMessage($"{Ko.Eun(newSkill.skillName)} 이미 기억해 냈다!");
             return;
         }
 
@@ -6269,7 +6581,7 @@ public class BattleManager : MonoBehaviour
                         currentSkills.Add(newSkill);
                         currentSkills.Sort(); // 다시 정렬
                         
-                        AddMessage($"{Ko.Eul(newSkill.skillName)} 배웠다!");
+                        AddMessage($"{Ko.Eul(newSkill.skillName)} 기억해 냈다!");
                         AddMessage($"자리를 만들려고 {Ko.Eul(removedSkill.skillName)} 잊었다.");
                     }
                 );
@@ -6284,7 +6596,7 @@ public class BattleManager : MonoBehaviour
             // 공간 있음: 그냥 배움
             currentSkills.Add(newSkill);
             currentSkills.Sort();
-            AddMessage($"{Ko.Eul(newSkill.skillName)} 배웠다!");
+            AddMessage($"{Ko.Eul(newSkill.skillName)} 기억해 냈다!");
         }
     }
 
@@ -7030,6 +7342,8 @@ public class BattleManager : MonoBehaviour
         // [2026-10-14] 도끼 숙련 규칙: 투척도끼를 뺀 모든 도끼 액티브는 전열(1·2번)에서만
         if (skill.weaponCategory == AbyssdawnBattle.WeaponCategory.Axe && skill.IsActive && !IsThrowingAxe(skill) && !who.IsFrontRow) return "전열에서만";
         if (skill.Key == SkillBackstepSlash && !who.IsFrontRow) return "전열에서만";
+        if (skill.Key == EnemySkillFocus && !who.IsFrontRow) return "전열에서만";   // [2026-10-22] 동료 슬라임
+        if (skill.Key == EnemySkillSonicWave && !who.IsBackRow) return "후열에서만"; // [2026-10-22] 동료 박쥐
         if (skill.Key == SkillLungeSlash && !who.IsBackRow) return "후열에서만";
         if (skill.Key == SkillAdvancingThrust && !who.IsBackRow) return "후열에서만"; // [2026-10-19]
         if (skill.Key == SkillShadowSlash && FixDaggerTarget(skill, null) == null) return "후열에 적 없음";
@@ -7071,11 +7385,18 @@ public class BattleManager : MonoBehaviour
             if (m.pullCounterRounds > 0) m.pullCounterRounds--;
             if (m.shadowStepRounds > 0) m.shadowStepRounds--;
             if (m.parryRounds > 0) m.parryRounds--; // [2026-10-19] 받아 넘기기는 그 라운드만
+            if (m.focusRounds > 0) m.focusRounds--; // [2026-10-22] 집중시키기
             if (m.oxRounds > 0 && --m.oxRounds <= 0) { m.oxStacks = 0; ApplyOxModifiers(m); } // [2026-10-19] 옥스 디펜스 만료
             if (m.escapeBonusRounds > 0 && --m.escapeBonusRounds <= 0) m.escapeBonus = 0f;
         }
 
         foreach (var kv in _skillCooldowns)
+        {
+            var keys = new List<SkillData>(kv.Value.Keys);
+            foreach (var k in keys) if (kv.Value[k] > 0) kv.Value[k]--;
+        }
+        foreach (var e in activeEnemies) if (e != null && e.focusRounds > 0) e.focusRounds--; // [2026-10-22] 집중시키기
+        foreach (var kv in _enemySkillCooldowns) // [2026-10-22] 몬스터 스킬 재사용 대기 (약초 씹기 등)
         {
             var keys = new List<SkillData>(kv.Value.Keys);
             foreach (var k in keys) if (kv.Value[k] > 0) kv.Value[k]--;
@@ -7286,14 +7607,14 @@ public class BattleManager : MonoBehaviour
     private static bool IsSwordSkill(SkillData s) => s != null && s.weaponCategory == AbyssdawnBattle.WeaponCategory.Sword;
 
     // ── [2026-10-20] 검술 추가 2 ──
-    //   리베르소: 만드리토처럼 전열 둘을 왼쪽→오른쪽으로 벤 뒤, 마지막으로 벤 1체를 반대로 한 번 더 (STR 40%)
+    //   리베르소: 만드리토처럼 전열 둘을 왼쪽→오른쪽으로 벤 뒤, 마지막으로 벤 1체를 반대로 한 번 더 (STR 60%)
     //   자루치기: 1체 STR 50% + 기절 3턴 (같은 적에게 70 → 60 → 50 → 40 → 30% → 더는 안 걸림)
     //   칼등치기: 아군 = 격려 (명중·치명·회피·STR +5%, 2턴) / 적 = HP 30% 미만인 적만, STR 50%, HP 1 아래로는 안 내림
     //             HP 1 이 된 적은 다음 자기 차례에 항복하고 도망칠 확률↑ — 도망치면 골드 ×1.5, 소지품 30%, 계단 위치 35%, 다른 적도 겁먹음
     private const string SkillRiverso = "Riverso";
     private const string SkillPommelStrike = "Pommel Strike";
     private const string SkillFlatBlade = "Flat of the Blade";
-    private const float RiversoMult = 0.4f;
+    private const float RiversoMult = 0.6f; // [2026-10-22] 40% → 60%
     private static readonly float[] PommelStunChance = { 0.7f, 0.6f, 0.5f, 0.4f, 0.3f };
     private const int PommelStunTurns = 3;
     private const float FlatBladeHpGate = 0.3f, FlatBladeBuff = 0.05f;
@@ -7354,7 +7675,7 @@ public class BattleManager : MonoBehaviour
         AddMessage($"<color=#FFE066>{Ko.I(target.enemyName)} 정신을 잃었다!</color> {PommelStunTurns}턴 기절 <color=#AAAAAA>(다음엔 {(target.pommelStuns < PommelStunChance.Length ? Mathf.RoundToInt(PommelStunChance[target.pommelStuns] * 100f) + "%" : "안 걸림")})</color>");
     }
 
-    /// <summary>리베르소 마지막 반대 베기 (STR 40%).</summary>
+    /// <summary>리베르소 마지막 반대 베기 (STR 60%).</summary>
     private void RiversoBackstroke(PlayerStats attacker, EnemyStats e)
     {
         if (attacker == null || e == null || e.currentHP <= 0 || battleEnded) return;
@@ -7378,7 +7699,7 @@ public class BattleManager : MonoBehaviour
             {
                 var it = pool[UnityEngine.Random.Range(0, pool.Count)];
                 ConsumableInventory.Instance.AddItem(it, 1);
-                AddMessage($"<color=#FFD24A>{Ko.I(enemy.enemyName)} 떨어뜨린 {Ko.Eul(it.itemName)} 주웠다.</color>");
+                AddMessage($"<color=#FFD24A>{Ko.I(enemy.enemyName)} {Ko.Eul(it.itemName)} 떨어뜨렸다.</color>"); // [2026-10-22] "주웠다" 빼기
             }
         }
         if (UnityEngine.Random.value < SurrenderStairsChance)
@@ -8096,6 +8417,12 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || skill == null) return;
         if (ApplyShieldActive(attacker, skill)) return; // [2026-10-09] 방패
+        if (skill.Key == EnemySkillFocus) // [2026-10-22] 동료 슬라임의 집중시키기 — 적 전열의 공격이 이 동료에게
+        {
+            attacker.focusRounds = DrawFocusRounds + 1;
+            AddMessage($"<color=#C8FF9F>{Ko.I(attacker.playerName)} 몸을 크게 부풀린다!</color> 적 전열의 공격이 {Ko.Ro(attacker.playerName)} 쏠린다. ({DrawFocusRounds}턴)");
+            return;
+        }
         if (skill.Key == SkillParry) // [2026-10-19] 받아 넘기기 자세 (이번 라운드)
         {
             attacker.parryRounds = 1;
@@ -8234,28 +8561,31 @@ public class BattleManager : MonoBehaviour
                         int currentStacks = target.activeStatModifiers
                             .Count(m => m.source is SkillData sd && sd.skillID == skill.skillID);
 
+                        // [2026-10-22] 가산(Flat) 디버프만 중첩 (눈 할퀴기: 첫 2중첩, 최대 4). 배율(%) 디버프는 한 번만 걸고 시간만 갱신
+                        bool stacking = CurseStacks(skill.curseEffect);
                         if (currentStacks == 0)
                         {
-                            for (int s = 0; s < 2; s++)
+                            int first = stacking ? 2 : 1;
+                            for (int s = 0; s < first; s++)
                                 foreach (var mod in skill.curseEffect.statModifiers)
                                     target.AddStatModifier(mod, skill, dur);
-                            AddMessage($"{target.enemyName} 명중 -10%!");
+                            AddMessage($"{target.enemyName} {CurseModText(skill.curseEffect, first)}!");
                         }
-                        else if (currentStacks < 4)
+                        else if (stacking && currentStacks < 4)
                         {
                             foreach (var mod in skill.curseEffect.statModifiers)
                                 target.AddStatModifier(mod, skill, dur);
                             foreach (var am in target.activeStatModifiers
                                 .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
                                 am.remainingTurns = dur;
-                            AddMessage($"{target.enemyName} 명중이 더 떨어졌다! {currentStacks + 1}중첩");
+                            AddMessage($"{target.enemyName} {CurseModText(skill.curseEffect, currentStacks + 1)}! ({currentStacks + 1}중첩)");
                         }
                         else
                         {
                             foreach (var am in target.activeStatModifiers
                                 .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
                                 am.remainingTurns = dur;
-                            AddMessage($"{target.enemyName} 명중 저하 시간이 갱신됐다!");
+                            AddMessage($"{target.enemyName} {CurseModText(skill.curseEffect, 1, true)} 시간이 갱신됐다!");
                         }
                     }
                 }
@@ -8270,6 +8600,8 @@ public class BattleManager : MonoBehaviour
                         string cCol = GetStatusColor(skill.curseEffect.effectType);
                         AddMessage($"{Ko.I(target.enemyName)} <color={cCol}>{Ko.Status(skill.curseEffect.variantId)}</color>에 걸렸다!");
                     }
+                    else if (target.sourceMonster != null && target.sourceMonster.IsImmune(skill.curseEffect.effectType)) // [2026-10-23] 면역
+                        AddMessage($"<color=#AAAAAA>{target.enemyName}에게는 {Ko.I(Ko.Status(skill.curseEffect.effectType))} 통하지 않는다!</color>");
                 }
             }
         }
@@ -8294,14 +8626,14 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>적 스킬이 플레이어(아군)에게 상태이상을 거는 경로</summary>
-    private void ApplyCurseEffectsToPlayer(PlayerStats target, SkillData skill)
+    private bool ApplyCurseEffectsToPlayer(PlayerStats target, SkillData skill)
     {
-        if (skill.curseEffect == null || skill.curseApplyChance <= 0f) return;
+        if (skill.curseEffect == null || skill.curseApplyChance <= 0f) return false;
 
         // [StatMod] 대상의 StatusResist 배율 적용
         float chance = skill.curseApplyChance *
             target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f);
-        if (UnityEngine.Random.value >= chance) return;
+        if (UnityEngine.Random.value >= chance) return false;
 
         // [분기] curseEffect에 statModifiers가 있으면 activeStatModifiers 경로
         if (skill.curseEffect.statModifiers != null && skill.curseEffect.statModifiers.Count > 0)
@@ -8309,21 +8641,24 @@ public class BattleManager : MonoBehaviour
             int dur = skill.damageType == DamageType.Physical
                 ? skill.curseEffect.physicalDuration
                 : skill.curseEffect.magicalDuration;
-            if (dur <= 0) return;
+            if (dur <= 0) return false;
 
             // 현재 같은 source(skill) 스택 수 확인
             int currentStacks = target.activeStatModifiers
                 .Count(m => m.source is SkillData sd && sd.skillID == skill.skillID);
 
+            // [2026-10-22] 가산(Flat) 디버프만 중첩 (눈 할퀴기). 배율(%) 디버프(산성 점액 DEF ×0.8)는 한 번만 — 예전엔 2번 걸려 DEF ×0.64 였다
+            bool stacking = CurseStacks(skill.curseEffect);
             if (currentStacks == 0)
             {
-                // 첫 적용: 2스택 (-0.10)
-                for (int s = 0; s < 2; s++)
+                // 첫 적용: 가산이면 2스택 (-0.10)
+                int first = stacking ? 2 : 1;
+                for (int s = 0; s < first; s++)
                     foreach (var mod in skill.curseEffect.statModifiers)
                         target.AddStatModifier(mod, skill, dur);
-                AddMessage($"{Ko.I(target.playerName)} 당했다! 명중 -10%!");
+                AddMessage($"{Ko.I(target.playerName)} 당했다! {CurseModText(skill.curseEffect, first)}!");
             }
-            else if (currentStacks < 4)
+            else if (stacking && currentStacks < 4)
             {
                 // 추가 중첩: 1스택 + 타이머 갱신
                 foreach (var mod in skill.curseEffect.statModifiers)
@@ -8331,17 +8666,17 @@ public class BattleManager : MonoBehaviour
                 foreach (var am in target.activeStatModifiers
                     .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
                     am.remainingTurns = dur;
-                AddMessage($"{target.playerName} 명중이 더 떨어졌다! {currentStacks + 1}중첩");
+                AddMessage($"{target.playerName} {CurseModText(skill.curseEffect, currentStacks + 1)}! ({currentStacks + 1}중첩)");
             }
             else
             {
-                // 최대 스택: 타이머만 갱신
+                // 최대 스택(또는 중첩 안 되는 디버프): 타이머만 갱신
                 foreach (var am in target.activeStatModifiers
                     .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
                     am.remainingTurns = dur;
-                AddMessage($"{target.playerName} 명중 저하 시간이 갱신됐다!");
+                AddMessage($"{target.playerName} {CurseModText(skill.curseEffect, 1, true)} 시간이 갱신됐다!");
             }
-            return;
+            return true;
         }
 
         // [기존 경로] statModifiers 없으면 activeStatusEffects 경로 유지
@@ -8350,9 +8685,16 @@ public class BattleManager : MonoBehaviour
             : skill.curseEffect.magicalDuration;
         if (duration > 0)
         {
-            target.ApplyStatusEffect(skill.curseEffect, duration);
+            if (target.companionSource != null && target.companionSource.IsImmune(skill.curseEffect.effectType))
+            {
+                AddMessage($"<color=#AAAAAA>{target.playerName}에게는 {Ko.I(Ko.Status(skill.curseEffect.effectType))} 통하지 않는다!</color>");
+                return false;
+            }
+            if (!target.ApplyStatusEffect(skill.curseEffect, duration)) return false;
             AddMessage($"{Ko.I(target.playerName)} {Ko.Status(skill.curseEffect.effectType)}에 걸렸다!");
+            return true;
         }
+        return false;
     }
 
     /// <summary>적 스킬용 스탯 스케일 값 — EnemyStats에 GetScaleValue가 없어 직접 분기.</summary>
@@ -8379,11 +8721,11 @@ public class BattleManager : MonoBehaviour
             BattleFxCombat.EnemyLunge(enemy); // [2026-10-17] 공격 스킬도 튀어나온 뒤
             yield return new WaitForSeconds(BattleFxCombat.LungeLead);
         }
-        // 1. MP 차감
-        enemy.currentMP = Mathf.Max(0, enemy.currentMP - skill.mpCost);
+        // 1. MP 차감 — [2026-10-22] 전체 공격(음파)은 대상마다 이 함수를 부르므로 비용은 첫 대상에서 한 번만
+        if (!_skipEnemyDeclare) enemy.currentMP = Mathf.Max(0, enemy.currentMP - skill.mpCost);
 
         // 2. HP 코스트
-        if (skill.hpCostPercent > 0f)
+        if (skill.hpCostPercent > 0f && !_skipEnemyDeclare)
         {
             int hpCost = Mathf.RoundToInt(enemy.maxHP * skill.hpCostPercent / 100f);
             enemy.currentHP = Mathf.Max(1, enemy.currentHP - hpCost);
@@ -8425,48 +8767,16 @@ public class BattleManager : MonoBehaviour
         }
 
         // [Debuff 분기 — 순수 디버프 스킬만 (Physical+Debuff는 데미지 루프로)]
+        // [2026-10-22] 피해 없음 → 선언 후 상태이상만. 중첩·시간 갱신 규칙은 공격 스킬의 부가 효과와 같다 (예전엔 이 분기만 따로 2중첩부터 시작)
         if (skill is MonsterSkillData debuffSkill && debuffSkill.Category == MonsterSkillCategory.Debuff)
         {
-            if (target != null && skill.curseEffect != null)
+            if (!_skipEnemyDeclare)
             {
-                float effectiveChance = skill.curseApplyChance *
-                    target.ApplyStatModifiers(AbyssdawnBattle.ModStatType.StatusResist, 1f);
-                if (UnityEngine.Random.value <= effectiveChance)
-                {
-                int currentStacks = target.activeStatModifiers
-                    .Count(m => m.source is SkillData sd && sd.skillID == skill.skillID);
-
-                if (currentStacks == 0)
-                {
-                    // 첫 적용: 2스택 (-0.10)
-                    for (int s = 0; s < 2; s++)
-                        foreach (var mod in skill.curseEffect.statModifiers)
-                            target.AddStatModifier(mod, skill, skill.curseEffect.physicalDuration);
-                    AddMessage($"{Ko.I(enemy.enemyName)} {Ko.Eul(skill.skillName)} 쓴다! " +
-                              $"{target.playerName}의 명중이 떨어졌다!");
-                }
-                else if (currentStacks < 4)
-                {
-                    // 추가 중첩: 1스택 + 전체 타이머 갱신
-                    foreach (var mod in skill.curseEffect.statModifiers)
-                        target.AddStatModifier(mod, skill, skill.curseEffect.physicalDuration);
-                    foreach (var am in target.activeStatModifiers
-                        .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
-                        am.remainingTurns = skill.curseEffect.physicalDuration;
-                    AddMessage($"{Ko.I(enemy.enemyName)} {Ko.Eul(skill.skillName)} 쓴다! " +
-                              $"효과가 갱신되고 중첩됐다!");
-                }
-                else
-                {
-                    // 최대 스택 도달: 타이머만 갱신
-                    foreach (var am in target.activeStatModifiers
-                        .Where(m => m.source is SkillData sd && sd.skillID == skill.skillID))
-                        am.remainingTurns = skill.curseEffect.physicalDuration;
-                    AddMessage($"{Ko.I(enemy.enemyName)} {Ko.Eul(skill.skillName)} 쓴다! " +
-                              $"효과 시간이 갱신됐다!");
-                }
-                }
+                AddMessage($"{Ko.Ui(enemy.enemyName)} {EnemySkillShortName(enemy, skill)}!");
+                yield return StartCoroutine(BeatWait(DeclareHold));
             }
+            if (target != null && skill.curseEffect != null && !ApplyCurseEffectsToPlayer(target, skill))
+                AddMessage($"<color=#AAAAAA>{Ko.Eun(target.playerName)} 버텨 냈다.</color>");
             yield return new WaitForSeconds(actionDelay);
             UpdateStatusUI();
             yield break;
@@ -8474,8 +8784,11 @@ public class BattleManager : MonoBehaviour
 
         int hits = Mathf.Max(1, skill.hitCount);
         int totalDamage = 0;
-        AddMessage($"{Ko.Ui(enemy.enemyName)} {EnemySkillShortName(enemy, skill)}!"); // [2026-10-20] 드퀘5식 선언
-        yield return StartCoroutine(BeatWait(DeclareHold));
+        if (!_skipEnemyDeclare) // [2026-10-22] 전체 공격은 선언을 한 번만
+        {
+            AddMessage($"{Ko.Ui(enemy.enemyName)} {EnemySkillShortName(enemy, skill)}!"); // [2026-10-20] 드퀘5식 선언
+            yield return StartCoroutine(BeatWait(DeclareHold));
+        }
 
         for (int i = 0; i < hits; i++)
         {
@@ -8530,6 +8843,7 @@ public class BattleManager : MonoBehaviour
 
             // 6. 슬롯 보정
             damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.playerName);
+            if (_enemyMultiMult < 1f) damage = Mathf.Max(1, Mathf.FloorToInt(damage * _enemyMultiMult)); // [2026-10-22] 전체 공격 뒤쪽 대상 감쇠
 
             // 7. 적 방어 경감 (isDefending)
             if (target.isDefending)
@@ -8731,22 +9045,43 @@ public class BattleManager : MonoBehaviour
                 foreach (var e in activeEnemies)
                     if (e != null && e.currentHP > 0 && (e.currentSlot == BattleSlot.Center || (int)e.currentSlot <= 4)) front.Add(e);
                 if (front.Count == 0) front.Add(target);
-                foreach (var e in front)
+                front = OrderLeftToRight(front); // [2026-10-22] 드퀘식: 왼쪽 → 오른쪽, 뒤로 갈수록 약하게
+                for (int k = 0; k < front.Count; k++)
                 {
+                    var e = front[k];
                     if (battleEnded) break;
                     if (e == null || e.currentHP <= 0) continue;
+                    _multiHitMult = MultiTargetFalloff(k);
                     yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, e, true));
                 }
+                _multiHitMult = 1f;
+            }
+            else if (skill.Key == EnemySkillSonicWave)
+            {
+                // [2026-10-22] 동료 박쥐의 음파: 적 전원 — 왼쪽 → 오른쪽, 뒤로 갈수록 약하게
+                var allE = OrderLeftToRight(activeEnemies.Where(e => e != null && e.currentHP > 0 && !_fledEnemies.Contains(e)).ToList());
+                for (int k = 0; k < allE.Count; k++)
+                {
+                    if (battleEnded) break;
+                    if (allE[k] == null || allE[k].currentHP <= 0) continue;
+                    _multiHitMult = MultiTargetFalloff(k);
+                    yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, allE[k], true));
+                }
+                _multiHitMult = 1f;
             }
             else if (skill.Key == SkillWhirlwindKick)
             {
                 // [2026-10-12] 선풍각: 고른 적이 있는 줄(전열 1~4번 칸·단독 / 후열 5~7번 칸)에서 고른 적 + 가장 가까운 1명
-                foreach (var e in WhirlwindTargets(target))
+                var ww = OrderLeftToRight(WhirlwindTargets(target)); // [2026-10-22] 왼쪽 → 오른쪽, 뒤로 갈수록 약하게
+                for (int k = 0; k < ww.Count; k++)
                 {
+                    var e = ww[k];
                     if (battleEnded) break;
                     if (e == null || e.currentHP <= 0) continue;
+                    _multiHitMult = MultiTargetFalloff(k);
                     yield return StartCoroutine(ExecuteSingleTargetSkill(attacker, skill, e, true));
                 }
+                _multiHitMult = 1f;
             }
             else
             {
@@ -8870,6 +9205,82 @@ public class BattleManager : MonoBehaviour
         return list;
     }
 
+    // ── [2026-10-22] 다중 공격 규칙 (드퀘식) ──
+    //   여러 적을 치는 공격은 언제나 왼쪽(작은 번호) → 오른쪽 순서. 뒤로 갈수록 피해가 줄어든다: 100% · 85% · 72% · 61% …
+    private const float MultiFalloffStep = 0.85f;
+    private float _multiHitMult = 1f;
+    private float _enemyMultiMult = 1f;   // 적의 전체 공격 (박쥐 음파)
+    private bool _skipEnemyDeclare;
+
+    // [2026-10-22] 몬스터 스킬 키
+    private const string EnemySkillSonicWave = "Sonic Wave"; // 박쥐 음파 — 후열(3·4번)에서만, 아군 전원
+    private const string EnemySkillFocus = "Draw Focus";     // 슬라임 집중시키기 — 전열(1·2번)에서만
+    private const int DrawFocusRounds = 2;
+
+    /// <summary>
+    /// [2026-10-22] 집중시키기: 전열(1·2번) 아군이 적을 노리면, 집중시키기 중인 적이 있을 때 그 적에게로 바뀐다.
+    ///   후열 아군·자기 몸에 쓰는 스킬은 그대로. 여러 마리면 가장 왼쪽.
+    /// </summary>
+    private EnemyStats RedirectToFocus(PlayerStats attacker, EnemyStats picked)
+    {
+        if (attacker == null || !attacker.IsFrontRow) return picked;
+        var focus = activeEnemies.Where(e => e != null && e.currentHP > 0 && !_fledEnemies.Contains(e) && e.focusRounds > 0)
+                                 .OrderBy(SlotOrder).FirstOrDefault();
+        if (focus == null || focus == picked) return picked;
+        AddMessage($"<color=#C8FF9F>{Ko.Ui(attacker.playerName)} 눈길이 {Ko.Ro(focus.enemyName)} 끌려간다!</color>");
+        return focus;
+    }
+
+    private static float MultiTargetFalloff(int index) => index <= 0 ? 1f : Mathf.Pow(MultiFalloffStep, index);
+
+    private static int SlotOrder(EnemyStats e) => e.currentSlot == BattleSlot.Center ? 0 : (int)e.currentSlot;
+
+    private static List<EnemyStats> OrderLeftToRight(List<EnemyStats> list) =>
+        list.Where(e => e != null).OrderBy(SlotOrder).ToList();
+
+    /// <summary>만드리토·리베르소가 실제로 맞힐 적: 1·2번 짝 또는 3·4번 짝 (단독 Center 는 혼자). 왼쪽 → 오른쪽.</summary>
+    private List<EnemyStats> MandrittoTargets(EnemyStats picked)
+    {
+        var alive = activeEnemies.Where(e => e != null && e.currentHP > 0 && !_fledEnemies.Contains(e) && IsEnemyFrontLine(e)).ToList();
+        System.Func<EnemyStats, int> pair = e => e.currentSlot == BattleSlot.Center ? 0 : ((int)e.currentSlot - 1) / 2 + 1;
+        int want = picked != null && IsEnemyFrontLine(picked) ? pair(picked) : -1;
+        var group = alive.Where(e => pair(e) == want).ToList();
+        if (group.Count == 0 && alive.Count > 0) // 고른 짝이 비었으면 남은 적 중 가장 왼쪽 짝
+        {
+            int first = alive.Select(pair).Min();
+            group = alive.Where(e => pair(e) == first).ToList();
+        }
+        return OrderLeftToRight(group);
+    }
+
+    /// <summary>
+    /// [2026-10-22] 플레이어 스킬의 적 자리 제한. allowedTargetSlots 가 정확히 1·2번(전열) 또는 3·4번일 때만 지킨다.
+    ///   (기본값이 "1번만" 이라 그대로 둔 스킬이 많아, 그 밖의 값은 제한 없음으로 본다)
+    ///   제한된 자리에 살아 있는 적이 하나도 없으면 막지 않는다 (아무도 못 치는 일이 없게).
+    /// </summary>
+    private bool SkillReachesEnemy(SkillData skill, EnemyStats e)
+    {
+        if (skill == null || skill.targeting == null || e == null) return true;
+        var m = skill.targeting.allowedTargetSlots;
+        System.Func<EnemyStats, bool> ok;
+        if (m == (SlotMask.Slot1 | SlotMask.Slot2)) ok = x => SlotOrder(x) <= 2;
+        else if (m == (SlotMask.Slot3 | SlotMask.Slot4)) ok = x => SlotOrder(x) == 3 || SlotOrder(x) == 4;
+        else return true;
+        if (!activeEnemies.Exists(x => x != null && x.currentHP > 0 && ok(x))) return true;
+        return ok(e);
+    }
+
+    /// <summary>[2026-10-22] 고른 적이 그새 쓰러지거나 도망쳤으면 가장 가까운 다른 적으로 (드퀘식 — 명령이 취소되지 않는다).</summary>
+    private EnemyStats RetargetIfGone(EnemyStats picked, SkillData skill)
+    {
+        if (picked != null && picked.currentHP > 0 && !_fledEnemies.Contains(picked)) return picked;
+        int from = picked != null ? SlotOrder(picked) : 1;
+        return activeEnemies
+            .Where(e => e != null && e.currentHP > 0 && !_fledEnemies.Contains(e) && SkillReachesEnemy(skill, e))
+            .OrderBy(e => Mathf.Abs(SlotOrder(e) - from)).ThenBy(SlotOrder)
+            .FirstOrDefault();
+    }
+
     /// <summary>적 전열 = 1~4번 칸 또는 단독(Center), 후열 = 5~7번 칸.</summary>
     private static bool IsEnemyFrontLine(EnemyStats e)
     {
@@ -8879,6 +9290,18 @@ public class BattleManager : MonoBehaviour
     private IEnumerator ExecuteSingleTargetSkill(PlayerStats attacker, SkillData skill, EnemyStats target, bool multiTarget = false)
     {
         if (attacker == null || skill == null || target == null) yield break;
+        // [2026-10-22] 피해 없는 몬스터 디버프 스킬 (동료 고블린의 모래 뿌리기 등) — 적이 쓸 때와 같게 상태이상만
+        if (skill is MonsterSkillData pureDebuff && pureDebuff.Category == MonsterSkillCategory.Debuff)
+        {
+            int before = target.activeStatModifiers.Count + (target.activeStatusEffects != null ? target.activeStatusEffects.Count : 0);
+            ApplyCurseEffects(target, skill);
+            int after = target.activeStatModifiers.Count + (target.activeStatusEffects != null ? target.activeStatusEffects.Count : 0);
+            if (after == before && !target.activeStatModifiers.Exists(m => m.source is SkillData sd && sd.skillID == skill.skillID))
+                AddMessage($"<color=#AAAAAA>{Ko.Eun(target.enemyName)} 버텨 냈다.</color>");
+            yield return new WaitForSeconds(actionDelay);
+            UpdateStatusUI();
+            yield break;
+        }
 
         // [2026-10-12] 근육의 기억 — 격투 스킬로 한 명을 노릴 때만. 여러 명을 치는 스킬은 중첩을 쌓지 않고 처음부터.
         bool muscle = skill.weaponCategory == AbyssdawnBattle.WeaponCategory.Fist && attacker.HasEquippedPassiveByName(PlayerStats.SkillMuscleMemory);
@@ -9047,6 +9470,7 @@ public class BattleManager : MonoBehaviour
             Debug.Log($"[BattleLog] Skill Final Damage (with armor break): base={baseDamage}, armorBreak={armorBreakDamage}, total={damage}");
 
             damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.enemyName);
+            if (_multiHitMult < 1f) damage = Mathf.Max(1, Mathf.FloorToInt(damage * _multiHitMult)); // [2026-10-22] 다중 공격 뒤쪽 대상 감쇠
             if (target.isDefending)
             {
                 damage = Mathf.FloorToInt(damage * (1f - target.defenceReduction));
@@ -9115,11 +9539,7 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        // 다중 타격일 경우 총합 메시지 추가
-        if (hits > 1 && successfulHits > 0)
-        {
-            AddMessage($"합계: {totalDamage} 피해 ({successfulHits}/{hits}타 명중)");
-        }
+        // [2026-10-22] 다중 타격 합계 줄은 없앰 (타격마다 피해가 이미 나온다)
 
         // [2026-10-09] 방패 강타·방패돌진: 맞혔으면 기절·밀치기·전진
         _lastSkillHits = successfulHits; // [2026-10-13] 도끼 집기 판정용
@@ -9169,26 +9589,10 @@ public class BattleManager : MonoBehaviour
         // [2026-10-05] 적 앞열 = 슬롯 1~4 (+ 단독 Center). 고른 적 + 그 옆에서 가장 가까운 앞열 적 = 최대 2명.
         //   예전에는 allowedTargetSlots(=Slot1 만)로 레거시 4칸 BattleLine 을 걸러, 2/2 대열(2·3·5·6)이나
         //   Center 단독 적이면 아무도 맞지 않고 HP 만 소모됐다.
-        List<EnemyStats> front = activeEnemies
-            .Where(e => e != null && e.currentHP > 0 &&
-                        (((int)e.currentSlot >= 1 && (int)e.currentSlot <= 4) || e.currentSlot == BattleSlot.Center))
-            .ToList();
-        EnemyStats anchor = (selectedTarget != null && front.Contains(selectedTarget))
-            ? selectedTarget
-            : front.OrderBy(e => (int)e.currentSlot).FirstOrDefault();
-        List<EnemyStats> frontRowEnemies = new List<EnemyStats>();
-        if (anchor != null)
-        {
-            frontRowEnemies.Add(anchor);
-            EnemyStats second = front.Where(e => e != anchor)
-                .OrderBy(e => Mathf.Abs((int)e.currentSlot - (int)anchor.currentSlot))
-                .ThenBy(e => (int)e.currentSlot)
-                .FirstOrDefault();
-            if (second != null) frontRowEnemies.Add(second);
-        }
-
+        // [2026-10-22] 짝 규칙: 1·2번 또는 3·4번 (2·3번은 한 번에 못 친다). 짝 중 하나만 남았으면 그 하나만.
+        //   고른 적이 그새 쓰러지거나 도망쳤으면 같은 짝의 남은 적, 짝이 비었으면 다른 짝으로 (취소되지 않음). 왼쪽 → 오른쪽.
+        List<EnemyStats> frontRowEnemies = MandrittoTargets(selectedTarget);
         if (frontRowEnemies.Count == 0) yield break;
-        if (skill.Key == SkillRiverso) frontRowEnemies = frontRowEnemies.OrderBy(e => (int)e.currentSlot).ToList(); // [2026-10-20] 왼쪽 → 오른쪽
 
         int totalDamage = 0;
 
@@ -9246,6 +9650,7 @@ public class BattleManager : MonoBehaviour
             // Sharp Edge 등 공격 패시브 보정
             damage = ApplyOffensivePassiveBonuses(attacker, skill, target, damage);
             damage = ConsumeFollowUpBonus(attacker, damage); // 버티기 자세 다음 첫 공격 +20% (첫 대상만)
+            damage = Mathf.Max(1, Mathf.FloorToInt(damage * MultiTargetFalloff(frontRowEnemies.IndexOf(target)))); // [2026-10-22] 오른쪽 대상일수록 약하게
 
             damage = ApplySlotDamageToTarget(damage, target.currentSlot, target.enemyName);
             if (target.isDefending)
@@ -9283,7 +9688,7 @@ public class BattleManager : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
         }
 
-        if (totalDamage > 0)
+        if (false && totalDamage > 0) // [2026-10-22] 합계 줄 없앰
         {
             AddMessage($"만드리토 합계 피해: {totalDamage}");
         }
@@ -9649,7 +10054,7 @@ public class BattleManager : MonoBehaviour
         }
 
         // 2) 영입 권유 문구 — CompanionRecruitPhrases에서 랜덤 선택 ({0}에 동료 이름 삽입).
-        string invitePhrase = Abyssdawn.CompanionRecruitPhrases.GetRandomPhrase($"<color=#FFD700>{data.MonsterName}</color>");
+        string invitePhrase = Abyssdawn.CompanionRecruitPhrases.GetRandomPhrase(data.MonsterName); // [2026-10-22] 조사 처리 때문에 이름만 넘긴다
         Debug.Log($"[Recruit] 랜덤 권유 문구: \"{invitePhrase}\"");
         yield return StartCoroutine(WaitForMessageSequence(new System.Collections.Generic.List<string>
         {
@@ -9706,14 +10111,44 @@ public class BattleManager : MonoBehaviour
         {
             // YES — 영속화 등록만. 활성 파티 슬롯/_companionInstances는 건드리지 않음 (사용자 명시)
             // 다음 씬에서 RestoreCompanionInstancesFromPersistence가 ActiveRoster 기반으로 동료 인스턴스화.
+            // [2026-10-22] 파티가 가득 찼으면: 지금 동료 3명 중 누구와 바꿀지 고른다 (드퀘식 명단). 밀려난 동료는 대기 명단으로.
+            int swapWith = -1; // -1 = 바꾸지 않음 (새 동료가 대기 명단으로)
+            bool full = CompanionPartyPersistence.CountActive() >= CompanionPartyPersistence.MaxActive;
+            if (full)
+            {
+                int picked = -2; // -2 = 고르는 중
+                var picker = BuildRecruitSwapPicker(data, i => picked = i);
+                while (picked == -2) yield return null;
+                if (picker != null) Destroy(picker);
+                swapWith = picked;
+            }
+
             bool added = CompanionPartyPersistence.TryAddActive(data, data.HP, data.MP);
             Debug.Log($"[Recruit] ✅ YES → CompanionPartyPersistence.TryAddActive 호출. 반환={added}, ActiveRoster.Count={CompanionPartyPersistence.ActiveRoster.Count}, WaitlistPaths.Count={CompanionPartyPersistence.WaitlistPaths.Count}");
 
-            // "동료가 되었다" 메시지 (영어)
-            yield return StartCoroutine(WaitForMessageSequence(new System.Collections.Generic.List<string>
+            string outName = null;
+            if (!added && swapWith >= 0)
             {
-                $"<color=#90EE90>{data.MonsterName}</color>이(가) 동료가 되었다!"
-            }));
+                // 새 동료는 방금 대기 명단에 들어갔다 (가장 최근 id) → 고른 동료와 자리를 맞바꾼다
+                int newId = CompanionPartyPersistence.NextCompanionId - 1;
+                int waitIdx = CompanionPartyPersistence.WaitlistPaths.FindIndex(w => w != null && w.id == newId);
+                var outEntry = CompanionPartyPersistence.ActiveRoster[swapWith];
+                outName = outEntry != null ? CompanionPartyPersistence.LoadCompanion(outEntry.resourcePath)?.MonsterName : null;
+                // 명단 HP 는 전투 전 값 — 이번 전투의 HP(쓰러졌으면 0)를 먼저 옮겨 적고 대기 명단으로 보낸다
+                if (outEntry != null)
+                    foreach (var inst in _companionInstances)
+                        if (inst != null && inst.companionId == outEntry.id) { outEntry.currentHP = Mathf.Max(0, inst.currentHP); outEntry.currentMP = Mathf.Max(0, inst.currentMP); break; }
+                if (waitIdx >= 0 && CompanionPartyPersistence.SwapActiveWait(swapWith, waitIdx)) added = true;
+                Debug.Log($"[Recruit] 교체 — 활성 {swapWith} ↔ 대기 {waitIdx} ({outName} → 대기 명단)");
+            }
+
+            var lines = new System.Collections.Generic.List<string>
+            {
+                $"<color=#90EE90>{data.MonsterName}</color>{Ko.I(data.MonsterName).Substring(data.MonsterName.Length)} 동료가 되었다!"
+            };
+            if (!added) lines.Add($"<color=#AAAAAA>파티가 가득 차 {Ko.I(data.MonsterName)} 대기 명단에서 기다린다.</color>");
+            else if (outName != null) lines.Add($"<color=#AAAAAA>{Ko.Eun(outName)} 대기 명단으로 물러났다.</color>");
+            yield return StartCoroutine(WaitForMessageSequence(lines));
 
             yield return new WaitForSeconds(3f);
         }
@@ -9721,6 +10156,44 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log($"[Recruit] NO → '{data.MonsterName}' 영입 거절, 즉시 맵 복귀");
         }
+    }
+
+    /// <summary>
+    /// [2026-10-22] 파티가 가득 찼을 때 영입 — "누구와 교체할까?" 드퀘식 명단 창.
+    ///   지금 동료 3명(이름 · Lv · HP)과 맨 아래 "교체하지 않는다"(새 동료는 대기 명단으로). onPick(활성 칸 번호, 바꾸지 않으면 -1).
+    /// </summary>
+    private GameObject BuildRecruitSwapPicker(Abyssdawn.MonsterSO incoming, System.Action<int> onPick)
+    {
+        var root = new GameObject("RecruitSwapPicker", typeof(RectTransform));
+        var cv = root.AddComponent<Canvas>(); cv.renderMode = RenderMode.ScreenSpaceOverlay; cv.sortingOrder = 210;
+        var sc = root.AddComponent<CanvasScaler>(); sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; sc.referenceResolution = new Vector2(1080f, 1920f); sc.matchWidthOrHeight = 0f;
+        root.AddComponent<GraphicRaycaster>();
+        var dim = new GameObject("Dim", typeof(RectTransform), typeof(Image));
+        dim.transform.SetParent(root.transform, false);
+        var drt = (RectTransform)dim.transform; drt.anchorMin = Vector2.zero; drt.anchorMax = Vector2.one; drt.offsetMin = drt.offsetMax = Vector2.zero;
+        dim.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.6f);
+
+        var roster = CompanionPartyPersistence.ActiveRoster;
+        float h = 200f + roster.Count * 100f + 120f;
+        var box = MoveUiPanel((RectTransform)root.transform, h);
+        MoveUiText(box, $"<color=#FFD700>{incoming.MonsterName}</color> <size=70%>Lv{incoming.MonsterLevel}</size> — 누구와 교체할까?", 24f, 60f, 40f, new Color(0.96f, 0.87f, 0.58f));
+        MoveUiText(box, "<color=#AAAAAA>교체된 동료는 대기 명단으로 간다.</color>", 84f, 44f, 28f, Color.white);
+        float y = 150f;
+        for (int i = 0; i < roster.Count; i++)
+        {
+            var e = roster[i];
+            var so = e != null ? CompanionPartyPersistence.LoadCompanion(e.resourcePath) : null;
+            if (so == null) continue;
+            int cap = i;
+            // 전투 중 HP 는 아직 명단에 저장 전 — 전투에 나와 있는 동료면 그 HP 를 보여 준다
+            int curHp = e.currentHP;
+            foreach (var inst in _companionInstances) if (inst != null && inst.companionId == e.id) { curHp = inst.currentHP; break; }
+            string hp = curHp <= 0 ? "<color=#FF8C8C>쓰러짐</color>" : $"HP {curHp}/{so.HP}";
+            MoveUiButton(box, $"<size=70%><color=#B8A57A>No.{CompanionPartyPersistence.RosterIndexToMainLineSlot(i) + 1}</color></size>  <size=72%><color=#B8A57A>Lv{so.MonsterLevel}</color></size> {so.MonsterName}   <size=70%>{hp}</size>", y, () => onPick(cap));
+            y += 100f;
+        }
+        MoveUiButton(box, "<color=#BBBBBB>교체하지 않는다</color> <size=70%>(대기 명단으로)</size>", y + 20f, () => onPick(-1));
+        return root;
     }
 
     /// <summary>SpriteRenderer alpha를 0에서 originalColor의 alpha까지 duration초 동안 보간.</summary>
@@ -9847,10 +10320,13 @@ public class BattleManager : MonoBehaviour
         // 7스탯은 MonsterSO에서 직접 읽음.
         allyStats.baseHP      = data.HP;
         allyStats.baseMP      = data.MP;
-        allyStats.baseAttack  = data.ATK;
+        // [2026-10-22] 든 무기(예: 고블린 뼈 단검)의 공격·민첩 보너스 — 적일 때(EnemyStats.Init)와 같게
+        int weaponAtk = data.EquippedWeapon != null ? data.EquippedWeapon.attackBonus : 0;
+        int weaponAgi = data.EquippedWeapon != null ? data.EquippedWeapon.agiBonus : 0;
+        allyStats.baseAttack  = data.ATK + weaponAtk;
         allyStats.baseDefense = data.DEF;
         allyStats.baseMagic   = data.MAG;
-        allyStats.baseAgility = data.AGI;
+        allyStats.baseAgility = data.AGI + weaponAgi;
         allyStats.baseLuck    = data.LUK;
 
         // characterClass = null (CompanionSO는 직업 없음, base 스탯이 그대로 최종)
@@ -9919,6 +10395,7 @@ public class BattleManager : MonoBehaviour
     public void AddMessage(string newMessage)
     {
         if (messageText == null) return; // 전투씬 외 호출 안전 가드
+        BattleLogArchive.Add(newMessage); // [2026-10-22] 전투 기록 (던전 메뉴 "전투 기록")
         // [SeqMsg-DIAG] 시퀀스 진행 중 다른 메시지가 AddMessage로 들어오면
         // messageText.text가 덮어쓰기되어 시퀀스 출력이 깨짐. 경고로 가시화.
         if (IsPlayingMessageSequence)
@@ -9965,6 +10442,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public void PlayMessageSequence(IList<string> lines, System.Action onComplete = null)
     {
+        if (lines != null) foreach (var l in lines) BattleLogArchive.Add(l); // [2026-10-22] 전투 기록
         Debug.Log($"[SeqMsg-DIAG] === PlayMessageSequence 진입 === lines.Count={(lines == null ? "(null)" : lines.Count.ToString())}, messageText={(messageText != null ? messageText.name : "NULL")}, gameObject.activeInHierarchy={gameObject.activeInHierarchy}");
         if (lines != null)
         {
@@ -10309,6 +10787,9 @@ public class BattleManager : MonoBehaviour
         var want = (waitingForTargetSelection && hoveredEnemy != null && hoveredEnemy.currentHP > 0)
             ? PreviewTargets(pendingAction == "skill" ? pendingSkill : null, hoveredEnemy)
             : new List<EnemyStats>();
+        // [2026-10-23] 음파처럼 적 전원을 치는 스킬은 커서와 상관없이 고르는 동안 내내 전원이 반짝
+        if (waitingForTargetSelection && pendingAction == "skill" && pendingSkill != null && pendingSkill.Key == EnemySkillSonicWave)
+            want = AllLiveEnemies();
         foreach (var e in _hoverGroup)
             if (e != null && e != hoveredEnemy && !want.Contains(e)) e.SetHighlight(false);
         foreach (var e in want)
@@ -10323,18 +10804,7 @@ public class BattleManager : MonoBehaviour
         var list = new List<EnemyStats>();
         if (picked == null) return list;
         if (skill == null) { list.Add(picked); return list; }
-        if (skill.Key == "Mandritto")
-        {
-            var front = activeEnemies.Where(e => e != null && e.currentHP > 0 && IsEnemyFrontLine(e)).ToList();
-            EnemyStats anchor = front.Contains(picked) ? picked : front.OrderBy(e => (int)e.currentSlot).FirstOrDefault();
-            if (anchor != null)
-            {
-                list.Add(anchor);
-                var second = front.Where(e => e != anchor).OrderBy(e => Mathf.Abs((int)e.currentSlot - (int)anchor.currentSlot)).ThenBy(e => (int)e.currentSlot).FirstOrDefault();
-                if (second != null) list.Add(second);
-            }
-            return list;
-        }
+        if (skill.Key == "Mandritto" || skill.Key == SkillRiverso) return MandrittoTargets(picked); // [2026-10-22] 1·2 / 3·4 짝
         if (skill.Key == SkillRoundhouse)
         {
             foreach (var e in activeEnemies) if (e != null && e.currentHP > 0 && IsEnemyFrontLine(e)) list.Add(e);
@@ -10342,9 +10812,13 @@ public class BattleManager : MonoBehaviour
             return list;
         }
         if (skill.Key == SkillWhirlwindKick) return WhirlwindTargets(picked);
+        if (skill.Key == EnemySkillSonicWave) return AllLiveEnemies(); // [2026-10-23] 동료 박쥐의 음파 = 적 전원
         list.Add(picked);
         return list;
     }
+
+    private List<EnemyStats> AllLiveEnemies()
+        => activeEnemies.Where(e => e != null && e.currentHP > 0 && !_fledEnemies.Contains(e)).ToList();
 
     // ========== 파티 상태 UI ==========
     private void RebuildPlayerStatusPanel()
@@ -10573,6 +11047,7 @@ public class BattleManager : MonoBehaviour
             playerStatusHPTexts.Add(hpText);
             playerStatusMPTexts.Add(mpText);
             playerStatusLevelTexts.Add(PartyCardVisuals.FindText(slot, PartyCardVisuals.LevelTextNames));
+            PartyCardVisuals.SetNumberLabel(slot); // [2026-10-22] "Lv." → "No."
 
             Transform statusIconRow = FindNamedDescendantRecursive(slot, "StatusIconRow");
             playerStatusIconRows.Add(statusIconRow);
@@ -11194,7 +11669,8 @@ private void CacheHeroSkills()
 
                     if (hasDedicatedSlotTexts)
                     {
-                        playerStatusNameTexts[i].text = member.playerName;
+                        // [2026-10-22] 이름 왼쪽에 레벨 (왼쪽 위 칸은 자리 번호 No.)
+                        playerStatusNameTexts[i].text = member.playerName; // [2026-10-22] 레벨은 이름 왼쪽 별도 글자 (LvBadge)
                         if (member == _cardFreezeMember)
                         {
                             playerStatusHPTexts[i].text = $"HP {_fzHp}/{_fzMaxHp}";
@@ -11223,7 +11699,9 @@ private void CacheHeroSkills()
 
                     if (i < playerStatusLevelTexts.Count && playerStatusLevelTexts[i] != null)
                     {
-                        playerStatusLevelTexts[i].text = (member == _cardFreezeMember ? _fzLevel : PartyCardVisuals.LevelOf(member)).ToString();
+                        playerStatusLevelTexts[i].text = ((int)member.currentSlot).ToString(); // [2026-10-22] 자리 번호 (No.)
+                        if (i < playerStatusNameTexts.Count)
+                            PartyCardVisuals.SetLevelBadge(playerStatusLevelTexts[i], playerStatusNameTexts[i], member == _cardFreezeMember ? _fzLevel : PartyCardVisuals.LevelOf(member));
                         playerStatusLevelTexts[i].color = isDead ? downedTextColor : aliveTextColor;
                     }
 
@@ -11243,6 +11721,7 @@ private void CacheHeroSkills()
                     tmp.text = "";
                     if (i < playerStatusNameTexts.Count && playerStatusNameTexts[i] != null)
                         playerStatusNameTexts[i].text = "";
+                        PartyCardVisuals.SetLevelBadge(null, playerStatusNameTexts[i], 0);
                     if (i < playerStatusHPTexts.Count && playerStatusHPTexts[i] != null)
                         playerStatusHPTexts[i].text = "";
                     if (i < playerStatusMPTexts.Count && playerStatusMPTexts[i] != null)
@@ -11322,6 +11801,7 @@ private void CacheHeroSkills()
                     lastEnemyDisplayedHP[es] = es.currentHP;
 
                     if (nameText != null) nameText.text = es.enemyName;
+                    es.RefreshNumberLabel(); // [2026-10-22] No.n
                     if (hpText != null) hpText.text = $"HP {es.currentHP}/{es.maxHP}";
                     if (mpText != null) mpText.text = $"MP {es.currentMP}/{es.maxMP}";
 
@@ -11650,7 +12130,7 @@ private void CacheHeroSkills()
 
             if (player != null && player.currentHP < 0) player.currentHP = 0;
             UpdateStatusUI();
-            AddMessage("파티가 쓰러졌다...");
+            AddMessage("파티가 무너졌다..."); // [2026-10-21] 쓰러졌다 → 무너졌다
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
             StartCoroutine(GameOverRoutine(3.0f));
@@ -11737,6 +12217,19 @@ private void CacheHeroSkills()
                 AddMessage($"<color=#FFD24A>{totalGold} 골드</color>를 찾았다!");
                 Debug.Log($"[BattleManager] 골드 +{totalGold} → {PlayerWallet.Gold}G");
             }
+            // [2026-10-22] 몬스터 드롭 테이블: 쓰러뜨린 몬스터마다 항목별 확률 판정 (도망친 몬스터는 없음)
+            foreach (var e in activeEnemies)
+            {
+                if (e == null || e.sourceMonster == null || _fledEnemies.Contains(e)) continue;
+                foreach (var drop in e.sourceMonster.DropTable)
+                {
+                    if (drop == null || drop.item == null || UnityEngine.Random.value >= drop.dropChance) continue;
+                    bool got = false;
+                    if (drop.item is ConsumableItemSO c) got = ConsumableInventory.Instance != null && ConsumableInventory.Instance.AddItem(c, 1) > 0;
+                    else if (drop.item is EquipmentData eq) got = EquipmentBag.CanAdd(eq) && EquipmentBag.Add(eq);
+                    if (got) AddMessage($"<color=#9FFF9F>{Ko.I(e.enemyName)} {Ko.Eul(drop.item.itemName)} 떨어뜨렸다.</color>");
+                }
+            }
             // [2026-10-11] 보급술 '전리품 수습': 승리 시 5% 확률로 HP 포션
             if (FieldSkills.Has(FieldSkills.LootSalvage) && UnityEngine.Random.value < FieldSkills.LootVictoryPotionChance)
             {
@@ -11747,6 +12240,7 @@ private void CacheHeroSkills()
 
             if (actionPanel != null) actionPanel.SetActive(false);
             if (skillPanel != null) skillPanel.SetActive(false);
+            PlayLog.BattleEnd("승리"); // [2026-10-22]
             ReturnToDungeon(3.0f);
         }
     }

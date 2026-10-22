@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_S3_FollowIn
   skillName: "\uB530\uB77C \uB4E4\uC5B4\uAC00\uAE30"
   skillKey: Follow In
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 0d2a1ae43ecd485e968c09be52f3a425, type: 3}
   description: "[\uAC80 \uC804\uC6A9] STR 70%\uB85C \uBCA4\uB2E4. \uC774\uBC88 \uB77C\uC6B4\uB4DC\uC5D0
     \uC801\xB7\uC544\uAD70 \uD589\uB3D9\uC774 \uBAA8\uB450 \uB05D\uB098\uBA74, \uACF5\uACA9
     \uB9D0\uACE0 \uB2E4\uB978 \uD589\uB3D9(\uBC29\uC5B4\xB7\uBC84\uD504\xB7\uD798
@@ -81,4 +81,4 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: feba555009448ee40935a8c4b1a6e0f7, type: 2}
-  requiredLorePoints: 3
+  requiredLorePoints: 1

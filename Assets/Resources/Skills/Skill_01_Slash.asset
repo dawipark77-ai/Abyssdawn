@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: 01
   skillName: "\uBCA0\uAE30"
   skillKey: Slash
-  skillIcon: {fileID: 21300000, guid: 69df82ed2574fe94e86708adc7675fdd, type: 3}
+  skillIcon: {fileID: 21300000, guid: a0c3efcfb293c0e4d8f91ee212d153f1, type: 3}
   description: "\uBE60\uB978 \uBB3C\uB9AC \uACF5\uACA9. \uBCF4\uD1B5 \uD53C\uD574."
   usageType: 0
   damageType: 0
@@ -24,7 +24,7 @@ MonoBehaviour:
   targeting:
     targetFaction: 0
     allowedCasterSlots: 3
-    allowedTargetSlots: 1
+    allowedTargetSlots: 3
     specificSlots: 
   hpCostPercent: 5
   mpCost: 0

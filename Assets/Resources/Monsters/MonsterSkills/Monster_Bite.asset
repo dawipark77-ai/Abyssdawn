@@ -15,9 +15,8 @@ MonoBehaviour:
   skillID: Monster_Bite
   skillName: "\uBB3C\uAE30"
   skillKey: Bite
-  skillIcon: {fileID: -3504630673186957658, guid: de470716e5ee2094aa72d0862083ed16, type: 3}
-  description: "\uC57C\uC218(Beast) \uC804\uC6A9 \uD3C9\uD0C0 \uB300\uCCB4. \uB2E4\uB978
-    \uC885\uC871\uC740 \uC801\uC6A9\uB418\uC9C0 \uC54A\uC74C."
+  skillIcon: {fileID: 21300000, guid: 8f1bce8c4a1144d495597acd144099f8, type: 3}
+  description: "\uC57C\uC218\uC758 \uAE30\uBCF8 \uACF5\uACA9. \uD798 <color=#8CFF8C>\u00D71.25</color>\uB85C \uBB38\uB2E4 (\uBA85\uC911 <color=#F5DE94>97%</color>). \uCE58\uBA85\uD0C0 \uD655\uB960 <color=#8CFF8C>+8%</color>."
   usageType: 0
   damageType: 1
   scalingStat: 1

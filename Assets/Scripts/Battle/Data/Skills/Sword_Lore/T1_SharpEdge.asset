@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_T1_04
   skillName: "\uB0A0 \uC138\uC6B0\uAE30"
   skillKey: Sharp Edge
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: cd672900f8c841f683ce3bddff6d018c, type: 3}
   description: "[\uAC80 \uC804\uC6A9 \xB7 \uBC84\uD504] \uCE7C\uB0A0\uC744 \uBCBC\uB824
     \uBC29\uC5B4\uB97C \uAFF0\uB6AB\uB294\uB2E4. \uD55C \uD134\uC744 \uC368\uC11C,
     \uB2E4\uC74C 2\uD134 \uB3D9\uC548 \uC801 \uBC29\uC5B4\uB825\uC758 60%\uB97C \uBB34\uC2DC\uD558\uACE0

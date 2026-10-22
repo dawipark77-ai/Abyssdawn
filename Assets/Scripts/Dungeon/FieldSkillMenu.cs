@@ -96,7 +96,7 @@ public class FieldSkillMenu : MonoBehaviour
 
         if (skills.Count == 0)
         {
-            var t = Text(_list, "<color=#888888>지금 쓸 수 있는 스킬이 없다.</color>\n<size=70%><color=#666666>회복 마법처럼 전투 밖에서도 쓰는 스킬을 배우면 여기에 나온다.</color></size>", 0f, 200f, 940f, 200f, 36f, Muted, TextAlignmentOptions.Center);
+            var t = Text(_list, "<color=#888888>지금 쓸 수 있는 스킬이 없다.</color>\n<size=70%><color=#666666>회복 마법처럼 전투 밖에서도 쓰는 스킬을 기억해 내면 여기에 나온다.</color></size>", 0f, 200f, 940f, 200f, 36f, Muted, TextAlignmentOptions.Center);
             t.textWrappingMode = TextWrappingModes.Normal;
             return;
         }
@@ -200,6 +200,7 @@ public class FieldSkillMenu : MonoBehaviour
         {
             case "Detoxify":
                 if (heroTarget != null && DungeonFieldStatus.Has(StatusEffectType.Poison)) { DungeonFieldStatus.Remove(StatusEffectType.Poison); Flash(heroTarget, rosterIndex, null); return $"{skill.skillName}: <color=#9FFF9F>{who}의 독이 나았다.</color>"; }
+                if (ally != null && DungeonFieldStatus.CompanionHas(ally.id, StatusEffectType.Poison)) { DungeonFieldStatus.RemoveCompanion(ally.id, StatusEffectType.Poison); Flash(null, rosterIndex, null); return $"{skill.skillName}: <color=#9FFF9F>{who}의 독이 나았다.</color>"; } // [2026-10-21] 동료
                 Flash(heroTarget, rosterIndex, null);
                 return $"{skill.skillName}: <color=#AAAAAA>{Ko.Eun(who)} 독에 걸려 있지 않다.</color>";
             case "Inner Cleanse":

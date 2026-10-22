@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_S2_AdvancingThrust
   skillName: "\uC804\uC9C4\uCC0C\uB974\uAE30"
   skillKey: Advancing Thrust
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: e1bac4534b614f61b9fcff7fa69446af, type: 3}
   description: "[\uAC80 \uC804\uC6A9] \uD6C4\uC5F4(3\xB74\uBC88)\uC5D0\uC11C\uB9CC.
     \uC55E\uC73C\uB85C 1\uCE78 \uD30C\uACE0\uB4E4\uBA70 \uC801 \uC804\uC5F4\uC744
     STR 80%\uB85C \uCC0C\uB978\uB2E4. \uCD5C\uB300 HP\uC758 6% \uC18C\uBAA8."
@@ -79,4 +79,4 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: 8a0e13040b5c22040b525bf89feedeb7, type: 2}
-  requiredLorePoints: 3
+  requiredLorePoints: 1

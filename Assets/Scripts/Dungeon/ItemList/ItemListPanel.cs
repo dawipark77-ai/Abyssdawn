@@ -259,7 +259,7 @@ public class ItemListPanel : MonoBehaviour
         {
             var slots = new List<ConsumableInventory.ConsumableSlot>();
             foreach (var s in inv.slots)
-                if (s != null && s.item != null && !s.item.isDawnChalice && s.quantity > 0 && Matches(s.item)) slots.Add(s);
+                if (s != null && s.item != null && !s.item.isDawnChalice && !s.item.IsJunk && s.quantity > 0 && Matches(s.item)) slots.Add(s); // [2026-10-22] 잡템 숨김
             slots.Sort((a, b) =>
             {
                 int c = ((int)a.item.itemCategory).CompareTo((int)b.item.itemCategory);
@@ -514,7 +514,7 @@ public class ItemListPanel : MonoBehaviour
             ConsumableInventory inv = ConsumableInventory.Instance;
             if (inv != null)
                 foreach (var s in inv.slots)
-                    if (s != null && s.item != null && !s.item.isDawnChalice && s.quantity > 0) { kinds++; total += s.quantity; }
+                    if (s != null && s.item != null && !s.item.isDawnChalice && !s.item.IsJunk && s.quantity > 0) { kinds++; total += s.quantity; }
             bagText.text = $"소비 {kinds}종 · {total}개   장비 {EquipmentBag.Items.Count}";
         }
     }

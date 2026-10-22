@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uB109\uB109\uD55C \uBC30\uB0AD"
   skillKey: Ample Pack
   skillIcon: {fileID: 0}
-  description: "[\uBCF4\uAE09\uC220 \xB7 \uC0C1\uC2DC] \uC18C\uBE44 \uC544\uC774\uD15C
+  description: "[\uBCF4\uAE09\uD559 \xB7 \uC0C1\uC2DC] \uC18C\uBE44 \uC544\uC774\uD15C
     \uCD5C\uB300 \uBCF4\uC720 +1 (\uC0C8\uBCBD\uC758 \uC794 \uC81C\uC678)."
   usageType: 2
   damageType: 0

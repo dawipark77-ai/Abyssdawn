@@ -661,7 +661,7 @@ public class BattleUIManager : MonoBehaviour
         rt.anchorMax = new Vector2(1, 0);
         rt.pivot = new Vector2(1, 0);
         rt.anchoredPosition = new Vector2(-24, 24); // 여백
-        rt.sizeDelta = new Vector2(220, 90); // [2026-10-20] 크게
+        rt.sizeDelta = new Vector2(150, 60); // [2026-10-22] 너무 커서 줄임 (220×90 → 150×60)
 
         // 스타일 설정
         Image img = btnObj.GetComponent<Image>();
@@ -678,7 +678,7 @@ public class BattleUIManager : MonoBehaviour
 
         TMPro.TextMeshProUGUI text = textObj.GetComponent<TMPro.TextMeshProUGUI>();
         text.text = "취소"; // [2026-10-20] 행동 취소
-        text.fontSize = 34;
+        text.fontSize = 26;
         text.alignment = TMPro.TextAlignmentOptions.Center;
         text.color = Color.white;
 
@@ -697,7 +697,31 @@ public class BattleUIManager : MonoBehaviour
     public void ShowBackButton(bool show)
     {
         if (backButton == null) CreateBackButton();
-        if (backButton != null) backButton.gameObject.SetActive(show);
+        if (backButton == null) return;
+        if (show) PlaceBackButtonAboveLog();
+        backButton.gameObject.SetActive(show);
+    }
+
+    /// <summary>[2026-10-21] 취소 버튼을 전투 기록 상자 오른쪽 위 바로 위에 둔다.
+    ///   예전 자리(화면 오른쪽 아래)는 파티 카드 Canvas(정렬 10)에 가려 버튼이 켜져도 보이지 않았다.
+    ///   기록 상자와 같은 Canvas 로 옮겨 그 위에 그린다. 기록 상자를 못 찾으면 예전 자리 그대로.</summary>
+    private RectTransform _battleLog;
+    private void PlaceBackButtonAboveLog()
+    {
+        if (_battleLog == null)
+        {
+            var go = GameObject.Find("BattleLogScroll");
+            _battleLog = go != null ? go.transform as RectTransform : null;
+        }
+        if (_battleLog == null) return;
+        var rt = (RectTransform)backButton.transform;
+        Canvas logCanvas = _battleLog.GetComponentInParent<Canvas>();
+        if (logCanvas != null && rt.parent != logCanvas.rootCanvas.transform) rt.SetParent(logCanvas.rootCanvas.transform, false);
+        var c = new Vector3[4];
+        _battleLog.GetWorldCorners(c); // 0 왼아래 1 왼위 2 오른위 3 오른아래
+        rt.pivot = new Vector2(1f, 0f);
+        rt.position = c[2] + new Vector3(-12f, 10f, 0f) * (logCanvas != null ? logCanvas.rootCanvas.scaleFactor : 1f);
+        rt.SetAsLastSibling();
     }
 
     // 빈 공간 터치 확인 (UI가 아닌 곳을 터치했는지)

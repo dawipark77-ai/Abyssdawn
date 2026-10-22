@@ -15,7 +15,7 @@ MonoBehaviour:
   skillID: Swords_T1_03
   skillName: "\uB9CC\uB4DC\uB9AC\uD1A0"
   skillKey: Mandritto
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 21300000, guid: 78c37b5d27ef9ad448050322bbc53a93, type: 3}
   description: "[\uAC80 \uC804\uC6A9] \uC55E\uC5F4\uC758 \uC801 \uB458\uC744 \uD55C
     \uBC88\uC5D0 \uD729\uC4F0\uB294 \uD6A1\uBCA0\uAE30. \uACE0\uB978 \uC801\uACFC
     \uAC00\uC7A5 \uAC00\uAE4C\uC6B4 \uC55E\uC5F4 \uC801\uC5D0\uAC8C \uAC01\uAC01
@@ -81,4 +81,4 @@ MonoBehaviour:
   bleedChanceByArmorBroken: []
   prerequisiteSkills:
   - {fileID: 11400000, guid: db0cc0a74e55b8647bf22681e22977a7, type: 2}
-  requiredLorePoints: 2
+  requiredLorePoints: 1

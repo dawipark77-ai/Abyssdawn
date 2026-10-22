@@ -204,6 +204,16 @@ namespace Abyssdawn
         [Tooltip("상시 발동하는 패시브 스킬 목록")]
         [SerializeField] private List<PassiveData> passiveSkills = new();
 
+        // [2026-10-22] 몬스터가 든 무기 — 공격·민첩 보너스가 스탯에 더해진다. 드랍은 드롭 테이블에 따로 넣을 것
+        [Header("장비")]
+        [Tooltip("들고 있는 무기 (예: 고블린 뼈 단검). 공격·민첩 보너스가 기본 스탯에 더해짐")]
+        [SerializeField] private EquipmentData equippedWeapon;
+
+        // [2026-10-23] 상태이상 면역 (예: 슬라임 = 독). 적일 때도 동료일 때도, 맵에서도 걸리지 않는다
+        [Header("면역")]
+        [Tooltip("걸리지 않는 상태이상 종류")]
+        [SerializeField] private List<StatusEffectType> statusImmunities = new();
+
         // ──────────────────────────────────────────
         // AI 행동 패턴
         // ──────────────────────────────────────────
@@ -220,6 +230,10 @@ namespace Abyssdawn
         [Tooltip("Critical 페이즈 진입 HP 비율 (기본 0.2 = 20% 이하)")]
         [Range(0f, 1f)] [SerializeField] private float criticalPhaseThreshold = 0.2f;
         public float CriticalPhaseThreshold => criticalPhaseThreshold;
+
+        [Tooltip("[2026-10-21] Critical 페이즈 도망 선택 가중치 배율 (1 = 기본, 0.3 = 덜 도망침, 0 = 안 도망침)")]
+        [Range(0f, 2f)] [SerializeField] private float fleeWeightMultiplier = 1f;
+        public float FleeWeightMultiplier => fleeWeightMultiplier;
 
         // ──────────────────────────────────────────
         // 파티 배치
@@ -372,6 +386,12 @@ namespace Abyssdawn
 
         /// <summary>드롭 테이블</summary>
         public IReadOnlyList<DropEntry> DropTable => dropTable;
+
+        /// <summary>들고 있는 무기 (없으면 null)</summary>
+        public EquipmentData EquippedWeapon => equippedWeapon;
+
+        /// <summary>[2026-10-23] 이 상태이상에 면역인가</summary>
+        public bool IsImmune(StatusEffectType type) => statusImmunities != null && statusImmunities.Contains(type);
 
         // 동료화
         /// <summary>동료 합류 확률 (0 = 불가)</summary>

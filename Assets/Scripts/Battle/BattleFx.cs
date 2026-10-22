@@ -51,6 +51,23 @@ public class BattleFx : MonoBehaviour
         if (crit) fx.CritImpact();
     }
 
+    /// <summary>[2026-10-20] 지속 피해(출혈·독·점화) 숫자 — 상태이상 색으로.</summary>
+    public static void EnemyDot(EnemyStats e, int damage, Color color)
+    {
+        var fx = Get();
+        if (fx == null || e == null || damage <= 0) return;
+        fx.Popup(fx.EnemyAnchor(e), damage.ToString(), color, false);
+    }
+
+    public static void AllyDot(PlayerStats p, int damage, Color color)
+    {
+        var fx = Get();
+        if (fx == null || p == null || damage <= 0) return;
+        Vector2? pos = fx.AllyAnchor(p);
+        if (pos == null) return;
+        fx.Popup(pos.Value, damage.ToString(), color, false);
+    }
+
     public static readonly Color EtherColor = new Color(0.49f, 0.88f, 1f);
 
     /// <summary>[2026-10-15] 에테르 감응 추가 피해: 파란 숫자, 일반 피해보다 작게, 조금 오른쪽 위.</summary>

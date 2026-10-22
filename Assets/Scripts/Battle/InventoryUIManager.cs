@@ -483,6 +483,7 @@ public class InventoryUIManager : MonoBehaviour
         {
             if (s == null || s.item == null) continue;
             if (s.item.isDawnChalice) continue;
+            if (s.item.IsJunk) continue; // [2026-10-22] 잡템은 상점 팔기에서만
             if (s.quantity <= 0) continue;
             sorted.Add(s);
         }

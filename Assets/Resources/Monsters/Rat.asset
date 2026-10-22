@@ -25,7 +25,7 @@ MonoBehaviour:
   atk: 8
   def: 8
   mag: 1
-  agi: 8
+  agi: 6
   luk: 4
   physResist: 1
   magResist: 1
@@ -40,6 +40,7 @@ MonoBehaviour:
   aiPattern: 0
   desperatePhaseThreshold: 0.5
   criticalPhaseThreshold: 0.2
+  fleeWeightMultiplier: 0.3
   rowPreference: 0
   allowedSlots: 15
   minFloor: 1
@@ -48,6 +49,8 @@ MonoBehaviour:
   expReward: 14
   goldReward: 4
   dropTable:
-  - item: {fileID: 11400000, guid: e0d8da405b906cd45a2c35baadd4a6d0, type: 2}
-    dropChance: 0.2
+  - item: {fileID: 11400000, guid: c3124b0ddddc8c5448e95d406ea711dd, type: 2}
+    dropChance: 0.25
+  - item: {fileID: 11400000, guid: c385726b763b4e808d1da7cff7c9f2cb, type: 2}
+    dropChance: 0.5
   companionChance: 0.25

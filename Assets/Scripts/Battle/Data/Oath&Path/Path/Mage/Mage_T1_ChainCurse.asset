@@ -23,5 +23,5 @@ MonoBehaviour:
     \uB54C,\n\uC778\uC811\uD55C \uC801\uC5D0\uAC8C 50% \uD655\uB960\uB85C \uB3D9\uC77C
     \uC800\uC8FC\uAC00 \uC804\uC5FC."
   drawbackDescription: "MP 7%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
-  lpCost: 2
+  lpCost: 1
   battleSkill: {fileID: 0}

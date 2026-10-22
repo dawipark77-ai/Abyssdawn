@@ -25,5 +25,5 @@ MonoBehaviour:
   drawbackDescription: "\uC774 \uD134 \uACF5\uACA9\uC744 \uD558\uC9C0 \uC54A\uB294\uB2E4.\n\uC5F0\uB9C9
     \uD6C4 \uD6C4\uC5F4 \uC774\uB3D9\uC774 \uAC15\uC81C\uB418\uC5B4 \uC804\uC5F4
     \uC720\uC9C0\uAC00 \uBD88\uAC00\uB2A5\uD558\uB2E4."
-  lpCost: 2
+  lpCost: 1
   battleSkill: {fileID: 0}

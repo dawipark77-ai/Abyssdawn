@@ -592,7 +592,7 @@ public class NewSkillTreeUI : MonoBehaviour
     {
         if (lpText == null) return;
         int lp = GetSkillPoints();
-        lpText.text = $"LP  {lp}";
+        lpText.text = $"SP  {lp}";
     }
 
     // ────────────────────────────────────────────────────────

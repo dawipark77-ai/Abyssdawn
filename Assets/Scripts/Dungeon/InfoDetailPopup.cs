@@ -18,6 +18,12 @@ public class InfoDetailPopup : MonoBehaviour
     private GameObject _root;
     private TextMeshProUGUI _title, _tag, _body;
     private Image _icon;
+    private RectTransform _panel, _indicator;
+    private Image _bodyDivider;
+    private const float PanelH = 620f, PanelHWithIndicator = 700f;
+
+    /// <summary>[2026-10-22] 다음 Show 에 목표/위치 칸을 함께 그릴 스킬 (몬스터 스킬만 — DetailClickTarget.ForSkill 이 넣고 Show 가 비움).</summary>
+    public static AbyssdawnBattle.SkillData NextPositionSkill;
 
     /// <summary>팝업을 연다. icon 이 없으면 아이콘 칸을 숨기고 글을 넓게 쓴다.</summary>
     public static void Show(string title, string tag, Sprite icon, string description)
@@ -28,7 +34,9 @@ public class InfoDetailPopup : MonoBehaviour
             _instance = go.AddComponent<InfoDetailPopup>();
             _instance.Build();
         }
-        _instance.Fill(title, tag, icon, description);
+        var posSkill = NextPositionSkill;
+        NextPositionSkill = null;
+        _instance.Fill(title, tag, icon, description, posSkill);
     }
 
     public static void Hide()
@@ -71,7 +79,8 @@ public class InfoDetailPopup : MonoBehaviour
         AddGoldFrame(panel.rectTransform, "FrameInner", new Color(0.86f, 0.74f, 0.45f, 0.30f), -8f);
         RectTransform prt = panel.rectTransform;
         prt.anchorMin = prt.anchorMax = new Vector2(0.5f, 0.5f);
-        prt.sizeDelta = new Vector2(940f, 620f);
+        prt.sizeDelta = new Vector2(940f, PanelH);
+        _panel = prt;
         prt.anchoredPosition = Vector2.zero;
 
         TMP_FontAsset font = FindKoreanFont();
@@ -86,6 +95,18 @@ public class InfoDetailPopup : MonoBehaviour
         _icon = NewImage(prt, "Icon", Color.white, false);
         _icon.preserveAspect = true;
         Place(_icon.rectTransform, new Vector2(0f, 1f), new Vector2(150f, -240f), new Vector2(190f, 190f));
+
+        // [2026-10-22] 몬스터 스킬 — 오른쪽 위(종류 줄 옆) 목표(빨강)/위치(노랑) 칸
+        _indicator = SkillPositionIndicator.Build(prt, font);
+        _indicator.anchorMin = _indicator.anchorMax = new Vector2(1f, 1f);
+        _indicator.pivot = new Vector2(0.5f, 0.5f);
+        _indicator.anchoredPosition = new Vector2(-190f, -200f);
+        _indicator.localScale = Vector3.one * 1.2f;
+        _indicator.gameObject.SetActive(false);
+
+        // 설명 위 구분선 (단순한 한 줄)
+        _bodyDivider = NewImage(prt, "BodyDivider", new Color(0.86f, 0.74f, 0.45f, 0.35f), false);
+        _bodyDivider.gameObject.SetActive(false);
 
         _tag = NewText(prt, "Tag", font, 28, FontStyles.Normal, TextAlignmentOptions.TopLeft);
         _tag.color = new Color(0.96f, 0.87f, 0.58f, 1f);
@@ -140,8 +161,13 @@ public class InfoDetailPopup : MonoBehaviour
         rt.offsetMin = new Vector2(-outset, -outset); rt.offsetMax = new Vector2(outset, outset);
     }
 
-    private void Fill(string title, string tag, Sprite icon, string description)
+    private void Fill(string title, string tag, Sprite icon, string description, AbyssdawnBattle.SkillData positionSkill)
     {
+        bool showPos = positionSkill != null && positionSkill.usageType == AbyssdawnBattle.UsageType.Active && icon != null;
+        _panel.sizeDelta = new Vector2(_panel.sizeDelta.x, showPos ? PanelHWithIndicator : PanelH); // 칸이 들어갈 만큼 위아래로 늘림
+        if (showPos) SkillPositionIndicator.Refresh(_panel, positionSkill);
+        else _indicator.gameObject.SetActive(false);
+
         _title.text = title ?? "";
         _tag.text = tag ?? "";
         _body.text = string.IsNullOrEmpty(description) ? "<color=#888888>(설명 없음)</color>" : description;
@@ -156,9 +182,16 @@ public class InfoDetailPopup : MonoBehaviour
         float left = hasIcon ? 280f : 60f;
         RectTransform tagRT = _tag.rectTransform, body = _bodyViewport;
         tagRT.anchorMin = new Vector2(0f, 1f); tagRT.anchorMax = new Vector2(1f, 1f); tagRT.pivot = new Vector2(0f, 1f);
-        tagRT.offsetMin = new Vector2(left, -186f); tagRT.offsetMax = new Vector2(-50f, -130f);
+        tagRT.offsetMin = new Vector2(left, -186f); tagRT.offsetMax = new Vector2(showPos ? -340f : -50f, -130f); // 목표/위치 칸 자리 비움
         body.anchorMin = new Vector2(0f, 0f); body.anchorMax = new Vector2(1f, 1f); body.pivot = new Vector2(0f, 1f);
-        body.offsetMin = new Vector2(left, 40f); body.offsetMax = new Vector2(-50f, -196f); // 닫기가 창 밖으로 나가 글 칸이 넓어짐
+        body.offsetMin = new Vector2(left, 40f); body.offsetMax = new Vector2(-50f, showPos ? -366f : -196f); // 닫기가 창 밖으로 나가 글 칸이 넓어짐
+        _bodyDivider.gameObject.SetActive(showPos);
+        if (showPos)
+        {
+            var drt = _bodyDivider.rectTransform;
+            drt.anchorMin = new Vector2(0f, 1f); drt.anchorMax = new Vector2(1f, 1f); drt.pivot = new Vector2(0.5f, 0.5f);
+            drt.offsetMin = new Vector2(left, -352f); drt.offsetMax = new Vector2(-50f, -350f);
+        }
         Canvas.ForceUpdateCanvases();
         if (_bodyScroll != null) _bodyScroll.verticalNormalizedPosition = 1f; // 맨 위부터
 
@@ -258,7 +291,10 @@ public class DetailClickTarget : MonoBehaviour, IPointerClickHandler
         var hero = FieldSkills.HeroData();
         if (s.maxRank > 1 && hero != null) tag += $" · Lv {hero.SkillRank(s)}/{s.maxRank}";
         else { string tier = s.TierLabel(); if (tier != null) tag += $" · {tier}"; } // [2026-10-15] 단계 스킬
-        return (s.skillName, tag, s.skillIcon, s.description);
+        bool monster = s is AbyssdawnBattle.MonsterSkillData;
+        InfoDetailPopup.NextPositionSkill = monster ? s : null; // [2026-10-22] 몬스터 스킬엔 목표/위치 칸
+        string desc = monster ? SkillTooltip.ColorMonsterNumbers(s.description) : s.description; // [2026-10-22] 수치 색
+        return (s.skillName, tag, s.skillIcon, desc);
     }
 
     public static (string, string, Sprite, string)? ForMemory(AbyssdawnBattle.MemoryOfSpeciesData m)

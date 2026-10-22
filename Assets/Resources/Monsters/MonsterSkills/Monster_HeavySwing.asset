@@ -16,9 +16,7 @@ MonoBehaviour:
   skillName: "\uBB35\uC9C1\uD55C \uD718\uB450\uB974\uAE30"
   skillKey: Heavy Swing
   skillIcon: {fileID: 0}
-  description: "\uD55C \uD134 \uBB34\uAE30\uB97C \uCE58\uCF1C\uB4E0 \uB4A4 \uC628
-    \uD798\uC73C\uB85C \uB0B4\uB9AC\uCE5C\uB2E4. \uB9C9\uAC70\uB098 \uBA3C\uC800
-    \uCCD0\uB77C!"
+  description: "<color=#F5DE94>1\uD134</color> \uB3D9\uC548 \uBB34\uAE30\uB97C \uCE58\uCF1C\uB4E0 \uB4A4 \uD798\uC758 <color=#8CFF8C>230~260%</color>\uB85C \uB0B4\uB9AC\uCE5C\uB2E4 (\uBA85\uC911 <color=#F5DE94>90%</color>). \uB9C9\uAC70\uB098 \uBA3C\uC800 \uCCD0\uB77C!"
   usageType: 0
   damageType: 1
   scalingStat: 1

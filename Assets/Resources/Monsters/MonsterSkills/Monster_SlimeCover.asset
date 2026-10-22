@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e4c93a1f2d4856ab09cd3e5f7081a2, type: 3}
+  m_Name: Monster_SlimeCover
+  m_EditorClassIdentifier: 
+  skillID: Monster_SlimeCover
+  skillName: "\uC810\uC561 \uB4A4\uC9D1\uC5B4\uC50C\uC6B0\uAE30"
+  skillKey: Slime Cover
+  skillIcon: {fileID: 0}
+  description: "\uB048\uC801\uD55C \uC810\uC561\uC744 \uB4A4\uC9D1\uC5B4\uC50C\uC6B4\uB2E4. \uD798\uC758 <color=#8CFF8C>20~30%</color> \uD53C\uD574 (\uBA85\uC911 <color=#F5DE94>90%</color>). <color=#F5DE94>65%</color> \uD655\uB960\uB85C \uB3C5 \u2014 <color=#F5DE94>10\uD134</color> \uB3D9\uC548 \uB9E4 \uD134 \uCD5C\uB300 HP\uC758 <color=#FF6B6B>2%</color> \uD53C\uD574."
+  usageType: 0
+  damageType: 1
+  scalingStat: 1
+  weaponCategory: 0
+  targeting:
+    targetFaction: 0
+    allowedCasterSlots: 15
+    allowedTargetSlots: 15
+    specificSlots: 
+  hpCostPercent: 0
+  mpCost: 0
+  minMult: 0.2
+  maxMult: 0.3
+  hitCount: 1
+  accuracy: 0.9
+  selfDmgPercent: 0
+  selfDmgChance: 0
+  selfStatusEffect: {fileID: 0}
+  selfStatusEffectChance: 0
+  effects: []
+  legacyCurseChance: 0
+  legacyEffectType: 0
+  legacyRecoveryTarget: 0
+  legacyEffectAmount: 0
+  triggerCondition: 0
+  dunbreakChance: 0
+  dunbreakDescription: 
+  curseEffect: {fileID: 11400000, guid: 9593ae741d964bd4ea6870fe916eb3d4, type: 2}
+  curseApplyChance: 0.65
+  backflowChance: 0
+  backflowType: 0
+  backflowStatusEffect: {fileID: 0}
+  backflowSuppression: 0
+  maxRank: 0
+  bonusPerRank: []
+  backflowPerRank: []
+  requireTargetIgnited: 0
+  selfIgnitedBonus: 0
+  armorBreakPercent: 0
+  requiresPreviousSkillId: 
+  requiresSameTarget: 0
+  preemptive: 0
+  cooldownTurns: 0
+  fieldSkill: 0
+  usableInField: 0
+  usesPerBattle: 0
+  endsTurnImmediately: 0
+  critBonusPercent: 0
+  partyPhysicalBuffPercent: 0
+  partyPhysicalBuffTurns: 0
+  selfAgilityPenalty: 0
+  selfAgilityPenaltyTurns: 0
+  bleedChanceByArmorBroken: []
+  prerequisiteSkills: []
+  requiredLorePoints: 0
+  slotShiftAmount: 0
+  slotShiftChance: 1
+  isBasicAttackOverride: 0
+  atkMultiplierOverride: 0
+  randomRollMaxOverride: 0
+  chargeTurns: 0
+  chargeMessage: 
+  chargeIntentLabel: '!! HEAVY BLOW'

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ee3885eebfa6c649bb3c5fbb7ea0273, type: 3}
-  m_Name: Buff_Enrage1
+  m_Name: Debuff_SandThrow
   m_EditorClassIdentifier: Assembly-CSharp::AbyssdawnBattle.StatusEffectSO
-  effectType: 8
-  variantId: Buff_Enrage1
+  effectType: 7
+  variantId: Debuff_SandThrow
   itemIcon: {fileID: 0}
   flatIcon: {fileID: 0}
   physicalDuration: 2
@@ -24,9 +24,10 @@ MonoBehaviour:
   magicalApplyChance: 1
   selfApplyChance: 0
   statModifiers:
-  - statType: 0
-    modType: 300
-    value: 1.1
+  - statType: 3
+    modType: 100
+    value: -0.2
+  noStack: 1
   preventAction: 0
   preventSkillUse: 0
   statusVFX: {fileID: 0}

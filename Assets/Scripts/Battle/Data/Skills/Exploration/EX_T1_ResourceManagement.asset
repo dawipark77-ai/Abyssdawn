@@ -16,7 +16,7 @@ MonoBehaviour:
   skillName: "\uC790\uC6D0 \uAD00\uB9AC"
   skillKey: Resource Management
   skillIcon: {fileID: 21300000, guid: a469cdb349aaf5048a844089a9ec73d7, type: 3}
-  description: "[\uBCF4\uAE09\uC220 \xB7 \uC0C1\uC2DC] \uC0C1\uC810 \uAD6C\uB9E4\uAC00
+  description: "[\uBCF4\uAE09\uD559 \xB7 \uC0C1\uC2DC] \uC0C1\uC810 \uAD6C\uB9E4\uAC00
     -10%, \uD310\uB9E4\uAC00 +10%. \uC804\uD22C \uACE8\uB4DC +15%."
   usageType: 2
   damageType: 0

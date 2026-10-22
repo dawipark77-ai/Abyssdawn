@@ -689,7 +689,7 @@ public class SkillTreeNode : MonoBehaviour
     /// </summary>
     private void ShowLockedReason()
     {
-        string reason = "이 스킬을 배울 수 없습니다:\n";
+        string reason = "아직 이 스킬을 기억해 낼 수 없습니다:\n";
         
         // 선행 스킬 체크
         if (prerequisiteNodes != null && prerequisiteNodes.Length > 0)
@@ -698,7 +698,7 @@ public class SkillTreeNode : MonoBehaviour
             {
                 if (prereq != null && prereq.currentState != SkillState.Learned)
                 {
-                    reason += $"- {prereq.skillData.skillName}을(를) 먼저 배워야 합니다.\n";
+                    reason += $"- {prereq.skillData.skillName}을(를) 먼저 기억해 내야 합니다.\n";
                 }
             }
         }

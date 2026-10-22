@@ -22,5 +22,5 @@ MonoBehaviour:
   effectDescription: "\uB2E8\uC77C \uB300\uC0C1 HP Max\uC758 15% \uD68C\uBCF5.\n\uB300\uC0C1\uC5D0\uAC8C
     \uAC78\uB9B0 \uC800\uC8FC 1\uAC1C \uD574\uC81C."
   drawbackDescription: "MP 6%\uB97C \uC18C\uBAA8\uD55C\uB2E4."
-  lpCost: 2
+  lpCost: 1
   battleSkill: {fileID: 0}

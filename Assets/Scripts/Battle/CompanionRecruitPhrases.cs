@@ -10,38 +10,37 @@ namespace Abyssdawn
     ///   - 전투 씬(BattleManager)뿐 아니라 던전 씬 등 어디서든 호출 가능.
     ///   - 이미 동료 전용 static 유틸 CompanionPartyPersistence가 있어 같은 결로 분리.
     ///
-    /// 현재 어디서도 호출하지 않음 — 호출 연결은 영입 연출 작업에서 수행.
     /// </summary>
     public static class CompanionRecruitPhrases
     {
-        // 문구 8종. 일부는 몬스터 이름 자리({0}) 포함, 일부는 미포함.
+        // [2026-10-22] 한국어로 (게임 전체 한국어). {0} = 이름, {I}/{Eun}/{Eul} = 이름 뒤 조사 (이/가 · 은/는 · 을/를)
         private static readonly string[] Phrases =
         {
-            "Something from the abyss follows you.",
-            "{0} wishes to remain by your side.",
-            "{0} is drawn to you.",
-            "Something forgotten gazes upon you.",
-            "{0} approaches as if it were once part of you.",
-            "A familiar shadow asks to stay beside you.",
-            "{0} no longer wishes to be alone.",
-            "A lost soul awaits your hand.",
+            "심연에서 무언가가 당신을 따라온다.",
+            "{0}{I} 당신 곁에 남고 싶어 한다.",
+            "{0}{I} 당신에게 이끌린다.",
+            "잊힌 무언가가 당신을 바라본다.",
+            "{0}{I} 원래 당신의 일부였던 것처럼 다가온다.",
+            "낯익은 그림자가 곁에 머물게 해 달라고 한다.",
+            "{0}{Eun} 더는 혼자이고 싶지 않다.",
+            "길 잃은 혼이 당신의 손을 기다린다.",
         };
 
         /// <summary>
         /// 8종 중 하나를 랜덤으로 골라 최종 문구를 반환한다.
-        /// 고른 문구에 {0}가 있으면 monsterName을 끼우고, 없으면 그대로 반환한다.
+        /// {0} 자리에는 색을 입힌 이름, {I}/{Eun}/{Eul} 에는 받침에 맞는 조사가 들어간다.
         /// </summary>
-        /// <param name="monsterName">{0} 자리에 들어갈 몬스터(동료) 이름</param>
-        public static string GetRandomPhrase(string monsterName)
+        /// <param name="monsterName">몬스터(동료) 이름 (색 태그 없이)</param>
+        /// <param name="color">이름 색 (예: #FFD700). 비우면 색 없음</param>
+        public static string GetRandomPhrase(string monsterName, string color = "#FFD700")
         {
             string template = Phrases[Random.Range(0, Phrases.Length)];
-
-            // {0} 포함 여부 판단 — 포함 시에만 string.Format으로 이름 삽입.
-            if (template.Contains("{0}"))
-            {
-                return string.Format(template, monsterName);
-            }
-            return template;
+            string name = string.IsNullOrEmpty(color) ? monsterName : $"<color={color}>{monsterName}</color>";
+            return template
+                .Replace("{I}", Ko.I(monsterName).Substring(monsterName.Length))
+                .Replace("{Eun}", Ko.Eun(monsterName).Substring(monsterName.Length))
+                .Replace("{Eul}", Ko.Eul(monsterName).Substring(monsterName.Length))
+                .Replace("{0}", name);
         }
     }
 }

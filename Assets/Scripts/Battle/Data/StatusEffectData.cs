@@ -73,6 +73,9 @@ namespace AbyssdawnBattle
         [Header("스탯 모디파이어")]
         public List<StatModifier> statModifiers = new List<StatModifier>();
 
+        [Tooltip("[2026-10-22] 켜면 가산(Flat) 디버프여도 중첩하지 않는다 — 다시 걸리면 시간만 갱신 (모래 뿌리기)")]
+        public bool noStack = false;
+
         [Header("디버프 효과 (선택사항)")]
         [Tooltip("행동 불가 여부 (Stun)")]
         public bool preventAction = false;

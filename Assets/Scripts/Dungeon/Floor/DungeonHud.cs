@@ -90,7 +90,7 @@ public class DungeonHud : MonoBehaviour
 
     // ── 마을 메뉴 (여관 · 상점 · 저장) ──
     private GameObject _town;
-    private Action _townInn, _townShop, _townSave, _townLeave;
+    private Action _townInn, _townShop, _townSave, _townLeave, _townMorgue;
     public bool IsTownOpen => _town != null && _town.activeSelf;
 
     // ── 상점 (마을 위에 뜸) ──
@@ -602,6 +602,14 @@ public class DungeonHud : MonoBehaviour
     {
         _shopKind = kind;
         if (_shopTitle != null) _shopTitle.text = kind == TownShop.Kind.Arms ? "<color=#FFD24A>무기점</color>" : "<color=#FFD24A>잡화점</color>";
+        // [2026-10-22] 가게마다 창 배경 그림 (잡화점 / 무기점)
+        if (_shopBg != null)
+        {
+            Sprite bg = Resources.Load<Sprite>(kind == TownShop.Kind.Arms ? ShopArmsBgResource : ShopGeneralBgResource);
+            _shopBg.sprite = bg;
+            _shopBg.enabled = bg != null;
+            if (_shopBgShade != null) _shopBgShade.enabled = bg != null;
+        }
         OpenShopPanel();
     }
 
@@ -624,6 +632,48 @@ public class DungeonHud : MonoBehaviour
         _shop.SetActive(false);
         var player = FindFirstObjectByType<DungeonGridPlayer>();
         if (player != null) player.UnlockInput(_shop);
+    }
+
+    // [2026-10-22] 상점 창 배경 그림 — 마을 그림은 뒤에 그대로 보이고, 그 위에 가게 그림이 든 창이 뜬다
+    public const string ShopGeneralBgResource = "UI/Shop_General_Bg";
+    public const string ShopArmsBgResource = "UI/Shop_Arms_Bg";
+    private const float ShopScreenDim = 0.35f;  // 화면 전체 어둡게 (예전 0.6 — 마을 그림이 비치게)
+    private const float ShopBgShade = 0.25f;    // 가게 그림 위 검은 막 (글자가 읽히게)
+    private const float ShopRowAlpha = 0.72f;   // 목록 줄 바탕 (가게 그림이 비치게)
+    private Image _shopBg, _shopBgShade;
+
+    private void AddShopBackground()
+    {
+        var dim = _shop.GetComponent<Image>();
+        if (dim != null) { var c = dim.color; c.a = ShopScreenDim; dim.color = c; }
+        var panel = _shop.transform.Find("Panel") as RectTransform;
+        if (panel == null) return;
+        // 그림은 늘이지 않고 창을 꽉 채우게 (남는 부분은 잘림) — 정사각 그림을 세로로 긴 창에 맞춘다
+        var clip = new GameObject("ShopBackgroundClip", typeof(RectTransform), typeof(RectMask2D)).GetComponent<RectTransform>();
+        clip.SetParent(panel, false);
+        Stretch(clip, 14f); // 테두리 안쪽
+        clip.SetSiblingIndex(0);
+        _shopBg = CreateImage(clip, "ShopBackground", Color.white, false);
+        var fit = _shopBg.gameObject.AddComponent<AspectRatioFitter>();
+        fit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+        fit.aspectRatio = 1f;
+        _shopBgShade = CreateImage(clip, "ShopBackgroundShade", new Color(0f, 0f, 0f, ShopBgShade), false);
+        Stretch(_shopBgShade.rectTransform);
+        // 목록 줄을 살짝 비치게 — 가게 그림이 줄 사이·뒤로 보이도록
+        if (_shopRowTemplate != null)
+        {
+            // 줄 바탕은 자기 자신 + 안쪽 "Inner" 판 두 겹 — 둘 다 낮춰야 비친다 (겹치면 진해지므로 Inner 는 바탕만, 자신은 투명)
+            var rowImg = _shopRowTemplate.GetComponent<Image>();
+            if (rowImg != null) { var c = rowImg.color; c.a = 0f; rowImg.color = c; }
+            var inner = _shopRowTemplate.transform.Find("Inner");
+            var innerImg = inner != null ? inner.GetComponent<Image>() : null;
+            if (innerImg != null) { var c = innerImg.color; c.a = ShopRowAlpha; innerImg.color = c; }
+            // 테두리는 금색 "꽉 찬 판"이라 안쪽이 비치면 줄 전체가 금색이 된다 → 가운데 빈 금선으로
+            var border = _shopRowTemplate.transform.Find("Border");
+            var borderImg = border != null ? border.GetComponent<Image>() : null;
+            var glow = Resources.Load<Sprite>("UI/GlowBorder");
+            if (borderImg != null && glow != null) { borderImg.sprite = glow; borderImg.type = Image.Type.Sliced; borderImg.fillCenter = false; }
+        }
     }
 
     private void BuildShop()
@@ -651,6 +701,7 @@ public class DungeonHud : MonoBehaviour
                 case "Close": b.onClick.AddListener(CloseShop); break;
             }
         }
+        AddShopBackground();
         if (_shopRows == null || _shopRowTemplate == null)
             Debug.LogWarning("[DungeonHud] 상점 창에 Rows / RowTemplate 이 없습니다. 목록을 표시할 수 없습니다.");
         else
@@ -952,9 +1003,9 @@ public class DungeonHud : MonoBehaviour
     // ─────────────────────────────────────────
 
     /// <summary>마을 메뉴를 연다. 각 버튼은 해당 동작을 부르고 메뉴는 열린 채로 둔다 (Leave 만 닫음).</summary>
-    public void ShowTown(Action onInn, Action onShop, Action onSave, Action onLeave)
+    public void ShowTown(Action onInn, Action onShop, Action onSave, Action onLeave, Action onMorgue = null)
     {
-        _townInn = onInn; _townShop = onShop; _townSave = onSave; _townLeave = onLeave;
+        _townInn = onInn; _townShop = onShop; _townSave = onSave; _townLeave = onLeave; _townMorgue = onMorgue;
         _town.SetActive(true);
         _dialog.transform.SetAsLastSibling();
         var player = FindFirstObjectByType<DungeonGridPlayer>();
@@ -968,7 +1019,7 @@ public class DungeonHud : MonoBehaviour
         var player = FindFirstObjectByType<DungeonGridPlayer>();
         if (player != null) player.UnlockInput(_town);
         Action leave = _townLeave;
-        _townInn = _townShop = _townSave = _townLeave = null;
+        _townInn = _townShop = _townSave = _townLeave = _townMorgue = null;
         if (leave != null) leave();
     }
 
@@ -990,9 +1041,67 @@ public class DungeonHud : MonoBehaviour
         {
             _town = BuildTownPanel(_overlayRoot);
         }
+        AddMorgueButton(_town);
+        TuneTownLayout(_town);
         BindTownButtons(_town);
         ButtonSkin.ApplyPlain(_town.transform); // [2026-10-17] 마을 버튼도 금테 패널 배경
         _town.SetActive(false);
+    }
+
+    /// <summary>
+    /// [2026-10-22] 안치소 버튼 — 프리팹에 "Morgue" 가 없으면 여관 버튼을 복제해 만들고,
+    /// 명령 줄(여관 · 안치소 · 상점 · 무기점 · 기록)을 같은 간격으로 다시 놓는다.
+    /// </summary>
+    private static void AddMorgueButton(GameObject root)
+    {
+        Transform inn = FindDeepChild(root.transform, "Inn");
+        if (inn == null || inn.parent.Find("Morgue") != null) return;
+        var morgue = Instantiate(inn.gameObject, inn.parent, false);
+        morgue.name = "Morgue";
+        var b = morgue.GetComponent<Button>();
+        if (b != null) b.onClick = new Button.ButtonClickedEvent();
+        foreach (var t in morgue.GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (t.name == "Label") t.text = "안치소";
+            else if (t.name == "Desc") t.text = "<color=#BBBBBB>쓰러진 동료\n되살리기</color>";
+        }
+        // 버튼이 5개로 좁아져 여관 설명이 "파티를 / 를" 처럼 끊겼다 — 짧게
+        foreach (var t in inn.GetComponentsInChildren<TMP_Text>(true))
+            if (t.name == "Desc") t.text = "<color=#BBBBBB>쉬면서\n모두 회복</color>";
+        string[] order = { "Inn", "Morgue", "Shop", "Arms", "Save" };
+        var row = new List<RectTransform>();
+        foreach (string n in order) { var c = inn.parent.Find(n) as RectTransform; if (c != null) row.Add(c); }
+        const float w = 182f, gap = 10f;
+        float x0 = -(row.Count * w + (row.Count - 1) * gap) * 0.5f + w * 0.5f;
+        for (int i = 0; i < row.Count; i++)
+        {
+            row[i].sizeDelta = new Vector2(w, row[i].sizeDelta.y);
+            row[i].anchoredPosition = new Vector2(x0 + i * (w + gap), row[i].anchoredPosition.y);
+            foreach (var t in row[i].GetComponentsInChildren<TMP_Text>(true))
+                t.rectTransform.sizeDelta = new Vector2(w - 20f, t.rectTransform.sizeDelta.y);
+        }
+    }
+
+    /// <summary>[2026-10-22] 마을 창 다듬기 — 그림과 명령 줄을 조금 위로, 가게 이름 아래 설명은 작은 글씨로.</summary>
+    private const float TownRaise = 140f;
+    private const float TownDescFontSize = 22f;
+
+    private static void TuneTownLayout(GameObject root)
+    {
+        foreach (string n in new[] { "TownBackgroundFrame", "Panel" })
+        {
+            var t = root.transform.Find(n) as RectTransform;
+            if (t != null) t.anchoredPosition += new Vector2(0f, TownRaise);
+        }
+        foreach (var t in root.GetComponentsInChildren<TMP_Text>(true))
+            if (t.name == "Desc") { t.enableAutoSizing = false; t.fontSize = TownDescFontSize; }
+    }
+
+    private static Transform FindDeepChild(Transform t, string name)
+    {
+        if (t.name == name) return t;
+        foreach (Transform c in t) { var r = FindDeepChild(c, name); if (r != null) return r; }
+        return null;
     }
 
     /// <summary>이름으로 버튼을 찾아 마을 동작을 연결한다 (프리팹 배치를 바꿔도 이름만 같으면 됨).</summary>
@@ -1007,6 +1116,7 @@ public class DungeonHud : MonoBehaviour
                 case "Shop": b.onClick.AddListener(() => OnTownCommand(1)); bound++; break;
                 case "Arms": b.onClick.AddListener(() => OnTownCommand(3)); bound++; break; // [2026-10-08] 무기점
                 case "Save": b.onClick.AddListener(() => OnTownCommand(2)); bound++; break;
+                case "Morgue": b.onClick.AddListener(() => OnTownCommand(4)); break; // [2026-10-22] 안치소
                 case "Leave": b.onClick.AddListener(CloseTown); bound++; break;
             }
         }
@@ -1075,6 +1185,7 @@ public class DungeonHud : MonoBehaviour
     {
         if (_dialog != null && _dialog.activeSelf) return; // 확인창이 떠 있으면 무시
         if (index == 3) { ShowShop(TownShop.Kind.Arms); return; } // 무기점
+        if (index == 4) { if (_townMorgue != null) _townMorgue(); return; } // [2026-10-22] 안치소
         Action a = index == 0 ? _townInn : index == 1 ? _townShop : _townSave;
         if (a != null) a();
     }
